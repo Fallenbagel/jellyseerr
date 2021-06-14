@@ -246,7 +246,7 @@ settingsRoutes.get('/jellyfin/library', async (req, res) => {
   if (req.query.sync) {
     const userRepository = getRepository(User);
     const admin = await userRepository.findOneOrFail({
-      select: ['id', 'jellyfinAuthToken', 'jellyfinDeviceId'],
+      select: ['id', 'jellyfinAuthToken', 'jellyfinDeviceId', 'jellyfinUserId'],
       order: { id: 'ASC' },
     });
     const jellyfinClient = new JellyfinAPI(
@@ -254,6 +254,8 @@ settingsRoutes.get('/jellyfin/library', async (req, res) => {
       admin.jellyfinAuthToken ?? '',
       admin.jellyfinDeviceId ?? ''
     );
+
+    jellyfinClient.setUserId(admin.jellyfinUserId ?? '');
 
     const libraries = await jellyfinClient.getLibraries();
 

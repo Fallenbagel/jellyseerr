@@ -151,7 +151,9 @@ class JellyfinAPI {
 
   public async getLibraries(): Promise<JellyfinLibrary[]> {
     try {
-      const account = await this.axios.get<any>('/Library/MediaFolders');
+      const account = await this.axios.get<any>(
+        `/Users/${this.userId ?? 'Me'}/Views`
+      );
 
       const response: JellyfinLibrary[] = account.data.Items.filter(
         (Item: any) => {
@@ -176,7 +178,7 @@ class JellyfinAPI {
         `Something went wrong while getting libraries from the Jellyfin server: ${e.message}`,
         { label: 'Jellyfin API' }
       );
-      throw new Error('Invalid auth token');
+      return [];
     }
   }
 
