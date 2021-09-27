@@ -3,7 +3,7 @@ import { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
 
 export interface AccordionProps {
-  children: (args: AccordionChildProps) => React.ReactElement<any, any> | null;
+  children: (args: AccordionChildProps) => React.ReactElement | null;
   /** If true, only one accordion item can be open at any time */
   single?: boolean;
   /** If true, at least one accordion item will always be open */
@@ -13,7 +13,7 @@ export interface AccordionProps {
 export interface AccordionChildProps {
   openIndexes: number[];
   handleClick(index: number): void;
-  AccordionContent: any;
+  AccordionContent: typeof AccordionContent;
 }
 
 export const AccordionContent: React.FC<{ isOpen: boolean }> = ({

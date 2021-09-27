@@ -1,4 +1,5 @@
 import { randomBytes } from 'crypto';
+import MailMessage from 'nodemailer/lib/mailer/mail-message';
 import * as openpgp from 'openpgp';
 import { Transform, TransformCallback } from 'stream';
 
@@ -25,7 +26,7 @@ class PGPEncryptor extends Transform {
 
   // just save the whole message
   _transform = (
-    chunk: any,
+    chunk: Uint8Array,
     _encoding: BufferEncoding,
     callback: TransformCallback
   ): void => {
@@ -166,17 +167,16 @@ class PGPEncryptor extends Transform {
 }
 
 export const openpgpEncrypt = (options: EncryptorOptions) => {
-  return function (mail: any, callback: () => unknown): void {
+  return function (mail: MailMessage, callback: () => unknown): void {
     if (!options.encryptionKeys.length) {
       setImmediate(callback);
     }
     mail.message.transform(
-      () =>
-        new PGPEncryptor({
-          signingKey: options.signingKey,
-          password: options.password,
-          encryptionKeys: options.encryptionKeys,
-        })
+      new PGPEncryptor({
+        signingKey: options.signingKey,
+        password: options.password,
+        encryptionKeys: options.encryptionKeys,
+      })
     );
     setImmediate(callback);
   };

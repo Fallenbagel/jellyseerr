@@ -40,7 +40,7 @@ class AsyncLock {
   public dispatch = async (
     key: string | number,
     callback: () => Promise<void>
-  ) => {
+  ): Promise<void> => {
     const skey = String(key);
     await this.acquire(skey);
     try {

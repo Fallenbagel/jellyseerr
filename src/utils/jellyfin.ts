@@ -1,4 +1,3 @@
-/* eslint-disable no-async-promise-executor */
 import axios, { AxiosError, AxiosResponse } from 'axios';
 
 interface JellyfinAuthenticationResult {
