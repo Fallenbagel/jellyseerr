@@ -1,17 +1,17 @@
+import { randomUUID as uuid } from 'crypto';
+import { uniqWith } from 'lodash';
 import { getRepository } from 'typeorm';
-import { User } from '../../entity/User';
 import JellyfinAPI, { JellyfinLibraryItem } from '../../api/jellyfin';
 import TheMovieDb from '../../api/themoviedb';
 import { TmdbTvDetails } from '../../api/themoviedb/interfaces';
-import Media from '../../entity/Media';
 import { MediaStatus, MediaType } from '../../constants/media';
-import logger from '../../logger';
-import { getSettings, Library } from '../../lib/settings';
-import Season from '../../entity/Season';
-import { uniqWith } from 'lodash';
-import { v4 as uuid } from 'uuid';
-import AsyncLock from '../../utils/asyncLock';
 import { MediaServerType } from '../../constants/server';
+import Media from '../../entity/Media';
+import Season from '../../entity/Season';
+import { User } from '../../entity/User';
+import { getSettings, Library } from '../../lib/settings';
+import logger from '../../logger';
+import AsyncLock from '../../utils/asyncLock';
 
 const BUNDLE_SIZE = 20;
 const UPDATE_RATE = 4 * 1000;

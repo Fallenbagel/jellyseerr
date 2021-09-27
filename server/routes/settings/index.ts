@@ -22,7 +22,7 @@ import { scheduledJobs } from '../../job/schedule';
 import cacheManager, { AvailableCacheIds } from '../../lib/cache';
 import { Permission } from '../../lib/permissions';
 import { plexFullScanner } from '../../lib/scanners/plex';
-import { getSettings, MainSettings } from '../../lib/settings';
+import { getSettings, Library, MainSettings } from '../../lib/settings';
 import logger from '../../logger';
 import { isAuthenticated } from '../../middleware/auth';
 import { getAppVersion } from '../../utils/appVersion';
@@ -269,6 +269,7 @@ settingsRoutes.get('/jellyfin/library', async (req, res) => {
         id: library.key,
         name: library.title,
         enabled: existing?.enabled ?? false,
+        type: library.type,
       };
     });
 
