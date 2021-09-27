@@ -5,31 +5,35 @@ import { getSettings } from '../lib/settings';
 
 export const checkUser: Middleware = async (req, _res, next) => {
   const settings = getSettings();
+  let user: User | undefined;
+
   if (req.header('X-API-Key') === settings.main.apiKey) {
     const userRepository = getRepository(User);
 
     let userId = 1; // Work on original administrator account
 
-    // If a User ID is provided, we will act on that users behalf
+    // If a User ID is provided, we will act on that user's behalf
     if (req.header('X-API-User')) {
       userId = Number(req.header('X-API-User'));
     }
-    const user = await userRepository.findOne({ where: { id: userId } });
 
-    if (user) {
-      req.user = user;
-    }
+    user = await userRepository.findOne({ where: { id: userId } });
   } else if (req.session?.userId) {
     const userRepository = getRepository(User);
 
-    const user = await userRepository.findOne({
+    user = await userRepository.findOne({
       where: { id: req.session.userId },
     });
-
-    if (user) {
-      req.user = user;
-    }
   }
+
+  if (user) {
+    req.user = user;
+  }
+
+  req.locale = user?.settings?.locale
+    ? user.settings.locale
+    : settings.main.locale;
+
   next();
 };
 

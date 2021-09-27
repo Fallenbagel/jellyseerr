@@ -1,17 +1,14 @@
 import React from 'react';
+import { useIntl } from 'react-intl';
 import {
-  TvResult,
   MovieResult,
   PersonResult,
+  TvResult,
 } from '../../../../server/models/Search';
-import TitleCard from '../../TitleCard';
 import useVerticalScroll from '../../../hooks/useVerticalScroll';
+import globalMessages from '../../../i18n/globalMessages';
 import PersonCard from '../../PersonCard';
-import { defineMessages, useIntl } from 'react-intl';
-
-const messages = defineMessages({
-  noresults: 'No results.',
-});
+import TitleCard from '../../TitleCard';
 
 interface ListViewProps {
   items?: (TvResult | MovieResult | PersonResult)[];
@@ -34,11 +31,11 @@ const ListView: React.FC<ListViewProps> = ({
     <>
       {isEmpty && (
         <div className="w-full mt-64 text-2xl text-center text-gray-400">
-          {intl.formatMessage(messages.noresults)}
+          {intl.formatMessage(globalMessages.noresults)}
         </div>
       )}
-      <ul className="cardList">
-        {items?.map((title) => {
+      <ul className="cards-vertical">
+        {items?.map((title, index) => {
           let titleCard: React.ReactNode;
 
           switch (title.mediaType) {
@@ -90,7 +87,7 @@ const ListView: React.FC<ListViewProps> = ({
               break;
           }
 
-          return <li key={title.id}>{titleCard}</li>;
+          return <li key={`${title.id}-${index}`}>{titleCard}</li>;
         })}
         {isLoading &&
           !isReachingEnd &&

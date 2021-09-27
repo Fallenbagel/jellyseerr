@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: Support via Discord
-    url: https://discord.gg/PkCWJSeCk7
+    url: https://discord.gg/overseerr
     about: Chat with users and devs on support and setup related topics.
   - name: Support via GitHub Discussions
     url: https://github.com/sct/overseerr/discussions

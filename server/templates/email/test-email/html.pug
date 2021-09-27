@@ -5,7 +5,7 @@ head
   meta(http-equiv='x-ua-compatible' content='ie=edge')
   meta(name='viewport' content='width=device-width, initial-scale=1')
   meta(name='format-detection' content='telephone=no, date=no, address=no, email=no')
-  link(href='https://fonts.googleapis.com/css?family=Nunito+Sans:400,700&amp;display=swap' rel='stylesheet' media='screen')
+  link(href='https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap' rel='stylesheet' media='screen')
   //if mso
     xml
       o:officedocumentsettings
@@ -26,71 +26,29 @@ head
       mso-line-height-rule: exactly;
       }
   style.
-    @media (max-width: 600px) {
-    .sm-w-full {
+    .title:hover * {
+    text-decoration: underline;
+    }
+    @media only screen and (max-width:600px) {
+    table {
+    font-size: 20px !important;
     width: 100% !important;
     }
     }
-div(role='article' aria-roledescription='email' aria-label='' lang='en')
-  table(style="\
-  background-color: #f2f4f6;\
-  font-family: 'Nunito Sans', -apple-system, 'Segoe UI', sans-serif;\
-  width: 100%;\
-  " width='100%' bgcolor='#f2f4f6' cellpadding='0' cellspacing='0' role='presentation')
+div(style='display: block; background-color: #111827;')
+  table(style='margin: 0 auto; font-family: Inter, Arial, Sans-Serif; color: #fff; font-size: 16px; width: 26rem;')
     tr
-      td(align='center')
-        table(style='width: 100%' width='100%' cellpadding='0' cellspacing='0' role='presentation')
-          tr
-            td(align='center' style='\
-            font-size: 16px;\
-            padding-top: 25px;\
-            padding-bottom: 25px;\
-            text-align: center;\
-            ')
-              a(href=applicationUrl style='\
-              text-shadow: 0 1px 0 #ffffff;\
-              font-weight: 700;\
-              font-size: 16px;\
-              color: #a8aaaf;\
-              text-decoration: none;\
-              ')
-                | #{applicationTitle}
-          tr
-            td(style='width: 100%' width='100%')
-              table.sm-w-full(align='center' style='\
-              background-color: #ffffff;\
-              margin-left: auto;\
-              margin-right: auto;\
-              width: 570px;\
-              ' width='570' bgcolor='#ffffff' cellpadding='0' cellspacing='0' role='presentation')
-                tr
-                  td(style='padding: 45px')
-                    div(style='font-size: 16px')
-                      | #{body}
-        p(style='\
-        font-size: 13px;\
-        line-height: 24px;\
-        margin-top: 6px;\
-        margin-bottom: 20px;\
-        color: #51545e;\
-        ')
-          a(href=applicationUrl style='color: #3869d4') Open #{applicationTitle}
-tr
-  td
-    table.sm-w-full(align='center' style='\
-    margin-left: auto;\
-    margin-right: auto;\
-    text-align: center;\
-    width: 570px;\
-    ' width='570' cellpadding='0' cellspacing='0' role='presentation')
+      td(style="text-align: center;")
+        a(href=applicationUrl)
+          img(src=applicationUrl +'/logo_full.png' style='width: 26rem; padding: 1rem; image-rendering: crisp-edges; image-rendering: -webkit-optimize-contrast;')
+    tr
+      td(style='text-align: center;')
+        div(style='margin: 0rem 1rem 1rem; font-size: 1.25em;')
+          span
+            | #{body}
+    if applicationUrl
       tr
-        td(align='center' style='font-size: 16px; padding: 45px')
-          p(style='\
-          font-size: 13px;\
-          line-height: 24px;\
-          margin-top: 6px;\
-          margin-bottom: 20px;\
-          text-align: center;\
-          color: #a8aaaf;\
-          ')
-            | #{applicationTitle}
+        td
+          a(href=applicationUrl style='display: block; margin: 1.5rem 3rem 2.5rem 3rem; text-decoration: none; font-size: 1.0em; line-height: 2.25em;')
+            span(style='padding: 0.2rem; font-weight: 500; text-align: center; border-radius: 10px; background-color: rgb(99,102,241); color: #fff; display: block; border: 1px solid rgba(255, 255, 255, 0.2);')
+              | Open #{applicationTitle}

@@ -8,6 +8,7 @@ import Media from '../entity/Media';
 export interface PersonDetail {
   id: number;
   name: string;
+  birthday: string;
   deathday: string;
   knownForDepartment: string;
   alsoKnownAs?: string[];
@@ -64,6 +65,7 @@ export interface CombinedCredit {
 export const mapPersonDetails = (person: TmdbPersonDetail): PersonDetail => ({
   id: person.id,
   name: person.name,
+  birthday: person.birthday,
   deathday: person.deathday,
   knownForDepartment: person.known_for_department,
   alsoKnownAs: person.also_known_as,

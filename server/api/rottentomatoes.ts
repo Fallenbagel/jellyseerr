@@ -1,39 +1,28 @@
 import cacheManager from '../lib/cache';
 import ExternalAPI from './externalapi';
 
-interface RTMovieOldSearchResult {
-  id: number;
-  title: string;
-  year: number;
-  ratings: {
-    critics_rating: 'Certified Fresh' | 'Fresh' | 'Rotten';
-    critics_score: number;
-    audience_rating: 'Upright' | 'Spilled';
-    audience_score: number;
-  };
-  links: {
-    self: string;
-    alternate: string;
-  };
-}
-
-interface RTTvSearchResult {
-  title: string;
-  meterClass: 'fresh' | 'rotten';
+interface RTSearchResult {
+  meterClass: 'certified_fresh' | 'fresh' | 'rotten';
   meterScore: number;
   url: string;
+}
+
+interface RTTvSearchResult extends RTSearchResult {
+  title: string;
   startYear: number;
   endYear: number;
 }
-
-interface RTMovieSearchResponse {
-  total: number;
-  movies: RTMovieOldSearchResult[];
+interface RTMovieSearchResult extends RTSearchResult {
+  name: string;
+  url: string;
+  year: number;
 }
 
 interface RTMultiSearchResponse {
   tvCount: number;
   tvSeries: RTTvSearchResult[];
+  movieCount: number;
+  movies: RTMovieSearchResult[];
 }
 
 export interface RTRating {
@@ -88,19 +77,19 @@ class RottenTomatoes extends ExternalAPI {
     year: number
   ): Promise<RTRating | null> {
     try {
-      const data = await this.get<RTMovieSearchResponse>('/v1.0/movies', {
-        params: { q: name },
+      const data = await this.get<RTMultiSearchResponse>('/v2.0/search/', {
+        params: { q: name, limit: 10 },
       });
 
       // First, attempt to match exact name and year
       let movie = data.movies.find(
-        (movie) => movie.year === year && movie.title === name
+        (movie) => movie.year === year && movie.name === name
       );
 
       // If we don't find a movie, try to match partial name and year
       if (!movie) {
         movie = data.movies.find(
-          (movie) => movie.year === year && movie.title.includes(name)
+          (movie) => movie.year === year && movie.name.includes(name)
         );
       }
 
@@ -111,7 +100,7 @@ class RottenTomatoes extends ExternalAPI {
 
       // One last try, try exact name match only
       if (!movie) {
-        movie = data.movies.find((movie) => movie.title === name);
+        movie = data.movies.find((movie) => movie.name === name);
       }
 
       if (!movie) {
@@ -119,12 +108,15 @@ class RottenTomatoes extends ExternalAPI {
       }
 
       return {
-        title: movie.title,
-        url: movie.links.alternate,
-        criticsRating: movie.ratings.critics_rating,
-        criticsScore: movie.ratings.critics_score,
-        audienceRating: movie.ratings.audience_rating,
-        audienceScore: movie.ratings.audience_score,
+        title: movie.name,
+        url: `https://www.rottentomatoes.com${movie.url}`,
+        criticsRating:
+          movie.meterClass === 'certified_fresh'
+            ? 'Certified Fresh'
+            : movie.meterClass === 'fresh'
+            ? 'Fresh'
+            : 'Rotten',
+        criticsScore: movie.meterScore,
         year: movie.year,
       };
     } catch (e) {

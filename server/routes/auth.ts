@@ -1,14 +1,14 @@
 import { Router } from 'express';
 import { getRepository } from 'typeorm';
-import { User } from '../entity/User';
-import PlexTvAPI from '../api/plextv';
 import JellyfinAPI from '../api/jellyfin';
-import { isAuthenticated } from '../middleware/auth';
-import { Permission } from '../lib/permissions';
-import logger from '../logger';
-import { getSettings } from '../lib/settings';
-import { UserType } from '../constants/user';
+import PlexTvAPI from '../api/plextv';
 import { MediaServerType } from '../constants/server';
+import { UserType } from '../constants/user';
+import { User } from '../entity/User';
+import { Permission } from '../lib/permissions';
+import { getSettings } from '../lib/settings';
+import logger from '../logger';
+import { isAuthenticated } from '../middleware/auth';
 
 const authRoutes = Router();
 
@@ -51,9 +51,13 @@ authRoutes.post('/plex', async (req, res, next) => {
     const account = await plextv.getUser();
 
     // Next let's see if the user already exists
-    let user = await userRepository.findOne({
-      where: { plexId: account.id },
-    });
+    let user = await userRepository
+      .createQueryBuilder('user')
+      .where('user.plexId = :id', { id: account.id })
+      .orWhere('user.email = :email', {
+        email: account.email.toLowerCase(),
+      })
+      .getOne();
 
     if (user) {
       // Let's check if their Plex token is up-to-date
@@ -66,9 +70,12 @@ authRoutes.post('/plex', async (req, res, next) => {
       user.email = account.email;
       user.plexUsername = account.username;
 
-      if (user.username === account.username) {
-        user.username = '';
+      // In case the user was previously a local account
+      if (user.userType === UserType.LOCAL) {
+        user.userType = UserType.PLEX;
+        user.plexId = account.id;
       }
+
       await userRepository.save(user);
     } else {
       // Here we check if it's the first user. If it is, we create the user with no check
@@ -93,6 +100,24 @@ authRoutes.post('/plex', async (req, res, next) => {
 
       // Double check that we didn't create the first admin user before running this
       if (!user) {
+        if (!settings.main.newPlexLogin) {
+          logger.info(
+            'Failed sign-in attempt from user who has not been imported to Overseerr.',
+            {
+              label: 'Auth',
+              account: {
+                ...account,
+                authentication_token: '__REDACTED__',
+                authToken: '__REDACTED__',
+              },
+            }
+          );
+          return next({
+            status: 403,
+            message: 'Access denied.',
+          });
+        }
+
         // If we get to this point, the user does not already exist so we need to create the
         // user _assuming_ they have access to the Plex server
         const mainUser = await userRepository.findOneOrFail({
@@ -126,7 +151,7 @@ authRoutes.post('/plex', async (req, res, next) => {
           );
           return next({
             status: 403,
-            message: 'You do not have access to this Plex server.',
+            message: 'Access denied.',
           });
         }
       }
@@ -142,7 +167,7 @@ authRoutes.post('/plex', async (req, res, next) => {
     logger.error(e.message, { label: 'Auth' });
     return next({
       status: 500,
-      message: 'Something went wrong. Is your auth token valid?',
+      message: 'Something went wrong.',
     });
   }
 });
@@ -322,10 +347,11 @@ authRoutes.post('/local', async (req, res, next) => {
     });
   }
   try {
-    const user = await userRepository.findOne({
-      select: ['id', 'password'],
-      where: { email: body.email },
-    });
+    const user = await userRepository
+      .createQueryBuilder('user')
+      .select(['user.id', 'user.password'])
+      .where('user.email = :email', { email: body.email.toLowerCase() })
+      .getOne();
 
     const isCorrectCredentials = await user?.passwordMatch(body.password);
 
@@ -389,9 +415,10 @@ authRoutes.post('/reset-password', async (req, res) => {
       .json({ error: 'You must provide an email address.' });
   }
 
-  const user = await userRepository.findOne({
-    where: { email: body.email },
-  });
+  const user = await userRepository
+    .createQueryBuilder('user')
+    .where('user.email = :email', { email: body.email.toLowerCase() })
+    .getOne();
 
   if (user) {
     await user.resetPassword();

@@ -1,3 +1,4 @@
+import { CogIcon, UserIcon } from '@heroicons/react/solid';
 import Link from 'next/link';
 import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
@@ -7,6 +8,8 @@ import Button from '../../Common/Button';
 const messages = defineMessages({
   settings: 'Edit Settings',
   profile: 'View Profile',
+  joindate: 'Joined {joindate}',
+  userid: 'User ID: {userid}',
 });
 
 interface ProfileHeaderProps {
@@ -21,13 +24,27 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const intl = useIntl();
   const { user: loggedInUser, hasPermission } = useUser();
 
+  const subtextItems: React.ReactNode[] = [
+    intl.formatMessage(messages.joindate, {
+      joindate: intl.formatDate(user.createdAt, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }),
+    }),
+  ];
+
+  if (hasPermission(Permission.MANAGE_REQUESTS)) {
+    subtextItems.push(intl.formatMessage(messages.userid, { userid: user.id }));
+  }
+
   return (
-    <div className="relative z-40 mt-6 mb-12 md:flex md:items-end md:justify-between md:space-x-5">
+    <div className="relative z-40 mt-6 mb-12 lg:flex lg:items-end lg:justify-between lg:space-x-5">
       <div className="flex items-end space-x-5 justify-items-end">
         <div className="flex-shrink-0">
           <div className="relative">
             <img
-              className="w-24 h-24 bg-gray-600 rounded-full"
+              className="w-24 h-24 bg-gray-600 rounded-full ring-1 ring-gray-700"
               src={user.avatar}
               alt=""
             />
@@ -48,21 +65,24 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 {user.displayName}
               </a>
             </Link>
-            {user.email && (
+            {user.email && user.displayName.toLowerCase() !== user.email && (
               <span className="text-sm text-gray-400 sm:text-lg sm:ml-2">
                 ({user.email})
               </span>
             )}
           </h1>
           <p className="text-sm font-medium text-gray-400">
-            Joined {intl.formatDate(user.createdAt)} |{' '}
-            {intl.formatNumber(user.requestCount)} Requests
+            {subtextItems.reduce((prev, curr) => (
+              <>
+                {prev} | {curr}
+              </>
+            ))}
           </p>
         </div>
       </div>
-      <div className="flex flex-col-reverse mt-6 space-y-4 space-y-reverse justify-stretch sm:flex-row-reverse sm:justify-end sm:space-x-reverse sm:space-y-0 sm:space-x-3 md:mt-0 md:flex-row md:space-x-3">
+      <div className="flex flex-col-reverse mt-6 space-y-4 space-y-reverse justify-stretch lg:flex-row lg:justify-end lg:space-x-reverse lg:space-y-0 lg:space-x-3">
         {(loggedInUser?.id === user.id ||
-          hasPermission(Permission.MANAGE_USERS)) &&
+          (user.id !== 1 && hasPermission(Permission.MANAGE_USERS))) &&
         !isSettingsPage ? (
           <Link
             href={
@@ -73,44 +93,24 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             passHref
           >
             <Button as="a">
-              <svg
-                className="w-5 h-5 mr-1"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              {intl.formatMessage(messages.settings)}
+              <CogIcon />
+              <span>{intl.formatMessage(messages.settings)}</span>
             </Button>
           </Link>
         ) : (
-          <Link
-            href={
-              loggedInUser?.id === user.id ? `/profile` : `/users/${user.id}`
-            }
-            passHref
-          >
-            <Button as="a">
-              <svg
-                className="w-5 h-5 mr-1"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              {intl.formatMessage(messages.profile)}
-            </Button>
-          </Link>
+          isSettingsPage && (
+            <Link
+              href={
+                loggedInUser?.id === user.id ? `/profile` : `/users/${user.id}`
+              }
+              passHref
+            >
+              <Button as="a">
+                <UserIcon />
+                <span>{intl.formatMessage(messages.profile)}</span>
+              </Button>
+            </Link>
+          )
         )}
       </div>
     </div>

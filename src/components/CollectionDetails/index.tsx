@@ -1,40 +1,39 @@
+import { DownloadIcon, DuplicateIcon } from '@heroicons/react/outline';
 import axios from 'axios';
+import { uniq } from 'lodash';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import { MediaStatus } from '../../../server/constants/media';
 import type { MediaRequest } from '../../../server/entity/MediaRequest';
 import type { Collection } from '../../../server/models/Collection';
-import { LanguageContext } from '../../context/LanguageContext';
+import useSettings from '../../hooks/useSettings';
+import { Permission, useUser } from '../../hooks/useUser';
+import globalMessages from '../../i18n/globalMessages';
 import Error from '../../pages/_error';
-import StatusBadge from '../StatusBadge';
 import ButtonWithDropdown from '../Common/ButtonWithDropdown';
+import CachedImage from '../Common/CachedImage';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import Modal from '../Common/Modal';
+import PageTitle from '../Common/PageTitle';
 import Slider from '../Slider';
+import StatusBadge from '../StatusBadge';
 import TitleCard from '../TitleCard';
 import Transition from '../Transition';
-import PageTitle from '../Common/PageTitle';
-import { useUser, Permission } from '../../hooks/useUser';
-import useSettings from '../../hooks/useSettings';
 
 const messages = defineMessages({
-  overviewunavailable: 'Overview unavailable.',
   overview: 'Overview',
-  movies: 'Movies',
-  numberofmovies: 'Number of Movies: {count}',
-  requesting: 'Requesting…',
-  request: 'Request',
+  numberofmovies: '{count} Movies',
   requestcollection: 'Request Collection',
   requestswillbecreated:
     'The following titles will have requests created for them:',
-  request4k: 'Request 4K',
   requestcollection4k: 'Request Collection in 4K',
   requestswillbecreated4k:
     'The following titles will have 4K requests created for them:',
-  requestSuccess: '<strong>{title}</strong> successfully requested!',
+  requestSuccess: '<strong>{title}</strong> requested successfully!',
 });
 
 interface CollectionDetailsProps {
@@ -48,18 +47,21 @@ const CollectionDetails: React.FC<CollectionDetailsProps> = ({
   const router = useRouter();
   const settings = useSettings();
   const { addToast } = useToasts();
-  const { locale } = useContext(LanguageContext);
   const { hasPermission } = useUser();
   const [requestModal, setRequestModal] = useState(false);
   const [isRequesting, setRequesting] = useState(false);
   const [is4k, setIs4k] = useState(false);
 
   const { data, error, revalidate } = useSWR<Collection>(
-    `/api/v1/collection/${router.query.collectionId}?language=${locale}`,
+    `/api/v1/collection/${router.query.collectionId}`,
     {
       initialData: collection,
       revalidateOnMount: true,
     }
+  );
+
+  const { data: genres } = useSWR<{ id: number; name: string }[]>(
+    `/api/v1/genres/movie`
   );
 
   if (!data && !error) {
@@ -105,6 +107,24 @@ const CollectionDetails: React.FC<CollectionDetailsProps> = ({
     collectionStatus4k = MediaStatus.PARTIALLY_AVAILABLE;
   }
 
+  const hasRequestable =
+    hasPermission([Permission.REQUEST, Permission.REQUEST_MOVIE], {
+      type: 'or',
+    }) &&
+    data.parts.filter(
+      (part) => !part.mediaInfo || part.mediaInfo.status === MediaStatus.UNKNOWN
+    ).length > 0;
+
+  const hasRequestable4k =
+    settings.currentSettings.movie4kEnabled &&
+    hasPermission([Permission.REQUEST_4K, Permission.REQUEST_4K_MOVIE], {
+      type: 'or',
+    }) &&
+    data.parts.filter(
+      (part) =>
+        !part.mediaInfo || part.mediaInfo.status4k === MediaStatus.UNKNOWN
+    ).length > 0;
+
   const requestableParts = data.parts.filter(
     (part) =>
       !part.mediaInfo ||
@@ -147,14 +167,68 @@ const CollectionDetails: React.FC<CollectionDetailsProps> = ({
     }
   };
 
+  const collectionAttributes: React.ReactNode[] = [];
+
+  collectionAttributes.push(
+    intl.formatMessage(messages.numberofmovies, {
+      count: data.parts.length,
+    })
+  );
+
+  if (genres && data.parts.some((part) => part.genreIds.length)) {
+    collectionAttributes.push(
+      uniq(
+        data.parts.reduce(
+          (genresList: number[], curr) => genresList.concat(curr.genreIds),
+          []
+        )
+      )
+        .map((genreId) => (
+          <Link
+            href={`/discover/movies/genre/${genreId}`}
+            key={`genre-${genreId}`}
+          >
+            <a className="hover:underline">
+              {genres.find((g) => g.id === genreId)?.name}
+            </a>
+          </Link>
+        ))
+        .reduce((prev, curr) => (
+          <>
+            {intl.formatMessage(globalMessages.delimitedlist, {
+              a: prev,
+              b: curr,
+            })}
+          </>
+        ))
+    );
+  }
+
   return (
     <div
-      className="px-4 pt-16 -mx-4 -mt-16 bg-center bg-cover"
+      className="media-page"
       style={{
         height: 493,
-        backgroundImage: `linear-gradient(180deg, rgba(17, 24, 39, 0.47) 0%, rgba(17, 24, 39, 1) 100%), url(//image.tmdb.org/t/p/w1920_and_h800_multi_faces/${data.backdropPath})`,
       }}
     >
+      {data.backdropPath && (
+        <div className="media-page-bg-image">
+          <CachedImage
+            alt=""
+            src={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${data.backdropPath}`}
+            layout="fill"
+            objectFit="cover"
+            priority
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                'linear-gradient(180deg, rgba(17, 24, 39, 0.47) 0%, rgba(17, 24, 39, 1) 100%)',
+            }}
+          />
+        </div>
+      )}
       <PageTitle title={data.name} />
       <Transition
         enter="opacity-0 transition duration-300"
@@ -169,8 +243,10 @@ const CollectionDetails: React.FC<CollectionDetailsProps> = ({
           onOk={() => requestBundle()}
           okText={
             isRequesting
-              ? intl.formatMessage(messages.requesting)
-              : intl.formatMessage(is4k ? messages.request4k : messages.request)
+              ? intl.formatMessage(globalMessages.requesting)
+              : intl.formatMessage(
+                  is4k ? globalMessages.request4k : globalMessages.request
+                )
           }
           okDisabled={isRequesting}
           okButtonType="primary"
@@ -178,22 +254,7 @@ const CollectionDetails: React.FC<CollectionDetailsProps> = ({
           title={intl.formatMessage(
             is4k ? messages.requestcollection4k : messages.requestcollection
           )}
-          iconSvg={
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-              />
-            </svg>
-          }
+          iconSvg={<DuplicateIcon />}
         >
           <p>
             {intl.formatMessage(
@@ -216,24 +277,29 @@ const CollectionDetails: React.FC<CollectionDetailsProps> = ({
           </ul>
         </Modal>
       </Transition>
-      <div className="flex flex-col items-center pt-4 lg:flex-row lg:items-end">
-        <div className="lg:mr-4">
-          <img
-            src={`//image.tmdb.org/t/p/w600_and_h900_bestv2${data.posterPath}`}
+      <div className="media-header">
+        <div className="media-poster">
+          <CachedImage
+            src={
+              data.posterPath
+                ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${data.posterPath}`
+                : '/images/overseerr_poster_not_found.png'
+            }
             alt=""
-            className="w-32 rounded shadow md:rounded-lg md:shadow-2xl md:w-44 lg:w-52"
+            layout="responsive"
+            width={600}
+            height={900}
+            priority
           />
         </div>
-        <div className="flex flex-col flex-1 mt-4 text-center text-white lg:mr-4 lg:mt-0 lg:text-left">
-          <div className="mb-2 space-x-2">
-            <span className="ml-2 lg:ml-0">
-              <StatusBadge
-                status={collectionStatus}
-                inProgress={data.parts.some(
-                  (part) => (part.mediaInfo?.downloadStatus ?? []).length > 0
-                )}
-              />
-            </span>
+        <div className="media-title">
+          <div className="media-status">
+            <StatusBadge
+              status={collectionStatus}
+              inProgress={data.parts.some(
+                (part) => (part.mediaInfo?.downloadStatus ?? []).length > 0
+              )}
+            />
             {settings.currentSettings.movie4kEnabled &&
               hasPermission(
                 [Permission.REQUEST_4K, Permission.REQUEST_4K_MOVIE],
@@ -241,122 +307,78 @@ const CollectionDetails: React.FC<CollectionDetailsProps> = ({
                   type: 'or',
                 }
               ) && (
-                <span>
-                  <StatusBadge
-                    status={collectionStatus4k}
-                    is4k
-                    inProgress={data.parts.some(
-                      (part) =>
-                        (part.mediaInfo?.downloadStatus4k ?? []).length > 0
-                    )}
-                  />
-                </span>
+                <StatusBadge
+                  status={collectionStatus4k}
+                  is4k
+                  inProgress={data.parts.some(
+                    (part) =>
+                      (part.mediaInfo?.downloadStatus4k ?? []).length > 0
+                  )}
+                />
               )}
           </div>
-          <h1 className="text-2xl md:text-4xl">{data.name}</h1>
-          <span className="mt-1 text-xs lg:text-base lg:mt-0">
-            {intl.formatMessage(messages.numberofmovies, {
-              count: data.parts.length,
-            })}
+          <h1>{data.name}</h1>
+          <span className="media-attributes">
+            {collectionAttributes.length > 0 &&
+              collectionAttributes
+                .map((t, k) => <span key={k}>{t}</span>)
+                .reduce((prev, curr) => (
+                  <>
+                    {prev} | {curr}
+                  </>
+                ))}
           </span>
         </div>
-        <div className="relative z-10 flex flex-wrap justify-center flex-shrink-0 mt-4 sm:justify-end sm:flex-nowrap lg:mt-0">
-          {hasPermission(Permission.REQUEST) &&
-            (collectionStatus !== MediaStatus.AVAILABLE ||
-              (settings.currentSettings.movie4kEnabled &&
-                hasPermission(
-                  [Permission.REQUEST_4K, Permission.REQUEST_4K_MOVIE],
-                  { type: 'or' }
-                ) &&
-                collectionStatus4k !== MediaStatus.AVAILABLE)) && (
-              <div className="mb-3 sm:mb-0">
-                <ButtonWithDropdown
+        <div className="media-actions">
+          {(hasRequestable || hasRequestable4k) && (
+            <ButtonWithDropdown
+              buttonType="primary"
+              onClick={() => {
+                setRequestModal(true);
+                setIs4k(!hasRequestable);
+              }}
+              text={
+                <>
+                  <DownloadIcon />
+                  <span>
+                    {intl.formatMessage(
+                      hasRequestable
+                        ? messages.requestcollection
+                        : messages.requestcollection4k
+                    )}
+                  </span>
+                </>
+              }
+            >
+              {hasRequestable && hasRequestable4k && (
+                <ButtonWithDropdown.Item
                   buttonType="primary"
                   onClick={() => {
                     setRequestModal(true);
-                    setIs4k(collectionStatus === MediaStatus.AVAILABLE);
+                    setIs4k(true);
                   }}
-                  text={
-                    <>
-                      <svg
-                        className="w-4 mr-1"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                        />
-                      </svg>
-                      <span>
-                        {intl.formatMessage(
-                          collectionStatus === MediaStatus.AVAILABLE
-                            ? messages.requestcollection4k
-                            : messages.requestcollection
-                        )}
-                      </span>
-                    </>
-                  }
                 >
-                  {settings.currentSettings.movie4kEnabled &&
-                    hasPermission(
-                      [Permission.REQUEST_4K, Permission.REQUEST_4K_MOVIE],
-                      { type: 'or' }
-                    ) &&
-                    collectionStatus !== MediaStatus.AVAILABLE &&
-                    collectionStatus4k !== MediaStatus.AVAILABLE && (
-                      <ButtonWithDropdown.Item
-                        buttonType="primary"
-                        onClick={() => {
-                          setRequestModal(true);
-                          setIs4k(true);
-                        }}
-                      >
-                        <svg
-                          className="w-4 mr-1"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                          />
-                        </svg>
-                        <span>
-                          {intl.formatMessage(messages.requestcollection4k)}
-                        </span>
-                      </ButtonWithDropdown.Item>
-                    )}
-                </ButtonWithDropdown>
-              </div>
-            )}
+                  <DownloadIcon />
+                  <span>
+                    {intl.formatMessage(messages.requestcollection4k)}
+                  </span>
+                </ButtonWithDropdown.Item>
+              )}
+            </ButtonWithDropdown>
+          )}
         </div>
       </div>
-      <div className="flex flex-col pt-8 pb-4 text-white md:flex-row">
-        <div className="flex-1 md:mr-8">
-          <h2 className="text-xl md:text-2xl">
-            {intl.formatMessage(messages.overview)}
-          </h2>
-          <p className="pt-2 text-sm md:text-base">
-            {data.overview
-              ? data.overview
-              : intl.formatMessage(messages.overviewunavailable)}
-          </p>
-        </div>
-      </div>
-      <div className="mt-6 mb-4 md:flex md:items-center md:justify-between">
-        <div className="flex-1 min-w-0">
-          <div className="inline-flex items-center text-xl leading-7 text-white sm:text-2xl sm:leading-9 sm:truncate">
-            <span>{intl.formatMessage(messages.movies)}</span>
+      {data.overview && (
+        <div className="media-overview">
+          <div className="flex-1">
+            <h2>{intl.formatMessage(messages.overview)}</h2>
+            <p>{data.overview}</p>
           </div>
+        </div>
+      )}
+      <div className="slider-header">
+        <div className="slider-title">
+          <span>{intl.formatMessage(globalMessages.movies)}</span>
         </div>
       </div>
       <Slider

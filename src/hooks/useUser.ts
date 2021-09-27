@@ -1,13 +1,15 @@
 import useSwr from 'swr';
+import { MutatorCallback } from 'swr/dist/types';
+import { UserType } from '../../server/constants/user';
 import {
   hasPermission,
   Permission,
   PermissionCheckOptions,
 } from '../../server/lib/permissions';
-import { UserType } from '../../server/constants/user';
-import { mutateCallback } from 'swr/dist/types';
+import { NotificationAgentKey } from '../../server/lib/settings';
 
 export { Permission, UserType };
+export type { PermissionCheckOptions };
 
 export interface User {
   id: number;
@@ -24,11 +26,14 @@ export interface User {
   settings?: UserSettings;
 }
 
+type NotificationAgentTypes = Record<NotificationAgentKey, number>;
+
 export interface UserSettings {
-  enableNotifications: boolean;
   discordId?: string;
   region?: string;
   originalLanguage?: string;
+  locale?: string;
+  notificationTypes: Partial<NotificationAgentTypes>;
 }
 
 interface UserHookResponse {
@@ -37,7 +42,7 @@ interface UserHookResponse {
   error: string;
   revalidate: () => Promise<boolean>;
   mutate: (
-    data?: User | Promise<User> | mutateCallback<User> | undefined,
+    data?: User | Promise<User> | MutatorCallback<User> | undefined,
     shouldRevalidate?: boolean | undefined
   ) => Promise<User | undefined>;
   hasPermission: (

@@ -1,54 +1,57 @@
+import { SaveIcon } from '@heroicons/react/outline';
 import axios from 'axios';
-import { Field, Form, Formik } from 'formik';
+import { Form, Formik } from 'formik';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
-import { useUser } from '../../../../hooks/useUser';
+import * as Yup from 'yup';
+import { Permission, useUser } from '../../../../hooks/useUser';
+import globalMessages from '../../../../i18n/globalMessages';
 import Error from '../../../../pages/_error';
 import Alert from '../../../Common/Alert';
 import Button from '../../../Common/Button';
 import LoadingSpinner from '../../../Common/LoadingSpinner';
-import * as Yup from 'yup';
-import useSettings from '../../../../hooks/useSettings';
+import PageTitle from '../../../Common/PageTitle';
+import SensitiveInput from '../../../Common/SensitiveInput';
 
 const messages = defineMessages({
   password: 'Password',
   currentpassword: 'Current Password',
   newpassword: 'New Password',
   confirmpassword: 'Confirm Password',
-  save: 'Save Changes',
-  saving: 'Saving…',
-  toastSettingsSuccess: 'Password changed!',
-  toastSettingsFailure:
-    'Something went wrong while changing the password. Is your current password correct?',
+  toastSettingsSuccess: 'Password saved successfully!',
+  toastSettingsFailure: 'Something went wrong while saving the password.',
+  toastSettingsFailureVerifyCurrent:
+    'Something went wrong while saving the password. Was your current password entered correctly?',
   validationCurrentPassword: 'You must provide your current password',
   validationNewPassword: 'You must provide a new password',
   validationNewPasswordLength:
     'Password is too short; should be a minimum of 8 characters',
-  validationConfirmPassword: 'You must confirm your new password',
-  validationConfirmPasswordSame: 'Password must match',
-  nopasswordset: 'No Password Set',
-  nopasswordsetDescription:
-    'This user account currently does not have a password specifically for {applicationTitle}.\
-    Configure a password below to enable this account to sign in as a "local user."',
+  validationConfirmPassword: 'You must confirm the new password',
+  validationConfirmPasswordSame: 'Passwords must match',
+  noPasswordSet:
+    'This user account currently does not have a password set. Configure a password below to enable this account to sign in as a "local user."',
+  noPasswordSetOwnAccount:
+    'Your account currently does not have a password set. Configure a password below to enable sign-in as a "local user" using your email address.',
+  nopermissionDescription:
+    "You do not have permission to modify this user's password.",
 });
 
 const UserPasswordChange: React.FC = () => {
-  const settings = useSettings();
   const intl = useIntl();
   const { addToast } = useToasts();
   const router = useRouter();
   const { user: currentUser } = useUser();
-  const { user } = useUser({ id: Number(router.query.userId) });
+  const { user, hasPermission } = useUser({ id: Number(router.query.userId) });
   const { data, error, revalidate } = useSWR<{ hasPassword: boolean }>(
     user ? `/api/v1/user/${user?.id}/settings/password` : null
   );
 
   const PasswordChangeSchema = Yup.object().shape({
     currentPassword: Yup.lazy(() =>
-      data?.hasPassword
+      data?.hasPassword && currentUser?.id === user?.id
         ? Yup.string().required(
             intl.formatMessage(messages.validationCurrentPassword)
           )
@@ -73,8 +76,33 @@ const UserPasswordChange: React.FC = () => {
     return <Error statusCode={500} />;
   }
 
+  if (
+    currentUser?.id !== user?.id &&
+    hasPermission(Permission.ADMIN) &&
+    currentUser?.id !== 1
+  ) {
+    return (
+      <>
+        <div className="mb-6">
+          <h3 className="heading">{intl.formatMessage(messages.password)}</h3>
+        </div>
+        <Alert
+          title={intl.formatMessage(messages.nopermissionDescription)}
+          type="error"
+        />
+      </>
+    );
+  }
+
   return (
     <>
+      <PageTitle
+        title={[
+          intl.formatMessage(messages.password),
+          intl.formatMessage(globalMessages.usersettings),
+          user?.displayName,
+        ]}
+      />
       <div className="mb-6">
         <h3 className="heading">{intl.formatMessage(messages.password)}</h3>
       </div>
@@ -99,28 +127,35 @@ const UserPasswordChange: React.FC = () => {
               appearance: 'success',
             });
           } catch (e) {
-            addToast(intl.formatMessage(messages.toastSettingsFailure), {
-              autoDismiss: true,
-              appearance: 'error',
-            });
+            addToast(
+              intl.formatMessage(
+                data.hasPassword && user?.id === currentUser?.id
+                  ? messages.toastSettingsFailureVerifyCurrent
+                  : messages.toastSettingsFailure
+              ),
+              {
+                autoDismiss: true,
+                appearance: 'error',
+              }
+            );
           } finally {
             revalidate();
             resetForm();
           }
         }}
       >
-        {({ errors, touched, isSubmitting }) => {
+        {({ errors, touched, isSubmitting, isValid }) => {
           return (
             <Form className="section">
               {!data.hasPassword && (
                 <Alert
                   type="warning"
-                  title={intl.formatMessage(messages.nopasswordset)}
-                >
-                  {intl.formatMessage(messages.nopasswordsetDescription, {
-                    applicationTitle: settings.currentSettings.applicationTitle,
-                  })}
-                </Alert>
+                  title={intl.formatMessage(
+                    user?.id === currentUser?.id
+                      ? messages.noPasswordSetOwnAccount
+                      : messages.noPasswordSet
+                  )}
+                />
               )}
               {data.hasPassword && user?.id === currentUser?.id && (
                 <div className="pb-6 form-row">
@@ -128,11 +163,13 @@ const UserPasswordChange: React.FC = () => {
                     {intl.formatMessage(messages.currentpassword)}
                   </label>
                   <div className="form-input">
-                    <div className="flex max-w-lg rounded-md shadow-sm">
-                      <Field
+                    <div className="form-input-field">
+                      <SensitiveInput
+                        as="field"
                         id="currentPassword"
                         name="currentPassword"
-                        type="text"
+                        type="password"
+                        autoComplete="current-password"
                       />
                     </div>
                     {errors.currentPassword && touched.currentPassword && (
@@ -146,8 +183,14 @@ const UserPasswordChange: React.FC = () => {
                   {intl.formatMessage(messages.newpassword)}
                 </label>
                 <div className="form-input">
-                  <div className="flex max-w-lg rounded-md shadow-sm">
-                    <Field id="newPassword" name="newPassword" type="text" />
+                  <div className="form-input-field">
+                    <SensitiveInput
+                      as="field"
+                      id="newPassword"
+                      name="newPassword"
+                      type="password"
+                      autoComplete="new-password"
+                    />
                   </div>
                   {errors.newPassword && touched.newPassword && (
                     <div className="error">{errors.newPassword}</div>
@@ -159,11 +202,13 @@ const UserPasswordChange: React.FC = () => {
                   {intl.formatMessage(messages.confirmpassword)}
                 </label>
                 <div className="form-input">
-                  <div className="flex max-w-lg rounded-md shadow-sm">
-                    <Field
+                  <div className="form-input-field">
+                    <SensitiveInput
+                      as="field"
                       id="confirmPassword"
                       name="confirmPassword"
-                      type="text"
+                      type="password"
+                      autoComplete="new-password"
                     />
                   </div>
                   {errors.confirmPassword && touched.confirmPassword && (
@@ -177,11 +222,14 @@ const UserPasswordChange: React.FC = () => {
                     <Button
                       buttonType="primary"
                       type="submit"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || !isValid}
                     >
-                      {isSubmitting
-                        ? intl.formatMessage(messages.saving)
-                        : intl.formatMessage(messages.save)}
+                      <SaveIcon />
+                      <span>
+                        {isSubmitting
+                          ? intl.formatMessage(globalMessages.saving)
+                          : intl.formatMessage(globalMessages.save)}
+                      </span>
                     </Button>
                   </span>
                 </div>

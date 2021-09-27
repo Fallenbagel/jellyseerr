@@ -14,7 +14,6 @@ export interface PlexConnection {
   local: boolean;
   status?: number;
   message?: string;
-  host?: string;
 }
 
 export interface PlexDevice {

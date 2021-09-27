@@ -1,35 +1,50 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import { Listbox, Transition } from '@headlessui/react';
+import { AdjustmentsIcon } from '@heroicons/react/outline';
+import { CheckIcon, ChevronDownIcon } from '@heroicons/react/solid';
+import { isEqual } from 'lodash';
+import dynamic from 'next/dynamic';
 import React, { useEffect, useState } from 'react';
+import { defineMessages, useIntl } from 'react-intl';
+import type { OptionsType, OptionTypeBase } from 'react-select';
 import useSWR from 'swr';
-import { SmallLoadingSpinner } from '../../Common/LoadingSpinner';
 import type {
   ServiceCommonServer,
   ServiceCommonServerWithDetails,
 } from '../../../../server/interfaces/api/serviceInterfaces';
-import { defineMessages, useIntl } from 'react-intl';
-import { formatBytes } from '../../../utils/numberHelpers';
-import { Listbox, Transition } from '@headlessui/react';
-import { Permission, User, useUser } from '../../../hooks/useUser';
 import type { UserResultsResponse } from '../../../../server/interfaces/api/userInterfaces';
+import { Permission, User, useUser } from '../../../hooks/useUser';
+import globalMessages from '../../../i18n/globalMessages';
+import { formatBytes } from '../../../utils/numberHelpers';
+import { SmallLoadingSpinner } from '../../Common/LoadingSpinner';
+
+type OptionType = {
+  value: string;
+  label: string;
+};
+
+const Select = dynamic(() => import('react-select'), { ssr: false });
 
 const messages = defineMessages({
-  advancedoptions: 'Advanced Options',
+  advancedoptions: 'Advanced',
   destinationserver: 'Destination Server',
   qualityprofile: 'Quality Profile',
   rootfolder: 'Root Folder',
   animenote: '* This series is an anime.',
-  default: '(Default)',
-  loadingprofiles: 'Loading profiles…',
-  loadingfolders: 'Loading folders…',
+  default: '{name} (Default)',
+  folder: '{path} ({space})',
   requestas: 'Request As',
   languageprofile: 'Language Profile',
-  loadinglanguages: 'Loading languages…',
+  tags: 'Tags',
+  selecttags: 'Select tags',
+  notagoptions: 'No tags.',
 });
 
 export type RequestOverrides = {
   server?: number;
   profile?: number;
   folder?: string;
+  tags?: number[];
   language?: number;
   user?: User;
 };
@@ -78,6 +93,10 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
     defaultOverrides?.language ?? -1
   );
 
+  const [selectedTags, setSelectedTags] = useState<number[]>(
+    defaultOverrides?.tags ?? []
+  );
+
   const {
     data: serverData,
     isValidating,
@@ -100,7 +119,7 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
 
   const { data: userData } = useSWR<UserResultsResponse>(
     hasPermission([Permission.MANAGE_REQUESTS, Permission.MANAGE_USERS])
-      ? '/api/v1/user?take=1000'
+      ? '/api/v1/user?take=1000&sort=displayname'
       : null
   );
 
@@ -151,6 +170,9 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
             ? serverData.server.activeAnimeLanguageProfileId
             : serverData.server.activeLanguageProfileId)
       );
+      const defaultTags = isAnime
+        ? serverData.server.activeAnimeTags
+        : serverData.server.activeTags;
 
       if (
         defaultProfile &&
@@ -175,46 +197,43 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
       ) {
         setSelectedLanguage(defaultLanguage.id);
       }
+
+      if (
+        defaultTags &&
+        !isEqual(defaultTags, selectedTags) &&
+        (!defaultOverrides || defaultOverrides.tags === null)
+      ) {
+        setSelectedTags(defaultTags);
+      }
     }
   }, [serverData]);
 
   useEffect(() => {
-    if (
-      defaultOverrides &&
-      defaultOverrides.server !== null &&
-      defaultOverrides.server !== undefined
-    ) {
+    if (defaultOverrides && defaultOverrides.server != null) {
       setSelectedServer(defaultOverrides.server);
     }
 
-    if (
-      defaultOverrides &&
-      defaultOverrides.profile !== null &&
-      defaultOverrides.profile !== undefined
-    ) {
+    if (defaultOverrides && defaultOverrides.profile != null) {
       setSelectedProfile(defaultOverrides.profile);
     }
 
-    if (
-      defaultOverrides &&
-      defaultOverrides.folder !== null &&
-      defaultOverrides.folder !== undefined
-    ) {
+    if (defaultOverrides && defaultOverrides.folder != null) {
       setSelectedFolder(defaultOverrides.folder);
     }
 
-    if (
-      defaultOverrides &&
-      defaultOverrides.language !== null &&
-      defaultOverrides.language !== undefined
-    ) {
+    if (defaultOverrides && defaultOverrides.language != null) {
       setSelectedLanguage(defaultOverrides.language);
+    }
+
+    if (defaultOverrides && defaultOverrides.tags != null) {
+      setSelectedTags(defaultOverrides.tags);
     }
   }, [
     defaultOverrides?.server,
     defaultOverrides?.folder,
     defaultOverrides?.profile,
     defaultOverrides?.language,
+    defaultOverrides?.tags,
   ]);
 
   useEffect(() => {
@@ -225,6 +244,7 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
         server: selectedServer ?? undefined,
         user: selectedUser ?? undefined,
         language: selectedLanguage ?? undefined,
+        tags: selectedTags,
       });
     }
   }, [
@@ -233,6 +253,7 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
     selectedProfile,
     selectedUser,
     selectedLanguage,
+    selectedTags,
   ]);
 
   if (!data && !error) {
@@ -250,23 +271,15 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
   return (
     <>
       <div className="flex items-center mb-2 font-bold tracking-wider">
-        <svg
-          className="w-4 h-4 mr-1"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="M9.707 7.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L13 8.586V5h3a2 2 0 012 2v5a2 2 0 01-2 2H8a2 2 0 01-2-2V7a2 2 0 012-2h3v3.586L9.707 7.293zM11 3a1 1 0 112 0v2h-2V3z" />
-          <path d="M4 9a2 2 0 00-2 2v5a2 2 0 002 2h8a2 2 0 002-2H4V9z" />
-        </svg>
+        <AdjustmentsIcon className="w-5 h-5 mr-1.5" />
         {intl.formatMessage(messages.advancedoptions)}
       </div>
       <div className="p-4 bg-gray-600 rounded-md shadow">
         {!!data && selectedServer !== null && (
-          <>
-            <div className="flex flex-col items-center justify-between md:flex-row">
-              <div className="flex-grow flex-shrink-0 w-full mb-2 md:w-1/4 md:pr-4 md:mb-0">
-                <label htmlFor="server" className="text-label">
+          <div className="flex flex-col md:flex-row">
+            {data.filter((server) => server.is4k === is4k).length > 1 && (
+              <div className="flex-grow flex-shrink-0 w-full mb-3 md:w-1/4 md:pr-4 last:pr-0">
+                <label htmlFor="server">
                   {intl.formatMessage(messages.destinationserver)}
                 </label>
                 <select
@@ -275,20 +288,30 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
                   value={selectedServer}
                   onChange={(e) => setSelectedServer(Number(e.target.value))}
                   onBlur={(e) => setSelectedServer(Number(e.target.value))}
-                  className="block w-full py-2 pl-3 pr-10 mt-1 text-base leading-6 text-white transition duration-150 ease-in-out bg-gray-800 border-gray-700 rounded-md form-select focus:outline-none focus:ring-blue focus:border-blue-300 sm:text-sm sm:leading-5"
+                  className="bg-gray-800 border-gray-700"
                 >
-                  {data.map((server) => (
-                    <option key={`server-list-${server.id}`} value={server.id}>
-                      {server.name}
-                      {server.isDefault && server.is4k === is4k
-                        ? ` ${intl.formatMessage(messages.default)}`
-                        : ''}
-                    </option>
-                  ))}
+                  {data
+                    .filter((server) => server.is4k === is4k)
+                    .map((server) => (
+                      <option
+                        key={`server-list-${server.id}`}
+                        value={server.id}
+                      >
+                        {server.isDefault
+                          ? intl.formatMessage(messages.default, {
+                              name: server.name,
+                            })
+                          : server.name}
+                      </option>
+                    ))}
                 </select>
               </div>
-              <div className="flex-grow flex-shrink-0 w-full mb-2 md:w-1/4 md:pr-4 md:mb-0">
-                <label htmlFor="profile" className="text-label">
+            )}
+            {(isValidating ||
+              !serverData ||
+              serverData.profiles.length > 1) && (
+              <div className="flex-grow flex-shrink-0 w-full mb-3 md:w-1/4 md:pr-4 last:pr-0">
+                <label htmlFor="profile">
                   {intl.formatMessage(messages.qualityprofile)}
                 </label>
                 <select
@@ -297,11 +320,12 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
                   value={selectedProfile}
                   onChange={(e) => setSelectedProfile(Number(e.target.value))}
                   onBlur={(e) => setSelectedProfile(Number(e.target.value))}
-                  className="block w-full py-2 pl-3 pr-10 mt-1 text-base leading-6 text-white transition duration-150 ease-in-out bg-gray-800 border-gray-700 rounded-md form-select focus:outline-none focus:ring-blue focus:border-blue-300 sm:text-sm sm:leading-5"
+                  className="bg-gray-800 border-gray-700"
+                  disabled={isValidating || !serverData}
                 >
-                  {isValidating && (
+                  {(isValidating || !serverData) && (
                     <option value="">
-                      {intl.formatMessage(messages.loadingprofiles)}
+                      {intl.formatMessage(globalMessages.loading)}
                     </option>
                   )}
                   {!isValidating &&
@@ -311,24 +335,27 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
                         key={`profile-list${profile.id}`}
                         value={profile.id}
                       >
-                        {profile.name}
                         {isAnime &&
                         serverData.server.activeAnimeProfileId === profile.id
-                          ? ` ${intl.formatMessage(messages.default)}`
+                          ? intl.formatMessage(messages.default, {
+                              name: profile.name,
+                            })
                           : !isAnime &&
                             serverData.server.activeProfileId === profile.id
-                          ? ` ${intl.formatMessage(messages.default)}`
-                          : ''}
+                          ? intl.formatMessage(messages.default, {
+                              name: profile.name,
+                            })
+                          : profile.name}
                       </option>
                     ))}
                 </select>
               </div>
-              <div
-                className={`flex-grow flex-shrink-0 w-full mb-2 md:w-1/4 md:mb-0 ${
-                  type === 'tv' ? 'md:pr-4' : ''
-                }`}
-              >
-                <label htmlFor="folder" className="text-label">
+            )}
+            {(isValidating ||
+              !serverData ||
+              serverData.rootFolders.length > 1) && (
+              <div className="flex-grow flex-shrink-0 w-full mb-3 md:w-1/4 md:pr-4 last:pr-0">
+                <label htmlFor="folder">
                   {intl.formatMessage(messages.rootfolder)}
                 </label>
                 <select
@@ -337,11 +364,12 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
                   value={selectedFolder}
                   onChange={(e) => setSelectedFolder(e.target.value)}
                   onBlur={(e) => setSelectedFolder(e.target.value)}
-                  className="block w-full py-2 pl-3 pr-10 mt-1 text-base leading-6 text-white transition duration-150 ease-in-out bg-gray-800 border-gray-700 rounded-md form-select focus:outline-none focus:ring-blue focus:border-blue-300 sm:text-sm sm:leading-5"
+                  className="bg-gray-800 border-gray-700"
+                  disabled={isValidating || !serverData}
                 >
-                  {isValidating && (
+                  {(isValidating || !serverData) && (
                     <option value="">
-                      {intl.formatMessage(messages.loadingfolders)}
+                      {intl.formatMessage(globalMessages.loading)}
                     </option>
                   )}
                   {!isValidating &&
@@ -351,21 +379,37 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
                         key={`folder-list${folder.id}`}
                         value={folder.path}
                       >
-                        {folder.path} ({formatBytes(folder.freeSpace ?? 0)})
                         {isAnime &&
                         serverData.server.activeAnimeDirectory === folder.path
-                          ? ` ${intl.formatMessage(messages.default)}`
+                          ? intl.formatMessage(messages.default, {
+                              name: intl.formatMessage(messages.folder, {
+                                path: folder.path,
+                                space: formatBytes(folder.freeSpace ?? 0),
+                              }),
+                            })
                           : !isAnime &&
                             serverData.server.activeDirectory === folder.path
-                          ? ` ${intl.formatMessage(messages.default)}`
-                          : ''}
+                          ? intl.formatMessage(messages.default, {
+                              name: intl.formatMessage(messages.folder, {
+                                path: folder.path,
+                                space: formatBytes(folder.freeSpace ?? 0),
+                              }),
+                            })
+                          : intl.formatMessage(messages.folder, {
+                              path: folder.path,
+                              space: formatBytes(folder.freeSpace ?? 0),
+                            })}
                       </option>
                     ))}
                 </select>
               </div>
-              {type === 'tv' && (
-                <div className="flex-grow flex-shrink-0 w-full mb-2 md:w-1/4 md:mb-0">
-                  <label htmlFor="language" className="text-label">
+            )}
+            {type === 'tv' &&
+              (isValidating ||
+                !serverData ||
+                (serverData.languageProfiles ?? []).length > 1) && (
+                <div className="flex-grow flex-shrink-0 w-full mb-3 md:w-1/4 md:pr-4 last:pr-0">
+                  <label htmlFor="language">
                     {intl.formatMessage(messages.languageprofile)}
                   </label>
                   <select
@@ -378,11 +422,12 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
                     onBlur={(e) =>
                       setSelectedLanguage(parseInt(e.target.value))
                     }
-                    className="block w-full py-2 pl-3 pr-10 mt-1 text-base leading-6 text-white transition duration-150 ease-in-out bg-gray-800 border-gray-700 rounded-md form-select focus:outline-none focus:ring-blue focus:border-blue-300 sm:text-sm sm:leading-5"
+                    className="bg-gray-800 border-gray-700"
+                    disabled={isValidating || !serverData}
                   >
-                    {isValidating && (
+                    {(isValidating || !serverData) && (
                       <option value="">
-                        {intl.formatMessage(messages.loadinglanguages)}
+                        {intl.formatMessage(globalMessages.loading)}
                       </option>
                     )}
                     {!isValidating &&
@@ -392,146 +437,169 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
                           key={`folder-list${language.id}`}
                           value={language.id}
                         >
-                          {language.name}
                           {isAnime &&
                           serverData.server.activeAnimeLanguageProfileId ===
                             language.id
-                            ? ` ${intl.formatMessage(messages.default)}`
+                            ? intl.formatMessage(messages.default, {
+                                name: language.name,
+                              })
                             : !isAnime &&
                               serverData.server.activeLanguageProfileId ===
                                 language.id
-                            ? ` ${intl.formatMessage(messages.default)}`
-                            : ''}
+                            ? intl.formatMessage(messages.default, {
+                                name: language.name,
+                              })
+                            : language.name}
                         </option>
                       ))}
                   </select>
                 </div>
               )}
-            </div>
-          </>
+          </div>
         )}
+        {selectedServer !== null &&
+          (isValidating || !serverData || !!serverData?.tags?.length) && (
+            <div className="mb-2">
+              <label htmlFor="tags">{intl.formatMessage(messages.tags)}</label>
+              <Select
+                name="tags"
+                options={(serverData?.tags ?? []).map((tag) => ({
+                  label: tag.label,
+                  value: tag.id,
+                }))}
+                isMulti
+                isDisabled={isValidating || !serverData}
+                placeholder={
+                  isValidating || !serverData
+                    ? intl.formatMessage(globalMessages.loading)
+                    : intl.formatMessage(messages.selecttags)
+                }
+                className="react-select-container react-select-container-dark"
+                classNamePrefix="react-select"
+                value={selectedTags.map((tagId) => {
+                  const foundTag = serverData?.tags.find(
+                    (tag) => tag.id === tagId
+                  );
+                  return {
+                    value: foundTag?.id,
+                    label: foundTag?.label,
+                  };
+                })}
+                onChange={(
+                  value: OptionTypeBase | OptionsType<OptionType> | null
+                ) => {
+                  if (!Array.isArray(value)) {
+                    return;
+                  }
+                  setSelectedTags(value?.map((option) => option.value));
+                }}
+                noOptionsMessage={() =>
+                  intl.formatMessage(messages.notagoptions)
+                }
+              />
+            </div>
+          )}
         {hasPermission([Permission.MANAGE_REQUESTS, Permission.MANAGE_USERS]) &&
           selectedUser && (
-            <div className="mt-0 sm:mt-2">
-              <Listbox
-                as="div"
-                value={selectedUser}
-                onChange={(value) => setSelectedUser(value)}
-                className="space-y-1"
-              >
-                {({ open }) => (
-                  <>
-                    <Listbox.Label className="text-label">
-                      {intl.formatMessage(messages.requestas)}
-                    </Listbox.Label>
-                    <div className="relative">
-                      <span className="inline-block w-full rounded-md shadow-sm">
-                        <Listbox.Button className="relative w-full py-2 pl-3 pr-10 text-left text-white transition duration-150 ease-in-out bg-gray-800 border border-gray-700 rounded-md cursor-default focus:outline-none focus:shadow-outline-blue focus:border-blue-300 sm:text-sm sm:leading-5">
-                          <span className="flex items-center">
-                            <img
-                              src={selectedUser.avatar}
-                              alt=""
-                              className="flex-shrink-0 w-6 h-6 rounded-full"
-                            />
-                            <span className="block ml-3">
-                              {selectedUser.displayName}
-                            </span>
+            <Listbox
+              as="div"
+              value={selectedUser}
+              onChange={(value) => setSelectedUser(value)}
+              className="space-y-1"
+            >
+              {({ open }) => (
+                <>
+                  <Listbox.Label>
+                    {intl.formatMessage(messages.requestas)}
+                  </Listbox.Label>
+                  <div className="relative">
+                    <span className="inline-block w-full rounded-md shadow-sm">
+                      <Listbox.Button className="relative w-full py-2 pl-3 pr-10 text-left text-white transition duration-150 ease-in-out bg-gray-800 border border-gray-700 rounded-md cursor-default focus:outline-none focus:shadow-outline-blue focus:border-blue-300 sm:text-sm sm:leading-5">
+                        <span className="flex items-center">
+                          <img
+                            src={selectedUser.avatar}
+                            alt=""
+                            className="flex-shrink-0 w-6 h-6 rounded-full"
+                          />
+                          <span className="block ml-3">
+                            {selectedUser.displayName}
+                          </span>
+                          {selectedUser.displayName.toLowerCase() !==
+                            selectedUser.email && (
                             <span className="ml-1 text-gray-400 truncate">
                               ({selectedUser.email})
                             </span>
-                          </span>
-                          <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                            <svg
-                              className="w-5 h-5 text-gray-500"
-                              viewBox="0 0 20 20"
-                              fill="none"
-                              stroke="currentColor"
-                            >
-                              <path
-                                d="M7 7l3-3 3 3m0 6l-3 3-3-3"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          </span>
-                        </Listbox.Button>
-                      </span>
+                          )}
+                        </span>
+                        <span className="absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500 pointer-events-none">
+                          <ChevronDownIcon className="w-5 h-5" />
+                        </span>
+                      </Listbox.Button>
+                    </span>
 
-                      <Transition
-                        show={open}
-                        enter="transition ease-in duration-300"
-                        enterFrom="opacity-0"
-                        enterTo="opacity-100"
-                        leave="transition ease-in duration-100"
-                        leaveFrom="opacity-100"
-                        leaveTo="opacity-0"
-                        className="w-full mt-1 bg-gray-800 rounded-md shadow-lg"
+                    <Transition
+                      show={open}
+                      enter="transition ease-in duration-300"
+                      enterFrom="opacity-0"
+                      enterTo="opacity-100"
+                      leave="transition ease-in duration-100"
+                      leaveFrom="opacity-100"
+                      leaveTo="opacity-0"
+                      className="w-full mt-1 bg-gray-800 rounded-md shadow-lg"
+                    >
+                      <Listbox.Options
+                        static
+                        className="py-1 overflow-auto text-base leading-6 rounded-md shadow-xs max-h-60 focus:outline-none sm:text-sm sm:leading-5"
                       >
-                        <Listbox.Options
-                          static
-                          className="py-1 overflow-auto text-base leading-6 rounded-md shadow-xs max-h-60 focus:outline-none sm:text-sm sm:leading-5"
-                        >
-                          {userData?.results.map((user) => (
-                            <Listbox.Option key={user.id} value={user}>
-                              {({ selected, active }) => (
-                                <div
+                        {userData?.results.map((user) => (
+                          <Listbox.Option key={user.id} value={user}>
+                            {({ selected, active }) => (
+                              <div
+                                className={`${
+                                  active
+                                    ? 'text-white bg-indigo-600'
+                                    : 'text-gray-300'
+                                } cursor-default select-none relative py-2 pl-8 pr-4`}
+                              >
+                                <span
                                   className={`${
-                                    active
-                                      ? 'text-white bg-indigo-600'
-                                      : 'text-gray-300'
-                                  } cursor-default select-none relative py-2 pl-8 pr-4`}
+                                    selected ? 'font-semibold' : 'font-normal'
+                                  } flex items-center`}
                                 >
-                                  <span
-                                    className={`${
-                                      selected ? 'font-semibold' : 'font-normal'
-                                    } flex items-center`}
-                                  >
-                                    <img
-                                      src={user.avatar}
-                                      alt=""
-                                      className="flex-shrink-0 w-6 h-6 rounded-full"
-                                    />
-                                    <span className="flex-shrink-0 block ml-3">
-                                      {user.displayName}
-                                    </span>
+                                  <img
+                                    src={user.avatar}
+                                    alt=""
+                                    className="flex-shrink-0 w-6 h-6 rounded-full"
+                                  />
+                                  <span className="flex-shrink-0 block ml-3">
+                                    {user.displayName}
+                                  </span>
+                                  {user.displayName.toLowerCase() !==
+                                    user.email && (
                                     <span className="ml-1 text-gray-400 truncate">
                                       ({user.email})
                                     </span>
-                                  </span>
-                                  {selected && (
-                                    <span
-                                      className={`${
-                                        active
-                                          ? 'text-white'
-                                          : 'text-indigo-600'
-                                      } absolute inset-y-0 left-0 flex items-center pl-1.5`}
-                                    >
-                                      <svg
-                                        className="w-5 h-5"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 20 20"
-                                        fill="currentColor"
-                                      >
-                                        <path
-                                          fillRule="evenodd"
-                                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                          clipRule="evenodd"
-                                        />
-                                      </svg>
-                                    </span>
                                   )}
-                                </div>
-                              )}
-                            </Listbox.Option>
-                          ))}
-                        </Listbox.Options>
-                      </Transition>
-                    </div>
-                  </>
-                )}
-              </Listbox>
-            </div>
+                                </span>
+                                {selected && (
+                                  <span
+                                    className={`${
+                                      active ? 'text-white' : 'text-indigo-600'
+                                    } absolute inset-y-0 left-0 flex items-center pl-1.5`}
+                                  >
+                                    <CheckIcon className="w-5 h-5" />
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </Listbox.Option>
+                        ))}
+                      </Listbox.Options>
+                    </Transition>
+                  </div>
+                </>
+              )}
+            </Listbox>
           )}
         {isAnime && (
           <div className="mt-4 italic">

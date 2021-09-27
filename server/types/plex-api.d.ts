@@ -21,6 +21,13 @@ declare module 'plex-api' {
       requestOptions?: Record<string, string | number>;
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: <T extends Record<string, any>>(endpoint: string) => Promise<T>;
+    query: <T extends Record<string, any>>(
+      endpoint:
+        | string
+        | {
+            uri: string;
+            extraHeaders?: Record<string, string | number>;
+          }
+    ) => Promise<T>;
   }
 }

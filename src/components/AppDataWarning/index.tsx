@@ -4,7 +4,6 @@ import useSWR from 'swr';
 import Alert from '../Common/Alert';
 
 const messages = defineMessages({
-  dockerVolumeMissing: 'Docker Volume Mount Missing',
   dockerVolumeMissingDescription:
     'The <code>{appDataPath}</code> volume mount was not configured properly. All data will be cleared when the container is stopped or restarted.',
 });
@@ -26,14 +25,14 @@ const AppDataWarning: React.FC = () => {
   return (
     <>
       {!data.appData && (
-        <Alert title={intl.formatMessage(messages.dockerVolumeMissing)}>
-          {intl.formatMessage(messages.dockerVolumeMissingDescription, {
+        <Alert
+          title={intl.formatMessage(messages.dockerVolumeMissingDescription, {
             code: function code(msg) {
               return <code className="bg-opacity-50">{msg}</code>;
             },
             appDataPath: data.appDataPath,
           })}
-        </Alert>
+        />
       )}
     </>
   );

@@ -20,6 +20,7 @@ const KeyMap: Record<string, string | KeyMapFunction> = {
   notifyuser_email: 'notifyUser.email',
   notifyuser_avatar: 'notifyUser.avatar',
   notifyuser_settings_discordId: 'notifyUser.settings.discordId',
+  notifyuser_settings_telegramChatId: 'notifyUser.settings.telegramChatId',
   media_tmdbid: 'media.tmdbId',
   media_imdbid: 'media.imdbId',
   media_tvdbid: 'media.tvdbId',
@@ -29,6 +30,12 @@ const KeyMap: Record<string, string | KeyMapFunction> = {
   media_status4k: (payload) =>
     payload.media?.status ? MediaStatus[payload.media?.status4k] : '',
   request_id: 'request.id',
+  requestedBy_username: 'request.requestedBy.displayName',
+  requestedBy_email: 'request.requestedBy.email',
+  requestedBy_avatar: 'request.requestedBy.avatar',
+  requestedBy_settings_discordId: 'request.requestedBy.settings.discordId',
+  requestedBy_settings_telegramChatId:
+    'request.requestedBy.settings.telegramChatId',
 };
 
 class WebhookAgent
@@ -105,12 +112,10 @@ class WebhookAgent
     return this.parseKeys(parsedJSON, payload, type);
   }
 
-  public shouldSend(type: Notification): boolean {
-    if (
-      this.getSettings().enabled &&
-      this.getSettings().options.webhookUrl &&
-      hasNotificationType(type, this.getSettings().types)
-    ) {
+  public shouldSend(): boolean {
+    const settings = this.getSettings();
+
+    if (settings.enabled && settings.options.webhookUrl) {
       return true;
     }
 
@@ -121,26 +126,41 @@ class WebhookAgent
     type: Notification,
     payload: NotificationPayload
   ): Promise<boolean> {
-    logger.debug('Sending webhook notification', { label: 'Notifications' });
+    const settings = this.getSettings();
+
+    if (!hasNotificationType(type, settings.types ?? 0)) {
+      return true;
+    }
+
+    logger.debug('Sending webhook notification', {
+      label: 'Notifications',
+      type: Notification[type],
+      subject: payload.subject,
+    });
+
     try {
-      const { webhookUrl, authHeader } = this.getSettings().options;
-
-      if (!webhookUrl) {
-        return false;
-      }
-
-      await axios.post(webhookUrl, this.buildPayload(type, payload), {
-        headers: {
-          Authorization: authHeader,
-        },
-      });
+      await axios.post(
+        settings.options.webhookUrl,
+        this.buildPayload(type, payload),
+        settings.options.authHeader
+          ? {
+              headers: {
+                Authorization: settings.options.authHeader,
+              },
+            }
+          : undefined
+      );
 
       return true;
     } catch (e) {
-      logger.error('Error sending Webhook notification', {
+      logger.error('Error sending webhook notification', {
         label: 'Notifications',
+        type: Notification[type],
+        subject: payload.subject,
         errorMessage: e.message,
+        response: e.response?.data,
       });
+
       return false;
     }
   }

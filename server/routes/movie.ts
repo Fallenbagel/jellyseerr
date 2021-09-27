@@ -1,11 +1,11 @@
 import { Router } from 'express';
+import RottenTomatoes from '../api/rottentomatoes';
 import TheMovieDb from '../api/themoviedb';
+import { MediaType } from '../constants/media';
+import Media from '../entity/Media';
+import logger from '../logger';
 import { mapMovieDetails } from '../models/Movie';
 import { mapMovieResult } from '../models/Search';
-import Media from '../entity/Media';
-import RottenTomatoes from '../api/rottentomatoes';
-import logger from '../logger';
-import { MediaType } from '../constants/media';
 
 const movieRoutes = Router();
 
@@ -15,7 +15,7 @@ movieRoutes.get('/:id', async (req, res, next) => {
   try {
     const tmdbMovie = await tmdb.getMovie({
       movieId: Number(req.params.id),
-      language: req.query.language as string,
+      language: req.locale ?? (req.query.language as string),
     });
 
     const media = await Media.getMedia(tmdbMovie.id, MediaType.MOVIE);
@@ -36,7 +36,7 @@ movieRoutes.get('/:id/recommendations', async (req, res) => {
   const results = await tmdb.getMovieRecommendations({
     movieId: Number(req.params.id),
     page: Number(req.query.page),
-    language: req.query.language as string,
+    language: req.locale ?? (req.query.language as string),
   });
 
   const media = await Media.getRelatedMedia(
@@ -64,7 +64,7 @@ movieRoutes.get('/:id/similar', async (req, res) => {
   const results = await tmdb.getMovieSimilar({
     movieId: Number(req.params.id),
     page: Number(req.query.page),
-    language: req.query.language as string,
+    language: req.locale ?? (req.query.language as string),
   });
 
   const media = await Media.getRelatedMedia(

@@ -1,18 +1,18 @@
 <p align="center">
-<img src="https://i.imgur.com/TMoEG7g.png" alt="Overseerr">
+<img src="./public/logo_full.svg" alt="Overseerr" style="margin: 20px 0;">
 </p>
 <p align="center">
 <img src="https://github.com/sct/overseerr/workflows/Overseerr%20Release/badge.svg?branch=master" alt="Overseerr Release" />
 <img src="https://github.com/sct/overseerr/workflows/Overseerr%20CI/badge.svg" alt="Overseerr CI">
 </p>
 <p align="center">
-<a href="https://discord.gg/PkCWJSeCk7"><img src="https://img.shields.io/discord/783137440809746482" alt="Discord"></a>
+<a href="https://discord.gg/overseerr"><img src="https://img.shields.io/discord/783137440809746482" alt="Discord"></a>
 <a href="https://hub.docker.com/r/sctx/overseerr"><img src="https://img.shields.io/docker/pulls/sctx/overseerr" alt="Docker pulls"></a>
 <a href="https://hosted.weblate.org/engage/overseerr/"><img src="https://hosted.weblate.org/widgets/overseerr/-/overseerr-frontend/svg-badge.svg" alt="Translation status" /></a>
 <a href="https://lgtm.com/projects/g/sct/overseerr/context:javascript"><img alt="Language grade: JavaScript" src="https://img.shields.io/lgtm/grade/javascript/g/sct/overseerr.svg?logo=lgtm&logoWidth=18"/></a>
 <a href="https://github.com/sct/overseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/sct/overseerr"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-33-orange.svg"/></a>
+<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-58-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 </p>
 
@@ -22,44 +22,20 @@
 
 - Full Plex integration. Authenticate and manage user access with Plex!
 - Easy integration with your existing services. Currently, Overseerr supports Sonarr and Radarr. More to come!
-- Plex library sync, to keep track of the titles which are already available.
+- Plex library scan, to keep track of the titles which are already available.
 - Customizable request system, which allows users to request individual seasons or movies in a friendly, easy-to-use interface.
 - Incredibly simple request management UI. Don't dig through the app to simply approve recent requests!
 - Granular permission system.
 - Support for various notification agents.
 - Mobile-friendly design, for when you need to approve requests on the go!
 
-## Planned Features
-
-- Additional notification types.
-- Issues system. This will allow users to report issues with content on your media server.
-- And a ton more! Check out our [issue tracker](https://github.com/sct/overseerr/issues) to see the features which have already been requested.
+With more features on the way! Check out our [issue tracker](https://github.com/sct/overseerr/issues) to see the features which have already been requested.
 
 ## Getting Started
 
 Check out our documentation for instructions on how to install and run Overseerr:
 
 https://docs.overseerr.dev/getting-started/installation
-
-## Running Overseerr
-
-Currently, Overseerr is primarily distributed as Docker images. If you have Docker installed, you can simply run Overseerr with:
-
-```
-docker run -d \
-  -e LOG_LEVEL=info \
-  -e TZ=Asia/Tokyo \
-  -p 5055:5055 \
-  -v /path/to/appdata/config:/app/config \
-  --restart unless-stopped \
-  sctx/overseerr
-```
-
-After running Overseerr for the first time, configure it by visiting the web UI at http://[address]:5055 and completing the setup steps
-
-For more information or alternative installation methods, please see the [Overseerr documentation](https://docs.overseerr.dev/getting-started/installation).
-
-⚠️ Overseerr is currently under very heavy, rapid development and things are likely to break often. We need all the help we can get to find bugs and get them fixed to hit a more stable release. If you would like to help test the bleeding edge, please use the `sctx/overseerr:develop` image instead! ⚠️
 
 ## Preview
 
@@ -68,7 +44,7 @@ For more information or alternative installation methods, please see the [Overse
 ## Support
 
 - Check out the [Overseerr Documentation](https://docs.overseerr.dev/) before asking for help. Your question might already be in the [FAQ](https://docs.overseerr.dev/support/faq).
-- You can get support on [Discord](https://discord.gg/PkCWJSeCk7).
+- You can get support on [Discord](https://discord.gg/overseerr).
 - You can ask questions in the Help category of our [GitHub Discussions](https://github.com/sct/overseerr/discussions).
 - Bug reports and feature requests can be submitted via [GitHub Issues](https://github.com/sct/overseerr/issues).
 
@@ -82,7 +58,7 @@ You can also access the API documentation from your local Overseerr install at h
 
 You can ask questions, share ideas, and more in [GitHub Discussions](https://github.com/sct/overseerr/discussions).
 
-If you would like to chat with other members of our growing community, [join the Overseerr Discord server](https://discord.gg/PkCWJSeCk7)!
+If you would like to chat with other members of our growing community, [join the Overseerr Discord server](https://discord.gg/overseerr)!
 
 Our [Code of Conduct](https://github.com/sct/overseerr/blob/develop/CODE_OF_CONDUCT.md) applies to all Overseerr community channels.
 
@@ -140,6 +116,39 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://hmnd.io"><img src="https://avatars.githubusercontent.com/u/12853597?v=4?s=100" width="100px;" alt=""/><br /><sub><b>David</b></sub></a><br /><a href="https://github.com/sct/overseerr/commits?author=hmnd" title="Code">💻</a></td>
     <td align="center"><a href="https://www.douglas-parker.com"><img src="https://avatars.githubusercontent.com/u/18235822?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Douglas Parker</b></sub></a><br /><a href="https://github.com/sct/overseerr/commits?author=douglasparker" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/dancarter"><img src="https://avatars.githubusercontent.com/u/4387516?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Daniel Carter</b></sub></a><br /><a href="https://github.com/sct/overseerr/commits?author=dancarter" title="Code">💻</a></td>
+    <td align="center"><a href="https://nuro.dev"><img src="https://avatars.githubusercontent.com/u/4991309?v=4?s=100" width="100px;" alt=""/><br /><sub><b>nuro</b></sub></a><br /><a href="https://github.com/sct/overseerr/commits?author=NuroDev" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/onedr0p"><img src="https://avatars.githubusercontent.com/u/213795?v=4?s=100" width="100px;" alt=""/><br /><sub><b>ᗪєνιη ᗷυнʟ</b></sub></a><br /><a href="#infra-onedr0p" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/JonnyWong16"><img src="https://avatars.githubusercontent.com/u/9099342?v=4?s=100" width="100px;" alt=""/><br /><sub><b>JonnyWong16</b></sub></a><br /><a href="https://github.com/sct/overseerr/commits?author=JonnyWong16" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/Roxedus"><img src="https://avatars.githubusercontent.com/u/7110194?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Roxedus</b></sub></a><br /><a href="https://github.com/sct/overseerr/commits?author=Roxedus" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/WoisWoi"><img src="https://avatars.githubusercontent.com/u/75491231?v=4?s=100" width="100px;" alt=""/><br /><sub><b>WoisWoi</b></sub></a><br /><a href="#translation-WoisWoi" title="Translation">🌍</a></td>
+    <td align="center"><a href="https://github.com/HubDuck"><img src="https://avatars.githubusercontent.com/u/77843475?v=4?s=100" width="100px;" alt=""/><br /><sub><b>HubDuck</b></sub></a><br /><a href="#translation-HubDuck" title="Translation">🌍</a> <a href="https://github.com/sct/overseerr/commits?author=HubDuck" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/costaht"><img src="https://avatars.githubusercontent.com/u/50637431?v=4?s=100" width="100px;" alt=""/><br /><sub><b>costaht</b></sub></a><br /><a href="https://github.com/sct/overseerr/commits?author=costaht" title="Documentation">📖</a> <a href="#translation-costaht" title="Translation">🌍</a></td>
+    <td align="center"><a href="https://github.com/Shjosan"><img src="https://avatars.githubusercontent.com/u/20847626?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Shjosan</b></sub></a><br /><a href="#translation-Shjosan" title="Translation">🌍</a></td>
+    <td align="center"><a href="https://github.com/kobaubarr"><img src="https://avatars.githubusercontent.com/u/28481522?v=4?s=100" width="100px;" alt=""/><br /><sub><b>kobaubarr</b></sub></a><br /><a href="#translation-kobaubarr" title="Translation">🌍</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/notorius28"><img src="https://avatars.githubusercontent.com/u/1621513?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ricardo González</b></sub></a><br /><a href="#translation-notorius28" title="Translation">🌍</a></td>
+    <td align="center"><a href="http://torkili.uz"><img src="https://avatars.githubusercontent.com/u/460764?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Torkil</b></sub></a><br /><a href="#translation-Torkiliuz" title="Translation">🌍</a></td>
+    <td align="center"><a href="https://www.jagandeepbrar.io"><img src="https://avatars.githubusercontent.com/u/3048295?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jagandeep Brar</b></sub></a><br /><a href="https://github.com/sct/overseerr/commits?author=JagandeepBrar" title="Documentation">📖</a></td>
+    <td align="center"><a href="http://dtalens.com"><img src="https://avatars.githubusercontent.com/u/6631832?v=4?s=100" width="100px;" alt=""/><br /><sub><b>dtalens</b></sub></a><br /><a href="#translation-dtalens" title="Translation">🌍</a></td>
+    <td align="center"><a href="https://github.com/acortelyou"><img src="https://avatars.githubusercontent.com/u/1689668?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alex Cortelyou</b></sub></a><br /><a href="https://github.com/sct/overseerr/commits?author=acortelyou" title="Code">💻</a></td>
+    <td align="center"><a href="https://nz.linkedin.com/in/jonocairns"><img src="https://avatars.githubusercontent.com/u/182836?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jono Cairns</b></sub></a><br /><a href="https://github.com/sct/overseerr/commits?author=jonocairns" title="Code">💻</a></td>
+    <td align="center"><a href="https://scias.net/"><img src="https://avatars.githubusercontent.com/u/439655?v=4?s=100" width="100px;" alt=""/><br /><sub><b>DJScias</b></sub></a><br /><a href="#translation-DJScias" title="Translation">🌍</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/Dabu-dot"><img src="https://avatars.githubusercontent.com/u/52525576?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Dabu-dot</b></sub></a><br /><a href="#translation-Dabu-dot" title="Translation">🌍</a></td>
+    <td align="center"><a href="https://github.com/Jabster28"><img src="https://avatars.githubusercontent.com/u/29015942?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jabster28</b></sub></a><br /><a href="https://github.com/sct/overseerr/commits?author=Jabster28" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/littlerooster"><img src="https://avatars.githubusercontent.com/u/83890654?v=4?s=100" width="100px;" alt=""/><br /><sub><b>littlerooster</b></sub></a><br /><a href="#translation-littlerooster" title="Translation">🌍</a></td>
+    <td align="center"><a href="https://github.com/dphildebrandt"><img src="https://avatars.githubusercontent.com/u/154459?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Dustin Hildebrandt</b></sub></a><br /><a href="https://github.com/sct/overseerr/commits?author=dphildebrandt" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/Generator"><img src="https://avatars.githubusercontent.com/u/44146?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Bruno Guerreiro</b></sub></a><br /><a href="#translation-Generator" title="Translation">🌍</a></td>
+    <td align="center"><a href="https://github.com/iceHtwoO"><img src="https://avatars.githubusercontent.com/u/27020492?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alexander Neuhäuser</b></sub></a><br /><a href="#translation-iceHtwoO" title="Translation">🌍</a></td>
+    <td align="center"><a href="http://www.unext.co.jp"><img src="https://avatars.githubusercontent.com/u/37431541?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Livio</b></sub></a><br /><a href="#design-liviokanone" title="Design">🎨</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/tangentThought"><img src="https://avatars.githubusercontent.com/u/25516090?v=4?s=100" width="100px;" alt=""/><br /><sub><b>tangentThought</b></sub></a><br /><a href="https://github.com/sct/overseerr/commits?author=tangentThought" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/nicospz"><img src="https://avatars.githubusercontent.com/u/31373060?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nicolás Espinoza</b></sub></a><br /><a href="https://github.com/sct/overseerr/commits?author=nicospz" title="Code">💻</a></td>
   </tr>
 </table>
 

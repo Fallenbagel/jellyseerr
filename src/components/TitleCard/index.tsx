@@ -1,21 +1,20 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import { DownloadIcon } from '@heroicons/react/outline';
+import { BellIcon, CheckIcon, ClockIcon } from '@heroicons/react/solid';
+import Link from 'next/link';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useIntl } from 'react-intl';
+import { MediaStatus } from '../../../server/constants/media';
 import type { MediaType } from '../../../server/models/Search';
+import Spinner from '../../assets/spinner.svg';
+import { useIsTouch } from '../../hooks/useIsTouch';
+import { Permission, useUser } from '../../hooks/useUser';
+import globalMessages from '../../i18n/globalMessages';
 import { withProperties } from '../../utils/typeHelpers';
+import Button from '../Common/Button';
+import CachedImage from '../Common/CachedImage';
+import RequestModal from '../RequestModal';
 import Transition from '../Transition';
 import Placeholder from './Placeholder';
-import Link from 'next/link';
-import { MediaStatus } from '../../../server/constants/media';
-import RequestModal from '../RequestModal';
-import { defineMessages, useIntl } from 'react-intl';
-import { useIsTouch } from '../../hooks/useIsTouch';
-import globalMessages from '../../i18n/globalMessages';
-import Spinner from '../../assets/spinner.svg';
-import { useUser, Permission } from '../../hooks/useUser';
-
-const messages = defineMessages({
-  movie: 'Movie',
-  tvshow: 'Series',
-});
 
 interface TitleCardProps {
   id: number;
@@ -70,6 +69,14 @@ const TitleCard: React.FC<TitleCardProps> = ({
 
   const closeModal = useCallback(() => setShowRequestModal(false), []);
 
+  const showRequestButton = hasPermission(
+    [
+      Permission.REQUEST,
+      mediaType === 'movie' ? Permission.REQUEST_MOVIE : Permission.REQUEST_TV,
+    ],
+    { type: 'or' }
+  );
+
   return (
     <div className={canExpand ? 'w-full' : 'w-36 sm:w-36 md:w-44'}>
       <RequestModal
@@ -81,13 +88,13 @@ const TitleCard: React.FC<TitleCardProps> = ({
         onCancel={closeModal}
       />
       <div
-        className={`transition duration-300 transform-gpu scale-100 outline-none cursor-default titleCard ${
-          showDetail ? 'scale-105' : ''
+        className={`transition duration-300 transform-gpu outline-none cursor-default relative bg-gray-800 bg-cover rounded-xl ring-1 overflow-hidden ${
+          showDetail
+            ? 'scale-105 shadow-lg ring-gray-500'
+            : 'scale-100 shadow ring-gray-700'
         }`}
         style={{
-          backgroundImage: image
-            ? `url(//image.tmdb.org/t/p/w300_and_h450_face${image})`
-            : `url('/images/overseerr_poster_not_found_logo_top.png')`,
+          paddingBottom: '150%',
         }}
         onMouseEnter={() => {
           if (!isTouch) {
@@ -104,49 +111,40 @@ const TitleCard: React.FC<TitleCardProps> = ({
         role="link"
         tabIndex={0}
       >
-        <div className="absolute top-0 bottom-0 left-0 right-0 w-full h-full overflow-hidden shadow">
+        <div className="absolute inset-0 w-full h-full overflow-hidden">
+          <CachedImage
+            className="absolute inset-0 w-full h-full"
+            alt=""
+            src={
+              image
+                ? `https://image.tmdb.org/t/p/w300_and_h450_face${image}`
+                : `/images/overseerr_poster_not_found_logo_top.png`
+            }
+            layout="fill"
+            objectFit="cover"
+          />
           <div className="absolute left-0 right-0 flex items-center justify-between p-2">
             <div
               className={`rounded-full z-40 pointer-events-none shadow ${
                 mediaType === 'movie' ? 'bg-blue-500' : 'bg-purple-600'
               }`}
             >
-              <div className="flex items-center h-4 px-2 py-2 text-xs font-normal tracking-wider text-center text-white uppercase sm:h-5">
+              <div className="flex items-center h-4 px-2 py-2 text-xs font-medium tracking-wider text-center text-white uppercase sm:h-5">
                 {mediaType === 'movie'
-                  ? intl.formatMessage(messages.movie)
-                  : intl.formatMessage(messages.tvshow)}
+                  ? intl.formatMessage(globalMessages.movie)
+                  : intl.formatMessage(globalMessages.tvshow)}
               </div>
             </div>
             <div className="z-40 pointer-events-none">
               {(currentStatus === MediaStatus.AVAILABLE ||
                 currentStatus === MediaStatus.PARTIALLY_AVAILABLE) && (
                 <div className="flex items-center justify-center w-4 h-4 text-white bg-green-400 rounded-full shadow sm:w-5 sm:h-5">
-                  <svg
-                    className="w-3 h-3 sm:w-4 sm:h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
+                  <CheckIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                 </div>
               )}
               {currentStatus === MediaStatus.PENDING && (
                 <div className="flex items-center justify-center w-4 h-4 text-white bg-yellow-500 rounded-full shadow sm:w-5 sm:h-5">
-                  <svg
-                    className="w-3 h-3 sm:w-4 sm:h-4"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-                  </svg>
+                  <BellIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                 </div>
               )}
               {currentStatus === MediaStatus.PROCESSING && (
@@ -154,18 +152,7 @@ const TitleCard: React.FC<TitleCardProps> = ({
                   {inProgress ? (
                     <Spinner className="w-3 h-3" />
                   ) : (
-                    <svg
-                      className="w-3 h-3 sm:w-4 sm:h-4"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <ClockIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                   )}
                 </div>
               )}
@@ -180,7 +167,7 @@ const TitleCard: React.FC<TitleCardProps> = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="absolute top-0 bottom-0 left-0 right-0 z-40 flex items-center justify-center text-white bg-gray-800 bg-opacity-75 rounded-lg">
+            <div className="absolute inset-0 z-40 flex items-center justify-center text-white bg-gray-800 bg-opacity-75 rounded-xl">
               <Spinner className="w-10 h-10" />
             </div>
           </Transition>
@@ -194,10 +181,10 @@ const TitleCard: React.FC<TitleCardProps> = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="absolute top-0 bottom-0 left-0 right-0">
+            <div className="absolute inset-0 overflow-hidden rounded-xl">
               <Link href={mediaType === 'movie' ? `/movie/${id}` : `/tv/${id}`}>
                 <a
-                  className="absolute top-0 bottom-0 left-0 right-0 w-full h-full overflow-hidden text-left rounded-lg cursor-pointer"
+                  className="absolute inset-0 w-full h-full overflow-hidden text-left cursor-pointer"
                   style={{
                     background:
                       'linear-gradient(180deg, rgba(45, 55, 72, 0.4) 0%, rgba(45, 55, 72, 0.9) 100%)',
@@ -206,22 +193,33 @@ const TitleCard: React.FC<TitleCardProps> = ({
                   <div className="flex items-end w-full h-full">
                     <div
                       className={`px-2 text-white ${
-                        !hasPermission(Permission.REQUEST) ||
+                        !showRequestButton ||
                         (currentStatus && currentStatus !== MediaStatus.UNKNOWN)
                           ? 'pb-2'
                           : 'pb-11'
                       }`}
                     >
-                      {year && <div className="text-sm">{year}</div>}
+                      {year && (
+                        <div className="text-sm font-medium">{year}</div>
+                      )}
 
-                      <h1 className="text-xl leading-tight whitespace-normal">
+                      <h1
+                        className="text-xl font-bold leading-tight whitespace-normal"
+                        style={{
+                          WebkitLineClamp: 3,
+                          display: '-webkit-box',
+                          overflow: 'hidden',
+                          WebkitBoxOrient: 'vertical',
+                          wordBreak: 'break-word',
+                        }}
+                      >
                         {title}
                       </h1>
                       <div
                         className="text-xs whitespace-normal"
                         style={{
                           WebkitLineClamp:
-                            !hasPermission(Permission.REQUEST) ||
+                            !showRequestButton ||
                             (currentStatus &&
                               currentStatus !== MediaStatus.UNKNOWN)
                               ? 5
@@ -229,6 +227,7 @@ const TitleCard: React.FC<TitleCardProps> = ({
                           display: '-webkit-box',
                           overflow: 'hidden',
                           WebkitBoxOrient: 'vertical',
+                          wordBreak: 'break-word',
                         }}
                       >
                         {summary}
@@ -239,33 +238,20 @@ const TitleCard: React.FC<TitleCardProps> = ({
               </Link>
 
               <div className="absolute bottom-0 left-0 right-0 flex justify-between px-2 py-2">
-                {hasPermission(Permission.REQUEST) &&
+                {showRequestButton &&
                   (!currentStatus || currentStatus === MediaStatus.UNKNOWN) && (
-                    <button
+                    <Button
+                      buttonType="primary"
+                      buttonSize="sm"
                       onClick={(e) => {
                         e.preventDefault();
                         setShowRequestModal(true);
                       }}
-                      className="flex items-center justify-center w-full text-white transition duration-150 ease-in-out bg-indigo-600 rounded-md h-7 hover:bg-indigo-500 focus:border-indigo-700 focus:ring-indigo active:bg-indigo-700"
+                      className="w-full h-7"
                     >
-                      <svg
-                        className="w-4 mr-1"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                        />
-                      </svg>
-                      <span className="text-xs">
-                        {intl.formatMessage(globalMessages.request)}
-                      </span>
-                    </button>
+                      <DownloadIcon />
+                      <span>{intl.formatMessage(globalMessages.request)}</span>
+                    </Button>
                   )}
               </div>
             </div>

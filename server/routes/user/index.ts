@@ -1,16 +1,20 @@
 import { Router } from 'express';
+import gravatarUrl from 'gravatar-url';
 import { getRepository, Not } from 'typeorm';
 import PlexTvAPI from '../../api/plextv';
+import { UserType } from '../../constants/user';
 import { MediaRequest } from '../../entity/MediaRequest';
 import { User } from '../../entity/User';
+import { UserPushSubscription } from '../../entity/UserPushSubscription';
+import {
+  QuotaResponse,
+  UserRequestsResponse,
+  UserResultsResponse,
+} from '../../interfaces/api/userInterfaces';
 import { hasPermission, Permission } from '../../lib/permissions';
 import { getSettings } from '../../lib/settings';
 import logger from '../../logger';
-import gravatarUrl from 'gravatar-url';
-import { UserType } from '../../constants/user';
 import { isAuthenticated } from '../../middleware/auth';
-import { UserResultsResponse } from '../../interfaces/api/userInterfaces';
-import { UserRequestsResponse } from '../../interfaces/api/userInterfaces';
 import userSettingsRoutes from './usersettings';
 
 const router = Router();
@@ -27,7 +31,7 @@ router.get('/', async (req, res, next) => {
         break;
       case 'displayname':
         query = query.orderBy(
-          '(CASE WHEN user.username IS NULL THEN user.plexUsername ELSE user.username END)',
+          "(CASE WHEN (user.username IS NULL OR user.username = '') THEN (CASE WHEN (user.plexUsername IS NULL OR user.plexUsername = '') THEN user.email ELSE LOWER(user.plexUsername) END) ELSE LOWER(user.username) END)",
           'ASC'
         );
         break;
@@ -78,10 +82,28 @@ router.post(
       const body = req.body;
       const userRepository = getRepository(User);
 
+      const existingUser = await userRepository
+        .createQueryBuilder('user')
+        .where('user.email = :email', {
+          email: body.email.toLowerCase(),
+        })
+        .getOne();
+
+      if (existingUser) {
+        return next({
+          status: 409,
+          message: 'User already exists with submitted email.',
+          errors: ['USER_EXISTS'],
+        });
+      }
+
       const passedExplicitPassword = body.password && body.password.length > 0;
       const avatar = gravatarUrl(body.email, { default: 'mm', size: 200 });
 
-      if (!passedExplicitPassword && !settings.notifications.agents.email) {
+      if (
+        !passedExplicitPassword &&
+        !settings.notifications.agents.email.enabled
+      ) {
         throw new Error('Email notifications must be enabled');
       }
 
@@ -108,6 +130,48 @@ router.post(
     }
   }
 );
+
+router.post<
+  never,
+  unknown,
+  {
+    endpoint: string;
+    p256dh: string;
+    auth: string;
+  }
+>('/registerPushSubscription', async (req, res, next) => {
+  try {
+    const userPushSubRepository = getRepository(UserPushSubscription);
+
+    const existingSubs = await userPushSubRepository.find({
+      where: { auth: req.body.auth },
+    });
+
+    if (existingSubs.length > 0) {
+      logger.debug(
+        'User push subscription already exists. Skipping registration.',
+        { label: 'API' }
+      );
+      return res.status(204).send();
+    }
+
+    const userPushSubscription = new UserPushSubscription({
+      auth: req.body.auth,
+      endpoint: req.body.endpoint,
+      p256dh: req.body.p256dh,
+      user: req.user,
+    });
+
+    userPushSubRepository.save(userPushSubscription);
+
+    return res.status(204).send();
+  } catch (e) {
+    logger.error('Failed to register user push subscription', {
+      label: 'API',
+    });
+    next({ status: 500, message: 'Failed to register subscription.' });
+  }
+});
 
 router.get<{ id: string }>('/:id', async (req, res, next) => {
   try {
@@ -167,7 +231,10 @@ router.get<{ id: string }, UserRequestsResponse>(
   }
 );
 
-const canMakePermissionsChange = (permissions: number, user?: User) =>
+export const canMakePermissionsChange = (
+  permissions: number,
+  user?: User
+): boolean =>
   // Only let the owner grant admin privileges
   !(hasPermission(Permission.ADMIN, permissions) && user?.id !== 1) ||
   // Only let users with the manage settings permission, grant the same permission
@@ -275,7 +342,7 @@ router.delete<{ id: string }>(
         });
       }
 
-      if (user.hasPermission(Permission.ADMIN)) {
+      if (user.hasPermission(Permission.ADMIN) && req.user?.id !== 1) {
         return next({
           status: 405,
           message: 'You cannot delete users with administrative privileges.',
@@ -329,50 +396,80 @@ router.post(
       for (const rawUser of plexUsersResponse.MediaContainer.User) {
         const account = rawUser.$;
 
-        const user = await userRepository.findOne({
-          where: [{ plexId: account.id }, { email: account.email }],
-        });
+        if (account.email) {
+          const user = await userRepository
+            .createQueryBuilder('user')
+            .where('user.plexId = :id', { id: account.id })
+            .orWhere('user.email = :email', {
+              email: account.email.toLowerCase(),
+            })
+            .getOne();
 
-        if (user) {
-          // Update the users avatar with their plex thumbnail (incase it changed)
-          user.avatar = account.thumb;
-          user.email = account.email;
-          user.plexUsername = account.username;
+          if (user) {
+            // Update the user's avatar with their Plex thumbnail, in case it changed
+            user.avatar = account.thumb;
+            user.email = account.email;
+            user.plexUsername = account.username;
 
-          // in-case the user was previously a local account
-          if (user.userType === UserType.LOCAL) {
-            user.userType = UserType.PLEX;
-            user.plexId = parseInt(account.id);
-
-            if (user.username === account.username) {
-              user.username = '';
+            // In case the user was previously a local account
+            if (user.userType === UserType.LOCAL) {
+              user.userType = UserType.PLEX;
+              user.plexId = parseInt(account.id);
             }
-          }
-          await userRepository.save(user);
-        } else {
-          // Check to make sure it's a real account
-          if (
-            account.email &&
-            account.username &&
-            (await mainPlexTv.checkUserAccess(Number(account.id)))
-          ) {
-            const newUser = new User({
-              plexUsername: account.username,
-              email: account.email,
-              permissions: settings.main.defaultPermissions,
-              plexId: parseInt(account.id),
-              plexToken: '',
-              avatar: account.thumb,
-              userType: UserType.PLEX,
-            });
-            await userRepository.save(newUser);
-            createdUsers.push(newUser);
+            await userRepository.save(user);
+          } else {
+            if (await mainPlexTv.checkUserAccess(parseInt(account.id))) {
+              const newUser = new User({
+                plexUsername: account.username,
+                email: account.email,
+                permissions: settings.main.defaultPermissions,
+                plexId: parseInt(account.id),
+                plexToken: '',
+                avatar: account.thumb,
+                userType: UserType.PLEX,
+              });
+              await userRepository.save(newUser);
+              createdUsers.push(newUser);
+            }
           }
         }
       }
+
       return res.status(201).json(User.filterMany(createdUsers));
     } catch (e) {
       next({ status: 500, message: e.message });
+    }
+  }
+);
+
+router.get<{ id: string }, QuotaResponse>(
+  '/:id/quota',
+  async (req, res, next) => {
+    try {
+      const userRepository = getRepository(User);
+
+      if (
+        Number(req.params.id) !== req.user?.id &&
+        !req.user?.hasPermission(
+          [Permission.MANAGE_USERS, Permission.MANAGE_REQUESTS],
+          { type: 'and' }
+        )
+      ) {
+        return next({
+          status: 403,
+          message: 'You do not have permission to access this endpoint.',
+        });
+      }
+
+      const user = await userRepository.findOneOrFail({
+        where: { id: Number(req.params.id) },
+      });
+
+      const quotas = await user.getQuota();
+
+      return res.status(200).json(quotas);
+    } catch (e) {
+      next({ status: 404, message: e.message });
     }
   }
 );

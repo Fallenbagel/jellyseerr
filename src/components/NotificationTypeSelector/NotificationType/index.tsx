@@ -1,5 +1,5 @@
 import React from 'react';
-import { NotificationItem, hasNotificationType } from '..';
+import { hasNotificationType, NotificationItem } from '..';
 
 interface NotificationTypeProps {
   option: NotificationItem;
@@ -38,7 +38,7 @@ const NotificationType: React.FC<NotificationTypeProps> = ({
                   : currentTypes + option.value
               );
             }}
-            defaultChecked={
+            checked={
               hasNotificationType(option.value, currentTypes) ||
               (!!parent?.value &&
                 hasNotificationType(parent.value, currentTypes))
@@ -46,10 +46,14 @@ const NotificationType: React.FC<NotificationTypeProps> = ({
           />
         </div>
         <div className="ml-3 text-sm leading-6">
-          <label htmlFor={option.id} className="font-medium">
-            {option.name}
+          <label htmlFor={option.id} className="block">
+            <div className="flex flex-col">
+              <span className="font-medium text-white">{option.name}</span>
+              <span className="font-normal text-gray-400">
+                {option.description}
+              </span>
+            </div>
           </label>
-          <p className="text-gray-500">{option.description}</p>
         </div>
       </div>
       {(option.children ?? []).map((child) => (

@@ -1,24 +1,23 @@
+import { SparklesIcon } from '@heroicons/react/outline';
 import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
+import { StatusResponse } from '../../../server/interfaces/api/settingsInterfaces';
 import Modal from '../Common/Modal';
 import Transition from '../Transition';
 
 const messages = defineMessages({
-  newversionavailable: 'New Version Available',
+  newversionavailable: 'Application Update',
   newversionDescription:
-    'An update is now available. Click the button below to reload the application.',
-  reloadOverseerr: 'Reload Overseerr',
+    'Overseerr has been updated! Please click the button below to reload the page.',
+  reloadOverseerr: 'Reload',
 });
 
 const StatusChecker: React.FC = () => {
   const intl = useIntl();
-  const { data, error } = useSWR<{ version: string; commitTag: string }>(
-    '/api/v1/status',
-    {
-      refreshInterval: 60 * 1000,
-    }
-  );
+  const { data, error } = useSWR<StatusResponse>('/api/v1/status', {
+    refreshInterval: 60 * 1000,
+  });
 
   if (!data && !error) {
     return null;
@@ -40,22 +39,7 @@ const StatusChecker: React.FC = () => {
       show={data.commitTag !== process.env.commitTag}
     >
       <Modal
-        iconSvg={
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-            />
-          </svg>
-        }
+        iconSvg={<SparklesIcon />}
         title={intl.formatMessage(messages.newversionavailable)}
         onOk={() => location.reload()}
         okText={intl.formatMessage(messages.reloadOverseerr)}

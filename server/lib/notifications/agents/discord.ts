@@ -1,7 +1,14 @@
 import axios from 'axios';
+import { getRepository } from 'typeorm';
 import { hasNotificationType, Notification } from '..';
+import { User } from '../../../entity/User';
 import logger from '../../../logger';
-import { getSettings, NotificationAgentDiscord } from '../../settings';
+import { Permission } from '../../permissions';
+import {
+  getSettings,
+  NotificationAgentDiscord,
+  NotificationAgentKey,
+} from '../../settings';
 import { BaseAgent, NotificationAgent, NotificationPayload } from './agent';
 
 enum EmbedColors {
@@ -71,7 +78,7 @@ interface DiscordRichEmbed {
 
 interface DiscordWebhookPayload {
   embeds: DiscordRichEmbed[];
-  username: string;
+  username?: string;
   avatar_url?: string;
   tts: boolean;
   content?: string;
@@ -107,7 +114,7 @@ class DiscordAgent
     if (payload.request) {
       fields.push({
         name: 'Requested By',
-        value: payload.notifyUser.displayName ?? '',
+        value: payload.request.requestedBy.displayName,
         inline: true,
       });
     }
@@ -122,6 +129,7 @@ class DiscordAgent
         });
         break;
       case Notification.MEDIA_APPROVED:
+      case Notification.MEDIA_AUTO_APPROVED:
         color = EmbedColors.PURPLE;
         fields.push({
           name: 'Status',
@@ -155,15 +163,14 @@ class DiscordAgent
         break;
     }
 
-    if (settings.main.applicationUrl && payload.media) {
-      fields.push({
-        name: `Open in ${settings.main.applicationTitle}`,
-        value: `${settings.main.applicationUrl}/${payload.media?.mediaType}/${payload.media?.tmdbId}`,
-      });
-    }
+    const url =
+      settings.main.applicationUrl && payload.media
+        ? `${settings.main.applicationUrl}/${payload.media.mediaType}/${payload.media.tmdbId}`
+        : undefined;
 
     return {
       title: payload.subject,
+      url,
       description: payload.message,
       color,
       timestamp: new Date().toISOString(),
@@ -185,12 +192,10 @@ class DiscordAgent
     };
   }
 
-  public shouldSend(type: Notification): boolean {
-    if (
-      this.getSettings().enabled &&
-      this.getSettings().options.webhookUrl &&
-      hasNotificationType(type, this.getSettings().types)
-    ) {
+  public shouldSend(): boolean {
+    const settings = this.getSettings();
+
+    if (settings.enabled && settings.options.webhookUrl) {
       return true;
     }
 
@@ -201,42 +206,72 @@ class DiscordAgent
     type: Notification,
     payload: NotificationPayload
   ): Promise<boolean> {
-    logger.debug('Sending discord notification', { label: 'Notifications' });
+    const settings = this.getSettings();
+
+    if (!hasNotificationType(type, settings.types ?? 0)) {
+      return true;
+    }
+
+    logger.debug('Sending Discord notification', {
+      label: 'Notifications',
+      type: Notification[type],
+      subject: payload.subject,
+    });
+
+    let content = undefined;
+
     try {
-      const settings = getSettings();
-      const webhookUrl = this.getSettings().options.webhookUrl;
+      if (payload.notifyUser) {
+        // Mention user who submitted the request
+        if (
+          payload.notifyUser.settings?.hasNotificationType(
+            NotificationAgentKey.DISCORD,
+            type
+          ) &&
+          payload.notifyUser.settings?.discordId
+        ) {
+          content = `<@${payload.notifyUser.settings.discordId}>`;
+        }
+      } else {
+        // Mention all users with the Manage Requests permission
+        const userRepository = getRepository(User);
+        const users = await userRepository.find();
 
-      if (!webhookUrl) {
-        return false;
+        content = users
+          .filter(
+            (user) =>
+              user.hasPermission(Permission.MANAGE_REQUESTS) &&
+              user.settings?.hasNotificationType(
+                NotificationAgentKey.DISCORD,
+                type
+              ) &&
+              user.settings?.discordId &&
+              // Check if it's the user's own auto-approved request
+              (type !== Notification.MEDIA_AUTO_APPROVED ||
+                user.id !== payload.request?.requestedBy.id)
+          )
+          .map((user) => `<@${user.settings?.discordId}>`)
+          .join(' ');
       }
 
-      const mentionedUsers: string[] = [];
-      let content = undefined;
-
-      if (
-        payload.notifyUser.settings?.enableNotifications &&
-        payload.notifyUser.settings?.discordId
-      ) {
-        mentionedUsers.push(payload.notifyUser.settings.discordId);
-        content = `<@${payload.notifyUser.settings.discordId}>`;
-      }
-
-      await axios.post(webhookUrl, {
-        username: settings.main.applicationTitle,
+      await axios.post(settings.options.webhookUrl, {
+        username: settings.options.botUsername,
+        avatar_url: settings.options.botAvatarUrl,
         embeds: [this.buildEmbed(type, payload)],
         content,
-        allowed_mentions: {
-          users: mentionedUsers,
-        },
       } as DiscordWebhookPayload);
 
       return true;
     } catch (e) {
       logger.error('Error sending Discord notification', {
         label: 'Notifications',
-        message: e.message,
-        response: e.response.data,
+        mentions: content,
+        type: Notification[type],
+        subject: payload.subject,
+        errorMessage: e.message,
+        response: e.response?.data,
       });
+
       return false;
     }
   }

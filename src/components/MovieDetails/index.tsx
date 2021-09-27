@@ -1,47 +1,56 @@
-import React, { useState, useContext, useMemo } from 'react';
 import {
-  defineMessages,
-  FormattedNumber,
-  FormattedDate,
-  useIntl,
-} from 'react-intl';
-import type { MovieDetails as MovieDetailsType } from '../../../server/models/Movie';
-import useSWR from 'swr';
-import { useRouter } from 'next/router';
-import Button from '../Common/Button';
-import Link from 'next/link';
-import Slider from '../Slider';
-import PersonCard from '../PersonCard';
-import { LanguageContext } from '../../context/LanguageContext';
-import LoadingSpinner from '../Common/LoadingSpinner';
-import { useUser, Permission } from '../../hooks/useUser';
-import { MediaStatus } from '../../../server/constants/media';
+  ArrowCircleRightIcon,
+  CogIcon,
+  FilmIcon,
+  PlayIcon,
+} from '@heroicons/react/outline';
+import {
+  CheckCircleIcon,
+  ChevronDoubleDownIcon,
+  ChevronDoubleUpIcon,
+  DocumentRemoveIcon,
+  ExternalLinkIcon,
+} from '@heroicons/react/solid';
 import axios from 'axios';
-import SlideOver from '../Common/SlideOver';
-import RequestBlock from '../RequestBlock';
-import TmdbLogo from '../../assets/tmdb_logo.svg';
-import RTFresh from '../../assets/rt_fresh.svg';
-import RTRotten from '../../assets/rt_rotten.svg';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import React, { useMemo, useState } from 'react';
+import { defineMessages, useIntl } from 'react-intl';
+import useSWR from 'swr';
+import type { RTRating } from '../../../server/api/rottentomatoes';
+import { MediaStatus } from '../../../server/constants/media';
+import { MediaServerType } from '../../../server/constants/server';
+import type { MovieDetails as MovieDetailsType } from '../../../server/models/Movie';
 import RTAudFresh from '../../assets/rt_aud_fresh.svg';
 import RTAudRotten from '../../assets/rt_aud_rotten.svg';
-import type { RTRating } from '../../../server/api/rottentomatoes';
-import Error from '../../pages/_error';
-import ExternalLinkBlock from '../ExternalLinkBlock';
-import { sortCrewPriority } from '../../utils/creditHelpers';
-import StatusBadge from '../StatusBadge';
-import RequestButton from '../RequestButton';
-import MediaSlider from '../MediaSlider';
-import ConfirmButton from '../Common/ConfirmButton';
-import DownloadBlock from '../DownloadBlock';
-import PageTitle from '../Common/PageTitle';
+import RTFresh from '../../assets/rt_fresh.svg';
+import RTRotten from '../../assets/rt_rotten.svg';
+import TmdbLogo from '../../assets/tmdb_logo.svg';
+import useLocale from '../../hooks/useLocale';
 import useSettings from '../../hooks/useSettings';
+import { Permission, useUser } from '../../hooks/useUser';
+import globalMessages from '../../i18n/globalMessages';
+import Error from '../../pages/_error';
+import { sortCrewPriority } from '../../utils/creditHelpers';
+import Button from '../Common/Button';
+import CachedImage from '../Common/CachedImage';
+import ConfirmButton from '../Common/ConfirmButton';
+import LoadingSpinner from '../Common/LoadingSpinner';
+import PageTitle from '../Common/PageTitle';
 import PlayButton, { PlayButtonLink } from '../Common/PlayButton';
-import { MediaServerType } from '../../../server/constants/server';
+import SlideOver from '../Common/SlideOver';
+import DownloadBlock from '../DownloadBlock';
+import ExternalLinkBlock from '../ExternalLinkBlock';
+import MediaSlider from '../MediaSlider';
+import PersonCard from '../PersonCard';
+import RequestBlock from '../RequestBlock';
+import RequestButton from '../RequestButton';
+import Slider from '../Slider';
+import StatusBadge from '../StatusBadge';
 
 const messages = defineMessages({
+  originaltitle: 'Original Title',
   releasedate: 'Release Date',
-  userrating: 'User Rating',
-  status: 'Status',
   revenue: 'Revenue',
   budget: 'Budget',
   watchtrailer: 'Watch Trailer',
@@ -51,30 +60,25 @@ const messages = defineMessages({
   cast: 'Cast',
   recommendations: 'Recommendations',
   similar: 'Similar Titles',
-  cancelrequest: 'Cancel Request',
-  available: 'Available',
-  unavailable: 'Unavailable',
-  pending: 'Pending',
   overviewunavailable: 'Overview unavailable.',
   manageModalTitle: 'Manage Movie',
   manageModalRequests: 'Requests',
-  manageModalNoRequests: 'No Requests',
-  manageModalClearMedia: 'Clear All Media Data',
+  manageModalNoRequests: 'No requests.',
+  manageModalClearMedia: 'Clear Media Data',
   manageModalClearMediaWarning:
-    'This will irreversibly remove all data for this movie, including any requests. If this item exists in your Plex library, the media information will be recreated during the next sync.',
-  approve: 'Approve',
-  decline: 'Decline',
-  studio: 'Studio',
+    '* This will irreversibly remove all data for this movie, including any requests. If this item exists in your Plex library, the media information will be recreated during the next scan.',
+  studio: '{studioCount, plural, one {Studio} other {Studios}}',
   viewfullcrew: 'View Full Crew',
-  view: 'View',
-  areyousure: 'Are you sure?',
   openradarr: 'Open Movie in Radarr',
   openradarr4k: 'Open Movie in 4K Radarr',
   downloadstatus: 'Download Status',
   play: 'Play on {mediaServerName}',
   play4k: 'Play 4K on {mediaServerName}',
   markavailable: 'Mark as Available',
-  mark4kavailable: 'Mark 4K as Available',
+  mark4kavailable: 'Mark as Available in 4K',
+  showmore: 'Show More',
+  showless: 'Show Less',
+  streamingproviders: 'Currently Streaming On',
 });
 
 interface MovieDetailsProps {
@@ -86,11 +90,13 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
   const { user, hasPermission } = useUser();
   const router = useRouter();
   const intl = useIntl();
-  const { locale } = useContext(LanguageContext);
+  const { locale } = useLocale();
   const [showManager, setShowManager] = useState(false);
+  const minStudios = 3;
+  const [showMoreStudios, setShowMoreStudios] = useState(false);
 
   const { data, error, revalidate } = useSWR<MovieDetailsType>(
-    `/api/v1/movie/${router.query.movieId}?language=${locale}`,
+    `/api/v1/movie/${router.query.movieId}`,
     {
       initialData: movie,
     }
@@ -112,6 +118,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
     return <Error statusCode={404} />;
   }
 
+  const showAllStudios = data.productionCompanies.length <= minStudios + 1;
   const mediaLinks: PlayButtonLink[] = [];
 
   if (data.mediaInfo?.mediaUrl) {
@@ -121,6 +128,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
           ? intl.formatMessage(messages.play, { mediaServerName: 'Jellyfin' })
           : intl.formatMessage(messages.play, { mediaServerName: 'Plex' }),
       url: data.mediaInfo?.mediaUrl,
+      svg: <PlayIcon />,
     });
   }
 
@@ -136,6 +144,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
           ? intl.formatMessage(messages.play4k, { mediaServerName: 'Jellyfin' })
           : intl.formatMessage(messages.play4k, { mediaServerName: 'Plex' }),
       url: data.mediaInfo?.mediaUrl4k,
+      svg: <PlayIcon />,
     });
   }
 
@@ -148,6 +157,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
     mediaLinks.push({
       text: intl.formatMessage(messages.watchtrailer),
       url: trailerUrl,
+      svg: <FilmIcon />,
     });
   }
 
@@ -194,17 +204,53 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
   }
 
   if (data.genres.length) {
-    movieAttributes.push(data.genres.map((g) => g.name).join(', '));
+    movieAttributes.push(
+      data.genres
+        .map((g) => (
+          <Link href={`/discover/movies/genre/${g.id}`} key={`genre-${g.id}`}>
+            <a className="hover:underline">{g.name}</a>
+          </Link>
+        ))
+        .reduce((prev, curr) => (
+          <>
+            {intl.formatMessage(globalMessages.delimitedlist, {
+              a: prev,
+              b: curr,
+            })}
+          </>
+        ))
+    );
   }
+
+  const streamingProviders =
+    data?.watchProviders?.find((provider) => provider.iso_3166_1 === region)
+      ?.flatrate ?? [];
 
   return (
     <div
-      className="px-4 pt-16 -mx-4 -mt-16 bg-center bg-cover"
+      className="media-page"
       style={{
         height: 493,
-        backgroundImage: `linear-gradient(180deg, rgba(17, 24, 39, 0.47) 0%, rgba(17, 24, 39, 1) 100%), url(//image.tmdb.org/t/p/w1920_and_h800_multi_faces/${data.backdropPath})`,
       }}
     >
+      {data.backdropPath && (
+        <div className="media-page-bg-image">
+          <CachedImage
+            alt=""
+            src={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${data.backdropPath}`}
+            layout="fill"
+            objectFit="cover"
+            priority
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                'linear-gradient(180deg, rgba(17, 24, 39, 0.47) 0%, rgba(17, 24, 39, 1) 100%)',
+            }}
+          />
+        </div>
+      )}
       <PageTitle title={data.title} />
       <SlideOver
         show={showManager}
@@ -215,7 +261,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
         {((data?.mediaInfo?.downloadStatus ?? []).length > 0 ||
           (data?.mediaInfo?.downloadStatus4k ?? []).length > 0) && (
           <>
-            <h3 className="mb-2 text-xl">
+            <h3 className="mb-2 text-xl font-bold">
               {intl.formatMessage(messages.downloadstatus)}
             </h3>
             <div className="mb-6 overflow-hidden bg-gray-600 rounded-md shadow">
@@ -253,18 +299,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                       className="w-full sm:mb-0"
                       buttonType="success"
                     >
-                      <svg
-                        className="w-5 h-5 mr-1"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                      <CheckCircleIcon />
                       <span>{intl.formatMessage(messages.markavailable)}</span>
                     </Button>
                   </div>
@@ -278,18 +313,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                       className="w-full sm:mb-0"
                       buttonType="success"
                     >
-                      <svg
-                        className="w-5 h-5 mr-1"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                      <CheckCircleIcon />
                       <span>
                         {intl.formatMessage(messages.mark4kavailable)}
                       </span>
@@ -298,7 +322,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                 )}
             </div>
           )}
-        <h3 className="mb-2 text-xl">
+        <h3 className="mb-2 text-xl font-bold">
           {intl.formatMessage(messages.manageModalRequests)}
         </h3>
         <div className="overflow-hidden bg-gray-600 rounded-md shadow">
@@ -328,15 +352,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                 className="block mb-2 last:mb-0"
               >
                 <Button buttonType="ghost" className="w-full">
-                  <svg
-                    className="w-5 h-5 mr-1"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-                    <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
-                  </svg>
+                  <ExternalLinkIcon />
                   <span>{intl.formatMessage(messages.openradarr)}</span>
                 </Button>
               </a>
@@ -348,15 +364,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                 rel="noreferrer"
               >
                 <Button buttonType="ghost" className="w-full">
-                  <svg
-                    className="w-5 h-5 mr-1"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-                    <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
-                  </svg>
+                  <ExternalLinkIcon />
                   <span>{intl.formatMessage(messages.openradarr4k)}</span>
                 </Button>
               </a>
@@ -367,56 +375,40 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
           <div className="mt-8">
             <ConfirmButton
               onClick={() => deleteMedia()}
-              confirmText={intl.formatMessage(messages.areyousure)}
+              confirmText={intl.formatMessage(globalMessages.areyousure)}
               className="w-full"
             >
-              {intl.formatMessage(messages.manageModalClearMedia)}
+              <DocumentRemoveIcon />
+              <span>{intl.formatMessage(messages.manageModalClearMedia)}</span>
             </ConfirmButton>
-            <div className="mt-2 text-sm text-gray-400">
+            <div className="mt-3 text-xs text-gray-400">
               {intl.formatMessage(messages.manageModalClearMediaWarning)}
             </div>
           </div>
         )}
       </SlideOver>
-      <div className="flex flex-col items-center pt-4 lg:flex-row lg:items-end">
-        <div className="lg:mr-4">
-          <img
+      <div className="media-header">
+        <div className="media-poster">
+          <CachedImage
             src={
               data.posterPath
-                ? `//image.tmdb.org/t/p/w600_and_h900_bestv2${data.posterPath}`
+                ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${data.posterPath}`
                 : '/images/overseerr_poster_not_found.png'
             }
             alt=""
-            className="w-32 rounded shadow md:rounded-lg md:shadow-2xl md:w-44 lg:w-52"
+            layout="responsive"
+            width={600}
+            height={900}
+            priority
           />
         </div>
-        <div className="flex flex-col flex-1 mt-4 text-center text-white lg:mr-4 lg:mt-0 lg:text-left">
-          <div className="mb-2 space-x-2">
-            {data.mediaInfo && data.mediaInfo.status !== MediaStatus.UNKNOWN && (
-              <span className="ml-2 lg:ml-0">
-                <StatusBadge
-                  status={data.mediaInfo?.status}
-                  inProgress={(data.mediaInfo.downloadStatus ?? []).length > 0}
-                  mediaUrl={data.mediaInfo?.mediaUrl}
-                  mediaUrl4k={data.mediaInfo?.mediaUrl4k}
-                />
-              </span>
-            )}
-            <span>
-              <StatusBadge
-                status={data.mediaInfo?.status4k}
-                is4k
-                inProgress={(data.mediaInfo?.downloadStatus4k ?? []).length > 0}
-                mediaUrl={data.mediaInfo?.mediaUrl}
-                mediaUrl4k={
-                  data.mediaInfo?.mediaUrl4k &&
-                  (hasPermission(Permission.REQUEST_4K) ||
-                    hasPermission(Permission.REQUEST_4K_MOVIE))
-                    ? data.mediaInfo.mediaUrl4k
-                    : undefined
-                }
-              />
-            </span>
+        <div className="media-title">
+          <div className="media-status">
+            <StatusBadge
+              status={data.mediaInfo?.status}
+              inProgress={(data.mediaInfo?.downloadStatus ?? []).length > 0}
+              mediaUrl={data.mediaInfo?.mediaUrl}
+            />
             {settings.currentSettings.movie4kEnabled &&
               hasPermission(
                 [Permission.REQUEST_4K, Permission.REQUEST_4K_MOVIE],
@@ -424,25 +416,25 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                   type: 'or',
                 }
               ) && (
-                <span>
-                  <StatusBadge
-                    status={data.mediaInfo?.status4k}
-                    is4k
-                    inProgress={
-                      (data.mediaInfo?.downloadStatus4k ?? []).length > 0
-                    }
-                    mediaUrl4k={data.mediaInfo?.mediaUrl4k}
-                  />
-                </span>
+                <StatusBadge
+                  status={data.mediaInfo?.status4k}
+                  is4k
+                  inProgress={
+                    (data.mediaInfo?.downloadStatus4k ?? []).length > 0
+                  }
+                  mediaUrl4k={data.mediaInfo?.mediaUrl4k}
+                />
               )}
           </div>
-          <h1 className="text-2xl lg:text-4xl">
+          <h1>
             {data.title}{' '}
             {data.releaseDate && (
-              <span className="text-2xl">({data.releaseDate.slice(0, 4)})</span>
+              <span className="media-year">
+                ({data.releaseDate.slice(0, 4)})
+              </span>
             )}
           </h1>
-          <span className="mt-1 text-xs lg:text-base lg:mt-0">
+          <span className="media-attributes">
             {movieAttributes.length > 0 &&
               movieAttributes
                 .map((t, k) => <span key={k}>{t}</span>)
@@ -453,113 +445,82 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                 ))}
           </span>
         </div>
-        <div className="relative z-10 flex flex-wrap justify-center flex-shrink-0 mt-4 sm:justify-end sm:flex-nowrap lg:mt-0">
-          <div className="mb-3 sm:mb-0">
-            <PlayButton links={mediaLinks} />
-          </div>
-          <div className="mb-3 sm:mb-0">
-            <RequestButton
-              mediaType="movie"
-              media={data.mediaInfo}
-              tmdbId={data.id}
-              onUpdate={() => revalidate()}
-            />
-          </div>
+        <div className="media-actions">
+          <PlayButton links={mediaLinks} />
+          <RequestButton
+            mediaType="movie"
+            media={data.mediaInfo}
+            tmdbId={data.id}
+            onUpdate={() => revalidate()}
+          />
           {hasPermission(Permission.MANAGE_REQUESTS) && (
             <Button
               buttonType="default"
-              className="mb-3 ml-2 first:ml-0 sm:mb-0"
+              className="ml-2 first:ml-0"
               onClick={() => setShowManager(true)}
             >
-              <svg
-                className="w-5"
-                style={{ height: 20 }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
+              <CogIcon />
             </Button>
           )}
         </div>
       </div>
-      <div className="flex flex-col pt-8 pb-4 text-white md:flex-row">
-        <div className="flex-1 md:mr-8">
-          <h2 className="text-xl md:text-2xl">
-            {intl.formatMessage(messages.overview)}
-          </h2>
-          <p className="pt-2 text-sm md:text-base">
+      <div className="media-overview">
+        <div className="media-overview-left">
+          {data.tagline && <div className="tagline">{data.tagline}</div>}
+          <h2>{intl.formatMessage(messages.overview)}</h2>
+          <p>
             {data.overview
               ? data.overview
               : intl.formatMessage(messages.overviewunavailable)}
           </p>
-          <ul className="grid grid-cols-2 gap-6 mt-6 sm:grid-cols-3">
-            {sortedCrew.slice(0, 6).map((person) => (
-              <li
-                className="flex flex-col col-span-1"
-                key={`crew-${person.job}-${person.id}`}
-              >
-                <span className="font-bold">{person.job}</span>
-                <Link href={`/person/${person.id}`}>
-                  <a className="text-gray-400 transition duration-300 hover:text-underline hover:text-gray-100">
-                    {person.name}
+          {sortedCrew.length > 0 && (
+            <>
+              <ul className="media-crew">
+                {sortedCrew.slice(0, 6).map((person) => (
+                  <li key={`crew-${person.job}-${person.id}`}>
+                    <span>{person.job}</span>
+                    <Link href={`/person/${person.id}`}>
+                      <a className="crew-name">{person.name}</a>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <div className="flex justify-end mt-4">
+                <Link href={`/movie/${data.id}/crew`}>
+                  <a className="flex items-center text-gray-400 transition duration-300 hover:text-gray-100">
+                    <span>{intl.formatMessage(messages.viewfullcrew)}</span>
+                    <ArrowCircleRightIcon className="inline-block w-5 h-5 ml-1.5" />
                   </a>
                 </Link>
-              </li>
-            ))}
-          </ul>
-          {sortedCrew.length > 0 && (
-            <div className="flex justify-end mt-4">
-              <Link href={`/movie/${data.id}/crew`}>
-                <a className="flex items-center text-gray-400 transition duration-300 hover:text-gray-100">
-                  <span>{intl.formatMessage(messages.viewfullcrew)}</span>
-                  <svg
-                    className="inline-block w-5 h-5 ml-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </a>
-              </Link>
-            </div>
+              </div>
+            </>
           )}
         </div>
-        <div className="w-full mt-8 md:w-80 md:mt-0">
+        <div className="media-overview-right">
           {data.collection && (
             <div className="mb-6">
               <Link href={`/collection/${data.collection.id}`}>
                 <a>
-                  <div
-                    className="relative z-0 transition duration-300 scale-100 bg-gray-800 bg-center bg-cover rounded-lg shadow-md cursor-pointer transform-gpu group hover:scale-105"
-                    style={{
-                      backgroundImage: `linear-gradient(180deg, rgba(31, 41, 55, 0.47) 0%, rgba(31, 41, 55, 0.80) 100%), url(//image.tmdb.org/t/p/w1440_and_h320_multi_faces/${data.collection.backdropPath})`,
-                    }}
-                  >
-                    <div className="flex items-center justify-between p-4 text-gray-200 transition duration-300 h-14 group-hover:text-white">
+                  <div className="relative z-0 overflow-hidden transition duration-300 scale-100 bg-gray-800 bg-center bg-cover rounded-lg shadow-md cursor-pointer transform-gpu group hover:scale-105 ring-1 ring-gray-700 hover:ring-gray-500">
+                    <div className="absolute inset-0 z-0">
+                      <CachedImage
+                        src={`https://image.tmdb.org/t/p/w1440_and_h320_multi_faces/${data.collection.backdropPath}`}
+                        alt=""
+                        layout="fill"
+                        objectFit="cover"
+                      />
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          backgroundImage:
+                            'linear-gradient(180deg, rgba(31, 41, 55, 0.47) 0%, rgba(31, 41, 55, 0.80) 100%)',
+                        }}
+                      />
+                    </div>
+                    <div className="relative z-10 flex items-center justify-between p-4 text-gray-200 transition duration-300 h-14 group-hover:text-white">
                       <div>{data.collection.name}</div>
                       <Button buttonSize="sm">
-                        {intl.formatMessage(messages.view)}
+                        {intl.formatMessage(globalMessages.view)}
                       </Button>
                     </div>
                   </div>
@@ -567,165 +528,197 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
               </Link>
             </div>
           )}
-          <div className="bg-gray-900 border border-gray-800 rounded-lg shadow">
+          <div className="media-facts">
             {(!!data.voteCount ||
               (ratingData?.criticsRating && !!ratingData?.criticsScore) ||
               (ratingData?.audienceRating && !!ratingData?.audienceScore)) && (
-              <div className="flex items-center justify-center px-4 py-2 border-b border-gray-800 last:border-b-0">
+              <div className="media-ratings">
                 {ratingData?.criticsRating && !!ratingData?.criticsScore && (
                   <>
-                    <span className="text-sm">
+                    <span className="media-rating">
                       {ratingData.criticsRating === 'Rotten' ? (
                         <RTRotten className="w-6 mr-1" />
                       ) : (
                         <RTFresh className="w-6 mr-1" />
                       )}
-                    </span>
-                    <span className="mr-4 text-sm text-gray-400 last:mr-0">
                       {ratingData.criticsScore}%
                     </span>
                   </>
                 )}
                 {ratingData?.audienceRating && !!ratingData?.audienceScore && (
                   <>
-                    <span className="text-sm">
+                    <span className="media-rating">
                       {ratingData.audienceRating === 'Spilled' ? (
                         <RTAudRotten className="w-6 mr-1" />
                       ) : (
                         <RTAudFresh className="w-6 mr-1" />
                       )}
-                    </span>
-                    <span className="mr-4 text-sm text-gray-400 last:mr-0">
                       {ratingData.audienceScore}%
                     </span>
                   </>
                 )}
                 {!!data.voteCount && (
                   <>
-                    <span className="text-sm">
+                    <span className="media-rating">
                       <TmdbLogo className="w-6 mr-2" />
-                    </span>
-                    <span className="text-sm text-gray-400">
                       {data.voteAverage}/10
                     </span>
                   </>
                 )}
               </div>
             )}
+            {data.originalTitle &&
+              data.originalLanguage !== locale.slice(0, 2) && (
+                <div className="media-fact">
+                  <span>{intl.formatMessage(messages.originaltitle)}</span>
+                  <span className="media-fact-value">{data.originalTitle}</span>
+                </div>
+              )}
+            <div className="media-fact">
+              <span>{intl.formatMessage(globalMessages.status)}</span>
+              <span className="media-fact-value">{data.status}</span>
+            </div>
             {data.releaseDate && (
-              <div className="flex px-4 py-2 border-b border-gray-800 last:border-b-0">
-                <span className="text-sm">
-                  {intl.formatMessage(messages.releasedate)}
-                </span>
-                <span className="flex-1 text-sm text-right text-gray-400">
-                  <FormattedDate
-                    value={new Date(data.releaseDate)}
-                    year="numeric"
-                    month="long"
-                    day="numeric"
-                  />
+              <div className="media-fact">
+                <span>{intl.formatMessage(messages.releasedate)}</span>
+                <span className="media-fact-value">
+                  {intl.formatDate(data.releaseDate, {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
                 </span>
               </div>
             )}
-            <div className="flex px-4 py-2 border-b border-gray-800 last:border-b-0">
-              <span className="text-sm">
-                {intl.formatMessage(messages.status)}
-              </span>
-              <span className="flex-1 text-sm text-right text-gray-400">
-                {data.status}
-              </span>
-            </div>
             {data.revenue > 0 && (
-              <div className="flex px-4 py-2 border-b border-gray-800 last:border-b-0">
-                <span className="text-sm">
-                  {intl.formatMessage(messages.revenue)}
-                </span>
-                <span className="flex-1 text-sm text-right text-gray-400">
-                  <FormattedNumber
-                    currency="USD"
-                    style="currency"
-                    value={data.revenue}
-                  />
+              <div className="media-fact">
+                <span>{intl.formatMessage(messages.revenue)}</span>
+                <span className="media-fact-value">
+                  {intl.formatNumber(data.revenue, {
+                    currency: 'USD',
+                    style: 'currency',
+                  })}
                 </span>
               </div>
             )}
             {data.budget > 0 && (
-              <div className="flex px-4 py-2 border-b border-gray-800 last:border-b-0">
-                <span className="text-sm">
-                  {intl.formatMessage(messages.budget)}
-                </span>
-                <span className="flex-1 text-sm text-right text-gray-400">
-                  <FormattedNumber
-                    currency="USD"
-                    style="currency"
-                    value={data.budget}
-                  />
+              <div className="media-fact">
+                <span>{intl.formatMessage(messages.budget)}</span>
+                <span className="media-fact-value">
+                  {intl.formatNumber(data.budget, {
+                    currency: 'USD',
+                    style: 'currency',
+                  })}
                 </span>
               </div>
             )}
-            {data.spokenLanguages.some(
-              (lng) => lng.iso_639_1 === data.originalLanguage
-            ) && (
-              <div className="flex px-4 py-2 border-b border-gray-800 last:border-b-0">
-                <span className="text-sm">
-                  {intl.formatMessage(messages.originallanguage)}
-                </span>
-                <span className="flex-1 text-sm text-right text-gray-400">
-                  {
-                    data.spokenLanguages.find(
-                      (lng) => lng.iso_639_1 === data.originalLanguage
-                    )?.name
-                  }
-                </span>
-              </div>
-            )}
-            {data.productionCompanies[0] && (
-              <div className="flex px-4 py-2 border-b border-gray-800 last:border-b-0">
-                <span className="text-sm">
-                  {intl.formatMessage(messages.studio)}
-                </span>
-                <span className="flex-1 text-sm text-right text-gray-400">
-                  {data.productionCompanies[0]?.name}
+            {data.originalLanguage && (
+              <div className="media-fact">
+                <span>{intl.formatMessage(messages.originallanguage)}</span>
+                <span className="media-fact-value">
+                  <Link
+                    href={`/discover/movies/language/${data.originalLanguage}`}
+                  >
+                    <a>
+                      {intl.formatDisplayName(data.originalLanguage, {
+                        type: 'language',
+                        fallback: 'none',
+                      }) ??
+                        data.spokenLanguages.find(
+                          (lng) => lng.iso_639_1 === data.originalLanguage
+                        )?.name}
+                    </a>
+                  </Link>
                 </span>
               </div>
             )}
-          </div>
-          <div className="mt-4">
-            <ExternalLinkBlock
-              mediaType="movie"
-              tmdbId={data.id}
-              tvdbId={data.externalIds.tvdbId}
-              imdbId={data.externalIds.imdbId}
-              rtUrl={ratingData?.url}
-              mediaUrl={data.mediaInfo?.mediaUrl ?? data.mediaInfo?.mediaUrl4k}
-            />
+            {data.productionCompanies.length > 0 && (
+              <div className="media-fact">
+                <span>
+                  {intl.formatMessage(messages.studio, {
+                    studioCount: data.productionCompanies.length,
+                  })}
+                </span>
+                <span className="media-fact-value">
+                  {data.productionCompanies
+                    .slice(
+                      0,
+                      showAllStudios || showMoreStudios
+                        ? data.productionCompanies.length
+                        : minStudios
+                    )
+                    .map((s) => {
+                      return (
+                        <Link
+                          href={`/discover/movies/studio/${s.id}`}
+                          key={`studio-${s.id}`}
+                        >
+                          <a className="block">{s.name}</a>
+                        </Link>
+                      );
+                    })}
+                  {!showAllStudios && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowMoreStudios(!showMoreStudios);
+                      }}
+                    >
+                      <span className="flex items-center">
+                        {intl.formatMessage(
+                          !showMoreStudios
+                            ? messages.showmore
+                            : messages.showless
+                        )}
+                        {!showMoreStudios ? (
+                          <ChevronDoubleDownIcon className="w-4 h-4 ml-1" />
+                        ) : (
+                          <ChevronDoubleUpIcon className="w-4 h-4 ml-1" />
+                        )}
+                      </span>
+                    </button>
+                  )}
+                </span>
+              </div>
+            )}
+            {!!streamingProviders.length && (
+              <div className="media-fact">
+                <span>{intl.formatMessage(messages.streamingproviders)}</span>
+                <span className="media-fact-value">
+                  {streamingProviders.map((p) => {
+                    return (
+                      <span className="block" key={`provider-${p.id}`}>
+                        {p.name}
+                      </span>
+                    );
+                  })}
+                </span>
+              </div>
+            )}
+            <div className="media-fact">
+              <ExternalLinkBlock
+                mediaType="movie"
+                tmdbId={data.id}
+                tvdbId={data.externalIds.tvdbId}
+                imdbId={data.externalIds.imdbId}
+                rtUrl={ratingData?.url}
+                mediaUrl={
+                  data.mediaInfo?.mediaUrl ?? data.mediaInfo?.mediaUrl4k
+                }
+              />
+            </div>
           </div>
         </div>
       </div>
       {data.credits.cast.length > 0 && (
         <>
-          <div className="mt-6 mb-4 md:flex md:items-center md:justify-between">
-            <div className="flex-1 min-w-0">
-              <Link href="/movie/[movieId]/cast" as={`/movie/${data.id}/cast`}>
-                <a className="inline-flex items-center text-xl leading-7 text-gray-300 hover:text-white sm:text-2xl sm:leading-9 sm:truncate">
-                  <span>{intl.formatMessage(messages.cast)}</span>
-                  <svg
-                    className="w-6 h-6 ml-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </a>
-              </Link>
-            </div>
+          <div className="slider-header">
+            <Link href="/movie/[movieId]/cast" as={`/movie/${data.id}/cast`}>
+              <a className="slider-title">
+                <span>{intl.formatMessage(messages.cast)}</span>
+                <ArrowCircleRightIcon />
+              </a>
+            </Link>
           </div>
           <Slider
             sliderKey="cast"

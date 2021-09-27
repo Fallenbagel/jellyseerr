@@ -1,9 +1,9 @@
 import React from 'react';
-import { MediaStatus } from '../../../server/constants/media';
-import Badge from '../Common/Badge';
 import { defineMessages, useIntl } from 'react-intl';
-import globalMessages from '../../i18n/globalMessages';
+import { MediaStatus } from '../../../server/constants/media';
 import Spinner from '../../assets/spinner.svg';
+import globalMessages from '../../i18n/globalMessages';
+import Badge from '../Common/Badge';
 
 const messages = defineMessages({
   status4k: '4K {status}',
@@ -34,7 +34,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
             <a href={mediaUrl4k} target="_blank" rel="noopener noreferrer">
               <Badge
                 badgeType="success"
-                className="transition cursor-pointer hover:bg-green-400"
+                className="transition !cursor-pointer hover:bg-green-400"
               >
                 {intl.formatMessage(messages.status4k, {
                   status: intl.formatMessage(globalMessages.available),
@@ -57,7 +57,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
             <a href={mediaUrl4k} target="_blank" rel="noopener noreferrer">
               <Badge
                 badgeType="success"
-                className="transition cursor-pointer hover:bg-green-400"
+                className="transition !cursor-pointer hover:bg-green-400"
               >
                 {intl.formatMessage(messages.status4k, {
                   status: intl.formatMessage(globalMessages.partiallyavailable),
@@ -109,7 +109,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
           <a href={mediaUrl} target="_blank" rel="noopener noreferrer">
             <Badge
               badgeType="success"
-              className="transition cursor-pointer hover:bg-green-400"
+              className="transition !cursor-pointer hover:bg-green-400"
             >
               <div className="flex items-center">
                 <span>{intl.formatMessage(globalMessages.available)}</span>
@@ -134,7 +134,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
           <a href={mediaUrl} target="_blank" rel="noopener noreferrer">
             <Badge
               badgeType="success"
-              className="transition cursor-pointer hover:bg-green-400"
+              className="transition !cursor-pointer hover:bg-green-400"
             >
               <div className="flex items-center">
                 <span>

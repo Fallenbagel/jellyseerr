@@ -1,28 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import '../styles/globals.css';
-import App, { AppInitialProps, AppProps } from 'next/app';
-import { SWRConfig } from 'swr';
-import { ToastProvider } from 'react-toast-notifications';
-import { parseCookies, setCookie } from 'nookies';
-import Layout from '../components/Layout';
-import { UserContext } from '../context/UserContext';
 import axios from 'axios';
-import { User } from '../hooks/useUser';
-import { IntlProvider } from 'react-intl';
-import { LanguageContext, AvailableLocales } from '../context/LanguageContext';
+import App, { AppInitialProps, AppProps } from 'next/app';
 import Head from 'next/head';
-import Toast from '../components/Toast';
-import { InteractionProvider } from '../context/InteractionContext';
-import StatusChecker from '../components/StatusChacker';
-import { PublicSettingsResponse } from '../../server/interfaces/api/settingsInterfaces';
-import { SettingsProvider } from '../context/SettingsContext';
+import React, { useEffect, useState } from 'react';
+import { IntlProvider } from 'react-intl';
+import { ToastProvider } from 'react-toast-notifications';
+import { SWRConfig } from 'swr';
 import { MediaServerType } from '../../server/constants/server';
+import { PublicSettingsResponse } from '../../server/interfaces/api/settingsInterfaces';
+import Layout from '../components/Layout';
+import LoadingBar from '../components/LoadingBar';
+import PWAHeader from '../components/PWAHeader';
+import ServiceWorkerSetup from '../components/ServiceWorkerSetup';
+import StatusChecker from '../components/StatusChacker';
+import Toast from '../components/Toast';
+import ToastContainer from '../components/ToastContainer';
+import { InteractionProvider } from '../context/InteractionContext';
+import { AvailableLocale, LanguageContext } from '../context/LanguageContext';
+import { SettingsProvider } from '../context/SettingsContext';
+import { UserContext } from '../context/UserContext';
+import { User } from '../hooks/useUser';
+import '../styles/globals.css';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const loadLocaleData = (locale: AvailableLocales): Promise<any> => {
+const loadLocaleData = (locale: AvailableLocale): Promise<any> => {
   switch (locale) {
+    case 'ca':
+      return import('../i18n/locale/ca.json');
     case 'de':
       return import('../i18n/locale/de.json');
+    case 'el':
+      return import('../i18n/locale/el.json');
     case 'es':
       return import('../i18n/locale/es.json');
     case 'fr':
@@ -47,6 +54,8 @@ const loadLocaleData = (locale: AvailableLocales): Promise<any> => {
       return import('../i18n/locale/sr.json');
     case 'sv':
       return import('../i18n/locale/sv.json');
+    case 'zh-CN':
+      return import('../i18n/locale/zh_Hans.json');
     case 'zh-TW':
       return import('../i18n/locale/zh_Hant.json');
     default:
@@ -58,12 +67,12 @@ const loadLocaleData = (locale: AvailableLocales): Promise<any> => {
 // with our combined user prop
 // This is specific to _app.tsx. Other pages will not need to do this!
 type NextAppComponentType = typeof App;
-type MessagesType = Record<string, any>;
+type MessagesType = Record<string, string>;
 
 interface ExtendedAppProps extends AppProps {
   user: User;
   messages: MessagesType;
-  locale: AvailableLocales;
+  locale: AvailableLocale;
   currentSettings: PublicSettingsResponse;
 }
 
@@ -82,14 +91,10 @@ const CoreApp: Omit<NextAppComponentType, 'origGetInitialProps'> = ({
 }: ExtendedAppProps) => {
   let component: React.ReactNode;
   const [loadedMessages, setMessages] = useState<MessagesType>(messages);
-  const [currentLocale, setLocale] = useState<AvailableLocales>(locale);
+  const [currentLocale, setLocale] = useState<AvailableLocale>(locale);
 
   useEffect(() => {
     loadLocaleData(currentLocale).then(setMessages);
-    setCookie(null, 'locale', currentLocale, {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 365 * 10,
-    });
   }, [currentLocale]);
 
   if (router.pathname.match(/(login|setup|resetpassword)/)) {
@@ -114,17 +119,22 @@ const CoreApp: Omit<NextAppComponentType, 'origGetInitialProps'> = ({
           defaultLocale="en"
           messages={loadedMessages}
         >
+          <LoadingBar />
           <SettingsProvider currentSettings={currentSettings}>
             <InteractionProvider>
-              <ToastProvider components={{ Toast }}>
+              <ToastProvider components={{ Toast, ToastContainer }}>
                 <Head>
-                  <title>Overseerr</title>
+                  <title>{currentSettings.applicationTitle}</title>
                   <meta
                     name="viewport"
-                    content="width=device-width, initial-scale=1"
+                    content="initial-scale=1, viewport-fit=cover, width=device-width"
+                  ></meta>
+                  <PWAHeader
+                    applicationTitle={currentSettings.applicationTitle}
                   />
                 </Head>
                 <StatusChecker />
+                <ServiceWorkerSetup />
                 <UserContext initialUser={user}>{component}</UserContext>
               </ToastProvider>
             </InteractionProvider>
@@ -137,10 +147,11 @@ const CoreApp: Omit<NextAppComponentType, 'origGetInitialProps'> = ({
 
 CoreApp.getInitialProps = async (initialProps) => {
   const { ctx, router } = initialProps;
-  let user = undefined;
+  let user: User | undefined = undefined;
   let currentSettings: PublicSettingsResponse = {
     initialized: false,
     applicationTitle: '',
+    applicationUrl: '',
     hideAvailable: false,
     movie4kEnabled: false,
     series4kEnabled: false,
@@ -148,9 +159,13 @@ CoreApp.getInitialProps = async (initialProps) => {
     region: '',
     originalLanguage: '',
     mediaServerType: MediaServerType.NOT_CONFIGURED,
+    partialRequestsEnabled: true,
+    cacheImages: false,
+    vapidPublic: '',
+    enablePushRegistration: false,
+    locale: 'en',
+    emailEnabled: false,
   };
-
-  let locale = 'en';
 
   if (ctx.res) {
     // Check if app is initialized and redirect if necessary
@@ -178,7 +193,7 @@ CoreApp.getInitialProps = async (initialProps) => {
         );
         user = response.data;
 
-        if (router.pathname.match(/login/)) {
+        if (router.pathname.match(/(setup|login)/)) {
           ctx.res.writeHead(307, {
             Location: '/',
           });
@@ -196,12 +211,6 @@ CoreApp.getInitialProps = async (initialProps) => {
         }
       }
     }
-
-    const cookies = parseCookies(ctx);
-
-    if (cookies.locale) {
-      locale = cookies.locale;
-    }
   }
 
   // Run the default getInitialProps for the main nextjs initialProps
@@ -209,7 +218,11 @@ CoreApp.getInitialProps = async (initialProps) => {
     initialProps
   );
 
-  const messages = await loadLocaleData(locale as AvailableLocales);
+  const locale = user?.settings?.locale
+    ? user.settings.locale
+    : currentSettings.locale;
+
+  const messages = await loadLocaleData(locale as AvailableLocale);
 
   return { ...appInitialProps, user, messages, locale, currentSettings };
 };

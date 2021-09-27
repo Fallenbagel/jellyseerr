@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import RadarrAPI from '../api/radarr';
-import SonarrAPI from '../api/sonarr';
+import RadarrAPI from '../api/servarr/radarr';
+import SonarrAPI from '../api/servarr/sonarr';
+import TheMovieDb from '../api/themoviedb';
 import {
   ServiceCommonServer,
   ServiceCommonServerWithDetails,
 } from '../interfaces/api/serviceInterfaces';
 import { getSettings } from '../lib/settings';
-import TheMovieDb from '../api/themoviedb';
 import logger from '../logger';
 
 const serviceRoutes = Router();
@@ -22,6 +22,7 @@ serviceRoutes.get('/radarr', async (req, res) => {
       isDefault: radarr.isDefault,
       activeDirectory: radarr.activeDirectory,
       activeProfileId: radarr.activeProfileId,
+      activeTags: radarr.tags ?? [],
     })
   );
 
@@ -46,11 +47,12 @@ serviceRoutes.get<{ radarrId: string }>(
 
     const radarr = new RadarrAPI({
       apiKey: radarrSettings.apiKey,
-      url: RadarrAPI.buildRadarrUrl(radarrSettings, '/api/v3'),
+      url: RadarrAPI.buildUrl(radarrSettings, '/api/v3'),
     });
 
     const profiles = await radarr.getProfiles();
     const rootFolders = await radarr.getRootFolders();
+    const tags = await radarr.getTags();
 
     return res.status(200).json({
       server: {
@@ -60,6 +62,7 @@ serviceRoutes.get<{ radarrId: string }>(
         isDefault: radarrSettings.isDefault,
         activeDirectory: radarrSettings.activeDirectory,
         activeProfileId: radarrSettings.activeProfileId,
+        activeTags: radarrSettings.tags,
       },
       profiles: profiles.map((profile) => ({
         id: profile.id,
@@ -71,6 +74,7 @@ serviceRoutes.get<{ radarrId: string }>(
         path: folder.path,
         totalSpace: folder.totalSpace,
       })),
+      tags,
     } as ServiceCommonServerWithDetails);
   }
 );
@@ -90,6 +94,7 @@ serviceRoutes.get('/sonarr', async (req, res) => {
       activeAnimeDirectory: sonarr.activeAnimeDirectory,
       activeLanguageProfileId: sonarr.activeLanguageProfileId,
       activeAnimeLanguageProfileId: sonarr.activeAnimeLanguageProfileId,
+      activeTags: [],
     })
   );
 
@@ -114,13 +119,14 @@ serviceRoutes.get<{ sonarrId: string }>(
 
     const sonarr = new SonarrAPI({
       apiKey: sonarrSettings.apiKey,
-      url: SonarrAPI.buildSonarrUrl(sonarrSettings, '/api/v3'),
+      url: SonarrAPI.buildUrl(sonarrSettings, '/api/v3'),
     });
 
     try {
       const profiles = await sonarr.getProfiles();
       const rootFolders = await sonarr.getRootFolders();
       const languageProfiles = await sonarr.getLanguageProfiles();
+      const tags = await sonarr.getTags();
 
       return res.status(200).json({
         server: {
@@ -135,6 +141,8 @@ serviceRoutes.get<{ sonarrId: string }>(
           activeLanguageProfileId: sonarrSettings.activeLanguageProfileId,
           activeAnimeLanguageProfileId:
             sonarrSettings.activeAnimeLanguageProfileId,
+          activeTags: sonarrSettings.tags,
+          activeAnimeTags: sonarrSettings.animeTags,
         },
         profiles: profiles.map((profile) => ({
           id: profile.id,
@@ -147,6 +155,7 @@ serviceRoutes.get<{ sonarrId: string }>(
           totalSpace: folder.totalSpace,
         })),
         languageProfiles: languageProfiles,
+        tags,
       } as ServiceCommonServerWithDetails);
     } catch (e) {
       next({ status: 500, message: e.message });
@@ -182,7 +191,7 @@ serviceRoutes.get<{ tmdbId: string }>(
     try {
       const tv = await tmdb.getTvShow({
         tvId: Number(req.params.tmdbId),
-        language: req.query.language as string,
+        language: req.locale ?? (req.query.language as string),
       });
 
       const response = await sonarr.getSeriesByTitle(tv.name);

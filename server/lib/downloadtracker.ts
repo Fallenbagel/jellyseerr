@@ -1,6 +1,6 @@
 import { uniqWith } from 'lodash';
-import RadarrAPI from '../api/radarr';
-import SonarrAPI from '../api/sonarr';
+import RadarrAPI from '../api/servarr/radarr';
+import SonarrAPI from '../api/servarr/sonarr';
 import { MediaType } from '../constants/media';
 import logger from '../logger';
 import { getSettings } from './settings';
@@ -73,7 +73,7 @@ class DownloadTracker {
         if (server.syncEnabled) {
           const radarr = new RadarrAPI({
             apiKey: server.apiKey,
-            url: RadarrAPI.buildRadarrUrl(server, '/api/v3'),
+            url: RadarrAPI.buildUrl(server, '/api/v3'),
           });
 
           const queueItems = await radarr.getQueue();
@@ -140,7 +140,7 @@ class DownloadTracker {
         if (server.syncEnabled) {
           const radarr = new SonarrAPI({
             apiKey: server.apiKey,
-            url: SonarrAPI.buildSonarrUrl(server, '/api/v3'),
+            url: SonarrAPI.buildUrl(server, '/api/v3'),
           });
 
           const queueItems = await radarr.getQueue();

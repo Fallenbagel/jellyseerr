@@ -1,12 +1,13 @@
 import React, { MouseEvent, ReactNode, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import Button, { ButtonType } from '../Button';
-import { useLockBodyScroll } from '../../../hooks/useLockBodyScroll';
-import LoadingSpinner from '../LoadingSpinner';
-import useClickOutside from '../../../hooks/useClickOutside';
 import { useIntl } from 'react-intl';
+import useClickOutside from '../../../hooks/useClickOutside';
+import { useLockBodyScroll } from '../../../hooks/useLockBodyScroll';
 import globalMessages from '../../../i18n/globalMessages';
 import Transition from '../../Transition';
+import Button, { ButtonType } from '../Button';
+import CachedImage from '../CachedImage';
+import LoadingSpinner from '../LoadingSpinner';
 
 interface ModalProps {
   title?: string;
@@ -29,6 +30,7 @@ interface ModalProps {
   backgroundClickable?: boolean;
   iconSvg?: ReactNode;
   loading?: boolean;
+  backdrop?: string;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -53,6 +55,7 @@ const Modal: React.FC<ModalProps> = ({
   tertiaryDisabled = false,
   tertiaryText,
   onTertiary,
+  backdrop,
 }) => {
   const intl = useIntl();
   const modalRef = useRef<HTMLDivElement>(null);
@@ -66,7 +69,7 @@ const Modal: React.FC<ModalProps> = ({
   return ReactDOM.createPortal(
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
-      className="fixed top-0 bottom-0 left-0 right-0 z-50 flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-50"
+      className="fixed top-0 bottom-0 left-0 right-0 z-50 flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-70"
       onKeyDown={(e) => {
         if (e.key === 'Escape') {
           typeof onCancel === 'function' && backgroundClickable
@@ -98,18 +101,35 @@ const Modal: React.FC<ModalProps> = ({
         show={!loading}
       >
         <div
-          className="inline-block w-full max-h-full px-4 pt-5 pb-4 overflow-auto text-left align-bottom transition-all transform bg-gray-700 shadow-xl sm:rounded-lg sm:my-8 sm:align-middle sm:max-w-3xl"
+          className="relative inline-block w-full px-4 pt-5 pb-4 overflow-auto text-left align-bottom transition-all transform bg-gray-700 shadow-xl ring-1 ring-gray-500 sm:rounded-lg sm:my-8 sm:align-middle sm:max-w-3xl"
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-headline"
           ref={modalRef}
+          style={{
+            maxHeight: 'calc(100% - env(safe-area-inset-top) * 2)',
+          }}
         >
-          <div className="sm:flex sm:items-center">
-            {iconSvg && (
-              <div className="flex items-center justify-center flex-shrink-0 w-12 h-12 mx-auto text-white bg-gray-600 rounded-full sm:mx-0 sm:h-10 sm:w-10">
-                {iconSvg}
-              </div>
-            )}
+          {backdrop && (
+            <div className="absolute top-0 left-0 right-0 z-0 w-full h-64">
+              <CachedImage
+                alt=""
+                src={backdrop}
+                layout="fill"
+                objectFit="cover"
+                priority
+              />
+              <div
+                className="absolute inset-0"
+                style={{
+                  backgroundImage:
+                    'linear-gradient(180deg, rgba(55, 65, 81, 0.85) 0%, rgba(55, 65, 81, 1) 100%)',
+                }}
+              />
+            </div>
+          )}
+          <div className="relative sm:flex sm:items-center">
+            {iconSvg && <div className="modal-icon">{iconSvg}</div>}
             <div
               className={`mt-3 text-center sm:mt-0 sm:text-left ${
                 iconSvg ? 'sm:ml-4' : 'sm:mb-4'
@@ -117,7 +137,7 @@ const Modal: React.FC<ModalProps> = ({
             >
               {title && (
                 <span
-                  className="text-lg font-medium leading-6 text-white"
+                  className="text-lg font-bold leading-6 text-white"
                   id="modal-headline"
                 >
                   {title}
@@ -126,12 +146,12 @@ const Modal: React.FC<ModalProps> = ({
             </div>
           </div>
           {children && (
-            <div className="mt-4 text-sm leading-5 text-gray-300">
+            <div className="relative mt-4 text-sm leading-5 text-gray-300">
               {children}
             </div>
           )}
           {(onCancel || onOk || onSecondary || onTertiary) && (
-            <div className="flex flex-row-reverse justify-center mt-5 sm:mt-4 sm:justify-start">
+            <div className="relative flex flex-row-reverse justify-center mt-5 sm:mt-4 sm:justify-start">
               {typeof onOk === 'function' && (
                 <Button
                   buttonType={okButtonType}

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import SonarrAPI from '../../api/sonarr';
+import SonarrAPI from '../../api/servarr/sonarr';
 import { getSettings, SonarrSettings } from '../../lib/settings';
 import logger from '../../logger';
 
@@ -39,12 +39,13 @@ sonarrRoutes.post('/test', async (req, res, next) => {
   try {
     const sonarr = new SonarrAPI({
       apiKey: req.body.apiKey,
-      url: SonarrAPI.buildSonarrUrl(req.body, '/api/v3'),
+      url: SonarrAPI.buildUrl(req.body, '/api/v3'),
     });
 
     const profiles = await sonarr.getProfiles();
     const folders = await sonarr.getRootFolders();
     const languageProfiles = await sonarr.getLanguageProfiles();
+    const tags = await sonarr.getTags();
 
     return res.status(200).json({
       profiles,
@@ -53,6 +54,7 @@ sonarrRoutes.post('/test', async (req, res, next) => {
         path: folder.path,
       })),
       languageProfiles,
+      tags,
     });
   } catch (e) {
     logger.error('Failed to test Sonarr', {

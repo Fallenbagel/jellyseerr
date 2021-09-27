@@ -1,55 +1,74 @@
-import React from 'react';
-import { Field, Form, Formik } from 'formik';
-import useSWR from 'swr';
-import LoadingSpinner from '../../../Common/LoadingSpinner';
-import Button from '../../../Common/Button';
-import { defineMessages, useIntl } from 'react-intl';
+import { BeakerIcon, SaveIcon } from '@heroicons/react/outline';
 import axios from 'axios';
-import * as Yup from 'yup';
+import { Field, Form, Formik } from 'formik';
+import React, { useState } from 'react';
+import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
-import Alert from '../../../Common/Alert';
+import useSWR from 'swr';
+import * as Yup from 'yup';
+import globalMessages from '../../../../i18n/globalMessages';
+import Button from '../../../Common/Button';
+import LoadingSpinner from '../../../Common/LoadingSpinner';
 import NotificationTypeSelector from '../../../NotificationTypeSelector';
 
 const messages = defineMessages({
-  save: 'Save Changes',
-  saving: 'Saving…',
   agentenabled: 'Enable Agent',
-  accessToken: 'Application/API Token',
-  userToken: 'User Key',
+  accessToken: 'Application API Token',
+  accessTokenTip:
+    '<ApplicationRegistrationLink>Register an application</ApplicationRegistrationLink> for use with Overseerr',
+  userToken: 'User or Group Key',
+  userTokenTip:
+    'Your 30-character <UsersGroupsLink>user or group identifier</UsersGroupsLink>',
   validationAccessTokenRequired: 'You must provide a valid application token',
-  validationUserTokenRequired: 'You must provide a valid user key',
+  validationUserTokenRequired: 'You must provide a valid user or group key',
   pushoversettingssaved: 'Pushover notification settings saved successfully!',
   pushoversettingsfailed: 'Pushover notification settings failed to save.',
-  testsent: 'Test notification sent!',
-  test: 'Test',
-  settinguppushover: 'Setting Up Pushover Notifications',
-  settinguppushoverDescription:
-    'To configure Pushover notifications, you will need to <RegisterApplicationLink>register an application</RegisterApplicationLink> and enter the API token below.\
-    (You can use one of our <IconLink>official icons on GitHub</IconLink>.)\
-    You will also need your user key.',
-  notificationtypes: 'Notification Types',
+  toastPushoverTestSending: 'Sending Pushover test notification…',
+  toastPushoverTestSuccess: 'Pushover test notification sent!',
+  toastPushoverTestFailed: 'Pushover test notification failed to send.',
+  validationTypes: 'You must select at least one notification type',
 });
 
 const NotificationsPushover: React.FC = () => {
   const intl = useIntl();
-  const { addToast } = useToasts();
+  const { addToast, removeToast } = useToasts();
+  const [isTesting, setIsTesting] = useState(false);
   const { data, error, revalidate } = useSWR(
     '/api/v1/settings/notifications/pushover'
   );
 
   const NotificationsPushoverSchema = Yup.object().shape({
     accessToken: Yup.string()
-      .required(intl.formatMessage(messages.validationAccessTokenRequired))
+      .when('enabled', {
+        is: true,
+        then: Yup.string()
+          .nullable()
+          .required(intl.formatMessage(messages.validationAccessTokenRequired)),
+        otherwise: Yup.string().nullable(),
+      })
       .matches(
-        /^a[A-Za-z0-9]{29}$/,
+        /^[a-z\d]{30}$/i,
         intl.formatMessage(messages.validationAccessTokenRequired)
       ),
     userToken: Yup.string()
-      .required(intl.formatMessage(messages.validationUserTokenRequired))
+      .when('enabled', {
+        is: true,
+        then: Yup.string()
+          .nullable()
+          .required(intl.formatMessage(messages.validationUserTokenRequired)),
+        otherwise: Yup.string().nullable(),
+      })
       .matches(
-        /^[ug][A-Za-z0-9]{29}$/,
+        /^[a-z\d]{30}$/i,
         intl.formatMessage(messages.validationUserTokenRequired)
       ),
+    types: Yup.number().when('enabled', {
+      is: true,
+      then: Yup.number()
+        .nullable()
+        .moreThan(0, intl.formatMessage(messages.validationTypes)),
+      otherwise: Yup.number().nullable(),
+    }),
   });
 
   if (!data && !error) {
@@ -89,152 +108,183 @@ const NotificationsPushover: React.FC = () => {
         }
       }}
     >
-      {({ errors, touched, isSubmitting, values, isValid, setFieldValue }) => {
+      {({
+        errors,
+        touched,
+        isSubmitting,
+        values,
+        isValid,
+        setFieldValue,
+        setFieldTouched,
+      }) => {
         const testSettings = async () => {
-          await axios.post('/api/v1/settings/notifications/pushover/test', {
-            enabled: true,
-            types: values.types,
-            options: {
-              accessToken: values.accessToken,
-              userToken: values.userToken,
-            },
-          });
+          setIsTesting(true);
+          let toastId: string | undefined;
+          try {
+            addToast(
+              intl.formatMessage(messages.toastPushoverTestSending),
+              {
+                autoDismiss: false,
+                appearance: 'info',
+              },
+              (id) => {
+                toastId = id;
+              }
+            );
+            await axios.post('/api/v1/settings/notifications/pushover/test', {
+              enabled: true,
+              types: values.types,
+              options: {
+                accessToken: values.accessToken,
+                userToken: values.userToken,
+              },
+            });
 
-          addToast(intl.formatMessage(messages.testsent), {
-            appearance: 'info',
-            autoDismiss: true,
-          });
+            if (toastId) {
+              removeToast(toastId);
+            }
+            addToast(intl.formatMessage(messages.toastPushoverTestSuccess), {
+              autoDismiss: true,
+              appearance: 'success',
+            });
+          } catch (e) {
+            if (toastId) {
+              removeToast(toastId);
+            }
+            addToast(intl.formatMessage(messages.toastPushoverTestFailed), {
+              autoDismiss: true,
+              appearance: 'error',
+            });
+          } finally {
+            setIsTesting(false);
+          }
         };
 
         return (
-          <>
-            <Alert
-              title={intl.formatMessage(messages.settinguppushover)}
-              type="info"
-            >
-              {intl.formatMessage(messages.settinguppushoverDescription, {
-                RegisterApplicationLink: function RegisterApplicationLink(msg) {
-                  return (
-                    <a
-                      href="https://pushover.net/apps/build"
-                      className="text-indigo-100 hover:text-white hover:underline"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {msg}
-                    </a>
-                  );
-                },
-                IconLink: function IconLink(msg) {
-                  return (
-                    <a
-                      href="https://github.com/sct/overseerr/tree/develop/public"
-                      className="text-indigo-100 hover:text-white hover:underline"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {msg}
-                    </a>
-                  );
-                },
-              })}
-            </Alert>
-            <Form className="section">
-              <div className="form-row">
-                <label htmlFor="enabled" className="checkbox-label">
-                  {intl.formatMessage(messages.agentenabled)}
-                </label>
-                <div className="form-input">
-                  <Field type="checkbox" id="enabled" name="enabled" />
-                </div>
+          <Form className="section">
+            <div className="form-row">
+              <label htmlFor="enabled" className="checkbox-label">
+                {intl.formatMessage(messages.agentenabled)}
+                <span className="label-required">*</span>
+              </label>
+              <div className="form-input">
+                <Field type="checkbox" id="enabled" name="enabled" />
               </div>
-              <div className="form-row">
-                <label htmlFor="accessToken" className="text-label">
-                  {intl.formatMessage(messages.accessToken)}
-                </label>
-                <div className="form-input">
-                  <div className="flex max-w-lg rounded-md shadow-sm">
-                    <Field
-                      id="accessToken"
-                      name="accessToken"
-                      type="text"
-                      placeholder={intl.formatMessage(messages.accessToken)}
-                    />
-                  </div>
-                  {errors.accessToken && touched.accessToken && (
-                    <div className="error">{errors.accessToken}</div>
-                  )}
+            </div>
+            <div className="form-row">
+              <label htmlFor="accessToken" className="text-label">
+                {intl.formatMessage(messages.accessToken)}
+                <span className="label-required">*</span>
+                <span className="label-tip">
+                  {intl.formatMessage(messages.accessTokenTip, {
+                    ApplicationRegistrationLink: function ApplicationRegistrationLink(
+                      msg
+                    ) {
+                      return (
+                        <a
+                          href="https://pushover.net/api#registration"
+                          className="text-white transition duration-300 hover:underline"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {msg}
+                        </a>
+                      );
+                    },
+                  })}
+                </span>
+              </label>
+              <div className="form-input">
+                <div className="form-input-field">
+                  <Field id="accessToken" name="accessToken" type="text" />
                 </div>
+                {errors.accessToken && touched.accessToken && (
+                  <div className="error">{errors.accessToken}</div>
+                )}
               </div>
-              <div className="form-row">
-                <label htmlFor="userToken" className="text-label">
-                  {intl.formatMessage(messages.userToken)}
-                </label>
-                <div className="form-input">
-                  <div className="flex max-w-lg rounded-md shadow-sm">
-                    <Field
-                      id="userToken"
-                      name="userToken"
-                      type="text"
-                      placeholder={intl.formatMessage(messages.userToken)}
-                    />
-                  </div>
-                  {errors.userToken && touched.userToken && (
-                    <div className="error">{errors.userToken}</div>
-                  )}
+            </div>
+            <div className="form-row">
+              <label htmlFor="userToken" className="text-label">
+                {intl.formatMessage(messages.userToken)}
+                <span className="label-required">*</span>
+                <span className="label-tip">
+                  {intl.formatMessage(messages.userTokenTip, {
+                    UsersGroupsLink: function UsersGroupsLink(msg) {
+                      return (
+                        <a
+                          href="https://pushover.net/api#identifiers"
+                          className="text-white transition duration-300 hover:underline"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {msg}
+                        </a>
+                      );
+                    },
+                  })}
+                </span>
+              </label>
+              <div className="form-input">
+                <div className="form-input-field">
+                  <Field id="userToken" name="userToken" type="text" />
                 </div>
+                {errors.userToken && touched.userToken && (
+                  <div className="error">{errors.userToken}</div>
+                )}
               </div>
-              <div
-                role="group"
-                aria-labelledby="group-label"
-                className="form-group"
-              >
-                <div className="form-row">
-                  <span id="group-label" className="group-label">
-                    {intl.formatMessage(messages.notificationtypes)}
-                  </span>
-                  <div className="form-input">
-                    <div className="max-w-lg">
-                      <NotificationTypeSelector
-                        currentTypes={values.types}
-                        onUpdate={(newTypes) =>
-                          setFieldValue('types', newTypes)
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="actions">
-                <div className="flex justify-end">
-                  <span className="inline-flex ml-3 rounded-md shadow-sm">
-                    <Button
-                      buttonType="warning"
-                      disabled={isSubmitting || !isValid}
-                      onClick={(e) => {
-                        e.preventDefault();
+            </div>
+            <NotificationTypeSelector
+              currentTypes={values.enabled ? values.types : 0}
+              onUpdate={(newTypes) => {
+                setFieldValue('types', newTypes);
+                setFieldTouched('types');
 
-                        testSettings();
-                      }}
-                    >
-                      {intl.formatMessage(messages.test)}
-                    </Button>
-                  </span>
-                  <span className="inline-flex ml-3 rounded-md shadow-sm">
-                    <Button
-                      buttonType="primary"
-                      type="submit"
-                      disabled={isSubmitting || !isValid}
-                    >
+                if (newTypes) {
+                  setFieldValue('enabled', true);
+                }
+              }}
+              error={
+                errors.types && touched.types
+                  ? (errors.types as string)
+                  : undefined
+              }
+            />
+            <div className="actions">
+              <div className="flex justify-end">
+                <span className="inline-flex ml-3 rounded-md shadow-sm">
+                  <Button
+                    buttonType="warning"
+                    disabled={isSubmitting || !isValid || isTesting}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      testSettings();
+                    }}
+                  >
+                    <BeakerIcon />
+                    <span>
+                      {isTesting
+                        ? intl.formatMessage(globalMessages.testing)
+                        : intl.formatMessage(globalMessages.test)}
+                    </span>
+                  </Button>
+                </span>
+                <span className="inline-flex ml-3 rounded-md shadow-sm">
+                  <Button
+                    buttonType="primary"
+                    type="submit"
+                    disabled={isSubmitting || !isValid || isTesting}
+                  >
+                    <SaveIcon />
+                    <span>
                       {isSubmitting
-                        ? intl.formatMessage(messages.saving)
-                        : intl.formatMessage(messages.save)}
-                    </Button>
-                  </span>
-                </div>
+                        ? intl.formatMessage(globalMessages.saving)
+                        : intl.formatMessage(globalMessages.save)}
+                    </span>
+                  </Button>
+                </span>
               </div>
-            </Form>
-          </>
+            </div>
+          </Form>
         );
       }}
     </Formik>

@@ -91,7 +91,7 @@ interface FriendResponse {
         email: string;
         thumb: string;
       };
-      Server: ServerResponse[];
+      Server?: ServerResponse[];
     }[];
   };
 }
@@ -232,7 +232,7 @@ class PlexTvAPI {
         );
       }
 
-      return !!user.Server.find(
+      return !!user.Server?.find(
         (server) => server.$.machineIdentifier === settings.plex.machineId
       );
     } catch (e) {

@@ -1,39 +1,60 @@
-import React from 'react';
-import { Field, Form, Formik } from 'formik';
-import useSWR from 'swr';
-import LoadingSpinner from '../../Common/LoadingSpinner';
-import Button from '../../Common/Button';
-import { defineMessages, useIntl } from 'react-intl';
+import { BeakerIcon, SaveIcon } from '@heroicons/react/outline';
 import axios from 'axios';
-import * as Yup from 'yup';
+import { Field, Form, Formik } from 'formik';
+import React, { useState } from 'react';
+import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
+import useSWR from 'swr';
+import * as Yup from 'yup';
+import globalMessages from '../../../i18n/globalMessages';
+import Button from '../../Common/Button';
+import LoadingSpinner from '../../Common/LoadingSpinner';
 import NotificationTypeSelector from '../../NotificationTypeSelector';
 
 const messages = defineMessages({
-  save: 'Save Changes',
-  saving: 'Saving…',
   agentenabled: 'Enable Agent',
+  botUsername: 'Bot Username',
+  botAvatarUrl: 'Bot Avatar URL',
   webhookUrl: 'Webhook URL',
-  webhookUrlPlaceholder: 'Server Settings → Integrations → Webhooks',
+  webhookUrlTip:
+    'Create a <DiscordWebhookLink>webhook integration</DiscordWebhookLink> in your server',
   discordsettingssaved: 'Discord notification settings saved successfully!',
   discordsettingsfailed: 'Discord notification settings failed to save.',
-  testsent: 'Test notification sent!',
-  test: 'Test',
-  notificationtypes: 'Notification Types',
-  validationWebhookUrl: 'You must provide a valid URL',
+  toastDiscordTestSending: 'Sending Discord test notification…',
+  toastDiscordTestSuccess: 'Discord test notification sent!',
+  toastDiscordTestFailed: 'Discord test notification failed to send.',
+  validationUrl: 'You must provide a valid URL',
+  validationTypes: 'You must select at least one notification type',
 });
 
 const NotificationsDiscord: React.FC = () => {
   const intl = useIntl();
-  const { addToast } = useToasts();
+  const { addToast, removeToast } = useToasts();
+  const [isTesting, setIsTesting] = useState(false);
   const { data, error, revalidate } = useSWR(
     '/api/v1/settings/notifications/discord'
   );
 
   const NotificationsDiscordSchema = Yup.object().shape({
+    botAvatarUrl: Yup.string()
+      .nullable()
+      .url(intl.formatMessage(messages.validationUrl)),
     webhookUrl: Yup.string()
-      .required(intl.formatMessage(messages.validationWebhookUrl))
-      .url(intl.formatMessage(messages.validationWebhookUrl)),
+      .when('enabled', {
+        is: true,
+        then: Yup.string()
+          .nullable()
+          .required(intl.formatMessage(messages.validationUrl)),
+        otherwise: Yup.string().nullable(),
+      })
+      .url(intl.formatMessage(messages.validationUrl)),
+    types: Yup.number().when('enabled', {
+      is: true,
+      then: Yup.number()
+        .nullable()
+        .moreThan(0, intl.formatMessage(messages.validationTypes)),
+      otherwise: Yup.number().nullable(),
+    }),
   });
 
   if (!data && !error) {
@@ -45,6 +66,8 @@ const NotificationsDiscord: React.FC = () => {
       initialValues={{
         enabled: data.enabled,
         types: data.types,
+        botUsername: data?.options.botUsername,
+        botAvatarUrl: data?.options.botAvatarUrl,
         webhookUrl: data.options.webhookUrl,
       }}
       validationSchema={NotificationsDiscordSchema}
@@ -54,9 +77,12 @@ const NotificationsDiscord: React.FC = () => {
             enabled: values.enabled,
             types: values.types,
             options: {
+              botUsername: values.botUsername,
+              botAvatarUrl: values.botAvatarUrl,
               webhookUrl: values.webhookUrl,
             },
           });
+
           addToast(intl.formatMessage(messages.discordsettingssaved), {
             appearance: 'success',
             autoDismiss: true,
@@ -71,20 +97,57 @@ const NotificationsDiscord: React.FC = () => {
         }
       }}
     >
-      {({ errors, touched, isSubmitting, values, isValid, setFieldValue }) => {
+      {({
+        errors,
+        touched,
+        isSubmitting,
+        values,
+        isValid,
+        setFieldValue,
+        setFieldTouched,
+      }) => {
         const testSettings = async () => {
-          await axios.post('/api/v1/settings/notifications/discord/test', {
-            enabled: true,
-            types: values.types,
-            options: {
-              webhookUrl: values.webhookUrl,
-            },
-          });
+          setIsTesting(true);
+          let toastId: string | undefined;
+          try {
+            addToast(
+              intl.formatMessage(messages.toastDiscordTestSending),
+              {
+                autoDismiss: false,
+                appearance: 'info',
+              },
+              (id) => {
+                toastId = id;
+              }
+            );
+            await axios.post('/api/v1/settings/notifications/discord/test', {
+              enabled: true,
+              types: values.types,
+              options: {
+                botUsername: values.botUsername,
+                botAvatarUrl: values.botAvatarUrl,
+                webhookUrl: values.webhookUrl,
+              },
+            });
 
-          addToast(intl.formatMessage(messages.testsent), {
-            appearance: 'info',
-            autoDismiss: true,
-          });
+            if (toastId) {
+              removeToast(toastId);
+            }
+            addToast(intl.formatMessage(messages.toastDiscordTestSuccess), {
+              autoDismiss: true,
+              appearance: 'success',
+            });
+          } catch (e) {
+            if (toastId) {
+              removeToast(toastId);
+            }
+            addToast(intl.formatMessage(messages.toastDiscordTestFailed), {
+              autoDismiss: true,
+              appearance: 'error',
+            });
+          } finally {
+            setIsTesting(false);
+          }
         };
 
         return (
@@ -92,6 +155,7 @@ const NotificationsDiscord: React.FC = () => {
             <div className="form-row">
               <label htmlFor="enabled" className="checkbox-label">
                 {intl.formatMessage(messages.agentenabled)}
+                <span className="label-required">*</span>
               </label>
               <div className="form-input">
                 <Field type="checkbox" id="enabled" name="enabled" />
@@ -100,16 +164,31 @@ const NotificationsDiscord: React.FC = () => {
             <div className="form-row">
               <label htmlFor="name" className="text-label">
                 {intl.formatMessage(messages.webhookUrl)}
+                <span className="label-required">*</span>
+                <span className="label-tip">
+                  {intl.formatMessage(messages.webhookUrlTip, {
+                    DiscordWebhookLink: function DiscordWebhookLink(msg) {
+                      return (
+                        <a
+                          href="https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks"
+                          className="text-white transition duration-300 hover:underline"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {msg}
+                        </a>
+                      );
+                    },
+                  })}
+                </span>
               </label>
               <div className="form-input">
-                <div className="flex max-w-lg rounded-md shadow-sm">
+                <div className="form-input-field">
                   <Field
                     id="webhookUrl"
                     name="webhookUrl"
                     type="text"
-                    placeholder={intl.formatMessage(
-                      messages.webhookUrlPlaceholder
-                    )}
+                    inputMode="url"
                   />
                 </div>
                 {errors.webhookUrl && touched.webhookUrl && (
@@ -117,49 +196,84 @@ const NotificationsDiscord: React.FC = () => {
                 )}
               </div>
             </div>
-            <div
-              role="group"
-              aria-labelledby="group-label"
-              className="form-group"
-            >
-              <div className="form-row">
-                <span id="group-label" className="group-label">
-                  {intl.formatMessage(messages.notificationtypes)}
-                </span>
-                <div className="form-input">
-                  <div className="max-w-lg">
-                    <NotificationTypeSelector
-                      currentTypes={values.types}
-                      onUpdate={(newTypes) => setFieldValue('types', newTypes)}
-                    />
-                  </div>
+            <div className="form-row">
+              <label htmlFor="botUsername" className="text-label">
+                {intl.formatMessage(messages.botUsername)}
+              </label>
+              <div className="form-input">
+                <div className="form-input-field">
+                  <Field id="botUsername" name="botUsername" type="text" />
                 </div>
+                {errors.botUsername && touched.botUsername && (
+                  <div className="error">{errors.botUsername}</div>
+                )}
               </div>
             </div>
+            <div className="form-row">
+              <label htmlFor="botAvatarUrl" className="text-label">
+                {intl.formatMessage(messages.botAvatarUrl)}
+              </label>
+              <div className="form-input">
+                <div className="form-input-field">
+                  <Field
+                    id="botAvatarUrl"
+                    name="botAvatarUrl"
+                    type="text"
+                    inputMode="url"
+                  />
+                </div>
+                {errors.botAvatarUrl && touched.botAvatarUrl && (
+                  <div className="error">{errors.botAvatarUrl}</div>
+                )}
+              </div>
+            </div>
+            <NotificationTypeSelector
+              currentTypes={values.enabled ? values.types : 0}
+              onUpdate={(newTypes) => {
+                setFieldValue('types', newTypes);
+                setFieldTouched('types');
+
+                if (newTypes) {
+                  setFieldValue('enabled', true);
+                }
+              }}
+              error={
+                errors.types && touched.types
+                  ? (errors.types as string)
+                  : undefined
+              }
+            />
             <div className="actions">
               <div className="flex justify-end">
                 <span className="inline-flex ml-3 rounded-md shadow-sm">
                   <Button
                     buttonType="warning"
-                    disabled={isSubmitting || !isValid}
+                    disabled={isSubmitting || !isValid || isTesting}
                     onClick={(e) => {
                       e.preventDefault();
-
                       testSettings();
                     }}
                   >
-                    {intl.formatMessage(messages.test)}
+                    <BeakerIcon />
+                    <span>
+                      {isTesting
+                        ? intl.formatMessage(globalMessages.testing)
+                        : intl.formatMessage(globalMessages.test)}
+                    </span>
                   </Button>
                 </span>
                 <span className="inline-flex ml-3 rounded-md shadow-sm">
                   <Button
                     buttonType="primary"
                     type="submit"
-                    disabled={isSubmitting || !isValid}
+                    disabled={isSubmitting || !isValid || isTesting}
                   >
-                    {isSubmitting
-                      ? intl.formatMessage(messages.saving)
-                      : intl.formatMessage(messages.save)}
+                    <SaveIcon />
+                    <span>
+                      {isSubmitting
+                        ? intl.formatMessage(globalMessages.saving)
+                        : intl.formatMessage(globalMessages.save)}
+                    </span>
                   </Button>
                 </span>
               </div>

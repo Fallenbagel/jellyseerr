@@ -1,18 +1,20 @@
+import axios from 'axios';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
+import { defineMessages, useIntl } from 'react-intl';
+import { mutate } from 'swr';
+import useLocale from '../../hooks/useLocale';
+import AppDataWarning from '../AppDataWarning';
+import Badge from '../Common/Badge';
 import Button from '../Common/Button';
 import ImageFader from '../Common/ImageFader';
-import SettingsPlex from '../Settings/SettingsPlex';
+import PageTitle from '../Common/PageTitle';
+import LanguagePicker from '../Layout/LanguagePicker';
 import SettingsJellyfin from '../Settings/SettingsJellyfin';
+import SettingsPlex from '../Settings/SettingsPlex';
 import SettingsServices from '../Settings/SettingsServices';
 import SetupLogin from './SetupLogin';
 import SetupSteps from './SetupSteps';
-import axios from 'axios';
-import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
-import Badge from '../Common/Badge';
-import LanguagePicker from '../Layout/LanguagePicker';
-import PageTitle from '../Common/PageTitle';
-import AppDataWarning from '../AppDataWarning';
 
 const messages = defineMessages({
   setup: 'Setup',
@@ -23,8 +25,8 @@ const messages = defineMessages({
   configuremediaserver: 'Configure Media Server',
   configureservices: 'Configure Services',
   tip: 'Tip',
-  syncingbackground:
-    'Syncing will run in the background. You can continue the setup process in the meantime.',
+  scanbackground:
+    'Scanning will run in the background. You can continue the setup process in the meantime.',
 });
 
 const Setup: React.FC = () => {
@@ -37,15 +39,19 @@ const Setup: React.FC = () => {
   ] = useState(false);
   const [mediaServerType, setMediaServerType] = useState('');
   const router = useRouter();
+  const { locale } = useLocale();
 
   const finishSetup = async () => {
-    setIsUpdating(false);
+    setIsUpdating(true);
     const response = await axios.post<{ initialized: boolean }>(
       '/api/v1/settings/initialize'
     );
 
     setIsUpdating(false);
     if (response.data.initialized) {
+      await axios.post('/api/v1/settings/main', { locale });
+      mutate('/api/v1/settings/public');
+
       router.push('/');
     }
   };
@@ -74,8 +80,8 @@ const Setup: React.FC = () => {
       </div>
       <div className="relative z-40 px-4 sm:mx-auto sm:w-full sm:max-w-4xl">
         <img
-          src="/logo.png"
-          className="w-auto mx-auto mb-10 max-h-32"
+          src="/logo_stacked.svg"
+          className="max-w-full mb-10 sm:max-w-md sm:mx-auto"
           alt="Logo"
         />
         <AppDataWarning />
@@ -132,7 +138,7 @@ const Setup: React.FC = () => {
                 <span className="mr-2">
                   <Badge>{intl.formatMessage(messages.tip)}</Badge>
                 </span>
-                {intl.formatMessage(messages.syncingbackground)}
+                {intl.formatMessage(messages.scanbackground)}
               </div>
               <div className="actions">
                 <div className="flex justify-end">
@@ -142,7 +148,7 @@ const Setup: React.FC = () => {
                       disabled={!mediaServerSettingsComplete}
                       onClick={() => setCurrentStep(3)}
                     >
-                      <FormattedMessage {...messages.continue} />
+                      {intl.formatMessage(messages.continue)}
                     </Button>
                   </span>
                 </div>
@@ -160,11 +166,9 @@ const Setup: React.FC = () => {
                       onClick={() => finishSetup()}
                       disabled={isUpdating}
                     >
-                      {isUpdating ? (
-                        <FormattedMessage {...messages.finishing} />
-                      ) : (
-                        <FormattedMessage {...messages.finish} />
-                      )}
+                      {isUpdating
+                        ? intl.formatMessage(messages.finishing)
+                        : intl.formatMessage(messages.finish)}
                     </Button>
                   </span>
                 </div>

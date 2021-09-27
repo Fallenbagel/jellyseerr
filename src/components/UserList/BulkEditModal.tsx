@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import PermissionEdit from '../PermissionEdit';
-import Modal from '../Common/Modal';
-import { User, useUser } from '../../hooks/useUser';
-import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
+import { PencilIcon } from '@heroicons/react/solid';
 import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
+import { User, useUser } from '../../hooks/useUser';
+import globalMessages from '../../i18n/globalMessages';
+import Modal from '../Common/Modal';
+import PermissionEdit from '../PermissionEdit';
 
 interface BulkEditProps {
   selectedUserIds: number[];
@@ -15,12 +17,9 @@ interface BulkEditProps {
 }
 
 const messages = defineMessages({
-  userssaved: 'Users saved',
-  save: 'Save Changes',
-  saving: 'Saving…',
-  userfail: 'Something went wrong while saving the user.',
-  permissions: 'Permissions',
-  edituser: 'Edit User',
+  userssaved: 'User permissions saved successfully!',
+  userfail: 'Something went wrong while saving user permissions.',
+  edituser: 'Edit User Permissions',
 });
 
 const BulkEditModal: React.FC<BulkEditProps> = ({
@@ -86,34 +85,20 @@ const BulkEditModal: React.FC<BulkEditProps> = ({
   return (
     <Modal
       title={intl.formatMessage(messages.edituser)}
+      iconSvg={<PencilIcon />}
       onOk={() => {
         updateUsers();
       }}
       okDisabled={isSaving}
-      okText={intl.formatMessage(messages.save)}
+      okText={intl.formatMessage(globalMessages.save)}
       onCancel={onCancel}
     >
-      <div className="mt-6 mb-6">
-        <div role="group" aria-labelledby="group-label">
-          <div className="form-row">
-            <div>
-              <div id="group-label" className="group-label">
-                <FormattedMessage {...messages.permissions} />
-              </div>
-            </div>
-            <div className="form-input">
-              <div className="max-w-lg">
-                <PermissionEdit
-                  actingUser={currentUser}
-                  currentPermission={currentPermission}
-                  onUpdate={(newPermission) =>
-                    setCurrentPermission(newPermission)
-                  }
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="mb-6">
+        <PermissionEdit
+          actingUser={currentUser}
+          currentPermission={currentPermission}
+          onUpdate={(newPermission) => setCurrentPermission(newPermission)}
+        />
       </div>
     </Modal>
   );

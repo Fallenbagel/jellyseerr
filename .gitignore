@@ -32,7 +32,7 @@ yarn-error.log*
 .vercel
 
 # database
-config/db/*.sqlite3
+config/db/*.sqlite3*
 config/settings.json
 
 # logs

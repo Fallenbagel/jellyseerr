@@ -1,40 +1,48 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import Transition from '../../Transition';
-import Modal from '../../Common/Modal';
-import { Formik, Field } from 'formik';
-import type { SonarrSettings } from '../../../../server/lib/settings';
-import * as Yup from 'yup';
+import { PencilIcon, PlusIcon } from '@heroicons/react/solid';
 import axios from 'axios';
+import { Field, Formik } from 'formik';
+import dynamic from 'next/dynamic';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { defineMessages, useIntl } from 'react-intl';
+import type { OptionsType, OptionTypeBase } from 'react-select';
 import { useToasts } from 'react-toast-notifications';
-import { useIntl, defineMessages } from 'react-intl';
+import * as Yup from 'yup';
+import type { SonarrSettings } from '../../../../server/lib/settings';
+import globalMessages from '../../../i18n/globalMessages';
+import Modal from '../../Common/Modal';
+import SensitiveInput from '../../Common/SensitiveInput';
+import Transition from '../../Transition';
+
+type OptionType = {
+  value: string;
+  label: string;
+};
+
+const Select = dynamic(() => import('react-select'), { ssr: false });
 
 const messages = defineMessages({
   createsonarr: 'Add New Sonarr Server',
+  create4ksonarr: 'Add New 4K Sonarr Server',
   editsonarr: 'Edit Sonarr Server',
+  edit4ksonarr: 'Edit 4K Sonarr Server',
   validationNameRequired: 'You must provide a server name',
-  validationHostnameRequired: 'You must provide a hostname/IP',
-  validationPortRequired: 'You must provide a port',
+  validationHostnameRequired: 'You must provide a hostname or IP address',
+  validationPortRequired: 'You must provide a valid port number',
   validationApiKeyRequired: 'You must provide an API key',
   validationRootFolderRequired: 'You must select a root folder',
   validationProfileRequired: 'You must select a quality profile',
   validationLanguageProfileRequired: 'You must select a language profile',
-  toastSonarrTestSuccess: 'Sonarr connection established!',
+  toastSonarrTestSuccess: 'Sonarr connection established successfully!',
   toastSonarrTestFailure: 'Failed to connect to Sonarr.',
-  saving: 'Saving…',
-  save: 'Save Changes',
   add: 'Add Server',
-  test: 'Test',
-  testing: 'Testing…',
   defaultserver: 'Default Server',
+  default4kserver: 'Default 4K Server',
   servername: 'Server Name',
-  servernamePlaceholder: 'A Sonarr Server',
-  hostname: 'Hostname',
+  hostname: 'Hostname or IP Address',
   port: 'Port',
-  ssl: 'SSL',
+  ssl: 'Use SSL',
   apiKey: 'API Key',
-  apiKeyPlaceholder: 'Your Sonarr API key',
-  baseUrl: 'Base URL',
-  baseUrlPlaceholder: 'Example: /sonarr',
+  baseUrl: 'URL Base',
   qualityprofile: 'Quality Profile',
   languageprofile: 'Language Profile',
   rootfolder: 'Root Folder',
@@ -52,14 +60,19 @@ const messages = defineMessages({
   testFirstRootFolders: 'Test connection to load root folders',
   loadinglanguageprofiles: 'Loading language profiles…',
   testFirstLanguageProfiles: 'Test connection to load language profiles',
-  syncEnabled: 'Enable Sync',
+  loadingTags: 'Loading tags…',
+  testFirstTags: 'Test connection to load tags',
+  syncEnabled: 'Enable Scan',
   externalUrl: 'External URL',
-  externalUrlPlaceholder: 'External URL pointing to your Sonarr server',
-  preventSearch: 'Disable Auto-Search',
+  enableSearch: 'Enable Automatic Search',
   validationApplicationUrl: 'You must provide a valid URL',
   validationApplicationUrlTrailingSlash: 'URL must not end in a trailing slash',
   validationBaseUrlLeadingSlash: 'Base URL must have a leading slash',
   validationBaseUrlTrailingSlash: 'Base URL must not end in a trailing slash',
+  tags: 'Tags',
+  animeTags: 'Anime Tags',
+  notagoptions: 'No tags.',
+  selecttags: 'Select tags',
 });
 
 interface TestResponse {
@@ -74,6 +87,10 @@ interface TestResponse {
   languageProfiles: {
     id: number;
     name: string;
+  }[];
+  tags: {
+    id: number;
+    label: string;
   }[];
 }
 
@@ -97,17 +114,21 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
     profiles: [],
     rootFolders: [],
     languageProfiles: [],
+    tags: [],
   });
   const SonarrSettingsSchema = Yup.object().shape({
     name: Yup.string().required(
       intl.formatMessage(messages.validationNameRequired)
     ),
-    hostname: Yup.string().required(
-      intl.formatMessage(messages.validationHostnameRequired)
-    ),
-    port: Yup.number().required(
-      intl.formatMessage(messages.validationPortRequired)
-    ),
+    hostname: Yup.string()
+      .required(intl.formatMessage(messages.validationHostnameRequired))
+      .matches(
+        /^(([a-z]|\d|_|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*)?([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])$/i,
+        intl.formatMessage(messages.validationHostnameRequired)
+      ),
+    port: Yup.number()
+      .nullable()
+      .required(intl.formatMessage(messages.validationPortRequired)),
     apiKey: Yup.string().required(
       intl.formatMessage(messages.validationApiKeyRequired)
     ),
@@ -125,33 +146,18 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
       .test(
         'no-trailing-slash',
         intl.formatMessage(messages.validationApplicationUrlTrailingSlash),
-        (value) => {
-          if (value?.substr(value.length - 1) === '/') {
-            return false;
-          }
-          return true;
-        }
+        (value) => !value || !value.endsWith('/')
       ),
     baseUrl: Yup.string()
       .test(
         'leading-slash',
         intl.formatMessage(messages.validationBaseUrlLeadingSlash),
-        (value) => {
-          if (value && value?.substr(0, 1) !== '/') {
-            return false;
-          }
-          return true;
-        }
+        (value) => !value || value.startsWith('/')
       )
       .test(
         'no-trailing-slash',
         intl.formatMessage(messages.validationBaseUrlTrailingSlash),
-        (value) => {
-          if (value?.substr(value.length - 1) === '/') {
-            return false;
-          }
-          return true;
-        }
+        (value) => !value || !value.endsWith('/')
       ),
   });
 
@@ -185,7 +191,7 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
         setIsValidated(true);
         setTestResponse(response.data);
         if (initialLoad.current) {
-          addToast('Sonarr connection established!', {
+          addToast(intl.formatMessage(messages.toastSonarrTestSuccess), {
             appearance: 'success',
             autoDismiss: true,
           });
@@ -193,7 +199,7 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
       } catch (e) {
         setIsValidated(false);
         if (initialLoad.current) {
-          addToast('Failed to connect to Sonarr server', {
+          addToast(intl.formatMessage(messages.toastSonarrTestFailure), {
             appearance: 'error',
             autoDismiss: true,
           });
@@ -203,7 +209,7 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
         initialLoad.current = true;
       }
     },
-    [addToast]
+    [addToast, intl]
   );
 
   useEffect(() => {
@@ -233,7 +239,7 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
         initialValues={{
           name: sonarr?.name,
           hostname: sonarr?.hostname,
-          port: sonarr?.port,
+          port: sonarr?.port ?? 8989,
           ssl: sonarr?.useSsl ?? false,
           apiKey: sonarr?.apiKey,
           baseUrl: sonarr?.baseUrl,
@@ -243,12 +249,14 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
           activeAnimeProfileId: sonarr?.activeAnimeProfileId,
           activeAnimeLanguageProfileId: sonarr?.activeAnimeLanguageProfileId,
           activeAnimeRootFolder: sonarr?.activeAnimeDirectory,
+          tags: sonarr?.tags ?? [],
+          animeTags: sonarr?.animeTags ?? [],
           isDefault: sonarr?.isDefault ?? false,
           is4k: sonarr?.is4k ?? false,
           enableSeasonFolders: sonarr?.enableSeasonFolders ?? false,
           externalUrl: sonarr?.externalUrl,
           syncEnabled: sonarr?.syncEnabled ?? false,
-          preventSearch: sonarr?.preventSearch ?? false,
+          enableSearch: !sonarr?.preventSearch,
         }}
         validationSchema={SonarrSettingsSchema}
         onSubmit={async (values) => {
@@ -281,12 +289,14 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
                 : undefined,
               activeAnimeProfileName: animeProfileName ?? undefined,
               activeAnimeDirectory: values.activeAnimeRootFolder,
+              tags: values.tags,
+              animeTags: values.animeTags,
               is4k: values.is4k,
               isDefault: values.isDefault,
               enableSeasonFolders: values.enableSeasonFolders,
               externalUrl: values.externalUrl,
               syncEnabled: values.syncEnabled,
-              preventSearch: values.preventSearch,
+              preventSearch: !values.enableSearch,
             };
             if (!sonarr) {
               await axios.post('/api/v1/settings/sonarr', submission);
@@ -318,16 +328,16 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
               okButtonType="primary"
               okText={
                 isSubmitting
-                  ? intl.formatMessage(messages.saving)
+                  ? intl.formatMessage(globalMessages.saving)
                   : sonarr
-                  ? intl.formatMessage(messages.save)
+                  ? intl.formatMessage(globalMessages.save)
                   : intl.formatMessage(messages.add)
               }
               secondaryButtonType="warning"
               secondaryText={
                 isTesting
-                  ? intl.formatMessage(messages.testing)
-                  : intl.formatMessage(messages.test)
+                  ? intl.formatMessage(globalMessages.testing)
+                  : intl.formatMessage(globalMessages.test)
               }
               onSecondary={() => {
                 if (values.apiKey && values.hostname && values.port) {
@@ -341,20 +351,35 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
                 }
               }}
               secondaryDisabled={
-                !values.apiKey || !values.hostname || !values.port || isTesting
+                !values.apiKey ||
+                !values.hostname ||
+                !values.port ||
+                isTesting ||
+                isSubmitting
               }
               okDisabled={!isValidated || isSubmitting || isTesting || !isValid}
               onOk={() => handleSubmit()}
               title={
                 !sonarr
-                  ? intl.formatMessage(messages.createsonarr)
-                  : intl.formatMessage(messages.editsonarr)
+                  ? intl.formatMessage(
+                      values.is4k
+                        ? messages.create4ksonarr
+                        : messages.createsonarr
+                    )
+                  : intl.formatMessage(
+                      values.is4k ? messages.edit4ksonarr : messages.editsonarr
+                    )
               }
+              iconSvg={!sonarr ? <PlusIcon /> : <PencilIcon />}
             >
               <div className="mb-6">
                 <div className="form-row">
                   <label htmlFor="isDefault" className="checkbox-label">
-                    {intl.formatMessage(messages.defaultserver)}
+                    {intl.formatMessage(
+                      values.is4k
+                        ? messages.default4kserver
+                        : messages.defaultserver
+                    )}
                   </label>
                   <div className="form-input">
                     <Field type="checkbox" id="isDefault" name="isDefault" />
@@ -374,14 +399,11 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
                     <span className="label-required">*</span>
                   </label>
                   <div className="form-input">
-                    <div className="flex max-w-lg rounded-md shadow-sm">
+                    <div className="form-input-field">
                       <Field
                         id="name"
                         name="name"
                         type="text"
-                        placeholder={intl.formatMessage(
-                          messages.servernamePlaceholder
-                        )}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           setIsValidated(false);
                           setFieldValue('name', e.target.value);
@@ -399,7 +421,7 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
                     <span className="label-required">*</span>
                   </label>
                   <div className="form-input">
-                    <div className="flex max-w-lg rounded-md shadow-sm">
+                    <div className="form-input-field">
                       <span className="protocol">
                         {values.ssl ? 'https://' : 'http://'}
                       </span>
@@ -407,7 +429,7 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
                         id="hostname"
                         name="hostname"
                         type="text"
-                        placeholder="127.0.0.1"
+                        inputMode="url"
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           setIsValidated(false);
                           setFieldValue('hostname', e.target.value);
@@ -430,7 +452,7 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
                       id="port"
                       name="port"
                       type="text"
-                      placeholder="8989"
+                      inputMode="numeric"
                       className="short"
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         setIsValidated(false);
@@ -464,14 +486,12 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
                     <span className="label-required">*</span>
                   </label>
                   <div className="form-input">
-                    <div className="flex max-w-lg rounded-md shadow-sm">
-                      <Field
+                    <div className="form-input-field">
+                      <SensitiveInput
+                        as="field"
                         id="apiKey"
                         name="apiKey"
-                        type="text"
-                        placeholder={intl.formatMessage(
-                          messages.apiKeyPlaceholder
-                        )}
+                        autoComplete="one-time-code"
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           setIsValidated(false);
                           setFieldValue('apiKey', e.target.value);
@@ -488,14 +508,12 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
                     {intl.formatMessage(messages.baseUrl)}
                   </label>
                   <div className="form-input">
-                    <div className="flex max-w-lg rounded-md shadow-sm">
+                    <div className="form-input-field">
                       <Field
                         id="baseUrl"
                         name="baseUrl"
                         type="text"
-                        placeholder={intl.formatMessage(
-                          messages.baseUrlPlaceholder
-                        )}
+                        inputMode="url"
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           setIsValidated(false);
                           setFieldValue('baseUrl', e.target.value);
@@ -513,7 +531,7 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
                     <span className="label-required">*</span>
                   </label>
                   <div className="form-input">
-                    <div className="flex max-w-lg rounded-md shadow-sm">
+                    <div className="form-input-field">
                       <Field
                         as="select"
                         id="activeProfileId"
@@ -551,7 +569,7 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
                     <span className="label-required">*</span>
                   </label>
                   <div className="form-input">
-                    <div className="flex max-w-lg rounded-md shadow-sm">
+                    <div className="form-input-field">
                       <Field
                         as="select"
                         id="rootFolder"
@@ -590,7 +608,7 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
                     <span className="label-required">*</span>
                   </label>
                   <div className="form-input">
-                    <div className="flex max-w-lg rounded-md shadow-sm">
+                    <div className="form-input-field">
                       <Field
                         as="select"
                         id="activeLanguageProfileId"
@@ -630,11 +648,67 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
                   </div>
                 </div>
                 <div className="form-row">
+                  <label htmlFor="tags" className="text-label">
+                    {intl.formatMessage(messages.tags)}
+                  </label>
+                  <div className="form-input">
+                    <Select
+                      options={
+                        isValidated
+                          ? testResponse.tags.map((tag) => ({
+                              label: tag.label,
+                              value: tag.id,
+                            }))
+                          : []
+                      }
+                      isMulti
+                      isDisabled={!isValidated || isTesting}
+                      placeholder={
+                        !isValidated
+                          ? intl.formatMessage(messages.testFirstTags)
+                          : isTesting
+                          ? intl.formatMessage(messages.loadingTags)
+                          : intl.formatMessage(messages.selecttags)
+                      }
+                      isLoading={isTesting}
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                      value={
+                        isTesting
+                          ? []
+                          : values.tags.map((tagId) => {
+                              const foundTag = testResponse.tags.find(
+                                (tag) => tag.id === tagId
+                              );
+                              return {
+                                value: foundTag?.id,
+                                label: foundTag?.label,
+                              };
+                            })
+                      }
+                      onChange={(
+                        value: OptionTypeBase | OptionsType<OptionType> | null
+                      ) => {
+                        if (!Array.isArray(value)) {
+                          return;
+                        }
+                        setFieldValue(
+                          'tags',
+                          value?.map((option) => option.value)
+                        );
+                      }}
+                      noOptionsMessage={() =>
+                        intl.formatMessage(messages.notagoptions)
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
                   <label htmlFor="activeAnimeProfileId" className="text-label">
                     {intl.formatMessage(messages.animequalityprofile)}
                   </label>
                   <div className="form-input">
-                    <div className="flex max-w-lg rounded-md shadow-sm">
+                    <div className="form-input-field">
                       <Field
                         as="select"
                         id="activeAnimeProfileId"
@@ -674,7 +748,7 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
                     {intl.formatMessage(messages.animerootfolder)}
                   </label>
                   <div className="form-input">
-                    <div className="flex max-w-lg rounded-md shadow-sm">
+                    <div className="form-input-field">
                       <Field
                         as="select"
                         id="activeAnimeRootFolder"
@@ -713,7 +787,7 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
                     {intl.formatMessage(messages.animelanguageprofile)}
                   </label>
                   <div className="form-input">
-                    <div className="flex max-w-lg rounded-md shadow-sm">
+                    <div className="form-input-field">
                       <Field
                         as="select"
                         id="activeAnimeLanguageProfileId"
@@ -753,6 +827,62 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
                   </div>
                 </div>
                 <div className="form-row">
+                  <label htmlFor="tags" className="text-label">
+                    {intl.formatMessage(messages.animeTags)}
+                  </label>
+                  <div className="form-input">
+                    <Select
+                      options={
+                        isValidated
+                          ? testResponse.tags.map((tag) => ({
+                              label: tag.label,
+                              value: tag.id,
+                            }))
+                          : []
+                      }
+                      isMulti
+                      isDisabled={!isValidated}
+                      placeholder={
+                        !isValidated
+                          ? intl.formatMessage(messages.testFirstTags)
+                          : isTesting
+                          ? intl.formatMessage(messages.loadingTags)
+                          : intl.formatMessage(messages.selecttags)
+                      }
+                      isLoading={isTesting}
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                      value={
+                        isTesting
+                          ? []
+                          : values.animeTags.map((tagId) => {
+                              const foundTag = testResponse.tags.find(
+                                (tag) => tag.id === tagId
+                              );
+                              return {
+                                value: foundTag?.id,
+                                label: foundTag?.label,
+                              };
+                            })
+                      }
+                      onChange={(
+                        value: OptionTypeBase | OptionsType<OptionType> | null
+                      ) => {
+                        if (!Array.isArray(value)) {
+                          return;
+                        }
+                        setFieldValue(
+                          'animeTags',
+                          value?.map((option) => option.value)
+                        );
+                      }}
+                      noOptionsMessage={() =>
+                        intl.formatMessage(messages.notagoptions)
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
                   <label
                     htmlFor="enableSeasonFolders"
                     className="checkbox-label"
@@ -772,14 +902,12 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
                     {intl.formatMessage(messages.externalUrl)}
                   </label>
                   <div className="form-input">
-                    <div className="flex max-w-lg rounded-md shadow-sm">
+                    <div className="form-input-field">
                       <Field
                         id="externalUrl"
                         name="externalUrl"
                         type="text"
-                        placeholder={intl.formatMessage(
-                          messages.externalUrlPlaceholder
-                        )}
+                        inputMode="url"
                       />
                     </div>
                     {errors.externalUrl && touched.externalUrl && (
@@ -800,14 +928,14 @@ const SonarrModal: React.FC<SonarrModalProps> = ({
                   </div>
                 </div>
                 <div className="form-row">
-                  <label htmlFor="preventSearch" className="checkbox-label">
-                    {intl.formatMessage(messages.preventSearch)}
+                  <label htmlFor="enableSearch" className="checkbox-label">
+                    {intl.formatMessage(messages.enableSearch)}
                   </label>
-                  <div className="mt-1 sm:mt-0 sm:col-span-2">
+                  <div className="form-input">
                     <Field
                       type="checkbox"
-                      id="preventSearch"
-                      name="preventSearch"
+                      id="enableSearch"
+                      name="enableSearch"
                     />
                   </div>
                 </div>

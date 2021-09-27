@@ -1,12 +1,13 @@
 import type {
-  TmdbCreditCast,
   TmdbAggregateCreditCast,
+  TmdbCreditCast,
   TmdbCreditCrew,
   TmdbExternalIds,
   TmdbVideo,
   TmdbVideoResult,
+  TmdbWatchProviderDetails,
+  TmdbWatchProviders,
 } from '../api/themoviedb/interfaces';
-
 import { Video } from '../models/Movie';
 
 export interface ProductionCompany {
@@ -14,6 +15,18 @@ export interface ProductionCompany {
   logoPath?: string;
   originCountry: string;
   name: string;
+  description?: string;
+  headquarters?: string;
+  homepage?: string;
+}
+
+export interface TvNetwork {
+  id: number;
+  logoPath?: string;
+  originCountry?: string;
+  name: string;
+  headquarters?: string;
+  homepage?: string;
 }
 
 export interface Keyword {
@@ -56,6 +69,20 @@ export interface ExternalIds {
   facebookId?: string;
   instagramId?: string;
   twitterId?: string;
+}
+
+export interface WatchProviders {
+  iso_3166_1: string;
+  link?: string;
+  buy?: WatchProviderDetails[];
+  flatrate?: WatchProviderDetails[];
+}
+
+export interface WatchProviderDetails {
+  displayPriority?: number;
+  logoPath?: string;
+  id: number;
+  name: string;
 }
 
 export const mapCast = (person: TmdbCreditCast): Cast => ({
@@ -112,7 +139,33 @@ export const mapVideos = (videoResult: TmdbVideoResult): Video[] =>
     url: siteUrlCreator(site, key),
   }));
 
+export const mapWatchProviders = (watchProvidersResult: {
+  [iso_3166_1: string]: TmdbWatchProviders;
+}): WatchProviders[] =>
+  Object.entries(watchProvidersResult).map(
+    ([iso_3166_1, provider]) =>
+      ({
+        iso_3166_1,
+        link: provider.link,
+        buy: mapWatchProviderDetails(provider.buy ?? []),
+        flatrate: mapWatchProviderDetails(provider.flatrate ?? []),
+      } as WatchProviders)
+  );
+
+export const mapWatchProviderDetails = (
+  watchProviderDetails: TmdbWatchProviderDetails[]
+): WatchProviderDetails[] =>
+  watchProviderDetails.map(
+    (provider) =>
+      ({
+        displayPriority: provider.display_priority,
+        logoPath: provider.logo_path,
+        id: provider.provider_id,
+        name: provider.provider_name,
+      } as WatchProviderDetails)
+  );
+
 const siteUrlCreator = (site: Video['site'], key: string): string =>
   ({
-    YouTube: `https://www.youtube.com/watch?v=${key}/`,
+    YouTube: `https://www.youtube.com/watch?v=${key}`,
   }[site]);

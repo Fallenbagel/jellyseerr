@@ -1,5 +1,11 @@
+import { DownloadIcon } from '@heroicons/react/outline';
+import {
+  CheckIcon,
+  InformationCircleIcon,
+  XIcon,
+} from '@heroicons/react/solid';
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import {
   MediaRequestStatus,
@@ -9,28 +15,27 @@ import Media from '../../../server/entity/Media';
 import { MediaRequest } from '../../../server/entity/MediaRequest';
 import useSettings from '../../hooks/useSettings';
 import { Permission, useUser } from '../../hooks/useUser';
+import globalMessages from '../../i18n/globalMessages';
 import ButtonWithDropdown from '../Common/ButtonWithDropdown';
 import RequestModal from '../RequestModal';
 
 const messages = defineMessages({
   viewrequest: 'View Request',
   viewrequest4k: 'View 4K Request',
-  request: 'Request',
-  request4k: 'Request 4K',
   requestmore: 'Request More',
-  requestmore4k: 'Request More 4K',
+  requestmore4k: 'Request More in 4K',
   approverequest: 'Approve Request',
   approverequest4k: 'Approve 4K Request',
   declinerequest: 'Decline Request',
   declinerequest4k: 'Decline 4K Request',
   approverequests:
-    'Approve {requestCount} {requestCount, plural, one {Request} other {Requests}}',
+    'Approve {requestCount, plural, one {Request} other {{requestCount} Requests}}',
   declinerequests:
-    'Decline {requestCount} {requestCount, plural, one {Request} other {Requests}}',
+    'Decline {requestCount, plural, one {Request} other {{requestCount} Requests}}',
   approve4krequests:
-    'Approve {requestCount} 4K {requestCount, plural, one {Request} other {Requests}}',
+    'Approve {requestCount, plural, one {4K Request} other {{requestCount} 4K Requests}}',
   decline4krequests:
-    'Decline {requestCount} 4K {requestCount, plural, one {Request} other {Requests}}',
+    'Decline {requestCount, plural, one {4K Request} other {{requestCount} 4K Requests}}',
 });
 
 interface ButtonOption {
@@ -59,25 +64,33 @@ const RequestButton: React.FC<RequestButtonProps> = ({
 }) => {
   const intl = useIntl();
   const settings = useSettings();
-  const { hasPermission } = useUser();
+  const { user, hasPermission } = useUser();
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showRequest4kModal, setShowRequest4kModal] = useState(false);
+  const [editRequest, setEditRequest] = useState(false);
 
-  const activeRequest = media?.requests.find(
-    (request) => request.status === MediaRequestStatus.PENDING && !request.is4k
-  );
-  const active4kRequest = media?.requests.find(
-    (request) => request.status === MediaRequestStatus.PENDING && request.is4k
-  );
-
-  // All pending
+  // All pending requests
   const activeRequests = media?.requests.filter(
     (request) => request.status === MediaRequestStatus.PENDING && !request.is4k
   );
-
   const active4kRequests = media?.requests.filter(
     (request) => request.status === MediaRequestStatus.PENDING && request.is4k
   );
+
+  const activeRequest = useMemo(() => {
+    return activeRequests && activeRequests.length > 0
+      ? activeRequests.find((request) => request.requestedBy.id === user?.id) ??
+          activeRequests[0]
+      : undefined;
+  }, [activeRequests, user]);
+
+  const active4kRequest = useMemo(() => {
+    return active4kRequests && active4kRequests.length > 0
+      ? active4kRequests.find(
+          (request) => request.requestedBy.id === user?.id
+        ) ?? active4kRequests[0]
+      : undefined;
+  }, [active4kRequests, user]);
 
   const modifyRequest = async (
     request: MediaRequest,
@@ -110,184 +123,83 @@ const RequestButton: React.FC<RequestButtonProps> = ({
   const buttons: ButtonOption[] = [];
   if (
     (!media || media.status === MediaStatus.UNKNOWN) &&
-    hasPermission(Permission.REQUEST)
+    hasPermission(
+      [
+        Permission.REQUEST,
+        mediaType === 'movie'
+          ? Permission.REQUEST_MOVIE
+          : Permission.REQUEST_TV,
+      ],
+      { type: 'or' }
+    )
   ) {
     buttons.push({
       id: 'request',
-      text: intl.formatMessage(messages.request),
+      text: intl.formatMessage(globalMessages.request),
       action: () => {
+        setEditRequest(false);
         setShowRequestModal(true);
       },
-      svg: (
-        <svg
-          className="w-4 mr-1"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-          />
-        </svg>
-      ),
-    });
-  }
-
-  if (
-    hasPermission(Permission.REQUEST) &&
-    mediaType === 'tv' &&
-    media &&
-    media.status !== MediaStatus.AVAILABLE &&
-    media.status !== MediaStatus.UNKNOWN &&
-    !isShowComplete
-  ) {
-    buttons.push({
-      id: 'request-more',
-      text: intl.formatMessage(messages.requestmore),
-      action: () => {
-        setShowRequestModal(true);
-      },
-      svg: (
-        <svg
-          className="w-4 mr-1"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-          />
-        </svg>
-      ),
+      svg: <DownloadIcon />,
     });
   }
 
   if (
     (!media || media.status4k === MediaStatus.UNKNOWN) &&
-    (hasPermission(Permission.REQUEST_4K) ||
-      (mediaType === 'movie' && hasPermission(Permission.REQUEST_4K_MOVIE)) ||
-      (mediaType === 'tv' && hasPermission(Permission.REQUEST_4K_TV))) &&
+    hasPermission(
+      [
+        Permission.REQUEST_4K,
+        mediaType === 'movie'
+          ? Permission.REQUEST_4K_MOVIE
+          : Permission.REQUEST_4K_TV,
+      ],
+      { type: 'or' }
+    ) &&
     ((settings.currentSettings.movie4kEnabled && mediaType === 'movie') ||
       (settings.currentSettings.series4kEnabled && mediaType === 'tv'))
   ) {
     buttons.push({
       id: 'request4k',
-      text: intl.formatMessage(messages.request4k),
+      text: intl.formatMessage(globalMessages.request4k),
       action: () => {
+        setEditRequest(false);
         setShowRequest4kModal(true);
       },
-      svg: (
-        <svg
-          className="w-4 mr-1"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-          />
-        </svg>
-      ),
-    });
-  }
-
-  if (
-    mediaType === 'tv' &&
-    (hasPermission(Permission.REQUEST_4K) ||
-      (mediaType === 'tv' && hasPermission(Permission.REQUEST_4K_TV))) &&
-    media &&
-    media.status4k !== MediaStatus.AVAILABLE &&
-    media.status4k !== MediaStatus.UNKNOWN &&
-    !is4kShowComplete &&
-    settings.currentSettings.series4kEnabled
-  ) {
-    buttons.push({
-      id: 'request-more-4k',
-      text: intl.formatMessage(messages.requestmore4k),
-      action: () => {
-        setShowRequest4kModal(true);
-      },
-      svg: (
-        <svg
-          className="w-4 mr-1"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-          />
-        </svg>
-      ),
+      svg: <DownloadIcon />,
     });
   }
 
   if (
     activeRequest &&
-    mediaType === 'movie' &&
-    hasPermission(Permission.REQUEST)
+    (activeRequest.requestedBy.id === user?.id ||
+      (activeRequests?.length === 1 &&
+        hasPermission(Permission.MANAGE_REQUESTS)))
   ) {
     buttons.push({
       id: 'active-request',
       text: intl.formatMessage(messages.viewrequest),
-      action: () => setShowRequestModal(true),
-      svg: (
-        <svg
-          className="w-4 mr-1"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fillRule="evenodd"
-            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-            clipRule="evenodd"
-          />
-        </svg>
-      ),
+      action: () => {
+        setEditRequest(true);
+        setShowRequestModal(true);
+      },
+      svg: <InformationCircleIcon />,
     });
   }
 
   if (
     active4kRequest &&
-    mediaType === 'movie' &&
-    (hasPermission(Permission.REQUEST_4K) ||
-      hasPermission(Permission.REQUEST_4K_MOVIE))
+    (active4kRequest.requestedBy.id === user?.id ||
+      (active4kRequests?.length === 1 &&
+        hasPermission(Permission.MANAGE_REQUESTS)))
   ) {
     buttons.push({
       id: 'active-4k-request',
       text: intl.formatMessage(messages.viewrequest4k),
-      action: () => setShowRequest4kModal(true),
-      svg: (
-        <svg
-          className="w-4 mr-1"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fillRule="evenodd"
-            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-            clipRule="evenodd"
-          />
-        </svg>
-      ),
+      action: () => {
+        setEditRequest(true);
+        setShowRequest4kModal(true);
+      },
+      svg: <InformationCircleIcon />,
     });
   }
 
@@ -303,20 +215,7 @@ const RequestButton: React.FC<RequestButtonProps> = ({
         action: () => {
           modifyRequest(activeRequest, 'approve');
         },
-        svg: (
-          <svg
-            className="w-4 mr-1"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-        ),
+        svg: <CheckIcon />,
       },
       {
         id: 'decline-request',
@@ -324,20 +223,7 @@ const RequestButton: React.FC<RequestButtonProps> = ({
         action: () => {
           modifyRequest(activeRequest, 'decline');
         },
-        svg: (
-          <svg
-            className="w-4 mr-1"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-        ),
+        svg: <XIcon />,
       }
     );
   }
@@ -357,20 +243,7 @@ const RequestButton: React.FC<RequestButtonProps> = ({
         action: () => {
           modifyRequests(activeRequests, 'approve');
         },
-        svg: (
-          <svg
-            className="w-4 mr-1"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-        ),
+        svg: <CheckIcon />,
       },
       {
         id: 'decline-request-batch',
@@ -380,20 +253,7 @@ const RequestButton: React.FC<RequestButtonProps> = ({
         action: () => {
           modifyRequests(activeRequests, 'decline');
         },
-        svg: (
-          <svg
-            className="w-4 mr-1"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-        ),
+        svg: <XIcon />,
       }
     );
   }
@@ -410,20 +270,7 @@ const RequestButton: React.FC<RequestButtonProps> = ({
         action: () => {
           modifyRequest(active4kRequest, 'approve');
         },
-        svg: (
-          <svg
-            className="w-4 mr-1"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-        ),
+        svg: <CheckIcon />,
       },
       {
         id: 'decline-4k-request',
@@ -431,20 +278,7 @@ const RequestButton: React.FC<RequestButtonProps> = ({
         action: () => {
           modifyRequest(active4kRequest, 'decline');
         },
-        svg: (
-          <svg
-            className="w-4 mr-1"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-        ),
+        svg: <XIcon />,
       }
     );
   }
@@ -457,52 +291,71 @@ const RequestButton: React.FC<RequestButtonProps> = ({
   ) {
     buttons.push(
       {
-        id: 'approve-request-batch',
+        id: 'approve-4k-request-batch',
         text: intl.formatMessage(messages.approve4krequests, {
           requestCount: active4kRequests.length,
         }),
         action: () => {
           modifyRequests(active4kRequests, 'approve');
         },
-        svg: (
-          <svg
-            className="w-4 mr-1"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-        ),
+        svg: <CheckIcon />,
       },
       {
-        id: 'decline-request-batch',
+        id: 'decline-4k-request-batch',
         text: intl.formatMessage(messages.decline4krequests, {
           requestCount: active4kRequests.length,
         }),
         action: () => {
           modifyRequests(active4kRequests, 'decline');
         },
-        svg: (
-          <svg
-            className="w-4 mr-1"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-        ),
+        svg: <XIcon />,
       }
     );
+  }
+
+  if (
+    mediaType === 'tv' &&
+    (!activeRequest || activeRequest.requestedBy.id !== user?.id) &&
+    hasPermission([Permission.REQUEST, Permission.REQUEST_TV], {
+      type: 'or',
+    }) &&
+    media &&
+    media.status !== MediaStatus.AVAILABLE &&
+    media.status !== MediaStatus.UNKNOWN &&
+    !isShowComplete
+  ) {
+    buttons.push({
+      id: 'request-more',
+      text: intl.formatMessage(messages.requestmore),
+      action: () => {
+        setEditRequest(false);
+        setShowRequestModal(true);
+      },
+      svg: <DownloadIcon />,
+    });
+  }
+
+  if (
+    mediaType === 'tv' &&
+    (!active4kRequest || active4kRequest.requestedBy.id !== user?.id) &&
+    hasPermission([Permission.REQUEST_4K, Permission.REQUEST_4K_TV], {
+      type: 'or',
+    }) &&
+    media &&
+    media.status4k !== MediaStatus.AVAILABLE &&
+    media.status4k !== MediaStatus.UNKNOWN &&
+    !is4kShowComplete &&
+    settings.currentSettings.series4kEnabled
+  ) {
+    buttons.push({
+      id: 'request-more-4k',
+      text: intl.formatMessage(messages.requestmore4k),
+      action: () => {
+        setEditRequest(false);
+        setShowRequest4kModal(true);
+      },
+      svg: <DownloadIcon />,
+    });
   }
 
   const [buttonOne, ...others] = buttons;
@@ -517,6 +370,7 @@ const RequestButton: React.FC<RequestButtonProps> = ({
         tmdbId={tmdbId}
         show={showRequestModal}
         type={mediaType}
+        editRequest={editRequest ? activeRequest : undefined}
         onComplete={() => {
           onUpdate();
           setShowRequestModal(false);
@@ -527,6 +381,7 @@ const RequestButton: React.FC<RequestButtonProps> = ({
         tmdbId={tmdbId}
         show={showRequest4kModal}
         type={mediaType}
+        editRequest={editRequest ? active4kRequest : undefined}
         is4k
         onComplete={() => {
           onUpdate();
@@ -537,8 +392,8 @@ const RequestButton: React.FC<RequestButtonProps> = ({
       <ButtonWithDropdown
         text={
           <>
-            {buttonOne.svg ?? null}
-            {buttonOne.text}
+            {buttonOne.svg}
+            <span>{buttonOne.text}</span>
           </>
         }
         onClick={buttonOne.action}
@@ -551,7 +406,7 @@ const RequestButton: React.FC<RequestButtonProps> = ({
                 key={`request-option-${button.id}`}
               >
                 {button.svg}
-                {button.text}
+                <span>{button.text}</span>
               </ButtonWithDropdown.Item>
             ))
           : null}

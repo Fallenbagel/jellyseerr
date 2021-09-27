@@ -1,36 +1,37 @@
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import { Permission, useUser } from '../../../hooks/useUser';
+import useSWR from 'swr';
+import { UserSettingsNotificationsResponse } from '../../../../server/interfaces/api/userSettingsInterfaces';
+import { hasPermission, Permission } from '../../../../server/lib/permissions';
+import useSettings from '../../../hooks/useSettings';
+import { useUser } from '../../../hooks/useUser';
+import globalMessages from '../../../i18n/globalMessages';
 import Error from '../../../pages/_error';
+import Alert from '../../Common/Alert';
 import LoadingSpinner from '../../Common/LoadingSpinner';
 import PageTitle from '../../Common/PageTitle';
+import SettingsTabs, { SettingsRoute } from '../../Common/SettingsTabs';
 import ProfileHeader from '../ProfileHeader';
-import useSettings from '../../../hooks/useSettings';
 
 const messages = defineMessages({
-  settings: 'User Settings',
-  menuGeneralSettings: 'General Settings',
+  menuGeneralSettings: 'General',
   menuChangePass: 'Password',
   menuNotifications: 'Notifications',
   menuPermissions: 'Permissions',
+  unauthorizedDescription:
+    "You do not have permission to modify this user's settings.",
 });
-
-interface SettingsRoute {
-  text: string;
-  route: string;
-  regex: RegExp;
-  requiredPermission?: Permission | Permission[];
-  permissionType?: { type: 'and' | 'or' };
-}
 
 const UserSettings: React.FC = ({ children }) => {
   const router = useRouter();
   const settings = useSettings();
-  const { hasPermission } = useUser();
+  const { user: currentUser } = useUser();
   const { user, error } = useUser({ id: Number(router.query.userId) });
   const intl = useIntl();
+  const { data } = useSWR<UserSettingsNotificationsResponse>(
+    user ? `/api/v1/user/${user?.id}/settings/notifications` : null
+  );
 
   if (!user && !error) {
     return <LoadingSpinner />;
@@ -50,10 +51,23 @@ const UserSettings: React.FC = ({ children }) => {
       text: intl.formatMessage(messages.menuChangePass),
       route: '/settings/password',
       regex: /\/settings\/password/,
+      hidden:
+        (!settings.currentSettings.localLogin &&
+          !hasPermission(
+            Permission.MANAGE_SETTINGS,
+            currentUser?.permissions ?? 0
+          )) ||
+        (currentUser?.id !== 1 &&
+          currentUser?.id !== user?.id &&
+          hasPermission(Permission.ADMIN, user?.permissions ?? 0)),
     },
     {
       text: intl.formatMessage(messages.menuNotifications),
-      route: '/settings/notifications',
+      route: data?.emailEnabled
+        ? '/settings/notifications/email'
+        : data?.webPushEnabled
+        ? '/settings/notifications/webpush'
+        : '/settings/notifications/discord',
       regex: /\/settings\/notifications/,
     },
     {
@@ -61,118 +75,47 @@ const UserSettings: React.FC = ({ children }) => {
       route: '/settings/permissions',
       regex: /\/settings\/permissions/,
       requiredPermission: Permission.MANAGE_USERS,
+      hidden: currentUser?.id !== 1 && currentUser?.id === user.id,
     },
   ];
 
-  const activeLinkColor =
-    'border-indigo-600 text-indigo-500 focus:outline-none focus:text-indigo-500 focus:border-indigo-500';
-
-  const inactiveLinkColor =
-    'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300 focus:outline-none focus:text-gray-4700 focus:border-gray-300';
-
-  const SettingsLink: React.FC<{
-    route: string;
-    regex: RegExp;
-    isMobile?: boolean;
-  }> = ({ children, route, regex, isMobile = false }) => {
-    if (
-      route === '/settings/password' &&
-      !settings.currentSettings.localLogin &&
-      !hasPermission(Permission.MANAGE_SETTINGS)
-    ) {
-      return null;
-    }
-
-    const finalRoute = router.asPath.includes('/profile')
-      ? `/profile${route}`
-      : `/users/${user.id}${route}`;
-    if (isMobile) {
-      return <option value={finalRoute}>{children}</option>;
-    }
-
+  if (currentUser?.id !== 1 && user.id === 1) {
     return (
-      <Link href={finalRoute}>
-        <a
-          className={`whitespace-nowrap ml-8 first:ml-0 py-4 px-1 border-b-2 border-transparent font-medium text-sm leading-5 ${
-            router.pathname.match(regex) ? activeLinkColor : inactiveLinkColor
-          }`}
-          aria-current="page"
-        >
-          {children}
-        </a>
-      </Link>
+      <>
+        <PageTitle
+          title={[
+            intl.formatMessage(globalMessages.usersettings),
+            user.displayName,
+          ]}
+        />
+        <ProfileHeader user={user} isSettingsPage />
+        <div className="mt-6">
+          <Alert
+            title={intl.formatMessage(messages.unauthorizedDescription)}
+            type="error"
+          />
+        </div>
+      </>
     );
-  };
+  }
 
-  const currentRoute = settingsRoutes.find(
-    (route) => !!router.pathname.match(route.regex)
-  )?.route;
-
-  const finalRoute = router.asPath.includes('/profile')
-    ? `/profile${currentRoute}`
-    : `/users/${user.id}${currentRoute}`;
+  settingsRoutes.forEach((settingsRoute) => {
+    settingsRoute.route = router.asPath.includes('/profile')
+      ? `/profile${settingsRoute.route}`
+      : `/users/${user.id}${settingsRoute.route}`;
+  });
 
   return (
     <>
-      <PageTitle title={intl.formatMessage(messages.settings)} />
+      <PageTitle
+        title={[
+          intl.formatMessage(globalMessages.usersettings),
+          user.displayName,
+        ]}
+      />
       <ProfileHeader user={user} isSettingsPage />
       <div className="mt-6">
-        <div className="sm:hidden">
-          <select
-            onChange={(e) => {
-              router.push(e.target.value);
-            }}
-            onBlur={(e) => {
-              router.push(e.target.value);
-            }}
-            defaultValue={finalRoute}
-            aria-label="Selected tab"
-          >
-            {settingsRoutes
-              .filter((route) =>
-                route.requiredPermission
-                  ? hasPermission(
-                      route.requiredPermission,
-                      route.permissionType
-                    )
-                  : true
-              )
-              .map((route, index) => (
-                <SettingsLink
-                  route={route.route}
-                  regex={route.regex}
-                  isMobile
-                  key={`mobile-settings-link-${index}`}
-                >
-                  {route.text}
-                </SettingsLink>
-              ))}
-          </select>
-        </div>
-        <div className="hidden sm:block">
-          <div className="border-b border-gray-600">
-            <nav className="flex -mb-px">
-              {settingsRoutes
-                .filter((route) =>
-                  route.requiredPermission
-                    ? hasPermission(
-                        route.requiredPermission,
-                        route.permissionType
-                      )
-                    : true
-                )
-                .map((route, index) => (
-                  <SettingsLink
-                    route={route.route}
-                    regex={route.regex}
-                    key={`standard-settings-link-${index}`}
-                  >
-                    {route.text}
-                  </SettingsLink>
-                ))}
-            </nav>
-          </div>
-        </div>
+        <SettingsTabs settingsRoutes={settingsRoutes} />
       </div>
       <div className="mt-10 text-white">{children}</div>
     </>

@@ -1,17 +1,26 @@
-import React from 'react';
-import useSWR from 'swr';
-import LoadingSpinner from '../../Common/LoadingSpinner';
-import { FormattedRelativeTime, defineMessages, useIntl } from 'react-intl';
-import Button from '../../Common/Button';
-import Table from '../../Common/Table';
-import Spinner from '../../../assets/spinner.svg';
+import { PlayIcon, StopIcon, TrashIcon } from '@heroicons/react/outline';
 import axios from 'axios';
+import React from 'react';
+import {
+  defineMessages,
+  FormattedRelativeTime,
+  MessageDescriptor,
+  useIntl,
+} from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
-import Badge from '../../Common/Badge';
+import useSWR from 'swr';
 import { CacheItem } from '../../../../server/interfaces/api/settingsInterfaces';
+import Spinner from '../../../assets/spinner.svg';
+import globalMessages from '../../../i18n/globalMessages';
 import { formatBytes } from '../../../utils/numberHelpers';
+import Badge from '../../Common/Badge';
+import Button from '../../Common/Button';
+import LoadingSpinner from '../../Common/LoadingSpinner';
+import PageTitle from '../../Common/PageTitle';
+import Table from '../../Common/Table';
 
-const messages = defineMessages({
+const messages: { [messageName: string]: MessageDescriptor } = defineMessages({
+  jobsandcache: 'Jobs & Cache',
   jobs: 'Jobs',
   jobsDescription:
     'Overseerr performs certain maintenance tasks as regularly-scheduled jobs, but they can also be manually triggered below. Manually running a job will not alter its schedule.',
@@ -35,6 +44,13 @@ const messages = defineMessages({
   cacheksize: 'Key Size',
   cachevsize: 'Value Size',
   flushcache: 'Flush Cache',
+  unknownJob: 'Unknown Job',
+  'plex-recently-added-scan': 'Plex Recently Added Scan',
+  'plex-full-scan': 'Plex Full Library Scan',
+  'radarr-scan': 'Radarr Scan',
+  'sonarr-scan': 'Sonarr Scan',
+  'download-sync': 'Download Sync',
+  'download-sync-reset': 'Download Sync Reset',
 });
 
 interface Job {
@@ -66,7 +82,7 @@ const SettingsJobs: React.FC = () => {
     await axios.post(`/api/v1/settings/jobs/${job.id}/run`);
     addToast(
       intl.formatMessage(messages.jobstarted, {
-        jobname: job.name,
+        jobname: intl.formatMessage(messages[job.id] ?? messages.unknownJob),
       }),
       {
         appearance: 'success',
@@ -78,10 +94,15 @@ const SettingsJobs: React.FC = () => {
 
   const cancelJob = async (job: Job) => {
     await axios.post(`/api/v1/settings/jobs/${job.id}/cancel`);
-    addToast(intl.formatMessage(messages.jobcancelled, { jobname: job.name }), {
-      appearance: 'error',
-      autoDismiss: true,
-    });
+    addToast(
+      intl.formatMessage(messages.jobcancelled, {
+        jobname: intl.formatMessage(messages[job.id] ?? messages.unknownJob),
+      }),
+      {
+        appearance: 'error',
+        autoDismiss: true,
+      }
+    );
     revalidate();
   };
 
@@ -99,6 +120,12 @@ const SettingsJobs: React.FC = () => {
 
   return (
     <>
+      <PageTitle
+        title={[
+          intl.formatMessage(messages.jobsandcache),
+          intl.formatMessage(globalMessages.settings),
+        ]}
+      />
       <div className="mb-6">
         <h3 className="heading">{intl.formatMessage(messages.jobs)}</h3>
         <p className="description">
@@ -120,8 +147,12 @@ const SettingsJobs: React.FC = () => {
               <tr key={`job-list-${job.id}`}>
                 <Table.TD>
                   <div className="flex items-center text-sm leading-5 text-white">
-                    {job.running && <Spinner className="w-5 h-5 mr-2" />}
-                    <span>{job.name}</span>
+                    <span>
+                      {intl.formatMessage(
+                        messages[job.id] ?? messages.unknownJob
+                      )}
+                    </span>
+                    {job.running && <Spinner className="w-5 h-5 ml-2" />}
                   </div>
                 </Table.TD>
                 <Table.TD>
@@ -143,17 +174,20 @@ const SettingsJobs: React.FC = () => {
                           1000
                       )}
                       updateIntervalInSeconds={1}
+                      numeric="auto"
                     />
                   </div>
                 </Table.TD>
                 <Table.TD alignText="right">
                   {job.running ? (
                     <Button buttonType="danger" onClick={() => cancelJob(job)}>
-                      {intl.formatMessage(messages.canceljob)}
+                      <StopIcon />
+                      <span>{intl.formatMessage(messages.canceljob)}</span>
                     </Button>
                   ) : (
                     <Button buttonType="primary" onClick={() => runJob(job)}>
-                      {intl.formatMessage(messages.runnow)}
+                      <PlayIcon className="w-5 h-5 mr-1" />
+                      <span>{intl.formatMessage(messages.runnow)}</span>
                     </Button>
                   )}
                 </Table.TD>
@@ -192,7 +226,8 @@ const SettingsJobs: React.FC = () => {
                 <Table.TD>{formatBytes(cache.stats.vsize)}</Table.TD>
                 <Table.TD alignText="right">
                   <Button buttonType="danger" onClick={() => flushCache(cache)}>
-                    {intl.formatMessage(messages.flushcache)}
+                    <TrashIcon />
+                    <span>{intl.formatMessage(messages.flushcache)}</span>
                   </Button>
                 </Table.TD>
               </tr>

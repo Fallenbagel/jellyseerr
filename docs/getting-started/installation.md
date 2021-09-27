@@ -1,7 +1,7 @@
 # Installation
 
 {% hint style="danger" %}
-Overseerr is currently under very heavy, rapid development and things are likely to break often. We need all the help we can get to find bugs and get them fixed to hit a more stable release. If you would like to help test the bleeding edge, please use the image **`sctx/overseerr:develop`** instead!
+**Overseerr is currently in BETA.** If you would like to help test the bleeding edge, please use the image **`sctx/overseerr:develop`**!
 {% endhint %}
 
 {% hint style="info" %}
@@ -15,7 +15,8 @@ After running Overseerr for the first time, configure it by visiting the web UI 
 
 ```bash
 docker run -d \
-  -e LOG_LEVEL=info \
+  --name overseerr \
+  -e LOG_LEVEL=debug \
   -e TZ=Asia/Tokyo \
   -p 5055:5055 \
   -v /path/to/appdata/config:/app/config \
@@ -25,12 +26,37 @@ docker run -d \
 
 {% endtab %}
 
+{% tab title="Compose" %}
+
+**docker-compose.yml:**
+
+```yaml
+---
+version: '3'
+
+services:
+  overseerr:
+    image: sctx/overseerr:latest
+    container_name: overseerr
+    environment:
+      - LOG_LEVEL=debug
+      - TZ=Asia/Tokyo
+    ports:
+      - 5055:5055
+    volumes:
+      - /path/to/appdata/config:/app/config
+    restart: unless-stopped
+```
+
+{% endtab %}
+
 {% tab title="UID/GID" %}
 
 ```text
 docker run -d \
+  --name overseerr \
   --user=[ user | user:group | uid | uid:gid | user:gid | uid:group ] \
-  -e LOG_LEVEL=info \
+  -e LOG_LEVEL=debug \
   -e TZ=Asia/Tokyo \
   -p 5055:5055 \
   -v /path/to/appdata/config:/app/config \
@@ -42,7 +68,7 @@ docker run -d \
 
 {% tab title="Manual Update" %}
 
-```text
+```bash
 # Stop the Overseerr container
 docker stop overseerr
 
@@ -66,31 +92,56 @@ Use a 3rd party updating mechanism such as [Watchtower](https://github.com/conta
 ## Unraid
 
 1. Ensure you have the **Community Applications** plugin installed.
-2. Inside the **Communtiy Applications** app store, search for **Overseerr**.
+2. Inside the **Community Applications** app store, search for **Overseerr**.
 3. Click the **Install Button**.
 4. On the following **Add Container** screen, make changes to the **Host Port** and **Host Path 1**\(Appdata\) as needed.
 5. Click apply and access "Overseerr" at your `<ServerIP:HostPort>` in a web browser.
 
 ## Windows
 
-Please refer to the [docker for windows documentation](https://docs.docker.com/docker-for-windows/) for installation.
+Please refer to the [Docker Desktop for Windows user manual](https://docs.docker.com/docker-for-windows/) for details on how to install Docker on Windows. There is no need to install a Linux distro if using named volumes like in the example below.
 
 {% hint style="danger" %}
-**WSL2 will need to be installed to prevent DB corruption! Please see** [**Docker Desktop WSL 2 backend**](https://docs.docker.com/docker-for-windows/wsl/) **on how to enable WSL2. The command below will only work with WSL2 installed!**
+**WSL2 will need to be installed to prevent DB corruption!** Please see the [Docker Desktop WSL 2 backend documentation](https://docs.docker.com/docker-for-windows/wsl/) for instructions on how to enable WSL2. The commands below will only work with WSL2 installed!
 {% endhint %}
 
+First, create a volume to store the configuration data for Overseerr using using either the Docker CLI:
+
 ```bash
-docker run -d -e LOG_LEVEL=info -e TZ=Asia/Tokyo -p 5055:5055 -v "/your/path/here:/app/config" --restart unless-stopped sctx/overseerr
+docker volume create overseerr-data
 ```
 
+or the Docker Desktop app:
+
+1. Open the Docker Desktop app
+2. Head to the Volumes tab
+3. Click on the "New Volume" button near the top right
+4. Enter a name for the volume (example: `overseerr-data`) and hit "Create"
+
+Then, create and start the Overseerr container:
+
+```bash
+docker run -d -e LOG_LEVEL=debug -e TZ=Asia/Tokyo -p 5055:5055 -v "overseerr-data:/app/config" --restart unless-stopped sctx/overseerr
+```
+
+If using a named volume like above, you can safely ignore the warning about the `/app/config` folder being incorrectly mounted on the setup page.
+
+To access the files inside the volume created above, navigate to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes\overseerr-data\_data` using File Explorer.
+
 {% hint style="info" %}
-Docker on Windows works differently than it does on Linux; it uses a VM to run a stripped-down Linux and then runs docker within that. The volume mounts are exposed to the docker in this VM via SMB mounts. While this is fine for media, it is unacceptable for the `/app/config` directory because SMB does not support file locking. This will eventually corrupt your database which can lead to slow behavior and crashes. If you must run in docker on Windows, you should put the `/app/config` directory mount inside the VM and not on the Windows host. It's worth noting that this warning also extends to other containers which use SQLite databases.
+Docker on Windows works differently than it does on Linux; it runs Docker inside of a stripped-down Linux VM. Volume mounts are exposed to Docker inside this VM via SMB mounts. While this is fine for media, it is unacceptable for the `/app/config` directory because SMB does not support file locking. This will eventually corrupt your database, which can lead to slow behavior and crashes.
+
+**If you must run Docker on Windows, you should put the `/app/config` directory mount inside the VM and not on the Windows host.** (This also applies to other containers with SQLite databases.)
+
+Named volumes, like in the example commands above, are automatically mounted inside the VM.
 {% endhint %}
 
 ## Linux
 
 {% hint style="info" %}
-The [Overseerr snap](https://snapcraft.io/overseerr) is the only supported linux install method. Currently, the listening port cannot be changed. Port `5055` will need to be available on your host. To install snapd please refer to [Installing snapd](https://snapcraft.io/docs/installing-snapd).
+The [Overseerr snap](https://snapcraft.io/overseerr) is the only officially supported Linux install method aside from [Docker](#docker).
+
+Currently, the listening port cannot be changed, so port `5055` will need to be available on your host. To install `snapd`, please refer to the [Snapcraft documentation](https://snapcraft.io/docs/installing-snapd).
 {% endhint %}
 
 **To install:**
@@ -116,7 +167,7 @@ sudo snap install overseerr --edge
 This version can break any moment. Be prepared to troubleshoot any issues that arise!
 {% endhint %}
 
-## Third Party
+## Third-Party
 
 {% tabs %}
 
@@ -125,7 +176,7 @@ Portage overlay [GitHub Repository](https://github.com/chriscpritchard/overseerr
 
 This is now included in the list of [Gentoo repositories](https://overlays.gentoo.org/), so can be easily enabled with `eselect repository`
 
-Efforts will be made to keep up to date with the latest releases, however, this cannot be guaranteed.
+Efforts will be made to keep up-to-date with the latest releases; however, this cannot be guaranteed.
 
 **To enable:**
 To enable using `eselect repository`, run:

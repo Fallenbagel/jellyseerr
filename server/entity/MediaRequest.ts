@@ -1,27 +1,29 @@
+import { isEqual, truncate } from 'lodash';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  ManyToOne,
+  AfterInsert,
+  AfterRemove,
+  AfterUpdate,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
-  AfterUpdate,
-  AfterInsert,
+  Entity,
   getRepository,
+  ManyToOne,
   OneToMany,
-  AfterRemove,
+  PrimaryGeneratedColumn,
+  RelationCount,
+  UpdateDateColumn,
 } from 'typeorm';
-import { User } from './User';
-import Media from './Media';
-import { MediaStatus, MediaRequestStatus, MediaType } from '../constants/media';
-import { getSettings } from '../lib/settings';
+import RadarrAPI from '../api/servarr/radarr';
+import SonarrAPI, { SonarrSeries } from '../api/servarr/sonarr';
 import TheMovieDb from '../api/themoviedb';
 import { ANIME_KEYWORD_ID } from '../api/themoviedb/constants';
-import RadarrAPI from '../api/radarr';
-import logger from '../logger';
-import SeasonRequest from './SeasonRequest';
-import SonarrAPI, { SonarrSeries } from '../api/sonarr';
+import { MediaRequestStatus, MediaStatus, MediaType } from '../constants/media';
 import notificationManager, { Notification } from '../lib/notifications';
+import { getSettings } from '../lib/settings';
+import logger from '../logger';
+import Media from './Media';
+import SeasonRequest from './SeasonRequest';
+import { User } from './User';
 
 @Entity()
 export class MediaRequest {
@@ -60,6 +62,9 @@ export class MediaRequest {
   @Column({ type: 'varchar' })
   public type: MediaType;
 
+  @RelationCount((request: MediaRequest) => request.seasons)
+  public seasonCount: number;
+
   @OneToMany(() => SeasonRequest, (season) => season.request, {
     eager: true,
     cascade: true,
@@ -80,6 +85,37 @@ export class MediaRequest {
 
   @Column({ nullable: true })
   public languageProfileId: number;
+
+  @Column({
+    type: 'text',
+    nullable: true,
+    transformer: {
+      from: (value: string | null): number[] | null => {
+        if (value) {
+          if (value === 'none') {
+            return [];
+          }
+          return value.split(',').map((v) => Number(v));
+        }
+        return null;
+      },
+      to: (value: number[] | null): string | null => {
+        if (value) {
+          const finalValue = value.join(',');
+
+          // We want to keep the actual state of an "empty array" so we use
+          // the keyword "none" to track this.
+          if (!finalValue) {
+            return 'none';
+          }
+
+          return finalValue;
+        }
+        return null;
+      },
+    },
+  })
+  public tags?: number[];
 
   constructor(init?: Partial<MediaRequest>) {
     Object.assign(this, init);
@@ -106,10 +142,15 @@ export class MediaRequest {
       if (this.type === MediaType.MOVIE) {
         const movie = await tmdb.getMovie({ movieId: media.tmdbId });
         notificationManager.sendNotification(Notification.MEDIA_PENDING, {
-          subject: movie.title,
-          message: movie.overview,
+          subject: `${movie.title}${
+            movie.release_date ? ` (${movie.release_date.slice(0, 4)})` : ''
+          }`,
+          message: truncate(movie.overview, {
+            length: 500,
+            separator: /\s/,
+            omission: '…',
+          }),
           image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`,
-          notifyUser: this.requestedBy,
           media,
           request: this,
         });
@@ -118,10 +159,15 @@ export class MediaRequest {
       if (this.type === MediaType.TV) {
         const tv = await tmdb.getTvShow({ tvId: media.tmdbId });
         notificationManager.sendNotification(Notification.MEDIA_PENDING, {
-          subject: tv.name,
-          message: tv.overview,
+          subject: `${tv.name}${
+            tv.first_air_date ? ` (${tv.first_air_date.slice(0, 4)})` : ''
+          }`,
+          message: truncate(tv.overview, {
+            length: 500,
+            separator: /\s/,
+            omission: '…',
+          }),
           image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${tv.poster_path}`,
-          notifyUser: this.requestedBy,
           media,
           extra: [
             {
@@ -144,7 +190,7 @@ export class MediaRequest {
    * auto approved content
    */
   @AfterUpdate()
-  public async notifyApprovedOrDeclined(): Promise<void> {
+  public async notifyApprovedOrDeclined(autoApproved = false): Promise<void> {
     if (
       this.status === MediaRequestStatus.APPROVED ||
       this.status === MediaRequestStatus.DECLINED
@@ -171,13 +217,21 @@ export class MediaRequest {
         const movie = await tmdb.getMovie({ movieId: this.media.tmdbId });
         notificationManager.sendNotification(
           this.status === MediaRequestStatus.APPROVED
-            ? Notification.MEDIA_APPROVED
+            ? autoApproved
+              ? Notification.MEDIA_AUTO_APPROVED
+              : Notification.MEDIA_APPROVED
             : Notification.MEDIA_DECLINED,
           {
-            subject: movie.title,
-            message: movie.overview,
+            subject: `${movie.title}${
+              movie.release_date ? ` (${movie.release_date.slice(0, 4)})` : ''
+            }`,
+            message: truncate(movie.overview, {
+              length: 500,
+              separator: /\s/,
+              omission: '…',
+            }),
             image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`,
-            notifyUser: this.requestedBy,
+            notifyUser: autoApproved ? undefined : this.requestedBy,
             media,
             request: this,
           }
@@ -186,13 +240,21 @@ export class MediaRequest {
         const tv = await tmdb.getTvShow({ tvId: this.media.tmdbId });
         notificationManager.sendNotification(
           this.status === MediaRequestStatus.APPROVED
-            ? Notification.MEDIA_APPROVED
+            ? autoApproved
+              ? Notification.MEDIA_AUTO_APPROVED
+              : Notification.MEDIA_APPROVED
             : Notification.MEDIA_DECLINED,
           {
-            subject: tv.name,
-            message: tv.overview,
+            subject: `${tv.name}${
+              tv.first_air_date ? ` (${tv.first_air_date.slice(0, 4)})` : ''
+            }`,
+            message: truncate(tv.overview, {
+              length: 500,
+              separator: /\s/,
+              omission: '…',
+            }),
             image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${tv.poster_path}`,
-            notifyUser: this.requestedBy,
+            notifyUser: autoApproved ? undefined : this.requestedBy,
             media,
             extra: [
               {
@@ -211,13 +273,8 @@ export class MediaRequest {
 
   @AfterInsert()
   public async autoapprovalNotification(): Promise<void> {
-    const settings = getSettings().notifications;
-
-    if (
-      settings.autoapprovalEnabled &&
-      this.status === MediaRequestStatus.APPROVED
-    ) {
-      this.notifyApprovedOrDeclined();
+    if (this.status === MediaRequestStatus.APPROVED) {
+      this.notifyApprovedOrDeclined(true);
     }
   }
 
@@ -241,11 +298,7 @@ export class MediaRequest {
       media[this.is4k ? 'status4k' : 'status'] !==
         MediaStatus.PARTIALLY_AVAILABLE
     ) {
-      if (this.is4k) {
-        media.status4k = MediaStatus.PROCESSING;
-      } else {
-        media.status = MediaStatus.PROCESSING;
-      }
+      media[this.is4k ? 'status4k' : 'status'] = MediaStatus.PROCESSING;
       mediaRepository.save(media);
     }
 
@@ -253,11 +306,7 @@ export class MediaRequest {
       media.mediaType === MediaType.MOVIE &&
       this.status === MediaRequestStatus.DECLINED
     ) {
-      if (this.is4k) {
-        media.status4k = MediaStatus.UNKNOWN;
-      } else {
-        media.status = MediaStatus.UNKNOWN;
-      }
+      media[this.is4k ? 'status4k' : 'status'] = MediaStatus.UNKNOWN;
       mediaRepository.save(media);
     }
 
@@ -273,9 +322,9 @@ export class MediaRequest {
       media.requests.filter(
         (request) => request.status === MediaRequestStatus.PENDING
       ).length === 0 &&
-      media.status === MediaStatus.PENDING
+      media[this.is4k ? 'status4k' : 'status'] === MediaStatus.PENDING
     ) {
-      media.status = MediaStatus.UNKNOWN;
+      media[this.is4k ? 'status4k' : 'status'] = MediaStatus.UNKNOWN;
       mediaRepository.save(media);
     }
 
@@ -326,7 +375,7 @@ export class MediaRequest {
         const settings = getSettings();
         if (settings.radarr.length === 0 && !settings.radarr[0]) {
           logger.info(
-            'Skipped radarr request as there is no radarr configured',
+            'Skipped Radarr request as there is no Radarr server configured',
             { label: 'Media Request' }
           );
           return;
@@ -354,7 +403,9 @@ export class MediaRequest {
           logger.info(
             `There is no default ${
               this.is4k ? '4K ' : ''
-            }radarr configured. Did you set any of your Radarr servers as default?`,
+            }Radarr server configured. Did you set any of your ${
+              this.is4k ? '4K ' : ''
+            }Radarr servers as default?`,
             { label: 'Media Request' }
           );
           return;
@@ -362,6 +413,7 @@ export class MediaRequest {
 
         let rootFolder = radarrSettings.activeDirectory;
         let qualityProfile = radarrSettings.activeProfileId;
+        let tags = radarrSettings.tags;
 
         if (
           this.rootFolder &&
@@ -384,10 +436,18 @@ export class MediaRequest {
           });
         }
 
+        if (this.tags && !isEqual(this.tags, radarrSettings.tags)) {
+          tags = this.tags;
+          logger.info(`Request has override tags`, {
+            label: 'Media Request',
+            tagIds: tags,
+          });
+        }
+
         const tmdb = new TheMovieDb();
         const radarr = new RadarrAPI({
           apiKey: radarrSettings.apiKey,
-          url: RadarrAPI.buildRadarrUrl(radarrSettings, '/api/v3'),
+          url: RadarrAPI.buildUrl(radarrSettings, '/api/v3'),
         });
         const movie = await tmdb.getMovie({ movieId: this.media.tmdbId });
 
@@ -417,6 +477,7 @@ export class MediaRequest {
             tmdbId: movie.id,
             year: Number(movie.release_date.slice(0, 4)),
             monitored: true,
+            tags,
             searchNow: !radarrSettings.preventSearch,
           })
           .then(async (radarrMovie) => {
@@ -437,7 +498,7 @@ export class MediaRequest {
             await mediaRepository.save(media);
           })
           .catch(async () => {
-            media.status = MediaStatus.UNKNOWN;
+            media[this.is4k ? 'status4k' : 'status'] = MediaStatus.UNKNOWN;
             await mediaRepository.save(media);
             logger.warn(
               'Newly added movie request failed to add to Radarr, marking as unknown',
@@ -445,15 +506,16 @@ export class MediaRequest {
                 label: 'Media Request',
               }
             );
-            const userRepository = getRepository(User);
-            const admin = await userRepository.findOneOrFail({
-              select: ['id', 'plexToken'],
-              order: { id: 'ASC' },
-            });
+
             notificationManager.sendNotification(Notification.MEDIA_FAILED, {
-              subject: movie.title,
-              message: 'Movie failed to add to Radarr',
-              notifyUser: admin,
+              subject: `${movie.title}${
+                movie.release_date ? ` (${movie.release_date.slice(0, 4)})` : ''
+              }`,
+              message: truncate(movie.overview, {
+                length: 500,
+                separator: /\s/,
+                omission: '…',
+              }),
               media,
               image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`,
               request: this,
@@ -461,7 +523,7 @@ export class MediaRequest {
           });
         logger.info('Sent request to Radarr', { label: 'Media Request' });
       } catch (e) {
-        const errorMessage = `Request failed to send to radarr: ${e.message}`;
+        const errorMessage = `Request failed to send to Radarr: ${e.message}`;
         logger.error('Request failed to send to Radarr', {
           label: 'Media Request',
           errorMessage,
@@ -481,7 +543,7 @@ export class MediaRequest {
         const settings = getSettings();
         if (settings.sonarr.length === 0 && !settings.sonarr[0]) {
           logger.info(
-            'Skipped sonarr request as there is no sonarr configured',
+            'Skipped Sonarr request as there is no Sonarr server configured',
             { label: 'Media Request' }
           );
           return;
@@ -509,7 +571,9 @@ export class MediaRequest {
           logger.info(
             `There is no default ${
               this.is4k ? '4K ' : ''
-            }sonarr configured. Did you set any of your Sonarr servers as default?`,
+            }Sonarr server configured. Did you set any of your ${
+              this.is4k ? '4K ' : ''
+            }Sonarr servers as default?`,
             { label: 'Media Request' }
           );
           return;
@@ -533,7 +597,7 @@ export class MediaRequest {
         const tmdb = new TheMovieDb();
         const sonarr = new SonarrAPI({
           apiKey: sonarrSettings.apiKey,
-          url: SonarrAPI.buildSonarrUrl(sonarrSettings, '/api/v3'),
+          url: SonarrAPI.buildUrl(sonarrSettings, '/api/v3'),
         });
         const series = await tmdb.getTvShow({ tvId: media.tmdbId });
         const tvdbId = series.external_ids.tvdb_id ?? media.tvdbId;
@@ -570,6 +634,11 @@ export class MediaRequest {
             ? sonarrSettings.activeAnimeLanguageProfileId
             : sonarrSettings.activeLanguageProfileId;
 
+        let tags =
+          seriesType === 'anime'
+            ? sonarrSettings.animeTags
+            : sonarrSettings.tags;
+
         if (
           this.rootFolder &&
           this.rootFolder !== '' &&
@@ -601,6 +670,14 @@ export class MediaRequest {
           );
         }
 
+        if (this.tags && !isEqual(this.tags, tags)) {
+          tags = this.tags;
+          logger.info(`Request has override tags`, {
+            label: 'Media Request',
+            tagIds: tags,
+          });
+        }
+
         // Run this asynchronously so we don't wait for it on the UI side
         sonarr
           .addSeries({
@@ -612,6 +689,7 @@ export class MediaRequest {
             seasons: this.seasons.map((season) => season.seasonNumber),
             seasonFolder: sonarrSettings.enableSeasonFolders,
             seriesType,
+            tags,
             monitored: true,
             searchNow: !sonarrSettings.preventSearch,
           })
@@ -634,7 +712,7 @@ export class MediaRequest {
             await mediaRepository.save(media);
           })
           .catch(async () => {
-            media.status = MediaStatus.UNKNOWN;
+            media[this.is4k ? 'status4k' : 'status'] = MediaStatus.UNKNOWN;
             await mediaRepository.save(media);
             logger.warn(
               'Newly added series request failed to add to Sonarr, marking as unknown',
@@ -642,14 +720,18 @@ export class MediaRequest {
                 label: 'Media Request',
               }
             );
-            const userRepository = getRepository(User);
-            const admin = await userRepository.findOneOrFail({
-              order: { id: 'ASC' },
-            });
+
             notificationManager.sendNotification(Notification.MEDIA_FAILED, {
-              subject: series.name,
-              message: 'Series failed to add to Sonarr',
-              notifyUser: admin,
+              subject: `${series.name}${
+                series.first_air_date
+                  ? ` (${series.first_air_date.slice(0, 4)})`
+                  : ''
+              }`,
+              message: truncate(series.overview, {
+                length: 500,
+                separator: /\s/,
+                omission: '…',
+              }),
               image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${series.poster_path}`,
               media,
               extra: [
@@ -665,7 +747,7 @@ export class MediaRequest {
           });
         logger.info('Sent request to Sonarr', { label: 'Media Request' });
       } catch (e) {
-        const errorMessage = `Request failed to send to sonarr: ${e.message}`;
+        const errorMessage = `Request failed to send to Sonarr: ${e.message}`;
         logger.error('Request failed to send to Sonarr', {
           label: 'Media Request',
           errorMessage,

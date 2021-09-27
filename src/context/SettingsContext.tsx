@@ -1,7 +1,7 @@
 import React from 'react';
-import { PublicSettingsResponse } from '../../server/interfaces/api/settingsInterfaces';
 import useSWR from 'swr';
 import { MediaServerType } from '../../server/constants/server';
+import { PublicSettingsResponse } from '../../server/interfaces/api/settingsInterfaces';
 
 export interface SettingsContextProps {
   currentSettings: PublicSettingsResponse;
@@ -10,13 +10,20 @@ export interface SettingsContextProps {
 const defaultSettings = {
   initialized: false,
   applicationTitle: 'Overseerr',
+  applicationUrl: '',
   hideAvailable: false,
-  localLogin: false,
+  localLogin: true,
   movie4kEnabled: false,
   series4kEnabled: false,
   region: '',
   originalLanguage: '',
   mediaServerType: MediaServerType.NOT_CONFIGURED,
+  partialRequestsEnabled: true,
+  cacheImages: false,
+  vapidPublic: '',
+  enablePushRegistration: false,
+  locale: 'en',
+  emailEnabled: false,
 };
 
 export const SettingsContext = React.createContext<SettingsContextProps>({

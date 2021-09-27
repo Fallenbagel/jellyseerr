@@ -1,8 +1,9 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useState, useEffect, useRef } from 'react';
+import { XIcon } from '@heroicons/react/outline';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import Transition from '../../Transition';
 import { useLockBodyScroll } from '../../../hooks/useLockBodyScroll';
+import Transition from '../../Transition';
 
 interface SlideOverProps {
   show?: boolean;
@@ -43,7 +44,7 @@ const SlideOver: React.FC<SlideOverProps> = ({
     >
       {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
       <div
-        className={`z-50 fixed inset-0 overflow-hidden bg-opacity-50 bg-gray-800`}
+        className={`z-50 fixed inset-0 overflow-hidden bg-opacity-70 bg-gray-800`}
         onClick={() => onClose()}
         onKeyDown={(e) => {
           if (e.key === 'Escape') {
@@ -70,9 +71,9 @@ const SlideOver: React.FC<SlideOverProps> = ({
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex flex-col h-full overflow-y-scroll bg-gray-700 shadow-xl">
-                  <header className="px-4 py-6 space-y-1 bg-indigo-600">
+                  <header className="px-4 space-y-1 bg-indigo-600 slideover">
                     <div className="flex items-center justify-between space-x-3">
-                      <h2 className="text-lg font-medium leading-7 text-white">
+                      <h2 className="text-lg font-bold leading-7 text-white">
                         {title}
                       </h2>
                       <div className="flex items-center h-7">
@@ -81,20 +82,7 @@ const SlideOver: React.FC<SlideOverProps> = ({
                           className="text-indigo-200 transition duration-150 ease-in-out hover:text-white"
                           onClick={() => onClose()}
                         >
-                          <svg
-                            className="w-6 h-6"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
+                          <XIcon className="w-6 h-6" />
                         </button>
                       </div>
                     </div>

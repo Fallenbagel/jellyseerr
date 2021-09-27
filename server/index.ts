@@ -1,30 +1,33 @@
-import express, { Request, Response, NextFunction } from 'express';
-import next from 'next';
-import path from 'path';
-import { createConnection, getRepository } from 'typeorm';
-import routes from './routes';
-import bodyParser from 'body-parser';
+import { getClientIp } from '@supercharge/request-ip';
+import { TypeormStore } from 'connect-typeorm/out';
 import cookieParser from 'cookie-parser';
 import csurf from 'csurf';
-import session, { Store } from 'express-session';
-import { TypeormStore } from 'connect-typeorm/out';
-import YAML from 'yamljs';
-import swaggerUi from 'swagger-ui-express';
+import express, { NextFunction, Request, Response } from 'express';
 import * as OpenApiValidator from 'express-openapi-validator';
+import session, { Store } from 'express-session';
+import next from 'next';
+import path from 'path';
+import swaggerUi from 'swagger-ui-express';
+import { createConnection, getRepository } from 'typeorm';
+import YAML from 'yamljs';
+import PlexAPI from './api/plexapi';
 import { Session } from './entity/Session';
-import { getSettings } from './lib/settings';
-import logger from './logger';
+import { User } from './entity/User';
 import { startJobs } from './job/schedule';
 import notificationManager from './lib/notifications';
 import DiscordAgent from './lib/notifications/agents/discord';
 import EmailAgent from './lib/notifications/agents/email';
-import TelegramAgent from './lib/notifications/agents/telegram';
-import { getAppVersion } from './utils/appVersion';
-import SlackAgent from './lib/notifications/agents/slack';
-import PushoverAgent from './lib/notifications/agents/pushover';
-import WebhookAgent from './lib/notifications/agents/webhook';
-import { getClientIp } from '@supercharge/request-ip';
+import LunaSeaAgent from './lib/notifications/agents/lunasea';
 import PushbulletAgent from './lib/notifications/agents/pushbullet';
+import PushoverAgent from './lib/notifications/agents/pushover';
+import SlackAgent from './lib/notifications/agents/slack';
+import TelegramAgent from './lib/notifications/agents/telegram';
+import WebhookAgent from './lib/notifications/agents/webhook';
+import WebPushAgent from './lib/notifications/agents/webpush';
+import { getSettings } from './lib/settings';
+import logger from './logger';
+import routes from './routes';
+import { getAppVersion } from './utils/appVersion';
 
 const API_SPEC_PATH = path.join(__dirname, '../overseerr-api.yml');
 
@@ -48,15 +51,37 @@ app
     // Load Settings
     const settings = getSettings().load();
 
+    // Migrate library types
+    if (
+      settings.plex.libraries.length > 1 &&
+      !settings.plex.libraries[0].type
+    ) {
+      const userRepository = getRepository(User);
+      const admin = await userRepository.findOne({
+        select: ['id', 'plexToken'],
+        order: { id: 'ASC' },
+      });
+
+      if (admin) {
+        const plexapi = new PlexAPI({ plexToken: admin.plexToken });
+        await plexapi.syncLibraries();
+        logger.info('Migrating libraries to include media type', {
+          label: 'Settings',
+        });
+      }
+    }
+
     // Register Notification Agents
     notificationManager.registerAgents([
       new DiscordAgent(),
       new EmailAgent(),
+      new LunaSeaAgent(),
       new PushbulletAgent(),
       new PushoverAgent(),
       new SlackAgent(),
       new TelegramAgent(),
       new WebhookAgent(),
+      new WebPushAgent(),
     ]);
 
     // Start Jobs
@@ -67,9 +92,9 @@ app
       server.enable('trust proxy');
     }
     server.use(cookieParser());
-    server.use(bodyParser.json());
-    server.use(bodyParser.urlencoded({ extended: true }));
-    server.use((req, res, next) => {
+    server.use(express.json());
+    server.use(express.urlencoded({ extended: true }));
+    server.use((req, _res, next) => {
       try {
         const descriptor = Object.getOwnPropertyDescriptor(req, 'ip');
         if (descriptor?.writable === true) {

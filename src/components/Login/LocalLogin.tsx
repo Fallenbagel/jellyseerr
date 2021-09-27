@@ -1,18 +1,21 @@
+import { LoginIcon, SupportIcon } from '@heroicons/react/outline';
+import axios from 'axios';
+import { Field, Form, Formik } from 'formik';
+import Link from 'next/link';
 import React, { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import Button from '../Common/Button';
-import { Field, Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import axios from 'axios';
-import Link from 'next/link';
+import useSettings from '../../hooks/useSettings';
+import Button from '../Common/Button';
+import SensitiveInput from '../Common/SensitiveInput';
 
 const messages = defineMessages({
   email: 'Email Address',
   password: 'Password',
-  validationemailrequired: 'Not a valid email address',
-  validationpasswordrequired: 'Password required',
+  validationemailrequired: 'You must provide a valid email address',
+  validationpasswordrequired: 'You must provide a password',
   loginerror: 'Something went wrong while trying to sign in.',
-  signingin: 'Signing in…',
+  signingin: 'Signing In…',
   signin: 'Sign In',
   forgotpassword: 'Forgot Password?',
 });
@@ -23,6 +26,7 @@ interface LocalLoginProps {
 
 const LocalLogin: React.FC<LocalLoginProps> = ({ revalidate }) => {
   const intl = useIntl();
+  const settings = useSettings();
   const [loginError, setLoginError] = useState<string | null>(null);
 
   const LoginSchema = Yup.object().shape({
@@ -33,6 +37,10 @@ const LocalLogin: React.FC<LocalLoginProps> = ({ revalidate }) => {
       intl.formatMessage(messages.validationpasswordrequired)
     ),
   });
+
+  const passwordResetEnabled =
+    settings.currentSettings.applicationUrl &&
+    settings.currentSettings.emailEnabled;
 
   return (
     <Formik
@@ -58,17 +66,17 @@ const LocalLogin: React.FC<LocalLoginProps> = ({ revalidate }) => {
         return (
           <>
             <Form>
-              <div className="sm:border-t sm:border-gray-800">
+              <div>
                 <label htmlFor="email" className="text-label">
                   {intl.formatMessage(messages.email)}
                 </label>
                 <div className="mt-1 mb-2 sm:mt-0 sm:col-span-2">
-                  <div className="flex max-w-lg rounded-md shadow-sm">
+                  <div className="form-input-field">
                     <Field
                       id="email"
                       name="email"
                       type="text"
-                      placeholder="name@example.com"
+                      inputMode="email"
                     />
                   </div>
                   {errors.email && touched.email && (
@@ -79,12 +87,13 @@ const LocalLogin: React.FC<LocalLoginProps> = ({ revalidate }) => {
                   {intl.formatMessage(messages.password)}
                 </label>
                 <div className="mt-1 mb-2 sm:mt-0 sm:col-span-2">
-                  <div className="flex max-w-lg rounded-md shadow-sm">
-                    <Field
+                  <div className="form-input-field">
+                    <SensitiveInput
+                      as="field"
                       id="password"
                       name="password"
                       type="password"
-                      placeholder={intl.formatMessage(messages.password)}
+                      autoComplete="current-password"
                     />
                   </div>
                   {errors.password && touched.password && (
@@ -98,25 +107,33 @@ const LocalLogin: React.FC<LocalLoginProps> = ({ revalidate }) => {
                 )}
               </div>
               <div className="pt-5 mt-8 border-t border-gray-700">
-                <div className="flex justify-between">
-                  <span className="inline-flex rounded-md shadow-sm">
-                    <Link href="/resetpassword" passHref>
-                      <Button as="a" buttonType="ghost">
-                        {intl.formatMessage(messages.forgotpassword)}
-                      </Button>
-                    </Link>
-                  </span>
+                <div className="flex flex-row-reverse justify-between">
                   <span className="inline-flex rounded-md shadow-sm">
                     <Button
                       buttonType="primary"
                       type="submit"
                       disabled={isSubmitting || !isValid}
                     >
-                      {isSubmitting
-                        ? intl.formatMessage(messages.signingin)
-                        : intl.formatMessage(messages.signin)}
+                      <LoginIcon />
+                      <span>
+                        {isSubmitting
+                          ? intl.formatMessage(messages.signingin)
+                          : intl.formatMessage(messages.signin)}
+                      </span>
                     </Button>
                   </span>
+                  {passwordResetEnabled && (
+                    <span className="inline-flex rounded-md shadow-sm">
+                      <Link href="/resetpassword" passHref>
+                        <Button as="a" buttonType="ghost">
+                          <SupportIcon />
+                          <span>
+                            {intl.formatMessage(messages.forgotpassword)}
+                          </span>
+                        </Button>
+                      </Link>
+                    </span>
+                  )}
                 </div>
               </div>
             </Form>

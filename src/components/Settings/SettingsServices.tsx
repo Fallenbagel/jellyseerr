@@ -1,48 +1,58 @@
+import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/solid';
+import axios from 'axios';
 import React, { useState } from 'react';
-import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
-import Badge from '../Common/Badge';
-import Button from '../Common/Button';
-import useSWR from 'swr';
+import { defineMessages, useIntl } from 'react-intl';
+import useSWR, { mutate } from 'swr';
 import type {
   RadarrSettings,
   SonarrSettings,
 } from '../../../server/lib/settings';
-import LoadingSpinner from '../Common/LoadingSpinner';
-import RadarrModal from './RadarrModal';
-import Modal from '../Common/Modal';
-import Transition from '../Transition';
-import axios from 'axios';
-import SonarrModal from './SonarrModal';
+import RadarrLogo from '../../assets/services/radarr.svg';
+import SonarrLogo from '../../assets/services/sonarr.svg';
+import globalMessages from '../../i18n/globalMessages';
 import Alert from '../Common/Alert';
+import Badge from '../Common/Badge';
+import Button from '../Common/Button';
+import LoadingSpinner from '../Common/LoadingSpinner';
+import Modal from '../Common/Modal';
+import PageTitle from '../Common/PageTitle';
+import Transition from '../Transition';
+import RadarrModal from './RadarrModal';
+import SonarrModal from './SonarrModal';
 
 const messages = defineMessages({
+  services: 'Services',
   radarrsettings: 'Radarr Settings',
-  radarrSettingsDescription:
-    'Configure your Radarr connection below. You can have multiple Radarr configurations, but only two can be active as defaults at any time (one for standard HD and one for 4K). Administrators can override the server which is used for new requests.',
   sonarrsettings: 'Sonarr Settings',
-  sonarrSettingsDescription:
-    'Configure your Sonarr connection below. You can have multiple Sonarr configurations, but only two can be active as defaults at any time (one for standard HD and one for 4K). Administrators can override the server which is used for new requests.',
+  serviceSettingsDescription:
+    'Configure your {serverType} server(s) below. You can connect multiple {serverType} servers, but only two of them can be marked as defaults (one non-4K and one 4K). Administrators are able to override the server used to process new requests prior to approval.',
   deleteserverconfirm: 'Are you sure you want to delete this server?',
-  edit: 'Edit',
-  delete: 'Delete',
   ssl: 'SSL',
   default: 'Default',
   default4k: 'Default 4K',
+  is4k: '4K',
   address: 'Address',
   activeProfile: 'Active Profile',
   addradarr: 'Add Radarr Server',
   addsonarr: 'Add Sonarr Server',
-  nodefault: 'No default server selected!',
-  nodefaultdescription:
-    'At least one server must be marked as default before any requests will make it to your services.',
+  noDefaultServer:
+    'At least one {serverType} server must be marked as default in order for {mediaType} requests to be processed.',
+  noDefaultNon4kServer:
+    'If you only have a single {serverType} server for both non-4K and 4K content (or if you only download 4K content), your {serverType} server should <strong>NOT</strong> be designated as a 4K server.',
+  noDefault4kServer:
+    'A 4K {serverType} server must be marked as default in order to enable users to submit 4K {mediaType} requests.',
+  mediaTypeMovie: 'movie',
+  mediaTypeSeries: 'series',
 });
 
 interface ServerInstanceProps {
   name: string;
   isDefault?: boolean;
-  isDefault4K?: boolean;
-  address: string;
+  is4k?: boolean;
+  hostname: string;
+  port: number;
   isSSL?: boolean;
+  externalUrl?: string;
   profileName: string;
   isSonarr?: boolean;
   onEdit: () => void;
@@ -51,76 +61,88 @@ interface ServerInstanceProps {
 
 const ServerInstance: React.FC<ServerInstanceProps> = ({
   name,
-  address,
+  hostname,
+  port,
   profileName,
-  isDefault4K = false,
+  is4k = false,
   isDefault = false,
   isSSL = false,
   isSonarr = false,
+  externalUrl,
   onEdit,
   onDelete,
 }) => {
+  const intl = useIntl();
+
+  const internalUrl =
+    (isSSL ? 'https://' : 'http://') + hostname + ':' + String(port);
+  const serviceUrl = externalUrl ?? internalUrl;
+
   return (
-    <li className="col-span-1 bg-gray-700 rounded-lg shadow">
+    <li className="col-span-1 bg-gray-800 rounded-lg shadow ring-1 ring-gray-500">
       <div className="flex items-center justify-between w-full p-6 space-x-6">
         <div className="flex-1 truncate">
-          <div className="flex items-center mb-2 space-x-3">
+          <div className="flex items-center mb-2 space-x-2">
             <h3 className="font-medium leading-5 text-white truncate">
-              {name}
+              <a
+                href={serviceUrl}
+                className="transition duration-300 hover:underline hover:text-white"
+              >
+                {name}
+              </a>
             </h3>
-            {isDefault && (
-              <Badge>
-                <FormattedMessage {...messages.default} />
-              </Badge>
+            {isDefault && !is4k && (
+              <Badge>{intl.formatMessage(messages.default)}</Badge>
             )}
-            {isDefault4K && (
+            {isDefault && is4k && (
+              <Badge>{intl.formatMessage(messages.default4k)}</Badge>
+            )}
+            {!isDefault && is4k && (
               <Badge badgeType="warning">
-                <FormattedMessage {...messages.default4k} />
+                {intl.formatMessage(messages.is4k)}
               </Badge>
             )}
             {isSSL && (
               <Badge badgeType="success">
-                <FormattedMessage {...messages.ssl} />
+                {intl.formatMessage(messages.ssl)}
               </Badge>
             )}
           </div>
           <p className="mt-1 text-sm leading-5 text-gray-300 truncate">
             <span className="mr-2 font-bold">
-              <FormattedMessage {...messages.address} />
+              {intl.formatMessage(messages.address)}
             </span>
-            {address}
+            <a
+              href={internalUrl}
+              className="transition duration-300 hover:underline hover:text-white"
+            >
+              {internalUrl}
+            </a>
           </p>
           <p className="mt-1 text-sm leading-5 text-gray-300 truncate">
             <span className="mr-2 font-bold">
-              <FormattedMessage {...messages.activeProfile} />
-            </span>{' '}
+              {intl.formatMessage(messages.activeProfile)}
+            </span>
             {profileName}
           </p>
         </div>
-        <img
-          className="flex-shrink-0 w-10 h-10"
-          src={`/images/${isSonarr ? 'sonarr' : 'radarr'}_logo.svg`}
-          alt=""
-        />
+        <a href={serviceUrl} className="opacity-50 hover:opacity-100">
+          {isSonarr ? (
+            <SonarrLogo className="flex-shrink-0 w-10 h-10" />
+          ) : (
+            <RadarrLogo className="flex-shrink-0 w-10 h-10" />
+          )}
+        </a>
       </div>
-      <div className="border-t border-gray-800">
+      <div className="border-t border-gray-500">
         <div className="flex -mt-px">
-          <div className="flex flex-1 w-0 border-r border-gray-800">
+          <div className="flex flex-1 w-0 border-r border-gray-500">
             <button
               onClick={() => onEdit()}
               className="relative inline-flex items-center justify-center flex-1 w-0 py-4 -mr-px text-sm font-medium leading-5 text-gray-200 transition duration-150 ease-in-out border border-transparent rounded-bl-lg hover:text-white focus:outline-none focus:ring-blue focus:border-gray-500 focus:z-10"
             >
-              <svg
-                className="w-5 h-5"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-              </svg>
-              <span className="ml-3">
-                <FormattedMessage {...messages.edit} />
-              </span>
+              <PencilIcon className="w-5 h-5 mr-2" />
+              <span>{intl.formatMessage(globalMessages.edit)}</span>
             </button>
           </div>
           <div className="flex flex-1 w-0 -ml-px">
@@ -128,21 +150,8 @@ const ServerInstance: React.FC<ServerInstanceProps> = ({
               onClick={() => onDelete()}
               className="relative inline-flex items-center justify-center flex-1 w-0 py-4 text-sm font-medium leading-5 text-gray-200 transition duration-150 ease-in-out border border-transparent rounded-br-lg hover:text-white focus:outline-none focus:ring-blue focus:border-gray-500 focus:z-10"
             >
-              <svg
-                className="w-5 h-5"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="ml-3">
-                <FormattedMessage {...messages.delete} />
-              </span>
+              <TrashIcon className="w-5 h-5 mr-2" />
+              <span>{intl.formatMessage(globalMessages.delete)}</span>
             </button>
           </div>
         </div>
@@ -194,16 +203,25 @@ const SettingsServices: React.FC = () => {
     setDeleteServerModal({ open: false, serverId: null, type: 'radarr' });
     revalidateRadarr();
     revalidateSonarr();
+    mutate('/api/v1/settings/public');
   };
 
   return (
     <>
+      <PageTitle
+        title={[
+          intl.formatMessage(messages.services),
+          intl.formatMessage(globalMessages.settings),
+        ]}
+      />
       <div className="mb-6">
         <h3 className="heading">
-          <FormattedMessage {...messages.radarrsettings} />
+          {intl.formatMessage(messages.radarrsettings)}
         </h3>
         <p className="description">
-          <FormattedMessage {...messages.radarrSettingsDescription} />
+          {intl.formatMessage(messages.serviceSettingsDescription, {
+            serverType: 'Radarr',
+          })}
         </p>
       </div>
       {editRadarrModal.open && (
@@ -212,6 +230,7 @@ const SettingsServices: React.FC = () => {
           onClose={() => setEditRadarrModal({ open: false, radarr: null })}
           onSave={() => {
             revalidateRadarr();
+            mutate('/api/v1/settings/public');
             setEditRadarrModal({ open: false, radarr: null });
           }}
         />
@@ -222,6 +241,7 @@ const SettingsServices: React.FC = () => {
           onClose={() => setEditSonarrModal({ open: false, sonarr: null })}
           onSave={() => {
             revalidateSonarr();
+            mutate('/api/v1/settings/public');
             setEditSonarrModal({ open: false, sonarr: null });
           }}
         />
@@ -247,8 +267,9 @@ const SettingsServices: React.FC = () => {
             })
           }
           title="Delete Server"
+          iconSvg={<TrashIcon />}
         >
-          <FormattedMessage {...messages.deleteserverconfirm} />
+          {intl.formatMessage(messages.deleteserverconfirm)}
         </Modal>
       </Transition>
       <div className="section">
@@ -256,23 +277,53 @@ const SettingsServices: React.FC = () => {
         {radarrData && !radarrError && (
           <>
             {radarrData.length > 0 &&
-              !radarrData.some(
-                (radarr) => radarr.isDefault && !radarr.is4k
-              ) && (
-                <Alert title={intl.formatMessage(messages.nodefault)}>
-                  <p>{intl.formatMessage(messages.nodefaultdescription)}</p>
-                </Alert>
-              )}
-            <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              (!radarrData.some((radarr) => radarr.isDefault) ? (
+                <Alert
+                  title={intl.formatMessage(messages.noDefaultServer, {
+                    serverType: 'Radarr',
+                    mediaType: intl.formatMessage(messages.mediaTypeMovie),
+                  })}
+                />
+              ) : !radarrData.some(
+                  (radarr) => radarr.isDefault && !radarr.is4k
+                ) ? (
+                <Alert
+                  title={intl.formatMessage(messages.noDefaultNon4kServer, {
+                    serverType: 'Radarr',
+                    strong: function strong(msg) {
+                      return (
+                        <strong className="font-semibold text-yellow-100">
+                          {msg}
+                        </strong>
+                      );
+                    },
+                  })}
+                />
+              ) : (
+                radarrData.some((radarr) => radarr.is4k) &&
+                !radarrData.some(
+                  (radarr) => radarr.isDefault && radarr.is4k
+                ) && (
+                  <Alert
+                    title={intl.formatMessage(messages.noDefault4kServer, {
+                      serverType: 'Radarr',
+                      mediaType: intl.formatMessage(messages.mediaTypeMovie),
+                    })}
+                  />
+                )
+              ))}
+            <ul className="grid max-w-6xl grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
               {radarrData.map((radarr) => (
                 <ServerInstance
                   key={`radarr-config-${radarr.id}`}
                   name={radarr.name}
-                  address={radarr.hostname}
+                  hostname={radarr.hostname}
+                  port={radarr.port}
                   profileName={radarr.activeProfileName}
                   isSSL={radarr.useSsl}
-                  isDefault={radarr.isDefault && !radarr.is4k}
-                  isDefault4K={radarr.is4k && radarr.isDefault}
+                  isDefault={radarr.isDefault}
+                  is4k={radarr.is4k}
+                  externalUrl={radarr.externalUrl}
                   onEdit={() => setEditRadarrModal({ open: true, radarr })}
                   onDelete={() =>
                     setDeleteServerModal({
@@ -292,19 +343,8 @@ const SettingsServices: React.FC = () => {
                       setEditRadarrModal({ open: true, radarr: null })
                     }
                   >
-                    <svg
-                      className="w-5 h-5 mr-1"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <FormattedMessage {...messages.addradarr} />
+                    <PlusIcon />
+                    <span>{intl.formatMessage(messages.addradarr)}</span>
                   </Button>
                 </div>
               </li>
@@ -314,10 +354,12 @@ const SettingsServices: React.FC = () => {
       </div>
       <div className="mt-10 mb-6">
         <h3 className="heading">
-          <FormattedMessage {...messages.sonarrsettings} />
+          {intl.formatMessage(messages.sonarrsettings)}
         </h3>
         <p className="description">
-          <FormattedMessage {...messages.sonarrSettingsDescription} />
+          {intl.formatMessage(messages.serviceSettingsDescription, {
+            serverType: 'Sonarr',
+          })}
         </p>
       </div>
       <div className="section">
@@ -325,24 +367,54 @@ const SettingsServices: React.FC = () => {
         {sonarrData && !sonarrError && (
           <>
             {sonarrData.length > 0 &&
-              !sonarrData.some(
-                (sonarr) => sonarr.isDefault && !sonarr.is4k
-              ) && (
-                <Alert title={intl.formatMessage(messages.nodefault)}>
-                  <p>{intl.formatMessage(messages.nodefaultdescription)}</p>
-                </Alert>
-              )}
-            <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              (!sonarrData.some((sonarr) => sonarr.isDefault) ? (
+                <Alert
+                  title={intl.formatMessage(messages.noDefaultServer, {
+                    serverType: 'Sonarr',
+                    mediaType: intl.formatMessage(messages.mediaTypeSeries),
+                  })}
+                />
+              ) : !sonarrData.some(
+                  (sonarr) => sonarr.isDefault && !sonarr.is4k
+                ) ? (
+                <Alert
+                  title={intl.formatMessage(messages.noDefaultNon4kServer, {
+                    serverType: 'Sonarr',
+                    strong: function strong(msg) {
+                      return (
+                        <strong className="font-semibold text-yellow-100">
+                          {msg}
+                        </strong>
+                      );
+                    },
+                  })}
+                />
+              ) : (
+                sonarrData.some((sonarr) => sonarr.is4k) &&
+                !sonarrData.some(
+                  (sonarr) => sonarr.isDefault && sonarr.is4k
+                ) && (
+                  <Alert
+                    title={intl.formatMessage(messages.noDefault4kServer, {
+                      serverType: 'Sonarr',
+                      mediaType: intl.formatMessage(messages.mediaTypeSeries),
+                    })}
+                  />
+                )
+              ))}
+            <ul className="grid max-w-6xl grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
               {sonarrData.map((sonarr) => (
                 <ServerInstance
                   key={`sonarr-config-${sonarr.id}`}
                   name={sonarr.name}
-                  address={sonarr.hostname}
+                  hostname={sonarr.hostname}
+                  port={sonarr.port}
                   profileName={sonarr.activeProfileName}
                   isSSL={sonarr.useSsl}
                   isSonarr
-                  isDefault4K={sonarr.isDefault && sonarr.is4k}
-                  isDefault={sonarr.isDefault && !sonarr.is4k}
+                  isDefault={sonarr.isDefault}
+                  is4k={sonarr.is4k}
+                  externalUrl={sonarr.externalUrl}
                   onEdit={() => setEditSonarrModal({ open: true, sonarr })}
                   onDelete={() =>
                     setDeleteServerModal({
@@ -361,19 +433,8 @@ const SettingsServices: React.FC = () => {
                       setEditSonarrModal({ open: true, sonarr: null })
                     }
                   >
-                    <svg
-                      className="w-5 h-5 mr-1"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <FormattedMessage {...messages.addsonarr} />
+                    <PlusIcon />
+                    <span>{intl.formatMessage(messages.addsonarr)}</span>
                   </Button>
                 </div>
               </li>

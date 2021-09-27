@@ -1,23 +1,27 @@
-import {
-  Genre,
-  ProductionCompany,
-  Cast,
-  Crew,
-  mapAggregateCast,
-  mapCrew,
-  ExternalIds,
-  mapExternalIds,
-  Keyword,
-  mapVideos,
-} from './common';
 import type {
-  TmdbTvEpisodeResult,
-  TmdbTvSeasonResult,
-  TmdbTvDetails,
+  TmdbNetwork,
   TmdbSeasonWithEpisodes,
+  TmdbTvDetails,
+  TmdbTvEpisodeResult,
   TmdbTvRatingResult,
+  TmdbTvSeasonResult,
 } from '../api/themoviedb/interfaces';
 import type Media from '../entity/Media';
+import {
+  Cast,
+  Crew,
+  ExternalIds,
+  Genre,
+  Keyword,
+  mapAggregateCast,
+  mapCrew,
+  mapExternalIds,
+  mapVideos,
+  mapWatchProviders,
+  ProductionCompany,
+  TvNetwork,
+  WatchProviders,
+} from './common';
 import { Video } from './Movie';
 
 interface Episode {
@@ -77,7 +81,7 @@ export interface TvDetails {
   lastEpisodeToAir?: Episode;
   name: string;
   nextEpisodeToAir?: Episode;
-  networks: ProductionCompany[];
+  networks: TvNetwork[];
   numberOfEpisodes: number;
   numberOfSeasons: number;
   originCountry: string[];
@@ -89,6 +93,7 @@ export interface TvDetails {
   spokenLanguages: SpokenLanguage[];
   seasons: Season[];
   status: string;
+  tagline?: string;
   type: string;
   voteAverage: number;
   voteCount: number;
@@ -99,6 +104,7 @@ export interface TvDetails {
   externalIds: ExternalIds;
   keywords: Keyword[];
   mediaInfo?: Media;
+  watchProviders?: WatchProviders[];
 }
 
 const mapEpisodeResult = (episode: TmdbTvEpisodeResult): Episode => ({
@@ -139,6 +145,15 @@ export const mapSeasonWithEpisodes = (
   posterPath: season.poster_path,
 });
 
+export const mapNetwork = (network: TmdbNetwork): TvNetwork => ({
+  id: network.id,
+  name: network.name,
+  originCountry: network.origin_country,
+  headquarters: network.headquarters,
+  homepage: network.homepage,
+  logoPath: network.logo_path,
+});
+
 export const mapTvDetails = (
   show: TmdbTvDetails,
   media?: Media
@@ -157,17 +172,13 @@ export const mapTvDetails = (
   languages: show.languages,
   lastAirDate: show.last_air_date,
   name: show.name,
-  networks: show.networks.map((network) => ({
-    id: network.id,
-    name: network.name,
-    originCountry: network.origin_country,
-    logoPath: network.logo_path,
-  })),
+  networks: show.networks.map(mapNetwork),
   numberOfEpisodes: show.number_of_episodes,
   numberOfSeasons: show.number_of_seasons,
   originCountry: show.origin_country,
   originalLanguage: show.original_language,
   originalName: show.original_name,
+  tagline: show.tagline,
   overview: show.overview,
   popularity: show.popularity,
   productionCompanies: show.production_companies.map((company) => ({
@@ -205,4 +216,5 @@ export const mapTvDetails = (
     name: keyword.name,
   })),
   mediaInfo: media,
+  watchProviders: mapWatchProviders(show['watch/providers']?.results ?? {}),
 });

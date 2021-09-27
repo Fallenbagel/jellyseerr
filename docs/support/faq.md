@@ -1,46 +1,54 @@
 # Frequently Asked Questions (FAQ)
 
 {% hint style="info" %}
-If you can't find a solution here, please ask on [Discord](https://discord.gg/PkCWJSeCk7). Please do not post questions on the GitHub issues tracker.
+If you can't find the solution to your problem here, please read [Need Help?](./need-help.md) and reach out to us on [Discord](https://discord.gg/overseerr).
+
+_Please do not post questions or support requests on the GitHub issue tracker!_
 {% endhint %}
 
 ## General
 
-### I receive 409 or 400 errors when requesting a movie or TV series!
-
-**A:** Verify you are running Radarr and Sonarr v3. Overseerr was developed for v3 and is not currently backwards-compatible with previous versions.
-
 ### How do I keep Overseerr up-to-date?
 
-**A:** Use a 3rd party updating mechanism such as [Watchtower](https://github.com/containrrr/watchtower) or [Ouroboros](https://github.com/pyouroboros/ouroboros) to keep Overseerr up-to-date automatically.
+Use a third-party update mechanism (such as [Watchtower](https://github.com/containrrr/watchtower), [Ouroboros](https://github.com/pyouroboros/ouroboros), or [Pullio](https://hotio.dev/pullio)) to keep Overseerr up-to-date automatically.
 
-### How can I access Overseerr outside my home network?
+### How can I access Overseerr outside of my home network?
 
-**A:** The easy and least secure method is to forward an external port \(`5055`\) on your router to the internal port used by Overseerr \(default is TCP `5055`\). Visit [Port Forward](http://portforward.com/) for instructions for your particular router. You will then be able to access Overseerr via `http://EXTERNAL-IP-ADDRESS:5055`.
+The easiest but least secure method is to simply forward an external port (e.g., `5055`) on your router to the internal port used by Overseerr (default is TCP `5055`). Visit [Port Forward](http://portforward.com/) for instructions for your particular router. You would then be able to access Overseerr via `http://EXTERNAL-IP-ADDRESS:5055`.
 
-The more advanced and most preferred method \(and more secure if you use SSL\) is to set up a web server with NGINX/Apache, and use a reverse proxy to access Overseerr. You can lookup many guides on the internet to find out how to do this. There are several reverse proxy config examples located [here](../extending-overseerr/reverse-proxy-examples.md).
+A more advanced, user-friendly, and secure (if using SSL) method is to set up a web server and use a reverse proxy to access Overseerr. Please refer to our [reverse proxy examples](../extending-overseerr/reverse-proxy.md) for more information.
 
-The most secure method, but also the most inconvenient, is to set up a VPN tunnel to your home server, then you can access Overseerr as if it is on a local network via `http://LOCAL-IP-ADDRESS:5055`.
+The most secure method (but also the most inconvenient method) is to set up a VPN tunnel to your home server. You would then be able to access Overseerr as if you were on your local network, via `http://LOCAL-IP-ADDRESS:5055`.
 
 ### Overseerr is amazing! But it is not translated in my language yet! Can I help with translations?
 
-**A:** You sure can! We are using [Weblate](https://hosted.weblate.org/engage/overseerr/) for translations. If your language is not listed, please [open a feature request on GitHub](https://github.com/sct/overseerr/issues/new/choose).
+You sure can! We are using [Weblate](https://hosted.weblate.org/engage/overseerr/) for translations. If your language is not listed, please [open a feature request on GitHub](https://github.com/sct/overseerr/issues/new/choose).
 
 ### Where can I find the changelog?
 
-**A:** You can find the changelog in the **Settings &rarr; About** page in your Overseerr instance. You can also find it on [GitHub](https://github.com/sct/overseerr/releases).
+You can find the changelog for your version (stable/`latest`,s or `develop`) in the **Settings &rarr; About** page in your Overseerr instance.
 
-### Can I make 4K requests?
-
-**A:** Yes! When adding your 4K Sonarr/Radarr server in **Settings &rarr; Services**, tick the `4K Server` checkbox. You also need to tick the `Default Server` checkbox if it is the default server you would like to use for 4K content requests. (To enable 4K requests, there need to be default Sonarr/Radarr servers for both 4K content **and** non-4K content.)
+You can alternatively review the [stable release history](https://github.com/sct/overseerr/releases) and [`develop` branch commit history](https://github.com/sct/overseerr/commits/develop) on GitHub.
 
 ### Some media is missing from Overseerr that I know is in Plex!
 
-**A:** Overseerr supports the new Plex Movie, legacy Plex Movie, TheTVDB, and TMDb agents. Please verify that your library is using one of the agents previously listed. If you are changing agents, a full metadata refresh will need to be performed. Caution, this can take a long time depending on how many items you have in your movie library.
+Overseerr currently supports the following agents:
 
-**Troubleshooting Steps:**
+- New Plex Movie
+- Legacy Plex Movie
+- New Plex TV
+- Legacy Plex TV
+- TheTVDB
+- TMDb
+- [HAMA](https://github.com/ZeroQI/Hama.bundle)
 
-First, check the Overseerr logs for media items that are missing. The logs will contain an error as to why that item could not be matched. One example might be `errorMessage":"SQLITE_CONSTRAINT: NOT NULL`. This means that the TMDb ID is missing from the Plex XML for that item.
+Please verify that your library is using one of the agents previously listed.
+
+When changing agents, a full metadata refresh of your Plex library is required. (Caution: This can take a long time depending on the size of your library.)
+
+#### Troubleshooting Steps
+
+First, check the Overseerr logs for media items that are missing. The logs will contain an error as to why that item could not be matched.
 
 1. Verify that you are using one of the agents mentioned above.
 2. Refresh the metadata for just that item.
@@ -58,40 +66,56 @@ You can also perform the following to verify the media item has a GUID Overseerr
    3. TheTVDB agent `guid="com.plexapp.agents.thetvdb://78874/1/1"`
    4. Legacy Plex Movie agent `guid="com.plexapp.agents.imdb://tt0765446"`
 
-### TV series requests are failing after I updated Overseerr!
+### Where can I find the log files?
 
-**A:** Language profile support for Sonarr was added in [#860](https://github.com/sct/overseerr/pull/860), along with a new "Language Profile" required setting. If your TV series requests are failing, please make sure that you have a default language profile configured for each of your Sonarr servers in **Settings &rarr; Services**.
+Please see [these instructions on how to locate and share your logs](./need-help.md#how-can-i-share-my-logs).
 
-### Where can I find the logs?
+## Users
 
-**A:** The logs are located at `<Overseeerr-install-directory>/logs/overseerr.log`
+### Why can't I see all of my Plex users?
 
-## User management
-
-### Why can't I see all my Plex users?
-
-**A:** Navigate to your **User List** in Overseerr and click **Import Users from Plex** button. Don't forget to check the default user permissions in the **Settings &rarr; General Settings** page beforehand.
+Please see the [documentation for importing users from Plex](../using-overseerr/users/README.md#importing-users-from-plex).
 
 ### Can I create local users in Overseerr?
 
-**A:** Head to the **Users** page and hit **Create Local User**. Keep in mind that local user accounts need a valid email address.
+Yes! Please see the [documentation for creating local users](../using-overseerr/users/README.md#creating-local-users).
 
 ### Is is possible to set user roles in Overseerr?
 
-**A:** User roles can be set for each user on the **Users** page. The list of assignable permissions is one that is still growing, so if you have any suggestions, [make a feature request](https://github.com/sct/overseerr/issues/new/choose) on GitHub.
+Permissions can be configured for each user via the **User List** or their **User Settings** page. The list of assignable permissions is still growing, so if you have any suggestions, [submit a feature request](https://github.com/sct/overseerr/issues/new/choose)!
 
 ## Requests
 
+### I receive 409 or 400 errors when requesting a movie or TV series!
+
+Verify you are running v3 of both Radarr and Sonarr. Overseerr is not backwards-compatible with previous versions.
+
+### Can I allow users to submit 4K requests?
+
+Yes! If you keep both non-4K and 4K content in your media libraries, you can link separate 4K Radarr/Sonarr servers to allow users to submit 4K requests. (You must configure default non-4K **and** default 4K Radarr/Sonarr servers.)
+
+Please see the [Services documentation](../using-overseerr/settings/README.md#services) for details on how to configure your Radarr and/or Sonarr servers.
+
+Note that users must also have the **Request 4K**, **Request 4K Movies**, and/or **Request 4K Series** permissions in order to submit requests for 4K content.
+
 ### I approved a requested movie and Radarr didn't search for it!
 
-**A:** Check the minimum availability setting in your Radarr server. If a movie does not meet the minimum availability requirement, no search will be performed. Also verify that Radarr did not perform a search, by checking the Radarr logs. Lastly, verify that the item was not already being monitored by Radarr prior to approving the request.
+Check the minimum availability setting in your Radarr server. If a movie does not meet the minimum availability requirement, no search will be performed. Also verify that Radarr did not perform a search, by checking the Radarr logs. Lastly, verify that the item was not already being monitored by Radarr prior to approving the request.
 
 ### Help! My request still shows "requested" even though it is in Plex!
 
-**A:** See "[Some media is missing from Overseerr that I know is in Plex!](./faq.md#some-media-is-missing-from-overseerr-that-i-know-is-in-plex)" for troubleshooting steps.
+See "[Some media is missing from Overseerr that I know is in Plex!](#some-media-is-missing-from-overseerr-that-i-know-is-in-plex)" for troubleshooting steps.
+
+### Series requests keep failing!
+
+If you configured a URL base in Sonarr, make sure you have also configured the [URL Base](../using-overseerr/settings/README.md#url-base) setting for your Sonarr server in Overseerr.
+
+Also, check that you are using Sonarr v3 and that you have configured a default language profile in Overseerr.
+
+Language profile support for Sonarr was added in [v1.20.0](https://github.com/sct/overseerr/releases/tag/v1.20.0) along with a new, _required_ **Language Profile** setting. If series requests are failing, make sure that you have a default language profile configured for each of your Sonarr servers in **Settings &rarr; Services**.
 
 ## Notifications
 
 ### I am getting "Username and Password not accepted" when attempting to send email notifications via Gmail!
 
-**A:** If you have 2-Step Verification enabled on your account, you will need to create an [app password](https://support.google.com/mail/answer/185833).
+If you have 2-Step Verification enabled on your account, you will need to create an [app password](https://support.google.com/mail/answer/185833).

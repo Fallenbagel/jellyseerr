@@ -1,15 +1,14 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { useContext } from 'react';
+import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
 import { MovieDetails } from '../../../../server/models/Movie';
-import { LanguageContext } from '../../../context/LanguageContext';
 import Error from '../../../pages/_error';
 import Header from '../../Common/Header';
 import LoadingSpinner from '../../Common/LoadingSpinner';
-import PersonCard from '../../PersonCard';
 import PageTitle from '../../Common/PageTitle';
+import PersonCard from '../../PersonCard';
 
 const messages = defineMessages({
   fullcrew: 'Full Crew',
@@ -18,9 +17,8 @@ const messages = defineMessages({
 const MovieCrew: React.FC = () => {
   const router = useRouter();
   const intl = useIntl();
-  const { locale } = useContext(LanguageContext);
   const { data, error } = useSWR<MovieDetails>(
-    `/api/v1/movie/${router.query.movieId}?language=${locale}`
+    `/api/v1/movie/${router.query.movieId}`
   );
 
   if (!data && !error) {
@@ -45,7 +43,7 @@ const MovieCrew: React.FC = () => {
           {intl.formatMessage(messages.fullcrew)}
         </Header>
       </div>
-      <ul className="cardList">
+      <ul className="cards-vertical">
         {data?.credits.crew.map((person, index) => {
           return (
             <li key={`crew-${person.id}-${index}`}>

@@ -1,16 +1,16 @@
+import { DownloadIcon } from '@heroicons/react/outline';
 import React from 'react';
-import Alert from '../../Common/Alert';
-import Modal from '../../Common/Modal';
-import { SmallLoadingSpinner } from '../../Common/LoadingSpinner';
-import useSWR from 'swr';
 import { defineMessages, useIntl } from 'react-intl';
-import { SonarrSeries } from '../../../../server/api/sonarr';
+import useSWR from 'swr';
+import { SonarrSeries } from '../../../../server/api/servarr/sonarr';
+import globalMessages from '../../../i18n/globalMessages';
+import Alert from '../../Common/Alert';
+import { SmallLoadingSpinner } from '../../Common/LoadingSpinner';
+import Modal from '../../Common/Modal';
 
 const messages = defineMessages({
-  next: 'Next',
-  notvdbid: 'Manual Match Required',
   notvdbiddescription:
-    "We couldn't automatically match your request. Please select the correct match from the list below:",
+    "We couldn't automatically match your request. Please select the correct match from the list below.",
   nosummary: 'No summary for this title was found.',
 });
 
@@ -49,29 +49,15 @@ const SearchByNameModal: React.FC<SearchByNameModalProps> = ({
       onCancel={onCancel}
       onOk={closeModal}
       title={modalTitle}
-      okText={intl.formatMessage(messages.next)}
+      okText={intl.formatMessage(globalMessages.next)}
       okDisabled={!tvdbId}
       okButtonType="primary"
-      iconSvg={
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-          />
-        </svg>
-      }
+      iconSvg={<DownloadIcon />}
     >
-      <Alert title={intl.formatMessage(messages.notvdbid)} type="info">
-        {intl.formatMessage(messages.notvdbiddescription)}
-      </Alert>
+      <Alert
+        title={intl.formatMessage(messages.notvdbiddescription)}
+        type="info"
+      />
       {!data && !error && <SmallLoadingSpinner />}
       <div className="grid grid-cols-1 gap-4 pb-2 md:grid-cols-2">
         {data?.slice(0, 6).map((item) => (

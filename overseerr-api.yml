@@ -52,6 +52,12 @@ components:
         email:
           type: string
           example: 'hey@itsme.com'
+          readOnly: true
+        username:
+          type: string
+        plexUsername:
+          type: string
+          readOnly: true
         plexToken:
           type: string
           readOnly: true
@@ -80,13 +86,6 @@ components:
           type: number
           example: 5
           readOnly: true
-        requests:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/MediaRequest'
-        settings:
-          $ref: '#/components/schemas/UserSettings'
       required:
         - id
         - email
@@ -95,20 +94,21 @@ components:
     UserSettings:
       type: object
       properties:
-        enableNotifications:
-          type: boolean
-          default: true
-        discordId:
+        locale:
           type: string
-      required:
-        - enableNotifications
+        region:
+          type: string
+        originalLanguage:
+          type: string
     MainSettings:
       type: object
       properties:
         apiKey:
           type: string
-          example: 'anapikey'
           readOnly: true
+        appLanguage:
+          type: string
+          example: en
         applicationTitle:
           type: string
           example: Overseerr
@@ -124,12 +124,18 @@ components:
         hideAvailable:
           type: boolean
           example: false
+        partialRequestsEnabled:
+          type: boolean
+          example: false
         localLogin:
           type: boolean
           example: true
         mediaServerType:
           type: number
           example: 1
+        newPlexLogin:
+          type: boolean
+          example: true
         defaultPermissions:
           type: number
           example: 32
@@ -170,6 +176,9 @@ components:
           readOnly: true
           items:
             $ref: '#/components/schemas/PlexLibrary'
+        webAppUrl:
+          type: string
+          example: 'https://app.plex.tv/desktop'
       required:
         - name
         - machineId
@@ -199,9 +208,6 @@ components:
         message:
           type: string
           example: 'OK'
-        host:
-          type: string
-          example: '127-0-0-1.2ab6ce1a093d465e910def96cf4e4799.plex.direct'
       required:
         - protocol
         - address
@@ -438,7 +444,6 @@ components:
         activeLanguageProfileId:
           type: number
           example: 1
-          nullable: true
         activeAnimeProfileId:
           type: number
           nullable: true
@@ -448,6 +453,7 @@ components:
         activeAnimeProfileName:
           type: string
           example: 720p/1080p
+          nullable: true
         activeAnimeDirectory:
           type: string
           nullable: true
@@ -481,6 +487,15 @@ components:
         - is4k
         - enableSeasonFolders
         - isDefault
+    ServarrTag:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        label:
+          type: string
+          example: A Label
     PublicSettings:
       type: object
       properties:
@@ -609,6 +624,19 @@ components:
           type: string
           example: Adventure
     ProductionCompany:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        logoPath:
+          type: string
+          nullable: true
+        originCountry:
+          type: string
+        name:
+          type: string
+    Network:
       type: object
       properties:
         id:
@@ -787,6 +815,10 @@ components:
           $ref: '#/components/schemas/ExternalIds'
         mediaInfo:
           $ref: '#/components/schemas/MediaInfo'
+        watchProviders:
+          type: array
+          items:
+            $ref: '#/components/schemas/WatchProviders'
     Episode:
       type: object
       properties:
@@ -934,6 +966,8 @@ components:
             $ref: '#/components/schemas/Season'
         status:
           type: string
+        tagline:
+          type: string
         type:
           type: string
         voteAverage:
@@ -959,6 +993,10 @@ components:
             $ref: '#/components/schemas/Keyword'
         mediaInfo:
           $ref: '#/components/schemas/MediaInfo'
+        watchProviders:
+          type: array
+          items:
+            $ref: '#/components/schemas/WatchProviders'
     MediaRequest:
       type: object
       properties:
@@ -969,7 +1007,7 @@ components:
         status:
           type: number
           example: 0
-          description: Status of the request. 1 = PENDING APPROVAL, 2 = APPROVED, 3 = DECLINED, 4 = AVAILABLE
+          description: Status of the request. 1 = PENDING APPROVAL, 2 = APPROVED, 3 = DECLINED
           readOnly: true
         media:
           $ref: '#/components/schemas/MediaInfo'
@@ -1132,6 +1170,10 @@ components:
         options:
           type: object
           properties:
+            botUsername:
+              type: string
+            botAvatarUrl:
+              type: string
             webhookUrl:
               type: string
     SlackSettings:
@@ -1148,6 +1190,15 @@ components:
           properties:
             webhookUrl:
               type: string
+    WebPushSettings:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          example: false
+        types:
+          type: number
+          example: 2
     WebhookSettings:
       type: object
       properties:
@@ -1161,6 +1212,8 @@ components:
           type: object
           properties:
             webhookUrl:
+              type: string
+            authHeader:
               type: string
             jsonPayload:
               type: string
@@ -1176,10 +1229,14 @@ components:
         options:
           type: object
           properties:
+            botUsername:
+              type: string
             botAPI:
               type: string
             chatId:
               type: string
+            sendSilently:
+              type: boolean
     PushbulletSettings:
       type: object
       properties:
@@ -1210,17 +1267,22 @@ components:
               type: string
             userToken:
               type: string
-            priority:
-              type: number
-    NotificationSettings:
+    LunaSeaSettings:
       type: object
       properties:
         enabled:
           type: boolean
-          example: true
-        autoapprovalEnabled:
-          type: boolean
           example: false
+        types:
+          type: number
+          example: 2
+        options:
+          type: object
+          properties:
+            webhookUrl:
+              type: string
+            profileName:
+              type: string
     NotificationEmailSettings:
       type: object
       properties:
@@ -1246,6 +1308,12 @@ components:
               type: number
               example: 465
             secure:
+              type: boolean
+              example: false
+            ignoreTls:
+              type: boolean
+              example: false
+            requireTls:
               type: boolean
               example: false
             authUser:
@@ -1573,14 +1641,78 @@ components:
     UserSettingsNotifications:
       type: object
       properties:
-        enableNotifications:
+        notificationTypes:
+          $ref: '#/components/schemas/NotificationAgentTypes'
+        emailEnabled:
           type: boolean
-          default: true
+        pgpKey:
+          type: string
+          nullable: true
+        discordEnabled:
+          type: boolean
+        discordEnabledTypes:
+          type: number
+          nullable: true
         discordId:
           type: string
           nullable: true
-      required:
-        - enableNotifications
+        telegramEnabled:
+          type: boolean
+        telegramBotUsername:
+          type: string
+          nullable: true
+        telegramChatId:
+          type: string
+          nullable: true
+        telegramSendSilently:
+          type: boolean
+          nullable: true
+    NotificationAgentTypes:
+      type: object
+      properties:
+        discord:
+          type: number
+        email:
+          type: number
+        pushbullet:
+          type: number
+        pushover:
+          type: number
+        slack:
+          type: number
+        telegram:
+          type: number
+        webhook:
+          type: number
+        webpush:
+          type: number
+    WatchProviders:
+      type: array
+      items:
+        type: object
+        properties:
+          iso_3166_1:
+            type: string
+          link:
+            type: string
+          buy:
+            type: array
+            items:
+              $ref: '#/components/schemas/WatchProviderDetails'
+          flatrate:
+            items:
+              $ref: '#/components/schemas/WatchProviderDetails'
+    WatchProviderDetails:
+      type: object
+      properties:
+        displayPriority:
+          type: number
+        logoPath:
+          type: string
+        id:
+          type: number
+        name:
+          type: string
   securitySchemes:
     cookieAuth:
       type: apiKey
@@ -1870,13 +2002,13 @@ paths:
                   $ref: '#/components/schemas/PlexLibrary'
   /settings/plex/sync:
     get:
-      summary: Get status of full Plex library sync
-      description: Returns sync progress in a JSON array.
+      summary: Get status of full Plex library scan
+      description: Returns scan progress in a JSON array.
       tags:
         - settings
       responses:
         '200':
-          description: Status of Plex sync
+          description: Status of Plex scan
           content:
             application/json:
               schema:
@@ -1898,8 +2030,8 @@ paths:
                     items:
                       $ref: '#/components/schemas/PlexLibrary'
     post:
-      summary: Start full Plex library sync
-      description: Runs a full Plex library sync and returns the progress in a JSON array.
+      summary: Start full Plex library scan
+      description: Runs a full Plex library scan and returns the progress in a JSON array.
       tags:
         - settings
       requestBody:
@@ -1916,7 +2048,7 @@ paths:
                   example: false
       responses:
         '200':
-          description: Status of Plex sync
+          description: Status of Plex scan
           content:
             application/json:
               schema:
@@ -1939,8 +2071,8 @@ paths:
                       $ref: '#/components/schemas/PlexLibrary'
   /settings/plex/devices/servers:
     get:
-      summary: Gets the user's available plex servers
-      description: Returns a list of available plex servers and their connectivity state
+      summary: Gets the user's available Plex servers
+      description: Returns a list of available Plex servers and their connectivity state
       tags:
         - settings
       responses:
@@ -2396,37 +2528,54 @@ paths:
       responses:
         '204':
           description: 'Flushed cache'
-  /settings/notifications:
+  /settings/logs:
     get:
-      summary: Return notification settings
-      description: Returns current notification settings in a JSON object.
+      summary: Returns logs
+      description: Returns list of all log items and details
       tags:
         - settings
+      parameters:
+        - in: query
+          name: take
+          schema:
+            type: number
+            nullable: true
+            example: 25
+        - in: query
+          name: skip
+          schema:
+            type: number
+            nullable: true
+            example: 0
+        - in: query
+          name: filter
+          schema:
+            type: string
+            nullable: true
+            enum: [debug, info, warn, error]
+            default: debug
       responses:
         '200':
-          description: Returned settings
+          description: Server log returned
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotificationSettings'
-    post:
-      summary: Update notification settings
-      description: Updates notification settings with the provided values.
-      tags:
-        - settings
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NotificationSettings'
-      responses:
-        '200':
-          description: 'Values were sucessfully updated'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NotificationSettings'
+                type: array
+                items:
+                  type: object
+                  properties:
+                    label:
+                      type: string
+                      example: server
+                    level:
+                      type: string
+                      example: info
+                    message:
+                      type: string
+                      example: Server ready on port 5055
+                    timestamp:
+                      type: string
+                      example: 2020-12-15T16:20:00.069Z
   /settings/notifications/email:
     get:
       summary: Get email notification settings
@@ -2519,22 +2668,22 @@ paths:
       responses:
         '204':
           description: Test notification attempted
-  /settings/notifications/telegram:
+  /settings/notifications/lunasea:
     get:
-      summary: Get Telegram notification settings
-      description: Returns current Telegram notification settings in a JSON object.
+      summary: Get LunaSea notification settings
+      description: Returns current LunaSea notification settings in a JSON object.
       tags:
         - settings
       responses:
         '200':
-          description: Returned Telegram settings
+          description: Returned LunaSea settings
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TelegramSettings'
+                $ref: '#/components/schemas/LunaSeaSettings'
     post:
-      summary: Update Telegram notification settings
-      description: Update Telegram notification settings with the provided values.
+      summary: Update LunaSea notification settings
+      description: Updates LunaSea notification settings with the provided values.
       tags:
         - settings
       requestBody:
@@ -2542,18 +2691,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TelegramSettings'
+              $ref: '#/components/schemas/LunaSeaSettings'
       responses:
         '200':
           description: 'Values were sucessfully updated'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TelegramSettings'
-  /settings/notifications/telegram/test:
+                $ref: '#/components/schemas/LunaSeaSettings'
+  /settings/notifications/lunasea/test:
     post:
-      summary: Test Telegram settings
-      description: Sends a test notification to the Telegram agent.
+      summary: Test LunaSea settings
+      description: Sends a test notification to the LunaSea agent.
       tags:
         - settings
       requestBody:
@@ -2561,7 +2710,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TelegramSettings'
+              $ref: '#/components/schemas/LunaSeaSettings'
       responses:
         '204':
           description: Test notification attempted
@@ -2598,8 +2747,8 @@ paths:
                 $ref: '#/components/schemas/PushbulletSettings'
   /settings/notifications/pushbullet/test:
     post:
-      summary: Test Pushover settings
-      description: Sends a test notification to the Pushover agent.
+      summary: Test Pushbullet settings
+      description: Sends a test notification to the Pushbullet agent.
       tags:
         - settings
       requestBody:
@@ -2607,7 +2756,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PushoverSettings'
+              $ref: '#/components/schemas/PushbulletSettings'
       responses:
         '204':
           description: Test notification attempted
@@ -2703,6 +2852,98 @@ paths:
       responses:
         '204':
           description: Test notification attempted
+  /settings/notifications/telegram:
+    get:
+      summary: Get Telegram notification settings
+      description: Returns current Telegram notification settings in a JSON object.
+      tags:
+        - settings
+      responses:
+        '200':
+          description: Returned Telegram settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelegramSettings'
+    post:
+      summary: Update Telegram notification settings
+      description: Update Telegram notification settings with the provided values.
+      tags:
+        - settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelegramSettings'
+      responses:
+        '200':
+          description: 'Values were sucessfully updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelegramSettings'
+  /settings/notifications/telegram/test:
+    post:
+      summary: Test Telegram settings
+      description: Sends a test notification to the Telegram agent.
+      tags:
+        - settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelegramSettings'
+      responses:
+        '204':
+          description: Test notification attempted
+  /settings/notifications/webpush:
+    get:
+      summary: Get Web Push notification settings
+      description: Returns current Web Push notification settings in a JSON object.
+      tags:
+        - settings
+      responses:
+        '200':
+          description: Returned web push settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebPushSettings'
+    post:
+      summary: Update Web Push notification settings
+      description: Updates Web Push notification settings with the provided values.
+      tags:
+        - settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebPushSettings'
+      responses:
+        '200':
+          description: 'Values were sucessfully updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebPushSettings'
+  /settings/notifications/webpush/test:
+    post:
+      summary: Test Web Push settings
+      description: Sends a test notification to the Web Push agent.
+      tags:
+        - settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebPushSettings'
+      responses:
+        '204':
+          description: Test notification attempted
   /settings/notifications/webhook:
     get:
       summary: Get webhook notification settings
@@ -2745,7 +2986,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SlackSettings'
+              $ref: '#/components/schemas/WebhookSettings'
       responses:
         '204':
           description: Test notification attempted
@@ -3000,7 +3241,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: 'hey@itsme.com'
+                username:
+                  type: string
+                permissions:
+                  type: number
       responses:
         '201':
           description: The created user
@@ -3011,7 +3260,7 @@ paths:
     put:
       summary: Update batch of users
       description: |
-        Update users with given IDs with provided values in request `body.settings`. You cannot update users' plex tokens through this request.
+        Update users with given IDs with provided values in request `body.settings`. You cannot update users' Plex tokens through this request.
 
         Requires the `MANAGE_USERS` permission.
       tags:
@@ -3038,7 +3287,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
-
   /user/import-from-plex:
     post:
       summary: Import all users from Plex
@@ -3057,11 +3305,37 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
+  /user/registerPushSubscription:
+    post:
+      summary: Register a web push /user/registerPushSubscription
+      description: Registers a web push subscription for the logged-in user
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                endpoint:
+                  type: string
+                auth:
+                  type: string
+                p256dh:
+                  type: string
+              required:
+                - endpoint
+                - auth
+                - p256dh
+      responses:
+        '204':
+          description: Successfully registered push subscription
   /user/{userId}:
     get:
       summary: Get user by ID
       description: |
-        Retrieves user details in a JSON object.. Requires the `MANAGE_USERS` permission.
+        Retrieves user details in a JSON object. Requires the `MANAGE_USERS` permission.
       tags:
         - users
       parameters:
@@ -3161,6 +3435,63 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/MediaRequest'
+  /user/{userId}/quota:
+    get:
+      summary: Get quotas for a specific user
+      description: |
+        Returns quota details for a user in a JSON object. Requires `MANAGE_USERS` permission if viewing other users.
+      tags:
+        - users
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: User quota details in JSON
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  movie:
+                    type: object
+                    properties:
+                      days:
+                        type: number
+                        example: 7
+                      limit:
+                        type: number
+                        example: 10
+                      used:
+                        type: number
+                        example: 6
+                      remaining:
+                        type: number
+                        example: 4
+                      restricted:
+                        type: boolean
+                        example: false
+                  tv:
+                    type: object
+                    properties:
+                      days:
+                        type: number
+                        example: 7
+                      limit:
+                        type: number
+                        example: 10
+                      used:
+                        type: number
+                        example: 6
+                      remaining:
+                        type: number
+                        example: 4
+                      restricted:
+                        type: boolean
+                        example: false
   /user/{userId}/settings/main:
     get:
       summary: Get general settings for a user
@@ -3432,6 +3763,16 @@ paths:
           schema:
             type: string
             example: en
+        - in: query
+          name: genre
+          schema:
+            type: number
+            example: 18
+        - in: query
+          name: studio
+          schema:
+            type: number
+            example: 1
       responses:
         '200':
           description: Results
@@ -3449,6 +3790,147 @@ paths:
                   totalResults:
                     type: number
                     example: 200
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MovieResult'
+  /discover/movies/genre/{genreId}:
+    get:
+      summary: Discover movies by genre
+      description: Returns a list of movies based on the provided genre ID in a JSON object.
+      tags:
+        - search
+      parameters:
+        - in: path
+          name: genreId
+          required: true
+          schema:
+            type: string
+            example: '1'
+        - in: query
+          name: page
+          schema:
+            type: number
+            example: 1
+            default: 1
+        - in: query
+          name: language
+          schema:
+            type: string
+            example: en
+      responses:
+        '200':
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: number
+                    example: 1
+                  totalPages:
+                    type: number
+                    example: 20
+                  totalResults:
+                    type: number
+                    example: 200
+                  genre:
+                    $ref: '#/components/schemas/Genre'
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MovieResult'
+  /discover/movies/language/{language}:
+    get:
+      summary: Discover movies by original language
+      description: Returns a list of movies based on the provided ISO 639-1 language code in a JSON object.
+      tags:
+        - search
+      parameters:
+        - in: path
+          name: language
+          required: true
+          schema:
+            type: string
+            example: en
+        - in: query
+          name: page
+          schema:
+            type: number
+            example: 1
+            default: 1
+        - in: query
+          name: language
+          schema:
+            type: string
+            example: en
+      responses:
+        '200':
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: number
+                    example: 1
+                  totalPages:
+                    type: number
+                    example: 20
+                  totalResults:
+                    type: number
+                    example: 200
+                  language:
+                    $ref: '#/components/schemas/SpokenLanguage'
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MovieResult'
+  /discover/movies/studio/{studioId}:
+    get:
+      summary: Discover movies by studio
+      description: Returns a list of movies based on the provided studio ID in a JSON object.
+      tags:
+        - search
+      parameters:
+        - in: path
+          name: studioId
+          required: true
+          schema:
+            type: string
+            example: '1'
+        - in: query
+          name: page
+          schema:
+            type: number
+            example: 1
+            default: 1
+        - in: query
+          name: language
+          schema:
+            type: string
+            example: en
+      responses:
+        '200':
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: number
+                    example: 1
+                  totalPages:
+                    type: number
+                    example: 20
+                  totalResults:
+                    type: number
+                    example: 200
+                  studio:
+                    $ref: '#/components/schemas/ProductionCompany'
                   results:
                     type: array
                     items:
@@ -3510,6 +3992,16 @@ paths:
           schema:
             type: string
             example: en
+        - in: query
+          name: genre
+          schema:
+            type: number
+            example: 18
+        - in: query
+          name: network
+          schema:
+            type: number
+            example: 1
       responses:
         '200':
           description: Results
@@ -3527,6 +4019,147 @@ paths:
                   totalResults:
                     type: number
                     example: 200
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TvResult'
+  /discover/tv/language/{language}:
+    get:
+      summary: Discover TV shows by original language
+      description: Returns a list of TV shows based on the provided ISO 639-1 language code in a JSON object.
+      tags:
+        - search
+      parameters:
+        - in: path
+          name: language
+          required: true
+          schema:
+            type: string
+            example: en
+        - in: query
+          name: page
+          schema:
+            type: number
+            example: 1
+            default: 1
+        - in: query
+          name: language
+          schema:
+            type: string
+            example: en
+      responses:
+        '200':
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: number
+                    example: 1
+                  totalPages:
+                    type: number
+                    example: 20
+                  totalResults:
+                    type: number
+                    example: 200
+                  language:
+                    $ref: '#/components/schemas/SpokenLanguage'
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TvResult'
+  /discover/tv/genre/{genreId}:
+    get:
+      summary: Discover TV shows by genre
+      description: Returns a list of TV shows based on the provided genre ID in a JSON object.
+      tags:
+        - search
+      parameters:
+        - in: path
+          name: genreId
+          required: true
+          schema:
+            type: string
+            example: '1'
+        - in: query
+          name: page
+          schema:
+            type: number
+            example: 1
+            default: 1
+        - in: query
+          name: language
+          schema:
+            type: string
+            example: en
+      responses:
+        '200':
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: number
+                    example: 1
+                  totalPages:
+                    type: number
+                    example: 20
+                  totalResults:
+                    type: number
+                    example: 200
+                  genre:
+                    $ref: '#/components/schemas/Genre'
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TvResult'
+  /discover/tv/network/{networkId}:
+    get:
+      summary: Discover TV shows by network
+      description: Returns a list of TV shows based on the provided network ID in a JSON object.
+      tags:
+        - search
+      parameters:
+        - in: path
+          name: networkId
+          required: true
+          schema:
+            type: string
+            example: '1'
+        - in: query
+          name: page
+          schema:
+            type: number
+            example: 1
+            default: 1
+        - in: query
+          name: language
+          schema:
+            type: string
+            example: en
+      responses:
+        '200':
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: number
+                    example: 1
+                  totalPages:
+                    type: number
+                    example: 20
+                  totalResults:
+                    type: number
+                    example: 200
+                  network:
+                    $ref: '#/components/schemas/Network'
                   results:
                     type: array
                     items:
@@ -3657,11 +4290,77 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/MovieResult'
+  /discover/genreslider/movie:
+    get:
+      summary: Get genre slider data for movies
+      description: Returns a list of genres with backdrops attached
+      tags:
+        - search
+      parameters:
+        - in: query
+          name: language
+          schema:
+            type: string
+            example: en
+      responses:
+        '200':
+          description: Genre slider data returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: number
+                      example: 1
+                    backdrops:
+                      type: array
+                      items:
+                        type: string
+                    name:
+                      type: string
+                      example: Genre Name
+  /discover/genreslider/tv:
+    get:
+      summary: Get genre slider data for TV series
+      description: Returns a list of genres with backdrops attached
+      tags:
+        - search
+      parameters:
+        - in: query
+          name: language
+          schema:
+            type: string
+            example: en
+      responses:
+        '200':
+          description: Genre slider data returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: number
+                      example: 1
+                    backdrops:
+                      type: array
+                      items:
+                        type: string
+                    name:
+                      type: string
+                      example: Genre Name
   /request:
     get:
       summary: Get all requests
       description: |
         Returns all requests if the user has the `ADMIN` or `MANAGE_REQUESTS` permissions. Otherwise, only the logged-in user's requests are returned.
+
+        If the `requestedBy` parameter is specified, only requests from that particular user ID will be returned.
       tags:
         - request
       parameters:
@@ -3689,6 +4388,12 @@ paths:
             type: string
             enum: [added, modified]
             default: added
+        - in: query
+          name: requestedBy
+          schema:
+            type: number
+            nullable: true
+            example: 1
       responses:
         '200':
           description: Requests returned
@@ -3743,6 +4448,9 @@ paths:
                   type: string
                 languageProfileId:
                   type: number
+                userId:
+                  type: number
+                  nullable: true
               required:
                 - mediaType
                 - mediaId
@@ -4100,7 +4808,7 @@ paths:
           name: language
           schema:
             type: string
-            example: en-US
+            example: en
       responses:
         '200':
           description: TV details
@@ -4298,7 +5006,7 @@ paths:
                     type: number
   /media:
     get:
-      summary: Return media
+      summary: Get media
       description: Returns all media (can be filtered and limited) in a JSON object.
       tags:
         - media
@@ -4535,14 +5243,16 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  iso_3166_1:
-                    type: string
-                    example: US
-                  english_name:
-                    type: string
-                    example: United States of America
+                type: array
+                items:
+                  type: object
+                  properties:
+                    iso_3166_1:
+                      type: string
+                      example: US
+                    english_name:
+                      type: string
+                      example: United States of America
   /languages:
     get:
       summary: Languages supported by TMDb
@@ -4555,17 +5265,115 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  iso_639_1:
-                    type: string
-                    example: en
-                  english_name:
-                    type: string
-                    example: English
-                  name:
-                    type: string
-                    example: English
+                type: array
+                items:
+                  type: object
+                  properties:
+                    iso_639_1:
+                      type: string
+                      example: en
+                    english_name:
+                      type: string
+                      example: English
+                    name:
+                      type: string
+                      example: English
+  /studio/{studioId}:
+    get:
+      summary: Get movie studio details
+      description: Returns movie studio details in a JSON object.
+      tags:
+        - tmdb
+      parameters:
+        - in: path
+          name: studioId
+          required: true
+          schema:
+            type: number
+            example: 2
+      responses:
+        '200':
+          description: Movie studio details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductionCompany'
+  /network/{networkId}:
+    get:
+      summary: Get TV network details
+      description: Returns TV network details in a JSON object.
+      tags:
+        - tmdb
+      parameters:
+        - in: path
+          name: networkId
+          required: true
+          schema:
+            type: number
+            example: 1
+      responses:
+        '200':
+          description: TV network details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductionCompany'
+  /genres/movie:
+    get:
+      summary: Get list of official TMDb movie genres
+      description: Returns a list of genres in a JSON array.
+      tags:
+        - tmdb
+      parameters:
+        - in: query
+          name: language
+          schema:
+            type: string
+            example: en
+      responses:
+        '200':
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: number
+                      example: 10751
+                    name:
+                      type: string
+                      example: Family
+  /genres/tv:
+    get:
+      summary: Get list of official TMDb movie genres
+      description: Returns a list of genres in a JSON array.
+      tags:
+        - tmdb
+      parameters:
+        - in: query
+          name: language
+          schema:
+            type: string
+            example: en
+      responses:
+        '200':
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: number
+                      example: 18
+                    name:
+                      type: string
+                      example: Drama
 
 security:
   - cookieAuth: []

@@ -1,19 +1,22 @@
 import type {
   TmdbMovieDetails,
   TmdbMovieReleaseResult,
+  TmdbProductionCompany,
 } from '../api/themoviedb/interfaces';
+import Media from '../entity/Media';
 import {
-  ProductionCompany,
-  Genre,
   Cast,
   Crew,
+  ExternalIds,
+  Genre,
   mapCast,
   mapCrew,
-  ExternalIds,
   mapExternalIds,
   mapVideos,
+  mapWatchProviders,
+  ProductionCompany,
+  WatchProviders,
 } from './common';
-import Media from '../entity/Media';
 
 export interface Video {
   url?: string;
@@ -77,7 +80,20 @@ export interface MovieDetails {
   mediaInfo?: Media;
   externalIds: ExternalIds;
   plexUrl?: string;
+  watchProviders?: WatchProviders[];
 }
+
+export const mapProductionCompany = (
+  company: TmdbProductionCompany
+): ProductionCompany => ({
+  id: company.id,
+  name: company.name,
+  originCountry: company.origin_country,
+  description: company.description,
+  headquarters: company.headquarters,
+  homepage: company.homepage,
+  logoPath: company.logo_path,
+});
 
 export const mapMovieDetails = (
   movie: TmdbMovieDetails,
@@ -91,12 +107,7 @@ export const mapMovieDetails = (
   originalLanguage: movie.original_language,
   originalTitle: movie.original_title,
   popularity: movie.popularity,
-  productionCompanies: movie.production_companies.map((company) => ({
-    id: company.id,
-    logoPath: company.logo_path,
-    originCountry: company.origin_country,
-    name: company.name,
-  })),
+  productionCompanies: movie.production_companies.map(mapProductionCompany),
   productionCountries: movie.production_countries,
   releaseDate: movie.release_date,
   releases: movie.release_dates,
@@ -128,4 +139,5 @@ export const mapMovieDetails = (
     : undefined,
   externalIds: mapExternalIds(movie.external_ids),
   mediaInfo: media,
+  watchProviders: mapWatchProviders(movie['watch/providers']?.results ?? {}),
 });

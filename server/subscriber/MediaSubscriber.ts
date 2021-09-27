@@ -1,3 +1,4 @@
+import { truncate } from 'lodash';
 import {
   EntitySubscriberInterface,
   EventSubscriber,
@@ -31,8 +32,14 @@ export class MediaSubscriber implements EntitySubscriberInterface {
           relatedRequests.forEach((request) => {
             notificationManager.sendNotification(Notification.MEDIA_AVAILABLE, {
               notifyUser: request.requestedBy,
-              subject: movie.title,
-              message: movie.overview,
+              subject: `${movie.title}${
+                movie.release_date ? ` (${movie.release_date.slice(0, 4)})` : ''
+              }`,
+              message: truncate(movie.overview, {
+                length: 500,
+                separator: /\s/,
+                omission: '…',
+              }),
               media: entity,
               image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`,
               request: request,
@@ -84,8 +91,14 @@ export class MediaSubscriber implements EntitySubscriberInterface {
           );
           const tv = await tmdb.getTvShow({ tvId: entity.tmdbId });
           notificationManager.sendNotification(Notification.MEDIA_AVAILABLE, {
-            subject: tv.name,
-            message: tv.overview,
+            subject: `${tv.name}${
+              tv.first_air_date ? ` (${tv.first_air_date.slice(0, 4)})` : ''
+            }`,
+            message: truncate(tv.overview, {
+              length: 500,
+              separator: /\s/,
+              omission: '…',
+            }),
             notifyUser: request.requestedBy,
             image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${tv.poster_path}`,
             media: entity,
@@ -131,7 +144,7 @@ export class MediaSubscriber implements EntitySubscriberInterface {
       event.entity.mediaType === MediaType.MOVIE &&
       event.entity.status === MediaStatus.AVAILABLE
     ) {
-      this.notifyAvailableMovie(event.entity, event.databaseEntity);
+      this.notifyAvailableMovie(event.entity as Media, event.databaseEntity);
     }
 
     if (
@@ -139,21 +152,21 @@ export class MediaSubscriber implements EntitySubscriberInterface {
       (event.entity.status === MediaStatus.AVAILABLE ||
         event.entity.status === MediaStatus.PARTIALLY_AVAILABLE)
     ) {
-      this.notifyAvailableSeries(event.entity, event.databaseEntity);
+      this.notifyAvailableSeries(event.entity as Media, event.databaseEntity);
     }
 
     if (
       event.entity.status === MediaStatus.AVAILABLE &&
       event.databaseEntity.status === MediaStatus.PENDING
     ) {
-      this.updateChildRequestStatus(event.entity, false);
+      this.updateChildRequestStatus(event.entity as Media, false);
     }
 
     if (
       event.entity.status4k === MediaStatus.AVAILABLE &&
       event.databaseEntity.status4k === MediaStatus.PENDING
     ) {
-      this.updateChildRequestStatus(event.entity, true);
+      this.updateChildRequestStatus(event.entity as Media, true);
     }
   }
 }

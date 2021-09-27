@@ -1,5 +1,5 @@
 import NodePlexAPI from 'plex-api';
-import { getSettings, PlexSettings } from '../lib/settings';
+import { getSettings, Library, PlexSettings } from '../lib/settings';
 
 export interface PlexLibraryItem {
   ratingKey: string;
@@ -11,11 +11,16 @@ export interface PlexLibraryItem {
   grandparentGuid?: string;
   addedAt: number;
   updatedAt: number;
+  Guid?: {
+    id: string;
+  }[];
   type: 'movie' | 'show' | 'season' | 'episode';
+  Media: Media[];
 }
 
 interface PlexLibraryResponse {
   MediaContainer: {
+    totalSize: number;
     Metadata: PlexLibraryItem[];
   };
 }
@@ -118,7 +123,7 @@ class PlexAPI {
       options: {
         identifier: settings.clientId,
         product: 'Overseerr',
-        deviceName: settings.main.applicationTitle,
+        deviceName: 'Overseerr',
         platform: 'Overseerr',
       },
     });
@@ -137,12 +142,50 @@ class PlexAPI {
     return response.MediaContainer.Directory;
   }
 
-  public async getLibraryContents(id: string): Promise<PlexLibraryItem[]> {
-    const response = await this.plexClient.query<PlexLibraryResponse>(
-      `/library/sections/${id}/all`
-    );
+  public async syncLibraries(): Promise<void> {
+    const settings = getSettings();
 
-    return response.MediaContainer.Metadata;
+    const libraries = await this.getLibraries();
+
+    const newLibraries: Library[] = libraries
+      // Remove libraries that are not movie or show
+      .filter((library) => library.type === 'movie' || library.type === 'show')
+      // Remove libraries that do not have a metadata agent set (usually personal video libraries)
+      .filter((library) => library.agent !== 'com.plexapp.agents.none')
+      .map((library) => {
+        const existing = settings.plex.libraries.find(
+          (l) => l.id === library.key && l.name === library.title
+        );
+
+        return {
+          id: library.key,
+          name: library.title,
+          enabled: existing?.enabled ?? false,
+          type: library.type,
+          lastScan: existing?.lastScan,
+        };
+      });
+
+    settings.plex.libraries = newLibraries;
+    settings.save();
+  }
+
+  public async getLibraryContents(
+    id: string,
+    { offset = 0, size = 50 }: { offset?: number; size?: number } = {}
+  ): Promise<{ totalSize: number; items: PlexLibraryItem[] }> {
+    const response = await this.plexClient.query<PlexLibraryResponse>({
+      uri: `/library/sections/${id}/all?includeGuids=1`,
+      extraHeaders: {
+        'X-Plex-Container-Start': `${offset}`,
+        'X-Plex-Container-Size': `${size}`,
+      },
+    });
+
+    return {
+      totalSize: response.MediaContainer.totalSize,
+      items: response.MediaContainer.Metadata ?? [],
+    };
   }
 
   public async getMetadata(
@@ -166,10 +209,17 @@ class PlexAPI {
     return response.MediaContainer.Metadata;
   }
 
-  public async getRecentlyAdded(id: string): Promise<PlexLibraryItem[]> {
-    const response = await this.plexClient.query<PlexLibraryResponse>(
-      `/library/sections/${id}/recentlyAdded`
-    );
+  public async getRecentlyAdded(
+    id: string,
+    options: { addedAt: number } = {
+      addedAt: Date.now() - 1000 * 60 * 60,
+    }
+  ): Promise<PlexLibraryItem[]> {
+    const response = await this.plexClient.query<PlexLibraryResponse>({
+      uri: `/library/sections/${id}/all?sort=addedAt%3Adesc&addedAt>>=${Math.floor(
+        options.addedAt / 1000
+      )}`,
+    });
 
     return response.MediaContainer.Metadata;
   }

@@ -1,3 +1,4 @@
+import { SaveIcon } from '@heroicons/react/outline';
 import axios from 'axios';
 import { Form, Formik } from 'formik';
 import { useRouter } from 'next/router';
@@ -6,20 +7,19 @@ import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import { useUser } from '../../../../hooks/useUser';
+import globalMessages from '../../../../i18n/globalMessages';
 import Error from '../../../../pages/_error';
+import Alert from '../../../Common/Alert';
 import Button from '../../../Common/Button';
 import LoadingSpinner from '../../../Common/LoadingSpinner';
+import PageTitle from '../../../Common/PageTitle';
 import PermissionEdit from '../../../PermissionEdit';
 
 const messages = defineMessages({
-  displayName: 'Display Name',
-  save: 'Save Changes',
-  saving: 'Saving…',
-  plexuser: 'Plex User',
-  localuser: 'Local User',
-  toastSettingsSuccess: 'Settings successfully saved!',
+  toastSettingsSuccess: 'Permissions saved successfully!',
   toastSettingsFailure: 'Something went wrong while saving settings.',
   permissions: 'Permissions',
+  unauthorizedDescription: 'You cannot modify your own permissions.',
 });
 
 const UserPermissions: React.FC = () => {
@@ -40,8 +40,31 @@ const UserPermissions: React.FC = () => {
     return <Error statusCode={500} />;
   }
 
+  if (currentUser?.id !== 1 && currentUser?.id === user?.id) {
+    return (
+      <>
+        <div className="mb-6">
+          <h3 className="heading">
+            {intl.formatMessage(messages.permissions)}
+          </h3>
+        </div>
+        <Alert
+          title={intl.formatMessage(messages.unauthorizedDescription)}
+          type="error"
+        />
+      </>
+    );
+  }
+
   return (
     <>
+      <PageTitle
+        title={[
+          intl.formatMessage(messages.permissions),
+          intl.formatMessage(globalMessages.usersettings),
+          user?.displayName,
+        ]}
+      />
       <div className="mb-6">
         <h3 className="heading">{intl.formatMessage(messages.permissions)}</h3>
       </div>
@@ -74,28 +97,15 @@ const UserPermissions: React.FC = () => {
         {({ isSubmitting, setFieldValue, values }) => {
           return (
             <Form className="section">
-              <div
-                role="group"
-                aria-labelledby="group-label"
-                className="form-group"
-              >
-                <div className="form-row">
-                  <span id="group-label" className="group-label">
-                    {intl.formatMessage(messages.permissions)}
-                  </span>
-                  <div className="form-input">
-                    <div className="max-w-lg">
-                      <PermissionEdit
-                        actingUser={currentUser}
-                        currentUser={user}
-                        currentPermission={values.currentPermissions ?? 0}
-                        onUpdate={(newPermission) =>
-                          setFieldValue('currentPermissions', newPermission)
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
+              <div className="max-w-3xl">
+                <PermissionEdit
+                  actingUser={currentUser}
+                  currentUser={user}
+                  currentPermission={values.currentPermissions ?? 0}
+                  onUpdate={(newPermission) =>
+                    setFieldValue('currentPermissions', newPermission)
+                  }
+                />
               </div>
               <div className="actions">
                 <div className="flex justify-end">
@@ -105,9 +115,12 @@ const UserPermissions: React.FC = () => {
                       type="submit"
                       disabled={isSubmitting}
                     >
-                      {isSubmitting
-                        ? intl.formatMessage(messages.saving)
-                        : intl.formatMessage(messages.save)}
+                      <SaveIcon />
+                      <span>
+                        {isSubmitting
+                          ? intl.formatMessage(globalMessages.saving)
+                          : intl.formatMessage(globalMessages.save)}
+                      </span>
                     </Button>
                   </span>
                 </div>

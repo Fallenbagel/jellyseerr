@@ -1,10 +1,12 @@
-import React, { useState, useRef } from 'react';
-import Transition from '../../Transition';
-import { useUser } from '../../../hooks/useUser';
+import { LogoutIcon } from '@heroicons/react/outline';
+import { CogIcon, UserIcon } from '@heroicons/react/solid';
 import axios from 'axios';
-import useClickOutside from '../../../hooks/useClickOutside';
-import { defineMessages, useIntl } from 'react-intl';
 import Link from 'next/link';
+import React, { useRef, useState } from 'react';
+import { defineMessages, useIntl } from 'react-intl';
+import useClickOutside from '../../../hooks/useClickOutside';
+import { useUser } from '../../../hooks/useUser';
+import Transition from '../../Transition';
 
 const messages = defineMessages({
   myprofile: 'Profile',
@@ -31,13 +33,17 @@ const UserDropdown: React.FC = () => {
     <div className="relative ml-3">
       <div>
         <button
-          className="flex items-center max-w-xs text-sm rounded-full focus:outline-none focus:ring"
+          className="flex items-center max-w-xs text-sm rounded-full ring-1 ring-gray-700 focus:outline-none focus:ring-gray-500 hover:ring-gray-500"
           id="user-menu"
           aria-label="User menu"
           aria-haspopup="true"
           onClick={() => setDropdownOpen(true)}
         >
-          <img className="w-8 h-8 rounded-full" src={user?.avatar} alt="" />
+          <img
+            className="w-8 h-8 rounded-full sm:w-10 sm:h-10"
+            src={user?.avatar}
+            alt=""
+          />
         </button>
       </div>
       <Transition
@@ -61,7 +67,7 @@ const UserDropdown: React.FC = () => {
           >
             <Link href={`/profile`}>
               <a
-                className="block px-4 py-2 text-sm text-gray-200 transition duration-150 ease-in-out hover:bg-gray-600"
+                className="flex items-center px-4 py-2 text-sm font-medium text-gray-200 transition duration-150 ease-in-out hover:bg-gray-600"
                 role="menuitem"
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -71,12 +77,13 @@ const UserDropdown: React.FC = () => {
                 }}
                 onClick={() => setDropdownOpen(false)}
               >
-                {intl.formatMessage(messages.myprofile)}
+                <UserIcon className="inline w-5 h-5 mr-2" />
+                <span>{intl.formatMessage(messages.myprofile)}</span>
               </a>
             </Link>
             <Link href={`/profile/settings`}>
               <a
-                className="block px-4 py-2 text-sm text-gray-200 transition duration-150 ease-in-out hover:bg-gray-600"
+                className="flex items-center px-4 py-2 text-sm font-medium text-gray-200 transition duration-150 ease-in-out hover:bg-gray-600"
                 role="menuitem"
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -86,16 +93,18 @@ const UserDropdown: React.FC = () => {
                 }}
                 onClick={() => setDropdownOpen(false)}
               >
-                {intl.formatMessage(messages.settings)}
+                <CogIcon className="inline w-5 h-5 mr-2" />
+                <span>{intl.formatMessage(messages.settings)}</span>
               </a>
             </Link>
             <a
               href="#"
-              className="block px-4 py-2 text-sm text-gray-200 transition duration-150 ease-in-out hover:bg-gray-600"
+              className="flex items-center px-4 py-2 text-sm font-medium text-gray-200 transition duration-150 ease-in-out hover:bg-gray-600"
               role="menuitem"
               onClick={() => logout()}
             >
-              {intl.formatMessage(messages.signout)}
+              <LogoutIcon className="inline w-5 h-5 mr-2" />
+              <span>{intl.formatMessage(messages.signout)}</span>
             </a>
           </div>
         </div>

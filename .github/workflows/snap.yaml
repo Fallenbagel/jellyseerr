@@ -2,7 +2,8 @@ name: Publish Snap
 
 on:
   push:
-    branches: [develop]
+    branches:
+      - develop
 
 jobs:
   jobs:
@@ -11,25 +12,27 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.8.0
+        uses: styfle/cancel-workflow-action@0.9.0
         with:
           access_token: ${{ secrets.GITHUB_TOKEN }}
+
   test:
     name: Lint & Test Build
     needs: jobs
     runs-on: ubuntu-20.04
-    container: node:12.18-alpine
+    container: node:14.17-alpine
     steps:
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: install dependencies
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+      - name: Install dependencies
         env:
           HUSKY_SKIP_INSTALL: 1
         run: yarn
-      - name: lint
+      - name: Lint
         run: yarn lint
-      - name: build
+      - name: Build
         run: yarn build
+
   build-snap:
     name: Build Snap Package (${{ matrix.architecture }})
     needs: test
@@ -43,8 +46,7 @@ jobs:
           - armhf
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
-
+        uses: actions/checkout@v2.3.4
       - name: Prepare
         id: prepare
         run: |
@@ -54,35 +56,31 @@ jobs:
           else
             echo ::set-output name=RELEASE::edge
           fi
-
       - name: Set Up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v1.2.0
         with:
           image: tonistiigi/binfmt@sha256:df15403e06a03c2f461c1f7938b171fda34a5849eb63a70e2a2109ed5a778bde
-
       - name: Build Snap Package
         uses: diddlesnaps/snapcraft-multiarch-action@v1
         id: build
         with:
           architecture: ${{ matrix.architecture }}
-
       - name: Upload Snap Package
         uses: actions/upload-artifact@v2
         with:
           name: overseerr-snap-package-${{ matrix.architecture }}
           path: ${{ steps.build.outputs.snap }}
-
       - name: Review Snap Package
-        uses: diddlesnaps/snapcraft-review-tools-action@v1.2.0
+        uses: diddlesnaps/snapcraft-review-tools-action@v1.3.0
         with:
           snap: ${{ steps.build.outputs.snap }}
-
       - name: Publish Snap Package
         uses: snapcore/action-publish@v1
         with:
           store_login: ${{ secrets.SNAP_LOGIN }}
           snap: ${{ steps.build.outputs.snap }}
           release: ${{ steps.prepare.outputs.RELEASE }}
+
   discord:
     name: Send Discord Notification
     needs: build-snap
@@ -90,8 +88,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Get Build Job Status
-        uses: technote-space/workflow-conclusion-action@v2.1.2
-
+        uses: technote-space/workflow-conclusion-action@v2.1.6
       - name: Combine Job Status
         id: status
         run: |
@@ -101,7 +98,6 @@ jobs:
           else
             echo ::set-output name=status::$WORKFLOW_CONCLUSION
           fi
-
       - name: Post Status to Discord
         uses: sarisia/actions-status-discord@v1
         with:

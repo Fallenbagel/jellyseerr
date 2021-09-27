@@ -15,8 +15,9 @@
       "database": "./config/db/db.sqlite3"
     }
   ],
-  "i18n-ally.localesPaths": [
-    "src/i18n",
-    "src/i18n/locale"
-  ]
+  "i18n-ally.localesPaths": ["src/i18n", "src/i18n/locale"],
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
+  "editor.formatOnSave": true
 }

@@ -16,7 +16,7 @@ personRoutes.get('/:id', async (req, res, next) => {
   try {
     const person = await tmdb.getPerson({
       personId: Number(req.params.id),
-      language: req.query.language as string,
+      language: req.locale ?? (req.query.language as string),
     });
     return res.status(200).json(mapPersonDetails(person));
   } catch (e) {
@@ -30,7 +30,7 @@ personRoutes.get('/:id/combined_credits', async (req, res) => {
 
   const combinedCredits = await tmdb.getPersonCombinedCredits({
     personId: Number(req.params.id),
-    language: req.query.language as string,
+    language: req.locale ?? (req.query.language as string),
   });
 
   const castMedia = await Media.getRelatedMedia(

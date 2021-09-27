@@ -11,22 +11,22 @@ confinement: strict
 parts:
   overseerr:
     plugin: nodejs
-    nodejs-version: "12.18.4"
-    nodejs-package-manager: "yarn"
-    nodejs-yarn-version: v1.22.5
+    nodejs-version: '14.17.0'
+    nodejs-package-manager: 'yarn'
+    nodejs-yarn-version: v1.22.10
     build-packages:
       - git
       - on arm64:
-        - build-essential
-        - automake
-        - python-gi
-        - python-gi-dev
+          - build-essential
+          - automake
+          - python-gi
+          - python-gi-dev
       - on armhf:
-        - libatomic1
-        - build-essential
-        - automake
-        - python-gi
-        - python-gi-dev
+          - libatomic1
+          - build-essential
+          - automake
+          - python-gi
+          - python-gi-dev
     source: .
     override-pull: |
       snapcraftctl pull
@@ -56,7 +56,7 @@ parts:
       snapcraftctl set-version "$SNAP_VERSION"
       snapcraftctl set-grade "$GRADE"
     build-environment:
-      - PATH: "$SNAPCRAFT_PART_BUILD/node_modules/.bin:$SNAPCRAFT_PART_BUILD/../npm/bin:$PATH"
+      - PATH: '$SNAPCRAFT_PART_BUILD/node_modules/.bin:$SNAPCRAFT_PART_BUILD/../npm/bin:$PATH'
     override-build: |
       set -e
       # Set COMMIT_TAG before the build begins
@@ -72,11 +72,9 @@ parts:
       rm -rf $SNAPCRAFT_PART_INSTALL/.github && rm $SNAPCRAFT_PART_INSTALL/.gitbook.yaml
     stage-packages:
       - on armhf:
-        - libatomic1
-    stage:
-      [ .next, ./* ]
-    prime:
-      [ .next, ./* ]
+          - libatomic1
+    stage: [.next, ./*]
+    prime: [.next, ./*]
 
 apps:
   deamon:
@@ -89,8 +87,8 @@ apps:
       - network
       - network-bind
     environment:
-      PATH: "$SNAP/usr/sbin:$SNAP/usr/bin:$SNAP/sbin:$SNAP/bin:$PATH"
-      OVERSEERR_SNAP: "True"
+      PATH: '$SNAP/usr/sbin:$SNAP/usr/bin:$SNAP/sbin:$SNAP/bin:$PATH'
+      OVERSEERR_SNAP: 'True'
       CONFIG_DIRECTORY: $SNAP_USER_COMMON
-      LOG_LEVEL: "debug"
-      NODE_ENV: "production"
+      LOG_LEVEL: 'debug'
+      NODE_ENV: 'production'

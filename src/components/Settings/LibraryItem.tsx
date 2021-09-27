@@ -1,3 +1,4 @@
+import { CheckIcon, XIcon } from '@heroicons/react/solid';
 import React from 'react';
 
 interface LibraryItemProps {
@@ -12,8 +13,8 @@ const LibraryItem: React.FC<LibraryItemProps> = ({
   onToggle,
 }) => {
   return (
-    <li className="col-span-1 flex shadow-sm rounded-md">
-      <div className="flex-1 flex items-center justify-between border-t border-r border-b border-gray-700 bg-gray-600 rounded-md truncate">
+    <li className="flex col-span-1 rounded-md shadow-sm">
+      <div className="flex items-center justify-between flex-1 truncate bg-gray-600 border-t border-b border-r border-gray-700 rounded-md">
         <div className="flex-1 px-4 py-6 text-sm leading-5 truncate cursor-default">
           {name}
         </div>
@@ -45,19 +46,7 @@ const LibraryItem: React.FC<LibraryItemProps> = ({
                     : 'opacity-100 ease-in duration-200'
                 } absolute inset-0 h-full w-full flex items-center justify-center transition-opacity`}
               >
-                <svg
-                  className="h-3 w-3 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 12 12"
-                >
-                  <path
-                    d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <XIcon className="w-3 h-3 text-gray-400" />
               </span>
               <span
                 className={`${
@@ -66,13 +55,7 @@ const LibraryItem: React.FC<LibraryItemProps> = ({
                     : 'opacity-0 ease-out duration-100'
                 } absolute inset-0 h-full w-full flex items-center justify-center transition-opacity`}
               >
-                <svg
-                  className="h-3 w-3 text-indigo-600"
-                  fill="currentColor"
-                  viewBox="0 0 12 12"
-                >
-                  <path d="M3.707 5.293a1 1 0 00-1.414 1.414l1.414-1.414zM5 8l-.707.707a1 1 0 001.414 0L5 8zm4.707-3.293a1 1 0 00-1.414-1.414l1.414 1.414zm-7.414 2l2 2 1.414-1.414-2-2-1.414 1.414zm3.414 2l4-4-1.414-1.414-4 4 1.414 1.414z" />
-                </svg>
+                <CheckIcon className="w-3 h-3 text-indigo-600" />
               </span>
             </span>
           </span>

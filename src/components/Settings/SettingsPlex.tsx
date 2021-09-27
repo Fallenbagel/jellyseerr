@@ -1,56 +1,51 @@
-import React, { useMemo, useState } from 'react';
-import LoadingSpinner from '../Common/LoadingSpinner';
-import type { PlexSettings } from '../../../server/lib/settings';
-import type { PlexDevice } from '../../../server/interfaces/api/plexInterfaces';
-import useSWR from 'swr';
-import { useToasts } from 'react-toast-notifications';
-import { Formik, Field } from 'formik';
-import Button from '../Common/Button';
+import { SaveIcon } from '@heroicons/react/outline';
+import { RefreshIcon, SearchIcon, XIcon } from '@heroicons/react/solid';
 import axios from 'axios';
-import LibraryItem from './LibraryItem';
-import Badge from '../Common/Badge';
-import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
+import { Field, Formik } from 'formik';
+import { orderBy } from 'lodash';
+import React, { useMemo, useState } from 'react';
+import { defineMessages, useIntl } from 'react-intl';
+import { useToasts } from 'react-toast-notifications';
+import useSWR from 'swr';
 import * as Yup from 'yup';
+import type { PlexDevice } from '../../../server/interfaces/api/plexInterfaces';
+import type { PlexSettings } from '../../../server/lib/settings';
+import globalMessages from '../../i18n/globalMessages';
 import Alert from '../Common/Alert';
-import Spinner from '../../assets/spinner.svg';
+import Badge from '../Common/Badge';
+import Button from '../Common/Button';
+import LoadingSpinner from '../Common/LoadingSpinner';
+import PageTitle from '../Common/PageTitle';
+import LibraryItem from './LibraryItem';
 
 const messages = defineMessages({
+  plex: 'Plex',
   plexsettings: 'Plex Settings',
   plexsettingsDescription:
-    'Configure the settings for your Plex server. Overseerr scans your Plex libraries to see what content is available.',
-  servername: 'Server Name',
-  servernameTip: 'Automatically retrieved from Plex after saving',
-  servernamePlaceholder: 'Plex Server Name',
+    'Configure the settings for your Plex server. Overseerr scans your Plex libraries to determine content availability.',
   serverpreset: 'Server',
-  serverpresetPlaceholder: 'Plex Server',
   serverLocal: 'local',
   serverRemote: 'remote',
-  serverConnected: 'connected',
+  serverSecure: 'secure',
   serverpresetManualMessage: 'Manual configuration',
   serverpresetRefreshing: 'Retrieving servers…',
   serverpresetLoad: 'Press the button to load available servers',
-  toastPlexRefresh: 'Retrieving server list from Plex',
-  toastPlexRefreshSuccess: 'Retrieved server list from Plex',
-  toastPlexRefreshFailure: 'Unable to retrieve server list from Plex',
-  toastPlexConnecting: 'Attempting to connect to Plex server',
-  toastPlexConnectingSuccess: 'Connected to Plex server',
-  toastPlexConnectingFailure: 'Unable to connect to Plex server',
-  settingUpPlex: 'Setting Up Plex',
+  toastPlexRefresh: 'Retrieving server list from Plex…',
+  toastPlexRefreshSuccess: 'Plex server list retrieved successfully!',
+  toastPlexRefreshFailure: 'Failed to retrieve Plex server list.',
+  toastPlexConnecting: 'Attempting to connect to Plex…',
+  toastPlexConnectingSuccess: 'Plex connection established successfully!',
+  toastPlexConnectingFailure: 'Failed to connect to Plex.',
   settingUpPlexDescription:
-    'To set up Plex, you can either enter your details manually \
-    or select a server retrieved from <RegisterPlexTVLink>plex.tv</RegisterPlexTVLink>.\
-    Press the button to the right of the dropdown to check connectivity and retrieve available servers.',
-  hostname: 'Hostname/IP',
+    'To set up Plex, you can either enter the details manually or select a server retrieved from <RegisterPlexTVLink>plex.tv</RegisterPlexTVLink>. Press the button to the right of the dropdown to fetch the list of available servers.',
+  hostname: 'Hostname or IP Address',
   port: 'Port',
-  ssl: 'SSL',
-  timeout: 'Timeout',
-  save: 'Save Changes',
-  saving: 'Saving…',
+  enablessl: 'Use SSL',
   plexlibraries: 'Plex Libraries',
   plexlibrariesDescription:
     'The libraries Overseerr scans for titles. Set up and save your Plex connection settings, then click the button below if no libraries are listed.',
-  syncing: 'Syncing',
-  sync: 'Sync Plex Libraries',
+  scanning: 'Syncing…',
+  scan: 'Sync Libraries',
   manualscan: 'Manual Library Scan',
   manualscanDescription:
     "Normally, this will only be run once every 24 hours. Overseerr will check your Plex server's recently added more aggressively. If this is your first time configuring Plex, a one-time full manual library scan is recommended!",
@@ -59,8 +54,12 @@ const messages = defineMessages({
   librariesRemaining: 'Libraries Remaining: {count}',
   startscan: 'Start Scan',
   cancelscan: 'Cancel Scan',
-  validationHostnameRequired: 'You must provide a hostname/IP',
-  validationPortRequired: 'You must provide a port',
+  validationHostnameRequired: 'You must provide a valid hostname or IP address',
+  validationPortRequired: 'You must provide a valid port number',
+  webAppUrl: '<WebAppLink>Web App</WebAppLink> URL',
+  webAppUrlTip:
+    'Optionally direct users to the web app on your server instead of the "hosted" web app',
+  validationWebAppUrl: 'You must provide a valid Plex Web App URL',
 });
 
 interface Library {
@@ -82,7 +81,6 @@ interface PresetServerDisplay {
   ssl: boolean;
   uri: string;
   address: string;
-  host?: string;
   port: number;
   local: boolean;
   status?: boolean;
@@ -95,15 +93,12 @@ interface SettingsPlexProps {
 const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isRefreshingPresets, setIsRefreshingPresets] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const [availableServers, setAvailableServers] = useState<PlexDevice[] | null>(
     null
   );
-  const {
-    data: data,
-    error: error,
-    revalidate: revalidate,
-  } = useSWR<PlexSettings>('/api/v1/settings/plex');
+  const { data, error, revalidate } = useSWR<PlexSettings>(
+    '/api/v1/settings/plex'
+  );
   const { data: dataSync, revalidate: revalidateSync } = useSWR<SyncStatus>(
     '/api/v1/settings/plex/sync',
     {
@@ -113,12 +108,19 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
   const intl = useIntl();
   const { addToast, removeToast } = useToasts();
   const PlexSettingsSchema = Yup.object().shape({
-    hostname: Yup.string().required(
-      intl.formatMessage(messages.validationHostnameRequired)
-    ),
-    port: Yup.number().required(
-      intl.formatMessage(messages.validationPortRequired)
-    ),
+    hostname: Yup.string()
+      .nullable()
+      .required(intl.formatMessage(messages.validationHostnameRequired))
+      .matches(
+        /^(([a-z]|\d|_|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*)?([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])$/i,
+        intl.formatMessage(messages.validationHostnameRequired)
+      ),
+    port: Yup.number()
+      .nullable()
+      .required(intl.formatMessage(messages.validationPortRequired)),
+    webAppUrl: Yup.string()
+      .nullable()
+      .url(intl.formatMessage(messages.validationWebAppUrl)),
   });
 
   const activeLibraries =
@@ -132,25 +134,18 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
       dev.connection.forEach((conn) =>
         finalPresets.push({
           name: dev.name,
-          ssl: conn.protocol === 'https' ? true : false,
+          ssl: conn.protocol === 'https',
           uri: conn.uri,
           address: conn.address,
           port: conn.port,
           local: conn.local,
-          host: conn.host,
-          status: conn.status === 200 ? true : false,
+          status: conn.status === 200,
           message: conn.message,
         })
       );
     });
-    finalPresets.sort((a, b) => {
-      if (a.status && !b.status) {
-        return -1;
-      } else {
-        return 1;
-      }
-    });
-    return finalPresets;
+
+    return orderBy(finalPresets, ['status', 'ssl'], ['desc', 'desc']);
   }, [availableServers]);
 
   const syncLibraries = async () => {
@@ -255,38 +250,46 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
   }
   return (
     <>
+      <PageTitle
+        title={[
+          intl.formatMessage(messages.plex),
+          intl.formatMessage(globalMessages.settings),
+        ]}
+      />
       <div className="mb-6">
-        <h3 className="heading">
-          <FormattedMessage {...messages.plexsettings} />
-        </h3>
+        <h3 className="heading">{intl.formatMessage(messages.plexsettings)}</h3>
         <p className="description">
-          <FormattedMessage {...messages.plexsettingsDescription} />
+          {intl.formatMessage(messages.plexsettingsDescription)}
         </p>
-        <div className="section">
-          <Alert title={intl.formatMessage(messages.settingUpPlex)} type="info">
-            {intl.formatMessage(messages.settingUpPlexDescription, {
-              RegisterPlexTVLink: function RegisterPlexTVLink(msg) {
-                return (
-                  <a
-                    href="https://plex.tv"
-                    className="text-indigo-100 hover:text-white hover:underline"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {msg}
-                  </a>
-                );
-              },
-            })}
-          </Alert>
-        </div>
+        {!!onComplete && (
+          <div className="section">
+            <Alert
+              title={intl.formatMessage(messages.settingUpPlexDescription, {
+                RegisterPlexTVLink: function RegisterPlexTVLink(msg) {
+                  return (
+                    <a
+                      href="https://plex.tv"
+                      className="text-white transition duration-300 hover:underline"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {msg}
+                    </a>
+                  );
+                },
+              })}
+              type="info"
+            />
+          </div>
+        )}
       </div>
       <Formik
         initialValues={{
           hostname: data?.ip,
-          port: data?.port,
+          port: data?.port ?? 32400,
           useSsl: data?.useSsl,
           selectedPreset: undefined,
+          webAppUrl: data?.webAppUrl,
         }}
         validationSchema={PlexSettingsSchema}
         onSubmit={async (values) => {
@@ -306,10 +309,11 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
               ip: values.hostname,
               port: Number(values.port),
               useSsl: values.useSsl,
+              webAppUrl: values.webAppUrl,
             } as PlexSettings);
 
-            revalidate();
-            setSubmitError(null);
+            syncLibraries();
+
             if (toastId) {
               removeToast(toastId);
             }
@@ -317,6 +321,7 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
               autoDismiss: true,
               appearance: 'success',
             });
+
             if (onComplete) {
               onComplete();
             }
@@ -328,7 +333,6 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
               autoDismiss: true,
               appearance: 'error',
             });
-            setSubmitError(e.response.data.message);
           }
         }}
       >
@@ -338,63 +342,32 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
           values,
           handleSubmit,
           setFieldValue,
-          setFieldTouched,
           isSubmitting,
+          isValid,
         }) => {
           return (
             <form className="section" onSubmit={handleSubmit}>
               <div className="form-row">
-                <label htmlFor="name" className="text-label">
-                  <div className="flex flex-col">
-                    <span>
-                      <FormattedMessage {...messages.servername} />
-                    </span>
-                    <span className="text-gray-500">
-                      <FormattedMessage {...messages.servernameTip} />
-                    </span>
-                  </div>
-                </label>
-                <div className="form-input">
-                  <div className="flex max-w-lg rounded-md shadow-sm">
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      placeholder={intl.formatMessage(
-                        messages.servernamePlaceholder
-                      )}
-                      value={data?.name}
-                      readOnly
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="form-row">
                 <label htmlFor="preset" className="text-label">
-                  <FormattedMessage {...messages.serverpreset} />
+                  {intl.formatMessage(messages.serverpreset)}
                 </label>
                 <div className="form-input">
-                  <div className="flex max-w-lg rounded-md shadow-sm input-group">
+                  <div className="form-input-field">
                     <select
                       id="preset"
                       name="preset"
-                      placeholder={intl.formatMessage(
-                        messages.serverpresetPlaceholder
-                      )}
                       value={values.selectedPreset}
                       disabled={!availableServers || isRefreshingPresets}
                       className="rounded-l-only"
                       onChange={async (e) => {
                         const targPreset =
                           availablePresets[Number(e.target.value)];
+
                         if (targPreset) {
-                          setFieldValue('hostname', targPreset.host);
+                          setFieldValue('hostname', targPreset.address);
                           setFieldValue('port', targPreset.port);
                           setFieldValue('useSsl', targPreset.ssl);
                         }
-                        setFieldTouched('hostname');
-                        setFieldTouched('port');
-                        setFieldTouched('useSsl');
                       }}
                     >
                       <option value="manual">
@@ -420,7 +393,13 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
                               server.local
                                 ? intl.formatMessage(messages.serverLocal)
                                 : intl.formatMessage(messages.serverRemote)
-                            }]
+                            }]${
+                            server.ssl
+                              ? ` [${intl.formatMessage(
+                                  messages.serverSecure
+                                )}]`
+                              : ''
+                          }
                             ${server.status ? '' : '(' + server.message + ')'}
                           `}
                         </option>
@@ -431,42 +410,31 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
                         e.preventDefault();
                         refreshPresetServers();
                       }}
-                      className="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium leading-5 text-white transition duration-150 ease-in-out bg-indigo-600 border border-gray-500 rounded-r-md hover:bg-indigo-500 focus:outline-none focus:ring-blue focus:border-blue-300 active:bg-gray-100 active:text-gray-700"
+                      className="input-action"
                     >
-                      {isRefreshingPresets ? (
-                        <Spinner className="w-5 h-5" />
-                      ) : (
-                        <svg
-                          className="w-5 h-5"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      )}
+                      <RefreshIcon
+                        className={isRefreshingPresets ? 'animate-spin' : ''}
+                        style={{ animationDirection: 'reverse' }}
+                      />
                     </button>
                   </div>
                 </div>
               </div>
               <div className="form-row">
                 <label htmlFor="hostname" className="text-label">
-                  <FormattedMessage {...messages.hostname} />
+                  {intl.formatMessage(messages.hostname)}
+                  <span className="label-required">*</span>
                 </label>
                 <div className="form-input">
-                  <div className="flex max-w-lg rounded-md shadow-sm">
+                  <div className="form-input-field">
                     <span className="inline-flex items-center px-3 text-gray-100 bg-gray-800 border border-r-0 border-gray-500 cursor-default rounded-l-md sm:text-sm">
                       {values.useSsl ? 'https://' : 'http://'}
                     </span>
                     <Field
                       type="text"
+                      inputMode="url"
                       id="hostname"
                       name="hostname"
-                      placeholder="127.0.0.1"
                       className="rounded-r-only"
                     />
                   </div>
@@ -477,18 +445,17 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
               </div>
               <div className="form-row">
                 <label htmlFor="port" className="text-label">
-                  <FormattedMessage {...messages.port} />
+                  {intl.formatMessage(messages.port)}
+                  <span className="label-required">*</span>
                 </label>
                 <div className="form-input">
-                  <div className="max-w-lg rounded-md shadow-sm sm:max-w-xs">
-                    <Field
-                      type="text"
-                      id="port"
-                      name="port"
-                      placeholder="32400"
-                      className="short"
-                    />
-                  </div>
+                  <Field
+                    type="text"
+                    inputMode="numeric"
+                    id="port"
+                    name="port"
+                    className="short"
+                  />
                   {errors.port && touched.port && (
                     <div className="error">{errors.port}</div>
                   )}
@@ -496,7 +463,7 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
               </div>
               <div className="form-row">
                 <label htmlFor="ssl" className="checkbox-label">
-                  {intl.formatMessage(messages.ssl)}
+                  {intl.formatMessage(messages.enablessl)}
                 </label>
                 <div className="form-input">
                   <Field
@@ -509,29 +476,57 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
                   />
                 </div>
               </div>
-              {submitError && (
-                <div className="mt-6 sm:gap-4 sm:items-start">
-                  <Alert
-                    title={intl.formatMessage(
-                      messages.toastPlexConnectingFailure
-                    )}
-                    type="error"
-                  >
-                    {submitError}
-                  </Alert>
+              <div className="form-row">
+                <label htmlFor="webAppUrl" className="text-label">
+                  {intl.formatMessage(messages.webAppUrl, {
+                    WebAppLink: function WebAppLink(msg) {
+                      return (
+                        <a
+                          href="https://support.plex.tv/articles/200288666-opening-plex-web-app/"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {msg}
+                        </a>
+                      );
+                    },
+                  })}
+                  <Badge badgeType="danger" className="ml-2">
+                    {intl.formatMessage(globalMessages.advanced)}
+                  </Badge>
+                  <span className="label-tip">
+                    {intl.formatMessage(messages.webAppUrlTip)}
+                  </span>
+                </label>
+                <div className="form-input">
+                  <div className="form-input-field">
+                    <Field
+                      type="text"
+                      inputMode="url"
+                      id="webAppUrl"
+                      name="webAppUrl"
+                      placeholder="https://app.plex.tv/desktop"
+                    />
+                  </div>
+                  {errors.webAppUrl && touched.webAppUrl && (
+                    <div className="error">{errors.webAppUrl}</div>
+                  )}
                 </div>
-              )}
+              </div>
               <div className="actions">
                 <div className="flex justify-end">
                   <span className="inline-flex ml-3 rounded-md shadow-sm">
                     <Button
                       buttonType="primary"
                       type="submit"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || !isValid}
                     >
-                      {isSubmitting
-                        ? intl.formatMessage(messages.saving)
-                        : intl.formatMessage(messages.save)}
+                      <SaveIcon />
+                      <span>
+                        {isSubmitting
+                          ? intl.formatMessage(globalMessages.saving)
+                          : intl.formatMessage(globalMessages.save)}
+                      </span>
                     </Button>
                   </span>
                 </div>
@@ -542,29 +537,26 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
       </Formik>
       <div className="mt-10 mb-6">
         <h3 className="heading">
-          <FormattedMessage {...messages.plexlibraries} />
+          {intl.formatMessage(messages.plexlibraries)}
         </h3>
         <p className="description">
-          <FormattedMessage {...messages.plexlibrariesDescription} />
+          {intl.formatMessage(messages.plexlibrariesDescription)}
         </p>
       </div>
       <div className="section">
-        <Button onClick={() => syncLibraries()} disabled={isSyncing}>
-          <svg
-            className={`${isSyncing ? 'animate-spin' : ''} w-5 h-5 mr-1`}
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-              clipRule="evenodd"
-            />
-          </svg>
-          {isSyncing
-            ? intl.formatMessage(messages.syncing)
-            : intl.formatMessage(messages.sync)}
+        <Button
+          onClick={() => syncLibraries()}
+          disabled={isSyncing || !data?.ip || !data?.port}
+        >
+          <RefreshIcon
+            className={isSyncing ? 'animate-spin' : ''}
+            style={{ animationDirection: 'reverse' }}
+          />
+          <span>
+            {isSyncing
+              ? intl.formatMessage(messages.scanning)
+              : intl.formatMessage(messages.scan)}
+          </span>
         </Button>
         <ul className="grid grid-cols-1 gap-5 mt-6 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {data?.libraries.map((library) => (
@@ -578,11 +570,9 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
         </ul>
       </div>
       <div className="mt-10 mb-6">
-        <h3 className="heading">
-          <FormattedMessage {...messages.manualscan} />
-        </h3>
+        <h3 className="heading">{intl.formatMessage(messages.manualscan)}</h3>
         <p className="description">
-          <FormattedMessage {...messages.manualscanDescription} />
+          {intl.formatMessage(messages.manualscanDescription)}
         </p>
       </div>
       <div className="section">
@@ -612,70 +602,42 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
                 {dataSync.currentLibrary && (
                   <div className="flex items-center mb-2 mr-0 sm:mb-0 sm:mr-2">
                     <Badge>
-                      <FormattedMessage
-                        {...messages.currentlibrary}
-                        values={{ name: dataSync.currentLibrary.name }}
-                      />
+                      {intl.formatMessage(messages.currentlibrary, {
+                        name: dataSync.currentLibrary.name,
+                      })}
                     </Badge>
                   </div>
                 )}
                 <div className="flex items-center">
                   <Badge badgeType="warning">
-                    <FormattedMessage
-                      {...messages.librariesRemaining}
-                      values={{
-                        count: dataSync.currentLibrary
-                          ? dataSync.libraries.slice(
-                              dataSync.libraries.findIndex(
-                                (library) =>
-                                  library.id === dataSync.currentLibrary?.id
-                              ) + 1
-                            ).length
-                          : 0,
-                      }}
-                    />
+                    {intl.formatMessage(messages.librariesRemaining, {
+                      count: dataSync.currentLibrary
+                        ? dataSync.libraries.slice(
+                            dataSync.libraries.findIndex(
+                              (library) =>
+                                library.id === dataSync.currentLibrary?.id
+                            ) + 1
+                          ).length
+                        : 0,
+                    })}
                   </Badge>
                 </div>
               </>
             )}
             <div className="flex-1 text-right">
-              {!dataSync?.running && (
-                <Button buttonType="warning" onClick={() => startScan()}>
-                  <svg
-                    className="w-5 h-5 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                  <FormattedMessage {...messages.startscan} />
+              {!dataSync?.running ? (
+                <Button
+                  buttonType="warning"
+                  onClick={() => startScan()}
+                  disabled={isSyncing || !activeLibraries.length}
+                >
+                  <SearchIcon />
+                  <span>{intl.formatMessage(messages.startscan)}</span>
                 </Button>
-              )}
-
-              {dataSync?.running && (
+              ) : (
                 <Button buttonType="danger" onClick={() => cancelScan()}>
-                  <svg
-                    className="w-5 h-5 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                  <FormattedMessage {...messages.cancelscan} />
+                  <XIcon />
+                  <span>{intl.formatMessage(messages.cancelscan)}</span>
                 </Button>
               )}
             </div>

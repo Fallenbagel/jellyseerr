@@ -1,13 +1,17 @@
-import React from 'react';
+import { BeakerIcon, SaveIcon } from '@heroicons/react/outline';
+import { QuestionMarkCircleIcon, RefreshIcon } from '@heroicons/react/solid';
+import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import dynamic from 'next/dynamic';
-import useSWR from 'swr';
-import LoadingSpinner from '../../../Common/LoadingSpinner';
-import Button from '../../../Common/Button';
+import Link from 'next/link';
+import React, { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import axios from 'axios';
-import * as Yup from 'yup';
 import { useToasts } from 'react-toast-notifications';
+import useSWR from 'swr';
+import * as Yup from 'yup';
+import globalMessages from '../../../../i18n/globalMessages';
+import Button from '../../../Common/Button';
+import LoadingSpinner from '../../../Common/LoadingSpinner';
 import NotificationTypeSelector from '../../../NotificationTypeSelector';
 
 const JSONEditor = dynamic(() => import('../../../JSONEditor'), { ssr: false });
@@ -31,45 +35,60 @@ const defaultPayload = {
   '{{extra}}': [],
   '{{request}}': {
     request_id: '{{request_id}}',
+    requestedBy_email: '{{requestedBy_email}}',
+    requestedBy_username: '{{requestedBy_username}}',
+    requestedBy_avatar: '{{requestedBy_avatar}}',
   },
 };
 
 const messages = defineMessages({
-  save: 'Save Changes',
-  saving: 'Saving…',
   agentenabled: 'Enable Agent',
   webhookUrl: 'Webhook URL',
   authheader: 'Authorization Header',
   validationJsonPayloadRequired: 'You must provide a valid JSON payload',
   webhooksettingssaved: 'Webhook notification settings saved successfully!',
   webhooksettingsfailed: 'Webhook notification settings failed to save.',
-  testsent: 'Test notification sent!',
-  test: 'Test',
-  notificationtypes: 'Notification Types',
+  toastWebhookTestSending: 'Sending webhook test notification…',
+  toastWebhookTestSuccess: 'Webhook test notification sent!',
+  toastWebhookTestFailed: 'Webhook test notification failed to send.',
   resetPayload: 'Reset to Default',
   resetPayloadSuccess: 'JSON payload reset successfully!',
   customJson: 'JSON Payload',
   templatevariablehelp: 'Template Variable Help',
   validationWebhookUrl: 'You must provide a valid URL',
+  validationTypes: 'You must select at least one notification type',
 });
 
 const NotificationsWebhook: React.FC = () => {
   const intl = useIntl();
-  const { addToast } = useToasts();
+  const { addToast, removeToast } = useToasts();
+  const [isTesting, setIsTesting] = useState(false);
   const { data, error, revalidate } = useSWR(
     '/api/v1/settings/notifications/webhook'
   );
 
   const NotificationsWebhookSchema = Yup.object().shape({
     webhookUrl: Yup.string()
-      .required(intl.formatMessage(messages.validationWebhookUrl))
+      .when('enabled', {
+        is: true,
+        then: Yup.string()
+          .nullable()
+          .required(intl.formatMessage(messages.validationWebhookUrl)),
+        otherwise: Yup.string().nullable(),
+      })
       .matches(
-        // eslint-disable-next-line
+        // eslint-disable-next-line no-useless-escape
         /^(https?:)?\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*)?([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i,
         intl.formatMessage(messages.validationWebhookUrl)
       ),
     jsonPayload: Yup.string()
-      .required(intl.formatMessage(messages.validationJsonPayloadRequired))
+      .when('enabled', {
+        is: true,
+        then: Yup.string()
+          .nullable()
+          .required(intl.formatMessage(messages.validationJsonPayloadRequired)),
+        otherwise: Yup.string().nullable(),
+      })
       .test(
         'validate-json',
         intl.formatMessage(messages.validationJsonPayloadRequired),
@@ -82,6 +101,13 @@ const NotificationsWebhook: React.FC = () => {
           }
         }
       ),
+    types: Yup.number().when('enabled', {
+      is: true,
+      then: Yup.number()
+        .nullable()
+        .moreThan(0, intl.formatMessage(messages.validationTypes)),
+      otherwise: Yup.number().nullable(),
+    }),
   });
 
   if (!data && !error) {
@@ -144,20 +170,47 @@ const NotificationsWebhook: React.FC = () => {
         };
 
         const testSettings = async () => {
-          await axios.post('/api/v1/settings/notifications/webhook/test', {
-            enabled: true,
-            types: values.types,
-            options: {
-              webhookUrl: values.webhookUrl,
-              jsonPayload: JSON.stringify(values.jsonPayload),
-              authHeader: values.authHeader,
-            },
-          });
+          setIsTesting(true);
+          let toastId: string | undefined;
+          try {
+            addToast(
+              intl.formatMessage(messages.toastWebhookTestSending),
+              {
+                autoDismiss: false,
+                appearance: 'info',
+              },
+              (id) => {
+                toastId = id;
+              }
+            );
+            await axios.post('/api/v1/settings/notifications/webhook/test', {
+              enabled: true,
+              types: values.types,
+              options: {
+                webhookUrl: values.webhookUrl,
+                jsonPayload: JSON.stringify(values.jsonPayload),
+                authHeader: values.authHeader,
+              },
+            });
 
-          addToast(intl.formatMessage(messages.testsent), {
-            appearance: 'info',
-            autoDismiss: true,
-          });
+            if (toastId) {
+              removeToast(toastId);
+            }
+            addToast(intl.formatMessage(messages.toastWebhookTestSuccess), {
+              autoDismiss: true,
+              appearance: 'success',
+            });
+          } catch (e) {
+            if (toastId) {
+              removeToast(toastId);
+            }
+            addToast(intl.formatMessage(messages.toastWebhookTestFailed), {
+              autoDismiss: true,
+              appearance: 'error',
+            });
+          } finally {
+            setIsTesting(false);
+          }
         };
 
         return (
@@ -165,18 +218,25 @@ const NotificationsWebhook: React.FC = () => {
             <div className="form-row">
               <label htmlFor="enabled" className="checkbox-label">
                 {intl.formatMessage(messages.agentenabled)}
+                <span className="label-required">*</span>
               </label>
               <div className="form-input">
                 <Field type="checkbox" id="enabled" name="enabled" />
               </div>
             </div>
             <div className="form-row">
-              <label htmlFor="name" className="text-label">
+              <label htmlFor="webhookUrl" className="text-label">
                 {intl.formatMessage(messages.webhookUrl)}
+                <span className="label-required">*</span>
               </label>
               <div className="form-input">
-                <div className="flex max-w-lg rounded-md shadow-sm">
-                  <Field id="webhookUrl" name="webhookUrl" type="text" />
+                <div className="form-input-field">
+                  <Field
+                    id="webhookUrl"
+                    name="webhookUrl"
+                    type="text"
+                    inputMode="url"
+                  />
                 </div>
                 {errors.webhookUrl && touched.webhookUrl && (
                   <div className="error">{errors.webhookUrl}</div>
@@ -184,21 +244,22 @@ const NotificationsWebhook: React.FC = () => {
               </div>
             </div>
             <div className="form-row">
-              <label htmlFor="name" className="text-label">
+              <label htmlFor="authHeader" className="text-label">
                 {intl.formatMessage(messages.authheader)}
               </label>
               <div className="form-input">
-                <div className="flex max-w-lg rounded-md shadow-sm">
+                <div className="form-input-field">
                   <Field id="authHeader" name="authHeader" type="text" />
                 </div>
               </div>
             </div>
             <div className="form-row">
-              <label htmlFor="name" className="text-label">
+              <label htmlFor="webhook-json-payload" className="text-label">
                 {intl.formatMessage(messages.customJson)}
+                <span className="label-required">*</span>
               </label>
               <div className="form-input">
-                <div className="flex max-w-lg rounded-md shadow-sm">
+                <div className="form-input-field">
                   <JSONEditor
                     name="webhook-json-payload"
                     onUpdate={(value) => setFieldValue('jsonPayload', value)}
@@ -218,92 +279,75 @@ const NotificationsWebhook: React.FC = () => {
                     }}
                     className="mr-2"
                   >
-                    <svg
-                      className="w-5 h-5 mr-1"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    {intl.formatMessage(messages.resetPayload)}
+                    <RefreshIcon />
+                    <span>{intl.formatMessage(messages.resetPayload)}</span>
                   </Button>
-                  <a
+                  <Link
                     href="https://docs.overseerr.dev/using-overseerr/notifications/webhooks#template-variables"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center justify-center font-medium leading-5 text-white transition duration-150 ease-in-out bg-indigo-600 border border-transparent rounded-md focus:outline-none hover:bg-indigo-500 focus:border-indigo-700 focus:ring-indigo active:bg-indigo-700 disabled:opacity-50 px-2.5 py-1.5 text-xs"
+                    passHref
                   >
-                    <svg
-                      className="w-5 h-5 mr-1"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
+                    <Button
+                      as="a"
+                      buttonSize="sm"
+                      target="_blank"
+                      rel="noreferrer"
                     >
-                      <path
-                        fillRule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    {intl.formatMessage(messages.templatevariablehelp)}
-                  </a>
+                      <QuestionMarkCircleIcon />
+                      <span>
+                        {intl.formatMessage(messages.templatevariablehelp)}
+                      </span>
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>
-            <div className="mt-8">
-              <div
-                role="group"
-                aria-labelledby="group-label"
-                className="form-group"
-              >
-                <div className="sm:grid sm:grid-cols-4 sm:gap-4">
-                  <div>
-                    <div id="group-label" className="group-label">
-                      {intl.formatMessage(messages.notificationtypes)}
-                    </div>
-                  </div>
-                  <div className="form-input">
-                    <div className="max-w-lg">
-                      <NotificationTypeSelector
-                        currentTypes={values.types}
-                        onUpdate={(newTypes) =>
-                          setFieldValue('types', newTypes)
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <NotificationTypeSelector
+              currentTypes={values.enabled ? values.types : 0}
+              onUpdate={(newTypes) => {
+                setFieldValue('types', newTypes);
+                setFieldTouched('types');
+
+                if (newTypes) {
+                  setFieldValue('enabled', true);
+                }
+              }}
+              error={
+                errors.types && touched.types
+                  ? (errors.types as string)
+                  : undefined
+              }
+            />
             <div className="actions">
               <div className="flex justify-end">
                 <span className="inline-flex ml-3 rounded-md shadow-sm">
                   <Button
                     buttonType="warning"
-                    disabled={isSubmitting || !isValid}
+                    disabled={isSubmitting || !isValid || isTesting}
                     onClick={(e) => {
                       e.preventDefault();
-
                       testSettings();
                     }}
                   >
-                    {intl.formatMessage(messages.test)}
+                    <BeakerIcon />
+                    <span>
+                      {isTesting
+                        ? intl.formatMessage(globalMessages.testing)
+                        : intl.formatMessage(globalMessages.test)}
+                    </span>
                   </Button>
                 </span>
                 <span className="inline-flex ml-3 rounded-md shadow-sm">
                   <Button
                     buttonType="primary"
                     type="submit"
-                    disabled={isSubmitting || !isValid}
+                    disabled={isSubmitting || !isValid || isTesting}
                   >
-                    {isSubmitting
-                      ? intl.formatMessage(messages.saving)
-                      : intl.formatMessage(messages.save)}
+                    <SaveIcon />
+                    <span>
+                      {isSubmitting
+                        ? intl.formatMessage(globalMessages.saving)
+                        : intl.formatMessage(globalMessages.save)}
+                    </span>
                   </Button>
                 </span>
               </div>

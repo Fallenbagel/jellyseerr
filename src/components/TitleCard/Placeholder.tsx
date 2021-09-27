@@ -7,7 +7,7 @@ interface PlaceholderProps {
 const Placeholder: React.FC<PlaceholderProps> = ({ canExpand = false }) => {
   return (
     <div
-      className={`relative animate-pulse rounded-lg bg-gray-700 ${
+      className={`relative animate-pulse rounded-xl bg-gray-700 ${
         canExpand ? 'w-full' : 'w-36 sm:w-36 md:w-44'
       }`}
     >

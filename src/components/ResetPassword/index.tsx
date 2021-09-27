@@ -1,25 +1,28 @@
-import React, { useState } from 'react';
-import ImageFader from '../Common/ImageFader';
-import { defineMessages, useIntl } from 'react-intl';
-import LanguagePicker from '../Layout/LanguagePicker';
-import Button from '../Common/Button';
-import { Field, Form, Formik } from 'formik';
-import * as Yup from 'yup';
+import { SupportIcon } from '@heroicons/react/outline';
 import axios from 'axios';
-import { useRouter } from 'next/router';
+import { Form, Formik } from 'formik';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+import React, { useState } from 'react';
+import { defineMessages, useIntl } from 'react-intl';
+import * as Yup from 'yup';
+import globalMessages from '../../i18n/globalMessages';
+import Button from '../Common/Button';
+import ImageFader from '../Common/ImageFader';
+import SensitiveInput from '../Common/SensitiveInput';
+import LanguagePicker from '../Layout/LanguagePicker';
 
 const messages = defineMessages({
-  resetpassword: 'Reset Password',
+  passwordreset: 'Password Reset',
+  resetpassword: 'Reset your password',
   password: 'Password',
   confirmpassword: 'Confirm Password',
   validationpasswordrequired: 'You must provide a password',
-  validationpasswordmatch: 'Password must match',
+  validationpasswordmatch: 'Passwords must match',
   validationpasswordminchars:
     'Password is too short; should be a minimum of 8 characters',
-  gobacklogin: 'Go Back to Sign-In Page',
-  resetpasswordsuccessmessage:
-    'If the link is valid and is connected to a user then the password has been reset.',
+  gobacklogin: 'Return to Sign-In Page',
+  resetpasswordsuccessmessage: 'Password reset successfully!',
 });
 
 const ResetPassword: React.FC = () => {
@@ -47,6 +50,7 @@ const ResetPassword: React.FC = () => {
   return (
     <div className="relative flex flex-col min-h-screen bg-gray-900 py-14">
       <ImageFader
+        forceOptimize
         backgroundImages={[
           '/images/rotate1.jpg',
           '/images/rotate2.jpg',
@@ -59,12 +63,8 @@ const ResetPassword: React.FC = () => {
       <div className="absolute z-50 top-4 right-4">
         <LanguagePicker />
       </div>
-      <div className="relative z-40 px-4 sm:mx-auto sm:w-full sm:max-w-md">
-        <img
-          src="/logo.png"
-          className="w-auto mx-auto max-h-32"
-          alt="Overseerr Logo"
-        />
+      <div className="relative z-40 flex flex-col items-center px-4 mt-10 sm:mx-auto sm:w-full sm:max-w-md">
+        <img src="/logo_stacked.svg" className="max-w-full mb-10" alt="Logo" />
         <h2 className="mt-2 text-3xl font-extrabold leading-9 text-center text-gray-100">
           {intl.formatMessage(messages.resetpassword)}
         </h2>
@@ -111,7 +111,7 @@ const ResetPassword: React.FC = () => {
                 {({ errors, touched, isSubmitting, isValid }) => {
                   return (
                     <Form>
-                      <div className="sm:border-t sm:border-gray-800">
+                      <div>
                         <label
                           htmlFor="password"
                           className="block my-1 text-sm font-medium leading-5 text-gray-400 sm:mt-px"
@@ -119,14 +119,13 @@ const ResetPassword: React.FC = () => {
                           {intl.formatMessage(messages.password)}
                         </label>
                         <div className="mt-1 mb-2 sm:mt-0 sm:col-span-2">
-                          <div className="flex max-w-lg rounded-md shadow-sm">
-                            <Field
+                          <div className="form-input-field">
+                            <SensitiveInput
+                              as="field"
                               id="password"
                               name="password"
                               type="password"
-                              placeholder={intl.formatMessage(
-                                messages.password
-                              )}
+                              autoComplete="new-password"
                               className="flex-1 block w-full min-w-0 text-white transition duration-150 ease-in-out bg-gray-700 border border-gray-500 rounded-md form-input sm:text-sm sm:leading-5"
                             />
                           </div>
@@ -141,12 +140,13 @@ const ResetPassword: React.FC = () => {
                           {intl.formatMessage(messages.confirmpassword)}
                         </label>
                         <div className="mt-1 mb-2 sm:mt-0 sm:col-span-2">
-                          <div className="flex max-w-lg rounded-md shadow-sm">
-                            <Field
+                          <div className="form-input-field">
+                            <SensitiveInput
+                              as="field"
                               id="confirmPassword"
                               name="confirmPassword"
-                              placeholder="Confirm Password"
                               type="password"
+                              autoComplete="new-password"
                               className="flex-1 block w-full min-w-0 text-white transition duration-150 ease-in-out bg-gray-700 border border-gray-500 rounded-md form-input sm:text-sm sm:leading-5"
                             />
                           </div>
@@ -166,7 +166,12 @@ const ResetPassword: React.FC = () => {
                               type="submit"
                               disabled={isSubmitting || !isValid}
                             >
-                              {intl.formatMessage(messages.resetpassword)}
+                              <SupportIcon />
+                              <span>
+                                {isSubmitting
+                                  ? intl.formatMessage(globalMessages.saving)
+                                  : intl.formatMessage(globalMessages.save)}
+                              </span>
                             </Button>
                           </span>
                         </div>

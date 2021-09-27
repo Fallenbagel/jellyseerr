@@ -1,23 +1,42 @@
-import React from 'react';
+import { sortBy } from 'lodash';
+import React, { useMemo, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
+import useSettings from '../../hooks/useSettings';
+import { Permission, User, useUser } from '../../hooks/useUser';
 import NotificationType from './NotificationType';
 
 const messages = defineMessages({
+  notificationTypes: 'Notification Types',
   mediarequested: 'Media Requested',
   mediarequestedDescription:
-    'Sends a notification when media is requested and requires approval.',
+    'Send notifications when users submit new media requests which require approval.',
+  usermediarequestedDescription:
+    'Get notified when other users submit new media requests which require approval.',
   mediaapproved: 'Media Approved',
   mediaapprovedDescription:
-    'Sends a notification when media is approved.\
-    By default, automatically approved requests will not trigger notifications.',
+    'Send notifications when media requests are manually approved.',
+  usermediaapprovedDescription:
+    'Get notified when your media requests are approved.',
+  mediaAutoApproved: 'Media Automatically Approved',
+  mediaAutoApprovedDescription:
+    'Send notifications when users submit new media requests which are automatically approved.',
+  usermediaAutoApprovedDescription:
+    'Get notified when other users submit new media requests which are automatically approved.',
   mediaavailable: 'Media Available',
   mediaavailableDescription:
-    'Sends a notification when media becomes available.',
+    'Send notifications when media requests become available.',
+  usermediaavailableDescription:
+    'Get notified when your media requests become available.',
   mediafailed: 'Media Failed',
   mediafailedDescription:
-    'Sends a notification when media fails to be added to Radarr or Sonarr.',
+    'Send notifications when media requests fail to be added to Radarr or Sonarr.',
+  usermediafailedDescription:
+    'Get notified when media requests fail to be added to Radarr or Sonarr.',
   mediadeclined: 'Media Declined',
-  mediadeclinedDescription: 'Sends a notification when a request is declined.',
+  mediadeclinedDescription:
+    'Send notifications when media requests are declined.',
+  usermediadeclinedDescription:
+    'Get notified when your media requests are declined.',
 });
 
 export const hasNotificationType = (
@@ -26,91 +45,235 @@ export const hasNotificationType = (
 ): boolean => {
   let total = 0;
 
+  // If we are not checking any notifications, bail out and return true
   if (types === 0) {
     return true;
   }
 
   if (Array.isArray(types)) {
+    // Combine all notification values into one
     total = types.reduce((a, v) => a + v, 0);
   } else {
     total = types;
+  }
+
+  // Test notifications don't need to be enabled
+  if (!(value & Notification.TEST_NOTIFICATION)) {
+    value += Notification.TEST_NOTIFICATION;
   }
 
   return !!(value & total);
 };
 
 export enum Notification {
+  NONE = 0,
   MEDIA_PENDING = 2,
   MEDIA_APPROVED = 4,
   MEDIA_AVAILABLE = 8,
   MEDIA_FAILED = 16,
   TEST_NOTIFICATION = 32,
   MEDIA_DECLINED = 64,
+  MEDIA_AUTO_APPROVED = 128,
 }
+
+export const ALL_NOTIFICATIONS = Object.values(Notification)
+  .filter((v) => !isNaN(Number(v)))
+  .reduce((a, v) => a + Number(v), 0);
 
 export interface NotificationItem {
   id: string;
   name: string;
   description: string;
   value: Notification;
+  hasNotifyUser?: boolean;
   children?: NotificationItem[];
+  hidden?: boolean;
 }
 
 interface NotificationTypeSelectorProps {
+  user?: User;
+  enabledTypes?: number;
   currentTypes: number;
   onUpdate: (newTypes: number) => void;
+  error?: string;
 }
 
 const NotificationTypeSelector: React.FC<NotificationTypeSelectorProps> = ({
+  user,
+  enabledTypes = ALL_NOTIFICATIONS,
   currentTypes,
   onUpdate,
+  error,
 }) => {
   const intl = useIntl();
+  const settings = useSettings();
+  const { hasPermission } = useUser({ id: user?.id });
+  const [allowedTypes, setAllowedTypes] = useState(enabledTypes);
 
-  const types: NotificationItem[] = [
-    {
-      id: 'media-requested',
-      name: intl.formatMessage(messages.mediarequested),
-      description: intl.formatMessage(messages.mediarequestedDescription),
-      value: Notification.MEDIA_PENDING,
-    },
-    {
-      id: 'media-approved',
-      name: intl.formatMessage(messages.mediaapproved),
-      description: intl.formatMessage(messages.mediaapprovedDescription),
-      value: Notification.MEDIA_APPROVED,
-    },
-    {
-      id: 'media-declined',
-      name: intl.formatMessage(messages.mediadeclined),
-      description: intl.formatMessage(messages.mediadeclinedDescription),
-      value: Notification.MEDIA_DECLINED,
-    },
-    {
-      id: 'media-available',
-      name: intl.formatMessage(messages.mediaavailable),
-      description: intl.formatMessage(messages.mediaavailableDescription),
-      value: Notification.MEDIA_AVAILABLE,
-    },
-    {
-      id: 'media-failed',
-      name: intl.formatMessage(messages.mediafailed),
-      description: intl.formatMessage(messages.mediafailedDescription),
-      value: Notification.MEDIA_FAILED,
-    },
-  ];
+  const availableTypes = useMemo(() => {
+    const allRequestsAutoApproved =
+      user &&
+      // Has Manage Requests perm, which grants all Auto-Approve perms
+      (hasPermission(Permission.MANAGE_REQUESTS) ||
+        // Cannot submit requests of any type
+        !hasPermission(
+          [
+            Permission.REQUEST,
+            Permission.REQUEST_MOVIE,
+            Permission.REQUEST_TV,
+            Permission.REQUEST_4K,
+            Permission.REQUEST_4K_MOVIE,
+            Permission.REQUEST_4K_TV,
+          ],
+          { type: 'or' }
+        ) ||
+        // Cannot submit non-4K movie requests OR has Auto-Approve perms for non-4K movies
+        ((!hasPermission([Permission.REQUEST, Permission.REQUEST_MOVIE], {
+          type: 'or',
+        }) ||
+          hasPermission(
+            [Permission.AUTO_APPROVE, Permission.AUTO_APPROVE_MOVIE],
+            { type: 'or' }
+          )) &&
+          // Cannot submit non-4K series requests OR has Auto-Approve perms for non-4K series
+          (!hasPermission([Permission.REQUEST, Permission.REQUEST_TV], {
+            type: 'or',
+          }) ||
+            hasPermission(
+              [Permission.AUTO_APPROVE, Permission.AUTO_APPROVE_TV],
+              { type: 'or' }
+            )) &&
+          // Cannot submit 4K movie requests OR has Auto-Approve perms for 4K movies
+          (!settings.currentSettings.movie4kEnabled ||
+            !hasPermission(
+              [Permission.REQUEST_4K, Permission.REQUEST_4K_MOVIE],
+              { type: 'or' }
+            ) ||
+            hasPermission(
+              [Permission.AUTO_APPROVE_4K, Permission.AUTO_APPROVE_4K_MOVIE],
+              { type: 'or' }
+            )) &&
+          // Cannot submit 4K series requests OR has Auto-Approve perms for 4K series
+          (!settings.currentSettings.series4kEnabled ||
+            !hasPermission([Permission.REQUEST_4K, Permission.REQUEST_4K_TV], {
+              type: 'or',
+            }) ||
+            hasPermission(
+              [Permission.AUTO_APPROVE_4K, Permission.AUTO_APPROVE_4K_TV],
+              { type: 'or' }
+            ))));
+
+    const types: NotificationItem[] = [
+      {
+        id: 'media-requested',
+        name: intl.formatMessage(messages.mediarequested),
+        description: intl.formatMessage(
+          user
+            ? messages.usermediarequestedDescription
+            : messages.mediarequestedDescription
+        ),
+        value: Notification.MEDIA_PENDING,
+        hidden: user && !hasPermission(Permission.MANAGE_REQUESTS),
+      },
+      {
+        id: 'media-auto-approved',
+        name: intl.formatMessage(messages.mediaAutoApproved),
+        description: intl.formatMessage(
+          user
+            ? messages.usermediaAutoApprovedDescription
+            : messages.mediaAutoApprovedDescription
+        ),
+        value: Notification.MEDIA_AUTO_APPROVED,
+        hidden: user && !hasPermission(Permission.MANAGE_REQUESTS),
+      },
+      {
+        id: 'media-approved',
+        name: intl.formatMessage(messages.mediaapproved),
+        description: intl.formatMessage(
+          user
+            ? messages.usermediaapprovedDescription
+            : messages.mediaapprovedDescription
+        ),
+        value: Notification.MEDIA_APPROVED,
+        hasNotifyUser: true,
+        hidden: allRequestsAutoApproved,
+      },
+      {
+        id: 'media-declined',
+        name: intl.formatMessage(messages.mediadeclined),
+        description: intl.formatMessage(
+          user
+            ? messages.usermediadeclinedDescription
+            : messages.mediadeclinedDescription
+        ),
+        value: Notification.MEDIA_DECLINED,
+        hasNotifyUser: true,
+        hidden: allRequestsAutoApproved,
+      },
+      {
+        id: 'media-available',
+        name: intl.formatMessage(messages.mediaavailable),
+        description: intl.formatMessage(
+          user
+            ? messages.usermediaavailableDescription
+            : messages.mediaavailableDescription
+        ),
+        value: Notification.MEDIA_AVAILABLE,
+        hasNotifyUser: true,
+      },
+      {
+        id: 'media-failed',
+        name: intl.formatMessage(messages.mediafailed),
+        description: intl.formatMessage(
+          user
+            ? messages.usermediafailedDescription
+            : messages.mediafailedDescription
+        ),
+        value: Notification.MEDIA_FAILED,
+        hidden: user && !hasPermission(Permission.MANAGE_REQUESTS),
+      },
+    ];
+
+    const filteredTypes = types.filter(
+      (type) => !type.hidden && hasNotificationType(type.value, enabledTypes)
+    );
+
+    const newAllowedTypes = filteredTypes.reduce((a, v) => a + v.value, 0);
+    if (newAllowedTypes !== allowedTypes) {
+      setAllowedTypes(newAllowedTypes);
+    }
+
+    return user
+      ? sortBy(filteredTypes, 'hasNotifyUser', 'DESC')
+      : filteredTypes;
+  }, [user, hasPermission, settings, intl, allowedTypes, enabledTypes]);
+
+  if (!availableTypes.length) {
+    return null;
+  }
 
   return (
-    <>
-      {types.map((type) => (
-        <NotificationType
-          key={`notification-type-${type.id}`}
-          option={type}
-          currentTypes={currentTypes}
-          onUpdate={onUpdate}
-        />
-      ))}
-    </>
+    <div role="group" aria-labelledby="group-label" className="form-group">
+      <div className="form-row">
+        <span id="group-label" className="group-label">
+          {intl.formatMessage(messages.notificationTypes)}
+          {!user && <span className="label-required">*</span>}
+        </span>
+        <div className="form-input">
+          <div className="max-w-lg">
+            {availableTypes.map((type) => (
+              <NotificationType
+                key={`notification-type-${type.id}`}
+                option={type}
+                currentTypes={currentTypes}
+                onUpdate={onUpdate}
+              />
+            ))}
+          </div>
+          {error && <div className="error">{error}</div>}
+        </div>
+      </div>
+    </div>
   );
 };
 

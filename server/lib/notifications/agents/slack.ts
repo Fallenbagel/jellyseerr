@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { hasNotificationType, Notification } from '..';
+import { MediaType } from '../../../constants/media';
 import logger from '../../../logger';
 import { getSettings, NotificationAgentSlack } from '../../settings';
 import { BaseAgent, NotificationAgent, NotificationPayload } from './agent';
@@ -66,41 +67,60 @@ class SlackAgent
     if (payload.request) {
       fields.push({
         type: 'mrkdwn',
-        text: `*Requested By*\n${payload.notifyUser.displayName ?? ''}`,
+        text: `*Requested By*\n${payload.request.requestedBy.displayName}`,
       });
     }
 
     switch (type) {
       case Notification.MEDIA_PENDING:
-        header = 'New Request';
+        header = `New ${
+          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
+        } Request`;
         fields.push({
           type: 'mrkdwn',
           text: '*Status*\nPending Approval',
         });
         break;
       case Notification.MEDIA_APPROVED:
-        header = 'Request Approved';
+        header = `${
+          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
+        } Request Approved`;
+        fields.push({
+          type: 'mrkdwn',
+          text: '*Status*\nProcessing',
+        });
+        break;
+      case Notification.MEDIA_AUTO_APPROVED:
+        header = `${
+          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
+        } Request Automatically Approved`;
         fields.push({
           type: 'mrkdwn',
           text: '*Status*\nProcessing',
         });
         break;
       case Notification.MEDIA_AVAILABLE:
-        header = 'Now Available';
+        header = `${
+          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
+        } Now Available`;
         fields.push({
           type: 'mrkdwn',
           text: '*Status*\nAvailable',
         });
         break;
       case Notification.MEDIA_DECLINED:
-        header = 'Request Declined';
+        header = `${
+          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
+        } Request Declined`;
         fields.push({
           type: 'mrkdwn',
           text: '*Status*\nDeclined',
         });
         break;
       case Notification.MEDIA_FAILED:
-        header = 'Failed Request';
+        header = `Failed ${
+          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
+        } Request`;
         fields.push({
           type: 'mrkdwn',
           text: '*Status*\nFailed',
@@ -109,6 +129,13 @@ class SlackAgent
       case Notification.TEST_NOTIFICATION:
         header = 'Test Notification';
         break;
+    }
+
+    for (const extra of payload.extra ?? []) {
+      fields.push({
+        type: 'mrkdwn',
+        text: `*${extra.name}*\n${extra.value}`,
+      });
     }
 
     if (settings.main.applicationUrl && payload.media) {
@@ -190,12 +217,10 @@ class SlackAgent
     };
   }
 
-  public shouldSend(type: Notification): boolean {
-    if (
-      this.getSettings().enabled &&
-      this.getSettings().options.webhookUrl &&
-      hasNotificationType(type, this.getSettings().types)
-    ) {
+  public shouldSend(): boolean {
+    const settings = this.getSettings();
+
+    if (settings.enabled && settings.options.webhookUrl) {
       return true;
     }
 
@@ -206,22 +231,33 @@ class SlackAgent
     type: Notification,
     payload: NotificationPayload
   ): Promise<boolean> {
-    logger.debug('Sending slack notification', { label: 'Notifications' });
+    const settings = this.getSettings();
+
+    if (!hasNotificationType(type, settings.types ?? 0)) {
+      return true;
+    }
+
+    logger.debug('Sending Slack notification', {
+      label: 'Notifications',
+      type: Notification[type],
+      subject: payload.subject,
+    });
     try {
-      const webhookUrl = this.getSettings().options.webhookUrl;
-
-      if (!webhookUrl) {
-        return false;
-      }
-
-      await axios.post(webhookUrl, this.buildEmbed(type, payload));
+      await axios.post(
+        settings.options.webhookUrl,
+        this.buildEmbed(type, payload)
+      );
 
       return true;
     } catch (e) {
       logger.error('Error sending Slack notification', {
         label: 'Notifications',
-        message: e.message,
+        type: Notification[type],
+        subject: payload.subject,
+        errorMessage: e.message,
+        response: e.response?.data,
       });
+
       return false;
     }
   }

@@ -1,15 +1,14 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { useContext } from 'react';
+import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
 import type { TvDetails } from '../../../../server/models/Tv';
-import { LanguageContext } from '../../../context/LanguageContext';
 import Error from '../../../pages/_error';
 import Header from '../../Common/Header';
 import LoadingSpinner from '../../Common/LoadingSpinner';
-import PersonCard from '../../PersonCard';
 import PageTitle from '../../Common/PageTitle';
+import PersonCard from '../../PersonCard';
 
 const messages = defineMessages({
   fullseriescast: 'Full Series Cast',
@@ -18,10 +17,7 @@ const messages = defineMessages({
 const TvCast: React.FC = () => {
   const router = useRouter();
   const intl = useIntl();
-  const { locale } = useContext(LanguageContext);
-  const { data, error } = useSWR<TvDetails>(
-    `/api/v1/tv/${router.query.tvId}?language=${locale}`
-  );
+  const { data, error } = useSWR<TvDetails>(`/api/v1/tv/${router.query.tvId}`);
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -47,7 +43,7 @@ const TvCast: React.FC = () => {
           {intl.formatMessage(messages.fullseriescast)}
         </Header>
       </div>
-      <ul className="cardList">
+      <ul className="cards-vertical">
         {data?.credits.cast.map((person) => {
           return (
             <li key={person.id}>

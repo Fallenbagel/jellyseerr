@@ -13,7 +13,7 @@ const TH: React.FC<AllHTMLAttributes<HTMLTableHeaderCellElement>> = ({
   ...props
 }) => {
   const style = [
-    'px-6 py-3 bg-gray-500 text-left text-xs leading-4 font-medium text-gray-200 uppercase tracking-wider',
+    'px-4 py-3 bg-gray-500 text-left text-xs leading-4 font-medium text-gray-200 uppercase tracking-wider truncate',
   ];
 
   if (className) {
@@ -39,7 +39,7 @@ const TD: React.FC<TDProps> = ({
   className,
   ...props
 }) => {
-  const style = ['whitespace-nowrap text-sm leading-5 text-white'];
+  const style = ['text-sm leading-5 text-white'];
 
   switch (alignText) {
     case 'left':
@@ -54,7 +54,7 @@ const TD: React.FC<TDProps> = ({
   }
 
   if (!noPadding) {
-    style.push('px-6 py-4');
+    style.push('px-4 py-4');
   }
 
   if (className) {
@@ -73,7 +73,7 @@ const Table: React.FC = ({ children }) => {
     <div className="flex flex-col">
       <div className="my-2 -mx-4 overflow-x-auto md:mx-0 lg:mx-0">
         <div className="inline-block min-w-full py-2 align-middle">
-          <div className="overflow-hidden shadow sm:rounded-lg">
+          <div className="overflow-hidden rounded-lg shadow md:mx-0 lg:mx-0">
             <table className="min-w-full">{children}</table>
           </div>
         </div>

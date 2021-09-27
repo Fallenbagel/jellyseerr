@@ -1,29 +1,38 @@
-import React, { useState } from 'react';
-import useSWR from 'swr';
-import LoadingSpinner from '../Common/LoadingSpinner';
-import Badge from '../Common/Badge';
-import { FormattedDate, defineMessages, useIntl } from 'react-intl';
-import Button from '../Common/Button';
-import { hasPermission } from '../../../server/lib/permissions';
-import { Permission, User, UserType, useUser } from '../../hooks/useUser';
+import { TrashIcon } from '@heroicons/react/outline';
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  PencilIcon,
+  SortDescendingIcon,
+  UserAddIcon,
+} from '@heroicons/react/solid';
+import axios from 'axios';
+import { Field, Form, Formik } from 'formik';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
+import { defineMessages, useIntl } from 'react-intl';
+import { useToasts } from 'react-toast-notifications';
+import useSWR from 'swr';
+import * as Yup from 'yup';
+import { MediaServerType } from '../../../server/constants/server';
+import type { UserResultsResponse } from '../../../server/interfaces/api/userInterfaces';
+import { hasPermission } from '../../../server/lib/permissions';
+import useSettings from '../../hooks/useSettings';
+import { useUpdateQueryParams } from '../../hooks/useUpdateQueryParams';
+import { Permission, User, UserType, useUser } from '../../hooks/useUser';
+import globalMessages from '../../i18n/globalMessages';
+import Alert from '../Common/Alert';
+import Badge from '../Common/Badge';
+import Button from '../Common/Button';
 import Header from '../Common/Header';
+import LoadingSpinner from '../Common/LoadingSpinner';
+import Modal from '../Common/Modal';
+import PageTitle from '../Common/PageTitle';
+import SensitiveInput from '../Common/SensitiveInput';
 import Table from '../Common/Table';
 import Transition from '../Transition';
-import Modal from '../Common/Modal';
-import axios from 'axios';
-import { useToasts } from 'react-toast-notifications';
-import globalMessages from '../../i18n/globalMessages';
-import { Field, Form, Formik } from 'formik';
-import * as Yup from 'yup';
-import AddUserIcon from '../../assets/useradd.svg';
-import Alert from '../Common/Alert';
 import BulkEditModal from './BulkEditModal';
-import PageTitle from '../Common/PageTitle';
-import Link from 'next/link';
-import type { UserResultsResponse } from '../../../server/interfaces/api/userInterfaces';
-import useSettings from '../../hooks/useSettings';
-import { MediaServerType } from '../../../server/constants/server';
 
 const messages = defineMessages({
   users: 'Users',
@@ -31,48 +40,47 @@ const messages = defineMessages({
   importfromplex: 'Import Users from Plex',
   importfromplexerror: 'Something went wrong while importing users from Plex.',
   importedfromplex:
-    '{userCount, plural, =0 {No new users} one {# new user} other {# new users}} imported from Plex.',
+    '{userCount, plural, one {# new user} other {# new users}} imported from Plex successfully!',
+  nouserstoimport: 'No new users to import from Plex.',
   user: 'User',
-  totalrequests: 'Total Requests',
-  usertype: 'User Type',
+  totalrequests: 'Requests',
+  accounttype: 'Type',
   role: 'Role',
   created: 'Created',
-  lastupdated: 'Last Updated',
-  edit: 'Edit',
+  lastupdated: 'Updated',
   bulkedit: 'Bulk Edit',
-  delete: 'Delete',
+  owner: 'Owner',
   admin: 'Admin',
   plexuser: 'Plex User',
   deleteuser: 'Delete User',
-  userdeleted: 'User deleted',
+  userdeleted: 'User deleted successfully!',
   userdeleteerror: 'Something went wrong while deleting the user.',
   deleteconfirm:
-    'Are you sure you want to delete this user? All existing request data from this user will be removed.',
+    'Are you sure you want to delete this user? All of their request data will be permanently removed.',
   localuser: 'Local User',
   createlocaluser: 'Create Local User',
-  createuser: 'Create User',
   creating: 'Creating…',
   create: 'Create',
   validationpasswordminchars:
     'Password is too short; should be a minimum of 8 characters',
   usercreatedfailed: 'Something went wrong while creating the user.',
+  usercreatedfailedexisting:
+    'The provided email address is already in use by another user.',
   usercreatedsuccess: 'User created successfully!',
+  displayName: 'Display Name',
   email: 'Email Address',
   password: 'Password',
-  passwordinfo: 'Password Information',
   passwordinfodescription:
-    'Email notifications need to be configured and enabled in order to automatically generate passwords.',
-  autogeneratepassword: 'Automatically generate password',
+    'Configure an application URL and enable email notifications to allow automatic password generation.',
+  autogeneratepassword: 'Automatically Generate Password',
+  autogeneratepasswordTip: 'Email a server-generated password to the user',
   validationEmail: 'You must provide a valid email address',
   sortCreated: 'Creation Date',
   sortUpdated: 'Last Updated',
   sortDisplayName: 'Display Name',
   sortRequests: 'Request Count',
-  next: 'Next',
-  previous: 'Previous',
-  showingresults:
-    'Showing <strong>{from}</strong> to <strong>{to}</strong> of <strong>{total}</strong> results',
-  resultsperpage: 'Display {pageSize} results per page',
+  localLoginDisabled:
+    'The <strong>Enable Local Sign-In</strong> setting is currently disabled.',
 });
 
 type Sort = 'created' | 'updated' | 'requests' | 'displayname';
@@ -82,9 +90,13 @@ const UserList: React.FC = () => {
   const router = useRouter();
   const settings = useSettings();
   const { addToast } = useToasts();
-  const [pageIndex, setPageIndex] = useState(0);
+  const { user: currentUser, hasPermission: currentHasPermission } = useUser();
   const [currentSort, setCurrentSort] = useState<Sort>('created');
   const [currentPageSize, setCurrentPageSize] = useState<number>(10);
+
+  const page = router.query.page ? Number(router.query.page) : 1;
+  const pageIndex = page - 1;
+  const updateQueryParams = useUpdateQueryParams({ page: page.toString() });
 
   const { data, error, revalidate } = useSWR<UserResultsResponse>(
     `/api/v1/user?take=${currentPageSize}&skip=${
@@ -107,7 +119,27 @@ const UserList: React.FC = () => {
   });
   const [showBulkEditModal, setShowBulkEditModal] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
-  const { user: currentUser } = useUser();
+
+  useEffect(() => {
+    const filterString = window.localStorage.getItem('ul-filter-settings');
+
+    if (filterString) {
+      const filterSettings = JSON.parse(filterString);
+
+      setCurrentSort(filterSettings.currentSort);
+      setCurrentPageSize(filterSettings.currentPageSize);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      'ul-filter-settings',
+      JSON.stringify({
+        currentSort,
+        currentPageSize,
+      })
+    );
+  }, [currentSort, currentPageSize]);
 
   const isUserPermsEditable = (userId: number) =>
     userId !== 1 && userId !== currentUser?.id;
@@ -171,9 +203,11 @@ const UserList: React.FC = () => {
         '/api/v1/user/import-from-plex'
       );
       addToast(
-        intl.formatMessage(messages.importedfromplex, {
-          userCount: createdUsers.length,
-        }),
+        createdUsers.length
+          ? intl.formatMessage(messages.importedfromplex, {
+              userCount: createdUsers.length,
+            })
+          : intl.formatMessage(messages.nouserstoimport),
         {
           autoDismiss: true,
           appearance: 'success',
@@ -215,6 +249,10 @@ const UserList: React.FC = () => {
   const hasNextPage = data.pageInfo.pages > pageIndex + 1;
   const hasPrevPage = pageIndex > 0;
 
+  const passwordGenerationEnabled =
+    settings.currentSettings.applicationUrl &&
+    settings.currentSettings.emailEnabled;
+
   return (
     <>
       <PageTitle title={intl.formatMessage(messages.users)} />
@@ -238,22 +276,7 @@ const UserList: React.FC = () => {
           okButtonType="danger"
           onCancel={() => setDeleteModal({ isOpen: false })}
           title={intl.formatMessage(messages.deleteuser)}
-          iconSvg={
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
-          }
+          iconSvg={<TrashIcon />}
         >
           {intl.formatMessage(messages.deleteconfirm)}
         </Modal>
@@ -270,14 +293,16 @@ const UserList: React.FC = () => {
       >
         <Formik
           initialValues={{
+            displayName: '',
             email: '',
             password: '',
-            genpassword: true,
+            genpassword: false,
           }}
           validationSchema={CreateUserSchema}
           onSubmit={async (values) => {
             try {
               await axios.post('/api/v1/user', {
+                username: values.displayName,
                 email: values.email,
                 password: values.genpassword ? null : values.password,
               });
@@ -287,10 +312,17 @@ const UserList: React.FC = () => {
               });
               setCreateModal({ isOpen: false });
             } catch (e) {
-              addToast(intl.formatMessage(messages.usercreatedfailed), {
-                appearance: 'error',
-                autoDismiss: true,
-              });
+              addToast(
+                intl.formatMessage(
+                  e.response.data.errors?.includes('USER_EXISTS')
+                    ? messages.usercreatedfailedexisting
+                    : messages.usercreatedfailed
+                ),
+                {
+                  appearance: 'error',
+                  autoDismiss: true,
+                }
+              );
             } finally {
               revalidate();
             }
@@ -307,8 +339,8 @@ const UserList: React.FC = () => {
           }) => {
             return (
               <Modal
-                title={intl.formatMessage(messages.createuser)}
-                iconSvg={<AddUserIcon className="h-6" />}
+                title={intl.formatMessage(messages.createlocaluser)}
+                iconSvg={<UserAddIcon />}
                 onOk={() => handleSubmit()}
                 okText={
                   isSubmitting
@@ -319,21 +351,56 @@ const UserList: React.FC = () => {
                 okButtonType="primary"
                 onCancel={() => setCreateModal({ isOpen: false })}
               >
-                <Alert title={intl.formatMessage(messages.passwordinfo)}>
-                  {intl.formatMessage(messages.passwordinfodescription)}
-                </Alert>
+                {!settings.currentSettings.localLogin && (
+                  <Alert
+                    title={intl.formatMessage(messages.localLoginDisabled, {
+                      strong: function strong(msg) {
+                        return (
+                          <strong className="font-semibold text-yellow-100">
+                            {msg}
+                          </strong>
+                        );
+                      },
+                    })}
+                    type="warning"
+                  />
+                )}
+                {currentHasPermission(Permission.MANAGE_SETTINGS) &&
+                  !passwordGenerationEnabled && (
+                    <Alert
+                      title={intl.formatMessage(
+                        messages.passwordinfodescription
+                      )}
+                      type="info"
+                    />
+                  )}
                 <Form className="section">
+                  <div className="form-row">
+                    <label htmlFor="displayName" className="text-label">
+                      {intl.formatMessage(messages.displayName)}
+                    </label>
+                    <div className="form-input">
+                      <div className="form-input-field">
+                        <Field
+                          id="displayName"
+                          name="displayName"
+                          type="text"
+                        />
+                      </div>
+                    </div>
+                  </div>
                   <div className="form-row">
                     <label htmlFor="email" className="text-label">
                       {intl.formatMessage(messages.email)}
+                      <span className="label-required">*</span>
                     </label>
                     <div className="form-input">
-                      <div className="flex max-w-lg rounded-md shadow-sm">
+                      <div className="form-input-field">
                         <Field
                           id="email"
                           name="email"
                           type="text"
-                          placeholder="name@example.com"
+                          inputMode="email"
                         />
                       </div>
                       {errors.email && touched.email && (
@@ -341,31 +408,47 @@ const UserList: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  <div className="form-row">
+                  <div
+                    className={`form-row ${
+                      passwordGenerationEnabled ? '' : 'opacity-50'
+                    }`}
+                  >
                     <label htmlFor="genpassword" className="checkbox-label">
                       {intl.formatMessage(messages.autogeneratepassword)}
+                      <span className="label-tip">
+                        {intl.formatMessage(messages.autogeneratepasswordTip)}
+                      </span>
                     </label>
                     <div className="form-input">
                       <Field
                         type="checkbox"
                         id="genpassword"
                         name="genpassword"
+                        disabled={!passwordGenerationEnabled}
                         onClick={() => setFieldValue('password', '')}
                       />
                     </div>
                   </div>
-                  <div className="form-row">
+                  <div
+                    className={`form-row ${
+                      values.genpassword ? 'opacity-50' : ''
+                    }`}
+                  >
                     <label htmlFor="password" className="text-label">
                       {intl.formatMessage(messages.password)}
+                      {!values.genpassword && (
+                        <span className="label-required">*</span>
+                      )}
                     </label>
                     <div className="form-input">
-                      <div className="flex max-w-lg rounded-md shadow-sm">
-                        <Field
+                      <div className="form-input-field">
+                        <SensitiveInput
+                          as="field"
                           id="password"
                           name="password"
                           type="password"
+                          autoComplete="new-password"
                           disabled={values.genpassword}
-                          placeholder={intl.formatMessage(messages.password)}
                         />
                       </div>
                       {errors.password && touched.password && (
@@ -403,13 +486,14 @@ const UserList: React.FC = () => {
       <div className="flex flex-col justify-between lg:items-end lg:flex-row">
         <Header>{intl.formatMessage(messages.userlist)}</Header>
         <div className="flex flex-col flex-grow mt-2 lg:flex-row lg:flex-grow-0">
-          <div className="flex flex-row justify-between flex-grow mb-2 lg:mb-0 lg:flex-grow-0">
+          <div className="flex flex-col justify-between flex-grow mb-2 sm:flex-row lg:mb-0 lg:flex-grow-0">
             <Button
-              className="flex-grow mr-2 outline"
+              className="flex-grow mb-2 sm:mb-0 sm:mr-2 outline"
               buttonType="primary"
               onClick={() => setCreateModal({ isOpen: true })}
             >
-              {intl.formatMessage(messages.createlocaluser)}
+              <UserAddIcon />
+              <span>{intl.formatMessage(messages.createlocaluser)}</span>
             </Button>
             {settings.currentSettings.mediaServerType ==
               MediaServerType.PLEX && (
@@ -425,21 +509,14 @@ const UserList: React.FC = () => {
           </div>
           <div className="flex flex-grow mb-2 lg:mb-0 lg:flex-grow-0">
             <span className="inline-flex items-center px-3 text-sm text-gray-100 bg-gray-800 border border-r-0 border-gray-500 cursor-default rounded-l-md">
-              <svg
-                className="w-6 h-6"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h7a1 1 0 100-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z" />
-              </svg>
+              <SortDescendingIcon className="w-6 h-6" />
             </span>
             <select
               id="sort"
               name="sort"
               onChange={(e) => {
-                setPageIndex(0);
                 setCurrentSort(e.target.value as Sort);
+                router.push(router.pathname);
               }}
               value={currentSort}
               className="rounded-r-only"
@@ -478,7 +555,7 @@ const UserList: React.FC = () => {
             </Table.TH>
             <Table.TH>{intl.formatMessage(messages.user)}</Table.TH>
             <Table.TH>{intl.formatMessage(messages.totalrequests)}</Table.TH>
-            <Table.TH>{intl.formatMessage(messages.usertype)}</Table.TH>
+            <Table.TH>{intl.formatMessage(messages.accounttype)}</Table.TH>
             <Table.TH>{intl.formatMessage(messages.role)}</Table.TH>
             <Table.TH>{intl.formatMessage(messages.created)}</Table.TH>
             <Table.TH>{intl.formatMessage(messages.lastupdated)}</Table.TH>
@@ -489,7 +566,8 @@ const UserList: React.FC = () => {
                   onClick={() => setShowBulkEditModal(true)}
                   disabled={selectedUsers.length === 0}
                 >
-                  {intl.formatMessage(messages.bulkedit)}
+                  <PencilIcon />
+                  <span>{intl.formatMessage(messages.bulkedit)}</span>
                 </Button>
               )}
             </Table.TH>
@@ -524,18 +602,32 @@ const UserList: React.FC = () => {
                   </Link>
                   <div className="ml-4">
                     <Link href={`/users/${user.id}`}>
-                      <a className="text-sm font-medium leading-5">
+                      <a className="text-base font-bold leading-5 transition duration-300 hover:underline">
                         {user.displayName}
                       </a>
                     </Link>
-                    <div className="text-sm leading-5 text-gray-300">
-                      {user.email}
-                    </div>
+                    {user.displayName.toLowerCase() !== user.email && (
+                      <div className="text-sm leading-5 text-gray-300">
+                        {user.email}
+                      </div>
+                    )}
                   </div>
                 </div>
               </Table.TD>
               <Table.TD>
-                <div className="text-sm leading-5">{user.requestCount}</div>
+                {user.id === currentUser?.id ||
+                currentHasPermission(
+                  [Permission.MANAGE_REQUESTS, Permission.REQUEST_VIEW],
+                  { type: 'or' }
+                ) ? (
+                  <Link href={`/users/${user.id}/requests`}>
+                    <a className="text-sm leading-5 transition duration-300 hover:underline">
+                      {user.requestCount}
+                    </a>
+                  </Link>
+                ) : (
+                  user.requestCount
+                )}
               </Table.TD>
               <Table.TD>
                 {user.userType === UserType.PLEX ? (
@@ -549,19 +641,30 @@ const UserList: React.FC = () => {
                 )}
               </Table.TD>
               <Table.TD>
-                {hasPermission(Permission.ADMIN, user.permissions)
+                {user.id === 1
+                  ? intl.formatMessage(messages.owner)
+                  : hasPermission(Permission.ADMIN, user.permissions)
                   ? intl.formatMessage(messages.admin)
                   : intl.formatMessage(messages.user)}
               </Table.TD>
               <Table.TD>
-                <FormattedDate value={user.createdAt} />
+                {intl.formatDate(user.createdAt, {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
               </Table.TD>
               <Table.TD>
-                <FormattedDate value={user.updatedAt} />
+                {intl.formatDate(user.updatedAt, {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
               </Table.TD>
               <Table.TD alignText="right">
                 <Button
                   buttonType="warning"
+                  disabled={user.id === 1 && currentUser?.id !== 1}
                   className="mr-2"
                   onClick={() =>
                     router.push(
@@ -570,14 +673,18 @@ const UserList: React.FC = () => {
                     )
                   }
                 >
-                  {intl.formatMessage(messages.edit)}
+                  {intl.formatMessage(globalMessages.edit)}
                 </Button>
                 <Button
                   buttonType="danger"
-                  disabled={hasPermission(Permission.ADMIN, user.permissions)}
+                  disabled={
+                    user.id === 1 ||
+                    (currentUser?.id !== 1 &&
+                      hasPermission(Permission.ADMIN, user.permissions))
+                  }
                   onClick={() => setDeleteModal({ isOpen: true, user })}
                 >
-                  {intl.formatMessage(messages.delete)}
+                  {intl.formatMessage(globalMessages.delete)}
                 </Button>
               </Table.TD>
             </tr>
@@ -591,7 +698,7 @@ const UserList: React.FC = () => {
                 <div className="hidden lg:flex lg:flex-1">
                   <p className="text-sm">
                     {data.results.length > 0 &&
-                      intl.formatMessage(messages.showingresults, {
+                      intl.formatMessage(globalMessages.showingresults, {
                         from: pageIndex * currentPageSize + 1,
                         to:
                           data.results.length < currentPageSize
@@ -606,14 +713,16 @@ const UserList: React.FC = () => {
                 </div>
                 <div className="flex justify-center sm:flex-1 sm:justify-start lg:justify-center">
                   <span className="items-center -mt-3 text-sm sm:-ml-4 lg:ml-0 sm:mt-0">
-                    {intl.formatMessage(messages.resultsperpage, {
+                    {intl.formatMessage(globalMessages.resultsperpage, {
                       pageSize: (
                         <select
                           id="pageSize"
                           name="pageSize"
                           onChange={(e) => {
-                            setPageIndex(0);
                             setCurrentPageSize(Number(e.target.value));
+                            router
+                              .push(router.pathname)
+                              .then(() => window.scrollTo(0, 0));
                           }}
                           value={currentPageSize}
                           className="inline short"
@@ -631,15 +740,21 @@ const UserList: React.FC = () => {
                 <div className="flex justify-center flex-auto space-x-2 sm:justify-end sm:flex-1">
                   <Button
                     disabled={!hasPrevPage}
-                    onClick={() => setPageIndex((current) => current - 1)}
+                    onClick={() =>
+                      updateQueryParams('page', (page - 1).toString())
+                    }
                   >
-                    {intl.formatMessage(messages.previous)}
+                    <ChevronLeftIcon />
+                    <span>{intl.formatMessage(globalMessages.previous)}</span>
                   </Button>
                   <Button
                     disabled={!hasNextPage}
-                    onClick={() => setPageIndex((current) => current + 1)}
+                    onClick={() =>
+                      updateQueryParams('page', (page + 1).toString())
+                    }
                   >
-                    {intl.formatMessage(messages.next)}
+                    <span>{intl.formatMessage(globalMessages.next)}</span>
+                    <ChevronRightIcon />
                   </Button>
                 </div>
               </nav>

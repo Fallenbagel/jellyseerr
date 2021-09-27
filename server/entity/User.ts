@@ -1,28 +1,35 @@
+import bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
+import path from 'path';
+import { default as generatePassword } from 'secure-random-password';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
+  AfterLoad,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
+  Entity,
+  getRepository,
+  MoreThan,
+  Not,
   OneToMany,
-  RelationCount,
-  AfterLoad,
   OneToOne,
+  PrimaryGeneratedColumn,
+  RelationCount,
+  UpdateDateColumn,
 } from 'typeorm';
+import { MediaRequestStatus, MediaType } from '../constants/media';
+import { UserType } from '../constants/user';
+import { QuotaResponse } from '../interfaces/api/userInterfaces';
+import PreparedEmail from '../lib/email';
 import {
-  Permission,
   hasPermission,
+  Permission,
   PermissionCheckOptions,
 } from '../lib/permissions';
-import { MediaRequest } from './MediaRequest';
-import bcrypt from 'bcrypt';
-import path from 'path';
-import PreparedEmail from '../lib/email';
-import logger from '../logger';
 import { getSettings } from '../lib/settings';
-import { default as generatePassword } from 'secure-random-password';
-import { UserType } from '../constants/user';
-import { v4 as uuid } from 'uuid';
+import logger from '../logger';
+import { MediaRequest } from './MediaRequest';
+import SeasonRequest from './SeasonRequest';
+import { UserPushSubscription } from './UserPushSubscription';
 import { UserSettings } from './UserSettings';
 
 @Entity()
@@ -41,11 +48,17 @@ export class User {
   @PrimaryGeneratedColumn()
   public id: number;
 
-  @Column({ unique: true })
+  @Column({
+    unique: true,
+    transformer: {
+      from: (value: string): string => (value ?? '').toLowerCase(),
+      to: (value: string): string => (value ?? '').toLowerCase(),
+    },
+  })
   public email: string;
 
   @Column({ nullable: true })
-  public plexUsername: string;
+  public plexUsername?: string;
 
   @Column({ nullable: true })
   public jellyfinUsername: string;
@@ -92,12 +105,27 @@ export class User {
   @OneToMany(() => MediaRequest, (request) => request.requestedBy)
   public requests: MediaRequest[];
 
+  @Column({ nullable: true })
+  public movieQuotaLimit?: number;
+
+  @Column({ nullable: true })
+  public movieQuotaDays?: number;
+
+  @Column({ nullable: true })
+  public tvQuotaLimit?: number;
+
+  @Column({ nullable: true })
+  public tvQuotaDays?: number;
+
   @OneToOne(() => UserSettings, (settings) => settings.user, {
     cascade: true,
     eager: true,
     onDelete: 'CASCADE',
   })
   public settings?: UserSettings;
+
+  @OneToMany(() => UserPushSubscription, (pushSub) => pushSub.user)
+  public pushSubscriptions: UserPushSubscription[];
 
   @CreateDateColumn()
   public createdAt: Date;
@@ -151,7 +179,8 @@ export class User {
       logger.info(`Sending generated password email for ${this.email}`, {
         label: 'User Management',
       });
-      const email = new PreparedEmail();
+
+      const email = new PreparedEmail(getSettings().notifications.agents.email);
       await email.send({
         template: path.join(__dirname, '../templates/email/generatedpassword'),
         message: {
@@ -172,7 +201,7 @@ export class User {
   }
 
   public async resetPassword(): Promise<void> {
-    const guid = uuid();
+    const guid = randomUUID();
     this.resetPasswordGuid = guid;
 
     // 24 hours into the future
@@ -187,7 +216,7 @@ export class User {
       logger.info(`Sending reset password email for ${this.email}`, {
         label: 'User Management',
       });
-      const email = new PreparedEmail();
+      const email = new PreparedEmail(getSettings().notifications.agents.email);
       await email.send({
         template: path.join(__dirname, '../templates/email/resetpassword'),
         message: {
@@ -195,7 +224,7 @@ export class User {
         },
         locals: {
           resetPasswordLink,
-          applicationUrl: resetPasswordLink,
+          applicationUrl,
           applicationTitle,
         },
       });
@@ -211,5 +240,104 @@ export class User {
   public setDisplayName(): void {
     this.displayName =
       this.username || this.plexUsername || this.jellyfinUsername;
+    this.displayName = this.username || this.plexUsername || this.email;
+  }
+
+  public async getQuota(): Promise<QuotaResponse> {
+    const {
+      main: { defaultQuotas },
+    } = getSettings();
+    const requestRepository = getRepository(MediaRequest);
+    const canBypass = this.hasPermission([Permission.MANAGE_USERS], {
+      type: 'or',
+    });
+
+    const movieQuotaLimit = !canBypass
+      ? this.movieQuotaLimit ?? defaultQuotas.movie.quotaLimit
+      : 0;
+    const movieQuotaDays = this.movieQuotaDays ?? defaultQuotas.movie.quotaDays;
+
+    // Count movie requests made during quota period
+    const movieDate = new Date();
+    if (movieQuotaDays) {
+      movieDate.setDate(movieDate.getDate() - movieQuotaDays);
+    }
+    const movieQuotaStartDate = movieDate.toJSON();
+
+    const movieQuotaUsed = movieQuotaLimit
+      ? await requestRepository.count({
+          where: {
+            requestedBy: this,
+            createdAt: MoreThan(movieQuotaStartDate),
+            type: MediaType.MOVIE,
+            status: Not(MediaRequestStatus.DECLINED),
+          },
+        })
+      : 0;
+
+    const tvQuotaLimit = !canBypass
+      ? this.tvQuotaLimit ?? defaultQuotas.tv.quotaLimit
+      : 0;
+    const tvQuotaDays = this.tvQuotaDays ?? defaultQuotas.tv.quotaDays;
+
+    // Count tv season requests made during quota period
+    const tvDate = new Date();
+    if (tvQuotaDays) {
+      tvDate.setDate(tvDate.getDate() - tvQuotaDays);
+    }
+    const tvQuotaStartDate = tvDate.toJSON();
+    const tvQuotaUsed = tvQuotaLimit
+      ? (
+          await requestRepository
+            .createQueryBuilder('request')
+            .leftJoin('request.seasons', 'seasons')
+            .leftJoin('request.requestedBy', 'requestedBy')
+            .where('request.type = :requestType', {
+              requestType: MediaType.TV,
+            })
+            .andWhere('requestedBy.id = :userId', {
+              userId: this.id,
+            })
+            .andWhere('request.createdAt > :date', {
+              date: tvQuotaStartDate,
+            })
+            .andWhere('request.status != :declinedStatus', {
+              declinedStatus: MediaRequestStatus.DECLINED,
+            })
+            .addSelect((subQuery) => {
+              return subQuery
+                .select('COUNT(season.id)', 'seasonCount')
+                .from(SeasonRequest, 'season')
+                .leftJoin('season.request', 'parentRequest')
+                .where('parentRequest.id = request.id');
+            }, 'seasonCount')
+            .getMany()
+        ).reduce((sum: number, req: MediaRequest) => sum + req.seasonCount, 0)
+      : 0;
+
+    return {
+      movie: {
+        days: movieQuotaDays,
+        limit: movieQuotaLimit,
+        used: movieQuotaUsed,
+        remaining: movieQuotaLimit
+          ? Math.max(0, movieQuotaLimit - movieQuotaUsed)
+          : undefined,
+        restricted:
+          movieQuotaLimit && movieQuotaLimit - movieQuotaUsed <= 0
+            ? true
+            : false,
+      },
+      tv: {
+        days: tvQuotaDays,
+        limit: tvQuotaLimit,
+        used: tvQuotaUsed,
+        remaining: tvQuotaLimit
+          ? Math.max(0, tvQuotaLimit - tvQuotaUsed)
+          : undefined,
+        restricted:
+          tvQuotaLimit && tvQuotaLimit - tvQuotaUsed <= 0 ? true : false,
+      },
+    };
   }
 }

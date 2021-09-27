@@ -1,26 +1,36 @@
+import { InformationCircleIcon } from '@heroicons/react/solid';
 import React from 'react';
+import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
+import {
+  SettingsAboutResponse,
+  StatusResponse,
+} from '../../../../server/interfaces/api/settingsInterfaces';
+import globalMessages from '../../../i18n/globalMessages';
 import Error from '../../../pages/_error';
+import Badge from '../../Common/Badge';
 import List from '../../Common/List';
 import LoadingSpinner from '../../Common/LoadingSpinner';
-import { SettingsAboutResponse } from '../../../../server/interfaces/api/settingsInterfaces';
-import { defineMessages, FormattedNumber, useIntl } from 'react-intl';
+import PageTitle from '../../Common/PageTitle';
 import Releases from './Releases';
-import Badge from '../../Common/Badge';
 
 const messages = defineMessages({
+  about: 'About',
   overseerrinformation: 'Overseerr Information',
   version: 'Version',
   totalmedia: 'Total Media',
   totalrequests: 'Total Requests',
   gettingsupport: 'Getting Support',
   githubdiscussions: 'GitHub Discussions',
-  clickheretojoindiscord: 'Click here to join our Discord server.',
-  timezone: 'Timezone',
+  timezone: 'Time Zone',
   supportoverseerr: 'Support Overseerr',
   helppaycoffee: 'Help Pay for Coffee',
   documentation: 'Documentation',
   preferredmethod: 'Preferred',
+  outofdate: 'Out of Date',
+  uptodate: 'Up to Date',
+  betawarning:
+    'This is BETA software. Features may be broken and/or unstable. Please report any issues on GitHub!',
 });
 
 const SettingsAbout: React.FC = () => {
@@ -28,6 +38,8 @@ const SettingsAbout: React.FC = () => {
   const { data, error } = useSWR<SettingsAboutResponse>(
     '/api/v1/settings/about'
   );
+
+  const { data: status } = useSWR<StatusResponse>('/api/v1/status');
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -39,20 +51,62 @@ const SettingsAbout: React.FC = () => {
 
   return (
     <>
+      <PageTitle
+        title={[
+          intl.formatMessage(messages.about),
+          intl.formatMessage(globalMessages.settings),
+        ]}
+      />
+      <div className="p-4 mt-6 bg-indigo-700 rounded-md">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <InformationCircleIcon className="w-5 h-5 text-white" />
+          </div>
+          <div className="flex-1 ml-3 md:flex md:justify-between">
+            <p className="text-sm leading-5 text-white">
+              {intl.formatMessage(messages.betawarning)}
+            </p>
+            <p className="mt-3 text-sm leading-5 md:mt-0 md:ml-6">
+              <a
+                href="http://github.com/sct/overseerr"
+                className="font-medium text-indigo-100 transition duration-150 ease-in-out whitespace-nowrap hover:text-white"
+                target="_blank"
+                rel="noreferrer"
+              >
+                GitHub &rarr;
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
       <div className="section">
         <List title={intl.formatMessage(messages.overseerrinformation)}>
-          <List.Item title={intl.formatMessage(messages.version)}>
-            {data.version}
+          <List.Item
+            title={intl.formatMessage(messages.version)}
+            className="truncate"
+          >
+            <code>{data.version.replace('develop-', '')}</code>
+            {status?.updateAvailable ? (
+              <Badge badgeType="warning" className="ml-2">
+                {intl.formatMessage(messages.outofdate)}
+              </Badge>
+            ) : (
+              status?.commitTag !== 'local' && (
+                <Badge badgeType="success" className="ml-2">
+                  {intl.formatMessage(messages.uptodate)}
+                </Badge>
+              )
+            )}
           </List.Item>
           <List.Item title={intl.formatMessage(messages.totalmedia)}>
-            <FormattedNumber value={data.totalMediaItems} />
+            {intl.formatNumber(data.totalMediaItems)}
           </List.Item>
           <List.Item title={intl.formatMessage(messages.totalrequests)}>
-            <FormattedNumber value={data.totalRequests} />
+            {intl.formatNumber(data.totalRequests)}
           </List.Item>
           {data.tz && (
             <List.Item title={intl.formatMessage(messages.timezone)}>
-              {data.tz}
+              <code>{data.tz}</code>
             </List.Item>
           )}
         </List>
@@ -81,12 +135,12 @@ const SettingsAbout: React.FC = () => {
           </List.Item>
           <List.Item title="Discord">
             <a
-              href="https://discord.gg/PkCWJSeCk7"
+              href="https://discord.gg/overseerr"
               target="_blank"
               rel="noreferrer"
               className="text-indigo-500 hover:underline"
             >
-              {intl.formatMessage(messages.clickheretojoindiscord)}
+              https://discord.gg/overseerr
             </a>
           </List.Item>
         </List>

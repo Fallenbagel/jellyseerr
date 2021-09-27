@@ -8,7 +8,7 @@ jobs:
   support:
     runs-on: ubuntu-20.04
     steps:
-      - uses: dessant/support-requests@v2
+      - uses: dessant/support-requests@v2.0.1
         with:
           github-token: ${{ github.token }}
           support-label: 'support'
@@ -18,8 +18,9 @@ jobs:
             to be a support request. Please use our support channels
             to get help with Overseerr.
 
-            - [Discord](https://discord.gg/PkCWJSeCk7)
+            - [Discord](https://discord.gg/overseerr)
+
             - [GitHub Discussions](https://github.com/sct/overseerr/discussions)
           close-issue: true
-          lock-issue: false
+          lock-issue: true
           issue-lock-reason: 'off-topic'

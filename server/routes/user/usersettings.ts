@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { getRepository } from 'typeorm';
+import { canMakePermissionsChange } from '.';
 import { User } from '../../entity/User';
 import { UserSettings } from '../../entity/UserSettings';
 import {
@@ -7,6 +8,7 @@ import {
   UserSettingsNotificationsResponse,
 } from '../../interfaces/api/userSettingsInterfaces';
 import { Permission } from '../../lib/permissions';
+import { getSettings } from '../../lib/settings';
 import logger from '../../logger';
 import { isAuthenticated } from '../../middleware/auth';
 
@@ -21,6 +23,7 @@ const isOwnProfileOrAdmin = (): Middleware => {
         message: "You do not have permission to view this user's settings.",
       });
     }
+
     next();
   };
   return authMiddleware;
@@ -32,6 +35,9 @@ userSettingsRoutes.get<{ id: string }, UserSettingsGeneralResponse>(
   '/main',
   isOwnProfileOrAdmin(),
   async (req, res, next) => {
+    const {
+      main: { defaultQuotas },
+    } = getSettings();
     const userRepository = getRepository(User);
 
     try {
@@ -45,8 +51,17 @@ userSettingsRoutes.get<{ id: string }, UserSettingsGeneralResponse>(
 
       return res.status(200).json({
         username: user.username,
+        locale: user.settings?.locale,
         region: user.settings?.region,
         originalLanguage: user.settings?.originalLanguage,
+        movieQuotaLimit: user.movieQuotaLimit,
+        movieQuotaDays: user.movieQuotaDays,
+        tvQuotaLimit: user.tvQuotaLimit,
+        tvQuotaDays: user.tvQuotaDays,
+        globalMovieQuotaDays: defaultQuotas.movie.quotaDays,
+        globalMovieQuotaLimit: defaultQuotas.movie.quotaLimit,
+        globalTvQuotaDays: defaultQuotas.tv.quotaDays,
+        globalTvQuotaLimit: defaultQuotas.tv.quotaLimit,
       });
     } catch (e) {
       next({ status: 500, message: e.message });
@@ -70,21 +85,48 @@ userSettingsRoutes.post<
       return next({ status: 404, message: 'User not found.' });
     }
 
+    // "Owner" user settings cannot be modified by other users
+    if (user.id === 1 && req.user?.id !== 1) {
+      return next({
+        status: 403,
+        message: "You do not have permission to modify this user's settings.",
+      });
+    }
+
     user.username = req.body.username;
+
+    // Update quota values only if the user has the correct permissions
+    if (
+      !user.hasPermission(Permission.MANAGE_USERS) &&
+      req.user?.id !== user.id
+    ) {
+      user.movieQuotaDays = req.body.movieQuotaDays;
+      user.movieQuotaLimit = req.body.movieQuotaLimit;
+      user.tvQuotaDays = req.body.tvQuotaDays;
+      user.tvQuotaLimit = req.body.tvQuotaLimit;
+    }
+
     if (!user.settings) {
       user.settings = new UserSettings({
         user: req.user,
+        locale: req.body.locale,
         region: req.body.region,
         originalLanguage: req.body.originalLanguage,
       });
     } else {
+      user.settings.locale = req.body.locale;
       user.settings.region = req.body.region;
       user.settings.originalLanguage = req.body.originalLanguage;
     }
 
     await userRepository.save(user);
 
-    return res.status(200).json({ username: user.username });
+    return res.status(200).json({
+      username: user.username,
+      region: user.settings.region,
+      locale: user.settings.locale,
+      originalLanguage: user.settings.originalLanguage,
+    });
   } catch (e) {
     next({ status: 500, message: e.message });
   }
@@ -137,7 +179,19 @@ userSettingsRoutes.post<
     if (req.body.newPassword.length < 8) {
       return next({
         status: 400,
-        message: 'Password must be at least 8 characters',
+        message: 'Password must be at least 8 characters.',
+      });
+    }
+
+    if (
+      (user.id === 1 && req.user?.id !== 1) ||
+      (user.hasPermission(Permission.ADMIN) &&
+        user.id !== req.user?.id &&
+        req.user?.id !== 1)
+    ) {
+      return next({
+        status: 403,
+        message: "You do not have permission to modify this user's password.",
       });
     }
 
@@ -184,6 +238,7 @@ userSettingsRoutes.get<{ id: string }, UserSettingsNotificationsResponse>(
   isOwnProfileOrAdmin(),
   async (req, res, next) => {
     const userRepository = getRepository(User);
+    const settings = getSettings()?.notifications.agents;
 
     try {
       const user = await userRepository.findOne({
@@ -195,8 +250,19 @@ userSettingsRoutes.get<{ id: string }, UserSettingsNotificationsResponse>(
       }
 
       return res.status(200).json({
-        enableNotifications: user.settings?.enableNotifications ?? true,
+        emailEnabled: settings?.email.enabled,
+        pgpKey: user.settings?.pgpKey,
+        discordEnabled: settings?.discord.enabled,
+        discordEnabledTypes: settings?.discord.enabled
+          ? settings?.discord.types
+          : 0,
         discordId: user.settings?.discordId,
+        telegramEnabled: settings?.telegram.enabled,
+        telegramBotUsername: settings?.telegram.options.botUsername,
+        telegramChatId: user.settings?.telegramChatId,
+        telegramSendSilently: user?.settings?.telegramSendSilently,
+        webPushEnabled: settings?.webpush.enabled,
+        notificationTypes: user.settings?.notificationTypes ?? {},
       });
     } catch (e) {
       next({ status: 500, message: e.message });
@@ -204,43 +270,64 @@ userSettingsRoutes.get<{ id: string }, UserSettingsNotificationsResponse>(
   }
 );
 
-userSettingsRoutes.post<
-  { id: string },
-  UserSettingsNotificationsResponse,
-  UserSettingsNotificationsResponse
->('/notifications', isOwnProfileOrAdmin(), async (req, res, next) => {
-  const userRepository = getRepository(User);
+userSettingsRoutes.post<{ id: string }, UserSettingsNotificationsResponse>(
+  '/notifications',
+  isOwnProfileOrAdmin(),
+  async (req, res, next) => {
+    const userRepository = getRepository(User);
 
-  try {
-    const user = await userRepository.findOne({
-      where: { id: Number(req.params.id) },
-    });
-
-    if (!user) {
-      return next({ status: 404, message: 'User not found.' });
-    }
-
-    if (!user.settings) {
-      user.settings = new UserSettings({
-        user: req.user,
-        enableNotifications: req.body.enableNotifications,
-        discordId: req.body.discordId,
+    try {
+      const user = await userRepository.findOne({
+        where: { id: Number(req.params.id) },
       });
-    } else {
-      user.settings.enableNotifications = req.body.enableNotifications;
-      user.settings.discordId = req.body.discordId;
+
+      if (!user) {
+        return next({ status: 404, message: 'User not found.' });
+      }
+
+      // "Owner" user settings cannot be modified by other users
+      if (user.id === 1 && req.user?.id !== 1) {
+        return next({
+          status: 403,
+          message: "You do not have permission to modify this user's settings.",
+        });
+      }
+
+      if (!user.settings) {
+        user.settings = new UserSettings({
+          user: req.user,
+          pgpKey: req.body.pgpKey,
+          discordId: req.body.discordId,
+          telegramChatId: req.body.telegramChatId,
+          telegramSendSilently: req.body.telegramSendSilently,
+          notificationTypes: req.body.notificationTypes,
+        });
+      } else {
+        user.settings.pgpKey = req.body.pgpKey;
+        user.settings.discordId = req.body.discordId;
+        user.settings.telegramChatId = req.body.telegramChatId;
+        user.settings.telegramSendSilently = req.body.telegramSendSilently;
+        user.settings.notificationTypes = Object.assign(
+          {},
+          user.settings.notificationTypes,
+          req.body.notificationTypes
+        );
+      }
+
+      userRepository.save(user);
+
+      return res.status(200).json({
+        pgpKey: user.settings?.pgpKey,
+        discordId: user.settings?.discordId,
+        telegramChatId: user.settings?.telegramChatId,
+        telegramSendSilently: user?.settings?.telegramSendSilently,
+        notificationTypes: user.settings.notificationTypes,
+      });
+    } catch (e) {
+      next({ status: 500, message: e.message });
     }
-
-    userRepository.save(user);
-
-    return res.status(200).json({
-      enableNotifications: user.settings.enableNotifications,
-      discordId: user.settings.discordId,
-    });
-  } catch (e) {
-    next({ status: 500, message: e.message });
   }
-});
+);
 
 userSettingsRoutes.get<{ id: string }, { permissions?: number }>(
   '/permissions',
@@ -283,13 +370,20 @@ userSettingsRoutes.post<
         return next({ status: 404, message: 'User not found.' });
       }
 
-      if (user.id === 1) {
+      // "Owner" user permissions cannot be modified, and users cannot set their own permissions
+      if (user.id === 1 || req.user?.id === user.id) {
         return next({
-          status: 500,
-          message: 'Permissions for user with ID 1 cannot be modified',
+          status: 403,
+          message: 'You do not have permission to modify this user',
         });
       }
 
+      if (!canMakePermissionsChange(req.body.permissions, req.user)) {
+        return next({
+          status: 403,
+          message: 'You do not have permission to grant this level of access',
+        });
+      }
       user.permissions = req.body.permissions;
 
       await userRepository.save(user);

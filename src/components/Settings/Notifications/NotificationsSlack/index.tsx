@@ -1,42 +1,55 @@
-import React from 'react';
-import { Field, Form, Formik } from 'formik';
-import useSWR from 'swr';
-import LoadingSpinner from '../../../Common/LoadingSpinner';
-import Button from '../../../Common/Button';
-import { defineMessages, useIntl } from 'react-intl';
+import { BeakerIcon, SaveIcon } from '@heroicons/react/outline';
 import axios from 'axios';
-import * as Yup from 'yup';
+import { Field, Form, Formik } from 'formik';
+import React, { useState } from 'react';
+import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
-import Alert from '../../../Common/Alert';
+import useSWR from 'swr';
+import * as Yup from 'yup';
+import globalMessages from '../../../../i18n/globalMessages';
+import Button from '../../../Common/Button';
+import LoadingSpinner from '../../../Common/LoadingSpinner';
 import NotificationTypeSelector from '../../../NotificationTypeSelector';
 
 const messages = defineMessages({
-  save: 'Save Changes',
-  saving: 'Saving…',
   agentenabled: 'Enable Agent',
   webhookUrl: 'Webhook URL',
+  webhookUrlTip:
+    'Create an <WebhookLink>Incoming Webhook</WebhookLink> integration',
   slacksettingssaved: 'Slack notification settings saved successfully!',
   slacksettingsfailed: 'Slack notification settings failed to save.',
-  testsent: 'Test notification sent!',
-  test: 'Test',
-  settingupslack: 'Setting Up Slack Notifications',
-  settingupslackDescription:
-    'To configure Slack notifications, you will need to create an <WebhookLink>Incoming Webhook</WebhookLink> integration and enter the webhook URL below.',
-  notificationtypes: 'Notification Types',
+  toastSlackTestSending: 'Sending Slack test notification…',
+  toastSlackTestSuccess: 'Slack test notification sent!',
+  toastSlackTestFailed: 'Slack test notification failed to send.',
   validationWebhookUrl: 'You must provide a valid URL',
+  validationTypes: 'You must select at least one notification type',
 });
 
 const NotificationsSlack: React.FC = () => {
   const intl = useIntl();
-  const { addToast } = useToasts();
+  const { addToast, removeToast } = useToasts();
+  const [isTesting, setIsTesting] = useState(false);
   const { data, error, revalidate } = useSWR(
     '/api/v1/settings/notifications/slack'
   );
 
   const NotificationsSlackSchema = Yup.object().shape({
     webhookUrl: Yup.string()
-      .required(intl.formatMessage(messages.validationWebhookUrl))
+      .when('enabled', {
+        is: true,
+        then: Yup.string()
+          .nullable()
+          .required(intl.formatMessage(messages.validationWebhookUrl)),
+        otherwise: Yup.string().nullable(),
+      })
       .url(intl.formatMessage(messages.validationWebhookUrl)),
+    types: Yup.number().when('enabled', {
+      is: true,
+      then: Yup.number()
+        .nullable()
+        .moreThan(0, intl.formatMessage(messages.validationTypes)),
+      otherwise: Yup.number().nullable(),
+    }),
   });
 
   if (!data && !error) {
@@ -44,62 +57,59 @@ const NotificationsSlack: React.FC = () => {
   }
 
   return (
-    <>
-      <Alert title={intl.formatMessage(messages.settingupslack)} type="info">
-        {intl.formatMessage(messages.settingupslackDescription, {
-          WebhookLink: function WebhookLink(msg) {
-            return (
-              <a
-                href="https://my.slack.com/services/new/incoming-webhook/"
-                className="text-indigo-100 hover:text-white hover:underline"
-                target="_blank"
-                rel="noreferrer"
-              >
-                {msg}
-              </a>
-            );
-          },
-        })}
-      </Alert>
-      <Formik
-        initialValues={{
-          enabled: data.enabled,
-          types: data.types,
-          webhookUrl: data.options.webhookUrl,
-        }}
-        validationSchema={NotificationsSlackSchema}
-        onSubmit={async (values) => {
+    <Formik
+      initialValues={{
+        enabled: data.enabled,
+        types: data.types,
+        webhookUrl: data.options.webhookUrl,
+      }}
+      validationSchema={NotificationsSlackSchema}
+      onSubmit={async (values) => {
+        try {
+          await axios.post('/api/v1/settings/notifications/slack', {
+            enabled: values.enabled,
+            types: values.types,
+            options: {
+              webhookUrl: values.webhookUrl,
+            },
+          });
+          addToast(intl.formatMessage(messages.slacksettingssaved), {
+            appearance: 'success',
+            autoDismiss: true,
+          });
+        } catch (e) {
+          addToast(intl.formatMessage(messages.slacksettingsfailed), {
+            appearance: 'error',
+            autoDismiss: true,
+          });
+        } finally {
+          revalidate();
+        }
+      }}
+    >
+      {({
+        errors,
+        touched,
+        isSubmitting,
+        values,
+        isValid,
+        setFieldValue,
+        setFieldTouched,
+      }) => {
+        const testSettings = async () => {
+          setIsTesting(true);
+          let toastId: string | undefined;
           try {
-            await axios.post('/api/v1/settings/notifications/slack', {
-              enabled: values.enabled,
-              types: values.types,
-              options: {
-                webhookUrl: values.webhookUrl,
+            addToast(
+              intl.formatMessage(messages.toastSlackTestSending),
+              {
+                autoDismiss: false,
+                appearance: 'info',
               },
-            });
-            addToast(intl.formatMessage(messages.slacksettingssaved), {
-              appearance: 'success',
-              autoDismiss: true,
-            });
-          } catch (e) {
-            addToast(intl.formatMessage(messages.slacksettingsfailed), {
-              appearance: 'error',
-              autoDismiss: true,
-            });
-          } finally {
-            revalidate();
-          }
-        }}
-      >
-        {({
-          errors,
-          touched,
-          isSubmitting,
-          values,
-          isValid,
-          setFieldValue,
-        }) => {
-          const testSettings = async () => {
+              (id) => {
+                toastId = id;
+              }
+            );
             await axios.post('/api/v1/settings/notifications/slack/test', {
               enabled: true,
               types: values.types,
@@ -108,89 +118,127 @@ const NotificationsSlack: React.FC = () => {
               },
             });
 
-            addToast(intl.formatMessage(messages.testsent), {
-              appearance: 'info',
+            if (toastId) {
+              removeToast(toastId);
+            }
+            addToast(intl.formatMessage(messages.toastSlackTestSuccess), {
               autoDismiss: true,
+              appearance: 'success',
             });
-          };
+          } catch (e) {
+            if (toastId) {
+              removeToast(toastId);
+            }
+            addToast(intl.formatMessage(messages.toastSlackTestFailed), {
+              autoDismiss: true,
+              appearance: 'error',
+            });
+          } finally {
+            setIsTesting(false);
+          }
+        };
 
-          return (
-            <Form className="section">
-              <div className="form-row">
-                <label htmlFor="isDefault" className="checkbox-label">
-                  {intl.formatMessage(messages.agentenabled)}
-                </label>
-                <div className="form-input">
-                  <Field type="checkbox" id="enabled" name="enabled" />
-                </div>
+        return (
+          <Form className="section">
+            <div className="form-row">
+              <label htmlFor="isDefault" className="checkbox-label">
+                {intl.formatMessage(messages.agentenabled)}
+                <span className="label-required">*</span>
+              </label>
+              <div className="form-input">
+                <Field type="checkbox" id="enabled" name="enabled" />
               </div>
-              <div className="form-row">
-                <label htmlFor="name" className="text-label">
-                  {intl.formatMessage(messages.webhookUrl)}
-                </label>
-                <div className="form-input">
-                  <div className="flex max-w-lg rounded-md shadow-sm">
-                    <Field id="webhookUrl" name="webhookUrl" type="text" />
-                  </div>
-                  {errors.webhookUrl && touched.webhookUrl && (
-                    <div className="error">{errors.webhookUrl}</div>
-                  )}
+            </div>
+            <div className="form-row">
+              <label htmlFor="name" className="text-label">
+                {intl.formatMessage(messages.webhookUrl)}
+                <span className="label-required">*</span>
+                <span className="label-tip">
+                  {intl.formatMessage(messages.webhookUrlTip, {
+                    WebhookLink: function WebhookLink(msg) {
+                      return (
+                        <a
+                          href="https://my.slack.com/services/new/incoming-webhook/"
+                          className="text-white transition duration-300 hover:underline"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {msg}
+                        </a>
+                      );
+                    },
+                  })}
+                </span>
+              </label>
+              <div className="form-input">
+                <div className="form-input-field">
+                  <Field
+                    id="webhookUrl"
+                    name="webhookUrl"
+                    type="text"
+                    inputMode="url"
+                  />
                 </div>
+                {errors.webhookUrl && touched.webhookUrl && (
+                  <div className="error">{errors.webhookUrl}</div>
+                )}
               </div>
-              <div
-                role="group"
-                aria-labelledby="group-label"
-                className="form-group"
-              >
-                <div className="form-row">
-                  <span id="group-label" className="group-label">
-                    {intl.formatMessage(messages.notificationtypes)}
-                  </span>
-                  <div className="form-input">
-                    <div className="max-w-lg">
-                      <NotificationTypeSelector
-                        currentTypes={values.types}
-                        onUpdate={(newTypes) =>
-                          setFieldValue('types', newTypes)
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="actions">
-                <div className="flex justify-end">
-                  <span className="inline-flex ml-3 rounded-md shadow-sm">
-                    <Button
-                      buttonType="warning"
-                      disabled={isSubmitting || !isValid}
-                      onClick={(e) => {
-                        e.preventDefault();
+            </div>
+            <NotificationTypeSelector
+              currentTypes={values.enabled ? values.types : 0}
+              onUpdate={(newTypes) => {
+                setFieldValue('types', newTypes);
+                setFieldTouched('types');
 
-                        testSettings();
-                      }}
-                    >
-                      {intl.formatMessage(messages.test)}
-                    </Button>
-                  </span>
-                  <span className="inline-flex ml-3 rounded-md shadow-sm">
-                    <Button
-                      buttonType="primary"
-                      type="submit"
-                      disabled={isSubmitting || !isValid}
-                    >
+                if (newTypes) {
+                  setFieldValue('enabled', true);
+                }
+              }}
+              error={
+                errors.types && touched.types
+                  ? (errors.types as string)
+                  : undefined
+              }
+            />
+            <div className="actions">
+              <div className="flex justify-end">
+                <span className="inline-flex ml-3 rounded-md shadow-sm">
+                  <Button
+                    buttonType="warning"
+                    disabled={isSubmitting || !isValid || isTesting}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      testSettings();
+                    }}
+                  >
+                    <BeakerIcon />
+                    <span>
+                      {isTesting
+                        ? intl.formatMessage(globalMessages.testing)
+                        : intl.formatMessage(globalMessages.test)}
+                    </span>
+                  </Button>
+                </span>
+                <span className="inline-flex ml-3 rounded-md shadow-sm">
+                  <Button
+                    buttonType="primary"
+                    type="submit"
+                    disabled={isSubmitting || !isValid || isTesting}
+                  >
+                    <SaveIcon />
+                    <span>
                       {isSubmitting
-                        ? intl.formatMessage(messages.saving)
-                        : intl.formatMessage(messages.save)}
-                    </Button>
-                  </span>
-                </div>
+                        ? intl.formatMessage(globalMessages.saving)
+                        : intl.formatMessage(globalMessages.save)}
+                    </span>
+                  </Button>
+                </span>
               </div>
-            </Form>
-          );
-        }}
-      </Formik>
-    </>
+            </div>
+          </Form>
+        );
+      }}
+    </Formik>
   );
 };
 
