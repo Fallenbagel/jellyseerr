@@ -352,10 +352,10 @@ const IssueDetails: React.FC = () => {
               </div>
             </div>
             <div className="mt-4 mb-6 flex flex-col space-y-2">
-              {issueData?.media.plexUrl && (
+              {issueData?.media.mediaUrl && (
                 <Button
                   as="a"
-                  href={issueData?.media.plexUrl}
+                  href={issueData?.media.mediaUrl}
                   target="_blank"
                   rel="noreferrer"
                   className="w-full"
@@ -385,10 +385,10 @@ const IssueDetails: React.FC = () => {
                   </span>
                 </Button>
               )}
-              {issueData?.media.plexUrl4k && (
+              {issueData?.media.mediaUrl4k && (
                 <Button
                   as="a"
-                  href={issueData?.media.plexUrl4k}
+                  href={issueData?.media.mediaUrl4k}
                   target="_blank"
                   rel="noreferrer"
                   className="w-full"
@@ -588,10 +588,10 @@ const IssueDetails: React.FC = () => {
             </div>
           </div>
           <div className="mt-4 mb-6 flex flex-col space-y-2">
-            {issueData?.media.plexUrl && (
+            {issueData?.media.mediaUrl && (
               <Button
                 as="a"
-                href={issueData?.media.plexUrl}
+                href={issueData?.media.mediaUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full"
@@ -621,10 +621,10 @@ const IssueDetails: React.FC = () => {
                 </span>
               </Button>
             )}
-            {issueData?.media.plexUrl4k && (
+            {issueData?.media.mediaUrl4k && (
               <Button
                 as="a"
-                href={issueData?.media.plexUrl4k}
+                href={issueData?.media.mediaUrl4k}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full"

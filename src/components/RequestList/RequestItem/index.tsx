@@ -302,7 +302,7 @@ const RequestItem: React.FC<RequestItemProps> = ({
                   mediaType={requestData.type}
                   plexUrl={
                     requestData.media[
-                      requestData.is4k ? 'plexUrl4k' : 'plexUrl'
+                      requestData.is4k ? 'mediaUrl4k' : 'mediaUrl'
                     ]
                   }
                 />

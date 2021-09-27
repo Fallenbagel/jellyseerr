@@ -55,10 +55,13 @@ components:
           readOnly: true
         username:
           type: string
+        plexUsername:
+          type: string
+          readOnly: true
         plexToken:
           type: string
           readOnly: true
-        plexUsername:
+        jellyfinAuthToken:
           type: string
           readOnly: true
         userType:
@@ -127,6 +130,9 @@ components:
         localLogin:
           type: boolean
           example: true
+        mediaServerType:
+          type: number
+          example: 1
         newPlexLogin:
           type: boolean
           example: true
@@ -302,6 +308,47 @@ components:
         - provides
         - owned
         - connection
+    JellyfinLibrary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          example: Movies
+        enabled:
+          type: boolean
+          example: false
+      required:
+        - id
+        - name
+        - enabled
+    JellyfinSettings:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'Main Server'
+          readOnly: true
+        hostname:
+          type: string
+          example: 'http://my.jellyfin.host'
+        adminUser:
+          type: string
+          example: 'admin'
+        adminPass:
+          type: string
+          example: 'mypassword'
+        libraries:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/JellyfinLibrary'
+        serverID:
+          type: string
+          readOnly: true
+      required:
+        - hostname
     TautulliSettings:
       type: object
       properties:
@@ -1876,6 +1923,136 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MainSettings'
+  /settings/jellyfin:
+    get:
+      summary: Get Jellyfin settings
+      description: Retrieves current Jellyfin settings.
+      tags:
+        - settings
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JellyfinSettings'
+    post:
+      summary: Update Jellyfin settings
+      description: Updates Jellyfin settings with the provided values.
+      tags:
+        - settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JellyfinSettings'
+      responses:
+        '200':
+          description: 'Values were successfully updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JellyfinSettings'
+  /settings/jellyfin/library:
+    get:
+      summary: Get Jellyfin libraries
+      description: Returns a list of Jellyfin libraries in a JSON array.
+      tags:
+        - settings
+      parameters:
+        - in: query
+          name: sync
+          description: Syncs the current libraries with the current Jellyfin server
+          schema:
+            type: string
+            nullable: true
+        - in: query
+          name: enable
+          explode: false
+          allowReserved: true
+          description: Comma separated list of libraries to enable. Any libraries not passed will be disabled!
+          schema:
+            type: string
+            nullable: true
+      responses:
+        '200':
+          description: 'Jellyfin libraries returned'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JellyfinLibrary'
+  /settings/jellyfin/sync:
+    get:
+      summary: Get status of full Jellyfin library sync
+      description: Returns sync progress in a JSON array.
+      tags:
+        - settings
+      responses:
+        '200':
+          description: Status of Jellyfin sync
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  running:
+                    type: boolean
+                    example: false
+                  progress:
+                    type: number
+                    example: 0
+                  total:
+                    type: number
+                    example: 100
+                  currentLibrary:
+                    $ref: '#/components/schemas/JellyfinLibrary'
+                  libraries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/JellyfinLibrary'
+    post:
+      summary: Start full Jellyfin library sync
+      description: Runs a full Jellyfin library sync and returns the progress in a JSON array.
+      tags:
+        - settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cancel:
+                  type: boolean
+                  example: false
+                start:
+                  type: boolean
+                  example: false
+      responses:
+        '200':
+          description: Status of Jellyfin sync
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  running:
+                    type: boolean
+                    example: false
+                  progress:
+                    type: number
+                    example: 0
+                  total:
+                    type: number
+                    example: 100
+                  currentLibrary:
+                    $ref: '#/components/schemas/JellyfinLibrary'
+                  libraries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/JellyfinLibrary'
   /settings/plex:
     get:
       summary: Get Plex settings
@@ -3084,6 +3261,38 @@ paths:
                   type: string
               required:
                 - authToken
+  /auth/jellyfin:
+    post:
+      summary: Sign in using a Jellyfin username and password
+      description: Takes the user's username and password to log the user in. Generates a session cookie for use in further requests. If the user does not exist, and there are no other users, then a user will be created with full admin privileges. If a user logs in with access to the Jellyfin server, they will also have an account created, but without any permissions.
+      security: []
+      tags:
+        - auth
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                hostname:
+                  type: string
+                email:
+                  type: string
+              required:
+                - username
+                - password
   /auth/local:
     post:
       summary: Sign in using a local account

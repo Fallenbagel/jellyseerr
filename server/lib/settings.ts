@@ -3,6 +3,7 @@ import fs from 'fs';
 import { merge } from 'lodash';
 import path from 'path';
 import webpush from 'web-push';
+import { MediaServerType } from '../constants/server';
 import { Permission } from './permissions';
 
 export interface Library {
@@ -35,6 +36,12 @@ export interface PlexSettings {
   webAppUrl?: string;
 }
 
+export interface JellyfinSettings {
+  name: string;
+  hostname?: string;
+  libraries: Library[];
+  serverId: string;
+}
 export interface TautulliSettings {
   hostname?: string;
   port?: number;
@@ -99,6 +106,7 @@ export interface MainSettings {
   region: string;
   originalLanguage: string;
   trustProxy: boolean;
+  mediaServerType: number;
   partialRequestsEnabled: boolean;
   locale: string;
 }
@@ -116,6 +124,9 @@ interface FullPublicSettings extends PublicSettings {
   series4kEnabled: boolean;
   region: string;
   originalLanguage: string;
+  mediaServerType: number;
+  jellyfinHost?: string;
+  jellyfinServerName?: string;
   partialRequestsEnabled: boolean;
   cacheImages: boolean;
   vapidPublic: string;
@@ -246,7 +257,9 @@ export type JobId =
   | 'radarr-scan'
   | 'sonarr-scan'
   | 'download-sync'
-  | 'download-sync-reset';
+  | 'download-sync-reset'
+  | 'jellyfin-recently-added-sync'
+  | 'jellyfin-full-sync';
 
 interface AllSettings {
   clientId: string;
@@ -254,6 +267,7 @@ interface AllSettings {
   vapidPrivate: string;
   main: MainSettings;
   plex: PlexSettings;
+  jellyfin: JellyfinSettings;
   tautulli: TautulliSettings;
   radarr: RadarrSettings[];
   sonarr: SonarrSettings[];
@@ -291,6 +305,7 @@ class Settings {
         region: '',
         originalLanguage: '',
         trustProxy: false,
+        mediaServerType: MediaServerType.NOT_CONFIGURED,
         partialRequestsEnabled: true,
         locale: 'en',
       },
@@ -300,6 +315,12 @@ class Settings {
         port: 32400,
         useSsl: false,
         libraries: [],
+      },
+      jellyfin: {
+        name: '',
+        hostname: '',
+        libraries: [],
+        serverId: '',
       },
       tautulli: {},
       radarr: [],
@@ -410,6 +431,12 @@ class Settings {
         'download-sync-reset': {
           schedule: '0 0 1 * * *',
         },
+        'jellyfin-recently-added-sync': {
+          schedule: '0 */5 * * * *',
+        },
+        'jellyfin-full-sync': {
+          schedule: '0 0 3 * * *',
+        },
       },
     };
     if (initialSettings) {
@@ -435,6 +462,14 @@ class Settings {
 
   set plex(data: PlexSettings) {
     this.data.plex = data;
+  }
+
+  get jellyfin(): JellyfinSettings {
+    return this.data.jellyfin;
+  }
+
+  set jellyfin(data: JellyfinSettings) {
+    this.data.jellyfin = data;
   }
 
   get tautulli(): TautulliSettings {
@@ -484,6 +519,8 @@ class Settings {
       ),
       region: this.data.main.region,
       originalLanguage: this.data.main.originalLanguage,
+      mediaServerType: this.main.mediaServerType,
+      jellyfinHost: this.jellyfin.hostname,
       partialRequestsEnabled: this.data.main.partialRequestsEnabled,
       cacheImages: this.data.main.cacheImages,
       vapidPublic: this.vapidPublic,

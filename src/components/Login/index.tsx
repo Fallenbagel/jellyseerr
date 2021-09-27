@@ -4,6 +4,7 @@ import { useRouter } from 'next/dist/client/router';
 import React, { useEffect, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
+import { MediaServerType } from '../../../server/constants/server';
 import useSettings from '../../hooks/useSettings';
 import { useUser } from '../../hooks/useUser';
 import Accordion from '../Common/Accordion';
@@ -12,12 +13,14 @@ import PageTitle from '../Common/PageTitle';
 import LanguagePicker from '../Layout/LanguagePicker';
 import PlexLoginButton from '../PlexLoginButton';
 import Transition from '../Transition';
+import JellyfinLogin from './JellyfinLogin';
 import LocalLogin from './LocalLogin';
 
 const messages = defineMessages({
   signin: 'Sign In',
   signinheader: 'Sign in to continue',
   signinwithplex: 'Use your Plex account',
+  signinwithjellyfin: 'Use your Jellyfin account',
   signinwithoverseerr: 'Use your {applicationTitle} account',
 });
 
@@ -127,14 +130,22 @@ const Login: React.FC = () => {
                     onClick={() => handleClick(0)}
                     disabled={!settings.currentSettings.localLogin}
                   >
-                    {intl.formatMessage(messages.signinwithplex)}
+                    {settings.currentSettings.mediaServerType ==
+                    MediaServerType.PLEX
+                      ? intl.formatMessage(messages.signinwithplex)
+                      : intl.formatMessage(messages.signinwithjellyfin)}
                   </button>
                   <AccordionContent isOpen={openIndexes.includes(0)}>
                     <div className="px-10 py-8">
-                      <PlexLoginButton
-                        isProcessing={isProcessing}
-                        onAuthToken={(authToken) => setAuthToken(authToken)}
-                      />
+                      {settings.currentSettings.mediaServerType ==
+                      MediaServerType.PLEX ? (
+                        <PlexLoginButton
+                          isProcessing={isProcessing}
+                          onAuthToken={(authToken) => setAuthToken(authToken)}
+                        />
+                      ) : (
+                        <JellyfinLogin revalidate={revalidate} />
+                      )}
                     </div>
                   </AccordionContent>
                   {settings.currentSettings.localLogin && (

@@ -7,6 +7,7 @@ import path from 'path';
 import semver from 'semver';
 import { getRepository } from 'typeorm';
 import { URL } from 'url';
+import JellyfinAPI from '../../api/jellyfin';
 import PlexAPI from '../../api/plexapi';
 import PlexTvAPI from '../../api/plextv';
 import TautulliAPI from '../../api/tautulli';
@@ -19,11 +20,12 @@ import {
   LogsResultsResponse,
   SettingsAboutResponse,
 } from '../../interfaces/api/settingsInterfaces';
+import { jobJellyfinFullSync } from '../../job/jellyfinsync';
 import { scheduledJobs } from '../../job/schedule';
 import cacheManager, { AvailableCacheIds } from '../../lib/cache';
 import { Permission } from '../../lib/permissions';
 import { plexFullScanner } from '../../lib/scanners/plex';
-import { getSettings, MainSettings } from '../../lib/settings';
+import { getSettings, Library, MainSettings } from '../../lib/settings';
 import logger from '../../logger';
 import { isAuthenticated } from '../../middleware/auth';
 import { appDataPath } from '../../utils/appDataVolume';
@@ -238,6 +240,79 @@ settingsRoutes.post('/plex/sync', (req, res) => {
   return res.status(200).json(plexFullScanner.status());
 });
 
+settingsRoutes.get('/jellyfin', (_req, res) => {
+  const settings = getSettings();
+
+  res.status(200).json(settings.jellyfin);
+});
+
+settingsRoutes.post('/jellyfin', (req, res) => {
+  const settings = getSettings();
+
+  settings.jellyfin = merge(settings.jellyfin, req.body);
+  settings.save();
+
+  return res.status(200).json(settings.jellyfin);
+});
+
+settingsRoutes.get('/jellyfin/library', async (req, res) => {
+  const settings = getSettings();
+
+  if (req.query.sync) {
+    const userRepository = getRepository(User);
+    const admin = await userRepository.findOneOrFail({
+      select: ['id', 'jellyfinAuthToken', 'jellyfinDeviceId', 'jellyfinUserId'],
+      order: { id: 'ASC' },
+    });
+    const jellyfinClient = new JellyfinAPI(
+      settings.jellyfin.hostname ?? '',
+      admin.jellyfinAuthToken ?? '',
+      admin.jellyfinDeviceId ?? ''
+    );
+
+    jellyfinClient.setUserId(admin.jellyfinUserId ?? '');
+
+    const libraries = await jellyfinClient.getLibraries();
+
+    const newLibraries: Library[] = libraries.map((library) => {
+      const existing = settings.jellyfin.libraries.find(
+        (l) => l.id === library.key && l.name === library.title
+      );
+
+      return {
+        id: library.key,
+        name: library.title,
+        enabled: existing?.enabled ?? false,
+        type: library.type,
+      };
+    });
+
+    settings.jellyfin.libraries = newLibraries;
+  }
+
+  const enabledLibraries = req.query.enable
+    ? (req.query.enable as string).split(',')
+    : [];
+  settings.jellyfin.libraries = settings.jellyfin.libraries.map((library) => ({
+    ...library,
+    enabled: enabledLibraries.includes(library.id),
+  }));
+  settings.save();
+  return res.status(200).json(settings.jellyfin.libraries);
+});
+
+settingsRoutes.get('/jellyfin/sync', (_req, res) => {
+  return res.status(200).json(jobJellyfinFullSync.status());
+});
+
+settingsRoutes.post('/jellyfin/sync', (req, res) => {
+  if (req.body.cancel) {
+    jobJellyfinFullSync.cancel();
+  } else if (req.body.start) {
+    jobJellyfinFullSync.run();
+  }
+  return res.status(200).json(jobJellyfinFullSync.status());
+});
 settingsRoutes.get('/tautulli', (_req, res) => {
   const settings = getSettings();
 

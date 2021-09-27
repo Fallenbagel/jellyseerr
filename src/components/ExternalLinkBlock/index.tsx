@@ -1,12 +1,15 @@
 import React from 'react';
 import { MediaType } from '../../../server/constants/media';
+import { MediaServerType } from '../../../server/constants/server';
 import ImdbLogo from '../../assets/services/imdb.svg';
+import JellyfinLogo from '../../assets/services/jellyfin.svg';
 import PlexLogo from '../../assets/services/plex.svg';
 import RTLogo from '../../assets/services/rt.svg';
 import TmdbLogo from '../../assets/services/tmdb.svg';
 import TraktLogo from '../../assets/services/trakt.svg';
 import TvdbLogo from '../../assets/services/tvdb.svg';
 import useLocale from '../../hooks/useLocale';
+import useSettings from '../../hooks/useSettings';
 
 interface ExternalLinkBlockProps {
   mediaType: 'movie' | 'tv';
@@ -14,7 +17,7 @@ interface ExternalLinkBlockProps {
   tvdbId?: number;
   imdbId?: string;
   rtUrl?: string;
-  plexUrl?: string;
+  mediaUrl?: string;
 }
 
 const ExternalLinkBlock: React.FC<ExternalLinkBlockProps> = ({
@@ -23,20 +26,25 @@ const ExternalLinkBlock: React.FC<ExternalLinkBlockProps> = ({
   tvdbId,
   imdbId,
   rtUrl,
-  plexUrl,
+  mediaUrl,
 }) => {
+  const settings = useSettings();
   const { locale } = useLocale();
 
   return (
     <div className="flex w-full items-center justify-center space-x-5">
-      {plexUrl && (
+      {mediaUrl && (
         <a
-          href={plexUrl}
+          href={mediaUrl}
           className="w-12 opacity-50 transition duration-300 hover:opacity-100"
           target="_blank"
           rel="noreferrer"
         >
-          <PlexLogo />
+          {settings.currentSettings.mediaServerType === MediaServerType.PLEX ? (
+            <PlexLogo />
+          ) : (
+            <JellyfinLogo />
+          )}
         </a>
       )}
       {tmdbId && (

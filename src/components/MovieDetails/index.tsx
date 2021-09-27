@@ -22,6 +22,7 @@ import useSWR from 'swr';
 import type { RTRating } from '../../../server/api/rottentomatoes';
 import { IssueStatus } from '../../../server/constants/issue';
 import { MediaStatus } from '../../../server/constants/media';
+import { MediaServerType } from '../../../server/constants/server';
 import type { MovieDetails as MovieDetailsType } from '../../../server/models/Movie';
 import RTAudFresh from '../../assets/rt_aud_fresh.svg';
 import RTAudRotten from '../../assets/rt_aud_rotten.svg';
@@ -64,8 +65,11 @@ const messages = defineMessages({
   overviewunavailable: 'Overview unavailable.',
   studio: '{studioCount, plural, one {Studio} other {Studios}}',
   viewfullcrew: 'View Full Crew',
-  playonplex: 'Play on Plex',
-  play4konplex: 'Play in 4K on Plex',
+  openradarr: 'Open Movie in Radarr',
+  openradarr4k: 'Open Movie in 4K Radarr',
+  downloadstatus: 'Download Status',
+  play: 'Play on {mediaServerName}',
+  play4k: 'Play 4K on {mediaServerName}',
   markavailable: 'Mark as Available',
   mark4kavailable: 'Mark as Available in 4K',
   showmore: 'Show More',
@@ -124,29 +128,29 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
   const showAllStudios = data.productionCompanies.length <= minStudios + 1;
   const mediaLinks: PlayButtonLink[] = [];
 
-  if (
-    data.mediaInfo?.plexUrl &&
-    hasPermission([Permission.REQUEST, Permission.REQUEST_MOVIE], {
-      type: 'or',
-    })
-  ) {
+  if (data.mediaInfo?.mediaUrl) {
     mediaLinks.push({
-      text: intl.formatMessage(messages.playonplex),
-      url: data.mediaInfo?.plexUrl,
+      text:
+        settings.currentSettings.mediaServerType === MediaServerType.JELLYFIN
+          ? intl.formatMessage(messages.play, { mediaServerName: 'Jellyfin' })
+          : intl.formatMessage(messages.play, { mediaServerName: 'Plex' }),
+      url: data.mediaInfo?.mediaUrl,
       svg: <PlayIcon />,
     });
   }
 
   if (
-    settings.currentSettings.movie4kEnabled &&
-    data.mediaInfo?.plexUrl4k &&
-    hasPermission([Permission.REQUEST_4K, Permission.REQUEST_4K_MOVIE], {
+    data.mediaInfo?.mediaUrl4k &&
+    hasPermission([Permission.REQUEST_4K, Permission.REQUEST_4K_TV], {
       type: 'or',
     })
   ) {
     mediaLinks.push({
-      text: intl.formatMessage(messages.play4konplex),
-      url: data.mediaInfo?.plexUrl4k,
+      text:
+        settings.currentSettings.mediaServerType === MediaServerType.JELLYFIN
+          ? intl.formatMessage(messages.play4k, { mediaServerName: 'Jellyfin' })
+          : intl.formatMessage(messages.play4k, { mediaServerName: 'Plex' }),
+      url: data.mediaInfo?.mediaUrl4k,
       svg: <PlayIcon />,
     });
   }
@@ -291,7 +295,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
               inProgress={(data.mediaInfo?.downloadStatus ?? []).length > 0}
               tmdbId={data.mediaInfo?.tmdbId}
               mediaType="movie"
-              plexUrl={data.mediaInfo?.plexUrl}
+              plexUrl={data.mediaInfo?.mediaUrl}
             />
             {settings.currentSettings.movie4kEnabled &&
               hasPermission(
@@ -312,7 +316,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                   }
                   tmdbId={data.mediaInfo?.tmdbId}
                   mediaType="movie"
-                  plexUrl={data.mediaInfo?.plexUrl4k}
+                  plexUrl={data.mediaInfo?.mediaUrl4k}
                 />
               )}
           </div>
@@ -713,7 +717,9 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                 tvdbId={data.externalIds.tvdbId}
                 imdbId={data.externalIds.imdbId}
                 rtUrl={ratingData?.url}
-                plexUrl={data.mediaInfo?.plexUrl ?? data.mediaInfo?.plexUrl4k}
+                mediaUrl={
+                  data.mediaInfo?.mediaUrl ?? data.mediaInfo?.mediaUrl4k
+                }
               />
             </div>
           </div>

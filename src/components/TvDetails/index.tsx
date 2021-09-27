@@ -117,28 +117,28 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
   const mediaLinks: PlayButtonLink[] = [];
 
   if (
-    data.mediaInfo?.plexUrl &&
+    data.mediaInfo?.mediaUrl &&
     hasPermission([Permission.REQUEST, Permission.REQUEST_TV], {
       type: 'or',
     })
   ) {
     mediaLinks.push({
       text: intl.formatMessage(messages.playonplex),
-      url: data.mediaInfo?.plexUrl,
+      url: data.mediaInfo?.mediaUrl,
       svg: <PlayIcon />,
     });
   }
 
   if (
     settings.currentSettings.series4kEnabled &&
-    data.mediaInfo?.plexUrl4k &&
+    data.mediaInfo?.mediaUrl4k &&
     hasPermission([Permission.REQUEST_4K, Permission.REQUEST_4K_TV], {
       type: 'or',
     })
   ) {
     mediaLinks.push({
       text: intl.formatMessage(messages.play4konplex),
-      url: data.mediaInfo?.plexUrl4k,
+      url: data.mediaInfo?.mediaUrl4k,
       svg: <PlayIcon />,
     });
   }
@@ -298,7 +298,7 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
               inProgress={(data.mediaInfo?.downloadStatus ?? []).length > 0}
               tmdbId={data.mediaInfo?.tmdbId}
               mediaType="tv"
-              plexUrl={data.mediaInfo?.plexUrl}
+              plexUrl={data.mediaInfo?.mediaUrl}
             />
             {settings.currentSettings.series4kEnabled &&
               hasPermission(
@@ -319,7 +319,7 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
                   }
                   tmdbId={data.mediaInfo?.tmdbId}
                   mediaType="tv"
-                  plexUrl={data.mediaInfo?.plexUrl4k}
+                  plexUrl={data.mediaInfo?.mediaUrl4k}
                 />
               )}
           </div>
@@ -637,7 +637,9 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
                 tvdbId={data.externalIds.tvdbId}
                 imdbId={data.externalIds.imdbId}
                 rtUrl={ratingData?.url}
-                plexUrl={data.mediaInfo?.plexUrl ?? data.mediaInfo?.plexUrl4k}
+                mediaUrl={
+                  data.mediaInfo?.mediaUrl ?? data.mediaInfo?.mediaUrl4k
+                }
               />
             </div>
           </div>

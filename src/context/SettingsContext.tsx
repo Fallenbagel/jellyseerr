@@ -1,5 +1,6 @@
 import React from 'react';
 import useSWR from 'swr';
+import { MediaServerType } from '../../server/constants/server';
 import { PublicSettingsResponse } from '../../server/interfaces/api/settingsInterfaces';
 
 export interface SettingsContextProps {
@@ -16,6 +17,7 @@ const defaultSettings = {
   series4kEnabled: false,
   region: '',
   originalLanguage: '',
+  mediaServerType: MediaServerType.NOT_CONFIGURED,
   partialRequestsEnabled: true,
   cacheImages: false,
   vapidPublic: '',

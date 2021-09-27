@@ -13,6 +13,7 @@ import {
 import RadarrAPI from '../api/servarr/radarr';
 import SonarrAPI from '../api/servarr/sonarr';
 import { MediaStatus, MediaType } from '../constants/media';
+import { MediaServerType } from '../constants/server';
 import downloadTracker, { DownloadingItem } from '../lib/downloadtracker';
 import { getSettings } from '../lib/settings';
 import logger from '../logger';
@@ -137,13 +138,19 @@ class Media {
   @Column({ nullable: true })
   public ratingKey4k?: string;
 
+  @Column({ nullable: true })
+  public jellyfinMediaId?: string;
+
+  @Column({ nullable: true })
+  public jellyfinMediaId4k?: string;
+
   public serviceUrl?: string;
   public serviceUrl4k?: string;
   public downloadStatus?: DownloadingItem[] = [];
   public downloadStatus4k?: DownloadingItem[] = [];
 
-  public plexUrl?: string;
-  public plexUrl4k?: string;
+  public mediaUrl?: string;
+  public mediaUrl4k?: string;
 
   public tautulliUrl?: string;
   public tautulliUrl4k?: string;
@@ -157,27 +164,44 @@ class Media {
     const { machineId, webAppUrl } = getSettings().plex;
     const { externalUrl: tautulliUrl } = getSettings().tautulli;
 
-    if (this.ratingKey) {
-      this.plexUrl = `${
-        webAppUrl ? webAppUrl : 'https://app.plex.tv/desktop'
-      }#!/server/${machineId}/details?key=%2Flibrary%2Fmetadata%2F${
-        this.ratingKey
-      }`;
+    if (getSettings().main.mediaServerType == MediaServerType.PLEX) {
+      if (this.ratingKey) {
+        this.mediaUrl = `${
+          webAppUrl ? webAppUrl : 'https://app.plex.tv/desktop'
+        }#!/server/${machineId}/details?key=%2Flibrary%2Fmetadata%2F${
+          this.ratingKey
+        }`;
 
-      if (tautulliUrl) {
-        this.tautulliUrl = `${tautulliUrl}/info?rating_key=${this.ratingKey}`;
+        if (tautulliUrl) {
+          this.tautulliUrl = `${tautulliUrl}/info?rating_key=${this.ratingKey}`;
+        }
       }
-    }
 
-    if (this.ratingKey4k) {
-      this.plexUrl4k = `${
-        webAppUrl ? webAppUrl : 'https://app.plex.tv/desktop'
-      }#!/server/${machineId}/details?key=%2Flibrary%2Fmetadata%2F${
-        this.ratingKey4k
-      }`;
+      if (this.ratingKey4k) {
+        this.mediaUrl4k = `${
+          webAppUrl ? webAppUrl : 'https://app.plex.tv/desktop'
+        }#!/server/${machineId}/details?key=%2Flibrary%2Fmetadata%2F${
+          this.ratingKey4k
+        }`;
 
-      if (tautulliUrl) {
-        this.tautulliUrl4k = `${tautulliUrl}/info?rating_key=${this.ratingKey4k}`;
+        if (tautulliUrl) {
+          this.tautulliUrl4k = `${tautulliUrl}/info?rating_key=${this.ratingKey4k}`;
+        }
+      }
+    } else {
+      if (this.jellyfinMediaId) {
+        this.mediaUrl = `${
+          getSettings().jellyfin.hostname
+        }/web/index.html#!/details?id=${
+          this.jellyfinMediaId
+        }&context=home&serverId=${getSettings().jellyfin.serverId}`;
+      }
+      if (this.jellyfinMediaId4k) {
+        this.mediaUrl4k = `${
+          getSettings().jellyfin.hostname
+        }/web/index.html#!/details?id=${
+          this.jellyfinMediaId4k
+        }&context=home&serverId=${getSettings().jellyfin.serverId}`;
       }
     }
   }

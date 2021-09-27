@@ -299,7 +299,9 @@ const RequestCard: React.FC<RequestCardProps> = ({ request, onTitleData }) => {
                 tmdbId={requestData.media.tmdbId}
                 mediaType={requestData.type}
                 plexUrl={
-                  requestData.media[requestData.is4k ? 'plexUrl4k' : 'plexUrl']
+                  requestData.media[
+                    requestData.is4k ? 'mediaUrl4k' : 'mediaUrl'
+                  ]
                 }
               />
             )}

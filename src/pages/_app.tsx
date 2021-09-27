@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { IntlProvider } from 'react-intl';
 import { ToastProvider } from 'react-toast-notifications';
 import { SWRConfig } from 'swr';
+import { MediaServerType } from '../../server/constants/server';
 import { PublicSettingsResponse } from '../../server/interfaces/api/settingsInterfaces';
 import Layout from '../components/Layout';
 import LoadingBar from '../components/LoadingBar';
@@ -165,6 +166,7 @@ CoreApp.getInitialProps = async (initialProps) => {
     localLogin: true,
     region: '',
     originalLanguage: '',
+    mediaServerType: MediaServerType.NOT_CONFIGURED,
     partialRequestsEnabled: true,
     cacheImages: false,
     vapidPublic: '',

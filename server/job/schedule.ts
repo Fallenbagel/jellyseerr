@@ -5,6 +5,7 @@ import { radarrScanner } from '../lib/scanners/radarr';
 import { sonarrScanner } from '../lib/scanners/sonarr';
 import { getSettings, JobId } from '../lib/settings';
 import logger from '../logger';
+import { jobJellyfinFullSync, jobJellyfinRecentSync } from './jellyfinsync';
 
 interface ScheduledJob {
   id: JobId;
@@ -51,6 +52,41 @@ export const startJobs = (): void => {
     }),
     running: () => plexFullScanner.status().running,
     cancelFn: () => plexFullScanner.cancel(),
+  });
+
+  // Run recently added jellyfin sync every 5 minutes
+  scheduledJobs.push({
+    id: 'jellyfin-recently-added-sync',
+    name: 'Jellyfin Recently Added Sync',
+    type: 'process',
+    interval: 'long',
+    job: schedule.scheduleJob(
+      jobs['jellyfin-recently-added-sync'].schedule,
+      () => {
+        logger.info('Starting scheduled job: Jellyfin Recently Added Sync', {
+          label: 'Jobs',
+        });
+        jobJellyfinRecentSync.run();
+      }
+    ),
+    running: () => jobJellyfinRecentSync.status().running,
+    cancelFn: () => jobJellyfinRecentSync.cancel(),
+  });
+
+  // Run full jellyfin sync every 24 hours
+  scheduledJobs.push({
+    id: 'jellyfin-full-sync',
+    name: 'Jellyfin Full Library Sync',
+    type: 'process',
+    interval: 'long',
+    job: schedule.scheduleJob(jobs['jellyfin-full-sync'].schedule, () => {
+      logger.info('Starting scheduled job: Jellyfin Full Sync', {
+        label: 'Jobs',
+      });
+      jobJellyfinFullSync.run();
+    }),
+    running: () => jobJellyfinFullSync.status().running,
+    cancelFn: () => jobJellyfinFullSync.cancel(),
   });
 
   // Run full radarr scan every 24 hours

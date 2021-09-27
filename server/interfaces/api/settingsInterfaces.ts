@@ -21,6 +21,8 @@ export interface SettingsAboutResponse {
 }
 
 export interface PublicSettingsResponse {
+  jellyfinHost?: string;
+  jellyfinServerName?: string;
   initialized: boolean;
   applicationTitle: string;
   applicationUrl: string;
@@ -30,6 +32,7 @@ export interface PublicSettingsResponse {
   series4kEnabled: boolean;
   region: string;
   originalLanguage: string;
+  mediaServerType: number;
   partialRequestsEnabled: boolean;
   cacheImages: boolean;
   vapidPublic: string;

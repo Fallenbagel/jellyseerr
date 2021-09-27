@@ -62,6 +62,9 @@ export class User {
   public plexUsername?: string;
 
   @Column({ nullable: true })
+  public jellyfinUsername?: string;
+
+  @Column({ nullable: true })
   public username?: string;
 
   @Column({ nullable: true, select: false })
@@ -76,10 +79,19 @@ export class User {
   @Column({ type: 'integer', default: UserType.PLEX })
   public userType: UserType;
 
-  @Column({ nullable: true, select: false })
+  @Column({ nullable: true })
   public plexId?: number;
 
-  @Column({ nullable: true, select: false })
+  @Column({ nullable: true })
+  public jellyfinUserId?: string;
+
+  @Column({ nullable: true })
+  public jellyfinDeviceId?: string;
+
+  @Column({ nullable: true })
+  public jellyfinAuthToken?: string;
+
+  @Column({ nullable: true })
   public plexToken?: string;
 
   @Column({ type: 'integer', default: 0 })
@@ -233,7 +245,8 @@ export class User {
 
   @AfterLoad()
   public setDisplayName(): void {
-    this.displayName = this.username || this.plexUsername || this.email;
+    this.displayName =
+      this.username || this.plexUsername || this.jellyfinUsername || this.email;
   }
 
   public async getQuota(): Promise<QuotaResponse> {
