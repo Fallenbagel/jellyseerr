@@ -177,20 +177,19 @@ const NotificationsPushover: React.FC = () => {
                 <span className="label-required">*</span>
                 <span className="label-tip">
                   {intl.formatMessage(messages.accessTokenTip, {
-                    ApplicationRegistrationLink: function ApplicationRegistrationLink(
-                      msg
-                    ) {
-                      return (
-                        <a
-                          href="https://pushover.net/api#registration"
-                          className="text-white transition duration-300 hover:underline"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {msg}
-                        </a>
-                      );
-                    },
+                    ApplicationRegistrationLink:
+                      function ApplicationRegistrationLink(msg) {
+                        return (
+                          <a
+                            href="https://pushover.net/api#registration"
+                            className="text-white transition duration-300 hover:underline"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {msg}
+                          </a>
+                        );
+                      },
                   })}
                 </span>
               </label>

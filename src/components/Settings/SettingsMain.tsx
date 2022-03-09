@@ -306,9 +306,11 @@ const SettingsMain: React.FC = () => {
                   <div className="form-input">
                     <div className="form-input-field">
                       <Field as="select" id="locale" name="locale">
-                        {(Object.keys(
-                          availableLanguages
-                        ) as (keyof typeof availableLanguages)[]).map((key) => (
+                        {(
+                          Object.keys(
+                            availableLanguages
+                          ) as (keyof typeof availableLanguages)[]
+                        ).map((key) => (
                           <option
                             key={key}
                             value={availableLanguages[key].code}

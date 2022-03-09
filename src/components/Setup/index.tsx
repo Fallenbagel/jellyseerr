@@ -33,10 +33,8 @@ const Setup: React.FC = () => {
   const intl = useIntl();
   const [isUpdating, setIsUpdating] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const [
-    mediaServerSettingsComplete,
-    setMediaServerSettingsComplete,
-  ] = useState(false);
+  const [mediaServerSettingsComplete, setMediaServerSettingsComplete] =
+    useState(false);
   const [mediaServerType, setMediaServerType] = useState('');
   const router = useRouter();
   const { locale } = useLocale();

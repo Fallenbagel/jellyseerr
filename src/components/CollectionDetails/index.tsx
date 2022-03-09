@@ -60,9 +60,8 @@ const CollectionDetails: React.FC<CollectionDetailsProps> = ({
     }
   );
 
-  const { data: genres } = useSWR<{ id: number; name: string }[]>(
-    `/api/v1/genres/movie`
-  );
+  const { data: genres } =
+    useSWR<{ id: number; name: string }[]>(`/api/v1/genres/movie`);
 
   if (!data && !error) {
     return <LoadingSpinner />;
