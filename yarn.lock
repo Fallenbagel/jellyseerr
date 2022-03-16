@@ -4887,10 +4887,10 @@ cosmiconfig@^7.0.1:
     path-type "^4.0.0"
     yaml "^1.10.0"
 
-country-flag-icons@^1.4.10:
-  version "1.4.10"
-  resolved "https://registry.yarnpkg.com/country-flag-icons/-/country-flag-icons-1.4.10.tgz#3d440b14ff745caf755afb326398285ce2451bb6"
-  integrity sha512-4qngHBNB+k7IyXztHYVh0Nfo1SBwUX0ePksCQKntuuCHr/sNbzxtl1Oi0SDtov1q19HqJBzKdULEefYmafXmdg==
+country-flag-icons@^1.4.22:
+  version "1.4.22"
+  resolved "https://registry.yarnpkg.com/country-flag-icons/-/country-flag-icons-1.4.22.tgz#6e65bd1e738bba332784f32fd980d91f78ef3b45"
+  integrity sha512-5i98GkVm7AlDQKqqLk36mYn02WmVz5Ghej2x6vn2j83z7aFH4ELeAsGImcEHPhA2w/S0KQSLs28YqMDDrmgwIA==
 
 create-ecdh@^4.0.0:
   version "4.0.4"
