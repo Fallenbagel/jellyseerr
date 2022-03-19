@@ -2,7 +2,7 @@
 <img src="./public/logo_full.svg" alt="Overseerr" style="margin: 20px 0;">
 </p>
 <p align="center">
-<a href="https://discord.gg/VpVnZ92yQK"><img src="https://img.shields.io/discord/952656177924300932" alt="Discord"></a>
+<a href="https://discord.gg/BHak4GCk"><img src="https://img.shields.io/badge/Discord-Chat-lightgrey" alt="Discord"></a>
 </p>
 
 **Jellyseerr** is a free and open source fork of Overseerr for managing requests for your media library. It integrates with your existing services, such as **[Sonarr](https://sonarr.tv/)**, **[Radarr](https://radarr.video/)**, and **[Jellyfin](https://jellyfin.org/)**!
@@ -20,9 +20,20 @@
 
 Check out our [issue tracker](https://github.com/Fallenbagel/jellyseerr/issues).
 
+## Supported Architectures
+
+Jellyseerr image support multiple architectures such as x86-64, arm64 and armv7. 
+
+| **Architecture** | **Tag** |
+|------------------|---------|
+|      x86-64      |  latest |
+|       ARM64      |   arm   |
+|       ARMv7      |   arm   |
+
 ## Getting Started
 
-Check out our documentation for instructions on how to install and run Overseerr:
+Check out our dockerhub for instructions on how to install and run Jellyseerr:
+https://hub.docker.com/r/fallenbagel/jellyseerr
 
 ## Support
 
@@ -32,4 +43,3 @@ Check out our documentation for instructions on how to install and run Overseerr
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
 
-<!-- ALL-CONTRIBUTORS-LIST:END -->
