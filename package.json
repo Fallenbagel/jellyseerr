@@ -29,7 +29,7 @@
     "connect-typeorm": "^1.1.4",
     "cookie-parser": "^1.4.5",
     "copy-to-clipboard": "^3.3.1",
-    "country-flag-icons": "^1.4.10",
+    "country-flag-icons": "^1.4.24",
     "csurf": "^1.11.0",
     "email-templates": "^8.0.8",
     "express": "^4.17.1",
