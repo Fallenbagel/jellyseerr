@@ -43,3 +43,7 @@ https://hub.docker.com/r/fallenbagel/jellyseerr
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
 
+## Buy me a Coffee!
+If you like this, please help me buy me a coffee as it would help me out a lot!
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/fallen.bagel)
