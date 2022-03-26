@@ -1,18 +1,14 @@
+import { PrismaClient } from '@prisma/client';
 import { getClientIp } from '@supercharge/request-ip';
-import { TypeormStore } from 'connect-typeorm/out';
 import cookieParser from 'cookie-parser';
 import csurf from 'csurf';
 import express, { NextFunction, Request, Response } from 'express';
 import * as OpenApiValidator from 'express-openapi-validator';
-import session, { Store } from 'express-session';
 import next from 'next';
 import path from 'path';
 import swaggerUi from 'swagger-ui-express';
-import { createConnection, getRepository } from 'typeorm';
 import YAML from 'yamljs';
 import PlexAPI from './api/plexapi';
-import { Session } from './entity/Session';
-import { User } from './entity/User';
 import { startJobs } from './job/schedule';
 import notificationManager from './lib/notifications';
 import DiscordAgent from './lib/notifications/agents/discord';
@@ -35,18 +31,17 @@ logger.info(`Starting Overseerr version ${getAppVersion()}`);
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
+const prisma = new PrismaClient();
 
 app
   .prepare()
   .then(async () => {
-    const dbConnection = await createConnection();
-
-    // Run migrations in production
-    if (process.env.NODE_ENV === 'production') {
-      await dbConnection.query('PRAGMA foreign_keys=OFF');
-      await dbConnection.runMigrations();
-      await dbConnection.query('PRAGMA foreign_keys=ON');
-    }
+    // // Run migrations in production
+    // if (process.env.NODE_ENV === 'production') {
+    //   await dbConnection.query('PRAGMA foreign_keys=OFF');
+    //   await dbConnection.runMigrations();
+    //   await dbConnection.query('PRAGMA foreign_keys=ON');
+    // }
 
     // Load Settings
     const settings = getSettings().load();
@@ -56,14 +51,23 @@ app
       settings.plex.libraries.length > 1 &&
       !settings.plex.libraries[0].type
     ) {
-      const userRepository = getRepository(User);
-      const admin = await userRepository.findOne({
-        select: ['id', 'plexToken'],
-        order: { id: 'ASC' },
+      const admin = await prisma.user.findFirst({
+        select: {
+          id: true,
+          plexToken: true,
+        },
+        orderBy: {
+          id: 'asc',
+        },
       });
+      // const userRepository = getRepository(User);
+      // const admin = await userRepository.findOne({
+      //   select: ['id', 'plexToken'],
+      //   order: { id: 'ASC' },
+      // });
 
       if (admin) {
-        const plexapi = new PlexAPI({ plexToken: admin.plexToken });
+        const plexapi = new PlexAPI({ plexToken: admin.plexToken! });
         await plexapi.syncLibraries();
         logger.info('Migrating libraries to include media type', {
           label: 'Settings',
@@ -129,22 +133,24 @@ app
     }
 
     // Set up sessions
-    const sessionRespository = getRepository(Session);
-    server.use(
-      '/api',
-      session({
-        secret: settings.clientId,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-          maxAge: 1000 * 60 * 60 * 24 * 30,
-        },
-        store: new TypeormStore({
-          cleanupLimit: 2,
-          ttl: 1000 * 60 * 60 * 24 * 30,
-        }).connect(sessionRespository) as Store,
-      })
-    );
+    // const sessionRespository = getRepository(Session);
+    // const sessionRespository = await prisma.session.findMany();
+
+    // server.use(
+    //   '/api',
+    //   session({
+    //     secret: settings.clientId,
+    //     resave: false,
+    //     saveUninitialized: false,
+    //     cookie: {
+    //       maxAge: 1000 * 60 * 60 * 24 * 30,
+    //     },
+    //     store: new TypeormStore({
+    //       cleanupLimit: 2,
+    //       ttl: 1000 * 60 * 60 * 24 * 30,
+    //     }).connect(sessionRespository) as Store,
+    //   })
+    // );
     const apiDocs = YAML.load(API_SPEC_PATH);
     server.use('/api-docs', swaggerUi.serve, swaggerUi.setup(apiDocs));
     server.use(

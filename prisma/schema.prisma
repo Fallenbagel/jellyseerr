@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+model media {
+  id                    Int             @id @default(autoincrement())
+  mediaType             String
+  tmdbId                Int
+  tvdbId                Int?            @unique(map: "sqlite_autoindex_media_1")
+  imdbId                String?
+  status                Int             @default(1)
+  status4k              Int             @default(1)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @default(now())
+  lastSeasonChange      DateTime        @default(now())
+  mediaAddedAt          DateTime?
+  serviceId             Int?
+  serviceId4k           Int?
+  externalServiceId     Int?
+  externalServiceId4k   Int?
+  externalServiceSlug   String?
+  externalServiceSlug4k String?
+  ratingKey             String?
+  ratingKey4k           String?
+  jellyfinMediaId       String?
+  jellyfinMediaId4k     String?
+  media_request         media_request[]
+  season                season[]
+
+  @@index([imdbId], map: "IDX_7ff2d11f6a83cb52386eaebe74")
+  @@index([tvdbId], map: "IDX_41a289eb1fa489c1bc6f38d9c3")
+  @@index([tmdbId], map: "IDX_7157aad07c73f6a6ae3bbd5ef5")
+}
+
+model media_request {
+  id                                     Int              @id @default(autoincrement())
+  status                                 Int
+  createdAt                              DateTime         @default(now())
+  updatedAt                              DateTime         @default(now())
+  type                                   String
+  mediaId                                Int?
+  requestedById                          Int?
+  modifiedById                           Int?
+  is4k                                   Boolean          @default(false)
+  serverId                               Int?
+  profileId                              Int?
+  rootFolder                             String?
+  languageProfileId                      Int?
+  media                                  media?           @relation(fields: [mediaId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user_media_request_modifiedByIdTouser  user?            @relation("media_request_modifiedByIdTouser", fields: [modifiedById], references: [id], onUpdate: NoAction)
+  user_media_request_requestedByIdTouser user?            @relation("media_request_requestedByIdTouser", fields: [requestedById], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  season_request                         season_request[]
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement())
+  timestamp BigInt
+  name      String
+}
+
+model season {
+  id           Int      @id @default(autoincrement())
+  seasonNumber Int
+  status       Int      @default(1)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+  mediaId      Int?
+  status4k     Int      @default(1)
+  media        media?   @relation(fields: [mediaId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model season_request {
+  id            Int            @id @default(autoincrement())
+  seasonNumber  Int
+  status        Int            @default(1)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @default(now())
+  requestId     Int?
+  media_request media_request? @relation(fields: [requestId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model session {
+  expiredAt BigInt
+  id        String @id
+  json      String
+
+  @@index([expiredAt], map: "IDX_28c5d1d16da7908c97c9bc2f74")
+}
+
+model user {
+  id                                              Int             @id @default(autoincrement())
+  email                                           String          @unique(map: "sqlite_autoindex_user_1")
+  username                                        String?
+  plexId                                          Int?
+  plexToken                                       String?
+  permissions                                     Int             @default(0)
+  avatar                                          String
+  createdAt                                       DateTime        @default(now())
+  updatedAt                                       DateTime        @default(now())
+  password                                        String?
+  userType                                        Int             @default(1)
+  plexUsername                                    String?
+  resetPasswordGuid                               String?
+  recoveryLinkExpirationDate                      DateTime?
+  jellyfinUsername                                String?
+  jellyfinAuthToken                               String?
+  jellyfinUserId                                  String?
+  jellyfinDeviceId                                String?
+  media_request_media_request_modifiedByIdTouser  media_request[] @relation("media_request_modifiedByIdTouser")
+  media_request_media_request_requestedByIdTouser media_request[] @relation("media_request_requestedByIdTouser")
+  user_settings                                   user_settings?
+}
+
+model user_settings {
+  id                  Int     @id @default(autoincrement())
+  enableNotifications Boolean @default(true)
+  discordId           String?
+  userId              Int?    @unique(map: "sqlite_autoindex_user_settings_1")
+  region              String?
+  originalLanguage    String?
+  user                user?   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}

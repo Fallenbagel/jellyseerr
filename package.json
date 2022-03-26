@@ -19,6 +19,7 @@
   "dependencies": {
     "@headlessui/react": "^1.4.1",
     "@heroicons/react": "^1.0.4",
+    "@prisma/client": "^3.11.1",
     "@supercharge/request-ip": "^1.1.2",
     "@svgr/webpack": "^5.5.0",
     "@tanem/react-nprogress": "^3.0.79",
@@ -46,6 +47,7 @@
     "nodemailer": "^6.6.3",
     "openpgp": "^5.0.0-3",
     "plex-api": "^5.3.1",
+    "prisma": "^3.11.1",
     "pug": "^3.0.2",
     "react": "17.0.2",
     "react-ace": "^9.3.0",
