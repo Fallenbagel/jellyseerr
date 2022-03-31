@@ -1,0 +1,27 @@
+{
+  // see
+  //  - https://code.visualstudio.com/docs/editor/extension-gallery#_workspace-recommended-extensions
+  "recommendations": [
+    // https://marketplace.visualstudio.com/items?itemName=EditorConfig.editorconfig
+    "EditorConfig.editorconfig",
+
+    // https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
+    "dbaeumer.vscode-eslint",
+
+    // https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode
+    "esbenp.prettier-vscode",
+
+    // https://marketplace.visualstudio.com/items?itemName=eg2.vscode-npm-script
+    "eg2.vscode-npm-script",
+
+    // https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest
+    "Orta.vscode-jest",
+
+    "stylelint.vscode-stylelint",
+
+    "bradlc.vscode-tailwindcss",
+
+    // https://marketplace.visualstudio.com/items?itemName=heybourn.headwind
+    "heybourn.headwind"
+  ]
+}

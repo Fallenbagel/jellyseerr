@@ -1,0 +1,8 @@
+# Generated files which we would not like to format
+.next/
+dist/
+config/
+
+# assets
+src/assets/
+public/

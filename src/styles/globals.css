@@ -1,0 +1,161 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-900;
+}
+
+.plex-button {
+  @apply flex justify-center w-full px-4 py-2 text-sm font-medium text-center text-white transition duration-150 ease-in-out bg-indigo-600 border border-transparent rounded-md disabled:opacity-50;
+  background-color: #cc7b19;
+}
+
+.jellyfin-button {
+  @apply flex justify-center w-full px-4 py-2 text-sm font-medium text-center text-white transition duration-150 ease-in-out bg-indigo-600 border border-transparent rounded-md disabled:opacity-50;
+  background-color: #0083b0;
+}
+
+.plex-button:hover {
+  background: #f19a30;
+}
+
+.jellyfin-button:hover {
+  background: #00a4dc;
+}
+
+ul.cardList {
+  @apply grid gap-4;
+  grid-template-columns: repeat(auto-fill, minmax(9.375rem, 1fr));
+}
+
+ul.cardList > li {
+  @apply flex flex-col items-center col-span-1 text-center;
+}
+
+.titleCard {
+  @apply relative bg-gray-800 bg-cover rounded-lg;
+  padding-bottom: 150%;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.toast {
+  width: 360px;
+}
+
+.error-message {
+  @apply relative top-0 bottom-0 left-0 right-0 flex flex-col items-center justify-center h-screen text-center text-gray-300;
+}
+
+.heading {
+  @apply text-2xl leading-8 text-gray-100;
+}
+
+.description {
+  @apply max-w-2xl mt-1 text-sm leading-5 text-gray-500;
+}
+
+.section {
+  @apply mt-6 mb-10 text-white;
+}
+
+.form-row {
+  @apply max-w-6xl mt-6 sm:mt-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start;
+}
+
+.form-input {
+  @apply text-white sm:col-span-2;
+}
+
+.label-required {
+  @apply text-red-500;
+}
+
+.label-tip {
+  @apply block text-gray-500;
+}
+
+.actions {
+  @apply pt-5 mt-8 border-t border-gray-700;
+}
+
+input[type='checkbox'] {
+  @apply w-6 h-6 text-indigo-600 transition duration-150 ease-in-out rounded-md;
+}
+
+.checkbox-label {
+  @apply block mb-1 text-sm font-medium leading-5 text-gray-400 sm:mt-1;
+}
+
+input[type='text'],
+input[type='password'],
+select {
+  @apply flex-1 block w-full min-w-0 text-white transition duration-150 ease-in-out bg-gray-700 border border-gray-500 rounded-md form-input sm:text-sm sm:leading-5;
+}
+
+input.rounded-l-only,
+select.rounded-l-only {
+  @apply rounded-r-none;
+}
+
+input.rounded-r-only,
+select.rounded-r-only {
+  @apply rounded-l-none;
+}
+
+input.short,
+select.short {
+  @apply w-20;
+}
+
+.protocol {
+  @apply inline-flex items-center px-3 text-gray-100 bg-gray-600 border border-r-0 border-gray-500 cursor-default rounded-l-md sm:text-sm;
+}
+
+.text-label {
+  @apply block mb-1 text-sm font-medium leading-5 text-gray-400 sm:mt-2;
+}
+
+.error {
+  @apply mt-2 text-sm text-red-500;
+}
+
+.form-group {
+  @apply mt-6 text-white;
+}
+
+.group-label {
+  @apply block mb-1 text-sm font-medium leading-6 text-gray-400;
+}
+
+/* Used for animating height */
+.extra-max-height {
+  max-height: 100rem;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+code {
+  @apply px-2 py-1 bg-gray-800 rounded-md;
+}
+
+input[type='search']::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}

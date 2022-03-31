@@ -1,0 +1,9 @@
+{
+  "formats": {
+    "openapi": {
+      "rootDir": ".",
+      "include": ["**"]
+    }
+  },
+  "exclude": ["docs"]
+}

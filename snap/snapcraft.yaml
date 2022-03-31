@@ -1,0 +1,96 @@
+name: overseerr
+adopt-info: overseerr
+license: MIT
+summary: Request management and media discovery tool for the Plex ecosystem.
+description: >
+  Overseerr is a free and open source software application for managing requests for your media library.
+  It integrates with your existing services such as Sonarr, Radarr and Plex!
+base: core18
+confinement: strict
+
+parts:
+  overseerr:
+    plugin: nodejs
+    nodejs-version: "12.18.4"
+    nodejs-package-manager: "yarn"
+    nodejs-yarn-version: v1.22.5
+    build-packages:
+      - git
+      - on arm64:
+        - build-essential
+        - automake
+        - python-gi
+        - python-gi-dev
+      - on armhf:
+        - libatomic1
+        - build-essential
+        - automake
+        - python-gi
+        - python-gi-dev
+    source: .
+    override-pull: |
+      snapcraftctl pull
+      # Get information to determine snap grade and version
+      BRANCH=$(git rev-parse --abbrev-ref HEAD)
+      COMMIT=$(git rev-parse HEAD)
+      COMMIT_SHORT=$(git rev-parse --short HEAD)
+      VERSION='v'$(cat package.json | grep 'version' | head -1 | sed 's/.*"\(.*\)"\,/\1/')
+      if [ "$VERSION" = "v0.1.0" ]; then
+        SNAP_VERSION=$COMMIT_SHORT
+        GRADE=devel
+      else
+        SNAP_VERSION=$VERSION
+        GRADE=stable
+      fi
+      # Write COMMIT_TAG as it is needed durring the build process
+      echo $COMMIT > commit.txt
+      # Print debug info for build version
+      echo "{\"commitShort\": \"$COMMIT_SHORT\", \
+      \"version\": \"$VERSION\", \
+      \"snapVersion\": \"$SNAP_VERSION\", \
+      \"snapGrade\": \"$GRADE\", \
+      \"branch\": \"$BRANCH\", \
+      \"commit\": \"$COMMIT\"}"
+      echo "{\"commitTag\": \"$COMMIT\"}" > committag.json
+      # Set snap version and grade
+      snapcraftctl set-version "$SNAP_VERSION"
+      snapcraftctl set-grade "$GRADE"
+    build-environment:
+      - PATH: "$SNAPCRAFT_PART_BUILD/node_modules/.bin:$SNAPCRAFT_PART_BUILD/../npm/bin:$PATH"
+    override-build: |
+      set -e
+      # Set COMMIT_TAG before the build begins
+      export COMMIT_TAG=$(cat $SNAPCRAFT_PART_BUILD/commit.txt)
+      snapcraftctl build
+      yarn build
+      # Copy files needed for staging
+      cp $SNAPCRAFT_PART_BUILD/committag.json $SNAPCRAFT_PART_INSTALL/
+      cp -R $SNAPCRAFT_PART_BUILD/.next $SNAPCRAFT_PART_INSTALL/
+      cp -R $SNAPCRAFT_PART_BUILD/dist $SNAPCRAFT_PART_INSTALL/
+      cp -R $SNAPCRAFT_PART_BUILD/node_modules $SNAPCRAFT_PART_INSTALL/
+      # Remove .github and gitbook as it will fail snap lint
+      rm -rf $SNAPCRAFT_PART_INSTALL/.github && rm $SNAPCRAFT_PART_INSTALL/.gitbook.yaml
+    stage-packages:
+      - on armhf:
+        - libatomic1
+    stage:
+      [ .next, ./* ]
+    prime:
+      [ .next, ./* ]
+
+apps:
+  deamon:
+    command: /bin/sh -c "cd $SNAP && node dist/index.js"
+    daemon: simple
+    restart-condition: on-failure
+    restart-delay: 5s
+    plugs:
+      - home
+      - network
+      - network-bind
+    environment:
+      PATH: "$SNAP/usr/sbin:$SNAP/usr/bin:$SNAP/sbin:$SNAP/bin:$PATH"
+      OVERSEERR_SNAP: "True"
+      CONFIG_DIRECTORY: $SNAP_USER_COMMON
+      LOG_LEVEL: "debug"
+      NODE_ENV: "production"

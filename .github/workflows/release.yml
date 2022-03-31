@@ -1,0 +1,129 @@
+name: Overseerr Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    name: Lint & Test Build
+    runs-on: ubuntu-20.04
+    container: node:12.18-alpine
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: install dependencies
+        env:
+          HUSKY_SKIP_INSTALL: 1
+        run: yarn
+      - name: lint
+        run: yarn lint
+      - name: build
+        run: yarn build
+  semantic-release:
+    name: Tag and release latest version
+    needs: test
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Install dependencies
+        run: yarn
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: npx semantic-release
+  build-snap:
+    name: Build Snap Package (${{ matrix.architecture }})
+    needs: semantic-release
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture:
+          - amd64
+          - arm64
+          - armhf
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Switch to master branch
+        run: git checkout master
+      - name: Pull latest changes
+        run: git pull
+
+      - name: Prepare
+        id: prepare
+        run: |
+          git fetch --prune --tags
+          if [[ $GITHUB_REF == refs/tags/* || $GITHUB_REF == refs/heads/master ]]; then
+            echo ::set-output name=RELEASE::stable
+          else
+            echo ::set-output name=RELEASE::edge
+          fi
+
+      - name: Set Up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tonistiigi/binfmt@sha256:df15403e06a03c2f461c1f7938b171fda34a5849eb63a70e2a2109ed5a778bde
+
+      - name: Build Snap Package
+        uses: diddlesnaps/snapcraft-multiarch-action@v1
+        id: build
+        with:
+          architecture: ${{ matrix.architecture }}
+
+      - name: Upload Snap Package
+        uses: actions/upload-artifact@v2
+        with:
+          name: overseerr-snap-package-${{ matrix.architecture }}
+          path: ${{ steps.build.outputs.snap }}
+
+      - name: Review Snap Package
+        uses: diddlesnaps/snapcraft-review-tools-action@v1.2.0
+        with:
+          snap: ${{ steps.build.outputs.snap }}
+
+      - name: Publish Snap Package
+        uses: snapcore/action-publish@v1
+        with:
+          store_login: ${{ secrets.SNAP_LOGIN }}
+          snap: ${{ steps.build.outputs.snap }}
+          release: ${{ steps.prepare.outputs.RELEASE }}
+  discord:
+    name: Send Discord Notification
+    needs: semantic-release
+    if: always()
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Get Build Job Status
+        uses: technote-space/workflow-conclusion-action@v2.1.2
+
+      - name: Combine Job Status
+        id: status
+        run: |
+          failures=(neutral, skipped, timed_out, action_required)
+          if [[ ${array[@]} =~ $WORKFLOW_CONCLUSION ]]; then
+            echo ::set-output name=status::failure
+          else
+            echo ::set-output name=status::$WORKFLOW_CONCLUSION
+          fi
+
+      - name: Post Status to Discord
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ steps.status.outputs.status }}
+          title: ${{ github.workflow }}
+          nofail: true
