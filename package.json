@@ -60,7 +60,7 @@
     "secure-random-password": "^0.2.2",
     "sqlite3": "^5.0.2",
     "swagger-ui-express": "^4.1.6",
-    "swr": "^0.4.2",
+    "swr": "^1.2.2",
     "typeorm": "^0.2.31",
     "uuid": "^8.3.2",
     "winston": "^3.3.3",
