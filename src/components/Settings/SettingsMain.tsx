@@ -18,7 +18,7 @@ import RegionSelector from '../RegionSelector';
 const messages = defineMessages({
   generalsettings: 'General Settings',
   generalsettingsDescription:
-    'Configure global and default settings for Overseerr.',
+    'Configure global and default settings for Jellyseerr.',
   save: 'Save Changes',
   saving: 'Saving…',
   apikey: 'API Key',
@@ -38,12 +38,12 @@ const messages = defineMessages({
   hideAvailable: 'Hide Available Media',
   csrfProtection: 'Enable CSRF Protection',
   csrfProtectionTip:
-    'Sets external API access to read-only (requires HTTPS and Overseerr must be reloaded for changes to take effect)',
+    'Sets external API access to read-only (requires HTTPS and Jellyseerr must be reloaded for changes to take effect)',
   csrfProtectionHoverTip:
     'Do NOT enable this unless you understand what you are doing!',
   trustProxy: 'Enable Proxy Support',
   trustProxyTip:
-    'Allows Overseerr to correctly register client IP addresses behind a proxy (Overseerr must be reloaded for changes to take effect)',
+    'Allows Jellyseerr to correctly register client IP addresses behind a proxy (Jellyseerr must be reloaded for changes to take effect)',
   localLogin: 'Enable Local User Sign-In',
   validationApplicationTitle: 'You must provide an application title',
   validationApplicationUrl: 'You must provide a valid URL',
@@ -208,7 +208,7 @@ const SettingsMain: React.FC = () => {
                         id="applicationTitle"
                         name="applicationTitle"
                         type="text"
-                        placeholder="Overseerr"
+                        placeholder="Jellyseerr"
                       />
                     </div>
                     {errors.applicationTitle && touched.applicationTitle && (

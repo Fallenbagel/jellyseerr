@@ -9,7 +9,7 @@ import Releases from './Releases';
 import Badge from '../../Common/Badge';
 
 const messages = defineMessages({
-  overseerrinformation: 'Overseerr Information',
+  overseerrinformation: 'Jellyseerr Information',
   version: 'Version',
   totalmedia: 'Total Media',
   totalrequests: 'Total Requests',
@@ -17,7 +17,7 @@ const messages = defineMessages({
   githubdiscussions: 'GitHub Discussions',
   clickheretojoindiscord: 'Click here to join our Discord server.',
   timezone: 'Timezone',
-  supportoverseerr: 'Support Overseerr',
+  supportoverseerr: 'Support Jellyseerr',
   helppaycoffee: 'Help Pay for Coffee',
   documentation: 'Documentation',
   preferredmethod: 'Preferred',
@@ -61,27 +61,27 @@ const SettingsAbout: React.FC = () => {
         <List title={intl.formatMessage(messages.gettingsupport)}>
           <List.Item title={intl.formatMessage(messages.documentation)}>
             <a
-              href="https://docs.overseerr.dev"
+              href="https://github.com/Fallenbagel/jellyseerr/blob/main/README.md"
               target="_blank"
               rel="noreferrer"
               className="text-indigo-500 hover:underline"
             >
-              https://docs.overseerr.dev
+              https://github.com/Fallenbagel/jellyseerr/blob/main/README.md
             </a>
           </List.Item>
           <List.Item title={intl.formatMessage(messages.githubdiscussions)}>
             <a
-              href="https://github.com/sct/overseerr/discussions"
+              href="https://github.com/Fallenbagel/jellyseerr/issues"
               target="_blank"
               rel="noreferrer"
               className="text-indigo-500 hover:underline"
             >
-              https://github.com/sct/overseerr/discussions
+              https://github.com/Fallenbagel/jellyseerr/issues
             </a>
           </List.Item>
           <List.Item title="Discord">
             <a
-              href="https://discord.gg/PkCWJSeCk7"
+              href="https://discord.gg/ckbvBtDJgC"
               target="_blank"
               rel="noreferrer"
               className="text-indigo-500 hover:underline"
@@ -97,26 +97,16 @@ const SettingsAbout: React.FC = () => {
             title={`${intl.formatMessage(messages.helppaycoffee)} ☕️`}
           >
             <a
-              href="https://github.com/sponsors/sct"
+              href="https://www.buymeacoffee.com/fallen.bagel"
               target="_blank"
               rel="noreferrer"
               className="text-indigo-500 hover:underline"
             >
-              https://github.com/sponsors/sct
+              https://www.buymeacoffee.com/fallen.bagel
             </a>
             <Badge className="ml-2">
               {intl.formatMessage(messages.preferredmethod)}
             </Badge>
-          </List.Item>
-          <List.Item title="">
-            <a
-              href="https://patreon.com/overseerr"
-              target="_blank"
-              rel="noreferrer"
-              className="text-indigo-500 hover:underline"
-            >
-              https://patreon.com/overseerr
-            </a>
           </List.Item>
         </List>
       </div>

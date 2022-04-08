@@ -105,7 +105,7 @@ const Layout: React.FC = ({ children }) => {
                       </p>
                       <p className="mt-3 text-sm leading-5 md:mt-0 md:ml-6">
                         <a
-                          href="http://github.com/sct/overseerr"
+                          href="https://github.com/Fallenbagel/jellyseerr"
                           className="font-medium text-indigo-100 transition duration-150 ease-in-out whitespace-nowrap hover:text-white"
                           target="_blank"
                           rel="noreferrer"

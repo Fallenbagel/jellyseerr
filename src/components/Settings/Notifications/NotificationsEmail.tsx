@@ -174,7 +174,7 @@ const NotificationsEmail: React.FC = () => {
                     <Field
                       id="senderName"
                       name="senderName"
-                      placeholder="Overseerr"
+                      placeholder="Jellyseerr"
                       type="text"
                     />
                   </div>

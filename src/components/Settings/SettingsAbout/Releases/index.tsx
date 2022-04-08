@@ -18,7 +18,7 @@ const messages = defineMessages({
   latestversion: 'Latest',
   currentversion: 'Current Version',
   viewchangelog: 'View Changelog',
-  runningDevelop: 'You are running a develop version of Overseerr!',
+  runningDevelop: 'You are running a develop version of Overseerr! (However, this is the only version that will support jellyfin',
   runningDevelopMessage:
     'The changes in your version will not be available below. Please see the <GithubLink>GitHub repository</GithubLink> for latest updates.',
 });
@@ -164,7 +164,7 @@ const Releases: React.FC<ReleasesProps> = ({ currentVersion }) => {
               GithubLink: function GithubLink(msg) {
                 return (
                   <a
-                    href="https://github.com/sct/overseerr"
+                    href="https://github.com/Fallenbagel/jellyseerr"
                     target="_blank"
                     rel="noreferrer"
                     className="text-yellow-100 underline transition duration-300 hover:text-white"

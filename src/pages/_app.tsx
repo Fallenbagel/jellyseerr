@@ -118,7 +118,7 @@ const CoreApp: Omit<NextAppComponentType, 'origGetInitialProps'> = ({
             <InteractionProvider>
               <ToastProvider components={{ Toast }}>
                 <Head>
-                  <title>Overseerr</title>
+                  <title>Jellyseerr</title>
                   <meta
                     name="viewport"
                     content="width=device-width, initial-scale=1"

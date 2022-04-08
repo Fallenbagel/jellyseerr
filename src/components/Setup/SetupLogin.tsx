@@ -8,7 +8,7 @@ import Accordion from '../Common/Accordion';
 import { MediaServerType } from '../../../server/constants/server';
 
 const messages = defineMessages({
-  welcome: 'Welcome to Overseerr',
+  welcome: 'Welcome to Jellyseerr',
   signinMessage: 'Get started by signing in',
   signinWithJellyfin: 'Use your Jellyfin account',
   signinWithPlex: 'Use your Plex account',

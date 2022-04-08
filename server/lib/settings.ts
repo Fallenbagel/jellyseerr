@@ -199,7 +199,7 @@ class Settings {
       clientId: uuidv4(),
       main: {
         apiKey: '',
-        applicationTitle: 'Overseerr',
+        applicationTitle: 'Jellyseerr',
         applicationUrl: '',
         csrfProtection: false,
         defaultPermissions: Permission.REQUEST,
@@ -241,7 +241,7 @@ class Settings {
               smtpPort: 587,
               secure: false,
               allowSelfSigned: false,
-              senderName: 'Overseerr',
+              senderName: 'Jellyseerr',
             },
           },
           discord: {

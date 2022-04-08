@@ -117,9 +117,9 @@ class PlexAPI {
       // },
       options: {
         identifier: settings.clientId,
-        product: 'Overseerr',
+        product: 'Jellyseerr',
         deviceName: settings.main.applicationTitle,
-        platform: 'Overseerr',
+        platform: 'Jellyseerr',
       },
     });
   }

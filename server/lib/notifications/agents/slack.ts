@@ -175,7 +175,7 @@ class SlackAgent
             action_id: 'button-action',
             type: 'button',
             url: actionUrl,
-            value: 'open_overseerr',
+            value: 'open_Jellyseerr',
             text: {
               type: 'plain_text',
               text: `Open in ${settings.main.applicationTitle}`,

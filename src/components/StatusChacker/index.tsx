@@ -8,7 +8,7 @@ const messages = defineMessages({
   newversionavailable: 'New Version Available',
   newversionDescription:
     'An update is now available. Click the button below to reload the application.',
-  reloadOverseerr: 'Reload Overseerr',
+  reloadOverseerr: 'Reload Jellyseerr',
 });
 
 const StatusChecker: React.FC = () => {

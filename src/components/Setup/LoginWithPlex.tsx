@@ -5,7 +5,7 @@ import axios from 'axios';
 import { defineMessages, FormattedMessage } from 'react-intl';
 
 const messages = defineMessages({
-  welcome: 'Welcome to Overseerr',
+  welcome: 'Welcome to Jellyseerr',
   signinMessage: 'Get started by logging in with your Plex account',
 });
 

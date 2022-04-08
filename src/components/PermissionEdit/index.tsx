@@ -9,13 +9,13 @@ export const messages = defineMessages({
     'Full administrator access. Bypasses all other permission checks.',
   users: 'Manage Users',
   usersDescription:
-    'Grants permission to manage Overseerr users. Users with this permission cannot modify users with or grant the Admin privilege.',
+    'Grants permission to manage Jellyseerr users. Users with this permission cannot modify users with or grant the Admin privilege.',
   settings: 'Manage Settings',
   settingsDescription:
-    'Grants permission to modify all Overseerr settings. A user must have this permission to grant it to others.',
+    'Grants permission to modify all Jellyseerr settings. A user must have this permission to grant it to others.',
   managerequests: 'Manage Requests',
   managerequestsDescription:
-    'Grants permission to manage Overseerr requests. This includes approving and denying requests. All requests made by a user with this permission will be automatically approved regardless of whether or not they have Auto-Approve permissions.',
+    'Grants permission to manage Jellyseerr requests. This includes approving and denying requests. All requests made by a user with this permission will be automatically approved regardless of whether or not they have Auto-Approve permissions.',
   request: 'Request',
   requestDescription: 'Grants permission to request movies and series.',
   vote: 'Vote',

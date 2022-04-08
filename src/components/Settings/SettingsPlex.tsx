@@ -17,7 +17,7 @@ import Spinner from '../../assets/spinner.svg';
 const messages = defineMessages({
   plexsettings: 'Plex Settings',
   plexsettingsDescription:
-    'Configure the settings for your Plex server. Overseerr scans your Plex libraries to see what content is available.',
+    'Configure the settings for your Plex server. Jellyseerr scans your Plex libraries to see what content is available.',
   servername: 'Server Name',
   servernameTip: 'Automatically retrieved from Plex after saving',
   servernamePlaceholder: 'Plex Server Name',
@@ -48,12 +48,12 @@ const messages = defineMessages({
   saving: 'Saving…',
   plexlibraries: 'Plex Libraries',
   plexlibrariesDescription:
-    'The libraries Overseerr scans for titles. Set up and save your Plex connection settings, then click the button below if no libraries are listed.',
+    'The libraries Jellyseerr scans for titles. Set up and save your Plex connection settings, then click the button below if no libraries are listed.',
   syncing: 'Syncing',
   sync: 'Sync Plex Libraries',
   manualscan: 'Manual Library Scan',
   manualscanDescription:
-    "Normally, this will only be run once every 24 hours. Overseerr will check your Plex server's recently added more aggressively. If this is your first time configuring Plex, a one-time full manual library scan is recommended!",
+    "Normally, this will only be run once every 24 hours. Jellyseerr will check your Plex server's recently added more aggressively. If this is your first time configuring Plex, a one-time full manual library scan is recommended!",
   notrunning: 'Not Running',
   currentlibrary: 'Current Library: {name}',
   librariesRemaining: 'Libraries Remaining: {count}',
@@ -328,7 +328,7 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
               autoDismiss: true,
               appearance: 'error',
             });
-            setSubmitError(e.response.data.message);
+            setSubmitError(error.response.data.message);
           }
         }}
       >

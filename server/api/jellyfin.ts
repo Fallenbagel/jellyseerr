@@ -81,9 +81,9 @@ class JellyfinAPI {
 
     let authHeaderVal = '';
     if (this.authToken) {
-      authHeaderVal = `MediaBrowser Client="Overseerr", Device="Axios", DeviceId="${deviceId}", Version="10.8.0", Token="${authToken}"`;
+      authHeaderVal = `MediaBrowser Client="Jellyseerr", Device="Axios", DeviceId="${deviceId}", Version="10.8.0", Token="${authToken}"`;
     } else {
-      authHeaderVal = `MediaBrowser Client="Overseerr", Device="Axios", DeviceId="${deviceId}", Version="10.8.0"`;
+      authHeaderVal = `MediaBrowser Client="Jellyseerr", Device="Axios", DeviceId="${deviceId}", Version="10.8.0"`;
     }
 
     this.axios = axios.create({
