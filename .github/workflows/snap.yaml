@@ -21,7 +21,7 @@ jobs:
     container: node:12.18-alpine
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: install dependencies
         env:
           HUSKY_SKIP_INSTALL: 1
@@ -43,7 +43,7 @@ jobs:
           - armhf
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Prepare
         id: prepare
