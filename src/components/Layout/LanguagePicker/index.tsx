@@ -77,6 +77,11 @@ const availableLanguages: AvailableLanguageObject = {
     code: 'zh-TW',
     display: '中文（臺灣）',
   },
+    },
+  'zh-CN': {
+    code: 'zh-CN',
+    display: '中文（中国大陆）',
+  },
 };
 
 const LanguagePicker: React.FC = () => {
