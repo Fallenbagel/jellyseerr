@@ -69,7 +69,7 @@
     "uuid": "^8.3.2",
     "web-push": "^3.4.5",
     "winston": "^3.3.3",
-    "winston-daily-rotate-file": "^4.5.5",
+    "winston-daily-rotate-file": "^4.6.1",
     "xml2js": "^0.4.23",
     "yamljs": "^0.3.0",
     "yup": "^0.32.9"
