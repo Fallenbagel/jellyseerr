@@ -75,7 +75,7 @@
     "yup": "^0.32.9"
   },
   "devDependencies": {
-    "@babel/cli": "^7.15.7",
+    "@babel/cli": "^7.17.6",
     "@commitlint/cli": "^13.1.0",
     "@commitlint/config-conventional": "^13.1.0",
     "@fullhuman/postcss-purgecss": "3.0.0",
