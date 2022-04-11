@@ -59,7 +59,7 @@
     "react-toast-notifications": "^2.5.1",
     "react-transition-group": "^4.4.2",
     "react-truncate-markup": "^5.1.0",
-    "react-use-clipboard": "1.0.7",
+    "react-use-clipboard": "1.0.8",
     "reflect-metadata": "^0.1.13",
     "secure-random-password": "^0.2.3",
     "sqlite3": "^5.0.2",
