@@ -28,7 +28,7 @@ Jellyseerr image support multiple architectures such as x86-64, arm64 and armv7.
 |------------------|---------|
 |      x86-64      |  latest |
 |       ARM64      |   arm   |
-|       ARMv7      |   arm   |
+|       ARMv7      |   armv7   |
 
 ## Getting Started
 
