@@ -23,12 +23,13 @@ Check out our [issue tracker](https://github.com/Fallenbagel/jellyseerr/issues).
 ## Supported Architectures
 
 Jellyseerr image support multiple architectures such as x86-64, arm64 and armv7.
+**NOTE: `:arm` and `:armv7` tag has been deprecated and replaced with `:latest`.**
 
 | **Architecture** | **Tag** |
 | ---------------- | ------- |
 | x86-64           | latest  |
-| ARM64            | arm     |
-| ARMv7            | armv7   |
+| ARM64            | latest  |
+| ARMv7            | latest   |
 
 ## Getting Started
 
