@@ -1,12 +1,7 @@
 # Global code ownership
-*       @sct
 
-# Documentation
-docs/  @TheCatLady @samwiseg0
-
-# Snap-related files
-.github/workflows/snap.yaml @samwiseg0
-snap/  @samwiseg0
+-       @Fallenbagel
 
 # i18n locale files
-src/i18n/locale/ @sct @TheCatLady
+
+src/i18n/locale/ @Fallenbagel
