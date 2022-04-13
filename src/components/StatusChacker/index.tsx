@@ -27,28 +27,7 @@ const StatusChecker: React.FC = () => {
     return null;
   }
 
-  return (
-    <Transition
-      enter="opacity-0 transition duration-300"
-      enterFrom="opacity-0"
-      enterTo="opacity-100"
-      leave="opacity-100 transition duration-300"
-      leaveFrom="opacity-100"
-      leaveTo="opacity-0"
-      appear
-      show={data.commitTag !== process.env.commitTag}
-    >
-      <Modal
-        iconSvg={<SparklesIcon />}
-        title={intl.formatMessage(messages.newversionavailable)}
-        onOk={() => location.reload()}
-        okText={intl.formatMessage(messages.reloadOverseerr)}
-        backgroundClickable={false}
-      >
-        {intl.formatMessage(messages.newversionDescription)}
-      </Modal>
-    </Transition>
-  );
+  return null;
 };
 
 export default StatusChecker;
