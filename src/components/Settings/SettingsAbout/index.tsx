@@ -85,10 +85,10 @@ const SettingsAbout: React.FC = () => {
             title={intl.formatMessage(messages.version)}
             className="truncate"
           >
-            <code>{data.version.replace('develop-', '')}</code>
+            {/* <code>{data.version.replace('develop-', '')}</code> */}
             {status?.updateAvailable ? (
-              <Badge badgeType="warning" className="ml-2">
-                {intl.formatMessage(messages.outofdate)}
+              <Badge badgeType="success" className="ml-2">
+                {intl.formatMessage(messages.uptodate)}
               </Badge>
             ) : (
               status?.commitTag !== 'local' && (
@@ -115,12 +115,12 @@ const SettingsAbout: React.FC = () => {
         <List title={intl.formatMessage(messages.gettingsupport)}>
           <List.Item title={intl.formatMessage(messages.documentation)}>
             <a
-              href="https://github.com/Fallenbagel/jellyseerr#readme"
+              href="https://github.com/Fallenbagel/jellyseerr/blob/main/README.md"
               target="_blank"
               rel="noreferrer"
               className="text-indigo-500 hover:underline"
             >
-              https://github.com/Fallenbagel/jellyseerr#readme
+              https://github.com/Fallenbagel/jellyseerr/blob/main/README.md
             </a>
           </List.Item>
           <List.Item title={intl.formatMessage(messages.githubdiscussions)}>

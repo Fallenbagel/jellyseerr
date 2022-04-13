@@ -1,6 +1,6 @@
 import {
   ArrowCircleUpIcon,
-  BeakerIcon,
+  // BeakerIcon,
   CodeIcon,
   ServerIcon,
 } from '@heroicons/react/outline';
@@ -36,7 +36,7 @@ const VersionStatus: React.FC<VersionStatusProps> = ({ onClick }) => {
     data.commitTag === 'local'
       ? 'Keep it up! 👍'
       : data.version.startsWith('develop-')
-      ? intl.formatMessage(messages.streamdevelop)
+      ? intl.formatMessage(messages.streamstable)
       : intl.formatMessage(messages.streamstable);
 
   return (
@@ -52,14 +52,16 @@ const VersionStatus: React.FC<VersionStatusProps> = ({ onClick }) => {
         tabIndex={0}
         className={`flex items-center p-2 mx-2 text-xs transition duration-300 rounded-lg ring-1 ring-gray-700 ${
           data.updateAvailable
-            ? 'bg-yellow-500 text-white hover:bg-yellow-400'
+            ? // ? 'bg-yellow-500 text-white hover:bg-yellow-400'
+              'bg-gray-900 text-gray-300 hover:bg-gray-800'
             : 'bg-gray-900 text-gray-300 hover:bg-gray-800'
         }`}
       >
         {data.commitTag === 'local' ? (
           <CodeIcon className="w-6 h-6" />
         ) : data.version.startsWith('develop-') ? (
-          <BeakerIcon className="w-6 h-6" />
+          // <BeakerIcon className="w-6 h-6" />
+          <CodeIcon className="w-6 h-6" />
         ) : (
           <ServerIcon className="w-6 h-6" />
         )}
@@ -72,7 +74,8 @@ const VersionStatus: React.FC<VersionStatusProps> = ({ onClick }) => {
               intl.formatMessage(messages.commitsbehind, {
                 commitsBehind: data.commitsBehind,
               })
-            ) : data.commitsBehind === -1 ? (
+            ) : // ) : data.commitsBehind === -1 ? (
+            data.commitsBehind === 0 ? (
               intl.formatMessage(messages.outofdate)
             ) : (
               <code className="p-0 bg-transparent">
