@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Generate Swagger UI
-        uses: Legion2/swagger-ui-action@v1.1.2
+        uses: Legion2/swagger-ui-action@v1.1.3
         with:
           output: swagger-ui
           spec-file: overseerr-api.yml
