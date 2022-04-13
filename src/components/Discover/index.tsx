@@ -35,13 +35,11 @@ const Discover: React.FC = () => {
     { revalidateOnMount: true }
   );
 
-  const {
-    data: requests,
-    error: requestError,
-  } = useSWR<RequestResultsResponse>(
-    '/api/v1/request?filter=all&take=10&sort=modified&skip=0',
-    { revalidateOnMount: true }
-  );
+  const { data: requests, error: requestError } =
+    useSWR<RequestResultsResponse>(
+      '/api/v1/request?filter=all&take=10&sort=modified&skip=0',
+      { revalidateOnMount: true }
+    );
 
   return (
     <>

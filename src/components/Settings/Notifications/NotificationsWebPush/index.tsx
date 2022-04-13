@@ -18,7 +18,7 @@ const messages = defineMessages({
   toastWebPushTestSuccess: 'Web push test notification sent!',
   toastWebPushTestFailed: 'Web push test notification failed to send.',
   httpsRequirement:
-    'In order to receive web push notifications, Overseerr must be served over HTTPS.',
+    'In order to receive web push notifications, Jellyseerr must be served over HTTPS.',
 });
 
 const NotificationsWebPush: React.FC = () => {

@@ -65,9 +65,11 @@ const LanguagePicker: React.FC = () => {
                 }
                 defaultValue={locale}
               >
-                {(Object.keys(
-                  availableLanguages
-                ) as (keyof typeof availableLanguages)[]).map((key) => (
+                {(
+                  Object.keys(
+                    availableLanguages
+                  ) as (keyof typeof availableLanguages)[]
+                ).map((key) => (
                   <option key={key} value={availableLanguages[key].code}>
                     {availableLanguages[key].display}
                   </option>

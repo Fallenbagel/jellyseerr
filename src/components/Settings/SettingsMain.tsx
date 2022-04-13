@@ -29,7 +29,7 @@ const messages = defineMessages({
   general: 'General',
   generalsettings: 'General Settings',
   generalsettingsDescription:
-    'Configure global and default settings for Overseerr.',
+    'Configure global and default settings for Jellyseerr.',
   apikey: 'API Key',
   applicationTitle: 'Application Title',
   applicationurl: 'Application URL',
@@ -44,7 +44,7 @@ const messages = defineMessages({
   hideAvailable: 'Hide Available Media',
   csrfProtection: 'Enable CSRF Protection',
   csrfProtectionTip:
-    'Set external API access to read-only (requires HTTPS, and Overseerr must be reloaded for changes to take effect)',
+    'Set external API access to read-only (requires HTTPS, and Jellyseerr must be reloaded for changes to take effect)',
   csrfProtectionHoverTip:
     'Do NOT enable this setting unless you understand what you are doing!',
   cacheImages: 'Enable Image Caching',
@@ -52,7 +52,7 @@ const messages = defineMessages({
     'Optimize and store all images locally (consumes a significant amount of disk space)',
   trustProxy: 'Enable Proxy Support',
   trustProxyTip:
-    'Allow Overseerr to correctly register client IP addresses behind a proxy (Overseerr must be reloaded for changes to take effect)',
+    'Allow Jellyseerr to correctly register client IP addresses behind a proxy (Jellyseerr must be reloaded for changes to take effect)',
   validationApplicationTitle: 'You must provide an application title',
   validationApplicationUrl: 'You must provide a valid URL',
   validationApplicationUrlTrailingSlash: 'URL must not end in a trailing slash',
@@ -306,9 +306,11 @@ const SettingsMain: React.FC = () => {
                   <div className="form-input">
                     <div className="form-input-field">
                       <Field as="select" id="locale" name="locale">
-                        {(Object.keys(
-                          availableLanguages
-                        ) as (keyof typeof availableLanguages)[]).map((key) => (
+                        {(
+                          Object.keys(
+                            availableLanguages
+                          ) as (keyof typeof availableLanguages)[]
+                        ).map((key) => (
                           <option
                             key={key}
                             value={availableLanguages[key].code}

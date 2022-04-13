@@ -1,10 +1,10 @@
+import fs from 'fs';
+import path from 'path';
 import * as winston from 'winston';
 import 'winston-daily-rotate-file';
-import path from 'path';
-import fs from 'fs';
 
 // Migrate away from old log
-const OLD_LOG_FILE = path.join(__dirname, '../config/logs/overseerr.log');
+const OLD_LOG_FILE = path.join(__dirname, '../config/logs/Jellyseerr.log');
 if (fs.existsSync(OLD_LOG_FILE)) {
   const file = fs.lstatSync(OLD_LOG_FILE);
 
@@ -43,14 +43,14 @@ const logger = winston.createLogger({
     }),
     new winston.transports.DailyRotateFile({
       filename: process.env.CONFIG_DIRECTORY
-        ? `${process.env.CONFIG_DIRECTORY}/logs/overseerr-%DATE%.log`
-        : path.join(__dirname, '../config/logs/overseerr-%DATE%.log'),
+        ? `${process.env.CONFIG_DIRECTORY}/logs/Jellyseerr-%DATE%.log`
+        : path.join(__dirname, '../config/logs/Jellyseerr-%DATE%.log'),
       datePattern: 'YYYY-MM-DD',
       zippedArchive: true,
       maxSize: '20m',
       maxFiles: '7d',
       createSymlink: true,
-      symlinkName: 'overseerr.log',
+      symlinkName: 'Jellyseerr.log',
     }),
   ],
 });

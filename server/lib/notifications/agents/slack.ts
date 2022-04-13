@@ -43,7 +43,8 @@ interface SlackBlockEmbed {
 
 class SlackAgent
   extends BaseAgent<NotificationAgentSlack>
-  implements NotificationAgent {
+  implements NotificationAgent
+{
   protected getSettings(): NotificationAgentSlack {
     if (this.settings) {
       return this.settings;
@@ -202,7 +203,7 @@ class SlackAgent
             action_id: 'button-action',
             type: 'button',
             url: actionUrl,
-            value: 'open_overseerr',
+            value: 'open_jellyseerr',
             text: {
               type: 'plain_text',
               text: `Open in ${settings.main.applicationTitle}`,

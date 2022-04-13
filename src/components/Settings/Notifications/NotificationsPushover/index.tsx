@@ -15,7 +15,7 @@ const messages = defineMessages({
   agentenabled: 'Enable Agent',
   accessToken: 'Application API Token',
   accessTokenTip:
-    '<ApplicationRegistrationLink>Register an application</ApplicationRegistrationLink> for use with Overseerr',
+    '<ApplicationRegistrationLink>Register an application</ApplicationRegistrationLink> for use with Jellyseerr',
   userToken: 'User or Group Key',
   userTokenTip:
     'Your 30-character <UsersGroupsLink>user or group identifier</UsersGroupsLink>',
@@ -177,20 +177,19 @@ const NotificationsPushover: React.FC = () => {
                 <span className="label-required">*</span>
                 <span className="label-tip">
                   {intl.formatMessage(messages.accessTokenTip, {
-                    ApplicationRegistrationLink: function ApplicationRegistrationLink(
-                      msg
-                    ) {
-                      return (
-                        <a
-                          href="https://pushover.net/api#registration"
-                          className="text-white transition duration-300 hover:underline"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {msg}
-                        </a>
-                      );
-                    },
+                    ApplicationRegistrationLink:
+                      function ApplicationRegistrationLink(msg) {
+                        return (
+                          <a
+                            href="https://pushover.net/api#registration"
+                            className="text-white transition duration-300 hover:underline"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {msg}
+                          </a>
+                        );
+                      },
                   })}
                 </span>
               </label>

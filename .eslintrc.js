@@ -7,7 +7,6 @@ module.exports = {
     'plugin:jsx-a11y/recommended',
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
-    'prettier',
   ],
   parserOptions: {
     ecmaVersion: 6,
@@ -26,7 +25,6 @@ module.exports = {
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
     '@typescript-eslint/explicit-function-return-type': 'off',
-    'prettier/prettier': ['error', { endOfLine: 'auto' }],
     'formatjs/no-offset': 'error',
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': ['error'],
@@ -40,7 +38,7 @@ module.exports = {
       },
     },
   ],
-  plugins: ['jsx-a11y', 'prettier', 'react-hooks', 'formatjs'],
+  plugins: ['jsx-a11y', 'react-hooks', 'formatjs'],
   settings: {
     react: {
       pragma: 'React',

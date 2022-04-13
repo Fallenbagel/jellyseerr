@@ -162,7 +162,7 @@ router.get('/genres/tv', isAuthenticated(), async (req, res) => {
 
 router.get('/', (_req, res) => {
   return res.status(200).json({
-    api: 'Overseerr API',
+    api: 'Jellyseerr API',
     version: '1.0',
   });
 });

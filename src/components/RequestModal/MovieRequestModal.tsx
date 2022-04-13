@@ -51,10 +51,8 @@ const MovieRequestModal: React.FC<RequestModalProps> = ({
   is4k = false,
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
-  const [
-    requestOverrides,
-    setRequestOverrides,
-  ] = useState<RequestOverrides | null>(null);
+  const [requestOverrides, setRequestOverrides] =
+    useState<RequestOverrides | null>(null);
   const { addToast } = useToasts();
   const { data, error } = useSWR<MovieDetails>(`/api/v1/movie/${tmdbId}`, {
     revalidateOnMount: true,

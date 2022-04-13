@@ -74,10 +74,8 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
     (season) => season.seasonNumber
   );
   const { data, error } = useSWR<TvDetails>(`/api/v1/tv/${tmdbId}`);
-  const [
-    requestOverrides,
-    setRequestOverrides,
-  ] = useState<RequestOverrides | null>(null);
+  const [requestOverrides, setRequestOverrides] =
+    useState<RequestOverrides | null>(null);
   const [selectedSeasons, setSelectedSeasons] = useState<number[]>(
     editRequest ? editingSeasons : []
   );

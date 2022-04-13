@@ -37,7 +37,7 @@ class PlexOAuth {
     const browser = Bowser.getParser(window.navigator.userAgent);
     this.plexHeaders = {
       Accept: 'application/json',
-      'X-Plex-Product': 'Overseerr',
+      'X-Plex-Product': 'Jellyseerr',
       'X-Plex-Version': '2.0',
       'X-Plex-Client-Identifier': '7f9de3ba-e12b-11ea-87d0-0242ac130003',
       'X-Plex-Model': 'Plex OAuth',
@@ -85,15 +85,13 @@ class PlexOAuth {
       'context[device][product]': this.plexHeaders['X-Plex-Product'],
       'context[device][version]': this.plexHeaders['X-Plex-Version'],
       'context[device][platform]': this.plexHeaders['X-Plex-Platform'],
-      'context[device][platformVersion]': this.plexHeaders[
-        'X-Plex-Platform-Version'
-      ],
+      'context[device][platformVersion]':
+        this.plexHeaders['X-Plex-Platform-Version'],
       'context[device][device]': this.plexHeaders['X-Plex-Device'],
       'context[device][deviceName]': this.plexHeaders['X-Plex-Device-Name'],
       'context[device][model]': this.plexHeaders['X-Plex-Model'],
-      'context[device][screenResolution]': this.plexHeaders[
-        'X-Plex-Device-Screen-Resolution'
-      ],
+      'context[device][screenResolution]':
+        this.plexHeaders['X-Plex-Device-Screen-Resolution'],
       'context[device][layout]': 'desktop',
       code: this.pin.code,
     };

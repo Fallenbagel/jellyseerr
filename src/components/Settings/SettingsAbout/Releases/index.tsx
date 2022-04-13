@@ -20,11 +20,11 @@ const messages = defineMessages({
   currentversion: 'Current Version',
   viewchangelog: 'View Changelog',
   runningDevelopMessage:
-    'The latest changes to the <code>develop</code> branch of Overseerr are not shown below. Please see the commit history for this branch on <GithubLink>GitHub</GithubLink> for details.',
+    'The latest changes to the <code>develop</code> branch of Jellyseerr are not shown below. Please see the commit history for this branch on <GithubLink>GitHub</GithubLink> for details.',
 });
 
 const REPO_RELEASE_API =
-  'https://api.github.com/repos/sct/overseerr/releases?per_page=20';
+  'https://api.github.com/repos/Fallenbagel/jellyseerr/releases?per_page=20';
 
 interface GitHubRelease {
   url: string;
@@ -153,7 +153,7 @@ const Releases: React.FC<ReleasesProps> = ({ currentVersion }) => {
               GithubLink: function GithubLink(msg) {
                 return (
                   <a
-                    href="https://github.com/sct/overseerr"
+                    href="https://github.com/Fallenbagel/jellyseerr"
                     target="_blank"
                     rel="noreferrer"
                     className="text-yellow-100 underline transition duration-300 hover:text-white"

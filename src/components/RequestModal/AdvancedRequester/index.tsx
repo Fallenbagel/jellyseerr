@@ -97,21 +97,19 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
     defaultOverrides?.tags ?? []
   );
 
-  const {
-    data: serverData,
-    isValidating,
-  } = useSWR<ServiceCommonServerWithDetails>(
-    selectedServer !== null
-      ? `/api/v1/service/${
-          type === 'movie' ? 'radarr' : 'sonarr'
-        }/${selectedServer}`
-      : null,
-    {
-      refreshInterval: 0,
-      refreshWhenHidden: false,
-      revalidateOnFocus: false,
-    }
-  );
+  const { data: serverData, isValidating } =
+    useSWR<ServiceCommonServerWithDetails>(
+      selectedServer !== null
+        ? `/api/v1/service/${
+            type === 'movie' ? 'radarr' : 'sonarr'
+          }/${selectedServer}`
+        : null,
+      {
+        refreshInterval: 0,
+        refreshWhenHidden: false,
+        revalidateOnFocus: false,
+      }
+    );
 
   const [selectedUser, setSelectedUser] = useState<User | null>(
     requestUser ?? null

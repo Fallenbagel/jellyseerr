@@ -106,9 +106,10 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
     `/api/v1/movie/${router.query.movieId}/ratings`
   );
 
-  const sortedCrew = useMemo(() => sortCrewPriority(data?.credits.crew ?? []), [
-    data,
-  ]);
+  const sortedCrew = useMemo(
+    () => sortCrewPriority(data?.credits.crew ?? []),
+    [data]
+  );
 
   if (!data && !error) {
     return <LoadingSpinner />;

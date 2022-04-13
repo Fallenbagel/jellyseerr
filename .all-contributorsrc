@@ -543,8 +543,8 @@
   ],
   "badgeTemplate": "<a href=\"#contributors-\"><img alt=\"All Contributors\" src=\"https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg\"/></a>",
   "contributorsPerLine": 7,
-  "projectName": "overseerr",
-  "projectOwner": "sct",
+  "projectName": "Jellyseerr",
+  "projectOwner": "Fallenbagel",
   "repoType": "github",
   "repoHost": "https://github.com",
   "skipCi": true

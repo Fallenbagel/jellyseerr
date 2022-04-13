@@ -223,9 +223,11 @@ const UserGeneralSettings: React.FC = () => {
                             availableLanguages[currentSettings.locale].display,
                         })}
                       </option>
-                      {(Object.keys(
-                        availableLanguages
-                      ) as (keyof typeof availableLanguages)[]).map((key) => (
+                      {(
+                        Object.keys(
+                          availableLanguages
+                        ) as (keyof typeof availableLanguages)[]
+                      ).map((key) => (
                         <option
                           key={key}
                           value={availableLanguages[key].code}

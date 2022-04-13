@@ -325,8 +325,8 @@ settingsRoutes.get(
     }
 
     const logFile = process.env.CONFIG_DIRECTORY
-      ? `${process.env.CONFIG_DIRECTORY}/logs/overseerr.log`
-      : path.join(__dirname, '../../../config/logs/overseerr.log');
+      ? `${process.env.CONFIG_DIRECTORY}/logs/jellyseerr.log`
+      : path.join(__dirname, '../../../config/logs/jellyseerr.log');
     const logs: LogMessage[] = [];
 
     try {

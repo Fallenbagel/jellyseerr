@@ -32,12 +32,10 @@ const PersonDetails: React.FC = () => {
   );
   const [showBio, setShowBio] = useState(false);
 
-  const {
-    data: combinedCredits,
-    error: errorCombinedCredits,
-  } = useSWR<PersonCombinedCreditsResponse>(
-    `/api/v1/person/${router.query.personId}/combined_credits`
-  );
+  const { data: combinedCredits, error: errorCombinedCredits } =
+    useSWR<PersonCombinedCreditsResponse>(
+      `/api/v1/person/${router.query.personId}/combined_credits`
+    );
 
   const sortedCast = useMemo(() => {
     const grouped = groupBy(combinedCredits?.cast ?? [], 'id');

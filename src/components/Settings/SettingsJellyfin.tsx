@@ -1,28 +1,28 @@
-import React, { useState } from 'react';
-import LoadingSpinner from '../Common/LoadingSpinner';
-import type { JellyfinSettings } from '../../../server/lib/settings';
-import useSWR from 'swr';
-import Button from '../Common/Button';
 import axios from 'axios';
-import LibraryItem from './LibraryItem';
-import Badge from '../Common/Badge';
+import React, { useState } from 'react';
 import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
+import useSWR from 'swr';
+import type { JellyfinSettings } from '../../../server/lib/settings';
+import Badge from '../Common/Badge';
+import Button from '../Common/Button';
+import LoadingSpinner from '../Common/LoadingSpinner';
+import LibraryItem from './LibraryItem';
 
 const messages = defineMessages({
   jellyfinsettings: 'Jellyfin Settings',
   jellyfinsettingsDescription:
-    'Configure the settings for your Jellyfin server. Overseerr scans your Jellyfin libraries to see what content is available.',
+    'Configure the settings for your Jellyfin server. Jellyseerr scans your Jellyfin libraries to see what content is available.',
   timeout: 'Timeout',
   save: 'Save Changes',
   saving: 'Saving…',
   jellyfinlibraries: 'Jellyfin Libraries',
   jellyfinlibrariesDescription:
-    'The libraries Overseerr scans for titles. Click the button below if no libraries are listed.',
+    'The libraries Jellyseerr scans for titles. Click the button below if no libraries are listed.',
   syncing: 'Syncing',
   syncJellyfin: 'Sync Libraries',
   manualscanJellyfin: 'Manual Library Scan',
   manualscanDescriptionJellyfin:
-    "Normally, this will only be run once every 24 hours. Overseerr will check your Jellyfin server's recently added more aggressively. If this is your first time configuring Jellyfin, a one-time full manual library scan is recommended!",
+    "Normally, this will only be run once every 24 hours. Jellyseerr will check your Jellyfin server's recently added more aggressively. If this is your first time configuring Jellyfin, a one-time full manual library scan is recommended!",
   notrunning: 'Not Running',
   currentlibrary: 'Current Library: {name}',
   librariesRemaining: 'Libraries Remaining: {count}',

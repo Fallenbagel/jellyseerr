@@ -1,30 +1,30 @@
+import axios from 'axios';
+import Link from 'next/link';
 import React, { useContext, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
-import type { MediaRequest } from '../../../../server/entity/MediaRequest';
 import {
-  useIntl,
+  defineMessages,
   FormattedDate,
   FormattedRelativeTime,
-  defineMessages,
+  useIntl,
 } from 'react-intl';
-import { useUser, Permission } from '../../../hooks/useUser';
-import { LanguageContext } from '../../../context/LanguageContext';
-import type { MovieDetails } from '../../../../server/models/Movie';
-import type { TvDetails } from '../../../../server/models/Tv';
+import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
-import Badge from '../../Common/Badge';
-import StatusBadge from '../../StatusBadge';
-import Table from '../../Common/Table';
 import {
   MediaRequestStatus,
   MediaStatus,
 } from '../../../../server/constants/media';
-import Button from '../../Common/Button';
-import axios from 'axios';
+import type { MediaRequest } from '../../../../server/entity/MediaRequest';
+import type { MovieDetails } from '../../../../server/models/Movie';
+import type { TvDetails } from '../../../../server/models/Tv';
+import { LanguageContext } from '../../../context/LanguageContext';
+import { Permission, useUser } from '../../../hooks/useUser';
 import globalMessages from '../../../i18n/globalMessages';
-import Link from 'next/link';
-import { useToasts } from 'react-toast-notifications';
+import Badge from '../../Common/Badge';
+import Button from '../../Common/Button';
+import Table from '../../Common/Table';
 import RequestModal from '../../RequestModal';
+import StatusBadge from '../../StatusBadge';
 
 const messages = defineMessages({
   seasons: 'Seasons',
@@ -60,12 +60,13 @@ const RequestItem: React.FC<RequestItemProps> = ({
   const { data: title, error } = useSWR<MovieDetails | TvDetails>(
     inView ? `${url}?language=${locale}` : null
   );
-  const { data: requestData, revalidate, mutate } = useSWR<MediaRequest>(
-    `/api/v1/request/${request.id}`,
-    {
-      initialData: request,
-    }
-  );
+  const {
+    data: requestData,
+    revalidate,
+    mutate,
+  } = useSWR<MediaRequest>(`/api/v1/request/${request.id}`, {
+    initialData: request,
+  });
 
   const [isRetrying, setRetrying] = useState(false);
 

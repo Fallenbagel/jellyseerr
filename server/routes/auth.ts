@@ -102,7 +102,7 @@ authRoutes.post('/plex', async (req, res, next) => {
       if (!user) {
         if (!settings.main.newPlexLogin) {
           logger.info(
-            'Failed sign-in attempt from user who has not been imported to Overseerr.',
+            'Failed sign-in attempt from user who has not been imported to Jellyseerr.',
             {
               label: 'Auth',
               account: {
@@ -214,7 +214,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
     if (user) {
       deviceId = user.jellyfinDeviceId ?? '';
     } else {
-      deviceId = Buffer.from(`BOT_overseerr_${body.username ?? ''}`).toString(
+      deviceId = Buffer.from(`BOT_jellyseerr_${body.username ?? ''}`).toString(
         'base64'
       );
     }
