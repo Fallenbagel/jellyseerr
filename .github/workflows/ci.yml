@@ -56,7 +56,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
-        uses: docker/build-push-action@v2.5.0
+        uses: docker/build-push-action@v2.10.0
         with:
           context: .
           file: ./Dockerfile
