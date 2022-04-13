@@ -13,8 +13,11 @@ interface StatusBadgeProps {
   status?: MediaStatus;
   is4k?: boolean;
   inProgress?: boolean;
+  plexUrl?: string;
+  tmdbId?: number;
   mediaUrl?: string;
   mediaUrl4k?: string;
+  mediaType?: 'movie' | 'tv';
 }
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({

@@ -30,13 +30,15 @@ const messages = defineMessages({
   requesttitle: 'Request {title}',
   request4ktitle: 'Request {title} in 4K',
   edit: 'Edit Request',
+  approve: 'Approve Request',
   cancel: 'Cancel Request',
   pendingrequest: 'Pending Request for {title}',
   pending4krequest: 'Pending 4K Request for {title}',
   requestfrom: "{username}'s request is pending approval.",
   requestseasons:
     'Request {seasonCount} {seasonCount, plural, one {Season} other {Seasons}}',
-  requestall: 'Request All Seasons',
+  requestseasons4k:
+    'Request {seasonCount} {seasonCount, plural, one {Season} other {Seasons}} in 4K',
   alreadyrequested: 'Already Requested',
   selectseason: 'Select Season(s)',
   season: 'Season',
@@ -45,6 +47,7 @@ const messages = defineMessages({
   extras: 'Extras',
   errorediting: 'Something went wrong while editing the request.',
   requestedited: 'Request for <strong>{title}</strong> edited successfully!',
+  requestApproved: 'Request for <strong>{title}</strong> approved!',
   requestcancelled: 'Request for <strong>{title}</strong> canceled.',
   autoapproval: 'Automatic Approval',
   requesterror: 'Something went wrong while submitting the request.',
@@ -88,7 +91,10 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
   });
   const [tvdbId, setTvdbId] = useState<number | undefined>(undefined);
   const { data: quota } = useSWR<QuotaResponse>(
-    user ? `/api/v1/user/${requestOverrides?.user?.id ?? user.id}/quota` : null
+    user &&
+      (!requestOverrides?.user?.id || hasPermission(Permission.MANAGE_USERS))
+      ? `/api/v1/user/${requestOverrides?.user?.id ?? user.id}/quota`
+      : null
   );
 
   const currentlyRemaining =
@@ -96,7 +102,7 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
     selectedSeasons.length +
     (editRequest?.seasons ?? []).length;
 
-  const updateRequest = async () => {
+  const updateRequest = async (alsoApproveRequest = false) => {
     if (!editRequest) {
       return;
     }
@@ -117,6 +123,10 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
           tags: requestOverrides?.tags,
           seasons: selectedSeasons,
         });
+
+        if (alsoApproveRequest) {
+          await axios.post(`/api/v1/request/${editRequest.id}/approve`);
+        }
       } else {
         await axios.delete(`/api/v1/request/${editRequest.id}`);
       }
@@ -124,12 +134,17 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
       addToast(
         <span>
           {selectedSeasons.length > 0
-            ? intl.formatMessage(messages.requestedited, {
-                title: data?.name,
-                strong: function strong(msg) {
-                  return <strong>{msg}</strong>;
-                },
-              })
+            ? intl.formatMessage(
+                alsoApproveRequest
+                  ? messages.requestApproved
+                  : messages.requestedited,
+                {
+                  title: data?.name,
+                  strong: function strong(msg) {
+                    return <strong>{msg}</strong>;
+                  },
+                }
+              )
             : intl.formatMessage(messages.requestcancelled, {
                 title: data?.name,
                 strong: function strong(msg) {
@@ -368,7 +383,13 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
       loading={!data && !error}
       backgroundClickable
       onCancel={tvdbId ? () => setSearchModal({ show: true }) : onCancel}
-      onOk={() => (editRequest ? updateRequest() : sendRequest())}
+      onOk={() =>
+        editRequest
+          ? hasPermission(Permission.MANAGE_REQUESTS)
+            ? updateRequest(true)
+            : updateRequest()
+          : sendRequest()
+      }
       title={intl.formatMessage(
         editRequest
           ? is4k
@@ -383,16 +404,23 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
         editRequest
           ? selectedSeasons.length === 0
             ? intl.formatMessage(messages.cancel)
+            : hasPermission(Permission.MANAGE_REQUESTS)
+            ? intl.formatMessage(messages.approve)
             : intl.formatMessage(messages.edit)
           : getAllRequestedSeasons().length >= getAllSeasons().length
           ? intl.formatMessage(messages.alreadyrequested)
           : !settings.currentSettings.partialRequestsEnabled
-          ? intl.formatMessage(messages.requestall)
+          ? intl.formatMessage(
+              is4k ? globalMessages.request4k : globalMessages.request
+            )
           : selectedSeasons.length === 0
           ? intl.formatMessage(messages.selectseason)
-          : intl.formatMessage(messages.requestseasons, {
-              seasonCount: selectedSeasons.length,
-            })
+          : intl.formatMessage(
+              is4k ? messages.requestseasons4k : messages.requestseasons,
+              {
+                seasonCount: selectedSeasons.length,
+              }
+            )
       }
       okDisabled={
         editRequest
@@ -406,11 +434,14 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
               selectedSeasons.length === 0)
       }
       okButtonType={
-        editRequest &&
-        settings.currentSettings.partialRequestsEnabled &&
-        selectedSeasons.length === 0
-          ? 'danger'
-          : `primary`
+        editRequest
+          ? settings.currentSettings.partialRequestsEnabled &&
+            selectedSeasons.length === 0
+            ? 'danger'
+            : hasPermission(Permission.MANAGE_REQUESTS)
+            ? 'success'
+            : 'primary'
+          : 'primary'
       }
       cancelText={
         editRequest
@@ -440,7 +471,7 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
         !(
           quota?.tv.limit &&
           !settings.currentSettings.partialRequestsEnabled &&
-          unrequestedSeasons.length > (quota?.tv.limit ?? 0)
+          unrequestedSeasons.length > (quota?.tv.remaining ?? 0)
         ) &&
         getAllRequestedSeasons().length < getAllSeasons().length &&
         !editRequest && (
@@ -457,7 +488,7 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
           quota={quota?.tv}
           remaining={
             !settings.currentSettings.partialRequestsEnabled &&
-            unrequestedSeasons.length > (quota?.tv.limit ?? 0)
+            unrequestedSeasons.length > (quota?.tv.remaining ?? 0)
               ? 0
               : currentlyRemaining
           }
@@ -468,7 +499,7 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
           }
           overLimit={
             !settings.currentSettings.partialRequestsEnabled &&
-            unrequestedSeasons.length > (quota?.tv.limit ?? 0)
+            unrequestedSeasons.length > (quota?.tv.remaining ?? 0)
               ? unrequestedSeasons.length
               : undefined
           }
@@ -482,7 +513,7 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
                 <thead>
                   <tr>
                     <th
-                      className={`w-16 px-4 py-3 bg-gray-500 ${
+                      className={`w-16 bg-gray-500 px-4 py-3 ${
                         !settings.currentSettings.partialRequestsEnabled &&
                         'hidden'
                       }`}
@@ -497,7 +528,7 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
                             toggleAllSeasons();
                           }
                         }}
-                        className={`relative inline-flex items-center justify-center flex-shrink-0 w-10 h-5 pt-2 cursor-pointer focus:outline-none ${
+                        className={`relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer items-center justify-center pt-2 focus:outline-none ${
                           quota?.tv.remaining &&
                           quota.tv.limit &&
                           quota.tv.remaining < unrequestedSeasons.length
@@ -509,28 +540,28 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
                           aria-hidden="true"
                           className={`${
                             isAllSeasons() ? 'bg-indigo-500' : 'bg-gray-800'
-                          } absolute h-4 w-9 mx-auto rounded-full transition-colors ease-in-out duration-200`}
+                          } absolute mx-auto h-4 w-9 rounded-full transition-colors duration-200 ease-in-out`}
                         ></span>
                         <span
                           aria-hidden="true"
                           className={`${
                             isAllSeasons() ? 'translate-x-5' : 'translate-x-0'
-                          } absolute left-0 inline-block h-5 w-5 border border-gray-200 rounded-full bg-white shadow transform group-focus:ring group-focus:border-blue-300 transition-transform ease-in-out duration-200`}
+                          } absolute left-0 inline-block h-5 w-5 transform rounded-full border border-gray-200 bg-white shadow transition-transform duration-200 ease-in-out group-focus:border-blue-300 group-focus:ring`}
                         ></span>
                       </span>
                     </th>
-                    <th className="px-1 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-200 uppercase bg-gray-500 md:px-6">
+                    <th className="bg-gray-500 px-1 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-200 md:px-6">
                       {intl.formatMessage(messages.season)}
                     </th>
-                    <th className="px-5 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-200 uppercase bg-gray-500 md:px-6">
+                    <th className="bg-gray-500 px-5 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-200 md:px-6">
                       {intl.formatMessage(messages.numberofepisodes)}
                     </th>
-                    <th className="px-2 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-200 uppercase bg-gray-500 md:px-6">
+                    <th className="bg-gray-500 px-2 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-200 md:px-6">
                       {intl.formatMessage(globalMessages.status)}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-gray-600 divide-y divide-gray-700">
+                <tbody className="divide-y divide-gray-700 bg-gray-600">
                   {data?.seasons
                     .filter((season) => season.seasonNumber !== 0)
                     .map((season) => {
@@ -546,7 +577,7 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
                       return (
                         <tr key={`season-${season.id}`}>
                           <td
-                            className={`px-4 py-4 text-sm font-medium leading-5 text-gray-100 whitespace-nowrap ${
+                            className={`whitespace-nowrap px-4 py-4 text-sm font-medium leading-5 text-gray-100 ${
                               !settings.currentSettings
                                 .partialRequestsEnabled && 'hidden'
                             }`}
@@ -568,7 +599,7 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
                                   toggleSeason(season.seasonNumber);
                                 }
                               }}
-                              className={`pt-2 relative inline-flex items-center justify-center flex-shrink-0 h-5 w-10 cursor-pointer focus:outline-none ${
+                              className={`relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer items-center justify-center pt-2 focus:outline-none ${
                                 mediaSeason ||
                                 (quota?.tv.limit &&
                                   currentlyRemaining <= 0 &&
@@ -590,7 +621,7 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
                                   isSelectedSeason(season.seasonNumber)
                                     ? 'bg-indigo-500'
                                     : 'bg-gray-800'
-                                } absolute h-4 w-9 mx-auto rounded-full transition-colors ease-in-out duration-200`}
+                                } absolute mx-auto h-4 w-9 rounded-full transition-colors duration-200 ease-in-out`}
                               ></span>
                               <span
                                 aria-hidden="true"
@@ -603,21 +634,21 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
                                   isSelectedSeason(season.seasonNumber)
                                     ? 'translate-x-5'
                                     : 'translate-x-0'
-                                } absolute left-0 inline-block h-5 w-5 border border-gray-200 rounded-full bg-white shadow transform group-focus:ring group-focus:border-blue-300 transition-transform ease-in-out duration-200`}
+                                } absolute left-0 inline-block h-5 w-5 transform rounded-full border border-gray-200 bg-white shadow transition-transform duration-200 ease-in-out group-focus:border-blue-300 group-focus:ring`}
                               ></span>
                             </span>
                           </td>
-                          <td className="px-1 py-4 text-sm font-medium leading-5 text-gray-100 md:px-6 whitespace-nowrap">
+                          <td className="whitespace-nowrap px-1 py-4 text-sm font-medium leading-5 text-gray-100 md:px-6">
                             {season.seasonNumber === 0
                               ? intl.formatMessage(messages.extras)
                               : intl.formatMessage(messages.seasonnumber, {
                                   number: season.seasonNumber,
                                 })}
                           </td>
-                          <td className="px-5 py-4 text-sm leading-5 text-gray-200 md:px-6 whitespace-nowrap">
+                          <td className="whitespace-nowrap px-5 py-4 text-sm leading-5 text-gray-200 md:px-6">
                             {season.episodeCount}
                           </td>
-                          <td className="py-4 pr-2 text-sm leading-5 text-gray-200 md:px-6 whitespace-nowrap">
+                          <td className="whitespace-nowrap py-4 pr-2 text-sm leading-5 text-gray-200 md:px-6">
                             {!seasonRequest && !mediaSeason && (
                               <Badge>
                                 {intl.formatMessage(
@@ -667,28 +698,26 @@ const TvRequestModal: React.FC<RequestModalProps> = ({
       </div>
       {(hasPermission(Permission.REQUEST_ADVANCED) ||
         hasPermission(Permission.MANAGE_REQUESTS)) && (
-        <div className="mt-4">
-          <AdvancedRequester
-            type="tv"
-            is4k={is4k}
-            isAnime={data?.keywords.some(
-              (keyword) => keyword.id === ANIME_KEYWORD_ID
-            )}
-            onChange={(overrides) => setRequestOverrides(overrides)}
-            requestUser={editRequest?.requestedBy}
-            defaultOverrides={
-              editRequest
-                ? {
-                    folder: editRequest.rootFolder,
-                    profile: editRequest.profileId,
-                    server: editRequest.serverId,
-                    language: editRequest.languageProfileId,
-                    tags: editRequest.tags,
-                  }
-                : undefined
-            }
-          />
-        </div>
+        <AdvancedRequester
+          type="tv"
+          is4k={is4k}
+          isAnime={data?.keywords.some(
+            (keyword) => keyword.id === ANIME_KEYWORD_ID
+          )}
+          onChange={(overrides) => setRequestOverrides(overrides)}
+          requestUser={editRequest?.requestedBy}
+          defaultOverrides={
+            editRequest
+              ? {
+                  folder: editRequest.rootFolder,
+                  profile: editRequest.profileId,
+                  server: editRequest.serverId,
+                  language: editRequest.languageProfileId,
+                  tags: editRequest.tags,
+                }
+              : undefined
+          }
+        />
       )}
     </Modal>
   );
