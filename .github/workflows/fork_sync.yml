@@ -12,5 +12,5 @@ jobs:
       - uses: tgymnich/fork-sync@v1.4
         with:
           owner: Fallenbagel
-          base: master
-          head: master
+          base: main
+          head: main
