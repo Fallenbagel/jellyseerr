@@ -189,19 +189,14 @@ class Media {
         }
       }
     } else {
+      const pageName =
+        process.env.JELLYFIN_TYPE === 'emby' ? 'item' : 'details';
+      const { hostname, serverId } = getSettings().jellyfin;
       if (this.jellyfinMediaId) {
-        this.mediaUrl = `${
-          getSettings().jellyfin.hostname
-        }/web/index.html#!/details?id=${
-          this.jellyfinMediaId
-        }&context=home&serverId=${getSettings().jellyfin.serverId}`;
+        this.mediaUrl = `${hostname}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId}&context=home&serverId=${serverId}`;
       }
       if (this.jellyfinMediaId4k) {
-        this.mediaUrl4k = `${
-          getSettings().jellyfin.hostname
-        }/web/index.html#!/details?id=${
-          this.jellyfinMediaId4k
-        }&context=home&serverId=${getSettings().jellyfin.serverId}`;
+        this.mediaUrl4k = `${hostname}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId4k}&context=home&serverId=${serverId}`;
       }
     }
   }
