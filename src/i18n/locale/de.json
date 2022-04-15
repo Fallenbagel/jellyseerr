@@ -591,6 +591,8 @@
   "components.Settings.SettingsJobsCache.radarr-scan": "Radarr Scan",
   "components.Settings.SettingsJobsCache.plex-recently-added-scan": "Scan der zuletzt hinzugefügten Plex Medien",
   "components.Settings.SettingsJobsCache.plex-full-scan": "Vollständiger Plex Bibliotheken Scan",
+  "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Vollständiger Jellyfin Bibliotheken Scan",
+  "components.Settings.SettingsJobsCache.jelly-recently-added-scan": "Scan der zuletzt hinzugefügten Jellyfin Medien",
   "components.Settings.Notifications.validationUrl": "Du musst eine gültige URL angeben",
   "components.Settings.Notifications.botAvatarUrl": "Bot Avatar URL",
   "components.RequestList.RequestItem.requested": "Angefragt",

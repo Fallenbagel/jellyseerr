@@ -478,6 +478,8 @@
   "components.Settings.SettingsJobsCache.process": "Folyamat",
   "components.Settings.SettingsJobsCache.plex-recently-added-scan": "Plex \"nemrégiben hozzáadott\" beolvasása",
   "components.Settings.SettingsJobsCache.plex-full-scan": "Plex összes könyvtárának beolvasása",
+  "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Jellyfin összes könyvtárának beolvasása",
+  "components.Settings.SettingsJobsCache.jelly-recently-added-scan": "Jellyfin \"nemrégiben hozzáadott\" beolvasása",
   "components.Settings.SettingsJobsCache.nextexecution": "Következő végrehajtás",
   "components.Settings.SettingsJobsCache.jobtype": "Típus",
   "components.Settings.SettingsJobsCache.jobstarted": "{jobname} elindult.",

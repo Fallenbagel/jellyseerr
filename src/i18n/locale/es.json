@@ -439,6 +439,8 @@
   "components.Settings.SettingsJobsCache.process": "Procesamiento",
   "components.Settings.SettingsJobsCache.plex-recently-added-scan": "Escaneo de Recien Añadidos de Plex",
   "components.Settings.SettingsJobsCache.plex-full-scan": "Escaneo Completo de la Biblioteca de Plex",
+  "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Escaneo Completo de la Biblioteca de Jellyfin",
+  "components.Settings.SettingsJobsCache.jelly-recently-added-scan": "Escaneo de Recien Añadidos de Jellyfin",
   "components.Settings.SettingsJobsCache.nextexecution": "Próxima Ejecución",
   "components.Settings.SettingsJobsCache.jobtype": "Tipo",
   "components.Settings.SettingsJobsCache.jobstarted": "{jobname} comenzada.",
