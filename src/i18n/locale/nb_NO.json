@@ -507,6 +507,8 @@
   "components.Settings.SettingsJobsCache.process": "Prosess",
   "components.Settings.SettingsJobsCache.plex-recently-added-scan": "Nylig lagt til i Plex-skann",
   "components.Settings.SettingsJobsCache.plex-full-scan": "Full Plex-bibliotekskann",
+  "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Full Jellyfin-bibliotekskann",
+  "components.Settings.SettingsJobsCache.jelly-recently-added-scan": "Nylig lagt til i Jellyfin",
   "components.Settings.SettingsJobsCache.nextexecution": "Kjøres igjen",
   "components.Settings.SettingsJobsCache.jobtype": "Type",
   "components.Settings.SettingsJobsCache.jobstarted": "{jobname} startet.",

@@ -597,6 +597,8 @@
   "components.Settings.SettingsLogs.copiedLogMessage": "S'ha copiat el missatge de registre al porta-retalls.",
   "components.Settings.SettingsJobsCache.runnow": "Executa-ho ara",
   "components.Settings.SettingsJobsCache.plex-full-scan": "Exploració completa de la biblioteca plex",
+  "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Exploració completa de la biblioteca Jellyfin",
+  "components.Settings.SettingsJobsCache.jelly-recently-added-scan": "Exploració d'elements de Jellyfin afegits recentment",
   "components.Settings.SettingsJobsCache.nextexecution": "Pròxima execució",
   "components.Settings.SettingsJobsCache.jobstarted": "S'ha iniciat {jobname}.",
   "components.Settings.SettingsJobsCache.jobcancelled": "{jobname} s'ha cancel·lat.",

@@ -47,6 +47,8 @@ const messages: { [messageName: string]: MessageDescriptor } = defineMessages({
   unknownJob: 'Unknown Job',
   'plex-recently-added-scan': 'Plex Recently Added Scan',
   'plex-full-scan': 'Plex Full Library Scan',
+  'jellyfin-recently-added-sync': 'Jellyfin Recently Added Scan',
+  'jellyfin-full-sync': 'Jellyfin Full Library Scan',
   'radarr-scan': 'Radarr Scan',
   'sonarr-scan': 'Sonarr Scan',
   'download-sync': 'Download Sync',
