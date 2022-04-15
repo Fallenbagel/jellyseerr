@@ -163,11 +163,12 @@ class Media {
         this.mediaUrl4k = `https://app.plex.tv/desktop#!/server/${settings.plex.machineId}/details?key=%2Flibrary%2Fmetadata%2F${this.ratingKey4k}`;
       }
     } else {
+      const pageName = process.env.JELLYFIN_TYPE === 'emby' ? 'item' : 'details';
       if (this.jellyfinMediaId) {
-        this.mediaUrl = `${settings.jellyfin.hostname}/web/index.html#!/details?id=${this.jellyfinMediaId}&context=home&serverId=${settings.jellyfin.serverId}`;
+        this.mediaUrl = `${settings.jellyfin.hostname}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId}&context=home&serverId=${settings.jellyfin.serverId}`;
       }
       if (this.jellyfinMediaId4k) {
-        this.mediaUrl4k = `${settings.jellyfin.hostname}/web/index.html#!/details?id=${this.jellyfinMediaId4k}&context=home&serverId=${settings.jellyfin.serverId}`;
+        this.mediaUrl4k = `${settings.jellyfin.hostname}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId4k}&context=home&serverId=${settings.jellyfin.serverId}`;
       }
     }
   }
