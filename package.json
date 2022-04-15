@@ -1,5 +1,5 @@
 {
-  "name": "overseerr",
+  "name": "jellyseerr",
   "version": "1.29.1",
   "private": true,
   "scripts": {
@@ -197,7 +197,7 @@
       ]
     ],
     "branches": [
-      "master"
+      "main"
     ],
     "npmPublish": false,
     "publish": [
@@ -207,8 +207,7 @@
           "COMMIT_TAG": "$GITHUB_SHA"
         },
         "imageNames": [
-          "sctx/overseerr",
-          "ghcr.io/sct/overseerr"
+          "fallenbagel/jellyseerr"
         ],
         "platforms": [
           "linux/amd64",

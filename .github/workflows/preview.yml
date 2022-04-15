@@ -1,9 +1,9 @@
-name: Overseerr Preview
+name: Jellyseerr Preview
 
 on:
   push:
     tags:
-      - 'preview-*'
+      - "preview-*"
 
 jobs:
   build_and_push:
@@ -24,12 +24,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
@@ -40,5 +34,4 @@ jobs:
           build-args: |
             COMMIT_TAG=${{ github.sha }}
           tags: |
-            sctx/overseerr:${{ steps.get_version.outputs.VERSION }}
-            ghcr.io/sct/overseerr:${{ steps.get_version.outputs.VERSION }}
+            fallenbagel/jellyseerr:${{ steps.get_version.outputs.VERSION }}

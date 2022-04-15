@@ -1,7 +1,7 @@
 # Installation
 
 {% hint style="danger" %}
-**Overseerr is currently in BETA.** If you would like to help test the bleeding edge, please use the image **`sctx/overseerr:develop`**!
+**Overseerr is currently in BETA.** If you would like to help test the bleeding edge, please use the image **`fallenbagel/jellyseerr:develop`**!
 {% endhint %}
 
 {% hint style="info" %}
@@ -31,7 +31,7 @@ docker run -d \
   -p 5055:5055 \
   -v /path/to/appdata/config:/app/config \
   --restart unless-stopped \
-  sctx/overseerr
+  fallenbagel/jellyseerr
 ```
 
 To run the container as a specific user/group, you may optionally add `--user=[ user | user:group | uid | uid:gid | user:gid | uid:group ]` to the above command.
@@ -47,7 +47,7 @@ docker stop overseerr && docker rm overseerr
 Pull the latest image:
 
 ```bash
-docker pull sctx/overseerr
+docker pull fallenbagel/jellyseerr
 ```
 
 Finally, run the container with the same parameters originally used to create the container:
@@ -76,7 +76,7 @@ version: '3'
 
 services:
   overseerr:
-    image: sctx/overseerr:latest
+    image: fallenbagel/jellyseerr:latest
     container_name: overseerr
     environment:
       - LOG_LEVEL=debug
@@ -143,7 +143,7 @@ or the Docker Desktop app:
 Then, create and start the Overseerr container:
 
 ```bash
-docker run -d --name overseerr -e LOG_LEVEL=debug -e TZ=Asia/Tokyo -p 5055:5055 -v "overseerr-data:/app/config" --restart unless-stopped sctx/overseerr:latest
+docker run -d --name overseerr -e LOG_LEVEL=debug -e TZ=Asia/Tokyo -p 5055:5055 -v "overseerr-data:/app/config" --restart unless-stopped fallenbagel/jellyseerr:latest
 ```
 
 If using a named volume like above, you can safely ignore the warning about the `/app/config` folder being incorrectly mounted on the setup page.

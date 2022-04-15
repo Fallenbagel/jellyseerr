@@ -178,12 +178,12 @@ const SettingsAbout: React.FC = () => {
           </List.Item>
           <List.Item title="Discord">
             <a
-              href="https://discord.gg/overseerr"
+              href="https://discord.gg/ckbvBtDJgC"
               target="_blank"
               rel="noreferrer"
               className="text-indigo-500 transition duration-300 hover:underline"
             >
-              https://discord.gg/overseerr
+              https://discord.gg/ckbvBtDJgC
             </a>
           </List.Item>
         </List>

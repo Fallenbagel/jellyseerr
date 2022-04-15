@@ -1,7 +1,7 @@
 # Frequently Asked Questions (FAQ)
 
 {% hint style="info" %}
-If you can't find the solution to your problem here, please read [Need Help?](./need-help.md) and reach out to us on [Discord](https://discord.gg/overseerr).
+If you can't find the solution to your problem here, please read [Need Help?](./need-help.md) and reach out to us on [Discord](https://discord.gg/ckbvBtDJgC).
 
 _Please do not post questions or support requests on the GitHub issue tracker!_
 {% endhint %}
