@@ -21,4 +21,4 @@ The primary motivation for starting this project was to have an incredibly perfo
 
 Overseerr is an ambitious project. We have already poured a lot of work into this, and have a lot more to do. We need your valuable feedback and help to find and fix bugs. Also, with Overseerr being an open-source project, anyone is welcome to contribute. Contribution includes building new features, patching bugs, translating the application, or even just writing documentation.
 
-If you would like to contribute, please be sure to review our [contribution guidelines](https://github.com/sct/overseerr/blob/develop/CONTRIBUTING.md).
+If you would like to contribute, please be sure to review our [contribution guidelines](https://github.com/fallenbagel/jellyseerr/blob/develop/CONTRIBUTING.md).

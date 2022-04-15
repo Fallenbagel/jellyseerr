@@ -9,7 +9,7 @@ Before seeking assistance, please make sure you have first tried these following
 - **Analyzing** your logs, you just might find the solution yourself!
 - **Searching** the [documentation](../README.md), [installation guide](../getting-started/installation.md), and [FAQs](./faq.md).
 
-If you still have questions after troubleshooting on your own, feel free to ask on [Discord](https://discord.gg/ckbvBtDJgC)! (Please review our [Code of Conduct](https://github.com/sct/overseerr/blob/develop/CODE_OF_CONDUCT.md) before posting.)
+If you still have questions after troubleshooting on your own, feel free to ask on [Discord](https://discord.gg/ckbvBtDJgC)! (Please review our [Code of Conduct](https://github.com/fallenbagel/jellyseerr/blob/develop/CODE_OF_CONDUCT.md) before posting.)
 
 Be sure to also include a link to your logs. (Please see [How can I share my logs?](#how-can-i-share-my-logs) below.)
 

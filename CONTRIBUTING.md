@@ -24,7 +24,7 @@ All help is welcome and greatly appreciated! If you would like to contribute to 
 2. Add the remote `upstream`:
 
    ```bash
-   git remote add upstream https://github.com/sct/overseerr.git
+   git remote add upstream https://github.com/fallenbagel/jellyseerr.git
    ```
 
 3. Create a new branch:
@@ -66,7 +66,7 @@ All help is welcome and greatly appreciated! If you would like to contribute to 
 
 ### Contributing Code
 
-- If you are taking on an existing bug or feature ticket, please comment on the [issue](https://github.com/sct/overseerr/issues) to avoid multiple people working on the same thing.
+- If you are taking on an existing bug or feature ticket, please comment on the [issue](https://github.com/fallenbagel/jellyseerr/issues) to avoid multiple people working on the same thing.
 - All commits **must** follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
   - Pull requests with commits not following this standard will **not** be merged.
 - Please make meaningful commits, or squash them prior to opening a pull request.
@@ -76,7 +76,7 @@ All help is welcome and greatly appreciated! If you would like to contribute to 
 - You can create a "draft" pull request early to get feedback on your work.
 - Your code **must** be formatted correctly, or the tests will fail.
   - We use Prettier to format our code base. It should automatically run with a Git hook, but it is recommended to have the Prettier extension installed in your editor and format on save.
-- If you have questions or need help, you can reach out via [Discussions](https://github.com/sct/overseerr/discussions) or our [Discord server](https://discord.gg/ckbvBtDJgC).
+- If you have questions or need help, you can reach out via [Discussions](https://github.com/fallenbagel/jellyseerr/discussions) or our [Discord server](https://discord.gg/ckbvBtDJgC).
 - Only open pull requests to `develop`, never `master`! Any pull requests opened to `master` will be closed.
 
 ### UI Text Style
@@ -97,7 +97,7 @@ When adding new UI text, please try to adhere to the following guidelines:
 
 ## Translation
 
-We use [Weblate](https://hosted.weblate.org/engage/overseerr/) for our translations, and your help with localizing Overseerr would be greatly appreciated! If your language is not listed below, please [open a feature request](https://github.com/sct/overseerr/issues/new/choose).
+We use [Weblate](https://hosted.weblate.org/engage/overseerr/) for our translations, and your help with localizing Overseerr would be greatly appreciated! If your language is not listed below, please [open a feature request](https://github.com/fallenbagel/jellyseerr/issues/new/choose).
 
 <a href="https://hosted.weblate.org/engage/overseerr/"><img src="https://hosted.weblate.org/widgets/overseerr/-/overseerr-frontend/multi-auto.svg" alt="Translation status" /></a>
 

@@ -34,7 +34,7 @@ You sure can! We are using [Weblate](https://hosted.weblate.org/engage/overseerr
 
 You can find the changelog for your version (stable/`latest`,s or `develop`) in the **Settings &rarr; About** page in your Overseerr instance.
 
-You can alternatively review the [stable release history](https://github.com/sct/overseerr/releases) and [`develop` branch commit history](https://github.com/sct/overseerr/commits/develop) on GitHub.
+You can alternatively review the [stable release history](https://github.com/fallenbagel/jellyseerr/releases) and [`develop` branch commit history](https://github.com/fallenbagel/jellyseerr/commits/develop) on GitHub.
 
 ### Some media is missing from Overseerr that I know is in Plex!
 
@@ -88,7 +88,7 @@ Yes! Please see the [documentation for creating local users](../using-overseerr/
 
 ### Is is possible to set user roles in Overseerr?
 
-Permissions can be configured for each user via the **User List** or their **User Settings** page. The list of assignable permissions is still growing, so if you have any suggestions, [submit a feature request](https://github.com/sct/overseerr/issues/new/choose)!
+Permissions can be configured for each user via the **User List** or their **User Settings** page. The list of assignable permissions is still growing, so if you have any suggestions, [submit a feature request](https://github.com/fallenbagel/jellyseerr/issues/new/choose)!
 
 ## Requests
 
@@ -118,7 +118,7 @@ If you configured a URL base in Sonarr, make sure you have also configured the [
 
 Also, check that you are using Sonarr v3 and that you have configured a default language profile in Overseerr.
 
-Language profile support for Sonarr was added in [v1.20.0](https://github.com/sct/overseerr/releases/tag/v1.20.0) along with a new, _required_ **Language Profile** setting. If series requests are failing, make sure that you have a default language profile configured for each of your Sonarr servers in **Settings &rarr; Services**.
+Language profile support for Sonarr was added in [v1.20.0](https://github.com/fallenbagel/jellyseerr/releases/tag/v1.20.0) along with a new, _required_ **Language Profile** setting. If series requests are failing, make sure that you have a default language profile configured for each of your Sonarr servers in **Settings &rarr; Services**.
 
 ## Notifications
 
