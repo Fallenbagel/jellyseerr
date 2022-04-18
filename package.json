@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "private": true,
   "scripts": {
-    "dev": "nodemon -e ts --watch server --watch overseerr-api.yml -e .json,.ts,.yml -x ts-node --files --project server/tsconfig.json server/index.ts",
+    "dev": "nodemon -e ts --watch server --watch jellyseerr-api.yml -e .json,.ts,.yml -x ts-node --files --project server/tsconfig.json server/index.ts",
     "build:server": "tsc --project server/tsconfig.json && copyfiles -u 2 server/templates/**/*.{html,pug} dist/templates",
     "build:next": "next build",
     "build": "yarn build:next && yarn build:server",

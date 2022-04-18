@@ -14,7 +14,7 @@ jobs:
         uses: Legion2/swagger-ui-action@v1.1.2
         with:
           output: swagger-ui
-          spec-file: overseerr-api.yml
+          spec-file: jellyseerr-api.yml
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3.8.0
         with:

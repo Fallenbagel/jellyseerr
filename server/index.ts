@@ -29,7 +29,7 @@ import logger from './logger';
 import routes from './routes';
 import { getAppVersion } from './utils/appVersion';
 
-const API_SPEC_PATH = path.join(__dirname, '../overseerr-api.yml');
+const API_SPEC_PATH = path.join(__dirname, '../jellyseerr-api.yml');
 
 logger.info(`Starting Jellyseerr version ${getAppVersion()}`);
 const dev = process.env.NODE_ENV !== 'production';

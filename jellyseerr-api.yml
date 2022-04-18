@@ -1,6 +1,6 @@
 openapi: '3.0.2'
 info:
-  title: 'Overseerr API'
+  title: 'Jellyseerr API'
   version: '1.0.0'
   description: |
     This is the documentation for the Overseerr API backend.
