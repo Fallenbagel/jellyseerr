@@ -11,7 +11,7 @@ confinement: strict
 parts:
   jellyseerr:
     plugin: nodejs
-    nodejs-version: '14.17.0'
+    nodejs-version: '16.14.0'
     nodejs-package-manager: 'yarn'
     nodejs-yarn-version: v1.22.10
     build-packages:
