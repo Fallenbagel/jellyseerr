@@ -1,9 +1,9 @@
-name: Overseerr CI
+name: Jellyseerr CI
 
 on:
   pull_request:
     branches:
-      - '*'
+      - "*"
   push:
     branches:
       - develop
@@ -11,11 +11,12 @@ on:
 jobs:
   test:
     name: Lint & Test Build
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-20.04
-    container: node:14.17-alpine
+    container: node:16.14-alpine
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
       - name: Install dependencies
         env:
           HUSKY_SKIP_INSTALL: 1
@@ -27,36 +28,29 @@ jobs:
 
   build_and_push:
     name: Build & Publish Docker Images
-    needs: test
     if: github.ref == 'refs/heads/develop' && !contains(github.event.head_commit.message, '[skip ci]')
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1.2.0
+        uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1.3.0
+        uses: docker/setup-buildx-action@v1
       - name: Cache Docker layers
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
       - name: Log in to Docker Hub
-        uses: docker/login-action@v1.9.0
+        uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v1.9.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
-        uses: docker/build-push-action@v2.5.0
+        uses: docker/build-push-action@v2
         with:
           context: .
           file: ./Dockerfile
@@ -65,10 +59,7 @@ jobs:
           build-args: |
             COMMIT_TAG=${{ github.sha }}
           tags: |
-            sctx/overseerr:develop
-            sctx/overseerr:${{ github.sha }}
-            ghcr.io/sct/overseerr:develop
-            ghcr.io/sct/overseerr:${{ github.sha }}
+            notfakie/jellyseerr:develop
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
       - # Temporary fix
@@ -86,7 +77,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Get Build Job Status
-        uses: technote-space/workflow-conclusion-action@v2.1.6
+        uses: technote-space/workflow-conclusion-action@v2
       - name: Combine Job Status
         id: status
         run: |
