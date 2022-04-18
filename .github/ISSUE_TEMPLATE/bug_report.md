@@ -12,7 +12,7 @@ Please provide a clear and concise description of the bug or issue.
 
 #### Version
 
-What version of Overseerr are you running? (You can find this in Settings → About → Version.)
+What version of Jellyseerr are you running? (You can find this in Settings → About → Version.)
 
 #### Steps to Reproduce
 

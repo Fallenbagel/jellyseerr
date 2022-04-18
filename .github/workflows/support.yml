@@ -16,11 +16,11 @@ jobs:
             :wave: @{issue-author}, we use the issue tracker exclusively
             for bug reports and feature requests. However, this issue appears
             to be a support request. Please use our support channels
-            to get help with Overseerr.
+            to get help with Jellyseerr.
 
-            - [Discord](https://discord.gg/overseerr)
+            - [Discord](https://discord.gg/FspWaFnGHP)
 
-            - [GitHub Discussions](https://github.com/sct/overseerr/discussions)
+            - [GitHub Discussions](https://github.com/Fallenbagel/jellyseerr/discussions)
           close-issue: true
           lock-issue: true
           issue-lock-reason: 'off-topic'

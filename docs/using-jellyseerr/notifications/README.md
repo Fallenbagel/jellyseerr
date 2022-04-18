@@ -2,7 +2,7 @@
 
 ## Supported Notification Agents
 
-Overseerr currently supports the following notification agents:
+Jellyseerr currently supports the following notification agents:
 
 - [Email](./email.md)
 - [Web Push](./webpush.md)

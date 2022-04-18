@@ -1,4 +1,4 @@
-# Contributing to Overseerr
+# Contributing to Jellyseerr
 
 All help is welcome and greatly appreciated! If you would like to contribute to the project, the following instructions should get you started...
 
@@ -17,14 +17,14 @@ All help is welcome and greatly appreciated! If you would like to contribute to 
 1. [Fork](https://help.github.com/articles/fork-a-repo/) the repository to your own GitHub account and [clone](https://help.github.com/articles/cloning-a-repository/) it to your local device:
 
    ```bash
-   git clone https://github.com/YOUR_USERNAME/overseerr.git
-   cd overseerr/
+   git clone https://github.com/YOUR_USERNAME/jellyseerr.git
+   cd jellyseerr/
    ```
 
 2. Add the remote `upstream`:
 
    ```bash
-   git remote add upstream https://github.com/sct/overseerr.git
+   git remote add upstream https://github.com/sct/jellyseerr.git
    ```
 
 3. Create a new branch:
@@ -66,7 +66,7 @@ All help is welcome and greatly appreciated! If you would like to contribute to 
 
 ### Contributing Code
 
-- If you are taking on an existing bug or feature ticket, please comment on the [issue](https://github.com/sct/overseerr/issues) to avoid multiple people working on the same thing.
+- If you are taking on an existing bug or feature ticket, please comment on the [issue](https://github.com/Fallenbagel/jellyseerr/issues) to avoid multiple people working on the same thing.
 - All commits **must** follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
   - It is okay to squash your pull request down into a single commit that fits this standard.
   - Pull requests with commits not following this standard will **not** be merged.
@@ -76,7 +76,7 @@ All help is welcome and greatly appreciated! If you would like to contribute to 
 - You can create a "draft" pull request early to get feedback on your work.
 - Your code **must** be formatted correctly, or the tests will fail.
   - We use Prettier to format our code base. It should automatically run with a Git hook, but it is recommended to have the Prettier extension installed in your editor and format on save.
-- If you have questions or need help, you can reach out via [Discussions](https://github.com/sct/overseerr/discussions) or our [Discord server](https://discord.gg/overseerr).
+- If you have questions or need help, you can reach out via [Discussions](https://github.com/Fallenbagel/jellyseerr/discussions) or our [Discord server](https://discord.gg/FspWaFnGHP).
 - Only open pull requests to `develop`, never `master`! Any pull requests opened to `master` will be closed.
 
 ### UI Text Style
@@ -93,11 +93,11 @@ When adding new UI text, please try to adhere to the following guidelines:
 8. If an additional description or "tip" is required for a form field, it should be styled using the global CSS class `label-tip`.
 9. In full sentences, abbreviations like "info" or "auto" should not be used in place of full words, unless referencing the name/label of a specific setting or option which has an abbreviation in its name.
 10. Do your best to check for spelling errors and grammatical mistakes.
-11. Do not misspell "Overseerr."
+11. Do not misspell "Jellyseerr."
 
 ## Translation
 
-We use [Weblate](https://hosted.weblate.org/engage/overseerr/) for our translations, and your help with localizing Overseerr would be greatly appreciated! If your language is not listed below, please [open a feature request](https://github.com/sct/overseerr/issues/new/choose).
+We use [Weblate](https://hosted.weblate.org/engage/overseerr/) for our translations, and your help with localizing Jellyseerr would be greatly appreciated! If your language is not listed below, please [open a feature request](https://github.com/Fallenbagel/jellyseerr/issues/new/choose).
 
 <a href="https://hosted.weblate.org/engage/overseerr/"><img src="https://hosted.weblate.org/widgets/overseerr/-/overseerr-frontend/multi-auto.svg" alt="Translation status" /></a>
 

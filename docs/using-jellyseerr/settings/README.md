@@ -4,23 +4,23 @@
 
 ### API Key
 
-This is your Overseerr API key, which can be used to integrate Overseerr with third-party applications. Do **not** share this key publicly, as it can be used to gain administrator access!
+This is your Jellyseerr API key, which can be used to integrate Jellyseerr with third-party applications. Do **not** share this key publicly, as it can be used to gain administrator access!
 
 If you need to generate a new API key for any reason, simply click the button to the right of the text box.
 
 ### Application Title
 
-If you aren't a huge fan of the name "Overseerr" and would like to display something different to your users, you can customize the application title!
+If you aren't a huge fan of the name "Jellyseerr" and would like to display something different to your users, you can customize the application title!
 
 ### Application URL
 
-Set this to the externally-accessible URL of your Overseerr instance.
+Set this to the externally-accessible URL of your Jellyseerr instance.
 
 You must configure this setting in order to enable password reset and [generation](../users/README.md#automatically-generate-password) emails.
 
 ### Enable Proxy Support
 
-If you have Overseerr behind a [reverse proxy](../../extending-overseerr/reverse-proxy.md), enable this setting to allow Overseerr to correctly register client IP addresses. For details, please see the [Express documentation](http://expressjs.com/en/guide/behind-proxies.html).
+If you have Jellyseerr behind a [reverse proxy](../../extending-overseerr/reverse-proxy.md), enable this setting to allow Jellyseerr to correctly register client IP addresses. For details, please see the [Express documentation](http://expressjs.com/en/guide/behind-proxies.html).
 
 This setting is **disabled** by default.
 
@@ -30,19 +30,19 @@ This setting is **disabled** by default.
 **This is an advanced setting.** We do not recommend enabling it unless you understand the implications of doing so.
 {% endhint %}
 
-CSRF stands for [cross-site request forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery). When this setting is enabled, all external API access that alters Overseerr application data is blocked.
+CSRF stands for [cross-site request forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery). When this setting is enabled, all external API access that alters Jellyseerr application data is blocked.
 
-If you do not use Overseerr integrations with third-party applications to add/modify/delete requests or users, you can consider enabling this setting to protect against malicious attacks.
+If you do not use Jellyseerr integrations with third-party applications to add/modify/delete requests or users, you can consider enabling this setting to protect against malicious attacks.
 
-One caveat, however, is that _HTTPS is required_, meaning that once this setting is enabled, you will no longer be able to access your Overseerr instance over HTTP (including using an IP address and port number).
+One caveat, however, is that _HTTPS is required_, meaning that once this setting is enabled, you will no longer be able to access your Jellyseerr instance over HTTP (including using an IP address and port number).
 
-If you enable this setting and find yourself unable to access Overseerr, you can disable the setting by modifying `settings.json` in `/app/config`.
+If you enable this setting and find yourself unable to access Jellyseerr, you can disable the setting by modifying `settings.json` in `/app/config`.
 
 This setting is **disabled** by default.
 
 ### Display Language
 
-Set the default display language for Overseerr. Users can override this setting in their user settings.
+Set the default display language for Jellyseerr. Users can override this setting in their user settings.
 
 ### Discover Region & Discover Language
 
@@ -68,13 +68,13 @@ This setting is **enabled** by default.
 
 When enabled, users who have configured passwords will be allowed to sign in using their email address.
 
-When disabled, Plex OAuth becomes the only sign-in option, and any "local users" you have created will not be able to sign in to Overseerr.
+When disabled, Plex OAuth becomes the only sign-in option, and any "local users" you have created will not be able to sign in to Jellyseerr.
 
 This setting is **enabled** by default.
 
 ### Enable New Plex Sign-In
 
-When enabled, users with access to your Plex server will be able to sign in to Overseerr even if they have not yet been imported. Users will be automatically assigned the permissions configured in the [Default Permissions](#default-permissions) setting upon first sign-in.
+When enabled, users with access to your Plex server will be able to sign in to Jellyseerr even if they have not yet been imported. Users will be automatically assigned the permissions configured in the [Default Permissions](#default-permissions) setting upon first sign-in.
 
 This setting is **enabled** by default.
 
@@ -90,7 +90,7 @@ Note that users with the **Manage Users** permission are exempt from request lim
 
 Select the permissions you would like assigned to new users to have by default upon account creation.
 
-If [Enable New Plex Sign-In](#enable-new-plex-sign-in) is enabled, any user with access to your Plex server will be able to sign in to Overseerr, and they will be granted the permissions you select here upon first sign-in.
+If [Enable New Plex Sign-In](#enable-new-plex-sign-in) is enabled, any user with access to your Plex server will be able to sign in to Jellyseerr, and they will be granted the permissions you select here upon first sign-in.
 
 This setting only affects new users, and has no impact on existing users. In order to modify permissions for existing users, you will need to [edit the users](../users/README.md#editing-users).
 
@@ -101,12 +101,12 @@ This setting only affects new users, and has no impact on existing users. In ord
 {% hint style="info" %}
 To set up Plex, you can either enter your details manually or select a server retrieved from [plex.tv](https://plex.tv/). Press the button to the right of the "Server" dropdown to retrieve available servers.
 
-Depending on your setup/configuration, you may need to enter your Plex server details manually in order to establish a connection from Overseerr.
+Depending on your setup/configuration, you may need to enter your Plex server details manually in order to establish a connection from Jellyseerr.
 {% endhint %}
 
 #### Hostname or IP Address
 
-If you have Overseerr installed on the same network as Plex, you can set this to the local IP address of your Plex server. Otherwise, this should be set to a valid hostname (e.g., `plex.myawesomeserver.com`).
+If you have Jellyseerr installed on the same network as Plex, you can set this to the local IP address of your Plex server. Otherwise, this should be set to a valid hostname (e.g., `plex.myawesomeserver.com`).
 
 #### Port
 
@@ -124,20 +124,20 @@ Note that you will need to enter the full path to the web app (e.g., `https://pl
 
 ### Plex Libraries
 
-In this section, simply select the libraries you would like Overseerr to scan. Overseerr will periodically check the selected libraries for available content to update the media status that is displayed to users.
+In this section, simply select the libraries you would like Jellyseerr to scan. Jellyseerr will periodically check the selected libraries for available content to update the media status that is displayed to users.
 
 If you do not see your Plex libraries listed, verify your Plex settings are correct and click the **Sync Libraries** button.
 
 ### Manual Library Scan
 
-Overseerr will perform a full scan of your Plex libraries once every 24 hours (recently added items are fetched more frequently). If this is your first time configuring Plex, a one-time full manual library scan is recommended!
+Jellyseerr will perform a full scan of your Plex libraries once every 24 hours (recently added items are fetched more frequently). If this is your first time configuring Plex, a one-time full manual library scan is recommended!
 
 ## Services
 
 {% hint style="info" %}
-**If you keep separate copies of non-4K and 4K content in your media libraries, you will need to set up multiple Radarr/Sonarr instances and link each of them to Overseerr.**
+**If you keep separate copies of non-4K and 4K content in your media libraries, you will need to set up multiple Radarr/Sonarr instances and link each of them to Jellyseerr.**
 
-Overseerr checks these linked servers to determine whether or not media has already been requested or is available, so two servers of each type are required _if you keep separate non-4K and 4K copies of media_.
+Jellyseerr checks these linked servers to determine whether or not media has already been requested or is available, so two servers of each type are required _if you keep separate non-4K and 4K copies of media_.
 
 **If you only maintain one copy of media, you can instead simply set up one server and set the "Quality Profile" setting on a per-request basis.**
 {% endhint %}
@@ -145,7 +145,7 @@ Overseerr checks these linked servers to determine whether or not media has alre
 ### Radarr/Sonarr Settings
 
 {% hint style="warning" %}
-**Only v3 Radarr/Sonarr servers are supported!** If your Radarr/Sonarr server is still running v2, you will need to upgrade in order to add it to Overseerr.
+**Only v3 Radarr/Sonarr servers are supported!** If your Radarr/Sonarr server is still running v2, you will need to upgrade in order to add it to Jellyseerr.
 {% endhint %}
 
 #### Default Server
@@ -164,7 +164,7 @@ Enter a friendly name for the Radarr/Sonarr server.
 
 #### Hostname or IP Address
 
-If you have Overseerr installed on the same network as Radarr/Sonarr, you can set this to the local IP address of your Radarr/Sonarr server. Otherwise, this should be set to a valid hostname (e.g., `radarr.myawesomeserver.com`).
+If you have Jellyseerr installed on the same network as Radarr/Sonarr, you can set this to the local IP address of your Radarr/Sonarr server. Otherwise, this should be set to a valid hostname (e.g., `radarr.myawesomeserver.com`).
 
 #### Port
 
@@ -182,7 +182,7 @@ You can locate the required API keys in Radarr/Sonarr in **Settings &rarr; Gener
 
 #### URL Base
 
-If you have configured a URL base for your Radarr/Sonarr server, you _must_ enter it here in order for Overseerr to connect to those services!
+If you have configured a URL base for your Radarr/Sonarr server, you _must_ enter it here in order for Jellyseerr to connect to those services!
 
 You can verify whether or not you have a URL base configured in your Radarr/Sonarr server at **Settings &rarr; General &rarr; Host**. (Note that a restart of your Radarr/Sonarr server is required if you modify this setting!)
 
@@ -208,6 +208,6 @@ Please see [Notifications](../notifications/README.md) for details on configurin
 
 ## Jobs & Cache
 
-Overseerr performs certain maintenance tasks as regularly-scheduled jobs, but they can also be manually triggered on this page.
+Jellyseerr performs certain maintenance tasks as regularly-scheduled jobs, but they can also be manually triggered on this page.
 
-Overseerr also caches requests to external API endpoints to optimize performance and avoid making unnecessary API calls. If necessary, the cache for any particular endpoint can be cleared by clicking the "Flush Cache" button.
+Jellyseerr also caches requests to external API endpoints to optimize performance and avoid making unnecessary API calls. If necessary, the cache for any particular endpoint can be cleared by clicking the "Flush Cache" button.

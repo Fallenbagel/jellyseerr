@@ -1,38 +1,38 @@
 # Frequently Asked Questions (FAQ)
 
 {% hint style="info" %}
-If you can't find the solution to your problem here, please read [Need Help?](./need-help.md) and reach out to us on [Discord](https://discord.gg/overseerr).
+If you can't find the solution to your problem here, please read [Need Help?](./need-help.md) and reach out to us on [Discord](https://discord.gg/FspWaFnGHP).
 
 _Please do not post questions or support requests on the GitHub issue tracker!_
 {% endhint %}
 
 ## General
 
-### How do I keep Overseerr up-to-date?
+### How do I keep Jellyseerr up-to-date?
 
-Use a third-party update mechanism (such as [Watchtower](https://github.com/containrrr/watchtower), [Ouroboros](https://github.com/pyouroboros/ouroboros), or [Pullio](https://hotio.dev/pullio)) to keep Overseerr up-to-date automatically.
+Use a third-party update mechanism (such as [Watchtower](https://github.com/containrrr/watchtower), [Ouroboros](https://github.com/pyouroboros/ouroboros), or [Pullio](https://hotio.dev/pullio)) to keep Jellyseerr up-to-date automatically.
 
-### How can I access Overseerr outside of my home network?
+### How can I access Jellyseerr outside of my home network?
 
-The easiest but least secure method is to simply forward an external port (e.g., `5055`) on your router to the internal port used by Overseerr (default is TCP `5055`). Visit [Port Forward](http://portforward.com/) for instructions for your particular router. You would then be able to access Overseerr via `http://EXTERNAL-IP-ADDRESS:5055`.
+The easiest but least secure method is to simply forward an external port (e.g., `5055`) on your router to the internal port used by Jellyseerr (default is TCP `5055`). Visit [Port Forward](http://portforward.com/) for instructions for your particular router. You would then be able to access Jellyseerr via `http://EXTERNAL-IP-ADDRESS:5055`.
 
-A more advanced, user-friendly, and secure (if using SSL) method is to set up a web server and use a reverse proxy to access Overseerr. Please refer to our [reverse proxy examples](../extending-overseerr/reverse-proxy.md) for more information.
+A more advanced, user-friendly, and secure (if using SSL) method is to set up a web server and use a reverse proxy to access Jellyseerr. Please refer to our [reverse proxy examples](../extending-jellyseerr/reverse-proxy.md) for more information.
 
-The most secure method (but also the most inconvenient method) is to set up a VPN tunnel to your home server. You would then be able to access Overseerr as if you were on your local network, via `http://LOCAL-IP-ADDRESS:5055`.
+The most secure method (but also the most inconvenient method) is to set up a VPN tunnel to your home server. You would then be able to access Jellyseerr as if you were on your local network, via `http://LOCAL-IP-ADDRESS:5055`.
 
-### Overseerr is amazing! But it is not translated in my language yet! Can I help with translations?
+### Jellyseerr is amazing! But it is not translated in my language yet! Can I help with translations?
 
-You sure can! We are using [Weblate](https://hosted.weblate.org/engage/overseerr/) for translations. If your language is not listed, please [open a feature request on GitHub](https://github.com/sct/overseerr/issues/new/choose).
+You sure can! We are using [Weblate](https://hosted.weblate.org/engage/overseerr/) for translations. If your language is not listed, please [open a feature request on GitHub](https://github.com/Fallenbagel/jellyseerr/issues/new/choose).
 
 ### Where can I find the changelog?
 
-You can find the changelog for your version (stable/`latest`,s or `develop`) in the **Settings &rarr; About** page in your Overseerr instance.
+You can find the changelog for your version (stable/`latest`,s or `develop`) in the **Settings &rarr; About** page in your Jellyseerr instance.
 
-You can alternatively review the [stable release history](https://github.com/sct/overseerr/releases) and [`develop` branch commit history](https://github.com/sct/overseerr/commits/develop) on GitHub.
+You can alternatively review the [stable release history](https://github.com/sct/overseerr/releases) and [`develop` branch commit history](https://github.com/Fallenbagel/jellyseerr/commits/develop) on GitHub.
 
-### Some media is missing from Overseerr that I know is in Plex!
+### Some media is missing from Jellyseerr that I know is in Plex!
 
-Overseerr currently supports the following agents:
+Jellyseerr currently supports the following agents:
 
 - New Plex Movie
 - Legacy Plex Movie
@@ -48,15 +48,15 @@ When changing agents, a full metadata refresh of your Plex library is required. 
 
 #### Troubleshooting Steps
 
-First, check the Overseerr logs for media items that are missing. The logs will contain an error as to why that item could not be matched.
+First, check the Jellyseerr logs for media items that are missing. The logs will contain an error as to why that item could not be matched.
 
 1. Verify that you are using one of the agents mentioned above.
 2. Refresh the metadata for just that item.
-3. Run a full scan in Overseerr to see if that item is now matched properly.
-4. If the item is now seen by Overseerr then repeat step 2 for each missing item. If you have a large amount of items missing then a full metadata refresh is recommended for that library.
-5. Run a full scan on Overseerr after refreshing all unmatched items.
+3. Run a full scan in Jellyseerr to see if that item is now matched properly.
+4. If the item is now seen by Jellyseerr then repeat step 2 for each missing item. If you have a large amount of items missing then a full metadata refresh is recommended for that library.
+5. Run a full scan on Jellyseerr after refreshing all unmatched items.
 
-You can also perform the following to verify the media item has a GUID Overseerr can match:
+You can also perform the following to verify the media item has a GUID Jellyseerr can match:
 
 1. Go to the media item in Plex and **"Get info"** and click on **"View XML"**.
 2. Verify that the media item's GUID follows one of the below formats:
@@ -76,11 +76,11 @@ Please see [these instructions on how to locate and share your logs](./need-help
 
 Please see the [documentation for importing users from Plex](../using-overseerr/users/README.md#importing-users-from-plex).
 
-### Can I create local users in Overseerr?
+### Can I create local users in Jellyseerr?
 
 Yes! Please see the [documentation for creating local users](../using-overseerr/users/README.md#creating-local-users).
 
-### Is is possible to set user roles in Overseerr?
+### Is is possible to set user roles in Jellyseerr?
 
 Permissions can be configured for each user via the **User List** or their **User Settings** page. The list of assignable permissions is still growing, so if you have any suggestions, [submit a feature request](https://github.com/sct/overseerr/issues/new/choose)!
 
@@ -88,7 +88,7 @@ Permissions can be configured for each user via the **User List** or their **Use
 
 ### I receive 409 or 400 errors when requesting a movie or TV series!
 
-Verify you are running v3 of both Radarr and Sonarr. Overseerr is not backwards-compatible with previous versions.
+Verify you are running v3 of both Radarr and Sonarr. Jellyseerr is not backwards-compatible with previous versions.
 
 ### Can I allow users to submit 4K requests?
 
@@ -104,13 +104,13 @@ Check the minimum availability setting in your Radarr server. If a movie does no
 
 ### Help! My request still shows "requested" even though it is in Plex!
 
-See "[Some media is missing from Overseerr that I know is in Plex!](#some-media-is-missing-from-overseerr-that-i-know-is-in-plex)" for troubleshooting steps.
+See "[Some media is missing from Jellyseerr that I know is in Plex!](#some-media-is-missing-from-overseerr-that-i-know-is-in-plex)" for troubleshooting steps.
 
 ### Series requests keep failing!
 
-If you configured a URL base in Sonarr, make sure you have also configured the [URL Base](../using-overseerr/settings/README.md#url-base) setting for your Sonarr server in Overseerr.
+If you configured a URL base in Sonarr, make sure you have also configured the [URL Base](../using-overseerr/settings/README.md#url-base) setting for your Sonarr server in Jellyseerr.
 
-Also, check that you are using Sonarr v3 and that you have configured a default language profile in Overseerr.
+Also, check that you are using Sonarr v3 and that you have configured a default language profile in Jellyseerr.
 
 Language profile support for Sonarr was added in [v1.20.0](https://github.com/sct/overseerr/releases/tag/v1.20.0) along with a new, _required_ **Language Profile** setting. If series requests are failing, make sure that you have a default language profile configured for each of your Sonarr servers in **Settings &rarr; Services**.
 

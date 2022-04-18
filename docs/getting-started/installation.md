@@ -1,11 +1,11 @@
 # Installation
 
 {% hint style="danger" %}
-**Overseerr is currently in BETA.** If you would like to help test the bleeding edge, please use the image **`sctx/overseerr:develop`**!
+**Jellyseerr is currently in BETA.** If you would like to help test the bleeding edge, please use the image **`sctx/overseerr:develop`**!
 {% endhint %}
 
 {% hint style="info" %}
-After running Overseerr for the first time, configure it by visiting the web UI at `http://[address]:5055` and completing the setup steps.
+After running Jellyseerr for the first time, configure it by visiting the web UI at `http://[address]:5055` and completing the setup steps.
 {% endhint %}
 
 ## Docker
@@ -69,16 +69,16 @@ docker run -d \
 {% tab title="Manual Update" %}
 
 ```bash
-# Stop the Overseerr container
+# Stop the Jellyseerr container
 docker stop overseerr
 
-# Remove the Overseerr container
+# Remove the Jellyseerr container
 docker rm overseerr
 
 # Pull the latest update
 docker pull sctx/overseerr
 
-# Run the Overseerr container with the same parameters as before
+# Run the Jellyseerr container with the same parameters as before
 docker run -d ...
 ```
 
@@ -86,16 +86,16 @@ docker run -d ...
 {% endtabs %}
 
 {% hint style="info" %}
-Use a 3rd party updating mechanism such as [Watchtower](https://github.com/containrrr/watchtower) or [Ouroboros](https://github.com/pyouroboros/ouroboros) to keep Overseerr up-to-date automatically.
+Use a 3rd party updating mechanism such as [Watchtower](https://github.com/containrrr/watchtower) or [Ouroboros](https://github.com/pyouroboros/ouroboros) to keep Jellyseerr up-to-date automatically.
 {% endhint %}
 
 ## Unraid
 
 1. Ensure you have the **Community Applications** plugin installed.
-2. Inside the **Community Applications** app store, search for **Overseerr**.
+2. Inside the **Community Applications** app store, search for **Jellyseerr**.
 3. Click the **Install Button**.
 4. On the following **Add Container** screen, make changes to the **Host Port** and **Host Path 1**\(Appdata\) as needed.
-5. Click apply and access "Overseerr" at your `<ServerIP:HostPort>` in a web browser.
+5. Click apply and access "Jellyseerr" at your `<ServerIP:HostPort>` in a web browser.
 
 ## Windows
 
@@ -105,7 +105,7 @@ Please refer to the [Docker Desktop for Windows user manual](https://docs.docker
 **WSL2 will need to be installed to prevent DB corruption!** Please see the [Docker Desktop WSL 2 backend documentation](https://docs.docker.com/docker-for-windows/wsl/) for instructions on how to enable WSL2. The commands below will only work with WSL2 installed!
 {% endhint %}
 
-First, create a volume to store the configuration data for Overseerr using using either the Docker CLI:
+First, create a volume to store the configuration data for Jellyseerr using using either the Docker CLI:
 
 ```bash
 docker volume create overseerr-data
@@ -118,7 +118,7 @@ or the Docker Desktop app:
 3. Click on the "New Volume" button near the top right
 4. Enter a name for the volume (example: `overseerr-data`) and hit "Create"
 
-Then, create and start the Overseerr container:
+Then, create and start the Jellyseerr container:
 
 ```bash
 docker run -d -e LOG_LEVEL=debug -e TZ=Asia/Tokyo -p 5055:5055 -v "overseerr-data:/app/config" --restart unless-stopped sctx/overseerr
@@ -151,7 +151,7 @@ sudo snap install overseerr
 ```
 
 **Updating:**
-Snap will keep Overseerr up-to-date automatically. You can force a refresh by using the following command.
+Snap will keep Jellyseerr up-to-date automatically. You can force a refresh by using the following command.
 
 ```
 sudo snap refresh
@@ -219,7 +219,7 @@ This version can break any moment. Be prepared to troubleshoot any issues that a
 This implementation is not yet merged to master due to missing functionality. You can beta test the limited implementation or follow the status on [the pull request](https://github.com/swizzin/swizzin/pull/567).
 {% endhint %}
 
-The installation is not implemented via Docker, but barebones. The latest release version of Overseerr will be used.
+The installation is not implemented via Docker, but barebones. The latest release version of Jellyseerr will be used.
 Please see the [swizzin documentation](https://swizzin.ltd/applications/overseerr) for more information.
 
 To install, run the following:

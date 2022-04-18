@@ -2,21 +2,21 @@
 
 ## Owner Account
 
-The user account created during Overseerr setup is the "Owner" account, which cannot be deleted or modified by other users. This account's credentials are used to authenticate with Plex.
+The user account created during Jellyseerr setup is the "Owner" account, which cannot be deleted or modified by other users. This account's credentials are used to authenticate with Plex.
 
 ## Adding Users
 
-There are currently two methods to add users to Overseerr: importing Plex users and creating "local users." All new users are created with the [default permissions](../settings/README.md#default-permissions) defined in **Settings &rarr; Users**.
+There are currently two methods to add users to Jellyseerr: importing Plex users and creating "local users." All new users are created with the [default permissions](../settings/README.md#default-permissions) defined in **Settings &rarr; Users**.
 
 ### Importing Users from Plex
 
-Clicking the **Import Users from Plex** button on the **User List** page will fetch the list of users with access to the Plex server from [plex.tv](https://www.plex.tv/), and add them to Overseerr automatically.
+Clicking the **Import Users from Plex** button on the **User List** page will fetch the list of users with access to the Plex server from [plex.tv](https://www.plex.tv/), and add them to Jellyseerr automatically.
 
-Importing Plex users is not required, however. Any user with access to the Plex server can log in to Overseerr even if they have not been imported, and will be assigned the configured [default permissions](../settings/README.md#default-permissions) upon their first login.
+Importing Plex users is not required, however. Any user with access to the Plex server can log in to Jellyseerr even if they have not been imported, and will be assigned the configured [default permissions](../settings/README.md#default-permissions) upon their first login.
 
 ### Creating Local Users
 
-If you would like to grant Overseerr access to a user who doesn't have their own Plex account and/or access to the Plex server, you can manually add them by clicking the **Create Local User** button.
+If you would like to grant Jellyseerr access to a user who doesn't have their own Plex account and/or access to the Plex server, you can manually add them by clicking the **Create Local User** button.
 
 #### Email Address
 
@@ -24,7 +24,7 @@ Enter a valid email address at which the user can receive messages pertaining to
 
 #### Automatically Generate Password
 
-If an [application URL](../settings/README.md#application-url) is set and [email notifications](../notifications/email.md) have been configured and enabled, Overseerr can automatically generate a password for the new user.
+If an [application URL](../settings/README.md#application-url) is set and [email notifications](../notifications/email.md) have been configured and enabled, Jellyseerr can automatically generate a password for the new user.
 
 #### Password
 
@@ -44,7 +44,7 @@ You can optionally set a "friendly name" for any user. This name will be used in
 
 #### Display Language
 
-Users can override the [global display language](../settings/README.md#display-language) to use Overseerr in their preferred language.
+Users can override the [global display language](../settings/README.md#display-language) to use Jellyseerr in their preferred language.
 
 #### Discover Region & Discover Language
 
