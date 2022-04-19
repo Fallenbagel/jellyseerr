@@ -16,6 +16,7 @@ import type { RTRating } from '../../../server/api/rottentomatoes';
 import { ANIME_KEYWORD_ID } from '../../../server/api/themoviedb/constants';
 import { IssueStatus } from '../../../server/constants/issue';
 import { MediaStatus } from '../../../server/constants/media';
+import { MediaServerType } from '../../../server/constants/server';
 import { Crew } from '../../../server/models/common';
 import { TvDetails as TvDetailsType } from '../../../server/models/Tv';
 import RTAudFresh from '../../assets/rt_aud_fresh.svg';
@@ -59,8 +60,8 @@ const messages = defineMessages({
   anime: 'Anime',
   network: '{networkCount, plural, one {Network} other {Networks}}',
   viewfullcrew: 'View Full Crew',
-  playonplex: 'Play on Plex',
-  play4konplex: 'Play in 4K on Plex',
+  play: 'Play on {mediaServerName}',
+  play4k: 'Play 4K on {mediaServerName}',
   seasons: '{seasonCount, plural, one {# Season} other {# Seasons}}',
   episodeRuntime: 'Episode Runtime',
   episodeRuntimeMinutes: '{runtime} minutes',
@@ -123,7 +124,10 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
     })
   ) {
     mediaLinks.push({
-      text: intl.formatMessage(messages.playonplex),
+      text:
+        settings.currentSettings.mediaServerType === MediaServerType.JELLYFIN
+          ? intl.formatMessage(messages.play, { mediaServerName: 'Jellyfin' })
+          : intl.formatMessage(messages.play, { mediaServerName: 'Plex' }),
       url: data.mediaInfo?.mediaUrl,
       svg: <PlayIcon />,
     });
@@ -137,7 +141,10 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
     })
   ) {
     mediaLinks.push({
-      text: intl.formatMessage(messages.play4konplex),
+      text:
+        settings.currentSettings.mediaServerType === MediaServerType.JELLYFIN
+          ? intl.formatMessage(messages.play4k, { mediaServerName: 'Jellyfin' })
+          : intl.formatMessage(messages.play4k, { mediaServerName: 'Plex' }),
       url: data.mediaInfo?.mediaUrl4k,
       svg: <PlayIcon />,
     });
