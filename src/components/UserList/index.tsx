@@ -16,6 +16,7 @@ import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
+import { MediaServerType } from '../../../server/constants/server';
 import type { UserResultsResponse } from '../../../server/interfaces/api/userInterfaces';
 import { hasPermission } from '../../../server/lib/permissions';
 import useSettings from '../../hooks/useSettings';
@@ -487,6 +488,10 @@ const UserList: React.FC = () => {
               className="flex-grow lg:mr-2"
               buttonType="primary"
               onClick={() => setShowImportModal(true)}
+              disabled={
+                settings.currentSettings.mediaServerType !==
+                MediaServerType.PLEX
+              }
             >
               <InboxInIcon />
               <span>{intl.formatMessage(messages.importfromplex)}</span>
