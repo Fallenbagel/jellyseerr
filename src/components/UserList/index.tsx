@@ -55,6 +55,7 @@ const messages = defineMessages({
   deleteconfirm:
     'Are you sure you want to delete this user? All of their request data will be permanently removed.',
   localuser: 'Local User',
+  mediaServerUser: '{mediaServerName} User',
   createlocaluser: 'Create Local User',
   creating: 'Creating…',
   create: 'Create',
@@ -622,7 +623,13 @@ const UserList: React.FC = () => {
                   </Badge>
                 ) : (
                   <Badge badgeType="default">
-                    {intl.formatMessage(messages.localuser)}
+                    {intl.formatMessage(messages.mediaServerUser, {
+                      mediaServerName:
+                        settings.currentSettings.mediaServerType ===
+                        MediaServerType.PLEX
+                          ? 'Plex'
+                          : 'Jellyfin',
+                    })}
                   </Badge>
                 )}
               </Table.TD>
