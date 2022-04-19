@@ -566,6 +566,8 @@
   "components.Settings.SettingsJobsCache.radarr-scan": "Scansione Radarr",
   "components.Settings.SettingsJobsCache.plex-recently-added-scan": "Scansione aggiunti di recente su Plex",
   "components.Settings.SettingsJobsCache.plex-full-scan": "Scansione completa della libreria di Plex",
+  "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Scansione completa della libreria di Jellyfin",
+  "components.Settings.SettingsJobsCache.jelly-recently-added-scan": "Scansione aggiunti di recente su Jellyfin",
   "components.Settings.Notifications.validationUrl": "È necessario fornire un URL valido",
   "components.Settings.Notifications.botAvatarUrl": "URL avatar bot",
   "components.RequestList.RequestItem.requested": "Richiesto",

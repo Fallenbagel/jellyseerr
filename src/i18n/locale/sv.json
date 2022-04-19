@@ -546,6 +546,8 @@
   "components.Settings.SettingsJobsCache.radarr-scan": "Radarr-skanning",
   "components.Settings.SettingsJobsCache.plex-recently-added-scan": "Skanning av det senast tillagda i Plex",
   "components.Settings.SettingsJobsCache.plex-full-scan": "Full Plex-biblioteksskanning",
+  "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Full Jellyfin-biblioteksskanning",
+  "components.Settings.SettingsJobsCache.jelly-recently-added-scan": "Skanning av det senast tillagda i Jellyfin",
   "components.Settings.SettingsJobsCache.download-sync-reset": "Hämta synkroniseringsåterställning",
   "components.Settings.SettingsJobsCache.download-sync": "Ladda ner synkronisering",
   "components.Settings.SettingsAbout.preferredmethod": "Föredraget",

@@ -566,6 +566,8 @@
   "components.Settings.SettingsJobsCache.radarr-scan": "Sincronizar Radarr",
   "components.Settings.SettingsJobsCache.plex-recently-added-scan": "Sincronizar Adicionado Recentemente do Plex",
   "components.Settings.SettingsJobsCache.plex-full-scan": "Sincronização Completa da Biblioteca Plex",
+  "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Sincronização Completa da Biblioteca Jellyfin",
+  "components.Settings.SettingsJobsCache.jelly-recently-added-scan": "Sincronizar Adicionado Recentemente do Jellyfin",
   "components.RequestList.RequestItem.requested": "Pedido",
   "components.RequestList.RequestItem.modifieduserdate": "{date} por {user}",
   "components.RequestList.RequestItem.modified": "Modificado",

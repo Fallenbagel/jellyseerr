@@ -575,6 +575,8 @@
   "components.Settings.SettingsJobsCache.radarr-scan": "Escanemento do Radarr",
   "components.Settings.SettingsJobsCache.plex-recently-added-scan": "Recentemente Adicionado ao Plex",
   "components.Settings.SettingsJobsCache.plex-full-scan": "Escaneamento de Todas Bibliotecas do Plex",
+  "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Escaneamento de Todas Bibliotecas do Jellyfin",
+  "components.Settings.SettingsJobsCache.jelly-recently-added-scan": "Recentemente Adicionado ao Jellyfin",
   "components.UserProfile.norequests": "Nenhuma solicitação.",
   "components.UserProfile.UserSettings.unauthorizedDescription": "Você não tem permissão para modificar as configurações desse usuários.",
   "components.UserProfile.UserSettings.UserPermissions.unauthorizedDescription": "Você não pode modificar suas próprias permissões.",

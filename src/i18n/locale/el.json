@@ -376,6 +376,8 @@
   "components.Settings.SettingsJobsCache.process": "Διεργασία",
   "components.Settings.SettingsJobsCache.plex-recently-added-scan": "Σάρωση Plex για μέσα που προστέθηκαν πρόσφατα",
   "components.Settings.SettingsJobsCache.plex-full-scan": "Σάρωση πλήρους βιβλιοθήκης Plex",
+  "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Σάρωση πλήρους βιβλιοθήκης Jellyfin",
+  "components.Settings.SettingsJobsCache.jelly-recently-added-scan": "Σάρωση Jellyfin για μέσα που προστέθηκαν πρόσφατα",
   "components.Settings.SettingsJobsCache.nextexecution": "Επόμενη εκτέλεση",
   "components.Settings.SettingsJobsCache.jobtype": "Είδος",
   "components.Settings.SettingsJobsCache.jobstarted": "{jobname} ξεκίνησε.",
