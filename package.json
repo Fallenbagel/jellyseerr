@@ -201,7 +201,7 @@
       ]
     ],
     "branches": [
-      "master"
+      "main"
     ],
     "npmPublish": false,
     "publish": [
@@ -211,8 +211,7 @@
           "COMMIT_TAG": "$GITHUB_SHA"
         },
         "imageNames": [
-          "sctx/overseerr",
-          "ghcr.io/sct/overseerr"
+          "fallenbagel/jellyseerr"
         ],
         "platforms": [
           "linux/amd64",
