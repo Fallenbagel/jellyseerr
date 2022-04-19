@@ -8,7 +8,7 @@ jobs:
   support:
     runs-on: ubuntu-20.04
     steps:
-      - uses: dessant/support-requests@v2.0.1
+      - uses: dessant/support-requests@v2
         with:
           github-token: ${{ github.token }}
           support-label: 'support'
@@ -16,11 +16,10 @@ jobs:
             :wave: @{issue-author}, we use the issue tracker exclusively
             for bug reports and feature requests. However, this issue appears
             to be a support request. Please use our support channels
-            to get help with Overseerr.
+            to get help with Jellyseerr.
 
-            - [Discord](https://discord.gg/overseerr)
+            - [Discord](https://discord.gg/ckbvBtDJgC)
 
-            - [GitHub Discussions](https://github.com/sct/overseerr/discussions)
           close-issue: true
           lock-issue: true
           issue-lock-reason: 'off-topic'
