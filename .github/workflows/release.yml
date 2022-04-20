@@ -30,6 +30,7 @@ jobs:
         run: yarn
       - name: Release
         env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: npx semantic-release
