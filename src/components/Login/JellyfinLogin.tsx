@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import Button from '../Common/Button';
 
@@ -7,7 +7,6 @@ import * as Yup from 'yup';
 import axios from 'axios';
 import { useToasts } from 'react-toast-notifications';
 import useSettings from '../../hooks/useSettings';
-import AddEmailModal from './AddEmailModal';
 
 const messages = defineMessages({
   username: 'Username',
@@ -38,9 +37,6 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
   revalidate,
   initial,
 }) => {
-  const [requiresEmail, setRequiresEmail] = useState<number>(0);
-  const [username, setUsername] = useState<string>();
-  const [password, setPassword] = useState<string>();
   const toasts = useToasts();
   const intl = useIntl();
   const settings = useSettings();
@@ -195,14 +191,6 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
     });
     return (
       <div>
-        {requiresEmail == 1 && (
-          <AddEmailModal
-            username={username ?? ''}
-            password={password ?? ''}
-            onSave={revalidate}
-            onClose={() => setRequiresEmail(0)}
-          ></AddEmailModal>
-        )}
         <Formik
           initialValues={{
             username: '',
@@ -214,25 +202,20 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
               await axios.post('/api/v1/auth/jellyfin', {
                 username: values.username,
                 password: values.password,
+                email: values.username,
               });
             } catch (e) {
-              if (e.message === 'Request failed with status code 406') {
-                setUsername(values.username);
-                setPassword(values.password);
-                setRequiresEmail(1);
-              } else {
-                toasts.addToast(
-                  intl.formatMessage(
-                    e.message == 'Request failed with status code 401'
-                      ? messages.credentialerror
-                      : messages.loginerror
-                  ),
-                  {
-                    autoDismiss: true,
-                    appearance: 'error',
-                  }
-                );
-              }
+              toasts.addToast(
+                intl.formatMessage(
+                  e.message == 'Request failed with status code 401'
+                    ? messages.credentialerror
+                    : messages.loginerror
+                ),
+                {
+                  autoDismiss: true,
+                  appearance: 'error',
+                }
+              );
             } finally {
               revalidate();
             }

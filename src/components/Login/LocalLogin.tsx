@@ -10,6 +10,7 @@ import Button from '../Common/Button';
 import SensitiveInput from '../Common/SensitiveInput';
 
 const messages = defineMessages({
+  username: 'Username',
   email: 'Email Address',
   password: 'Password',
   validationemailrequired: 'You must provide a valid email address',
@@ -30,9 +31,9 @@ const LocalLogin: React.FC<LocalLoginProps> = ({ revalidate }) => {
   const [loginError, setLoginError] = useState<string | null>(null);
 
   const LoginSchema = Yup.object().shape({
-    email: Yup.string()
-      .email()
-      .required(intl.formatMessage(messages.validationemailrequired)),
+    email: Yup.string().required(
+      intl.formatMessage(messages.validationemailrequired)
+    ),
     password: Yup.string().required(
       intl.formatMessage(messages.validationpasswordrequired)
     ),
@@ -68,7 +69,9 @@ const LocalLogin: React.FC<LocalLoginProps> = ({ revalidate }) => {
             <Form>
               <div>
                 <label htmlFor="email" className="text-label">
-                  {intl.formatMessage(messages.email)}
+                  {intl.formatMessage(messages.email) +
+                    ' / ' +
+                    intl.formatMessage(messages.username)}
                 </label>
                 <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
                   <div className="form-input-field">
