@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/Fallenbagel/jellyseerr/stable/public/logo.png" alt="Overseerr" style="margin: 20px 0;">
+<img src="./public/logo_full.svg" alt="Jellyseerr" style="margin: 20px 0;">
 </p>
 <p align="center">
 <a href="https://discord.gg/ckbvBtDJgC"><img src="https://img.shields.io/badge/Discord-Chat-lightgrey" alt="Discord"></a>
