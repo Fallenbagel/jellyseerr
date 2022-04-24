@@ -301,6 +301,12 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
             : '/os_logo_square.png',
           userType: UserType.JELLYFIN,
         });
+        //initialize Jellyfin/Emby users with local login
+        const passedExplicitPassword =
+          body.password && body.password.length > 0;
+        if (passedExplicitPassword) {
+          await user.setPassword(body.password);
+        }
         await userRepository.save(user);
       }
     }
@@ -562,8 +568,6 @@ authRoutes.post('/reset-password/:guid', async (req, res, next) => {
       message: 'Invalid password reset link.',
     });
   }
-
-  await user.setPassword(req.body.password);
   user.recoveryLinkExpirationDate = null;
   userRepository.save(user);
   logger.info('Successfully reset password', {
