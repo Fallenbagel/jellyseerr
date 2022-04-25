@@ -210,7 +210,7 @@ const ManageSlideOver: React.FC<
         {hasPermission(Permission.ADMIN) &&
           (data.mediaInfo?.serviceUrl ||
             data.mediaInfo?.tautulliUrl ||
-            watchData?.data?.playCount) && (
+            !!watchData?.data?.playCount) && (
             <div>
               <h3 className="mb-2 text-xl font-bold">
                 {intl.formatMessage(messages.manageModalMedia)}
@@ -325,7 +325,7 @@ const ManageSlideOver: React.FC<
         {hasPermission(Permission.ADMIN) &&
           (data.mediaInfo?.serviceUrl4k ||
             data.mediaInfo?.tautulliUrl4k ||
-            watchData?.data4k?.playCount) && (
+            !!watchData?.data4k?.playCount) && (
             <div>
               <h3 className="mb-2 text-xl font-bold">
                 {intl.formatMessage(messages.manageModalMedia4k)}
