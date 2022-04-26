@@ -333,6 +333,9 @@ components:
         hostname:
           type: string
           example: 'http://my.jellyfin.host'
+        externalHostname:
+          type: string
+          example: 'http://my.jellyfin.host'
         adminUser:
           type: string
           example: 'admin'
@@ -347,8 +350,6 @@ components:
         serverID:
           type: string
           readOnly: true
-      required:
-        - hostname
     TautulliSettings:
       type: object
       properties:

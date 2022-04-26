@@ -1,8 +1,13 @@
+import { SaveIcon } from '@heroicons/react/outline';
 import axios from 'axios';
+import { Field, Formik } from 'formik';
 import React, { useState } from 'react';
 import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
+import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
-import type { JellyfinSettings } from '../../../server/lib/settings';
+import * as Yup from 'yup';
+import { JellyfinSettings } from '../../../server/lib/settings';
+import globalMessages from '../../i18n/globalMessages';
 import Badge from '../Common/Badge';
 import Button from '../Common/Button';
 import LoadingSpinner from '../Common/LoadingSpinner';
@@ -11,18 +16,26 @@ import LibraryItem from './LibraryItem';
 const messages = defineMessages({
   jellyfinsettings: 'Jellyfin Settings',
   jellyfinsettingsDescription:
-    'Configure the settings for your Jellyfin server. Overseerr scans your Jellyfin libraries to see what content is available.',
+    'Configure the settings for your Jellyfin server. Jellyfin scans your Jellyfin libraries to see what content is available.',
   timeout: 'Timeout',
   save: 'Save Changes',
   saving: 'Saving…',
   jellyfinlibraries: 'Jellyfin Libraries',
   jellyfinlibrariesDescription:
-    'The libraries Overseerr scans for titles. Click the button below if no libraries are listed.',
+    'The libraries Jellyfin scans for titles. Click the button below if no libraries are listed.',
+  jellyfinSettingsFailure:
+    'Something went wrong while saving Jellyfin settings.',
+  jellyfinSettingsSuccess: 'Jellyfin settings saved successfully!',
+  jellyfinSettings: 'Jellyfin Settings',
+  jellyfinSettingsDescription:
+    'Optionally configure an external player endpoint for your jellyfin server that is different to the internal URL used during setup',
+  externalUrl: 'External URL',
+  validationUrl: 'You must provide a valid URL',
   syncing: 'Syncing',
   syncJellyfin: 'Sync Libraries',
   manualscanJellyfin: 'Manual Library Scan',
   manualscanDescriptionJellyfin:
-    "Normally, this will only be run once every 24 hours. Overseerr will check your Jellyfin server's recently added more aggressively. If this is your first time configuring Jellyfin, a one-time full manual library scan is recommended!",
+    "Normally, this will only be run once every 24 hours. Jellyfin will check your Jellyfin server's recently added more aggressively. If this is your first time configuring Jellyfin, a one-time full manual library scan is recommended!",
   notrunning: 'Not Running',
   currentlibrary: 'Current Library: {name}',
   librariesRemaining: 'Libraries Remaining: {count}',
@@ -44,26 +57,36 @@ interface SyncStatus {
   libraries: Library[];
 }
 interface SettingsJellyfinProps {
+  showAdvancedSettings?: boolean;
   onComplete?: () => void;
 }
 
-const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({ onComplete }) => {
+const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
+  onComplete,
+  showAdvancedSettings,
+}) => {
   const [isSyncing, setIsSyncing] = useState(false);
 
   const {
-    data: data,
-    error: error,
-    // revalidate: revalidate,
+    data,
+    error,
+    mutate: revalidate,
   } = useSWR<JellyfinSettings>('/api/v1/settings/jellyfin');
-  const revalidate = () => undefined; //TODO
-  const revalidateSync = () => undefined; //TODO
-
-  const {
-    data: dataSync, //, revalidate: revalidateSync
-  } = useSWR<SyncStatus>('/api/v1/settings/jellyfin/sync', {
-    refreshInterval: 1000,
-  });
+  const { data: dataSync, mutate: revalidateSync } = useSWR<SyncStatus>(
+    '/api/v1/settings/jellyfin/sync',
+    {
+      refreshInterval: 1000,
+    }
+  );
   const intl = useIntl();
+  const { addToast } = useToasts();
+
+  const JellyfinSettingsSchema = Yup.object().shape({
+    jellyfinExternalUrl: Yup.string().matches(
+      /^(?:(?:(?:https?):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*\.?)(?::\d{2,5})?(?:[/?#]\S*)?$/,
+      intl.formatMessage(messages.validationUrl)
+    ),
+  });
 
   const activeLibraries =
     data?.libraries
@@ -278,6 +301,89 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({ onComplete }) => {
           </div>
         </div>
       </div>
+      {showAdvancedSettings && (
+        <>
+          <div className="mt-10 mb-6">
+            <h3 className="heading">
+              {intl.formatMessage(messages.jellyfinSettings)}
+            </h3>
+            <p className="description">
+              {intl.formatMessage(messages.jellyfinSettingsDescription)}
+            </p>
+          </div>
+          <Formik
+            initialValues={{
+              jellyfinExternalUrl: data?.externalHostname || '',
+            }}
+            validationSchema={JellyfinSettingsSchema}
+            onSubmit={async (values) => {
+              try {
+                await axios.post('/api/v1/settings/jellyfin', {
+                  externalHostname: values.jellyfinExternalUrl,
+                } as JellyfinSettings);
+
+                addToast(intl.formatMessage(messages.jellyfinSettingsSuccess), {
+                  autoDismiss: true,
+                  appearance: 'success',
+                });
+              } catch (e) {
+                addToast(intl.formatMessage(messages.jellyfinSettingsFailure), {
+                  autoDismiss: true,
+                  appearance: 'error',
+                });
+              } finally {
+                revalidate();
+              }
+            }}
+          >
+            {({ errors, touched, handleSubmit, isSubmitting, isValid }) => {
+              return (
+                <form className="section" onSubmit={handleSubmit}>
+                  <div className="form-row">
+                    <label htmlFor="jellyfinExternalUrl" className="text-label">
+                      {intl.formatMessage(messages.externalUrl)}
+                    </label>
+                    <div className="form-input-area">
+                      <div className="form-input-field">
+                        <Field
+                          type="text"
+                          inputMode="url"
+                          id="jellyfinExternalUrl"
+                          name="jellyfinExternalUrl"
+                        />
+                      </div>
+                      {errors.jellyfinExternalUrl &&
+                        touched.jellyfinExternalUrl && (
+                          <div className="error">
+                            {errors.jellyfinExternalUrl}
+                          </div>
+                        )}
+                    </div>
+                  </div>
+                  <div className="actions">
+                    <div className="flex justify-end">
+                      <span className="ml-3 inline-flex rounded-md shadow-sm">
+                        <Button
+                          buttonType="primary"
+                          type="submit"
+                          disabled={isSubmitting || !isValid}
+                        >
+                          <SaveIcon />
+                          <span>
+                            {isSubmitting
+                              ? intl.formatMessage(globalMessages.saving)
+                              : intl.formatMessage(globalMessages.save)}
+                          </span>
+                        </Button>
+                      </span>
+                    </div>
+                  </div>
+                </form>
+              );
+            }}
+          </Formik>
+        </>
+      )}
     </>
   );
 };

@@ -128,6 +128,7 @@ const Setup: React.FC = () => {
                 />
               ) : (
                 <SettingsJellyfin
+                  showAdvancedSettings={false}
                   onComplete={() => setMediaServerSettingsComplete(true)}
                 />
               )}

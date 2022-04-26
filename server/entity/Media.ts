@@ -191,12 +191,16 @@ class Media {
     } else {
       const pageName =
         process.env.JELLYFIN_TYPE === 'emby' ? 'item' : 'details';
-      const { hostname, serverId } = getSettings().jellyfin;
+      const { serverId, hostname, externalHostname } = getSettings().jellyfin;
+      const jellyfinHost =
+        externalHostname && externalHostname.length > 0
+          ? externalHostname
+          : hostname;
       if (this.jellyfinMediaId) {
-        this.mediaUrl = `${hostname}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId}&context=home&serverId=${serverId}`;
+        this.mediaUrl = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId}&context=home&serverId=${serverId}`;
       }
       if (this.jellyfinMediaId4k) {
-        this.mediaUrl4k = `${hostname}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId4k}&context=home&serverId=${serverId}`;
+        this.mediaUrl4k = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId4k}&context=home&serverId=${serverId}`;
       }
     }
   }

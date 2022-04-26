@@ -39,6 +39,7 @@ export interface PlexSettings {
 export interface JellyfinSettings {
   name: string;
   hostname?: string;
+  externalHostname?: string;
   libraries: Library[];
   serverId: string;
 }
@@ -319,6 +320,7 @@ class Settings {
       jellyfin: {
         name: '',
         hostname: '',
+        externalHostname: '',
         libraries: [],
         serverId: '',
       },
