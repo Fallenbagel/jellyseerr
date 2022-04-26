@@ -686,7 +686,7 @@
   "components.UserList.nouserstoimport": "No hi ha usuaris nous de Plex a importar.",
   "components.UserList.localuser": "Usuari local",
   "components.UserList.importfromplexerror": "S'ha produït un error en importar usuaris de Plex.",
-  "components.UserList.importfromplex": "Importeu usuaris de Plex",
+  "components.UserList.importfromplex": "Importeu usuaris de {mediaServerName}",
   "components.UserList.importedfromplex": "<strong>{userCount}</strong> {userCount, plural, one {usuari} other {usuaris}} de Plex importat correctament!",
   "components.TvDetails.watchtrailer": "Veure el tràiler",
   "components.TvDetails.viewfullcrew": "Mostreu equip complet",

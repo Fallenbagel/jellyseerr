@@ -34,12 +34,13 @@ import SensitiveInput from '../Common/SensitiveInput';
 import Table from '../Common/Table';
 import Transition from '../Transition';
 import BulkEditModal from './BulkEditModal';
+import JellyfinImportModal from './JellyfinImportModal';
 import PlexImportModal from './PlexImportModal';
 
 const messages = defineMessages({
   users: 'Users',
   userlist: 'User List',
-  importfromplex: 'Import Plex Users',
+  importfromplex: 'Import {mediaServerName} Users',
   user: 'User',
   totalrequests: 'Requests',
   accounttype: 'Type',
@@ -464,13 +465,23 @@ const UserList: React.FC = () => {
         leaveTo="opacity-0"
         show={showImportModal}
       >
-        <PlexImportModal
-          onCancel={() => setShowImportModal(false)}
-          onComplete={() => {
-            setShowImportModal(false);
-            revalidate();
-          }}
-        />
+        {settings.currentSettings.mediaServerType === MediaServerType.PLEX ? (
+          <PlexImportModal
+            onCancel={() => setShowImportModal(false)}
+            onComplete={() => {
+              setShowImportModal(false);
+              revalidate();
+            }}
+          />
+        ) : (
+          <JellyfinImportModal
+            onCancel={() => setShowImportModal(false)}
+            onComplete={() => {
+              setShowImportModal(false);
+              revalidate();
+            }}
+          />
+        )}
       </Transition>
 
       <div className="flex flex-col justify-between lg:flex-row lg:items-end">
@@ -489,13 +500,17 @@ const UserList: React.FC = () => {
               className="flex-grow lg:mr-2"
               buttonType="primary"
               onClick={() => setShowImportModal(true)}
-              disabled={
-                settings.currentSettings.mediaServerType !==
-                MediaServerType.PLEX
-              }
             >
               <InboxInIcon />
-              <span>{intl.formatMessage(messages.importfromplex)}</span>
+              <span>
+                {intl.formatMessage(messages.importfromplex, {
+                  mediaServerName:
+                    settings.currentSettings.mediaServerType ===
+                    MediaServerType.PLEX
+                      ? 'Plex'
+                      : 'Jellyfin',
+                })}
+              </span>
             </Button>
           </div>
           <div className="mb-2 flex flex-grow lg:mb-0 lg:flex-grow-0">

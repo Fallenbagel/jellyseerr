@@ -214,7 +214,7 @@
   "components.UserList.userdeleteerror": "Er ging iets mis bij het verwijderen van de gebruiker.",
   "components.UserList.userdeleted": "Gebruiker succesvol verwijderd!",
   "components.UserList.importfromplexerror": "Er is iets misgegaan bij het importeren van Plex-gebruikers.",
-  "components.UserList.importfromplex": "Plex-gebruikers importeren",
+  "components.UserList.importfromplex": "{mediaServerName}-gebruikers importeren",
   "components.UserList.deleteuser": "Gebruiker verwijderen",
   "components.UserList.deleteconfirm": "Weet je zeker dat je deze gebruiker wilt verwijderen? Al hun bestaande aanvraaggegevens zullen worden verwijderd.",
   "components.TvDetails.watchtrailer": "Trailer bekijken",

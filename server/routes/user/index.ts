@@ -2,6 +2,7 @@ import { Router } from 'express';
 import gravatarUrl from 'gravatar-url';
 import { findIndex, sortBy } from 'lodash';
 import { getRepository, In, Not } from 'typeorm';
+import JellyfinAPI from '../../api/jellyfin';
 import PlexTvAPI from '../../api/plextv';
 import TautulliAPI from '../../api/tautulli';
 import { MediaType } from '../../constants/media';
@@ -454,6 +455,86 @@ router.post(
               await userRepository.save(newUser);
               createdUsers.push(newUser);
             }
+          }
+        }
+      }
+
+      return res.status(201).json(User.filterMany(createdUsers));
+    } catch (e) {
+      next({ status: 500, message: e.message });
+    }
+  }
+);
+
+router.post(
+  '/import-from-jellyfin',
+  isAuthenticated(Permission.MANAGE_USERS),
+  async (req, res, next) => {
+    try {
+      const settings = getSettings();
+      const userRepository = getRepository(User);
+      const body = req.body as { jellyfinUserIds: string[] };
+
+      // taken from auth.ts
+      const admin = await userRepository.findOneOrFail({
+        select: [
+          'id',
+          'jellyfinAuthToken',
+          'jellyfinDeviceId',
+          'jellyfinUserId',
+        ],
+        order: { id: 'ASC' },
+      });
+      const jellyfinClient = new JellyfinAPI(
+        settings.jellyfin.hostname ?? '',
+        admin.jellyfinAuthToken ?? '',
+        admin.jellyfinDeviceId ?? ''
+      );
+      jellyfinClient.setUserId(admin.jellyfinUserId ?? '');
+
+      const jellyfinUsersResponse = await jellyfinClient.getUsers();
+      const createdUsers: User[] = [];
+      for (const account of jellyfinUsersResponse.users) {
+        if (account.Name) {
+          const user = await userRepository
+            .createQueryBuilder('user')
+            .where('user.jellyfinUserId = :id', { id: account.Id })
+            .orWhere('user.email = :email', {
+              email: account.Name,
+            })
+            .getOne();
+
+          const avatar = account.PrimaryImageTag
+            ? `${settings.jellyfin.hostname}/Users/${account.Id}/Images/Primary/?tag=${account.PrimaryImageTag}&quality=90`
+            : '/os_logo_square.png';
+
+          if (user) {
+            // Update the user's avatar with their Jellyfin thumbnail, in case it changed
+            user.avatar = avatar;
+            user.email = account.Name;
+            user.jellyfinUsername = account.Name;
+
+            // In case the user was previously a local account
+            if (user.userType === UserType.LOCAL) {
+              user.userType = UserType.JELLYFIN;
+              user.jellyfinUserId = account.Id;
+            }
+            await userRepository.save(user);
+          } else if (!body || body.jellyfinUserIds.includes(account.Id)) {
+            logger.error('CREATED USER', {
+              label: 'API',
+            });
+
+            const newUser = new User({
+              jellyfinUsername: account.Name,
+              jellyfinUserId: account.Id,
+              email: account.Name,
+              permissions: settings.main.defaultPermissions,
+              avatar,
+              userType: UserType.JELLYFIN,
+            });
+            await userRepository.save(newUser);
+            createdUsers.push(newUser);
           }
         }
       }

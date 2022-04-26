@@ -301,6 +301,34 @@ settingsRoutes.get('/jellyfin/library', async (req, res) => {
   return res.status(200).json(settings.jellyfin.libraries);
 });
 
+settingsRoutes.get('/jellyfin/users', async (req, res) => {
+  const settings = getSettings();
+
+  const userRepository = getRepository(User);
+  const admin = await userRepository.findOneOrFail({
+    select: ['id', 'jellyfinAuthToken', 'jellyfinDeviceId', 'jellyfinUserId'],
+    order: { id: 'ASC' },
+  });
+  const jellyfinClient = new JellyfinAPI(
+    settings.jellyfin.hostname ?? '',
+    admin.jellyfinAuthToken ?? '',
+    admin.jellyfinDeviceId ?? ''
+  );
+
+  jellyfinClient.setUserId(admin.jellyfinUserId ?? '');
+  const resp = await jellyfinClient.getUsers();
+  const users = resp.users.map((user) => ({
+    username: user.Name,
+    id: user.Id,
+    thumb: user.PrimaryImageTag
+      ? `${settings.jellyfin.hostname}/Users/${user.Id}/Images/Primary/?tag=${user.PrimaryImageTag}&quality=90`
+      : '/os_logo_square.png',
+    email: user.Name,
+  }));
+
+  return res.status(200).json(users);
+});
+
 settingsRoutes.get('/jellyfin/sync', (_req, res) => {
   return res.status(200).json(jobJellyfinFullSync.status());
 });

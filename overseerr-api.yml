@@ -1984,6 +1984,20 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/JellyfinLibrary'
+  /settings/jellyfin/users:
+    get:
+      summary: Get Jellyfin Users
+      description: Returns a list of Jellyfin Users in a JSON array.
+      tags:
+        - settings
+        - users
+      responses:
+        '200':
+          description: Jellyfin users returned
+          content:
+            application/json:
+              schema:
+                type: array
   /settings/jellyfin/sync:
     get:
       summary: Get status of full Jellyfin library sync
@@ -3516,6 +3530,35 @@ paths:
               type: object
               properties:
                 plexIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: A list of the newly created users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  /user/import-from-jellyfin:
+    post:
+      summary: Import all users from Jellyfin
+      description: |
+        Fetches and imports users from the Jellyfin server.
+
+        Requires the `MANAGE_USERS` permission.
+      tags:
+        - users
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                jellyfinIds:
                   type: array
                   items:
                     type: string

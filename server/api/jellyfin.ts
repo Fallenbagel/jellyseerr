@@ -15,6 +15,10 @@ export interface JellyfinLoginResponse {
   AccessToken: string;
 }
 
+export interface JellyfinUserListResponse {
+  users: Array<JellyfinUserResponse>;
+}
+
 export interface JellyfinLibrary {
   type: 'show' | 'movie';
   key: string;
@@ -131,6 +135,19 @@ class JellyfinAPI {
         { label: 'Jellyfin API' }
       );
       throw new Error('girl idk');
+    }
+  }
+
+  public async getUsers(): Promise<JellyfinUserListResponse> {
+    try {
+      const account = await this.axios.get(`/Users`);
+      return { users: account.data };
+    } catch (e) {
+      logger.error(
+        `Something went wrong while getting the account from the Jellyfin server: ${e.message}`,
+        { label: 'Jellyfin API' }
+      );
+      throw new Error('Invalid auth token');
     }
   }
 
