@@ -15,12 +15,12 @@ const messages = defineMessages({
 });
 
 interface LoginWithMediaServerProps {
-  onComplete: () => void;
+  onComplete: (onComplete: MediaServerType) => void;
 }
 
 const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
   const [authToken, setAuthToken] = useState<string | undefined>(undefined);
-  const [mediaServerType, setMediaServerType] = useState<number>(
+  const [mediaServerType, setMediaServerType] = useState<MediaServerType>(
     MediaServerType.NOT_CONFIGURED
   );
   const { user, revalidate } = useUser();
@@ -46,9 +46,9 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
 
   useEffect(() => {
     if (user) {
-      onComplete();
+      onComplete(mediaServerType);
     }
-  }, [user, onComplete]);
+  }, [user, mediaServerType, onComplete]);
 
   return (
     <div>

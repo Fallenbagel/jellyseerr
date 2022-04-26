@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR, { mutate } from 'swr';
+import { MediaServerType } from '../../../server/constants/server';
 import useLocale from '../../hooks/useLocale';
 import AppDataWarning from '../AppDataWarning';
 import Badge from '../Common/Badge';
@@ -35,7 +36,9 @@ const Setup: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [mediaServerSettingsComplete, setMediaServerSettingsComplete] =
     useState(false);
-  const [mediaServerType, setMediaServerType] = useState('');
+  const [mediaServerType, setMediaServerType] = useState(
+    MediaServerType.NOT_CONFIGURED
+  );
   const router = useRouter();
   const { locale } = useLocale();
 
@@ -54,11 +57,6 @@ const Setup: React.FC = () => {
     }
   };
 
-  const getMediaServerType = async () => {
-    const MainSettings = await axios.get('/api/v1/settings/main');
-    setMediaServerType(MainSettings.data.mediaServerType);
-    return;
-  };
   const { data: backdrops } = useSWR<string[]>('/api/v1/backdrops', {
     refreshInterval: 0,
     refreshWhenHidden: false,
@@ -113,16 +111,15 @@ const Setup: React.FC = () => {
         <div className="mt-10 w-full rounded-md border border-gray-600 bg-gray-800 bg-opacity-50 p-4 text-white">
           {currentStep === 1 && (
             <SetupLogin
-              onComplete={() => {
-                getMediaServerType().then(() => {
-                  setCurrentStep(2);
-                });
+              onComplete={(mServerType) => {
+                setMediaServerType(mServerType);
+                setCurrentStep(2);
               }}
             />
           )}
           {currentStep === 2 && (
             <div>
-              {mediaServerType == 'PLEX' ? (
+              {mediaServerType === MediaServerType.PLEX ? (
                 <SettingsPlex
                   onComplete={() => setMediaServerSettingsComplete(true)}
                 />
