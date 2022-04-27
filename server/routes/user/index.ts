@@ -521,9 +521,9 @@ router.post(
             }
             await userRepository.save(user);
           } else if (!body || body.jellyfinUserIds.includes(account.Id)) {
-            logger.error('CREATED USER', {
-              label: 'API',
-            });
+            // logger.error('CREATED USER', {
+            //   label: 'API',
+            // });
 
             const newUser = new User({
               jellyfinUsername: account.Name,
