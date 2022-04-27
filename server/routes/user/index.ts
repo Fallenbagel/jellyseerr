@@ -528,6 +528,9 @@ router.post(
             const newUser = new User({
               jellyfinUsername: account.Name,
               jellyfinUserId: account.Id,
+              jellyfinDeviceId: Buffer.from(
+                `BOT_overseerr_${account.Name ?? ''}`
+              ).toString('base64'),
               email: account.Name,
               permissions: settings.main.defaultPermissions,
               avatar,
