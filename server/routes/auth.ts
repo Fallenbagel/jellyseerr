@@ -255,11 +255,33 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         user.username = '';
       }
       await userRepository.save(user);
+    } else if (!settings.main.newPlexLogin) {
+      logger.warn(
+        'Failed sign-in attempt by unimported Jellyfin user with access to the media server',
+        {
+          label: 'API',
+          ip: req.ip,
+          jellyfinUserId: account.User.Id,
+          jellyfinUsername: account.User.Name,
+        }
+      );
+      return next({
+        status: 403,
+        message: 'Access denied.',
+      });
     } else {
       // Here we check if it's the first user. If it is, we create the user with no check
       // and give them admin permissions
       const totalUsers = await userRepository.count();
       if (totalUsers === 0) {
+        logger.info(
+          'Sign-in attempt from Jellyfin user with access to the media server; creating initial admin user for Overseerr',
+          {
+            label: 'API',
+            ip: req.ip,
+            jellyfinUsername: account.User.Name,
+          }
+        );
         user = new User({
           email: body.email,
           jellyfinUsername: account.User.Name,
