@@ -5,7 +5,9 @@ import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR, { mutate } from 'swr';
+import { MediaServerType } from '../../../../server/constants/server';
 import type { MainSettings } from '../../../../server/lib/settings';
+import useSettings from '../../../hooks/useSettings';
 import globalMessages from '../../../i18n/globalMessages';
 import Button from '../../Common/Button';
 import LoadingSpinner from '../../Common/LoadingSpinner';
@@ -22,8 +24,9 @@ const messages = defineMessages({
   localLogin: 'Enable Local Sign-In',
   localLoginTip:
     'Allow users to sign in using their email address and password, instead of Plex OAuth',
-  newPlexLogin: 'Enable New Plex Sign-In',
-  newPlexLoginTip: 'Allow Plex users to sign in without first being imported',
+  newPlexLogin: 'Enable New {mediaServerName} Sign-In',
+  newPlexLoginTip:
+    'Allow {mediaServerName} users to sign in without first being imported',
   movieRequestLimitLabel: 'Global Movie Request Limit',
   tvRequestLimitLabel: 'Global Series Request Limit',
   defaultPermissions: 'Default Permissions',
@@ -38,6 +41,7 @@ const SettingsUsers: React.FC = () => {
     error,
     mutate: revalidate,
   } = useSWR<MainSettings>('/api/v1/settings/main');
+  const settings = useSettings();
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -125,9 +129,21 @@ const SettingsUsers: React.FC = () => {
                 </div>
                 <div className="form-row">
                   <label htmlFor="newPlexLogin" className="checkbox-label">
-                    {intl.formatMessage(messages.newPlexLogin)}
+                    {intl.formatMessage(messages.newPlexLogin, {
+                      mediaServerName:
+                        settings.currentSettings.mediaServerType ===
+                        MediaServerType.PLEX
+                          ? 'Plex'
+                          : 'Jellyfin',
+                    })}
                     <span className="label-tip">
-                      {intl.formatMessage(messages.newPlexLoginTip)}
+                      {intl.formatMessage(messages.newPlexLoginTip, {
+                        mediaServerName:
+                          settings.currentSettings.mediaServerType ===
+                          MediaServerType.PLEX
+                            ? 'Plex'
+                            : 'Jellyfin',
+                      })}
                     </span>
                   </label>
                   <div className="form-input-area">
