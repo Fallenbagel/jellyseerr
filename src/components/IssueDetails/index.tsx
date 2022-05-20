@@ -33,6 +33,8 @@ import { issueOptions } from '../IssueModal/constants';
 import Transition from '../Transition';
 import IssueComment from './IssueComment';
 import IssueDescription from './IssueDescription';
+import { MediaServerType } from '../../../server/constants/server';
+import useSettings from '../../hooks/useSettings';
 
 const messages = defineMessages({
   openedby: '#{issueId} opened {relativeTime} by {username}',
@@ -43,8 +45,8 @@ const messages = defineMessages({
   reopenissue: 'Reopen Issue',
   reopenissueandcomment: 'Reopen with Comment',
   issuepagetitle: 'Issue',
-  playonplex: 'Play on Plex',
-  play4konplex: 'Play in 4K on Plex',
+  playonplex: 'Play on {mediaServerName}',
+  play4konplex: 'Play in 4K on {mediaServerName}',
   openinarr: 'Open in {arr}',
   openin4karr: 'Open in 4K {arr}',
   toasteditdescriptionsuccess: 'Issue description edited successfully!',
@@ -96,6 +98,7 @@ const IssueDetails: React.FC = () => {
   const issueOption = issueOptions.find(
     (opt) => opt.issueType === issueData?.issueType
   );
+  const settings = useSettings();
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -362,7 +365,15 @@ const IssueDetails: React.FC = () => {
                   buttonType="ghost"
                 >
                   <PlayIcon />
-                  <span>{intl.formatMessage(messages.playonplex)}</span>
+                  <span>
+                    {intl.formatMessage(messages.playonplex, {
+                      mediaServerName:
+                        settings.currentSettings.mediaServerType ===
+                        MediaServerType.PLEX
+                          ? 'Plex'
+                          : 'Jellyfin',
+                    })}
+                  </span>
                 </Button>
               )}
               {issueData?.media.serviceUrl && hasPermission(Permission.ADMIN) && (
@@ -395,7 +406,15 @@ const IssueDetails: React.FC = () => {
                   buttonType="ghost"
                 >
                   <PlayIcon />
-                  <span>{intl.formatMessage(messages.play4konplex)}</span>
+                  <span>
+                    {intl.formatMessage(messages.play4konplex, {
+                      mediaServerName:
+                        settings.currentSettings.mediaServerType ===
+                        MediaServerType.PLEX
+                          ? 'Plex'
+                          : 'Jellyfin',
+                    })}
+                  </span>
                 </Button>
               )}
               {issueData?.media.serviceUrl4k &&
@@ -598,7 +617,15 @@ const IssueDetails: React.FC = () => {
                 buttonType="ghost"
               >
                 <PlayIcon />
-                <span>{intl.formatMessage(messages.playonplex)}</span>
+                <span>
+                  {intl.formatMessage(messages.playonplex, {
+                    mediaServerName:
+                      settings.currentSettings.mediaServerType ===
+                      MediaServerType.PLEX
+                        ? 'Plex'
+                        : 'Jellyfin',
+                  })}
+                </span>
               </Button>
             )}
             {issueData?.media.serviceUrl && hasPermission(Permission.ADMIN) && (
@@ -631,7 +658,15 @@ const IssueDetails: React.FC = () => {
                 buttonType="ghost"
               >
                 <PlayIcon />
-                <span>{intl.formatMessage(messages.play4konplex)}</span>
+                <span>
+                  {intl.formatMessage(messages.play4konplex, {
+                    mediaServerName:
+                      settings.currentSettings.mediaServerType ===
+                      MediaServerType.PLEX
+                        ? 'Plex'
+                        : 'Jellyfin',
+                  })}
+                </span>
               </Button>
             )}
             {issueData?.media.serviceUrl4k && hasPermission(Permission.ADMIN) && (
