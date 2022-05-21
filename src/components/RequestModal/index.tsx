@@ -2,12 +2,13 @@ import React from 'react';
 import type { MediaStatus } from '../../../server/constants/media';
 import { MediaRequest } from '../../../server/entity/MediaRequest';
 import Transition from '../Transition';
+import CollectionRequestModal from './CollectionRequestModal';
 import MovieRequestModal from './MovieRequestModal';
 import TvRequestModal from './TvRequestModal';
 
 interface RequestModalProps {
   show: boolean;
-  type: 'movie' | 'tv';
+  type: 'movie' | 'tv' | 'collection';
   tmdbId: number;
   is4k?: boolean;
   editRequest?: MediaRequest;
@@ -45,7 +46,7 @@ const RequestModal: React.FC<RequestModalProps> = ({
           is4k={is4k}
           editRequest={editRequest}
         />
-      ) : (
+      ) : type === 'tv' ? (
         <TvRequestModal
           onComplete={onComplete}
           onCancel={onCancel}
@@ -53,6 +54,14 @@ const RequestModal: React.FC<RequestModalProps> = ({
           onUpdating={onUpdating}
           is4k={is4k}
           editRequest={editRequest}
+        />
+      ) : (
+        <CollectionRequestModal
+          onComplete={onComplete}
+          onCancel={onCancel}
+          tmdbId={tmdbId}
+          onUpdating={onUpdating}
+          is4k={is4k}
         />
       )}
     </Transition>

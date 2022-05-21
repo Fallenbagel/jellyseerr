@@ -27,8 +27,14 @@ const UserPermissions: React.FC = () => {
   const { addToast } = useToasts();
   const router = useRouter();
   const { user: currentUser } = useUser();
-  const { user, mutate } = useUser({ id: Number(router.query.userId) });
-  const { data, error, revalidate } = useSWR<{ permissions?: number }>(
+  const { user, revalidate: revalidateUser } = useUser({
+    id: Number(router.query.userId),
+  });
+  const {
+    data,
+    error,
+    mutate: revalidate,
+  } = useSWR<{ permissions?: number }>(
     user ? `/api/v1/user/${user?.id}/settings/permissions` : null
   );
 
@@ -90,7 +96,7 @@ const UserPermissions: React.FC = () => {
             });
           } finally {
             revalidate();
-            mutate();
+            revalidateUser();
           }
         }}
       >
@@ -109,7 +115,7 @@ const UserPermissions: React.FC = () => {
               </div>
               <div className="actions">
                 <div className="flex justify-end">
-                  <span className="inline-flex ml-3 rounded-md shadow-sm">
+                  <span className="ml-3 inline-flex rounded-md shadow-sm">
                     <Button
                       buttonType="primary"
                       type="submit"

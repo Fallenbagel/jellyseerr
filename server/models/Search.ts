@@ -1,6 +1,9 @@
 import type {
+  TmdbMovieDetails,
   TmdbMovieResult,
+  TmdbPersonDetails,
   TmdbPersonResult,
+  TmdbTvDetails,
   TmdbTvResult,
 } from '../api/themoviedb/interfaces';
 import { MediaType as MainMediaType } from '../constants/media';
@@ -140,3 +143,54 @@ export const mapSearchResults = (
         return mapPersonResult(result);
     }
   });
+
+export const mapMovieDetailsToResult = (
+  movieDetails: TmdbMovieDetails
+): TmdbMovieResult => ({
+  id: movieDetails.id,
+  media_type: 'movie',
+  adult: movieDetails.adult,
+  genre_ids: movieDetails.genres.map((genre) => genre.id),
+  original_language: movieDetails.original_language,
+  original_title: movieDetails.original_title,
+  overview: movieDetails.overview ?? '',
+  popularity: movieDetails.popularity,
+  release_date: movieDetails.release_date,
+  title: movieDetails.title,
+  video: movieDetails.video,
+  vote_average: movieDetails.vote_average,
+  vote_count: movieDetails.vote_count,
+  backdrop_path: movieDetails.backdrop_path,
+  poster_path: movieDetails.poster_path,
+});
+
+export const mapTvDetailsToResult = (
+  tvDetails: TmdbTvDetails
+): TmdbTvResult => ({
+  id: tvDetails.id,
+  media_type: 'tv',
+  first_air_date: tvDetails.first_air_date,
+  genre_ids: tvDetails.genres.map((genre) => genre.id),
+  name: tvDetails.name,
+  origin_country: tvDetails.origin_country,
+  original_language: tvDetails.original_language,
+  original_name: tvDetails.original_name,
+  overview: tvDetails.overview,
+  popularity: tvDetails.popularity,
+  vote_average: tvDetails.vote_average,
+  vote_count: tvDetails.vote_count,
+  backdrop_path: tvDetails.backdrop_path,
+  poster_path: tvDetails.poster_path,
+});
+
+export const mapPersonDetailsToResult = (
+  personDetails: TmdbPersonDetails
+): TmdbPersonResult => ({
+  id: personDetails.id,
+  media_type: 'person',
+  name: personDetails.name,
+  popularity: personDetails.popularity,
+  adult: personDetails.adult,
+  profile_path: personDetails.profile_path,
+  known_for: [],
+});

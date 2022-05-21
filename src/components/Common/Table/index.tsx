@@ -3,7 +3,7 @@ import { withProperties } from '../../../utils/typeHelpers';
 
 const TBody: React.FC = ({ children }) => {
   return (
-    <tbody className="bg-gray-800 divide-y divide-gray-700">{children}</tbody>
+    <tbody className="divide-y divide-gray-700 bg-gray-800">{children}</tbody>
   );
 };
 

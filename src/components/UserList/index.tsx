@@ -2,6 +2,7 @@ import { TrashIcon } from '@heroicons/react/outline';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
+  InboxInIcon,
   PencilIcon,
   SortDescendingIcon,
   UserAddIcon,
@@ -33,21 +34,18 @@ import SensitiveInput from '../Common/SensitiveInput';
 import Table from '../Common/Table';
 import Transition from '../Transition';
 import BulkEditModal from './BulkEditModal';
+import JellyfinImportModal from './JellyfinImportModal';
+import PlexImportModal from './PlexImportModal';
 
 const messages = defineMessages({
   users: 'Users',
   userlist: 'User List',
-  importfromplex: 'Import Users from Plex',
-  importfromplexerror: 'Something went wrong while importing users from Plex.',
-  importedfromplex:
-    '{userCount, plural, one {# new user} other {# new users}} imported from Plex successfully!',
-  nouserstoimport: 'No new users to import from Plex.',
+  importfromplex: 'Import {mediaServerName} Users',
   user: 'User',
   totalrequests: 'Requests',
   accounttype: 'Type',
   role: 'Role',
-  created: 'Created',
-  lastupdated: 'Updated',
+  created: 'Joined',
   bulkedit: 'Bulk Edit',
   owner: 'Owner',
   admin: 'Admin',
@@ -76,8 +74,7 @@ const messages = defineMessages({
   autogeneratepassword: 'Automatically Generate Password',
   autogeneratepasswordTip: 'Email a server-generated password to the user',
   validationEmail: 'You must provide a valid email address',
-  sortCreated: 'Creation Date',
-  sortUpdated: 'Last Updated',
+  sortCreated: 'Join Date',
   sortDisplayName: 'Display Name',
   sortRequests: 'Request Count',
   localLoginDisabled:
@@ -92,21 +89,25 @@ const UserList: React.FC = () => {
   const settings = useSettings();
   const { addToast } = useToasts();
   const { user: currentUser, hasPermission: currentHasPermission } = useUser();
-  const [currentSort, setCurrentSort] = useState<Sort>('created');
+  const [currentSort, setCurrentSort] = useState<Sort>('displayname');
   const [currentPageSize, setCurrentPageSize] = useState<number>(10);
 
   const page = router.query.page ? Number(router.query.page) : 1;
   const pageIndex = page - 1;
   const updateQueryParams = useUpdateQueryParams({ page: page.toString() });
 
-  const { data, error, revalidate } = useSWR<UserResultsResponse>(
+  const {
+    data,
+    error,
+    mutate: revalidate,
+  } = useSWR<UserResultsResponse>(
     `/api/v1/user?take=${currentPageSize}&skip=${
       pageIndex * currentPageSize
     }&sort=${currentSort}`
   );
 
   const [isDeleting, setDeleting] = useState(false);
-  const [isImporting, setImporting] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     user?: User;
@@ -193,35 +194,6 @@ const UserList: React.FC = () => {
     } finally {
       setDeleting(false);
       revalidate();
-    }
-  };
-
-  const importFromPlex = async () => {
-    setImporting(true);
-
-    try {
-      const { data: createdUsers } = await axios.post(
-        '/api/v1/user/import-from-plex'
-      );
-      addToast(
-        createdUsers.length
-          ? intl.formatMessage(messages.importedfromplex, {
-              userCount: createdUsers.length,
-            })
-          : intl.formatMessage(messages.nouserstoimport),
-        {
-          autoDismiss: true,
-          appearance: 'success',
-        }
-      );
-    } catch (e) {
-      addToast(intl.formatMessage(messages.importfromplexerror), {
-        autoDismiss: true,
-        appearance: 'error',
-      });
-    } finally {
-      revalidate();
-      setImporting(false);
     }
   };
 
@@ -357,7 +329,7 @@ const UserList: React.FC = () => {
                     title={intl.formatMessage(messages.localLoginDisabled, {
                       strong: function strong(msg) {
                         return (
-                          <strong className="font-semibold text-yellow-100">
+                          <strong className="font-semibold text-white">
                             {msg}
                           </strong>
                         );
@@ -380,7 +352,7 @@ const UserList: React.FC = () => {
                     <label htmlFor="displayName" className="text-label">
                       {intl.formatMessage(messages.displayName)}
                     </label>
-                    <div className="form-input">
+                    <div className="form-input-area">
                       <div className="form-input-field">
                         <Field
                           id="displayName"
@@ -395,7 +367,7 @@ const UserList: React.FC = () => {
                       {intl.formatMessage(messages.email)}
                       <span className="label-required">*</span>
                     </label>
-                    <div className="form-input">
+                    <div className="form-input-area">
                       <div className="form-input-field">
                         <Field
                           id="email"
@@ -420,7 +392,7 @@ const UserList: React.FC = () => {
                         {intl.formatMessage(messages.autogeneratepasswordTip)}
                       </span>
                     </label>
-                    <div className="form-input">
+                    <div className="form-input-area">
                       <Field
                         type="checkbox"
                         id="genpassword"
@@ -441,7 +413,7 @@ const UserList: React.FC = () => {
                         <span className="label-required">*</span>
                       )}
                     </label>
-                    <div className="form-input">
+                    <div className="form-input-area">
                       <div className="form-input-field">
                         <SensitiveInput
                           as="field"
@@ -484,33 +456,66 @@ const UserList: React.FC = () => {
         />
       </Transition>
 
-      <div className="flex flex-col justify-between lg:items-end lg:flex-row">
+      <Transition
+        enter="opacity-0 transition duration-300"
+        enterFrom="opacity-0"
+        enterTo="opacity-100"
+        leave="opacity-100 transition duration-300"
+        leaveFrom="opacity-100"
+        leaveTo="opacity-0"
+        show={showImportModal}
+      >
+        {settings.currentSettings.mediaServerType === MediaServerType.PLEX ? (
+          <PlexImportModal
+            onCancel={() => setShowImportModal(false)}
+            onComplete={() => {
+              setShowImportModal(false);
+              revalidate();
+            }}
+          />
+        ) : (
+          <JellyfinImportModal
+            onCancel={() => setShowImportModal(false)}
+            onComplete={() => {
+              setShowImportModal(false);
+              revalidate();
+            }}
+          />
+        )}
+      </Transition>
+
+      <div className="flex flex-col justify-between lg:flex-row lg:items-end">
         <Header>{intl.formatMessage(messages.userlist)}</Header>
-        <div className="flex flex-col flex-grow mt-2 lg:flex-row lg:flex-grow-0">
-          <div className="flex flex-col justify-between flex-grow mb-2 sm:flex-row lg:mb-0 lg:flex-grow-0">
+        <div className="mt-2 flex flex-grow flex-col lg:flex-grow-0 lg:flex-row">
+          <div className="mb-2 flex flex-grow flex-col justify-between sm:flex-row lg:mb-0 lg:flex-grow-0">
             <Button
-              className="flex-grow mb-2 sm:mb-0 sm:mr-2 outline"
+              className="mb-2 flex-grow sm:mb-0 sm:mr-2"
               buttonType="primary"
               onClick={() => setCreateModal({ isOpen: true })}
             >
               <UserAddIcon />
               <span>{intl.formatMessage(messages.createlocaluser)}</span>
             </Button>
-            {settings.currentSettings.mediaServerType ==
-              MediaServerType.PLEX && (
-              <Button
-                className="flex-grow outline lg:mr-2"
-                buttonType="primary"
-                disabled={isImporting}
-                onClick={() => importFromPlex()}
-              >
-                {intl.formatMessage(messages.importfromplex)}
-              </Button>
-            )}
+            <Button
+              className="flex-grow lg:mr-2"
+              buttonType="primary"
+              onClick={() => setShowImportModal(true)}
+            >
+              <InboxInIcon />
+              <span>
+                {intl.formatMessage(messages.importfromplex, {
+                  mediaServerName:
+                    settings.currentSettings.mediaServerType ===
+                    MediaServerType.PLEX
+                      ? 'Plex'
+                      : 'Jellyfin',
+                })}
+              </span>
+            </Button>
           </div>
-          <div className="flex flex-grow mb-2 lg:mb-0 lg:flex-grow-0">
-            <span className="inline-flex items-center px-3 text-sm text-gray-100 bg-gray-800 border border-r-0 border-gray-500 cursor-default rounded-l-md">
-              <SortDescendingIcon className="w-6 h-6" />
+          <div className="mb-2 flex flex-grow lg:mb-0 lg:flex-grow-0">
+            <span className="inline-flex cursor-default items-center rounded-l-md border border-r-0 border-gray-500 bg-gray-800 px-3 text-sm text-gray-100">
+              <SortDescendingIcon className="h-6 w-6" />
             </span>
             <select
               id="sort"
@@ -524,9 +529,6 @@ const UserList: React.FC = () => {
             >
               <option value="created">
                 {intl.formatMessage(messages.sortCreated)}
-              </option>
-              <option value="updated">
-                {intl.formatMessage(messages.sortUpdated)}
               </option>
               <option value="requests">
                 {intl.formatMessage(messages.sortRequests)}
@@ -559,7 +561,6 @@ const UserList: React.FC = () => {
             <Table.TH>{intl.formatMessage(messages.accounttype)}</Table.TH>
             <Table.TH>{intl.formatMessage(messages.role)}</Table.TH>
             <Table.TH>{intl.formatMessage(messages.created)}</Table.TH>
-            <Table.TH>{intl.formatMessage(messages.lastupdated)}</Table.TH>
             <Table.TH className="text-right">
               {(data.results ?? []).length > 1 && (
                 <Button
@@ -593,9 +594,9 @@ const UserList: React.FC = () => {
               <Table.TD>
                 <div className="flex items-center">
                   <Link href={`/users/${user.id}`}>
-                    <a className="flex-shrink-0 w-10 h-10">
+                    <a className="h-10 w-10 flex-shrink-0">
                       <img
-                        className="w-10 h-10 rounded-full"
+                        className="h-10 w-10 rounded-full"
                         src={user.avatar}
                         alt=""
                       />
@@ -661,13 +662,6 @@ const UserList: React.FC = () => {
                   day: 'numeric',
                 })}
               </Table.TD>
-              <Table.TD>
-                {intl.formatDate(user.updatedAt, {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </Table.TD>
               <Table.TD alignText="right">
                 <Button
                   buttonType="warning"
@@ -699,7 +693,7 @@ const UserList: React.FC = () => {
           <tr className="bg-gray-700">
             <Table.TD colSpan={8} noPadding>
               <nav
-                className="flex flex-col items-center w-screen px-6 py-3 space-x-4 space-y-3 sm:space-y-0 sm:flex-row lg:w-full"
+                className="flex w-screen flex-col items-center space-x-4 space-y-3 px-6 py-3 sm:flex-row sm:space-y-0 lg:w-full"
                 aria-label="Pagination"
               >
                 <div className="hidden lg:flex lg:flex-1">
@@ -719,7 +713,7 @@ const UserList: React.FC = () => {
                   </p>
                 </div>
                 <div className="flex justify-center sm:flex-1 sm:justify-start lg:justify-center">
-                  <span className="items-center -mt-3 text-sm sm:-ml-4 lg:ml-0 sm:mt-0">
+                  <span className="-mt-3 items-center text-sm sm:-ml-4 sm:mt-0 lg:ml-0">
                     {intl.formatMessage(globalMessages.resultsperpage, {
                       pageSize: (
                         <select
@@ -732,7 +726,7 @@ const UserList: React.FC = () => {
                               .then(() => window.scrollTo(0, 0));
                           }}
                           value={currentPageSize}
-                          className="inline short"
+                          className="short inline"
                         >
                           <option value="5">5</option>
                           <option value="10">10</option>
@@ -744,7 +738,7 @@ const UserList: React.FC = () => {
                     })}
                   </span>
                 </div>
-                <div className="flex justify-center flex-auto space-x-2 sm:justify-end sm:flex-1">
+                <div className="flex flex-auto justify-center space-x-2 sm:flex-1 sm:justify-end">
                   <Button
                     disabled={!hasPrevPage}
                     onClick={() =>

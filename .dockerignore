@@ -10,6 +10,7 @@
 .gitconfig
 .github
 .gitignore
+.husky
 .next
 .prettierignore
 config/db/*

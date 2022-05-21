@@ -29,9 +29,11 @@ const NotificationsSlack: React.FC = () => {
   const intl = useIntl();
   const { addToast, removeToast } = useToasts();
   const [isTesting, setIsTesting] = useState(false);
-  const { data, error, revalidate } = useSWR(
-    '/api/v1/settings/notifications/slack'
-  );
+  const {
+    data,
+    error,
+    mutate: revalidate,
+  } = useSWR('/api/v1/settings/notifications/slack');
 
   const NotificationsSlackSchema = Yup.object().shape({
     webhookUrl: Yup.string()
@@ -43,13 +45,6 @@ const NotificationsSlack: React.FC = () => {
         otherwise: Yup.string().nullable(),
       })
       .url(intl.formatMessage(messages.validationWebhookUrl)),
-    types: Yup.number().when('enabled', {
-      is: true,
-      then: Yup.number()
-        .nullable()
-        .moreThan(0, intl.formatMessage(messages.validationTypes)),
-      otherwise: Yup.number().nullable(),
-    }),
   });
 
   if (!data && !error) {
@@ -145,7 +140,7 @@ const NotificationsSlack: React.FC = () => {
                 {intl.formatMessage(messages.agentenabled)}
                 <span className="label-required">*</span>
               </label>
-              <div className="form-input">
+              <div className="form-input-area">
                 <Field type="checkbox" id="enabled" name="enabled" />
               </div>
             </div>
@@ -170,7 +165,7 @@ const NotificationsSlack: React.FC = () => {
                   })}
                 </span>
               </label>
-              <div className="form-input">
+              <div className="form-input-area">
                 <div className="form-input-field">
                   <Field
                     id="webhookUrl"
@@ -195,14 +190,14 @@ const NotificationsSlack: React.FC = () => {
                 }
               }}
               error={
-                errors.types && touched.types
-                  ? (errors.types as string)
+                values.enabled && !values.types && touched.types
+                  ? intl.formatMessage(messages.validationTypes)
                   : undefined
               }
             />
             <div className="actions">
               <div className="flex justify-end">
-                <span className="inline-flex ml-3 rounded-md shadow-sm">
+                <span className="ml-3 inline-flex rounded-md shadow-sm">
                   <Button
                     buttonType="warning"
                     disabled={isSubmitting || !isValid || isTesting}
@@ -219,11 +214,16 @@ const NotificationsSlack: React.FC = () => {
                     </span>
                   </Button>
                 </span>
-                <span className="inline-flex ml-3 rounded-md shadow-sm">
+                <span className="ml-3 inline-flex rounded-md shadow-sm">
                   <Button
                     buttonType="primary"
                     type="submit"
-                    disabled={isSubmitting || !isValid || isTesting}
+                    disabled={
+                      isSubmitting ||
+                      !isValid ||
+                      isTesting ||
+                      (values.enabled && !values.types)
+                    }
                   >
                     <SaveIcon />
                     <span>

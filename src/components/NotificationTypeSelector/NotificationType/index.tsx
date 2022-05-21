@@ -17,13 +17,13 @@ const NotificationType: React.FC<NotificationTypeProps> = ({
   return (
     <>
       <div
-        className={`relative flex items-start first:mt-0 mt-4 ${
+        className={`relative mt-4 flex items-start first:mt-0 ${
           !!parent?.value && hasNotificationType(parent.value, currentTypes)
             ? 'opacity-50'
             : ''
         }`}
       >
-        <div className="flex items-center h-6">
+        <div className="flex h-6 items-center">
           <input
             id={option.id}
             name="permissions"
@@ -57,7 +57,7 @@ const NotificationType: React.FC<NotificationTypeProps> = ({
         </div>
       </div>
       {(option.children ?? []).map((child) => (
-        <div key={`notification-type-child-${child.id}`} className="pl-6 mt-4">
+        <div key={`notification-type-child-${child.id}`} className="mt-4 pl-6">
           <NotificationType
             option={child}
             currentTypes={currentTypes}

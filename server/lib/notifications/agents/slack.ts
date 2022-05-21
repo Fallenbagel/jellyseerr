@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { hasNotificationType, Notification } from '..';
-import { MediaType } from '../../../constants/media';
+import { IssueStatus, IssueTypeName } from '../../../constants/issue';
 import logger from '../../../logger';
 import { getSettings, NotificationAgentSlack } from '../../settings';
 import { BaseAgent, NotificationAgent, NotificationPayload } from './agent';
@@ -19,9 +19,10 @@ interface TextItem {
 interface Element {
   type: 'button';
   text?: TextItem;
-  value: string;
-  url: string;
-  action_id: 'button-action';
+  action_id: string;
+  url?: string;
+  value?: string;
+  style?: 'primary' | 'danger';
 }
 
 interface EmbedBlock {
@@ -34,10 +35,11 @@ interface EmbedBlock {
     image_url: string;
     alt_text: string;
   };
-  elements?: Element[];
+  elements?: (Element | TextItem)[];
 }
 
 interface SlackBlockEmbed {
+  text: string;
   blocks: EmbedBlock[];
 }
 
@@ -59,9 +61,7 @@ class SlackAgent
     type: Notification,
     payload: NotificationPayload
   ): SlackBlockEmbed {
-    const settings = getSettings();
-    let header = '';
-    let actionUrl: string | undefined;
+    const { applicationUrl, applicationTitle } = getSettings().main;
 
     const fields: EmbedField[] = [];
 
@@ -70,66 +70,55 @@ class SlackAgent
         type: 'mrkdwn',
         text: `*Requested By*\n${payload.request.requestedBy.displayName}`,
       });
-    }
 
-    switch (type) {
-      case Notification.MEDIA_PENDING:
-        header = `New ${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Request`;
+      let status = '';
+      switch (type) {
+        case Notification.MEDIA_PENDING:
+          status = 'Pending Approval';
+          break;
+        case Notification.MEDIA_APPROVED:
+        case Notification.MEDIA_AUTO_APPROVED:
+          status = 'Processing';
+          break;
+        case Notification.MEDIA_AVAILABLE:
+          status = 'Available';
+          break;
+        case Notification.MEDIA_DECLINED:
+          status = 'Declined';
+          break;
+        case Notification.MEDIA_FAILED:
+          status = 'Failed';
+          break;
+      }
+
+      if (status) {
         fields.push({
           type: 'mrkdwn',
-          text: '*Status*\nPending Approval',
+          text: `*Request Status*\n${status}`,
         });
-        break;
-      case Notification.MEDIA_APPROVED:
-        header = `${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Request Approved`;
-        fields.push({
+      }
+    } else if (payload.comment) {
+      fields.push({
+        type: 'mrkdwn',
+        text: `*Comment from ${payload.comment.user.displayName}*\n${payload.comment.message}`,
+      });
+    } else if (payload.issue) {
+      fields.push(
+        {
           type: 'mrkdwn',
-          text: '*Status*\nProcessing',
-        });
-        break;
-      case Notification.MEDIA_AUTO_APPROVED:
-        header = `${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Request Automatically Approved`;
-        fields.push({
+          text: `*Reported By*\n${payload.issue.createdBy.displayName}`,
+        },
+        {
           type: 'mrkdwn',
-          text: '*Status*\nProcessing',
-        });
-        break;
-      case Notification.MEDIA_AVAILABLE:
-        header = `${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Now Available`;
-        fields.push({
+          text: `*Issue Type*\n${IssueTypeName[payload.issue.issueType]}`,
+        },
+        {
           type: 'mrkdwn',
-          text: '*Status*\nAvailable',
-        });
-        break;
-      case Notification.MEDIA_DECLINED:
-        header = `${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Request Declined`;
-        fields.push({
-          type: 'mrkdwn',
-          text: '*Status*\nDeclined',
-        });
-        break;
-      case Notification.MEDIA_FAILED:
-        header = `Failed ${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Request`;
-        fields.push({
-          type: 'mrkdwn',
-          text: '*Status*\nFailed',
-        });
-        break;
-      case Notification.TEST_NOTIFICATION:
-        header = 'Test Notification';
-        break;
+          text: `*Issue Status*\n${
+            payload.issue.status === IssueStatus.OPEN ? 'Open' : 'Resolved'
+          }`,
+        }
+      );
     }
 
     for (const extra of payload.extra ?? []) {
@@ -139,29 +128,27 @@ class SlackAgent
       });
     }
 
-    if (settings.main.applicationUrl && payload.media) {
-      actionUrl = `${settings.main.applicationUrl}/${payload.media?.mediaType}/${payload.media?.tmdbId}`;
-    }
+    const blocks: EmbedBlock[] = [];
 
-    const blocks: EmbedBlock[] = [
-      {
-        type: 'header',
-        text: {
-          type: 'plain_text',
-          text: header,
-        },
-      },
-    ];
-
-    if (type !== Notification.TEST_NOTIFICATION) {
+    if (payload.event) {
       blocks.push({
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `*${payload.subject}*`,
-        },
+        type: 'context',
+        elements: [
+          {
+            type: 'mrkdwn',
+            text: `*${payload.event}*`,
+          },
+        ],
       });
     }
+
+    blocks.push({
+      type: 'header',
+      text: {
+        type: 'plain_text',
+        text: payload.subject,
+      },
+    });
 
     if (payload.message) {
       blocks.push({
@@ -183,30 +170,31 @@ class SlackAgent
     if (fields.length > 0) {
       blocks.push({
         type: 'section',
-        fields: [
-          ...fields,
-          ...(payload.extra ?? []).map(
-            (extra): EmbedField => ({
-              type: 'mrkdwn',
-              text: `*${extra.name}*\n${extra.value}`,
-            })
-          ),
-        ],
+        fields,
       });
     }
 
-    if (actionUrl) {
+    const url = applicationUrl
+      ? payload.issue
+        ? `${applicationUrl}/issues/${payload.issue.id}`
+        : payload.media
+        ? `${applicationUrl}/${payload.media.mediaType}/${payload.media.tmdbId}`
+        : undefined
+      : undefined;
+
+    if (url) {
       blocks.push({
         type: 'actions',
         elements: [
           {
-            action_id: 'button-action',
+            action_id: 'open-in-overseerr',
             type: 'button',
-            url: actionUrl,
-            value: 'open_jellyseerr',
+            url,
             text: {
               type: 'plain_text',
-              text: `Open in ${settings.main.applicationTitle}`,
+              text: `View ${
+                payload.issue ? 'Issue' : 'Media'
+              } in ${applicationTitle}`,
             },
           },
         ],
@@ -214,6 +202,7 @@ class SlackAgent
     }
 
     return {
+      text: payload.event ?? payload.subject,
       blocks,
     };
   }

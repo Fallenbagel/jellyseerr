@@ -69,7 +69,7 @@ const Modal: React.FC<ModalProps> = ({
   return ReactDOM.createPortal(
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
-      className="fixed top-0 bottom-0 left-0 right-0 z-50 flex items-center justify-center w-full h-full bg-gray-800 bg-opacity-70"
+      className="fixed top-0 bottom-0 left-0 right-0 z-50 flex h-full w-full items-center justify-center bg-gray-800 bg-opacity-70"
       onKeyDown={(e) => {
         if (e.key === 'Escape') {
           typeof onCancel === 'function' && backgroundClickable
@@ -101,7 +101,7 @@ const Modal: React.FC<ModalProps> = ({
         show={!loading}
       >
         <div
-          className="relative inline-block w-full px-4 pt-5 pb-4 overflow-auto text-left align-bottom transition-all transform bg-gray-700 shadow-xl ring-1 ring-gray-500 sm:rounded-lg sm:my-8 sm:align-middle sm:max-w-3xl"
+          className="relative inline-block w-full transform overflow-auto bg-gray-700 px-4 pt-5 pb-4 text-left align-bottom shadow-xl ring-1 ring-gray-500 transition-all sm:my-8 sm:max-w-3xl sm:rounded-lg sm:align-middle"
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-headline"
@@ -111,7 +111,7 @@ const Modal: React.FC<ModalProps> = ({
           }}
         >
           {backdrop && (
-            <div className="absolute top-0 left-0 right-0 z-0 w-full h-64">
+            <div className="absolute top-0 left-0 right-0 z-0 h-64 max-h-full w-full">
               <CachedImage
                 alt=""
                 src={backdrop}
@@ -128,16 +128,16 @@ const Modal: React.FC<ModalProps> = ({
               />
             </div>
           )}
-          <div className="relative sm:flex sm:items-center">
+          <div className="relative overflow-x-hidden sm:flex sm:items-center">
             {iconSvg && <div className="modal-icon">{iconSvg}</div>}
             <div
-              className={`mt-3 text-center sm:mt-0 sm:text-left ${
+              className={`mt-3 truncate text-center text-white sm:mt-0 sm:text-left ${
                 iconSvg ? 'sm:ml-4' : 'sm:mb-4'
               }`}
             >
               {title && (
                 <span
-                  className="text-lg font-bold leading-6 text-white"
+                  className="truncate text-lg font-bold leading-6"
                   id="modal-headline"
                 >
                   {title}
@@ -151,7 +151,7 @@ const Modal: React.FC<ModalProps> = ({
             </div>
           )}
           {(onCancel || onOk || onSecondary || onTertiary) && (
-            <div className="relative flex flex-row-reverse justify-center mt-5 sm:mt-4 sm:justify-start">
+            <div className="relative mt-5 flex flex-row-reverse justify-center sm:mt-4 sm:justify-start">
               {typeof onOk === 'function' && (
                 <Button
                   buttonType={okButtonType}

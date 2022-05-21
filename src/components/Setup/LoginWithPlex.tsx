@@ -5,7 +5,7 @@ import { useUser } from '../../hooks/useUser';
 import PlexLoginButton from '../PlexLoginButton';
 
 const messages = defineMessages({
-  welcome: 'Welcome to Jellyseerr',
+  welcome: 'Welcome to Overseerr',
   signinMessage: 'Get started by signing in with your Plex account',
 });
 
@@ -45,10 +45,10 @@ const LoginWithPlex: React.FC<LoginWithPlexProps> = ({ onComplete }) => {
 
   return (
     <form>
-      <div className="flex justify-center mb-2 text-xl font-bold">
+      <div className="mb-2 flex justify-center text-xl font-bold">
         {intl.formatMessage(messages.welcome)}
       </div>
-      <div className="flex justify-center pb-6 mb-2 text-sm">
+      <div className="mb-2 flex justify-center pb-6 text-sm">
         {intl.formatMessage(messages.signinMessage)}
       </div>
       <div className="flex items-center justify-center">

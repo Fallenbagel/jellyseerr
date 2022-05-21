@@ -1,11 +1,17 @@
 import { Router } from 'express';
-import { getRepository, FindOperator, FindOneOptions, In } from 'typeorm';
-import Media from '../entity/Media';
+import { FindOneOptions, FindOperator, getRepository, In } from 'typeorm';
+import TautulliAPI from '../api/tautulli';
 import { MediaStatus, MediaType } from '../constants/media';
+import Media from '../entity/Media';
+import { User } from '../entity/User';
+import {
+  MediaResultsResponse,
+  MediaWatchDataResponse,
+} from '../interfaces/api/mediaInterfaces';
+import { Permission } from '../lib/permissions';
+import { getSettings } from '../lib/settings';
 import logger from '../logger';
 import { isAuthenticated } from '../middleware/auth';
-import { Permission } from '../lib/permissions';
-import { MediaResultsResponse } from '../interfaces/api/mediaInterfaces';
 
 const mediaRoutes = Router();
 
@@ -15,10 +21,8 @@ mediaRoutes.get('/', async (req, res, next) => {
   const pageSize = req.query.take ? Number(req.query.take) : 20;
   const skip = req.query.skip ? Number(req.query.skip) : 0;
 
-  let statusFilter:
-    | MediaStatus
-    | FindOperator<MediaStatus>
-    | undefined = undefined;
+  let statusFilter: MediaStatus | FindOperator<MediaStatus> | undefined =
+    undefined;
 
   switch (req.query.filter) {
     case 'available':
@@ -159,6 +163,105 @@ mediaRoutes.delete(
         message: e.message,
       });
       next({ status: 404, message: 'Media not found' });
+    }
+  }
+);
+
+mediaRoutes.get<{ id: string }, MediaWatchDataResponse>(
+  '/:id/watch_data',
+  isAuthenticated(Permission.ADMIN),
+  async (req, res, next) => {
+    const settings = getSettings().tautulli;
+
+    if (!settings.hostname || !settings.port || !settings.apiKey) {
+      return next({
+        status: 404,
+        message: 'Tautulli API not configured.',
+      });
+    }
+
+    const media = await getRepository(Media).findOne({
+      where: { id: Number(req.params.id) },
+    });
+
+    if (!media) {
+      return next({ status: 404, message: 'Media does not exist.' });
+    }
+
+    try {
+      const tautulli = new TautulliAPI(settings);
+      const userRepository = getRepository(User);
+
+      const response: MediaWatchDataResponse = {};
+
+      if (media.ratingKey) {
+        const watchStats = await tautulli.getMediaWatchStats(media.ratingKey);
+        const watchUsers = await tautulli.getMediaWatchUsers(media.ratingKey);
+
+        const users = await userRepository
+          .createQueryBuilder('user')
+          .where('user.plexId IN (:...plexIds)', {
+            plexIds: watchUsers.map((u) => u.user_id),
+          })
+          .getMany();
+
+        const playCount =
+          watchStats.find((i) => i.query_days == 0)?.total_plays ?? 0;
+
+        const playCount7Days =
+          watchStats.find((i) => i.query_days == 7)?.total_plays ?? 0;
+
+        const playCount30Days =
+          watchStats.find((i) => i.query_days == 30)?.total_plays ?? 0;
+
+        response.data = {
+          users: users,
+          playCount,
+          playCount7Days,
+          playCount30Days,
+        };
+      }
+
+      if (media.ratingKey4k) {
+        const watchStats4k = await tautulli.getMediaWatchStats(
+          media.ratingKey4k
+        );
+        const watchUsers4k = await tautulli.getMediaWatchUsers(
+          media.ratingKey4k
+        );
+
+        const users = await userRepository
+          .createQueryBuilder('user')
+          .where('user.plexId IN (:...plexIds)', {
+            plexIds: watchUsers4k.map((u) => u.user_id),
+          })
+          .getMany();
+
+        const playCount =
+          watchStats4k.find((i) => i.query_days == 0)?.total_plays ?? 0;
+
+        const playCount7Days =
+          watchStats4k.find((i) => i.query_days == 7)?.total_plays ?? 0;
+
+        const playCount30Days =
+          watchStats4k.find((i) => i.query_days == 30)?.total_plays ?? 0;
+
+        response.data4k = {
+          users,
+          playCount,
+          playCount7Days,
+          playCount30Days,
+        };
+      }
+
+      return res.status(200).json(response);
+    } catch (e) {
+      logger.error('Something went wrong fetching media watch data', {
+        label: 'API',
+        errorMessage: e.message,
+        mediaId: req.params.id,
+      });
+      next({ status: 500, message: 'Failed to fetch watch data.' });
     }
   }
 );

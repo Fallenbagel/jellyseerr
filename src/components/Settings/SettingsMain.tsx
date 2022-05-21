@@ -29,7 +29,7 @@ const messages = defineMessages({
   general: 'General',
   generalsettings: 'General Settings',
   generalsettingsDescription:
-    'Configure global and default settings for Jellyseerr.',
+    'Configure global and default settings for Overseerr.',
   apikey: 'API Key',
   applicationTitle: 'Application Title',
   applicationurl: 'Application URL',
@@ -44,7 +44,7 @@ const messages = defineMessages({
   hideAvailable: 'Hide Available Media',
   csrfProtection: 'Enable CSRF Protection',
   csrfProtectionTip:
-    'Set external API access to read-only (requires HTTPS, and Jellyseerr must be reloaded for changes to take effect)',
+    'Set external API access to read-only (requires HTTPS, and Overseerr must be reloaded for changes to take effect)',
   csrfProtectionHoverTip:
     'Do NOT enable this setting unless you understand what you are doing!',
   cacheImages: 'Enable Image Caching',
@@ -52,7 +52,7 @@ const messages = defineMessages({
     'Optimize and store all images locally (consumes a significant amount of disk space)',
   trustProxy: 'Enable Proxy Support',
   trustProxyTip:
-    'Allow Jellyseerr to correctly register client IP addresses behind a proxy (Jellyseerr must be reloaded for changes to take effect)',
+    'Allow Overseerr to correctly register client IP addresses behind a proxy (Overseerr must be reloaded for changes to take effect)',
   validationApplicationTitle: 'You must provide an application title',
   validationApplicationUrl: 'You must provide a valid URL',
   validationApplicationUrlTrailingSlash: 'URL must not end in a trailing slash',
@@ -65,9 +65,11 @@ const SettingsMain: React.FC = () => {
   const { user: currentUser, hasPermission: userHasPermission } = useUser();
   const intl = useIntl();
   const { setLocale } = useLocale();
-  const { data, error, revalidate } = useSWR<MainSettings>(
-    '/api/v1/settings/main'
-  );
+  const {
+    data,
+    error,
+    mutate: revalidate,
+  } = useSWR<MainSettings>('/api/v1/settings/main');
   const { data: userData } = useSWR<UserSettingsGeneralResponse>(
     currentUser ? `/api/v1/user/${currentUser.id}/settings/main` : null
   );
@@ -81,12 +83,7 @@ const SettingsMain: React.FC = () => {
       .test(
         'no-trailing-slash',
         intl.formatMessage(messages.validationApplicationUrlTrailingSlash),
-        (value) => {
-          if (value?.substr(value.length - 1) === '/') {
-            return false;
-          }
-          return true;
-        }
+        (value) => !value || !value.endsWith('/')
       ),
   });
 
@@ -194,7 +191,7 @@ const SettingsMain: React.FC = () => {
                     <label htmlFor="apiKey" className="text-label">
                       {intl.formatMessage(messages.apikey)}
                     </label>
-                    <div className="form-input">
+                    <div className="form-input-area">
                       <div className="form-input-field">
                         <SensitiveInput
                           type="text"
@@ -224,7 +221,7 @@ const SettingsMain: React.FC = () => {
                   <label htmlFor="applicationTitle" className="text-label">
                     {intl.formatMessage(messages.applicationTitle)}
                   </label>
-                  <div className="form-input">
+                  <div className="form-input-area">
                     <div className="form-input-field">
                       <Field
                         id="applicationTitle"
@@ -241,7 +238,7 @@ const SettingsMain: React.FC = () => {
                   <label htmlFor="applicationUrl" className="text-label">
                     {intl.formatMessage(messages.applicationurl)}
                   </label>
-                  <div className="form-input">
+                  <div className="form-input-area">
                     <div className="form-input-field">
                       <Field
                         id="applicationUrl"
@@ -262,7 +259,7 @@ const SettingsMain: React.FC = () => {
                       {intl.formatMessage(messages.trustProxyTip)}
                     </span>
                   </label>
-                  <div className="form-input">
+                  <div className="form-input-area">
                     <Field
                       type="checkbox"
                       id="trustProxy"
@@ -285,7 +282,7 @@ const SettingsMain: React.FC = () => {
                       {intl.formatMessage(messages.csrfProtectionTip)}
                     </span>
                   </label>
-                  <div className="form-input">
+                  <div className="form-input-area">
                     <Field
                       type="checkbox"
                       id="csrfProtection"
@@ -303,7 +300,7 @@ const SettingsMain: React.FC = () => {
                   <label htmlFor="locale" className="text-label">
                     {intl.formatMessage(messages.locale)}
                   </label>
-                  <div className="form-input">
+                  <div className="form-input-area">
                     <div className="form-input-field">
                       <Field as="select" id="locale" name="locale">
                         {(
@@ -330,7 +327,7 @@ const SettingsMain: React.FC = () => {
                       {intl.formatMessage(messages.regionTip)}
                     </span>
                   </label>
-                  <div className="form-input">
+                  <div className="form-input-area">
                     <div className="form-input-field">
                       <RegionSelector
                         value={values.region ?? ''}
@@ -347,7 +344,7 @@ const SettingsMain: React.FC = () => {
                       {intl.formatMessage(messages.originallanguageTip)}
                     </span>
                   </label>
-                  <div className="form-input">
+                  <div className="form-input-area">
                     <div className="form-input-field">
                       <LanguageSelector
                         setFieldValue={setFieldValue}
@@ -365,7 +362,7 @@ const SettingsMain: React.FC = () => {
                       {intl.formatMessage(globalMessages.experimental)}
                     </Badge>
                   </label>
-                  <div className="form-input">
+                  <div className="form-input-area">
                     <Field
                       type="checkbox"
                       id="hideAvailable"
@@ -385,7 +382,7 @@ const SettingsMain: React.FC = () => {
                       {intl.formatMessage(messages.partialRequestsEnabled)}
                     </span>
                   </label>
-                  <div className="form-input">
+                  <div className="form-input-area">
                     <Field
                       type="checkbox"
                       id="partialRequestsEnabled"
@@ -401,7 +398,7 @@ const SettingsMain: React.FC = () => {
                 </div>
                 <div className="actions">
                   <div className="flex justify-end">
-                    <span className="inline-flex ml-3 rounded-md shadow-sm">
+                    <span className="ml-3 inline-flex rounded-md shadow-sm">
                       <Button
                         buttonType="primary"
                         type="submit"

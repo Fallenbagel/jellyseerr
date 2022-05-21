@@ -76,23 +76,32 @@ class DownloadTracker {
             url: RadarrAPI.buildUrl(server, '/api/v3'),
           });
 
-          const queueItems = await radarr.getQueue();
+          try {
+            const queueItems = await radarr.getQueue();
 
-          this.radarrServers[server.id] = queueItems.map((item) => ({
-            externalId: item.movieId,
-            estimatedCompletionTime: new Date(item.estimatedCompletionTime),
-            mediaType: MediaType.MOVIE,
-            size: item.size,
-            sizeLeft: item.sizeleft,
-            status: item.status,
-            timeLeft: item.timeleft,
-            title: item.title,
-          }));
+            this.radarrServers[server.id] = queueItems.map((item) => ({
+              externalId: item.movieId,
+              estimatedCompletionTime: new Date(item.estimatedCompletionTime),
+              mediaType: MediaType.MOVIE,
+              size: item.size,
+              sizeLeft: item.sizeleft,
+              status: item.status,
+              timeLeft: item.timeleft,
+              title: item.title,
+            }));
 
-          if (queueItems.length > 0) {
-            logger.debug(
-              `Found ${queueItems.length} item(s) in progress on Radarr server: ${server.name}`,
-              { label: 'Download Tracker' }
+            if (queueItems.length > 0) {
+              logger.debug(
+                `Found ${queueItems.length} item(s) in progress on Radarr server: ${server.name}`,
+                { label: 'Download Tracker' }
+              );
+            }
+          } catch {
+            logger.error(
+              `Unable to get queue from Radarr server: ${server.name}`,
+              {
+                label: 'Download Tracker',
+              }
             );
           }
 
@@ -134,42 +143,51 @@ class DownloadTracker {
       );
     });
 
-    // Load downloads from Radarr servers
+    // Load downloads from Sonarr servers
     Promise.all(
       filteredServers.map(async (server) => {
         if (server.syncEnabled) {
-          const radarr = new SonarrAPI({
+          const sonarr = new SonarrAPI({
             apiKey: server.apiKey,
             url: SonarrAPI.buildUrl(server, '/api/v3'),
           });
 
-          const queueItems = await radarr.getQueue();
+          try {
+            const queueItems = await sonarr.getQueue();
 
-          this.sonarrServers[server.id] = queueItems.map((item) => ({
-            externalId: item.seriesId,
-            estimatedCompletionTime: new Date(item.estimatedCompletionTime),
-            mediaType: MediaType.TV,
-            size: item.size,
-            sizeLeft: item.sizeleft,
-            status: item.status,
-            timeLeft: item.timeleft,
-            title: item.title,
-          }));
+            this.sonarrServers[server.id] = queueItems.map((item) => ({
+              externalId: item.seriesId,
+              estimatedCompletionTime: new Date(item.estimatedCompletionTime),
+              mediaType: MediaType.TV,
+              size: item.size,
+              sizeLeft: item.sizeleft,
+              status: item.status,
+              timeLeft: item.timeleft,
+              title: item.title,
+            }));
 
-          if (queueItems.length > 0) {
-            logger.debug(
-              `Found ${queueItems.length} item(s) in progress on Sonarr server: ${server.name}`,
-              { label: 'Download Tracker' }
+            if (queueItems.length > 0) {
+              logger.debug(
+                `Found ${queueItems.length} item(s) in progress on Sonarr server: ${server.name}`,
+                { label: 'Download Tracker' }
+              );
+            }
+          } catch {
+            logger.error(
+              `Unable to get queue from Sonarr server: ${server.name}`,
+              {
+                label: 'Download Tracker',
+              }
             );
           }
 
           // Duplicate this data to matching servers
           const matchingServers = settings.sonarr.filter(
-            (rs) =>
-              rs.hostname === server.hostname &&
-              rs.port === server.port &&
-              rs.baseUrl === server.baseUrl &&
-              rs.id !== server.id
+            (ss) =>
+              ss.hostname === server.hostname &&
+              ss.port === server.port &&
+              ss.baseUrl === server.baseUrl &&
+              ss.id !== server.id
           );
 
           if (matchingServers.length > 0) {

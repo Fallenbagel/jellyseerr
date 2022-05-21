@@ -107,11 +107,11 @@ const PermissionOption: React.FC<PermissionOptionProps> = ({
   return (
     <>
       <div
-        className={`relative flex items-start first:mt-0 mt-4 ${
+        className={`relative mt-4 flex items-start first:mt-0 ${
           disabled ? 'opacity-50' : ''
         }`}
       >
-        <div className="flex items-center h-6">
+        <div className="flex h-6 items-center">
           <input
             id={option.id}
             name="permissions"
@@ -139,7 +139,7 @@ const PermissionOption: React.FC<PermissionOptionProps> = ({
         </div>
       </div>
       {(option.children ?? []).map((child) => (
-        <div key={`permission-child-${child.id}`} className="pl-10 mt-4">
+        <div key={`permission-child-${child.id}`} className="mt-4 pl-10">
           <PermissionOption
             option={child}
             currentPermission={currentPermission}

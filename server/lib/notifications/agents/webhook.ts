@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { get } from 'lodash';
 import { hasNotificationType, Notification } from '..';
+import { IssueStatus, IssueType } from '../../../constants/issue';
 import { MediaStatus } from '../../../constants/media';
 import logger from '../../../logger';
 import { getSettings, NotificationAgentWebhook } from '../../settings';
@@ -13,6 +14,7 @@ type KeyMapFunction = (
 
 const KeyMap: Record<string, string | KeyMapFunction> = {
   notification_type: (_payload, type) => Notification[type],
+  event: 'event',
   subject: 'subject',
   message: 'message',
   image: 'image',
@@ -22,13 +24,12 @@ const KeyMap: Record<string, string | KeyMapFunction> = {
   notifyuser_settings_discordId: 'notifyUser.settings.discordId',
   notifyuser_settings_telegramChatId: 'notifyUser.settings.telegramChatId',
   media_tmdbid: 'media.tmdbId',
-  media_imdbid: 'media.imdbId',
   media_tvdbid: 'media.tvdbId',
   media_type: 'media.mediaType',
   media_status: (payload) =>
-    payload.media?.status ? MediaStatus[payload.media?.status] : '',
+    payload.media ? MediaStatus[payload.media.status] : '',
   media_status4k: (payload) =>
-    payload.media?.status ? MediaStatus[payload.media?.status4k] : '',
+    payload.media ? MediaStatus[payload.media.status4k] : '',
   request_id: 'request.id',
   requestedBy_username: 'request.requestedBy.displayName',
   requestedBy_email: 'request.requestedBy.email',
@@ -36,11 +37,28 @@ const KeyMap: Record<string, string | KeyMapFunction> = {
   requestedBy_settings_discordId: 'request.requestedBy.settings.discordId',
   requestedBy_settings_telegramChatId:
     'request.requestedBy.settings.telegramChatId',
+  issue_id: 'issue.id',
+  issue_type: (payload) =>
+    payload.issue ? IssueType[payload.issue.issueType] : '',
+  issue_status: (payload) =>
+    payload.issue ? IssueStatus[payload.issue.status] : '',
+  reportedBy_username: 'issue.createdBy.displayName',
+  reportedBy_email: 'issue.createdBy.email',
+  reportedBy_avatar: 'issue.createdBy.avatar',
+  reportedBy_settings_discordId: 'issue.createdBy.settings.discordId',
+  reportedBy_settings_telegramChatId: 'issue.createdBy.settings.telegramChatId',
+  comment_message: 'comment.message',
+  commentedBy_username: 'comment.user.displayName',
+  commentedBy_email: 'comment.user.email',
+  commentedBy_avatar: 'comment.user.avatar',
+  commentedBy_settings_discordId: 'comment.user.settings.discordId',
+  commentedBy_settings_telegramChatId: 'comment.user.settings.telegramChatId',
 };
 
 class WebhookAgent
   extends BaseAgent<NotificationAgentWebhook>
-  implements NotificationAgent {
+  implements NotificationAgent
+{
   protected getSettings(): NotificationAgentWebhook {
     if (this.settings) {
       return this.settings;
@@ -77,6 +95,22 @@ class WebhookAgent
         }
         delete finalPayload[key];
         key = 'request';
+      } else if (key === '{{issue}}') {
+        if (payload.issue) {
+          finalPayload.issue = finalPayload[key];
+        } else {
+          finalPayload.issue = null;
+        }
+        delete finalPayload[key];
+        key = 'issue';
+      } else if (key === '{{comment}}') {
+        if (payload.comment) {
+          finalPayload.comment = finalPayload[key];
+        } else {
+          finalPayload.comment = null;
+        }
+        delete finalPayload[key];
+        key = 'comment';
       }
 
       if (typeof finalPayload[key] === 'string') {

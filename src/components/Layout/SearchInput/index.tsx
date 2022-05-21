@@ -17,17 +17,17 @@ const SearchInput: React.FC = () => {
         <label htmlFor="search_field" className="sr-only">
           Search
         </label>
-        <div className="relative flex items-center w-full text-white focus-within:text-gray-200">
-          <div className="absolute inset-y-0 flex items-center pointer-events-none left-4">
-            <SearchIcon className="w-5 h-5" />
+        <div className="relative flex w-full items-center text-white focus-within:text-gray-200">
+          <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center">
+            <SearchIcon className="h-5 w-5" />
           </div>
           <input
             id="search_field"
             style={{ paddingRight: searchValue.length > 0 ? '1.75rem' : '' }}
-            className="block w-full py-2 pl-10 text-white placeholder-gray-300 bg-gray-900 border border-gray-600 rounded-full bg-opacity-80 focus:bg-opacity-100 focus:border-gray-500 hover:border-gray-500 focus:outline-none focus:ring-0 focus:placeholder-gray-400 sm:text-base"
+            className="block w-full rounded-full border border-gray-600 bg-gray-900 bg-opacity-80 py-2 pl-10 text-white placeholder-gray-300 hover:border-gray-500 focus:border-gray-500 focus:bg-opacity-100 focus:placeholder-gray-400 focus:outline-none focus:ring-0 sm:text-base"
             placeholder={intl.formatMessage(messages.searchPlaceholder)}
             type="search"
-            inputMode="search"
+            autoComplete="off"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             onFocus={() => setIsOpen(true)}
@@ -36,13 +36,19 @@ const SearchInput: React.FC = () => {
                 setIsOpen(false);
               }
             }}
+            onKeyUp={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                (e.target as HTMLInputElement).blur();
+              }
+            }}
           />
           {searchValue.length > 0 && (
             <button
-              className="absolute inset-y-0 p-1 m-auto text-gray-400 transition border-none outline-none right-2 h-7 w-7 focus:outline-none focus:border-none hover:text-white"
+              className="absolute inset-y-0 right-2 m-auto h-7 w-7 border-none p-1 text-gray-400 outline-none transition hover:text-white focus:border-none focus:outline-none"
               onClick={() => clear()}
             >
-              <XCircleIcon className="w-5 h-5" />
+              <XCircleIcon className="h-5 w-5" />
             </button>
           )}
         </div>

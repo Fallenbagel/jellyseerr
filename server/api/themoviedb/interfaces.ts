@@ -67,6 +67,7 @@ export interface TmdbUpcomingMoviesResponse extends TmdbPaginatedResponse {
 export interface TmdbExternalIdResponse {
   movie_results: TmdbMovieResult[];
   tv_results: TmdbTvResult[];
+  person_results: TmdbPersonResult[];
 }
 
 export interface TmdbCreditCast {
@@ -251,6 +252,10 @@ export interface TmdbTvDetails {
     name: string;
     origin_country: string;
   }[];
+  production_countries: {
+    iso_3166_1: string;
+    name: string;
+  }[];
   spoken_languages: {
     english_name: string;
     iso_639_1: string;
@@ -311,7 +316,7 @@ export interface TmdbKeyword {
   name: string;
 }
 
-export interface TmdbPersonDetail {
+export interface TmdbPersonDetails {
   id: number;
   name: string;
   birthday: string;
@@ -320,7 +325,7 @@ export interface TmdbPersonDetail {
   also_known_as?: string[];
   gender: number;
   biography: string;
-  popularity: string;
+  popularity: number;
   place_of_birth?: string;
   profile_path?: string;
   adult: boolean;

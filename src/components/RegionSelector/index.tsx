@@ -81,13 +81,13 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
         {({ open }) => (
           <div className="relative">
             <span className="inline-block w-full rounded-md shadow-sm">
-              <Listbox.Button className="relative flex items-center w-full py-2 pl-3 pr-10 text-left text-white transition duration-150 ease-in-out bg-gray-700 border border-gray-500 rounded-md cursor-default focus:outline-none focus:shadow-outline-blue focus:border-blue-300 sm:text-sm sm:leading-5">
+              <Listbox.Button className="focus:shadow-outline-blue relative flex w-full cursor-default items-center rounded-md border border-gray-500 bg-gray-700 py-2 pl-3 pr-10 text-left text-white transition duration-150 ease-in-out focus:border-blue-300 focus:outline-none sm:text-sm sm:leading-5">
                 {((selectedRegion && hasFlag(selectedRegion?.iso_3166_1)) ||
                   (isUserSetting &&
                     !selectedRegion &&
                     currentSettings.region &&
                     hasFlag(currentSettings.region))) && (
-                  <span className="h-4 mr-2 overflow-hidden text-base leading-4">
+                  <span className="mr-2 h-4 overflow-hidden text-base leading-4">
                     <span
                       className={`flag:${
                         selectedRegion
@@ -108,8 +108,8 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
                       })
                     : intl.formatMessage(messages.regionDefault)}
                 </span>
-                <span className="absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500 pointer-events-none">
-                  <ChevronDownIcon className="w-5 h-5" />
+                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500">
+                  <ChevronDownIcon className="h-5 w-5" />
                 </span>
               </Listbox.Button>
             </span>
@@ -119,19 +119,19 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
               leave="transition ease-in duration-100"
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
-              className="absolute w-full mt-1 bg-gray-800 rounded-md shadow-lg"
+              className="absolute mt-1 w-full rounded-md bg-gray-800 shadow-lg"
             >
               <Listbox.Options
                 static
-                className="py-1 overflow-auto text-base leading-6 rounded-md shadow-xs max-h-60 focus:outline-none sm:text-sm sm:leading-5"
+                className="shadow-xs max-h-60 overflow-auto rounded-md py-1 text-base leading-6 focus:outline-none sm:text-sm sm:leading-5"
               >
                 {isUserSetting && (
                   <Listbox.Option value={null}>
                     {({ selected, active }) => (
                       <div
                         className={`${
-                          active ? 'text-white bg-indigo-600' : 'text-gray-300'
-                        } cursor-default select-none relative py-2 pl-8 pr-4 flex items-center`}
+                          active ? 'bg-indigo-600 text-white' : 'text-gray-300'
+                        } relative flex cursor-default select-none items-center py-2 pl-8 pr-4`}
                       >
                         <span className="mr-2 text-base">
                           <span
@@ -159,7 +159,7 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
                               active ? 'text-white' : 'text-indigo-600'
                             } absolute inset-y-0 left-0 flex items-center pl-1.5`}
                           >
-                            <CheckIcon className="w-5 h-5" />
+                            <CheckIcon className="h-5 w-5" />
                           </span>
                         )}
                       </div>
@@ -170,8 +170,8 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
                   {({ selected, active }) => (
                     <div
                       className={`${
-                        active ? 'text-white bg-indigo-600' : 'text-gray-300'
-                      } cursor-default select-none relative py-2 pl-8 pr-4`}
+                        active ? 'bg-indigo-600 text-white' : 'text-gray-300'
+                      } relative cursor-default select-none py-2 pl-8 pr-4`}
                     >
                       <span
                         className={`${
@@ -186,7 +186,7 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
                             active ? 'text-white' : 'text-indigo-600'
                           } absolute inset-y-0 left-0 flex items-center pl-1.5`}
                         >
-                          <CheckIcon className="w-5 h-5" />
+                          <CheckIcon className="h-5 w-5" />
                         </span>
                       )}
                     </div>
@@ -197,8 +197,8 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
                     {({ selected, active }) => (
                       <div
                         className={`${
-                          active ? 'text-white bg-indigo-600' : 'text-gray-300'
-                        } cursor-default select-none relative py-2 pl-8 pr-4 flex items-center`}
+                          active ? 'bg-indigo-600 text-white' : 'text-gray-300'
+                        } relative flex cursor-default select-none items-center py-2 pl-8 pr-4`}
                       >
                         <span className="mr-2 text-base">
                           <span
@@ -222,7 +222,7 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
                               active ? 'text-white' : 'text-indigo-600'
                             } absolute inset-y-0 left-0 flex items-center pl-1.5`}
                           >
-                            <CheckIcon className="w-5 h-5" />
+                            <CheckIcon className="h-5 w-5" />
                           </span>
                         )}
                       </div>

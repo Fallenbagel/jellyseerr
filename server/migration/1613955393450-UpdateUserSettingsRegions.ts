@@ -1,7 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class UpdateUserSettingsRegions1613955393450
-  implements MigrationInterface {
+  implements MigrationInterface
+{
   name = 'UpdateUserSettingsRegions1613955393450';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

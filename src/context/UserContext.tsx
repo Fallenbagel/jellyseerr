@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import { useUser, User } from '../hooks/useUser';
 import { useRouter } from 'next/dist/client/router';
+import React, { useEffect, useRef } from 'react';
+import { User, useUser } from '../hooks/useUser';
 
 interface UserContextProps {
   initialUser: User;

@@ -17,6 +17,7 @@ import { startJobs } from './job/schedule';
 import notificationManager from './lib/notifications';
 import DiscordAgent from './lib/notifications/agents/discord';
 import EmailAgent from './lib/notifications/agents/email';
+import GotifyAgent from './lib/notifications/agents/gotify';
 import LunaSeaAgent from './lib/notifications/agents/lunasea';
 import PushbulletAgent from './lib/notifications/agents/pushbullet';
 import PushoverAgent from './lib/notifications/agents/pushover';
@@ -31,7 +32,7 @@ import { getAppVersion } from './utils/appVersion';
 
 const API_SPEC_PATH = path.join(__dirname, '../overseerr-api.yml');
 
-logger.info(`Starting Jellyseerr version ${getAppVersion()}`);
+logger.info(`Starting Overseerr version ${getAppVersion()}`);
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
@@ -63,11 +64,12 @@ app
       });
 
       if (admin) {
-        const plexapi = new PlexAPI({ plexToken: admin.plexToken });
-        await plexapi.syncLibraries();
-        logger.info('Migrating libraries to include media type', {
+        logger.info('Migrating Plex libraries to include media type', {
           label: 'Settings',
         });
+
+        const plexapi = new PlexAPI({ plexToken: admin.plexToken });
+        await plexapi.syncLibraries();
       }
     }
 
@@ -75,6 +77,7 @@ app
     notificationManager.registerAgents([
       new DiscordAgent(),
       new EmailAgent(),
+      new GotifyAgent(),
       new LunaSeaAgent(),
       new PushbulletAgent(),
       new PushoverAgent(),
@@ -138,6 +141,9 @@ app
         saveUninitialized: false,
         cookie: {
           maxAge: 1000 * 60 * 60 * 24 * 30,
+          httpOnly: true,
+          sameSite: true,
+          secure: 'auto',
         },
         store: new TypeormStore({
           cleanupLimit: 2,

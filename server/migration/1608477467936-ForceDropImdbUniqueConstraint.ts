@@ -1,7 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class ForceDropImdbUniqueConstraint1608477467935
-  implements MigrationInterface {
+  implements MigrationInterface
+{
   name = 'ForceDropImdbUniqueConstraint1608477467936';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

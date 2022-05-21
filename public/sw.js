@@ -90,8 +90,8 @@ self.addEventListener('push', (event) => {
   if (payload.actionUrl){
     options.actions.push(
       {
-        action: 'viewmedia',
-        title: 'View Media',
+        action: 'view',
+        title: payload.actionUrlTitle ?? 'View',
       }
     );
   }
@@ -119,21 +119,17 @@ self.addEventListener('notificationclick', (event) => {
 
   event.notification.close();
 
-  if (event.action === 'viewmedia') {
-    clients.openWindow(notificationData.actionUrl);
-  } else if (event.action === 'approve') {
+  if (event.action === 'approve') {
     fetch(`/api/v1/request/${notificationData.requestId}/approve`, {
       method: 'POST',
     });
-
-    clients.openWindow(notificationData.actionUrl);
   } else if (event.action === 'decline') {
     fetch(`/api/v1/request/${notificationData.requestId}/decline`, {
       method: 'POST',
     });
-
-    clients.openWindow(notificationData.actionUrl);
-  } else if (notificationData.actionUrl) {
+  }
+  
+  if (notificationData.actionUrl) {
     clients.openWindow(notificationData.actionUrl);
   }
 }, false);

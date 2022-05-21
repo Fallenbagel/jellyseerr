@@ -33,14 +33,14 @@ const UserDropdown: React.FC = () => {
     <div className="relative ml-3">
       <div>
         <button
-          className="flex items-center max-w-xs text-sm rounded-full ring-1 ring-gray-700 focus:outline-none focus:ring-gray-500 hover:ring-gray-500"
+          className="flex max-w-xs items-center rounded-full text-sm ring-1 ring-gray-700 hover:ring-gray-500 focus:outline-none focus:ring-gray-500"
           id="user-menu"
           aria-label="User menu"
           aria-haspopup="true"
           onClick={() => setDropdownOpen(true)}
         >
           <img
-            className="w-8 h-8 rounded-full sm:w-10 sm:h-10"
+            className="h-8 w-8 rounded-full sm:h-10 sm:w-10"
             src={user?.avatar}
             alt=""
           />
@@ -56,11 +56,11 @@ const UserDropdown: React.FC = () => {
         leaveTo="transform opacity-0 scale-95"
       >
         <div
-          className="absolute right-0 w-48 mt-2 origin-top-right rounded-md shadow-lg"
+          className="absolute right-0 mt-2 w-48 origin-top-right rounded-md shadow-lg"
           ref={dropdownRef}
         >
           <div
-            className="py-1 bg-gray-700 rounded-md ring-1 ring-black ring-opacity-5"
+            className="rounded-md bg-gray-700 py-1 ring-1 ring-black ring-opacity-5"
             role="menu"
             aria-orientation="vertical"
             aria-labelledby="user-menu"
@@ -77,7 +77,7 @@ const UserDropdown: React.FC = () => {
                 }}
                 onClick={() => setDropdownOpen(false)}
               >
-                <UserIcon className="inline w-5 h-5 mr-2" />
+                <UserIcon className="mr-2 inline h-5 w-5" />
                 <span>{intl.formatMessage(messages.myprofile)}</span>
               </a>
             </Link>
@@ -93,7 +93,7 @@ const UserDropdown: React.FC = () => {
                 }}
                 onClick={() => setDropdownOpen(false)}
               >
-                <CogIcon className="inline w-5 h-5 mr-2" />
+                <CogIcon className="mr-2 inline h-5 w-5" />
                 <span>{intl.formatMessage(messages.settings)}</span>
               </a>
             </Link>
@@ -103,7 +103,7 @@ const UserDropdown: React.FC = () => {
               role="menuitem"
               onClick={() => logout()}
             >
-              <LogoutIcon className="inline w-5 h-5 mr-2" />
+              <LogoutIcon className="mr-2 inline h-5 w-5" />
               <span>{intl.formatMessage(messages.signout)}</span>
             </a>
           </div>

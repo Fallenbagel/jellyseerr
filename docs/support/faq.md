@@ -1,7 +1,7 @@
 # Frequently Asked Questions (FAQ)
 
 {% hint style="info" %}
-If you can't find the solution to your problem here, please read [Need Help?](./need-help.md) and reach out to us on [Discord](https://discord.gg/overseerr).
+If you can't find the solution to your problem here, please read [Need Help?](./need-help.md) and reach out to us on [Discord](https://discord.gg/ckbvBtDJgC).
 
 _Please do not post questions or support requests on the GitHub issue tracker!_
 {% endhint %}
@@ -20,6 +20,12 @@ A more advanced, user-friendly, and secure (if using SSL) method is to set up a 
 
 The most secure method (but also the most inconvenient method) is to set up a VPN tunnel to your home server. You would then be able to access Overseerr as if you were on your local network, via `http://LOCAL-IP-ADDRESS:5055`.
 
+### Are there mobile apps for Overseerr?
+
+Since Overseerr has an almost native app experience when installed as a Progressive Web App (PWA), there are no plans to develop mobile apps for Overseerr.
+
+Out of the box, Overseerr already fulfills most of the [PWA install criteria](https://web.dev/install-criteria/). You simply need to make sure that your Overseerr instance is being served over HTTPS (e.g., via a [reverse proxy](../extending-overseerr/reverse-proxy.md)).
+
 ### Overseerr is amazing! But it is not translated in my language yet! Can I help with translations?
 
 You sure can! We are using [Weblate](https://hosted.weblate.org/engage/overseerr/) for translations. If your language is not listed, please [open a feature request on GitHub](https://github.com/sct/overseerr/issues/new/choose).
@@ -28,7 +34,7 @@ You sure can! We are using [Weblate](https://hosted.weblate.org/engage/overseerr
 
 You can find the changelog for your version (stable/`latest`,s or `develop`) in the **Settings &rarr; About** page in your Overseerr instance.
 
-You can alternatively review the [stable release history](https://github.com/sct/overseerr/releases) and [`develop` branch commit history](https://github.com/sct/overseerr/commits/develop) on GitHub.
+You can alternatively review the [stable release history](https://github.com/fallenbagel/jellyseerr/releases) and [`develop` branch commit history](https://github.com/fallenbagel/jellyseerr/commits/develop) on GitHub.
 
 ### Some media is missing from Overseerr that I know is in Plex!
 
@@ -82,7 +88,7 @@ Yes! Please see the [documentation for creating local users](../using-overseerr/
 
 ### Is is possible to set user roles in Overseerr?
 
-Permissions can be configured for each user via the **User List** or their **User Settings** page. The list of assignable permissions is still growing, so if you have any suggestions, [submit a feature request](https://github.com/sct/overseerr/issues/new/choose)!
+Permissions can be configured for each user via the **User List** or their **User Settings** page. The list of assignable permissions is still growing, so if you have any suggestions, [submit a feature request](https://github.com/fallenbagel/jellyseerr/issues/new/choose)!
 
 ## Requests
 
@@ -112,10 +118,16 @@ If you configured a URL base in Sonarr, make sure you have also configured the [
 
 Also, check that you are using Sonarr v3 and that you have configured a default language profile in Overseerr.
 
-Language profile support for Sonarr was added in [v1.20.0](https://github.com/sct/overseerr/releases/tag/v1.20.0) along with a new, _required_ **Language Profile** setting. If series requests are failing, make sure that you have a default language profile configured for each of your Sonarr servers in **Settings &rarr; Services**.
+Language profile support for Sonarr was added in [v1.20.0](https://github.com/fallenbagel/jellyseerr/releases/tag/v1.20.0) along with a new, _required_ **Language Profile** setting. If series requests are failing, make sure that you have a default language profile configured for each of your Sonarr servers in **Settings &rarr; Services**.
 
 ## Notifications
 
 ### I am getting "Username and Password not accepted" when attempting to send email notifications via Gmail!
 
 If you have 2-Step Verification enabled on your account, you will need to create an [app password](https://support.google.com/mail/answer/185833).
+
+### The logo image in email notifications is broken!
+
+This may be an issue with how you are proxying your Overseerr instance. A good first troubleshooting step is to verify that the [`Content-Security-Policy` HTTP header](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) being set by your proxy (if any) is configured appropriately to allow external embedding of the image.
+
+For Gmail users, another possible issue is that Google's image URL proxy is being blocked from fetching the image. If using Cloudflare, overzealous firewall rules could be the culprit.

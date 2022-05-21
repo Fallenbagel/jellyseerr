@@ -31,6 +31,8 @@ const globalMessages = defineMessages({
   testing: 'Testing…',
   save: 'Save Changes',
   saving: 'Saving…',
+  import: 'Import',
+  importing: 'Importing…',
   close: 'Close',
   edit: 'Edit',
   areyousure: 'Are you sure?',
@@ -49,6 +51,8 @@ const globalMessages = defineMessages({
     'Showing <strong>{from}</strong> to <strong>{to}</strong> of <strong>{total}</strong> results',
   resultsperpage: 'Display {pageSize} results per page',
   noresults: 'No results.',
+  open: 'Open',
+  resolved: 'Resolved',
 });
 
 export default globalMessages;

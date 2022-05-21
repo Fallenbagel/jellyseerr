@@ -18,7 +18,7 @@ const messages = defineMessages({
   toastWebPushTestSuccess: 'Web push test notification sent!',
   toastWebPushTestFailed: 'Web push test notification failed to send.',
   httpsRequirement:
-    'In order to receive web push notifications, Jellyseerr must be served over HTTPS.',
+    'In order to receive web push notifications, Overseerr must be served over HTTPS.',
 });
 
 const NotificationsWebPush: React.FC = () => {
@@ -26,9 +26,11 @@ const NotificationsWebPush: React.FC = () => {
   const { addToast, removeToast } = useToasts();
   const [isTesting, setIsTesting] = useState(false);
   const [isHttps, setIsHttps] = useState(false);
-  const { data, error, revalidate } = useSWR(
-    '/api/v1/settings/notifications/webpush'
-  );
+  const {
+    data,
+    error,
+    mutate: revalidate,
+  } = useSWR('/api/v1/settings/notifications/webpush');
 
   useEffect(() => {
     setIsHttps(window.location.protocol.startsWith('https'));
@@ -118,13 +120,13 @@ const NotificationsWebPush: React.FC = () => {
                   {intl.formatMessage(messages.agentenabled)}
                   <span className="label-required">*</span>
                 </label>
-                <div className="form-input">
+                <div className="form-input-area">
                   <Field type="checkbox" id="enabled" name="enabled" />
                 </div>
               </div>
               <div className="actions">
                 <div className="flex justify-end">
-                  <span className="inline-flex ml-3 rounded-md shadow-sm">
+                  <span className="ml-3 inline-flex rounded-md shadow-sm">
                     <Button
                       buttonType="warning"
                       disabled={isSubmitting || isTesting}
@@ -141,7 +143,7 @@ const NotificationsWebPush: React.FC = () => {
                       </span>
                     </Button>
                   </span>
-                  <span className="inline-flex ml-3 rounded-md shadow-sm">
+                  <span className="ml-3 inline-flex rounded-md shadow-sm">
                     <Button
                       buttonType="primary"
                       type="submit"

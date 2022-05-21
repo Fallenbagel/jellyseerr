@@ -3,49 +3,57 @@
 </p>
 <p align="center">
 <a href="https://discord.gg/ckbvBtDJgC"><img src="https://img.shields.io/badge/Discord-Chat-lightgrey" alt="Discord"></a>
+<a href="https://hub.docker.com/r/fallenbagel/jellyseerr"><img src="https://img.shields.io/docker/pulls/fallenbagel/jellyseerr" alt="Docker pulls"></a>
+<a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
 </p>
 
-**Jellyseerr** is a free and open source fork of Overseerr for managing requests for your media library. It integrates with your existing services, such as **[Sonarr](https://sonarr.tv/)**, **[Radarr](https://radarr.video/)**, and **[Jellyfin](https://jellyfin.org/)**!
+**Jellyseerr** is a free and open source software application for managing requests for your media library. It is a a fork of Overseerr built to bring support for Jellyfin & Emby media servers!
 
 ## Current Features
 
-- Jellyfin support
-- Easy integration with your existing services. Currently, Jellyseerr supports Sonarr and Radarr.
-- Jellyfin library scan, to keep track of the titles which are already available.
+- Jellyfin Support
+- Emby Support
+
+Along with all the existing Overseerr features:
+
+- Full Plex integration. Authenticate and manage user access with Plex!
+- Easy integration with your existing services. Currently, Jellyseerr supports Sonarr and Radarr. More to come!
+- Plex library scan, to keep track of the titles which are already available.
 - Customizable request system, which allows users to request individual seasons or movies in a friendly, easy-to-use interface.
 - Incredibly simple request management UI. Don't dig through the app to simply approve recent requests!
 - Granular permission system.
 - Support for various notification agents.
 - Mobile-friendly design, for when you need to approve requests on the go!
 
-Check out our [issue tracker](https://github.com/Fallenbagel/jellyseerr/issues).
-
-## Supported Architectures
-
-Jellyseerr image support multiple architectures such as x86-64, arm64 and armv7.
-**NOTE: `:arm` and `:armv7` tag has been deprecated and replaced with `:latest`.**
-
-| **Architecture** | **Tag** |
-| ---------------- | ------- |
-| x86-64           | latest  |
-| ARM64            | latest  |
-| ARMv7            | latest   |
+With more features on the way! Check out our [issue tracker](https://github.com/fallenbagel/jellyseerr/issues) to see the features which have already been requested.
 
 ## Getting Started
 
 Check out our dockerhub for instructions on how to install and run Jellyseerr:
 https://hub.docker.com/r/fallenbagel/jellyseerr
 
+## Preview
+
+<img src="./public/preview.jpg">
+
 ## Support
 
 - You can get support on [Discord](https://discord.gg/ckbvBtDJgC).
-- Bug reports and feature requests can be submitted via [GitHub Issues](https://github.com/sct/overseerr/issues).
+- You can ask questions in the Help category of our [GitHub Discussions](https://github.com/fallenbagel/jellyseerr/discussions).
+- Bug reports and feature requests can be submitted via [GitHub Issues](https://github.com/fallenbagel/jellyseerr/issues).
 
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
+## API Documentation
 
-## Buy me a Coffee!
+You can access the API documentation from your local Jellyseerr install at http://localhost:5055/api-docs
 
-If you like jellyseerr and want to help maintain it, please buy me a coffee as it would help me out a lot!
+## Community
 
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/fallen.bagel)
+You can ask questions, share ideas, and more in [GitHub Discussions](https://github.com/fallenbagel/jellyseerr/discussions).
+
+If you would like to chat with other members of our growing community, [join the Jellyseerr Discord server](https://discord.gg/ckbvBtDJgC)!
+
+Our [Code of Conduct](https://github.com/fallenbagel/jellyseerr/blob/develop/CODE_OF_CONDUCT.md) applies to all Jellyseerr community channels.
+
+## Contributing
+
+You can help improve Jellyseerr too! Check out our [Contribution Guide](https://github.com/fallenbagel/jellyseerr/blob/develop/CONTRIBUTING.md) to get started.

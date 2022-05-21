@@ -1,22 +1,20 @@
 import {
   ArrowCircleRightIcon,
   CogIcon,
+  ExclamationIcon,
   FilmIcon,
   PlayIcon,
 } from '@heroicons/react/outline';
-import {
-  CheckCircleIcon,
-  DocumentRemoveIcon,
-  ExternalLinkIcon,
-} from '@heroicons/react/solid';
-import axios from 'axios';
+import { hasFlag } from 'country-flag-icons';
+import 'country-flag-icons/3x2/flags.css';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
 import type { RTRating } from '../../../server/api/rottentomatoes';
 import { ANIME_KEYWORD_ID } from '../../../server/api/themoviedb/constants';
+import { IssueStatus } from '../../../server/constants/issue';
 import { MediaStatus } from '../../../server/constants/media';
 import { MediaServerType } from '../../../server/constants/server';
 import { Crew } from '../../../server/models/common';
@@ -34,16 +32,14 @@ import Error from '../../pages/_error';
 import { sortCrewPriority } from '../../utils/creditHelpers';
 import Button from '../Common/Button';
 import CachedImage from '../Common/CachedImage';
-import ConfirmButton from '../Common/ConfirmButton';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import PageTitle from '../Common/PageTitle';
 import PlayButton, { PlayButtonLink } from '../Common/PlayButton';
-import SlideOver from '../Common/SlideOver';
-import DownloadBlock from '../DownloadBlock';
 import ExternalLinkBlock from '../ExternalLinkBlock';
+import IssueModal from '../IssueModal';
+import ManageSlideOver from '../ManageSlideOver';
 import MediaSlider from '../MediaSlider';
 import PersonCard from '../PersonCard';
-import RequestBlock from '../RequestBlock';
 import RequestButton from '../RequestButton';
 import RequestModal from '../RequestModal';
 import Slider from '../Slider';
@@ -59,29 +55,19 @@ const messages = defineMessages({
   similar: 'Similar Series',
   watchtrailer: 'Watch Trailer',
   overviewunavailable: 'Overview unavailable.',
-  manageModalTitle: 'Manage Series',
-  manageModalRequests: 'Requests',
-  manageModalNoRequests: 'No requests.',
-  manageModalClearMedia: 'Clear Media Data',
-  manageModalClearMediaWarning:
-    '* This will irreversibly remove all data for this series, including any requests. If this item exists in your Plex library, the media information will be recreated during the next scan.',
   originaltitle: 'Original Title',
   showtype: 'Series Type',
   anime: 'Anime',
   network: '{networkCount, plural, one {Network} other {Networks}}',
   viewfullcrew: 'View Full Crew',
-  opensonarr: 'Open Series in Sonarr',
-  opensonarr4k: 'Open Series in 4K Sonarr',
-  downloadstatus: 'Download Status',
   play: 'Play on {mediaServerName}',
   play4k: 'Play 4K on {mediaServerName}',
-  markavailable: 'Mark as Available',
-  mark4kavailable: 'Mark as Available in 4K',
-  allseasonsmarkedavailable: '* All seasons will be marked as available.',
   seasons: '{seasonCount, plural, one {# Season} other {# Seasons}}',
   episodeRuntime: 'Episode Runtime',
   episodeRuntimeMinutes: '{runtime} minutes',
   streamingproviders: 'Currently Streaming On',
+  productioncountries:
+    'Production {countryCount, plural, one {Country} other {Countries}}',
 });
 
 interface TvDetailsProps {
@@ -95,14 +81,18 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
   const intl = useIntl();
   const { locale } = useLocale();
   const [showRequestModal, setShowRequestModal] = useState(false);
-  const [showManager, setShowManager] = useState(false);
-
-  const { data, error, revalidate } = useSWR<TvDetailsType>(
-    `/api/v1/tv/${router.query.tvId}`,
-    {
-      initialData: tv,
-    }
+  const [showManager, setShowManager] = useState(
+    router.query.manage == '1' ? true : false
   );
+  const [showIssueModal, setShowIssueModal] = useState(false);
+
+  const {
+    data,
+    error,
+    mutate: revalidate,
+  } = useSWR<TvDetailsType>(`/api/v1/tv/${router.query.tvId}`, {
+    fallbackData: tv,
+  });
 
   const { data: ratingData } = useSWR<RTRating>(
     `/api/v1/tv/${router.query.tvId}/ratings`
@@ -112,6 +102,10 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
     () => sortCrewPriority(data?.credits.crew ?? []),
     [data]
   );
+
+  useEffect(() => {
+    setShowManager(router.query.manage == '1' ? true : false);
+  }, [router.query.manage]);
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -123,7 +117,12 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
 
   const mediaLinks: PlayButtonLink[] = [];
 
-  if (data.mediaInfo?.mediaUrl) {
+  if (
+    data.mediaInfo?.mediaUrl &&
+    hasPermission([Permission.REQUEST, Permission.REQUEST_TV], {
+      type: 'or',
+    })
+  ) {
     mediaLinks.push({
       text:
         settings.currentSettings.mediaServerType === MediaServerType.JELLYFIN
@@ -135,6 +134,7 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
   }
 
   if (
+    settings.currentSettings.series4kEnabled &&
     data.mediaInfo?.mediaUrl4k &&
     hasPermission([Permission.REQUEST_4K, Permission.REQUEST_4K_TV], {
       type: 'or',
@@ -163,20 +163,6 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
     });
   }
 
-  const deleteMedia = async () => {
-    if (data?.mediaInfo?.id) {
-      await axios.delete(`/api/v1/media/${data?.mediaInfo?.id}`);
-      revalidate();
-    }
-  };
-
-  const markAvailable = async (is4k = false) => {
-    await axios.post(`/api/v1/media/${data?.mediaInfo?.id}/available`, {
-      is4k,
-    });
-    revalidate();
-  };
-
   const region = user?.settings?.region
     ? user.settings.region
     : settings.currentSettings.region
@@ -184,17 +170,12 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
     : 'US';
   const seriesAttributes: React.ReactNode[] = [];
 
-  if (
-    data.contentRatings.results.length &&
-    data.contentRatings.results.find(
-      (r) => r.iso_3166_1 === region || data.contentRatings.results[0].rating
-    )
-  ) {
+  const contentRating = data.contentRatings.results.find(
+    (r) => r.iso_3166_1 === region
+  )?.rating;
+  if (contentRating) {
     seriesAttributes.push(
-      <span className="p-0.5 py-0 border rounded-md">
-        {data.contentRatings.results.find((r) => r.iso_3166_1 === region)
-          ?.rating || data.contentRatings.results[0].rating}
-      </span>
+      <span className="rounded-md border p-0.5 py-0">{contentRating}</span>
     );
   }
 
@@ -273,6 +254,12 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
         </div>
       )}
       <PageTitle title={data.name} />
+      <IssueModal
+        onCancel={() => setShowIssueModal(false)}
+        show={showIssueModal}
+        mediaType="tv"
+        tmdbId={data.id}
+      />
       <RequestModal
         tmdbId={data.id}
         show={showRequestModal}
@@ -283,144 +270,19 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
         }}
         onCancel={() => setShowRequestModal(false)}
       />
-      <SlideOver
+      <ManageSlideOver
+        data={data}
+        mediaType="tv"
+        onClose={() => {
+          setShowManager(false);
+          router.push({
+            pathname: router.pathname,
+            query: { tvId: router.query.tvId },
+          });
+        }}
+        revalidate={() => revalidate()}
         show={showManager}
-        title={intl.formatMessage(messages.manageModalTitle)}
-        onClose={() => setShowManager(false)}
-        subText={data.name}
-      >
-        {((data?.mediaInfo?.downloadStatus ?? []).length > 0 ||
-          (data?.mediaInfo?.downloadStatus4k ?? []).length > 0) && (
-          <>
-            <h3 className="mb-2 text-xl font-bold">
-              {intl.formatMessage(messages.downloadstatus)}
-            </h3>
-            <div className="mb-6 overflow-hidden bg-gray-600 rounded-md shadow">
-              <ul>
-                {data.mediaInfo?.downloadStatus?.map((status, index) => (
-                  <li
-                    key={`dl-status-${status.externalId}-${index}`}
-                    className="border-b border-gray-700 last:border-b-0"
-                  >
-                    <DownloadBlock downloadItem={status} />
-                  </li>
-                ))}
-                {data.mediaInfo?.downloadStatus4k?.map((status, index) => (
-                  <li
-                    key={`dl-status-${status.externalId}-${index}`}
-                    className="border-b border-gray-700 last:border-b-0"
-                  >
-                    <DownloadBlock downloadItem={status} is4k />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </>
-        )}
-        {data?.mediaInfo &&
-          (data.mediaInfo.status !== MediaStatus.AVAILABLE ||
-            (data.mediaInfo.status4k !== MediaStatus.AVAILABLE &&
-              settings.currentSettings.series4kEnabled)) && (
-            <div className="mb-6">
-              {data?.mediaInfo &&
-                data?.mediaInfo.status !== MediaStatus.AVAILABLE && (
-                  <div className="flex flex-col mb-2 sm:flex-row flex-nowrap">
-                    <Button
-                      onClick={() => markAvailable()}
-                      className="w-full sm:mb-0"
-                      buttonType="success"
-                    >
-                      <CheckCircleIcon />
-                      <span>{intl.formatMessage(messages.markavailable)}</span>
-                    </Button>
-                  </div>
-                )}
-              {data?.mediaInfo &&
-                data?.mediaInfo.status4k !== MediaStatus.AVAILABLE &&
-                settings.currentSettings.series4kEnabled && (
-                  <div className="flex flex-col mb-2 sm:flex-row flex-nowrap">
-                    <Button
-                      onClick={() => markAvailable(true)}
-                      className="w-full sm:mb-0"
-                      buttonType="success"
-                    >
-                      <CheckCircleIcon />
-                      <span>
-                        {intl.formatMessage(messages.mark4kavailable)}
-                      </span>
-                    </Button>
-                  </div>
-                )}
-              <div className="mt-3 text-xs text-gray-400">
-                {intl.formatMessage(messages.allseasonsmarkedavailable)}
-              </div>
-            </div>
-          )}
-        <h3 className="mb-2 text-xl font-bold">
-          {intl.formatMessage(messages.manageModalRequests)}
-        </h3>
-        <div className="overflow-hidden bg-gray-600 rounded-md shadow">
-          <ul>
-            {data.mediaInfo?.requests?.map((request) => (
-              <li
-                key={`manage-request-${request.id}`}
-                className="border-b border-gray-700 last:border-b-0"
-              >
-                <RequestBlock request={request} onUpdate={() => revalidate()} />
-              </li>
-            ))}
-            {(data.mediaInfo?.requests ?? []).length === 0 && (
-              <li className="py-4 text-center text-gray-400">
-                {intl.formatMessage(messages.manageModalNoRequests)}
-              </li>
-            )}
-          </ul>
-        </div>
-        {(data?.mediaInfo?.serviceUrl || data?.mediaInfo?.serviceUrl4k) && (
-          <div className="mt-8">
-            {data?.mediaInfo?.serviceUrl && (
-              <a
-                href={data?.mediaInfo?.serviceUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="block mb-2 last:mb-0"
-              >
-                <Button buttonType="ghost" className="w-full">
-                  <ExternalLinkIcon />
-                  <span>{intl.formatMessage(messages.opensonarr)}</span>
-                </Button>
-              </a>
-            )}
-            {data?.mediaInfo?.serviceUrl4k && (
-              <a
-                href={data?.mediaInfo?.serviceUrl4k}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Button buttonType="ghost" className="w-full">
-                  <ExternalLinkIcon />
-                  <span>{intl.formatMessage(messages.opensonarr4k)}</span>
-                </Button>
-              </a>
-            )}
-          </div>
-        )}
-        {data?.mediaInfo && (
-          <div className="mt-8">
-            <ConfirmButton
-              onClick={() => deleteMedia()}
-              confirmText={intl.formatMessage(globalMessages.areyousure)}
-              className="w-full"
-            >
-              <DocumentRemoveIcon />
-              <span>{intl.formatMessage(messages.manageModalClearMedia)}</span>
-            </ConfirmButton>
-            <div className="mt-3 text-xs text-gray-400">
-              {intl.formatMessage(messages.manageModalClearMediaWarning)}
-            </div>
-          </div>
-        )}
-      </SlideOver>
+      />
       <div className="media-header">
         <div className="media-poster">
           <CachedImage
@@ -441,19 +303,30 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
             <StatusBadge
               status={data.mediaInfo?.status}
               inProgress={(data.mediaInfo?.downloadStatus ?? []).length > 0}
-              mediaUrl={data.mediaInfo?.mediaUrl}
+              tmdbId={data.mediaInfo?.tmdbId}
+              mediaType="tv"
+              plexUrl={data.mediaInfo?.mediaUrl}
             />
             {settings.currentSettings.series4kEnabled &&
-              hasPermission([Permission.REQUEST_4K, Permission.REQUEST_4K_TV], {
-                type: 'or',
-              }) && (
+              hasPermission(
+                [
+                  Permission.MANAGE_REQUESTS,
+                  Permission.REQUEST_4K,
+                  Permission.REQUEST_4K_TV,
+                ],
+                {
+                  type: 'or',
+                }
+              ) && (
                 <StatusBadge
                   status={data.mediaInfo?.status4k}
                   is4k
                   inProgress={
                     (data.mediaInfo?.downloadStatus4k ?? []).length > 0
                   }
-                  mediaUrl4k={data.mediaInfo?.mediaUrl4k}
+                  tmdbId={data.mediaInfo?.tmdbId}
+                  mediaType="tv"
+                  plexUrl={data.mediaInfo?.mediaUrl4k}
                 />
               )}
           </div>
@@ -471,7 +344,9 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
                 .map((t, k) => <span key={k}>{t}</span>)
                 .reduce((prev, curr) => (
                   <>
-                    {prev} | {curr}
+                    {prev}
+                    <span>|</span>
+                    {curr}
                   </>
                 ))}
           </span>
@@ -486,13 +361,52 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
             isShowComplete={isComplete}
             is4kShowComplete={is4kComplete}
           />
-          {hasPermission(Permission.MANAGE_REQUESTS) && (
+          {(data.mediaInfo?.status === MediaStatus.AVAILABLE ||
+            data.mediaInfo?.status === MediaStatus.PARTIALLY_AVAILABLE ||
+            (settings.currentSettings.series4kEnabled &&
+              hasPermission([Permission.REQUEST_4K, Permission.REQUEST_4K_TV], {
+                type: 'or',
+              }) &&
+              (data.mediaInfo?.status4k === MediaStatus.AVAILABLE ||
+                data?.mediaInfo?.status4k ===
+                  MediaStatus.PARTIALLY_AVAILABLE))) &&
+            hasPermission(
+              [Permission.CREATE_ISSUES, Permission.MANAGE_ISSUES],
+              {
+                type: 'or',
+              }
+            ) && (
+              <Button
+                buttonType="warning"
+                className="ml-2 first:ml-0"
+                onClick={() => setShowIssueModal(true)}
+              >
+                <ExclamationIcon className="w-5" />
+              </Button>
+            )}
+          {hasPermission(Permission.MANAGE_REQUESTS) && data.mediaInfo && (
             <Button
               buttonType="default"
-              className="ml-2 first:ml-0"
+              className="relative ml-2 first:ml-0"
               onClick={() => setShowManager(true)}
             >
-              <CogIcon />
+              <CogIcon className="!mr-0" />
+              {hasPermission(
+                [Permission.MANAGE_ISSUES, Permission.VIEW_ISSUES],
+                {
+                  type: 'or',
+                }
+              ) &&
+                (
+                  data.mediaInfo?.issues.filter(
+                    (issue) => issue.status === IssueStatus.OPEN
+                  ) ?? []
+                ).length > 0 && (
+                  <>
+                    <div className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-red-600" />
+                    <div className="absolute -right-1 -top-1 h-3 w-3 animate-ping rounded-full bg-red-600" />
+                  </>
+                )}
             </Button>
           )}
         </div>
@@ -532,11 +446,11 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
                     </li>
                   ))}
               </ul>
-              <div className="flex justify-end mt-4">
+              <div className="mt-4 flex justify-end">
                 <Link href={`/tv/${data.id}/crew`}>
                   <a className="flex items-center text-gray-400 transition duration-300 hover:text-gray-100">
                     <span>{intl.formatMessage(messages.viewfullcrew)}</span>
-                    <ArrowCircleRightIcon className="inline-block w-5 h-5 ml-1.5" />
+                    <ArrowCircleRightIcon className="ml-1.5 inline-block h-5 w-5" />
                   </a>
                 </Link>
               </div>
@@ -552,9 +466,9 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
                 {ratingData?.criticsRating && !!ratingData?.criticsScore && (
                   <span className="media-rating">
                     {ratingData.criticsRating === 'Rotten' ? (
-                      <RTRotten className="w-6 mr-1" />
+                      <RTRotten className="mr-1 w-6" />
                     ) : (
-                      <RTFresh className="w-6 mr-1" />
+                      <RTFresh className="mr-1 w-6" />
                     )}
                     {ratingData.criticsScore}%
                   </span>
@@ -562,16 +476,16 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
                 {ratingData?.audienceRating && !!ratingData?.audienceScore && (
                   <span className="media-rating">
                     {ratingData.audienceRating === 'Spilled' ? (
-                      <RTAudRotten className="w-6 mr-1" />
+                      <RTAudRotten className="mr-1 w-6" />
                     ) : (
-                      <RTAudFresh className="w-6 mr-1" />
+                      <RTAudFresh className="mr-1 w-6" />
                     )}
                     {ratingData.audienceScore}%
                   </span>
                 )}
                 {!!data.voteCount && (
                   <span className="media-rating">
-                    <TmdbLogo className="w-6 mr-2" />
+                    <TmdbLogo className="mr-2 w-6" />
                     {data.voteAverage}/10
                   </span>
                 )}
@@ -650,6 +564,37 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
                 </span>
               </div>
             )}
+            {data.productionCountries.length > 0 && (
+              <div className="media-fact">
+                <span>
+                  {intl.formatMessage(messages.productioncountries, {
+                    countryCount: data.productionCountries.length,
+                  })}
+                </span>
+                <span className="media-fact-value">
+                  {data.productionCountries.map((c) => {
+                    return (
+                      <span
+                        className="flex items-center justify-end"
+                        key={`prodcountry-${c.iso_3166_1}`}
+                      >
+                        {hasFlag(c.iso_3166_1) && (
+                          <span
+                            className={`mr-1.5 text-xs leading-5 flag:${c.iso_3166_1}`}
+                          />
+                        )}
+                        <span>
+                          {intl.formatDisplayName(c.iso_3166_1, {
+                            type: 'region',
+                            fallback: 'none',
+                          }) ?? c.name}
+                        </span>
+                      </span>
+                    );
+                  })}
+                </span>
+              </div>
+            )}
             {data.networks.length > 0 && (
               <div className="media-fact">
                 <span>
@@ -669,7 +614,10 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
                     ))
                     .reduce((prev, curr) => (
                       <>
-                        {prev}, {curr}
+                        {intl.formatMessage(globalMessages.delimitedlist, {
+                          a: prev,
+                          b: curr,
+                        })}
                       </>
                     ))}
                 </span>

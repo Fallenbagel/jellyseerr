@@ -14,6 +14,7 @@ import { defineMessages, useIntl } from 'react-intl';
 import { MediaRequestStatus } from '../../../server/constants/media';
 import type { MediaRequest } from '../../../server/entity/MediaRequest';
 import useRequestOverride from '../../hooks/useRequestOverride';
+import { useUser } from '../../hooks/useUser';
 import globalMessages from '../../i18n/globalMessages';
 import Badge from '../Common/Badge';
 import Button from '../Common/Button';
@@ -33,6 +34,7 @@ interface RequestBlockProps {
 }
 
 const RequestBlock: React.FC<RequestBlockProps> = ({ request, onUpdate }) => {
+  const { user } = useUser();
   const intl = useIntl();
   const [isUpdating, setIsUpdating] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -75,14 +77,20 @@ const RequestBlock: React.FC<RequestBlockProps> = ({ request, onUpdate }) => {
           setShowEditModal(false);
         }}
       />
-      <div className="px-4 py-4 text-gray-300">
+      <div className="px-4 py-3 text-gray-300">
         <div className="flex items-center justify-between">
-          <div className="flex-col items-center flex-1 min-w-0 mr-6 text-sm leading-5">
-            <div className="flex mb-1 flex-nowrap white">
-              <UserIcon className="min-w-0 flex-shrink-0 mr-1.5 h-5 w-5" />
+          <div className="mr-6 min-w-0 flex-1 flex-col items-center text-sm leading-5">
+            <div className="white mb-1 flex flex-nowrap">
+              <UserIcon className="mr-1.5 h-5 w-5 min-w-0 flex-shrink-0" />
               <span className="w-40 truncate md:w-auto">
-                <Link href={`/users/${request.requestedBy.id}`}>
-                  <a className="text-gray-100 transition duration-300 hover:text-white hover:underline">
+                <Link
+                  href={
+                    request.requestedBy.id === user?.id
+                      ? '/profile'
+                      : `/users/${request.requestedBy.id}`
+                  }
+                >
+                  <a className="font-semibold text-gray-100 transition duration-300 hover:text-white hover:underline">
                     {request.requestedBy.displayName}
                   </a>
                 </Link>
@@ -90,10 +98,16 @@ const RequestBlock: React.FC<RequestBlockProps> = ({ request, onUpdate }) => {
             </div>
             {request.modifiedBy && (
               <div className="flex flex-nowrap">
-                <EyeIcon className="flex-shrink-0 mr-1.5 h-5 w-5" />
+                <EyeIcon className="mr-1.5 h-5 w-5 flex-shrink-0" />
                 <span className="w-40 truncate md:w-auto">
-                  <Link href={`/users/${request.modifiedBy.id}`}>
-                    <a className="text-gray-100 transition duration-300 hover:text-white hover:underline">
+                  <Link
+                    href={
+                      request.modifiedBy.id === user?.id
+                        ? '/profile'
+                        : `/users/${request.modifiedBy.id}`
+                    }
+                  >
+                    <a className="font-semibold text-gray-100 transition duration-300 hover:text-white hover:underline">
                       {request.modifiedBy.displayName}
                     </a>
                   </Link>
@@ -101,7 +115,7 @@ const RequestBlock: React.FC<RequestBlockProps> = ({ request, onUpdate }) => {
               </div>
             )}
           </div>
-          <div className="flex flex-wrap flex-shrink-0 ml-2">
+          <div className="ml-2 flex flex-shrink-0 flex-wrap">
             {request.status === MediaRequestStatus.PENDING && (
               <>
                 <Button
@@ -142,7 +156,7 @@ const RequestBlock: React.FC<RequestBlockProps> = ({ request, onUpdate }) => {
         </div>
         <div className="mt-2 sm:flex sm:justify-between">
           <div className="sm:flex">
-            <div className="flex items-center mr-6 text-sm leading-5">
+            <div className="mr-6 flex items-center text-sm leading-5">
               {request.is4k && (
                 <span className="mr-1">
                   <Badge badgeType="warning">4K</Badge>
@@ -165,8 +179,8 @@ const RequestBlock: React.FC<RequestBlockProps> = ({ request, onUpdate }) => {
               )}
             </div>
           </div>
-          <div className="flex items-center mt-2 text-sm leading-5 sm:mt-0">
-            <CalendarIcon className="flex-shrink-0 mr-1.5 h-5 w-5" />
+          <div className="mt-2 flex items-center text-sm leading-5 sm:mt-0">
+            <CalendarIcon className="mr-1.5 h-5 w-5 flex-shrink-0" />
             <span>
               {intl.formatDate(request.createdAt, {
                 year: 'numeric',
@@ -177,7 +191,7 @@ const RequestBlock: React.FC<RequestBlockProps> = ({ request, onUpdate }) => {
           </div>
         </div>
         {(request.seasons ?? []).length > 0 && (
-          <div className="flex flex-col mt-2 text-sm">
+          <div className="mt-2 flex flex-col text-sm">
             <div className="mb-1 font-medium">
               {intl.formatMessage(messages.seasons, {
                 seasonCount: request.seasons.length,
@@ -187,7 +201,7 @@ const RequestBlock: React.FC<RequestBlockProps> = ({ request, onUpdate }) => {
               {request.seasons.map((season) => (
                 <span
                   key={`season-${season.id}`}
-                  className="inline-block mb-1 mr-2"
+                  className="mb-1 mr-2 inline-block"
                 >
                   <Badge>{season.seasonNumber}</Badge>
                 </span>
@@ -200,7 +214,7 @@ const RequestBlock: React.FC<RequestBlockProps> = ({ request, onUpdate }) => {
             <div className="mt-4 mb-1 text-sm">
               {intl.formatMessage(messages.requestoverrides)}
             </div>
-            <ul className="px-2 text-xs bg-gray-800 divide-y divide-gray-700 rounded-md">
+            <ul className="divide-y divide-gray-700 rounded-md bg-gray-800 px-2 text-xs">
               {server && (
                 <li className="flex justify-between px-1 py-2">
                   <span className="font-bold">

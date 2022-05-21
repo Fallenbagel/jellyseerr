@@ -1,7 +1,7 @@
 import axios from 'axios';
 import Bowser from 'bowser';
 
-interface PlexHeaders {
+interface PlexHeaders extends Record<string, string> {
   Accept: string;
   'X-Plex-Product': string;
   'X-Plex-Version': string;
@@ -20,6 +20,19 @@ export interface PlexPin {
   code: string;
 }
 
+const uuidv4 = (): string => {
+  return ((1e7).toString() + -1e3 + -4e3 + -8e3 + -1e11).replace(
+    /[018]/g,
+    function (c) {
+      return (
+        parseInt(c) ^
+        (window.crypto.getRandomValues(new Uint8Array(1))[0] &
+          (15 >> (parseInt(c) / 4)))
+      ).toString(16);
+    }
+  );
+};
+
 class PlexOAuth {
   private plexHeaders?: PlexHeaders;
 
@@ -34,17 +47,25 @@ class PlexOAuth {
         'Window is not defined. Are you calling this in the browser?'
       );
     }
+
+    let clientId = localStorage.getItem('plex-client-id');
+    if (!clientId) {
+      const uuid = uuidv4();
+      localStorage.setItem('plex-client-id', uuid);
+      clientId = uuid;
+    }
+
     const browser = Bowser.getParser(window.navigator.userAgent);
     this.plexHeaders = {
       Accept: 'application/json',
-      'X-Plex-Product': 'Jellyseerr',
-      'X-Plex-Version': '2.0',
-      'X-Plex-Client-Identifier': '7f9de3ba-e12b-11ea-87d0-0242ac130003',
+      'X-Plex-Product': 'Overseerr',
+      'X-Plex-Version': 'Plex OAuth',
+      'X-Plex-Client-Identifier': clientId,
       'X-Plex-Model': 'Plex OAuth',
-      'X-Plex-Platform': browser.getOSName(),
-      'X-Plex-Platform-Version': browser.getOSVersion(),
-      'X-Plex-Device': browser.getBrowserName(),
-      'X-Plex-Device-Name': browser.getBrowserVersion(),
+      'X-Plex-Platform': browser.getBrowserName(),
+      'X-Plex-Platform-Version': browser.getBrowserVersion(),
+      'X-Plex-Device': browser.getOSName(),
+      'X-Plex-Device-Name': `${browser.getBrowserName()} (Overseerr)`,
       'X-Plex-Device-Screen-Resolution':
         window.screen.width + 'x' + window.screen.height,
       'X-Plex-Language': 'en',

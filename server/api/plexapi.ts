@@ -1,5 +1,6 @@
 import NodePlexAPI from 'plex-api';
 import { getSettings, Library, PlexSettings } from '../lib/settings';
+import logger from '../logger';
 
 export interface PlexLibraryItem {
   ratingKey: string;
@@ -122,9 +123,9 @@ class PlexAPI {
       // },
       options: {
         identifier: settings.clientId,
-        product: 'Jellyseerr',
-        deviceName: 'Jellyseerr',
-        platform: 'Jellyseerr',
+        product: 'Overseerr',
+        deviceName: 'Overseerr',
+        platform: 'Overseerr',
       },
     });
   }
@@ -145,28 +146,40 @@ class PlexAPI {
   public async syncLibraries(): Promise<void> {
     const settings = getSettings();
 
-    const libraries = await this.getLibraries();
+    try {
+      const libraries = await this.getLibraries();
 
-    const newLibraries: Library[] = libraries
-      // Remove libraries that are not movie or show
-      .filter((library) => library.type === 'movie' || library.type === 'show')
-      // Remove libraries that do not have a metadata agent set (usually personal video libraries)
-      .filter((library) => library.agent !== 'com.plexapp.agents.none')
-      .map((library) => {
-        const existing = settings.plex.libraries.find(
-          (l) => l.id === library.key && l.name === library.title
-        );
+      const newLibraries: Library[] = libraries
+        // Remove libraries that are not movie or show
+        .filter(
+          (library) => library.type === 'movie' || library.type === 'show'
+        )
+        // Remove libraries that do not have a metadata agent set (usually personal video libraries)
+        .filter((library) => library.agent !== 'com.plexapp.agents.none')
+        .map((library) => {
+          const existing = settings.plex.libraries.find(
+            (l) => l.id === library.key && l.name === library.title
+          );
 
-        return {
-          id: library.key,
-          name: library.title,
-          enabled: existing?.enabled ?? false,
-          type: library.type,
-          lastScan: existing?.lastScan,
-        };
+          return {
+            id: library.key,
+            name: library.title,
+            enabled: existing?.enabled ?? false,
+            type: library.type,
+            lastScan: existing?.lastScan,
+          };
+        });
+
+      settings.plex.libraries = newLibraries;
+    } catch (e) {
+      logger.error('Failed to fetch Plex libraries', {
+        label: 'Plex API',
+        message: e.message,
       });
 
-    settings.plex.libraries = newLibraries;
+      settings.plex.libraries = [];
+    }
+
     settings.save();
   }
 

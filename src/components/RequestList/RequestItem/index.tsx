@@ -109,7 +109,7 @@ const RequestItem: React.FC<RequestItemProps> = ({
   const { data: requestData, mutate: revalidate } = useSWR<MediaRequest>(
     `/api/v1/request/${request.id}`,
     {
-      initialData: request,
+      fallbackData: request,
     }
   );
 
@@ -281,7 +281,7 @@ const RequestItem: React.FC<RequestItemProps> = ({
                 ] === MediaStatus.UNKNOWN ? (
                 <Badge
                   badgeType="danger"
-                  //href={`/${requestData.type}/${requestData.media.tmdbId}?manage=1`}
+                  href={`/${requestData.type}/${requestData.media.tmdbId}?manage=1`}
                 >
                   {intl.formatMessage(globalMessages.failed)}
                 </Badge>

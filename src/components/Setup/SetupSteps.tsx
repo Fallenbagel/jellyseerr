@@ -17,14 +17,14 @@ const SetupSteps: React.FC<CurrentStep> = ({
   isLastStep = false,
 }) => {
   return (
-    <li className="relative md:flex-1 md:flex">
-      <div className="flex items-center px-6 py-4 space-x-4 text-sm font-medium leading-5">
+    <li className="relative md:flex md:flex-1">
+      <div className="flex items-center space-x-4 px-6 py-4 text-sm font-medium leading-5">
         <div
-          className={`flex-shrink-0 w-10 h-10 flex items-center justify-center border-2
+          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center border-2
           ${active ? 'border-indigo-600 ' : 'border-white '}
-          ${completed ? 'bg-indigo-600 border-indigo-600 ' : ''} rounded-full`}
+          ${completed ? 'border-indigo-600 bg-indigo-600 ' : ''} rounded-full`}
         >
-          {completed && <CheckIcon className="w-6 h-6 text-white" />}
+          {completed && <CheckIcon className="h-6 w-6 text-white" />}
           {!completed && (
             <p className={active ? 'text-white' : 'text-indigo-200'}>
               {stepNumber}
@@ -32,7 +32,7 @@ const SetupSteps: React.FC<CurrentStep> = ({
           )}
         </div>
         <p
-          className={`text-sm leading-5 font-medium ${
+          className={`text-sm font-medium leading-5 ${
             active ? 'text-white' : 'text-indigo-200'
           }`}
         >
@@ -41,9 +41,9 @@ const SetupSteps: React.FC<CurrentStep> = ({
       </div>
 
       {!isLastStep && (
-        <div className="absolute top-0 right-0 hidden w-5 h-full md:block">
+        <div className="absolute top-0 right-0 hidden h-full w-5 md:block">
           <svg
-            className="w-full h-full text-gray-600"
+            className="h-full w-full text-gray-600"
             viewBox="0 0 22 80"
             fill="none"
             preserveAspectRatio="none"

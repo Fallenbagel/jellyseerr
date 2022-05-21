@@ -15,7 +15,7 @@ const messages = defineMessages({
   agentenabled: 'Enable Agent',
   accessToken: 'Application API Token',
   accessTokenTip:
-    '<ApplicationRegistrationLink>Register an application</ApplicationRegistrationLink> for use with Jellyseerr',
+    '<ApplicationRegistrationLink>Register an application</ApplicationRegistrationLink> for use with Overseerr',
   userToken: 'User or Group Key',
   userTokenTip:
     'Your 30-character <UsersGroupsLink>user or group identifier</UsersGroupsLink>',
@@ -33,9 +33,11 @@ const NotificationsPushover: React.FC = () => {
   const intl = useIntl();
   const { addToast, removeToast } = useToasts();
   const [isTesting, setIsTesting] = useState(false);
-  const { data, error, revalidate } = useSWR(
-    '/api/v1/settings/notifications/pushover'
-  );
+  const {
+    data,
+    error,
+    mutate: revalidate,
+  } = useSWR('/api/v1/settings/notifications/pushover');
 
   const NotificationsPushoverSchema = Yup.object().shape({
     accessToken: Yup.string()
@@ -62,13 +64,6 @@ const NotificationsPushover: React.FC = () => {
         /^[a-z\d]{30}$/i,
         intl.formatMessage(messages.validationUserTokenRequired)
       ),
-    types: Yup.number().when('enabled', {
-      is: true,
-      then: Yup.number()
-        .nullable()
-        .moreThan(0, intl.formatMessage(messages.validationTypes)),
-      otherwise: Yup.number().nullable(),
-    }),
   });
 
   if (!data && !error) {
@@ -167,7 +162,7 @@ const NotificationsPushover: React.FC = () => {
                 {intl.formatMessage(messages.agentenabled)}
                 <span className="label-required">*</span>
               </label>
-              <div className="form-input">
+              <div className="form-input-area">
                 <Field type="checkbox" id="enabled" name="enabled" />
               </div>
             </div>
@@ -193,7 +188,7 @@ const NotificationsPushover: React.FC = () => {
                   })}
                 </span>
               </label>
-              <div className="form-input">
+              <div className="form-input-area">
                 <div className="form-input-field">
                   <Field id="accessToken" name="accessToken" type="text" />
                 </div>
@@ -223,7 +218,7 @@ const NotificationsPushover: React.FC = () => {
                   })}
                 </span>
               </label>
-              <div className="form-input">
+              <div className="form-input-area">
                 <div className="form-input-field">
                   <Field id="userToken" name="userToken" type="text" />
                 </div>
@@ -243,14 +238,14 @@ const NotificationsPushover: React.FC = () => {
                 }
               }}
               error={
-                errors.types && touched.types
-                  ? (errors.types as string)
+                values.enabled && !values.types && touched.types
+                  ? intl.formatMessage(messages.validationTypes)
                   : undefined
               }
             />
             <div className="actions">
               <div className="flex justify-end">
-                <span className="inline-flex ml-3 rounded-md shadow-sm">
+                <span className="ml-3 inline-flex rounded-md shadow-sm">
                   <Button
                     buttonType="warning"
                     disabled={isSubmitting || !isValid || isTesting}
@@ -267,11 +262,16 @@ const NotificationsPushover: React.FC = () => {
                     </span>
                   </Button>
                 </span>
-                <span className="inline-flex ml-3 rounded-md shadow-sm">
+                <span className="ml-3 inline-flex rounded-md shadow-sm">
                   <Button
                     buttonType="primary"
                     type="submit"
-                    disabled={isSubmitting || !isValid || isTesting}
+                    disabled={
+                      isSubmitting ||
+                      !isValid ||
+                      isTesting ||
+                      (values.enabled && !values.types)
+                    }
                   >
                     <SaveIcon />
                     <span>

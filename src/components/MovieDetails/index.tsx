@@ -1,23 +1,26 @@
 import {
   ArrowCircleRightIcon,
+  CloudIcon,
   CogIcon,
+  ExclamationIcon,
   FilmIcon,
   PlayIcon,
+  TicketIcon,
 } from '@heroicons/react/outline';
 import {
-  CheckCircleIcon,
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
-  DocumentRemoveIcon,
-  ExternalLinkIcon,
 } from '@heroicons/react/solid';
-import axios from 'axios';
+import { hasFlag } from 'country-flag-icons';
+import 'country-flag-icons/3x2/flags.css';
+import { uniqBy } from 'lodash';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
 import type { RTRating } from '../../../server/api/rottentomatoes';
+import { IssueStatus } from '../../../server/constants/issue';
 import { MediaStatus } from '../../../server/constants/media';
 import { MediaServerType } from '../../../server/constants/server';
 import type { MovieDetails as MovieDetailsType } from '../../../server/models/Movie';
@@ -34,23 +37,22 @@ import Error from '../../pages/_error';
 import { sortCrewPriority } from '../../utils/creditHelpers';
 import Button from '../Common/Button';
 import CachedImage from '../Common/CachedImage';
-import ConfirmButton from '../Common/ConfirmButton';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import PageTitle from '../Common/PageTitle';
 import PlayButton, { PlayButtonLink } from '../Common/PlayButton';
-import SlideOver from '../Common/SlideOver';
-import DownloadBlock from '../DownloadBlock';
 import ExternalLinkBlock from '../ExternalLinkBlock';
+import IssueModal from '../IssueModal';
+import ManageSlideOver from '../ManageSlideOver';
 import MediaSlider from '../MediaSlider';
 import PersonCard from '../PersonCard';
-import RequestBlock from '../RequestBlock';
 import RequestButton from '../RequestButton';
 import Slider from '../Slider';
 import StatusBadge from '../StatusBadge';
 
 const messages = defineMessages({
   originaltitle: 'Original Title',
-  releasedate: 'Release Date',
+  releasedate:
+    '{releaseCount, plural, one {Release Date} other {Release Dates}}',
   revenue: 'Revenue',
   budget: 'Budget',
   watchtrailer: 'Watch Trailer',
@@ -61,12 +63,6 @@ const messages = defineMessages({
   recommendations: 'Recommendations',
   similar: 'Similar Titles',
   overviewunavailable: 'Overview unavailable.',
-  manageModalTitle: 'Manage Movie',
-  manageModalRequests: 'Requests',
-  manageModalNoRequests: 'No requests.',
-  manageModalClearMedia: 'Clear Media Data',
-  manageModalClearMediaWarning:
-    '* This will irreversibly remove all data for this movie, including any requests. If this item exists in your Plex library, the media information will be recreated during the next scan.',
   studio: '{studioCount, plural, one {Studio} other {Studios}}',
   viewfullcrew: 'View Full Crew',
   openradarr: 'Open Movie in Radarr',
@@ -79,6 +75,8 @@ const messages = defineMessages({
   showmore: 'Show More',
   showless: 'Show Less',
   streamingproviders: 'Currently Streaming On',
+  productioncountries:
+    'Production {countryCount, plural, one {Country} other {Countries}}',
 });
 
 interface MovieDetailsProps {
@@ -91,16 +89,20 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
   const router = useRouter();
   const intl = useIntl();
   const { locale } = useLocale();
-  const [showManager, setShowManager] = useState(false);
+  const [showManager, setShowManager] = useState(
+    router.query.manage == '1' ? true : false
+  );
   const minStudios = 3;
   const [showMoreStudios, setShowMoreStudios] = useState(false);
+  const [showIssueModal, setShowIssueModal] = useState(false);
 
-  const { data, error, revalidate } = useSWR<MovieDetailsType>(
-    `/api/v1/movie/${router.query.movieId}`,
-    {
-      initialData: movie,
-    }
-  );
+  const {
+    data,
+    error,
+    mutate: revalidate,
+  } = useSWR<MovieDetailsType>(`/api/v1/movie/${router.query.movieId}`, {
+    fallbackData: movie,
+  });
 
   const { data: ratingData } = useSWR<RTRating>(
     `/api/v1/movie/${router.query.movieId}/ratings`
@@ -110,6 +112,10 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
     () => sortCrewPriority(data?.credits.crew ?? []),
     [data]
   );
+
+  useEffect(() => {
+    setShowManager(router.query.manage == '1' ? true : false);
+  }, [router.query.manage]);
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -162,39 +168,34 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
     });
   }
 
-  const deleteMedia = async () => {
-    if (data?.mediaInfo?.id) {
-      await axios.delete(`/api/v1/media/${data?.mediaInfo?.id}`);
-      revalidate();
-    }
-  };
-
-  const markAvailable = async (is4k = false) => {
-    await axios.post(`/api/v1/media/${data?.mediaInfo?.id}/available`, {
-      is4k,
-    });
-    revalidate();
-  };
-
   const region = user?.settings?.region
     ? user.settings.region
     : settings.currentSettings.region
     ? settings.currentSettings.region
     : 'US';
+
+  const releases = data.releases.results.find(
+    (r) => r.iso_3166_1 === region
+  )?.release_dates;
+
+  // Release date types:
+  // 1. Premiere
+  // 2. Theatrical (limited)
+  // 3. Theatrical
+  // 4. Digital
+  // 5. Physical
+  // 6. TV
+  const filteredReleases = uniqBy(
+    releases?.filter((r) => r.type > 2 && r.type < 6),
+    'type'
+  );
+
   const movieAttributes: React.ReactNode[] = [];
 
-  if (
-    data.releases.results.length &&
-    (data.releases.results.find((r) => r.iso_3166_1 === region)
-      ?.release_dates[0].certification ||
-      data.releases.results[0].release_dates[0].certification)
-  ) {
+  const certification = releases?.find((r) => r.certification)?.certification;
+  if (certification) {
     movieAttributes.push(
-      <span className="p-0.5 py-0 border rounded-md">
-        {data.releases.results.find((r) => r.iso_3166_1 === region)
-          ?.release_dates[0].certification ||
-          data.releases.results[0].release_dates[0].certification}
-      </span>
+      <span className="rounded-md border p-0.5 py-0">{certification}</span>
     );
   }
 
@@ -253,141 +254,25 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
         </div>
       )}
       <PageTitle title={data.title} />
-      <SlideOver
+      <IssueModal
+        onCancel={() => setShowIssueModal(false)}
+        show={showIssueModal}
+        mediaType="movie"
+        tmdbId={data.id}
+      />
+      <ManageSlideOver
+        data={data}
+        mediaType="movie"
+        onClose={() => {
+          setShowManager(false);
+          router.push({
+            pathname: router.pathname,
+            query: { movieId: router.query.movieId },
+          });
+        }}
+        revalidate={() => revalidate()}
         show={showManager}
-        title={intl.formatMessage(messages.manageModalTitle)}
-        onClose={() => setShowManager(false)}
-        subText={data.title}
-      >
-        {((data?.mediaInfo?.downloadStatus ?? []).length > 0 ||
-          (data?.mediaInfo?.downloadStatus4k ?? []).length > 0) && (
-          <>
-            <h3 className="mb-2 text-xl font-bold">
-              {intl.formatMessage(messages.downloadstatus)}
-            </h3>
-            <div className="mb-6 overflow-hidden bg-gray-600 rounded-md shadow">
-              <ul>
-                {data.mediaInfo?.downloadStatus?.map((status, index) => (
-                  <li
-                    key={`dl-status-${status.externalId}-${index}`}
-                    className="border-b border-gray-700 last:border-b-0"
-                  >
-                    <DownloadBlock downloadItem={status} />
-                  </li>
-                ))}
-                {data.mediaInfo?.downloadStatus4k?.map((status, index) => (
-                  <li
-                    key={`dl-status-${status.externalId}-${index}`}
-                    className="border-b border-gray-700 last:border-b-0"
-                  >
-                    <DownloadBlock downloadItem={status} is4k />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </>
-        )}
-        {data?.mediaInfo &&
-          (data.mediaInfo.status !== MediaStatus.AVAILABLE ||
-            (data.mediaInfo.status4k !== MediaStatus.AVAILABLE &&
-              settings.currentSettings.movie4kEnabled)) && (
-            <div className="mb-6">
-              {data?.mediaInfo &&
-                data?.mediaInfo.status !== MediaStatus.AVAILABLE && (
-                  <div className="flex flex-col mb-2 sm:flex-row flex-nowrap">
-                    <Button
-                      onClick={() => markAvailable()}
-                      className="w-full sm:mb-0"
-                      buttonType="success"
-                    >
-                      <CheckCircleIcon />
-                      <span>{intl.formatMessage(messages.markavailable)}</span>
-                    </Button>
-                  </div>
-                )}
-              {data?.mediaInfo &&
-                data?.mediaInfo.status4k !== MediaStatus.AVAILABLE &&
-                settings.currentSettings.movie4kEnabled && (
-                  <div className="flex flex-col mb-2 sm:flex-row flex-nowrap">
-                    <Button
-                      onClick={() => markAvailable(true)}
-                      className="w-full sm:mb-0"
-                      buttonType="success"
-                    >
-                      <CheckCircleIcon />
-                      <span>
-                        {intl.formatMessage(messages.mark4kavailable)}
-                      </span>
-                    </Button>
-                  </div>
-                )}
-            </div>
-          )}
-        <h3 className="mb-2 text-xl font-bold">
-          {intl.formatMessage(messages.manageModalRequests)}
-        </h3>
-        <div className="overflow-hidden bg-gray-600 rounded-md shadow">
-          <ul>
-            {data.mediaInfo?.requests?.map((request) => (
-              <li
-                key={`manage-request-${request.id}`}
-                className="border-b border-gray-700 last:border-b-0"
-              >
-                <RequestBlock request={request} onUpdate={() => revalidate()} />
-              </li>
-            ))}
-            {(data.mediaInfo?.requests ?? []).length === 0 && (
-              <li className="py-4 text-center text-gray-400">
-                {intl.formatMessage(messages.manageModalNoRequests)}
-              </li>
-            )}
-          </ul>
-        </div>
-        {(data?.mediaInfo?.serviceUrl || data?.mediaInfo?.serviceUrl4k) && (
-          <div className="mt-8">
-            {data?.mediaInfo?.serviceUrl && (
-              <a
-                href={data?.mediaInfo?.serviceUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="block mb-2 last:mb-0"
-              >
-                <Button buttonType="ghost" className="w-full">
-                  <ExternalLinkIcon />
-                  <span>{intl.formatMessage(messages.openradarr)}</span>
-                </Button>
-              </a>
-            )}
-            {data?.mediaInfo?.serviceUrl4k && (
-              <a
-                href={data?.mediaInfo?.serviceUrl4k}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Button buttonType="ghost" className="w-full">
-                  <ExternalLinkIcon />
-                  <span>{intl.formatMessage(messages.openradarr4k)}</span>
-                </Button>
-              </a>
-            )}
-          </div>
-        )}
-        {data?.mediaInfo && (
-          <div className="mt-8">
-            <ConfirmButton
-              onClick={() => deleteMedia()}
-              confirmText={intl.formatMessage(globalMessages.areyousure)}
-              className="w-full"
-            >
-              <DocumentRemoveIcon />
-              <span>{intl.formatMessage(messages.manageModalClearMedia)}</span>
-            </ConfirmButton>
-            <div className="mt-3 text-xs text-gray-400">
-              {intl.formatMessage(messages.manageModalClearMediaWarning)}
-            </div>
-          </div>
-        )}
-      </SlideOver>
+      />
       <div className="media-header">
         <div className="media-poster">
           <CachedImage
@@ -408,11 +293,17 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
             <StatusBadge
               status={data.mediaInfo?.status}
               inProgress={(data.mediaInfo?.downloadStatus ?? []).length > 0}
-              mediaUrl={data.mediaInfo?.mediaUrl}
+              tmdbId={data.mediaInfo?.tmdbId}
+              mediaType="movie"
+              plexUrl={data.mediaInfo?.mediaUrl}
             />
             {settings.currentSettings.movie4kEnabled &&
               hasPermission(
-                [Permission.REQUEST_4K, Permission.REQUEST_4K_MOVIE],
+                [
+                  Permission.MANAGE_REQUESTS,
+                  Permission.REQUEST_4K,
+                  Permission.REQUEST_4K_MOVIE,
+                ],
                 {
                   type: 'or',
                 }
@@ -423,7 +314,9 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                   inProgress={
                     (data.mediaInfo?.downloadStatus4k ?? []).length > 0
                   }
-                  mediaUrl4k={data.mediaInfo?.mediaUrl4k}
+                  tmdbId={data.mediaInfo?.tmdbId}
+                  mediaType="movie"
+                  plexUrl={data.mediaInfo?.mediaUrl4k}
                 />
               )}
           </div>
@@ -441,7 +334,9 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                 .map((t, k) => <span key={k}>{t}</span>)
                 .reduce((prev, curr) => (
                   <>
-                    {prev} | {curr}
+                    {prev}
+                    <span>|</span>
+                    {curr}
                   </>
                 ))}
           </span>
@@ -454,13 +349,52 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
             tmdbId={data.id}
             onUpdate={() => revalidate()}
           />
-          {hasPermission(Permission.MANAGE_REQUESTS) && (
+          {(data.mediaInfo?.status === MediaStatus.AVAILABLE ||
+            (settings.currentSettings.movie4kEnabled &&
+              hasPermission(
+                [Permission.REQUEST_4K, Permission.REQUEST_4K_MOVIE],
+                {
+                  type: 'or',
+                }
+              ) &&
+              data.mediaInfo?.status4k === MediaStatus.AVAILABLE)) &&
+            hasPermission(
+              [Permission.CREATE_ISSUES, Permission.MANAGE_ISSUES],
+              {
+                type: 'or',
+              }
+            ) && (
+              <Button
+                buttonType="warning"
+                className="ml-2 first:ml-0"
+                onClick={() => setShowIssueModal(true)}
+              >
+                <ExclamationIcon />
+              </Button>
+            )}
+          {hasPermission(Permission.MANAGE_REQUESTS) && data.mediaInfo && (
             <Button
               buttonType="default"
-              className="ml-2 first:ml-0"
+              className="relative ml-2 first:ml-0"
               onClick={() => setShowManager(true)}
             >
-              <CogIcon />
+              <CogIcon className="!mr-0" />
+              {hasPermission(
+                [Permission.MANAGE_ISSUES, Permission.VIEW_ISSUES],
+                {
+                  type: 'or',
+                }
+              ) &&
+                (
+                  data.mediaInfo?.issues.filter(
+                    (issue) => issue.status === IssueStatus.OPEN
+                  ) ?? []
+                ).length > 0 && (
+                  <>
+                    <div className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-red-600" />
+                    <div className="absolute -right-1 -top-1 h-3 w-3 animate-ping rounded-full bg-red-600" />
+                  </>
+                )}
             </Button>
           )}
         </div>
@@ -486,11 +420,11 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                   </li>
                 ))}
               </ul>
-              <div className="flex justify-end mt-4">
+              <div className="mt-4 flex justify-end">
                 <Link href={`/movie/${data.id}/crew`}>
                   <a className="flex items-center text-gray-400 transition duration-300 hover:text-gray-100">
                     <span>{intl.formatMessage(messages.viewfullcrew)}</span>
-                    <ArrowCircleRightIcon className="inline-block w-5 h-5 ml-1.5" />
+                    <ArrowCircleRightIcon className="ml-1.5 inline-block h-5 w-5" />
                   </a>
                 </Link>
               </div>
@@ -502,7 +436,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
             <div className="mb-6">
               <Link href={`/collection/${data.collection.id}`}>
                 <a>
-                  <div className="relative z-0 overflow-hidden transition duration-300 scale-100 bg-gray-800 bg-center bg-cover rounded-lg shadow-md cursor-pointer transform-gpu group hover:scale-105 ring-1 ring-gray-700 hover:ring-gray-500">
+                  <div className="group relative z-0 scale-100 transform-gpu cursor-pointer overflow-hidden rounded-lg bg-gray-800 bg-cover bg-center shadow-md ring-1 ring-gray-700 transition duration-300 hover:scale-105 hover:ring-gray-500">
                     <div className="absolute inset-0 z-0">
                       <CachedImage
                         src={`https://image.tmdb.org/t/p/w1440_and_h320_multi_faces/${data.collection.backdropPath}`}
@@ -518,7 +452,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                         }}
                       />
                     </div>
-                    <div className="relative z-10 flex items-center justify-between p-4 text-gray-200 transition duration-300 h-14 group-hover:text-white">
+                    <div className="relative z-10 flex h-14 items-center justify-between p-4 text-gray-200 transition duration-300 group-hover:text-white">
                       <div>{data.collection.name}</div>
                       <Button buttonSize="sm">
                         {intl.formatMessage(globalMessages.view)}
@@ -538,9 +472,9 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                   <>
                     <span className="media-rating">
                       {ratingData.criticsRating === 'Rotten' ? (
-                        <RTRotten className="w-6 mr-1" />
+                        <RTRotten className="mr-1 w-6" />
                       ) : (
-                        <RTFresh className="w-6 mr-1" />
+                        <RTFresh className="mr-1 w-6" />
                       )}
                       {ratingData.criticsScore}%
                     </span>
@@ -550,9 +484,9 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                   <>
                     <span className="media-rating">
                       {ratingData.audienceRating === 'Spilled' ? (
-                        <RTAudRotten className="w-6 mr-1" />
+                        <RTAudRotten className="mr-1 w-6" />
                       ) : (
-                        <RTAudFresh className="w-6 mr-1" />
+                        <RTAudFresh className="mr-1 w-6" />
                       )}
                       {ratingData.audienceScore}%
                     </span>
@@ -561,7 +495,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                 {!!data.voteCount && (
                   <>
                     <span className="media-rating">
-                      <TmdbLogo className="w-6 mr-2" />
+                      <TmdbLogo className="mr-2 w-6" />
                       {data.voteAverage}/10
                     </span>
                   </>
@@ -579,17 +513,66 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
               <span>{intl.formatMessage(globalMessages.status)}</span>
               <span className="media-fact-value">{data.status}</span>
             </div>
-            {data.releaseDate && (
+            {filteredReleases && filteredReleases.length > 0 ? (
               <div className="media-fact">
-                <span>{intl.formatMessage(messages.releasedate)}</span>
-                <span className="media-fact-value">
-                  {intl.formatDate(data.releaseDate, {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
+                <span>
+                  {intl.formatMessage(messages.releasedate, {
+                    releaseCount: filteredReleases.length,
                   })}
                 </span>
+                <span className="media-fact-value">
+                  {filteredReleases.map((r, i) => (
+                    <span
+                      className="flex items-center justify-end"
+                      key={`release-date-${i}`}
+                    >
+                      {r.type === 3 ? (
+                        // Theatrical
+                        <TicketIcon className="h-4 w-4" />
+                      ) : r.type === 4 ? (
+                        // Digital
+                        <CloudIcon className="h-4 w-4" />
+                      ) : (
+                        // Physical
+                        <svg
+                          className="h-4 w-4"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="m12 2c-5.5242 0-10 4.4758-10 10 0 5.5242 4.4758 10 10 10 5.5242 0 10-4.4758 10-10 0-5.5242-4.4758-10-10-10zm0 18.065c-4.4476 0-8.0645-3.6169-8.0645-8.0645 0-4.4476 3.6169-8.0645 8.0645-8.0645 4.4476 0 8.0645 3.6169 8.0645 8.0645 0 4.4476-3.6169 8.0645-8.0645 8.0645zm0-14.516c-3.5565 0-6.4516 2.8952-6.4516 6.4516h1.2903c0-2.8468 2.3145-5.1613 5.1613-5.1613zm0 2.9032c-1.9597 0-3.5484 1.5887-3.5484 3.5484s1.5887 3.5484 3.5484 3.5484 3.5484-1.5887 3.5484-3.5484-1.5887-3.5484-3.5484-3.5484zm0 4.8387c-0.71371 0-1.2903-0.57661-1.2903-1.2903s0.57661-1.2903 1.2903-1.2903 1.2903 0.57661 1.2903 1.2903-0.57661 1.2903-1.2903 1.2903z"
+                            fill="currentColor"
+                          />
+                        </svg>
+                      )}
+                      <span className="ml-1.5">
+                        {intl.formatDate(r.release_date, {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}
+                      </span>
+                    </span>
+                  ))}
+                </span>
               </div>
+            ) : (
+              data.releaseDate && (
+                <div className="media-fact">
+                  <span>
+                    {intl.formatMessage(messages.releasedate, {
+                      releaseCount: 1,
+                    })}
+                  </span>
+                  <span className="media-fact-value">
+                    {intl.formatDate(data.releaseDate, {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </span>
+                </div>
+              )
             )}
             {data.revenue > 0 && (
               <div className="media-fact">
@@ -633,6 +616,37 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                 </span>
               </div>
             )}
+            {data.productionCountries.length > 0 && (
+              <div className="media-fact">
+                <span>
+                  {intl.formatMessage(messages.productioncountries, {
+                    countryCount: data.productionCountries.length,
+                  })}
+                </span>
+                <span className="media-fact-value">
+                  {data.productionCountries.map((c) => {
+                    return (
+                      <span
+                        className="flex items-center justify-end"
+                        key={`prodcountry-${c.iso_3166_1}`}
+                      >
+                        {hasFlag(c.iso_3166_1) && (
+                          <span
+                            className={`mr-1.5 text-xs leading-5 flag:${c.iso_3166_1}`}
+                          />
+                        )}
+                        <span>
+                          {intl.formatDisplayName(c.iso_3166_1, {
+                            type: 'region',
+                            fallback: 'none',
+                          }) ?? c.name}
+                        </span>
+                      </span>
+                    );
+                  })}
+                </span>
+              </div>
+            )}
             {data.productionCompanies.length > 0 && (
               <div className="media-fact">
                 <span>
@@ -672,9 +686,9 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                             : messages.showless
                         )}
                         {!showMoreStudios ? (
-                          <ChevronDoubleDownIcon className="w-4 h-4 ml-1" />
+                          <ChevronDoubleDownIcon className="ml-1 h-4 w-4" />
                         ) : (
-                          <ChevronDoubleUpIcon className="w-4 h-4 ml-1" />
+                          <ChevronDoubleUpIcon className="ml-1 h-4 w-4" />
                         )}
                       </span>
                     </button>

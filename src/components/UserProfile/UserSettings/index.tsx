@@ -67,7 +67,9 @@ const UserSettings: React.FC = ({ children }) => {
         ? '/settings/notifications/email'
         : data?.webPushEnabled
         ? '/settings/notifications/webpush'
-        : '/settings/notifications/discord',
+        : data?.discordEnabled
+        ? '/settings/notifications/discord'
+        : '/settings/notifications/pushbullet',
       regex: /\/settings\/notifications/,
     },
     {

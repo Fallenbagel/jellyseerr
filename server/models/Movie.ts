@@ -79,7 +79,7 @@ export interface MovieDetails {
   };
   mediaInfo?: Media;
   externalIds: ExternalIds;
-  plexUrl?: string;
+  mediaUrl?: string;
   watchProviders?: WatchProviders[];
 }
 

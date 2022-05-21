@@ -2,10 +2,13 @@ import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { MediaStatus } from '../../../server/constants/media';
 import Spinner from '../../assets/spinner.svg';
+import useSettings from '../../hooks/useSettings';
+import { Permission, useUser } from '../../hooks/useUser';
 import globalMessages from '../../i18n/globalMessages';
 import Badge from '../Common/Badge';
 
 const messages = defineMessages({
+  status: '{status}',
   status4k: '4K {status}',
 });
 
@@ -14,9 +17,8 @@ interface StatusBadgeProps {
   is4k?: boolean;
   inProgress?: boolean;
   plexUrl?: string;
+  serviceUrl?: string;
   tmdbId?: number;
-  mediaUrl?: string;
-  mediaUrl4k?: string;
   mediaType?: 'movie' | 'tv';
 }
 
@@ -24,159 +26,103 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
   status,
   is4k = false,
   inProgress = false,
-  mediaUrl,
-  mediaUrl4k,
+  plexUrl,
+  serviceUrl,
+  tmdbId,
+  mediaType,
 }) => {
   const intl = useIntl();
+  const { hasPermission } = useUser();
+  const settings = useSettings();
 
-  if (is4k) {
-    switch (status) {
-      case MediaStatus.AVAILABLE:
-        if (mediaUrl4k) {
-          return (
-            <a href={mediaUrl4k} target="_blank" rel="noopener noreferrer">
-              <Badge
-                badgeType="success"
-                className="transition !cursor-pointer hover:bg-green-400"
-              >
-                {intl.formatMessage(messages.status4k, {
-                  status: intl.formatMessage(globalMessages.available),
-                })}
-              </Badge>
-            </a>
-          );
-        }
+  let mediaLink: string | undefined;
 
-        return (
-          <Badge badgeType="success">
-            {intl.formatMessage(messages.status4k, {
-              status: intl.formatMessage(globalMessages.available),
-            })}
-          </Badge>
-        );
-      case MediaStatus.PARTIALLY_AVAILABLE:
-        if (mediaUrl4k) {
-          return (
-            <a href={mediaUrl4k} target="_blank" rel="noopener noreferrer">
-              <Badge
-                badgeType="success"
-                className="transition !cursor-pointer hover:bg-green-400"
-              >
-                {intl.formatMessage(messages.status4k, {
-                  status: intl.formatMessage(globalMessages.partiallyavailable),
-                })}
-              </Badge>
-            </a>
-          );
-        }
-
-        return (
-          <Badge badgeType="success">
-            {intl.formatMessage(messages.status4k, {
-              status: intl.formatMessage(globalMessages.partiallyavailable),
-            })}
-          </Badge>
-        );
-      case MediaStatus.PROCESSING:
-        return (
-          <Badge badgeType="primary">
-            <div className="flex items-center">
-              <span>
-                {intl.formatMessage(messages.status4k, {
-                  status: inProgress
-                    ? intl.formatMessage(globalMessages.processing)
-                    : intl.formatMessage(globalMessages.requested),
-                })}
-              </span>
-              {inProgress && <Spinner className="w-3 h-3 ml-1" />}
-            </div>
-          </Badge>
-        );
-      case MediaStatus.PENDING:
-        return (
-          <Badge badgeType="warning">
-            {intl.formatMessage(messages.status4k, {
-              status: intl.formatMessage(globalMessages.pending),
-            })}
-          </Badge>
-        );
-      default:
-        return null;
-    }
+  if (
+    mediaType &&
+    plexUrl &&
+    hasPermission(
+      is4k
+        ? [
+            Permission.REQUEST_4K,
+            mediaType === 'movie'
+              ? Permission.REQUEST_4K_MOVIE
+              : Permission.REQUEST_4K_TV,
+          ]
+        : [
+            Permission.REQUEST,
+            mediaType === 'movie'
+              ? Permission.REQUEST_MOVIE
+              : Permission.REQUEST_TV,
+          ],
+      {
+        type: 'or',
+      }
+    ) &&
+    (!is4k ||
+      (mediaType === 'movie'
+        ? settings.currentSettings.movie4kEnabled
+        : settings.currentSettings.series4kEnabled))
+  ) {
+    mediaLink = plexUrl;
+  } else if (hasPermission(Permission.MANAGE_REQUESTS)) {
+    mediaLink =
+      mediaType && tmdbId ? `/${mediaType}/${tmdbId}?manage=1` : serviceUrl;
   }
 
   switch (status) {
     case MediaStatus.AVAILABLE:
-      if (mediaUrl) {
-        return (
-          <a href={mediaUrl} target="_blank" rel="noopener noreferrer">
-            <Badge
-              badgeType="success"
-              className="transition !cursor-pointer hover:bg-green-400"
-            >
-              <div className="flex items-center">
-                <span>{intl.formatMessage(globalMessages.available)}</span>
-                {inProgress && <Spinner className="w-3 h-3 ml-1" />}
-              </div>
-            </Badge>
-          </a>
-        );
-      }
-
       return (
-        <Badge badgeType="success">
-          <div className="flex items-center">
-            <span>{intl.formatMessage(globalMessages.available)}</span>
-            {inProgress && <Spinner className="w-3 h-3 ml-1" />}
-          </div>
-        </Badge>
-      );
-    case MediaStatus.PARTIALLY_AVAILABLE:
-      if (mediaUrl) {
-        return (
-          <a href={mediaUrl} target="_blank" rel="noopener noreferrer">
-            <Badge
-              badgeType="success"
-              className="transition !cursor-pointer hover:bg-green-400"
-            >
-              <div className="flex items-center">
-                <span>
-                  {intl.formatMessage(globalMessages.partiallyavailable)}
-                </span>
-                {inProgress && <Spinner className="w-3 h-3 ml-1" />}
-              </div>
-            </Badge>
-          </a>
-        );
-      }
-
-      return (
-        <Badge badgeType="success">
-          <div className="flex items-center">
-            <span>{intl.formatMessage(globalMessages.partiallyavailable)}</span>
-            {inProgress && <Spinner className="w-3 h-3 ml-1" />}
-          </div>
-        </Badge>
-      );
-    case MediaStatus.PROCESSING:
-      return (
-        <Badge badgeType="primary">
+        <Badge badgeType="success" href={mediaLink}>
           <div className="flex items-center">
             <span>
-              {inProgress
-                ? intl.formatMessage(globalMessages.processing)
-                : intl.formatMessage(globalMessages.requested)}
+              {intl.formatMessage(is4k ? messages.status4k : messages.status, {
+                status: intl.formatMessage(globalMessages.available),
+              })}
             </span>
-            {inProgress && <Spinner className="w-3 h-3 ml-1" />}
+            {inProgress && <Spinner className="ml-1 h-3 w-3" />}
           </div>
         </Badge>
       );
-    case MediaStatus.PENDING:
+
+    case MediaStatus.PARTIALLY_AVAILABLE:
       return (
-        <Badge badgeType="warning">
-          {intl.formatMessage(globalMessages.pending)}
+        <Badge badgeType="success" href={mediaLink}>
+          <div className="flex items-center">
+            <span>
+              {intl.formatMessage(is4k ? messages.status4k : messages.status, {
+                status: intl.formatMessage(globalMessages.partiallyavailable),
+              })}
+            </span>
+            {inProgress && <Spinner className="ml-1 h-3 w-3" />}
+          </div>
         </Badge>
       );
+
+    case MediaStatus.PROCESSING:
+      return (
+        <Badge badgeType="primary" href={mediaLink}>
+          <div className="flex items-center">
+            <span>
+              {intl.formatMessage(is4k ? messages.status4k : messages.status, {
+                status: inProgress
+                  ? intl.formatMessage(globalMessages.processing)
+                  : intl.formatMessage(globalMessages.requested),
+              })}
+            </span>
+            {inProgress && <Spinner className="ml-1 h-3 w-3" />}
+          </div>
+        </Badge>
+      );
+
+    case MediaStatus.PENDING:
+      return (
+        <Badge badgeType="warning" href={mediaLink}>
+          {intl.formatMessage(is4k ? messages.status4k : messages.status, {
+            status: intl.formatMessage(globalMessages.pending),
+          })}
+        </Badge>
+      );
+
     default:
       return null;
   }

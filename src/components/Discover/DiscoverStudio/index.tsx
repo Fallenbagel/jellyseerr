@@ -47,7 +47,7 @@ const DiscoverMovieStudio: React.FC = () => {
       <div className="mt-1 mb-5">
         <Header>
           {firstResultData?.studio.logoPath ? (
-            <div className="flex justify-center mb-6">
+            <div className="mb-6 flex justify-center">
               <img
                 src={`//image.tmdb.org/t/p/w780_filter(duotone,ffffff,bababa)${firstResultData.studio.logoPath}`}
                 alt={firstResultData.studio.name}

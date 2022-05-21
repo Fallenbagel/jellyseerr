@@ -1,7 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddUserRequestDeleteCascades1608219049304
-  implements MigrationInterface {
+  implements MigrationInterface
+{
   name = 'AddUserRequestDeleteCascades1608219049304';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

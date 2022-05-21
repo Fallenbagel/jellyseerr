@@ -71,7 +71,7 @@ class JobJellyfinSync {
       newMedia.tmdbId = Number(metadata.ProviderIds.Tmdb ?? null);
       newMedia.imdbId = metadata.ProviderIds.Imdb;
       if (newMedia.imdbId && !isNaN(newMedia.tmdbId)) {
-        const tmdbMovie = await this.tmdb.getMovieByImdbId({
+        const tmdbMovie = await this.tmdb.getMediaByImdbId({
           imdbId: newMedia.imdbId,
         });
         newMedia.tmdbId = tmdbMovie.id;

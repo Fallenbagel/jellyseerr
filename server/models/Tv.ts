@@ -90,6 +90,10 @@ export interface TvDetails {
   overview: string;
   popularity: number;
   productionCompanies: ProductionCompany[];
+  productionCountries: {
+    iso_3166_1: string;
+    name: string;
+  }[];
   spokenLanguages: SpokenLanguage[];
   seasons: Season[];
   status: string;
@@ -187,6 +191,7 @@ export const mapTvDetails = (
     originCountry: company.origin_country,
     logoPath: company.logo_path,
   })),
+  productionCountries: show.production_countries,
   contentRatings: show.content_ratings,
   spokenLanguages: show.spoken_languages.map((language) => ({
     englishName: language.english_name,

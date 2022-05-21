@@ -4,7 +4,7 @@ import * as winston from 'winston';
 import 'winston-daily-rotate-file';
 
 // Migrate away from old log
-const OLD_LOG_FILE = path.join(__dirname, '../config/logs/Jellyseerr.log');
+const OLD_LOG_FILE = path.join(__dirname, '../config/logs/overseerr.log');
 if (fs.existsSync(OLD_LOG_FILE)) {
   const file = fs.lstatSync(OLD_LOG_FILE);
 
@@ -43,14 +43,30 @@ const logger = winston.createLogger({
     }),
     new winston.transports.DailyRotateFile({
       filename: process.env.CONFIG_DIRECTORY
-        ? `${process.env.CONFIG_DIRECTORY}/logs/Jellyseerr-%DATE%.log`
-        : path.join(__dirname, '../config/logs/Jellyseerr-%DATE%.log'),
+        ? `${process.env.CONFIG_DIRECTORY}/logs/overseerr-%DATE%.log`
+        : path.join(__dirname, '../config/logs/overseerr-%DATE%.log'),
       datePattern: 'YYYY-MM-DD',
       zippedArchive: true,
       maxSize: '20m',
       maxFiles: '7d',
       createSymlink: true,
-      symlinkName: 'Jellyseerr.log',
+      symlinkName: 'overseerr.log',
+    }),
+    new winston.transports.DailyRotateFile({
+      filename: process.env.CONFIG_DIRECTORY
+        ? `${process.env.CONFIG_DIRECTORY}/logs/.machinelogs-%DATE%.json`
+        : path.join(__dirname, '../config/logs/.machinelogs-%DATE%.json'),
+      datePattern: 'YYYY-MM-DD',
+      zippedArchive: true,
+      maxSize: '20m',
+      maxFiles: '1d',
+      createSymlink: true,
+      symlinkName: '.machinelogs.json',
+      format: winston.format.combine(
+        winston.format.splat(),
+        winston.format.timestamp(),
+        winston.format.json()
+      ),
     }),
   ],
 });

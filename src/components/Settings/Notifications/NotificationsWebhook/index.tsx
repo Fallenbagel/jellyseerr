@@ -18,27 +18,38 @@ const JSONEditor = dynamic(() => import('../../../JSONEditor'), { ssr: false });
 
 const defaultPayload = {
   notification_type: '{{notification_type}}',
+  event: '{{event}}',
   subject: '{{subject}}',
   message: '{{message}}',
   image: '{{image}}',
-  email: '{{notifyuser_email}}',
-  username: '{{notifyuser_username}}',
-  avatar: '{{notifyuser_avatar}}',
   '{{media}}': {
     media_type: '{{media_type}}',
     tmdbId: '{{media_tmdbid}}',
-    imdbId: '{{media_imdbid}}',
     tvdbId: '{{media_tvdbid}}',
     status: '{{media_status}}',
     status4k: '{{media_status4k}}',
   },
-  '{{extra}}': [],
   '{{request}}': {
     request_id: '{{request_id}}',
     requestedBy_email: '{{requestedBy_email}}',
     requestedBy_username: '{{requestedBy_username}}',
     requestedBy_avatar: '{{requestedBy_avatar}}',
   },
+  '{{issue}}': {
+    issue_id: '{{issue_id}}',
+    issue_type: '{{issue_type}}',
+    issue_status: '{{issue_status}}',
+    reportedBy_email: '{{reportedBy_email}}',
+    reportedBy_username: '{{reportedBy_username}}',
+    reportedBy_avatar: '{{reportedBy_avatar}}',
+  },
+  '{{comment}}': {
+    comment_message: '{{comment_message}}',
+    commentedBy_email: '{{commentedBy_email}}',
+    commentedBy_username: '{{commentedBy_username}}',
+    commentedBy_avatar: '{{commentedBy_avatar}}',
+  },
+  '{{extra}}': [],
 };
 
 const messages = defineMessages({
@@ -63,9 +74,11 @@ const NotificationsWebhook: React.FC = () => {
   const intl = useIntl();
   const { addToast, removeToast } = useToasts();
   const [isTesting, setIsTesting] = useState(false);
-  const { data, error, revalidate } = useSWR(
-    '/api/v1/settings/notifications/webhook'
-  );
+  const {
+    data,
+    error,
+    mutate: revalidate,
+  } = useSWR('/api/v1/settings/notifications/webhook');
 
   const NotificationsWebhookSchema = Yup.object().shape({
     webhookUrl: Yup.string()
@@ -101,13 +114,6 @@ const NotificationsWebhook: React.FC = () => {
           }
         }
       ),
-    types: Yup.number().when('enabled', {
-      is: true,
-      then: Yup.number()
-        .nullable()
-        .moreThan(0, intl.formatMessage(messages.validationTypes)),
-      otherwise: Yup.number().nullable(),
-    }),
   });
 
   if (!data && !error) {
@@ -220,7 +226,7 @@ const NotificationsWebhook: React.FC = () => {
                 {intl.formatMessage(messages.agentenabled)}
                 <span className="label-required">*</span>
               </label>
-              <div className="form-input">
+              <div className="form-input-area">
                 <Field type="checkbox" id="enabled" name="enabled" />
               </div>
             </div>
@@ -229,7 +235,7 @@ const NotificationsWebhook: React.FC = () => {
                 {intl.formatMessage(messages.webhookUrl)}
                 <span className="label-required">*</span>
               </label>
-              <div className="form-input">
+              <div className="form-input-area">
                 <div className="form-input-field">
                   <Field
                     id="webhookUrl"
@@ -247,7 +253,7 @@ const NotificationsWebhook: React.FC = () => {
               <label htmlFor="authHeader" className="text-label">
                 {intl.formatMessage(messages.authheader)}
               </label>
-              <div className="form-input">
+              <div className="form-input-area">
                 <div className="form-input-field">
                   <Field id="authHeader" name="authHeader" type="text" />
                 </div>
@@ -258,7 +264,7 @@ const NotificationsWebhook: React.FC = () => {
                 {intl.formatMessage(messages.customJson)}
                 <span className="label-required">*</span>
               </label>
-              <div className="form-input">
+              <div className="form-input-area">
                 <div className="form-input-field">
                   <JSONEditor
                     name="webhook-json-payload"
@@ -312,14 +318,14 @@ const NotificationsWebhook: React.FC = () => {
                 }
               }}
               error={
-                errors.types && touched.types
-                  ? (errors.types as string)
+                values.enabled && !values.types && touched.types
+                  ? intl.formatMessage(messages.validationTypes)
                   : undefined
               }
             />
             <div className="actions">
               <div className="flex justify-end">
-                <span className="inline-flex ml-3 rounded-md shadow-sm">
+                <span className="ml-3 inline-flex rounded-md shadow-sm">
                   <Button
                     buttonType="warning"
                     disabled={isSubmitting || !isValid || isTesting}
@@ -336,11 +342,16 @@ const NotificationsWebhook: React.FC = () => {
                     </span>
                   </Button>
                 </span>
-                <span className="inline-flex ml-3 rounded-md shadow-sm">
+                <span className="ml-3 inline-flex rounded-md shadow-sm">
                   <Button
                     buttonType="primary"
                     type="submit"
-                    disabled={isSubmitting || !isValid || isTesting}
+                    disabled={
+                      isSubmitting ||
+                      !isValid ||
+                      isTesting ||
+                      (values.enabled && !values.types)
+                    }
                   >
                     <SaveIcon />
                     <span>

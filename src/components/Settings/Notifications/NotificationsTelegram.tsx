@@ -19,7 +19,7 @@ const messages = defineMessages({
     'Allow users to also start a chat with your bot and configure their own notifications',
   botAPI: 'Bot Authorization Token',
   botApiTip:
-    '<CreateBotLink>Create a bot</CreateBotLink> for use with Jellyseerr',
+    '<CreateBotLink>Create a bot</CreateBotLink> for use with Overseerr',
   chatId: 'Chat ID',
   chatIdTip:
     'Start a chat with your bot, add <GetIdBotLink>@get_id_bot</GetIdBotLink>, and issue the <code>/my_id</code> command',
@@ -38,9 +38,11 @@ const NotificationsTelegram: React.FC = () => {
   const intl = useIntl();
   const { addToast, removeToast } = useToasts();
   const [isTesting, setIsTesting] = useState(false);
-  const { data, error, revalidate } = useSWR(
-    '/api/v1/settings/notifications/telegram'
-  );
+  const {
+    data,
+    error,
+    mutate: revalidate,
+  } = useSWR('/api/v1/settings/notifications/telegram');
 
   const NotificationsTelegramSchema = Yup.object().shape({
     botAPI: Yup.string().when('enabled', {
@@ -51,8 +53,8 @@ const NotificationsTelegram: React.FC = () => {
       otherwise: Yup.string().nullable(),
     }),
     chatId: Yup.string()
-      .when('enabled', {
-        is: true,
+      .when(['enabled', 'types'], {
+        is: (enabled: boolean, types: number) => enabled && !!types,
         then: Yup.string()
           .nullable()
           .required(intl.formatMessage(messages.validationChatIdRequired)),
@@ -167,7 +169,7 @@ const NotificationsTelegram: React.FC = () => {
                 {intl.formatMessage(messages.agentenabled)}
                 <span className="label-required">*</span>
               </label>
-              <div className="form-input">
+              <div className="form-input-area">
                 <Field type="checkbox" id="enabled" name="enabled" />
               </div>
             </div>
@@ -207,7 +209,7 @@ const NotificationsTelegram: React.FC = () => {
                   })}
                 </span>
               </label>
-              <div className="form-input">
+              <div className="form-input-area">
                 <div className="form-input-field">
                   <SensitiveInput
                     as="field"
@@ -228,7 +230,7 @@ const NotificationsTelegram: React.FC = () => {
                   {intl.formatMessage(messages.botUsernameTip)}
                 </span>
               </label>
-              <div className="form-input">
+              <div className="form-input-area">
                 <div className="form-input-field">
                   <Field id="botUsername" name="botUsername" type="text" />
                 </div>
@@ -260,7 +262,7 @@ const NotificationsTelegram: React.FC = () => {
                   })}
                 </span>
               </label>
-              <div className="form-input">
+              <div className="form-input-area">
                 <div className="form-input-field">
                   <Field id="chatId" name="chatId" type="text" />
                 </div>
@@ -276,7 +278,7 @@ const NotificationsTelegram: React.FC = () => {
                   {intl.formatMessage(messages.sendSilentlyTip)}
                 </span>
               </label>
-              <div className="form-input">
+              <div className="form-input-area">
                 <Field type="checkbox" id="sendSilently" name="sendSilently" />
               </div>
             </div>
@@ -298,7 +300,7 @@ const NotificationsTelegram: React.FC = () => {
             />
             <div className="actions">
               <div className="flex justify-end">
-                <span className="inline-flex ml-3 rounded-md shadow-sm">
+                <span className="ml-3 inline-flex rounded-md shadow-sm">
                   <Button
                     buttonType="warning"
                     disabled={isSubmitting || !isValid || isTesting}
@@ -315,7 +317,7 @@ const NotificationsTelegram: React.FC = () => {
                     </span>
                   </Button>
                 </span>
-                <span className="inline-flex ml-3 rounded-md shadow-sm">
+                <span className="ml-3 inline-flex rounded-md shadow-sm">
                   <Button
                     buttonType="primary"
                     type="submit"

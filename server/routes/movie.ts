@@ -22,75 +22,105 @@ movieRoutes.get('/:id', async (req, res, next) => {
 
     return res.status(200).json(mapMovieDetails(tmdbMovie, media));
   } catch (e) {
-    logger.error('Something went wrong getting movie', {
-      label: 'Movie',
-      message: e.message,
+    logger.debug('Something went wrong retrieving movie', {
+      label: 'API',
+      errorMessage: e.message,
+      movieId: req.params.id,
     });
-    return next({ status: 404, message: 'Movie does not exist' });
+    return next({
+      status: 500,
+      message: 'Unable to retrieve movie.',
+    });
   }
 });
 
-movieRoutes.get('/:id/recommendations', async (req, res) => {
+movieRoutes.get('/:id/recommendations', async (req, res, next) => {
   const tmdb = new TheMovieDb();
 
-  const results = await tmdb.getMovieRecommendations({
-    movieId: Number(req.params.id),
-    page: Number(req.query.page),
-    language: req.locale ?? (req.query.language as string),
-  });
+  try {
+    const results = await tmdb.getMovieRecommendations({
+      movieId: Number(req.params.id),
+      page: Number(req.query.page),
+      language: req.locale ?? (req.query.language as string),
+    });
 
-  const media = await Media.getRelatedMedia(
-    results.results.map((result) => result.id)
-  );
+    const media = await Media.getRelatedMedia(
+      results.results.map((result) => result.id)
+    );
 
-  return res.status(200).json({
-    page: results.page,
-    totalPages: results.total_pages,
-    totalResults: results.total_results,
-    results: results.results.map((result) =>
-      mapMovieResult(
-        result,
-        media.find(
-          (req) => req.tmdbId === result.id && req.mediaType === MediaType.MOVIE
+    return res.status(200).json({
+      page: results.page,
+      totalPages: results.total_pages,
+      totalResults: results.total_results,
+      results: results.results.map((result) =>
+        mapMovieResult(
+          result,
+          media.find(
+            (req) =>
+              req.tmdbId === result.id && req.mediaType === MediaType.MOVIE
+          )
         )
-      )
-    ),
-  });
+      ),
+    });
+  } catch (e) {
+    logger.debug('Something went wrong retrieving movie recommendations', {
+      label: 'API',
+      errorMessage: e.message,
+      movieId: req.params.id,
+    });
+    return next({
+      status: 500,
+      message: 'Unable to retrieve movie recommendations.',
+    });
+  }
 });
 
-movieRoutes.get('/:id/similar', async (req, res) => {
+movieRoutes.get('/:id/similar', async (req, res, next) => {
   const tmdb = new TheMovieDb();
 
-  const results = await tmdb.getMovieSimilar({
-    movieId: Number(req.params.id),
-    page: Number(req.query.page),
-    language: req.locale ?? (req.query.language as string),
-  });
+  try {
+    const results = await tmdb.getMovieSimilar({
+      movieId: Number(req.params.id),
+      page: Number(req.query.page),
+      language: req.locale ?? (req.query.language as string),
+    });
 
-  const media = await Media.getRelatedMedia(
-    results.results.map((result) => result.id)
-  );
+    const media = await Media.getRelatedMedia(
+      results.results.map((result) => result.id)
+    );
 
-  return res.status(200).json({
-    page: results.page,
-    totalPages: results.total_pages,
-    totalResults: results.total_results,
-    results: results.results.map((result) =>
-      mapMovieResult(
-        result,
-        media.find(
-          (req) => req.tmdbId === result.id && req.mediaType === MediaType.MOVIE
+    return res.status(200).json({
+      page: results.page,
+      totalPages: results.total_pages,
+      totalResults: results.total_results,
+      results: results.results.map((result) =>
+        mapMovieResult(
+          result,
+          media.find(
+            (req) =>
+              req.tmdbId === result.id && req.mediaType === MediaType.MOVIE
+          )
         )
-      )
-    ),
-  });
+      ),
+    });
+  } catch (e) {
+    logger.debug('Something went wrong retrieving similar movies', {
+      label: 'API',
+      errorMessage: e.message,
+      movieId: req.params.id,
+    });
+    return next({
+      status: 500,
+      message: 'Unable to retrieve similar movies.',
+    });
+  }
 });
 
 movieRoutes.get('/:id/ratings', async (req, res, next) => {
-  try {
-    const tmdb = new TheMovieDb();
-    const rtapi = new RottenTomatoes();
+  const tmdb = new TheMovieDb();
+  const rtapi = new RottenTomatoes();
 
+  try {
     const movie = await tmdb.getMovie({
       movieId: Number(req.params.id),
     });
@@ -101,12 +131,23 @@ movieRoutes.get('/:id/ratings', async (req, res, next) => {
     );
 
     if (!rtratings) {
-      return next({ status: 404, message: 'Unable to retrieve ratings' });
+      return next({
+        status: 404,
+        message: 'Rotten Tomatoes ratings not found.',
+      });
     }
 
     return res.status(200).json(rtratings);
   } catch (e) {
-    return next({ status: 404, message: 'Movie does not exist' });
+    logger.debug('Something went wrong retrieving movie ratings', {
+      label: 'API',
+      errorMessage: e.message,
+      movieId: req.params.id,
+    });
+    return next({
+      status: 500,
+      message: 'Unable to retrieve movie ratings.',
+    });
   }
 });
 

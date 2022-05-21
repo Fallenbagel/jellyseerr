@@ -1,7 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddUserSettingsNotificationAgentsField1617730837489
-  implements MigrationInterface {
+  implements MigrationInterface
+{
   name = 'AddUserSettingsNotificationAgentsField1617730837489';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

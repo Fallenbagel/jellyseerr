@@ -539,23 +539,138 @@
       "contributions": [
         "code"
       ]
-    }
+    },
     {
-      "login": "Fallenbagel",
-      "name": "Mohamed Nuvaas",
-      "avatar_url": "https://avatars.githubusercontent.com/u/98979876?s=96&v=4",
-      "profile": "https://github.com/nicospz",
+      "login": "sootylunatic",
+      "name": "sootylunatic",
+      "avatar_url": "https://avatars.githubusercontent.com/u/36486087?v=4",
+      "profile": "https://github.com/sootylunatic",
       "contributions": [
-        "code",
-        "logo",
-        "design"
+        "translation"
+      ]
+    },
+    {
+      "login": "JoKerIsCraZy",
+      "name": "JoKerIsCraZy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/47474211?v=4",
+      "profile": "https://github.com/JoKerIsCraZy",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "GoByeBye",
+      "name": "Daddie0",
+      "avatar_url": "https://avatars.githubusercontent.com/u/33762262?v=4",
+      "profile": "https://daddie.dev",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "Simoneu01",
+      "name": "Simone",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43807696?v=4",
+      "profile": "http://ungaro.me",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "adan89lion",
+      "name": "Seohyun Joo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6585644?v=4",
+      "profile": "https://github.com/adan89lion",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "ty4ko",
+      "name": "Sergey",
+      "avatar_url": "https://avatars.githubusercontent.com/u/21213535?v=4",
+      "profile": "https://github.com/ty4ko",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "skafte1990",
+      "name": "Shaaft",
+      "avatar_url": "https://avatars.githubusercontent.com/u/31465453?v=4",
+      "profile": "https://github.com/skafte1990",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "sr093906",
+      "name": "sr093906",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8369201?v=4",
+      "profile": "https://github.com/sr093906",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "Nackophilz",
+      "name": "Nackophilz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/61667226?v=4",
+      "profile": "https://github.com/Nackophilz",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "schambers",
+      "name": "Sean Chambers",
+      "avatar_url": "https://avatars.githubusercontent.com/u/31563?v=4",
+      "profile": "https://github.com/schambers",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "deniscerri",
+      "name": "deniscerri",
+      "avatar_url": "https://avatars.githubusercontent.com/u/64997243?v=4",
+      "profile": "https://github.com/deniscerri",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "tomgacz",
+      "name": "tomgacz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/14138209?v=4",
+      "profile": "https://github.com/tomgacz",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "Andersborrits",
+      "name": "Andersborrits",
+      "avatar_url": "https://avatars.githubusercontent.com/u/29452218?v=4",
+      "profile": "https://github.com/Andersborrits",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "Maxentr",
+      "name": "Maxent",
+      "avatar_url": "https://avatars.githubusercontent.com/u/67283154?v=4",
+      "profile": "http://maxentrouault.fr",
+      "contributions": [
+        "translation"
       ]
     }
   ],
   "badgeTemplate": "<a href=\"#contributors-\"><img alt=\"All Contributors\" src=\"https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg\"/></a>",
   "contributorsPerLine": 7,
-  "projectName": "jellyseerr",
-  "projectOwner": "Fallenbagel",
+  "projectName": "overseerr",
+  "projectOwner": "sct",
   "repoType": "github",
   "repoHost": "https://github.com",
   "skipCi": true

@@ -1,9 +1,13 @@
 import axios from 'axios';
 import { getRepository } from 'typeorm';
-import { hasNotificationType, Notification } from '..';
+import {
+  hasNotificationType,
+  Notification,
+  shouldSendAdminNotification,
+} from '..';
+import { IssueStatus, IssueTypeName } from '../../../constants/issue';
 import { User } from '../../../entity/User';
 import logger from '../../../logger';
-import { Permission } from '../../permissions';
 import {
   getSettings,
   NotificationAgentDiscord,
@@ -91,7 +95,8 @@ interface DiscordWebhookPayload {
 
 class DiscordAgent
   extends BaseAgent<NotificationAgentDiscord>
-  implements NotificationAgent {
+  implements NotificationAgent
+{
   protected getSettings(): NotificationAgentDiscord {
     if (this.settings) {
       return this.settings;
@@ -106,9 +111,9 @@ class DiscordAgent
     type: Notification,
     payload: NotificationPayload
   ): DiscordRichEmbed {
-    const settings = getSettings();
-    let color = EmbedColors.DARK_PURPLE;
+    const { applicationUrl } = getSettings().main;
 
+    let color = EmbedColors.DARK_PURPLE;
     const fields: Field[] = [];
 
     if (payload.request) {
@@ -117,56 +122,94 @@ class DiscordAgent
         value: payload.request.requestedBy.displayName,
         inline: true,
       });
+
+      let status = '';
+      switch (type) {
+        case Notification.MEDIA_PENDING:
+          color = EmbedColors.ORANGE;
+          status = 'Pending Approval';
+          break;
+        case Notification.MEDIA_APPROVED:
+        case Notification.MEDIA_AUTO_APPROVED:
+          color = EmbedColors.PURPLE;
+          status = 'Processing';
+          break;
+        case Notification.MEDIA_AVAILABLE:
+          color = EmbedColors.GREEN;
+          status = 'Available';
+          break;
+        case Notification.MEDIA_DECLINED:
+          color = EmbedColors.RED;
+          status = 'Declined';
+          break;
+        case Notification.MEDIA_FAILED:
+          color = EmbedColors.RED;
+          status = 'Failed';
+          break;
+      }
+
+      if (status) {
+        fields.push({
+          name: 'Request Status',
+          value: status,
+          inline: true,
+        });
+      }
+    } else if (payload.comment) {
+      fields.push({
+        name: `Comment from ${payload.comment.user.displayName}`,
+        value: payload.comment.message,
+        inline: false,
+      });
+    } else if (payload.issue) {
+      fields.push(
+        {
+          name: 'Reported By',
+          value: payload.issue.createdBy.displayName,
+          inline: true,
+        },
+        {
+          name: 'Issue Type',
+          value: IssueTypeName[payload.issue.issueType],
+          inline: true,
+        },
+        {
+          name: 'Issue Status',
+          value:
+            payload.issue.status === IssueStatus.OPEN ? 'Open' : 'Resolved',
+          inline: true,
+        }
+      );
+
+      switch (type) {
+        case Notification.ISSUE_CREATED:
+        case Notification.ISSUE_REOPENED:
+          color = EmbedColors.RED;
+          break;
+        case Notification.ISSUE_COMMENT:
+          color = EmbedColors.ORANGE;
+          break;
+        case Notification.ISSUE_RESOLVED:
+          color = EmbedColors.GREEN;
+          break;
+      }
     }
 
-    switch (type) {
-      case Notification.MEDIA_PENDING:
-        color = EmbedColors.ORANGE;
-        fields.push({
-          name: 'Status',
-          value: 'Pending Approval',
-          inline: true,
-        });
-        break;
-      case Notification.MEDIA_APPROVED:
-      case Notification.MEDIA_AUTO_APPROVED:
-        color = EmbedColors.PURPLE;
-        fields.push({
-          name: 'Status',
-          value: 'Processing',
-          inline: true,
-        });
-        break;
-      case Notification.MEDIA_AVAILABLE:
-        color = EmbedColors.GREEN;
-        fields.push({
-          name: 'Status',
-          value: 'Available',
-          inline: true,
-        });
-        break;
-      case Notification.MEDIA_DECLINED:
-        color = EmbedColors.RED;
-        fields.push({
-          name: 'Status',
-          value: 'Declined',
-          inline: true,
-        });
-        break;
-      case Notification.MEDIA_FAILED:
-        color = EmbedColors.RED;
-        fields.push({
-          name: 'Status',
-          value: 'Failed',
-          inline: true,
-        });
-        break;
+    for (const extra of payload.extra ?? []) {
+      fields.push({
+        name: extra.name,
+        value: extra.value,
+        inline: true,
+      });
     }
 
-    const url =
-      settings.main.applicationUrl && payload.media
-        ? `${settings.main.applicationUrl}/${payload.media.mediaType}/${payload.media.tmdbId}`
-        : undefined;
+    const url = applicationUrl
+      ? payload.issue
+        ? `${applicationUrl}/issues/${payload.issue.id}`
+        : payload.media
+        ? `${applicationUrl}/${payload.media.mediaType}/${payload.media.tmdbId}`
+        : undefined
+      : undefined;
 
     return {
       title: payload.subject,
@@ -174,18 +217,12 @@ class DiscordAgent
       description: payload.message,
       color,
       timestamp: new Date().toISOString(),
-      author: {
-        name: settings.main.applicationTitle,
-        url: settings.main.applicationUrl,
-      },
-      fields: [
-        ...fields,
-        // If we have extra data, map it to fields for discord notifications
-        ...(payload.extra ?? []).map((extra) => ({
-          name: extra.name,
-          value: extra.value,
-        })),
-      ],
+      author: payload.event
+        ? {
+            name: payload.event,
+          }
+        : undefined,
+      fields,
       thumbnail: {
         url: payload.image,
       },
@@ -218,54 +255,55 @@ class DiscordAgent
       subject: payload.subject,
     });
 
-    let content = undefined;
+    const userMentions: string[] = [];
 
     try {
-      if (payload.notifyUser) {
-        // Mention user who submitted the request
-        if (
-          payload.notifyUser.settings?.hasNotificationType(
-            NotificationAgentKey.DISCORD,
-            type
-          ) &&
-          payload.notifyUser.settings?.discordId
-        ) {
-          content = `<@${payload.notifyUser.settings.discordId}>`;
+      if (settings.options.enableMentions) {
+        if (payload.notifyUser) {
+          if (
+            payload.notifyUser.settings?.hasNotificationType(
+              NotificationAgentKey.DISCORD,
+              type
+            ) &&
+            payload.notifyUser.settings.discordId
+          ) {
+            userMentions.push(`<@${payload.notifyUser.settings.discordId}>`);
+          }
         }
-      } else {
-        // Mention all users with the Manage Requests permission
-        const userRepository = getRepository(User);
-        const users = await userRepository.find();
 
-        content = users
-          .filter(
-            (user) =>
-              user.hasPermission(Permission.MANAGE_REQUESTS) &&
-              user.settings?.hasNotificationType(
-                NotificationAgentKey.DISCORD,
-                type
-              ) &&
-              user.settings?.discordId &&
-              // Check if it's the user's own auto-approved request
-              (type !== Notification.MEDIA_AUTO_APPROVED ||
-                user.id !== payload.request?.requestedBy.id)
-          )
-          .map((user) => `<@${user.settings?.discordId}>`)
-          .join(' ');
+        if (payload.notifyAdmin) {
+          const userRepository = getRepository(User);
+          const users = await userRepository.find();
+
+          userMentions.push(
+            ...users
+              .filter(
+                (user) =>
+                  user.settings?.hasNotificationType(
+                    NotificationAgentKey.DISCORD,
+                    type
+                  ) &&
+                  user.settings.discordId &&
+                  shouldSendAdminNotification(type, user, payload)
+              )
+              .map((user) => `<@${user.settings?.discordId}>`)
+          );
+        }
       }
 
       await axios.post(settings.options.webhookUrl, {
-        username: settings.options.botUsername,
+        username: settings.options.botUsername
+          ? settings.options.botUsername
+          : getSettings().main.applicationTitle,
         avatar_url: settings.options.botAvatarUrl,
         embeds: [this.buildEmbed(type, payload)],
-        content,
+        content: userMentions.join(' '),
       } as DiscordWebhookPayload);
 
       return true;
     } catch (e) {
       logger.error('Error sending Discord notification', {
         label: 'Notifications',
-        mentions: content,
         type: Notification[type],
         subject: payload.subject,
         errorMessage: e.message,

@@ -1,4 +1,4 @@
-FROM node:14.17-alpine AS BUILD_IMAGE
+FROM node:16.14-alpine AS BUILD_IMAGE
 
 WORKDIR /app
 
@@ -7,8 +7,10 @@ ENV TARGETPLATFORM=${TARGETPLATFORM:-linux/amd64}
 
 RUN \
   case "${TARGETPLATFORM}" in \
-    'linux/arm64') apk add --no-cache python make g++ ;; \
-    'linux/arm/v7') apk add --no-cache python make g++ ;; \
+    'linux/arm64' | 'linux/arm/v7') \
+      apk add --no-cache python3 make g++ && \
+      ln -s /usr/bin/python3 /usr/bin/python \
+      ;; \
   esac
 
 COPY package.json yarn.lock ./
@@ -24,18 +26,18 @@ RUN yarn build
 # remove development dependencies
 RUN yarn install --production --ignore-scripts --prefer-offline
 
-RUN rm -rf src server
+RUN rm -rf src server .next/cache
 
 RUN touch config/DOCKER
 
 RUN echo "{\"commitTag\": \"${COMMIT_TAG}\"}" > committag.json
 
 
-FROM node:14.17-alpine
+FROM node:16.14-alpine
 
 WORKDIR /app
 
-RUN apk add --no-cache tzdata tini
+RUN apk add --no-cache tzdata tini && rm -rf /tmp/*
 
 # copy from build image
 COPY --from=BUILD_IMAGE /app ./

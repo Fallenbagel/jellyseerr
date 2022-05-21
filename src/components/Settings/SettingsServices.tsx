@@ -79,14 +79,14 @@ const ServerInstance: React.FC<ServerInstanceProps> = ({
   const serviceUrl = externalUrl ?? internalUrl;
 
   return (
-    <li className="col-span-1 bg-gray-800 rounded-lg shadow ring-1 ring-gray-500">
-      <div className="flex items-center justify-between w-full p-6 space-x-6">
+    <li className="col-span-1 rounded-lg bg-gray-800 shadow ring-1 ring-gray-500">
+      <div className="flex w-full items-center justify-between space-x-6 p-6">
         <div className="flex-1 truncate">
-          <div className="flex items-center mb-2 space-x-2">
-            <h3 className="font-medium leading-5 text-white truncate">
+          <div className="mb-2 flex items-center space-x-2">
+            <h3 className="truncate font-medium leading-5 text-white">
               <a
                 href={serviceUrl}
-                className="transition duration-300 hover:underline hover:text-white"
+                className="transition duration-300 hover:text-white hover:underline"
               >
                 {name}
               </a>
@@ -108,18 +108,18 @@ const ServerInstance: React.FC<ServerInstanceProps> = ({
               </Badge>
             )}
           </div>
-          <p className="mt-1 text-sm leading-5 text-gray-300 truncate">
+          <p className="mt-1 truncate text-sm leading-5 text-gray-300">
             <span className="mr-2 font-bold">
               {intl.formatMessage(messages.address)}
             </span>
             <a
               href={internalUrl}
-              className="transition duration-300 hover:underline hover:text-white"
+              className="transition duration-300 hover:text-white hover:underline"
             >
               {internalUrl}
             </a>
           </p>
-          <p className="mt-1 text-sm leading-5 text-gray-300 truncate">
+          <p className="mt-1 truncate text-sm leading-5 text-gray-300">
             <span className="mr-2 font-bold">
               {intl.formatMessage(messages.activeProfile)}
             </span>
@@ -128,29 +128,29 @@ const ServerInstance: React.FC<ServerInstanceProps> = ({
         </div>
         <a href={serviceUrl} className="opacity-50 hover:opacity-100">
           {isSonarr ? (
-            <SonarrLogo className="flex-shrink-0 w-10 h-10" />
+            <SonarrLogo className="h-10 w-10 flex-shrink-0" />
           ) : (
-            <RadarrLogo className="flex-shrink-0 w-10 h-10" />
+            <RadarrLogo className="h-10 w-10 flex-shrink-0" />
           )}
         </a>
       </div>
       <div className="border-t border-gray-500">
-        <div className="flex -mt-px">
-          <div className="flex flex-1 w-0 border-r border-gray-500">
+        <div className="-mt-px flex">
+          <div className="flex w-0 flex-1 border-r border-gray-500">
             <button
               onClick={() => onEdit()}
-              className="relative inline-flex items-center justify-center flex-1 w-0 py-4 -mr-px text-sm font-medium leading-5 text-gray-200 transition duration-150 ease-in-out border border-transparent rounded-bl-lg hover:text-white focus:outline-none focus:ring-blue focus:border-gray-500 focus:z-10"
+              className="focus:ring-blue relative -mr-px inline-flex w-0 flex-1 items-center justify-center rounded-bl-lg border border-transparent py-4 text-sm font-medium leading-5 text-gray-200 transition duration-150 ease-in-out hover:text-white focus:z-10 focus:border-gray-500 focus:outline-none"
             >
-              <PencilIcon className="w-5 h-5 mr-2" />
+              <PencilIcon className="mr-2 h-5 w-5" />
               <span>{intl.formatMessage(globalMessages.edit)}</span>
             </button>
           </div>
-          <div className="flex flex-1 w-0 -ml-px">
+          <div className="-ml-px flex w-0 flex-1">
             <button
               onClick={() => onDelete()}
-              className="relative inline-flex items-center justify-center flex-1 w-0 py-4 text-sm font-medium leading-5 text-gray-200 transition duration-150 ease-in-out border border-transparent rounded-br-lg hover:text-white focus:outline-none focus:ring-blue focus:border-gray-500 focus:z-10"
+              className="focus:ring-blue relative inline-flex w-0 flex-1 items-center justify-center rounded-br-lg border border-transparent py-4 text-sm font-medium leading-5 text-gray-200 transition duration-150 ease-in-out hover:text-white focus:z-10 focus:border-gray-500 focus:outline-none"
             >
-              <TrashIcon className="w-5 h-5 mr-2" />
+              <TrashIcon className="mr-2 h-5 w-5" />
               <span>{intl.formatMessage(globalMessages.delete)}</span>
             </button>
           </div>
@@ -165,12 +165,12 @@ const SettingsServices: React.FC = () => {
   const {
     data: radarrData,
     error: radarrError,
-    revalidate: revalidateRadarr,
+    mutate: revalidateRadarr,
   } = useSWR<RadarrSettings[]>('/api/v1/settings/radarr');
   const {
     data: sonarrData,
     error: sonarrError,
-    revalidate: revalidateSonarr,
+    mutate: revalidateSonarr,
   } = useSWR<SonarrSettings[]>('/api/v1/settings/sonarr');
   const [editRadarrModal, setEditRadarrModal] = useState<{
     open: boolean;
@@ -292,7 +292,7 @@ const SettingsServices: React.FC = () => {
                     serverType: 'Radarr',
                     strong: function strong(msg) {
                       return (
-                        <strong className="font-semibold text-yellow-100">
+                        <strong className="font-semibold text-white">
                           {msg}
                         </strong>
                       );
@@ -334,8 +334,8 @@ const SettingsServices: React.FC = () => {
                   }
                 />
               ))}
-              <li className="h-32 col-span-1 border-2 border-gray-400 border-dashed rounded-lg shadow sm:h-44">
-                <div className="flex items-center justify-center w-full h-full">
+              <li className="col-span-1 h-32 rounded-lg border-2 border-dashed border-gray-400 shadow sm:h-44">
+                <div className="flex h-full w-full items-center justify-center">
                   <Button
                     buttonType="ghost"
                     className="mt-3 mb-3"
@@ -382,7 +382,7 @@ const SettingsServices: React.FC = () => {
                     serverType: 'Sonarr',
                     strong: function strong(msg) {
                       return (
-                        <strong className="font-semibold text-yellow-100">
+                        <strong className="font-semibold text-white">
                           {msg}
                         </strong>
                       );
@@ -425,8 +425,8 @@ const SettingsServices: React.FC = () => {
                   }
                 />
               ))}
-              <li className="h-32 col-span-1 border-2 border-gray-400 border-dashed rounded-lg shadow sm:h-44">
-                <div className="flex items-center justify-center w-full h-full">
+              <li className="col-span-1 h-32 rounded-lg border-2 border-dashed border-gray-400 shadow sm:h-44">
+                <div className="flex h-full w-full items-center justify-center">
                   <Button
                     buttonType="ghost"
                     onClick={() =>

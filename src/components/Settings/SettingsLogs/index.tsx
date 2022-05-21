@@ -31,7 +31,7 @@ import Transition from '../../Transition';
 const messages = defineMessages({
   logs: 'Logs',
   logsDescription:
-    'You can also view these logs directly via <code>stdout</code>, or in <code>{configDir}/logs/jellyseerr.log</code>.',
+    'You can also view these logs directly via <code>stdout</code>, or in <code>{appDataPath}/logs/overseerr.log</code>.',
   time: 'Timestamp',
   level: 'Severity',
   label: 'Label',
@@ -158,7 +158,7 @@ const SettingsLogs: React.FC = () => {
                   {intl.formatMessage(messages.time)}
                 </div>
                 <div className="mb-1 text-sm font-medium leading-5 text-gray-400 sm:mt-2">
-                  <div className="flex items-center max-w-lg">
+                  <div className="flex max-w-lg items-center">
                     {intl.formatDate(activeLog.timestamp, {
                       year: 'numeric',
                       month: 'short',
@@ -175,7 +175,7 @@ const SettingsLogs: React.FC = () => {
                   {intl.formatMessage(messages.level)}
                 </div>
                 <div className="mb-1 text-sm font-medium leading-5 text-gray-400 sm:mt-2">
-                  <div className="flex items-center max-w-lg">
+                  <div className="flex max-w-lg items-center">
                     <Badge
                       badgeType={
                         activeLog.level === 'error'
@@ -197,7 +197,7 @@ const SettingsLogs: React.FC = () => {
                   {intl.formatMessage(messages.label)}
                 </div>
                 <div className="mb-1 text-sm font-medium leading-5 text-gray-400 sm:mt-2">
-                  <div className="flex items-center max-w-lg">
+                  <div className="flex max-w-lg items-center">
                     {activeLog.label}
                   </div>
                 </div>
@@ -207,7 +207,7 @@ const SettingsLogs: React.FC = () => {
                   {intl.formatMessage(messages.message)}
                 </div>
                 <div className="col-span-2 mb-1 text-sm font-medium leading-5 text-gray-400 sm:mt-2">
-                  <div className="flex items-center max-w-lg">
+                  <div className="flex max-w-lg items-center">
                     {activeLog.message}
                   </div>
                 </div>
@@ -218,7 +218,7 @@ const SettingsLogs: React.FC = () => {
                     {intl.formatMessage(messages.extraData)}
                   </div>
                   <div className="col-span-2 mb-1 text-sm font-medium leading-5 text-gray-400 sm:mt-2">
-                    <code className="block w-full px-6 py-4 overflow-auto whitespace-pre bg-gray-800 ring-1 ring-gray-700 max-h-64">
+                    <code className="block max-h-64 w-full overflow-auto whitespace-pre bg-gray-800 px-6 py-4 ring-1 ring-gray-700">
                       {JSON.stringify(activeLog.data, null, ' ')}
                     </code>
                   </div>
@@ -235,13 +235,13 @@ const SettingsLogs: React.FC = () => {
             code: function code(msg) {
               return <code className="bg-opacity-50">{msg}</code>;
             },
-            configDir: appData ? appData.appDataPath : '/app/config',
+            appDataPath: appData ? appData.appDataPath : '/app/config',
           })}
         </p>
-        <div className="flex flex-row flex-grow mt-2 sm:flex-grow-0 sm:justify-end">
-          <div className="flex flex-row justify-between flex-1 mb-2 sm:mb-0 sm:flex-none">
+        <div className="mt-2 flex flex-grow flex-row sm:flex-grow-0 sm:justify-end">
+          <div className="mb-2 flex flex-1 flex-row justify-between sm:mb-0 sm:flex-none">
             <Button
-              className="flex-grow w-full mr-2"
+              className="mr-2 w-full flex-grow"
               buttonType={refreshInterval ? 'default' : 'primary'}
               onClick={() => toggleLogs()}
             >
@@ -253,9 +253,9 @@ const SettingsLogs: React.FC = () => {
               </span>
             </Button>
           </div>
-          <div className="flex flex-1 mb-2 sm:mb-0 sm:flex-none">
-            <span className="inline-flex items-center px-3 text-sm text-gray-100 bg-gray-800 border border-r-0 border-gray-500 cursor-default rounded-l-md">
-              <FilterIcon className="w-6 h-6" />
+          <div className="mb-2 flex flex-1 sm:mb-0 sm:flex-none">
+            <span className="inline-flex cursor-default items-center rounded-l-md border border-r-0 border-gray-500 bg-gray-800 px-3 text-sm text-gray-100">
+              <FilterIcon className="h-6 w-6" />
             </span>
             <select
               id="filter"
@@ -321,9 +321,11 @@ const SettingsLogs: React.FC = () => {
                       {row.level.toUpperCase()}
                     </Badge>
                   </Table.TD>
-                  <Table.TD className="text-gray-300">{row.label}</Table.TD>
+                  <Table.TD className="text-gray-300">
+                    {row.label ?? ''}
+                  </Table.TD>
                   <Table.TD className="text-gray-300">{row.message}</Table.TD>
-                  <Table.TD className="flex flex-wrap items-center justify-end -m-1">
+                  <Table.TD className="-m-1 flex flex-wrap items-center justify-end">
                     {row.data && (
                       <Button
                         buttonType="primary"
@@ -350,7 +352,7 @@ const SettingsLogs: React.FC = () => {
             {data.results.length === 0 && (
               <tr className="relative h-24 p-2 text-white">
                 <Table.TD colSpan={5} noPadding>
-                  <div className="flex flex-col items-center justify-center w-screen p-6 md:w-full">
+                  <div className="flex w-screen flex-col items-center justify-center p-6 md:w-full">
                     <span className="text-base">
                       {intl.formatMessage(globalMessages.noresults)}
                     </span>
@@ -372,7 +374,7 @@ const SettingsLogs: React.FC = () => {
             <tr className="bg-gray-700">
               <Table.TD colSpan={5} noPadding>
                 <nav
-                  className="flex flex-col items-center w-screen px-6 py-3 space-x-4 space-y-3 sm:space-y-0 sm:flex-row md:w-full"
+                  className="flex w-screen flex-col items-center space-x-4 space-y-3 px-6 py-3 sm:flex-row sm:space-y-0 md:w-full"
                   aria-label="Pagination"
                 >
                   <div className="hidden lg:flex lg:flex-1">
@@ -393,7 +395,7 @@ const SettingsLogs: React.FC = () => {
                     </p>
                   </div>
                   <div className="flex justify-center sm:flex-1 sm:justify-start md:justify-center">
-                    <span className="items-center -mt-3 text-sm sm:-ml-4 md:ml-0 sm:mt-0">
+                    <span className="-mt-3 items-center text-sm sm:-ml-4 sm:mt-0 md:ml-0">
                       {intl.formatMessage(globalMessages.resultsperpage, {
                         pageSize: (
                           <select
@@ -406,7 +408,7 @@ const SettingsLogs: React.FC = () => {
                                 .then(() => window.scrollTo(0, 0));
                             }}
                             value={currentPageSize}
-                            className="inline short"
+                            className="short inline"
                           >
                             <option value="10">10</option>
                             <option value="25">25</option>
@@ -417,7 +419,7 @@ const SettingsLogs: React.FC = () => {
                       })}
                     </span>
                   </div>
-                  <div className="flex justify-center flex-auto space-x-2 sm:justify-end sm:flex-1">
+                  <div className="flex flex-auto justify-center space-x-2 sm:flex-1 sm:justify-end">
                     <Button
                       disabled={!hasPrevPage}
                       onClick={() =>

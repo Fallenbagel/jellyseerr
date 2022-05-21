@@ -2,6 +2,7 @@ import { NotificationAgentKey } from '../../lib/settings';
 
 export interface UserSettingsGeneralResponse {
   username?: string;
+  discordId?: string;
   locale?: string;
   region?: string;
   originalLanguage?: string;
@@ -22,6 +23,9 @@ export interface UserSettingsNotificationsResponse {
   discordEnabled?: boolean;
   discordEnabledTypes?: number;
   discordId?: string;
+  pushbulletAccessToken?: string;
+  pushoverApplicationToken?: string;
+  pushoverUserKey?: string;
   telegramEnabled?: boolean;
   telegramBotUsername?: string;
   telegramChatId?: string;

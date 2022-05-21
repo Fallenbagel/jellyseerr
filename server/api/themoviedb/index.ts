@@ -10,7 +10,7 @@ import {
   TmdbMovieDetails,
   TmdbNetwork,
   TmdbPersonCombinedCredits,
-  TmdbPersonDetail,
+  TmdbPersonDetails,
   TmdbProductionCompany,
   TmdbRegion,
   TmdbSearchMovieResponse,
@@ -26,6 +26,10 @@ interface SearchOptions {
   page?: number;
   includeAdult?: boolean;
   language?: string;
+}
+
+interface SingleSearchOptions extends SearchOptions {
+  year?: number;
 }
 
 interface DiscoverMovieOptions {
@@ -116,15 +120,67 @@ class TheMovieDb extends ExternalAPI {
     }
   };
 
+  public searchMovies = async ({
+    query,
+    page = 1,
+    includeAdult = false,
+    language = 'en',
+    year,
+  }: SingleSearchOptions): Promise<TmdbSearchMovieResponse> => {
+    try {
+      const data = await this.get<TmdbSearchMovieResponse>('/search/movie', {
+        params: { query, page, include_adult: includeAdult, language, year },
+      });
+
+      return data;
+    } catch (e) {
+      return {
+        page: 1,
+        results: [],
+        total_pages: 1,
+        total_results: 0,
+      };
+    }
+  };
+
+  public searchTvShows = async ({
+    query,
+    page = 1,
+    includeAdult = false,
+    language = 'en',
+    year,
+  }: SingleSearchOptions): Promise<TmdbSearchTvResponse> => {
+    try {
+      const data = await this.get<TmdbSearchTvResponse>('/search/tv', {
+        params: {
+          query,
+          page,
+          include_adult: includeAdult,
+          language,
+          first_air_date_year: year,
+        },
+      });
+
+      return data;
+    } catch (e) {
+      return {
+        page: 1,
+        results: [],
+        total_pages: 1,
+        total_results: 0,
+      };
+    }
+  };
+
   public getPerson = async ({
     personId,
     language = 'en',
   }: {
     personId: number;
     language?: string;
-  }): Promise<TmdbPersonDetail> => {
+  }): Promise<TmdbPersonDetails> => {
     try {
-      const data = await this.get<TmdbPersonDetail>(`/person/${personId}`, {
+      const data = await this.get<TmdbPersonDetails>(`/person/${personId}`, {
         params: { language },
       });
 
@@ -561,13 +617,13 @@ class TheMovieDb extends ExternalAPI {
     }
   }
 
-  public async getMovieByImdbId({
+  public async getMediaByImdbId({
     imdbId,
     language = 'en',
   }: {
     imdbId: string;
     language?: string;
-  }): Promise<TmdbMovieDetails> {
+  }): Promise<TmdbMovieDetails | TmdbTvDetails> {
     try {
       const extResponse = await this.getByExternalId({
         externalId: imdbId,
@@ -583,12 +639,19 @@ class TheMovieDb extends ExternalAPI {
         return movie;
       }
 
-      throw new Error(
-        '[TMDb] Failed to find a title with the provided IMDB id'
-      );
+      if (extResponse.tv_results[0]) {
+        const tvshow = await this.getTvShow({
+          tvId: extResponse.tv_results[0].id,
+          language,
+        });
+
+        return tvshow;
+      }
+
+      throw new Error(`No movie or show returned from API for ID ${imdbId}`);
     } catch (e) {
       throw new Error(
-        `[TMDb] Failed to get movie by external imdb ID: ${e.message}`
+        `[TMDb] Failed to find media using external IMDb ID: ${e.message}`
       );
     }
   }

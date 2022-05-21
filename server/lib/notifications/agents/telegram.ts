@@ -1,10 +1,13 @@
 import axios from 'axios';
 import { getRepository } from 'typeorm';
-import { hasNotificationType, Notification } from '..';
-import { MediaType } from '../../../constants/media';
+import {
+  hasNotificationType,
+  Notification,
+  shouldSendAdminNotification,
+} from '..';
+import { IssueStatus, IssueTypeName } from '../../../constants/issue';
 import { User } from '../../../entity/User';
 import logger from '../../../logger';
-import { Permission } from '../../permissions';
 import {
   getSettings,
   NotificationAgentKey,
@@ -29,7 +32,8 @@ interface TelegramPhotoPayload {
 
 class TelegramAgent
   extends BaseAgent<NotificationAgentTelegram>
-  implements NotificationAgent {
+  implements NotificationAgent
+{
   private baseUrl = 'https://api.telegram.org/';
 
   protected getSettings(): NotificationAgentTelegram {
@@ -45,11 +49,7 @@ class TelegramAgent
   public shouldSend(): boolean {
     const settings = this.getSettings();
 
-    if (
-      settings.enabled &&
-      settings.options.botAPI &&
-      settings.options.chatId
-    ) {
+    if (settings.enabled && settings.options.botAPI) {
       return true;
     }
 
@@ -60,118 +60,91 @@ class TelegramAgent
     return text ? text.replace(/[_*[\]()~>#+=|{}.!-]/gi, (x) => '\\' + x) : '';
   }
 
-  private buildMessage(
+  private getNotificationPayload(
     type: Notification,
-    payload: NotificationPayload,
-    chatId: string,
-    sendSilently: boolean
-  ): TelegramMessagePayload | TelegramPhotoPayload {
-    const settings = getSettings();
-    let message = '';
-
-    const title = this.escapeText(payload.subject);
-    const plot = this.escapeText(payload.message);
-    const user = this.escapeText(payload.request?.requestedBy.displayName);
-    const applicationTitle = this.escapeText(settings.main.applicationTitle);
+    payload: NotificationPayload
+  ): Partial<TelegramMessagePayload | TelegramPhotoPayload> {
+    const { applicationUrl, applicationTitle } = getSettings().main;
 
     /* eslint-disable no-useless-escape */
-    switch (type) {
-      case Notification.MEDIA_PENDING:
-        message += `\*New ${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Request\*`;
-        message += `\n\n\*${title}\*`;
-        if (plot) {
-          message += `\n${plot}`;
-        }
-        message += `\n\n\*Requested By\*\n${user}`;
-        message += `\n\n\*Status\*\nPending Approval`;
-        break;
-      case Notification.MEDIA_APPROVED:
-        message += `\*${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Request Approved\*`;
-        message += `\n\n\*${title}\*`;
-        if (plot) {
-          message += `\n${plot}`;
-        }
-        message += `\n\n\*Requested By\*\n${user}`;
-        message += `\n\n\*Status\*\nProcessing`;
-        break;
-      case Notification.MEDIA_AUTO_APPROVED:
-        message += `\*${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Request Automatically Approved\*`;
-        message += `\n\n\*${title}\*`;
-        if (plot) {
-          message += `\n${plot}`;
-        }
-        message += `\n\n\*Requested By\*\n${user}`;
-        message += `\n\n\*Status\*\nProcessing`;
-        break;
-      case Notification.MEDIA_AVAILABLE:
-        message += `\*${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Now Available\*`;
-        message += `\n\n\*${title}\*`;
-        if (plot) {
-          message += `\n${plot}`;
-        }
-        message += `\n\n\*Requested By\*\n${user}`;
-        message += `\n\n\*Status\*\nAvailable`;
-        break;
-      case Notification.MEDIA_DECLINED:
-        message += `\*${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Request Declined\*`;
-        message += `\n\n\*${title}\*`;
-        if (plot) {
-          message += `\n${plot}`;
-        }
-        message += `\n\n\*Requested By\*\n${user}`;
-        message += `\n\n\*Status\*\nDeclined`;
-        break;
-      case Notification.MEDIA_FAILED:
-        message += `\*Failed ${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Request\*`;
-        message += `\n\n\*${title}\*`;
-        if (plot) {
-          message += `\n${plot}`;
-        }
-        message += `\n\n\*Requested By\*\n${user}`;
-        message += `\n\n\*Status\*\nFailed`;
-        break;
-      case Notification.TEST_NOTIFICATION:
-        message += `\*Test Notification\*`;
-        message += `\n\n${plot}`;
-        break;
+    let message = `\*${this.escapeText(
+      payload.event ? `${payload.event} - ${payload.subject}` : payload.subject
+    )}\*`;
+    if (payload.message) {
+      message += `\n${this.escapeText(payload.message)}`;
+    }
+
+    if (payload.request) {
+      message += `\n\n\*Requested By:\* ${this.escapeText(
+        payload.request?.requestedBy.displayName
+      )}`;
+
+      let status = '';
+      switch (type) {
+        case Notification.MEDIA_PENDING:
+          status = 'Pending Approval';
+          break;
+        case Notification.MEDIA_APPROVED:
+        case Notification.MEDIA_AUTO_APPROVED:
+          status = 'Processing';
+          break;
+        case Notification.MEDIA_AVAILABLE:
+          status = 'Available';
+          break;
+        case Notification.MEDIA_DECLINED:
+          status = 'Declined';
+          break;
+        case Notification.MEDIA_FAILED:
+          status = 'Failed';
+          break;
+      }
+
+      if (status) {
+        message += `\n\*Request Status:\* ${status}`;
+      }
+    } else if (payload.comment) {
+      message += `\n\n\*Comment from ${this.escapeText(
+        payload.comment.user.displayName
+      )}:\* ${this.escapeText(payload.comment.message)}`;
+    } else if (payload.issue) {
+      message += `\n\n\*Reported By:\* ${this.escapeText(
+        payload.issue.createdBy.displayName
+      )}`;
+      message += `\n\*Issue Type:\* ${IssueTypeName[payload.issue.issueType]}`;
+      message += `\n\*Issue Status:\* ${
+        payload.issue.status === IssueStatus.OPEN ? 'Open' : 'Resolved'
+      }`;
     }
 
     for (const extra of payload.extra ?? []) {
-      message += `\n\n\*${extra.name}\*\n${extra.value}`;
+      message += `\n\*${extra.name}:\* ${extra.value}`;
     }
 
-    if (settings.main.applicationUrl && payload.media) {
-      const actionUrl = `${settings.main.applicationUrl}/${payload.media.mediaType}/${payload.media.tmdbId}`;
-      message += `\n\n\[Open in ${applicationTitle}\]\(${actionUrl}\)`;
+    const url = applicationUrl
+      ? payload.issue
+        ? `${applicationUrl}/issues/${payload.issue.id}`
+        : payload.media
+        ? `${applicationUrl}/${payload.media.mediaType}/${payload.media.tmdbId}`
+        : undefined
+      : undefined;
+
+    if (url) {
+      message += `\n\n\[View ${
+        payload.issue ? 'Issue' : 'Media'
+      } in ${this.escapeText(applicationTitle)}\]\(${url}\)`;
     }
     /* eslint-enable */
 
     return payload.image
-      ? ({
+      ? {
           photo: payload.image,
           caption: message,
           parse_mode: 'MarkdownV2',
-          chat_id: chatId,
-          disable_notification: !!sendSilently,
-        } as TelegramPhotoPayload)
-      : ({
+        }
+      : {
           text: message,
           parse_mode: 'MarkdownV2',
-          chat_id: chatId,
-          disable_notification: !!sendSilently,
-        } as TelegramMessagePayload);
+        };
   }
 
   public async send(
@@ -179,13 +152,16 @@ class TelegramAgent
     payload: NotificationPayload
   ): Promise<boolean> {
     const settings = this.getSettings();
-
     const endpoint = `${this.baseUrl}bot${settings.options.botAPI}/${
       payload.image ? 'sendPhoto' : 'sendMessage'
     }`;
+    const notificationPayload = this.getNotificationPayload(type, payload);
 
     // Send system notification
-    if (hasNotificationType(type, settings.types ?? 0)) {
+    if (
+      hasNotificationType(type, settings.types ?? 0) &&
+      settings.options.chatId
+    ) {
       logger.debug('Sending Telegram notification', {
         label: 'Notifications',
         type: Notification[type],
@@ -193,15 +169,11 @@ class TelegramAgent
       });
 
       try {
-        await axios.post(
-          endpoint,
-          this.buildMessage(
-            type,
-            payload,
-            settings.options.chatId,
-            settings.options.sendSilently
-          )
-        );
+        await axios.post(endpoint, {
+          ...notificationPayload,
+          chat_id: settings.options.chatId,
+          disable_notification: !!settings.options.sendSilently,
+        } as TelegramMessagePayload | TelegramPhotoPayload);
       } catch (e) {
         logger.error('Error sending Telegram notification', {
           label: 'Notifications',
@@ -216,14 +188,13 @@ class TelegramAgent
     }
 
     if (payload.notifyUser) {
-      // Send notification to the user who submitted the request
       if (
         payload.notifyUser.settings?.hasNotificationType(
           NotificationAgentKey.TELEGRAM,
           type
         ) &&
         payload.notifyUser.settings?.telegramChatId &&
-        payload.notifyUser.settings?.telegramChatId !== settings.options.chatId
+        payload.notifyUser.settings.telegramChatId !== settings.options.chatId
       ) {
         logger.debug('Sending Telegram notification', {
           label: 'Notifications',
@@ -233,15 +204,12 @@ class TelegramAgent
         });
 
         try {
-          await axios.post(
-            endpoint,
-            this.buildMessage(
-              type,
-              payload,
-              payload.notifyUser.settings.telegramChatId,
-              !!payload.notifyUser.settings.telegramSendSilently
-            )
-          );
+          await axios.post(endpoint, {
+            ...notificationPayload,
+            chat_id: payload.notifyUser.settings.telegramChatId,
+            disable_notification:
+              !!payload.notifyUser.settings.telegramSendSilently,
+          } as TelegramMessagePayload | TelegramPhotoPayload);
         } catch (e) {
           logger.error('Error sending Telegram notification', {
             label: 'Notifications',
@@ -255,8 +223,9 @@ class TelegramAgent
           return false;
         }
       }
-    } else {
-      // Send notifications to all users with the Manage Requests permission
+    }
+
+    if (payload.notifyAdmin) {
       const userRepository = getRepository(User);
       const users = await userRepository.find();
 
@@ -264,14 +233,10 @@ class TelegramAgent
         users
           .filter(
             (user) =>
-              user.hasPermission(Permission.MANAGE_REQUESTS) &&
               user.settings?.hasNotificationType(
                 NotificationAgentKey.TELEGRAM,
                 type
-              ) &&
-              // Check if it's the user's own auto-approved request
-              (type !== Notification.MEDIA_AUTO_APPROVED ||
-                user.id !== payload.request?.requestedBy.id)
+              ) && shouldSendAdminNotification(type, user, payload)
           )
           .map(async (user) => {
             if (
@@ -286,15 +251,11 @@ class TelegramAgent
               });
 
               try {
-                await axios.post(
-                  endpoint,
-                  this.buildMessage(
-                    type,
-                    payload,
-                    user.settings.telegramChatId,
-                    !!user.settings?.telegramSendSilently
-                  )
-                );
+                await axios.post(endpoint, {
+                  ...notificationPayload,
+                  chat_id: user.settings.telegramChatId,
+                  disable_notification: !!user.settings?.telegramSendSilently,
+                } as TelegramMessagePayload | TelegramPhotoPayload);
               } catch (e) {
                 logger.error('Error sending Telegram notification', {
                   label: 'Notifications',

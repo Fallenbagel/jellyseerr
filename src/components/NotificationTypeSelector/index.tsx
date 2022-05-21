@@ -7,36 +7,58 @@ import NotificationType from './NotificationType';
 
 const messages = defineMessages({
   notificationTypes: 'Notification Types',
-  mediarequested: 'Media Requested',
+  mediarequested: 'Request Pending Approval',
   mediarequestedDescription:
     'Send notifications when users submit new media requests which require approval.',
   usermediarequestedDescription:
     'Get notified when other users submit new media requests which require approval.',
-  mediaapproved: 'Media Approved',
+  mediaapproved: 'Request Approved',
   mediaapprovedDescription:
     'Send notifications when media requests are manually approved.',
   usermediaapprovedDescription:
     'Get notified when your media requests are approved.',
-  mediaAutoApproved: 'Media Automatically Approved',
+  mediaAutoApproved: 'Request Automatically Approved',
   mediaAutoApprovedDescription:
     'Send notifications when users submit new media requests which are automatically approved.',
   usermediaAutoApprovedDescription:
     'Get notified when other users submit new media requests which are automatically approved.',
-  mediaavailable: 'Media Available',
+  mediaavailable: 'Request Available',
   mediaavailableDescription:
     'Send notifications when media requests become available.',
   usermediaavailableDescription:
     'Get notified when your media requests become available.',
-  mediafailed: 'Media Failed',
+  mediafailed: 'Request Processing Failed',
   mediafailedDescription:
     'Send notifications when media requests fail to be added to Radarr or Sonarr.',
   usermediafailedDescription:
     'Get notified when media requests fail to be added to Radarr or Sonarr.',
-  mediadeclined: 'Media Declined',
+  mediadeclined: 'Request Declined',
   mediadeclinedDescription:
     'Send notifications when media requests are declined.',
   usermediadeclinedDescription:
     'Get notified when your media requests are declined.',
+  issuecreated: 'Issue Reported',
+  issuecreatedDescription: 'Send notifications when issues are reported.',
+  userissuecreatedDescription: 'Get notified when other users report issues.',
+  issuecomment: 'Issue Comment',
+  issuecommentDescription:
+    'Send notifications when issues receive new comments.',
+  userissuecommentDescription:
+    'Get notified when issues you reported receive new comments.',
+  adminissuecommentDescription:
+    'Get notified when other users comment on issues.',
+  issueresolved: 'Issue Resolved',
+  issueresolvedDescription: 'Send notifications when issues are resolved.',
+  userissueresolvedDescription:
+    'Get notified when issues you reported are resolved.',
+  adminissueresolvedDescription:
+    'Get notified when issues are resolved by other users.',
+  issuereopened: 'Issue Reopened',
+  issuereopenedDescription: 'Send notifications when issues are reopened.',
+  userissuereopenedDescription:
+    'Get notified when issues you reported are reopened.',
+  adminissuereopenedDescription:
+    'Get notified when issues are reopened by other users.',
 });
 
 export const hasNotificationType = (
@@ -74,6 +96,10 @@ export enum Notification {
   TEST_NOTIFICATION = 32,
   MEDIA_DECLINED = 64,
   MEDIA_AUTO_APPROVED = 128,
+  ISSUE_CREATED = 256,
+  ISSUE_COMMENT = 512,
+  ISSUE_RESOLVED = 1024,
+  ISSUE_REOPENED = 2048,
 }
 
 export const ALL_NOTIFICATIONS = Object.values(Notification)
@@ -85,7 +111,7 @@ export interface NotificationItem {
   name: string;
   description: string;
   value: Notification;
-  hasNotifyUser?: boolean;
+  hasNotifyUser: boolean;
   children?: NotificationItem[];
   hidden?: boolean;
 }
@@ -173,6 +199,7 @@ const NotificationTypeSelector: React.FC<NotificationTypeSelectorProps> = ({
             : messages.mediarequestedDescription
         ),
         value: Notification.MEDIA_PENDING,
+        hasNotifyUser: false,
         hidden: user && !hasPermission(Permission.MANAGE_REQUESTS),
       },
       {
@@ -184,6 +211,7 @@ const NotificationTypeSelector: React.FC<NotificationTypeSelectorProps> = ({
             : messages.mediaAutoApprovedDescription
         ),
         value: Notification.MEDIA_AUTO_APPROVED,
+        hasNotifyUser: false,
         hidden: user && !hasPermission(Permission.MANAGE_REQUESTS),
       },
       {
@@ -231,6 +259,76 @@ const NotificationTypeSelector: React.FC<NotificationTypeSelectorProps> = ({
         ),
         value: Notification.MEDIA_FAILED,
         hidden: user && !hasPermission(Permission.MANAGE_REQUESTS),
+        hasNotifyUser: false,
+      },
+      {
+        id: 'issue-created',
+        name: intl.formatMessage(messages.issuecreated),
+        description: intl.formatMessage(
+          user
+            ? messages.userissuecreatedDescription
+            : messages.issuecreatedDescription
+        ),
+        value: Notification.ISSUE_CREATED,
+        hidden: user && !hasPermission(Permission.MANAGE_ISSUES),
+        hasNotifyUser: false,
+      },
+      {
+        id: 'issue-comment',
+        name: intl.formatMessage(messages.issuecomment),
+        description: intl.formatMessage(
+          user
+            ? hasPermission(Permission.MANAGE_ISSUES)
+              ? messages.adminissuecommentDescription
+              : messages.userissuecommentDescription
+            : messages.issuecommentDescription
+        ),
+        value: Notification.ISSUE_COMMENT,
+        hidden:
+          user &&
+          !hasPermission([Permission.MANAGE_ISSUES, Permission.CREATE_ISSUES], {
+            type: 'or',
+          }),
+        hasNotifyUser:
+          !user || hasPermission(Permission.MANAGE_ISSUES) ? false : true,
+      },
+      {
+        id: 'issue-resolved',
+        name: intl.formatMessage(messages.issueresolved),
+        description: intl.formatMessage(
+          user
+            ? hasPermission(Permission.MANAGE_ISSUES)
+              ? messages.adminissueresolvedDescription
+              : messages.userissueresolvedDescription
+            : messages.issueresolvedDescription
+        ),
+        value: Notification.ISSUE_RESOLVED,
+        hidden:
+          user &&
+          !hasPermission([Permission.MANAGE_ISSUES, Permission.CREATE_ISSUES], {
+            type: 'or',
+          }),
+        hasNotifyUser:
+          !user || hasPermission(Permission.MANAGE_ISSUES) ? false : true,
+      },
+      {
+        id: 'issue-reopened',
+        name: intl.formatMessage(messages.issuereopened),
+        description: intl.formatMessage(
+          user
+            ? hasPermission(Permission.MANAGE_ISSUES)
+              ? messages.adminissuereopenedDescription
+              : messages.userissuereopenedDescription
+            : messages.issuereopenedDescription
+        ),
+        value: Notification.ISSUE_REOPENED,
+        hidden:
+          user &&
+          !hasPermission([Permission.MANAGE_ISSUES, Permission.CREATE_ISSUES], {
+            type: 'or',
+          }),
+        hasNotifyUser:
+          !user || hasPermission(Permission.MANAGE_ISSUES) ? false : true,
       },
     ];
 
@@ -259,7 +357,7 @@ const NotificationTypeSelector: React.FC<NotificationTypeSelectorProps> = ({
           {intl.formatMessage(messages.notificationTypes)}
           {!user && <span className="label-required">*</span>}
         </span>
-        <div className="form-input">
+        <div className="form-input-area">
           <div className="max-w-lg">
             {availableTypes.map((type) => (
               <NotificationType

@@ -40,7 +40,7 @@ class Cache {
 
 class CacheManager {
   private availableCaches: Record<AvailableCacheIds, Cache> = {
-    tmdb: new Cache('tmdb', 'TMDb API', {
+    tmdb: new Cache('tmdb', 'The Movie Database API', {
       stdTtl: 21600,
       checkPeriod: 60 * 30,
     }),
@@ -54,7 +54,7 @@ class CacheManager {
       stdTtl: 21600,
       checkPeriod: 60 * 30,
     }),
-    plexguid: new Cache('plexguid', 'Plex GUID Cache', {
+    plexguid: new Cache('plexguid', 'Plex GUID', {
       stdTtl: 86400 * 7, // 1 week cache
       checkPeriod: 60 * 30,
     }),

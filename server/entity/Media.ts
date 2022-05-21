@@ -17,6 +17,7 @@ import { MediaServerType } from '../constants/server';
 import downloadTracker, { DownloadingItem } from '../lib/downloadtracker';
 import { getSettings } from '../lib/settings';
 import logger from '../logger';
+import Issue from './Issue';
 import { MediaRequest } from './MediaRequest';
 import Season from './Season';
 
@@ -55,7 +56,7 @@ class Media {
     try {
       const media = await mediaRepository.findOne({
         where: { tmdbId: id, mediaType },
-        relations: ['requests'],
+        relations: ['requests', 'issues'],
       });
 
       return media;
@@ -97,6 +98,9 @@ class Media {
     eager: true,
   })
   public seasons: Season[];
+
+  @OneToMany(() => Issue, (issue) => issue.media, { cascade: true })
+  public issues: Issue[];
 
   @CreateDateColumn()
   public createdAt: Date;
@@ -148,27 +152,55 @@ class Media {
   public mediaUrl?: string;
   public mediaUrl4k?: string;
 
+  public tautulliUrl?: string;
+  public tautulliUrl4k?: string;
+
   constructor(init?: Partial<Media>) {
     Object.assign(this, init);
   }
 
   @AfterLoad()
-  public setMediaUrls(): void {
-    const settings = getSettings();
-    if (settings.main.mediaServerType == MediaServerType.PLEX) {
+  public setPlexUrls(): void {
+    const { machineId, webAppUrl } = getSettings().plex;
+    const { externalUrl: tautulliUrl } = getSettings().tautulli;
+
+    if (getSettings().main.mediaServerType == MediaServerType.PLEX) {
       if (this.ratingKey) {
-        this.mediaUrl = `https://app.plex.tv/desktop#!/server/${settings.plex.machineId}/details?key=%2Flibrary%2Fmetadata%2F${this.ratingKey}`;
+        this.mediaUrl = `${
+          webAppUrl ? webAppUrl : 'https://app.plex.tv/desktop'
+        }#!/server/${machineId}/details?key=%2Flibrary%2Fmetadata%2F${
+          this.ratingKey
+        }`;
+
+        if (tautulliUrl) {
+          this.tautulliUrl = `${tautulliUrl}/info?rating_key=${this.ratingKey}`;
+        }
       }
+
       if (this.ratingKey4k) {
-        this.mediaUrl4k = `https://app.plex.tv/desktop#!/server/${settings.plex.machineId}/details?key=%2Flibrary%2Fmetadata%2F${this.ratingKey4k}`;
+        this.mediaUrl4k = `${
+          webAppUrl ? webAppUrl : 'https://app.plex.tv/desktop'
+        }#!/server/${machineId}/details?key=%2Flibrary%2Fmetadata%2F${
+          this.ratingKey4k
+        }`;
+
+        if (tautulliUrl) {
+          this.tautulliUrl4k = `${tautulliUrl}/info?rating_key=${this.ratingKey4k}`;
+        }
       }
     } else {
-      const pageName = process.env.JELLYFIN_TYPE === 'emby' ? 'item' : 'details';
+      const pageName =
+        process.env.JELLYFIN_TYPE === 'emby' ? 'item' : 'details';
+      const { serverId, hostname, externalHostname } = getSettings().jellyfin;
+      const jellyfinHost =
+        externalHostname && externalHostname.length > 0
+          ? externalHostname
+          : hostname;
       if (this.jellyfinMediaId) {
-        this.mediaUrl = `${settings.jellyfin.hostname}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId}&context=home&serverId=${settings.jellyfin.serverId}`;
+        this.mediaUrl = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId}&context=home&serverId=${serverId}`;
       }
       if (this.jellyfinMediaId4k) {
-        this.mediaUrl4k = `${settings.jellyfin.hostname}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId4k}&context=home&serverId=${settings.jellyfin.serverId}`;
+        this.mediaUrl4k = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId4k}&context=home&serverId=${serverId}`;
       }
     }
   }

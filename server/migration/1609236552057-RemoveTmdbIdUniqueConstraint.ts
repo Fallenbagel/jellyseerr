@@ -1,7 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class RemoveTmdbIdUniqueConstraint1609236552057
-  implements MigrationInterface {
+  implements MigrationInterface
+{
   name = 'RemoveTmdbIdUniqueConstraint1609236552057';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

@@ -2,9 +2,9 @@ import React from 'react';
 
 export const SmallLoadingSpinner: React.FC = () => {
   return (
-    <div className="inset-0 flex items-center justify-center w-full h-full text-gray-200">
+    <div className="inset-0 flex h-full w-full items-center justify-center text-gray-200">
       <svg
-        className="w-10 h-10"
+        className="h-10 w-10"
         viewBox="0 0 38 38"
         xmlns="http://www.w3.org/2000/svg"
         stroke="currentColor"
@@ -31,9 +31,9 @@ export const SmallLoadingSpinner: React.FC = () => {
 
 const LoadingSpinner: React.FC = () => {
   return (
-    <div className="inset-0 flex items-center justify-center h-64 text-gray-200">
+    <div className="inset-0 flex h-64 items-center justify-center text-gray-200">
       <svg
-        className="w-16 h-16"
+        className="h-16 w-16"
         viewBox="0 0 38 38"
         xmlns="http://www.w3.org/2000/svg"
         stroke="currentColor"

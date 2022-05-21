@@ -6,6 +6,7 @@ import JellyfinLogo from '../../assets/services/jellyfin.svg';
 import PlexLogo from '../../assets/services/plex.svg';
 import RTLogo from '../../assets/services/rt.svg';
 import TmdbLogo from '../../assets/services/tmdb.svg';
+import TraktLogo from '../../assets/services/trakt.svg';
 import TvdbLogo from '../../assets/services/tvdb.svg';
 import useLocale from '../../hooks/useLocale';
 import useSettings from '../../hooks/useSettings';
@@ -31,15 +32,11 @@ const ExternalLinkBlock: React.FC<ExternalLinkBlockProps> = ({
   const { locale } = useLocale();
 
   return (
-    <div className="flex items-center justify-end">
+    <div className="flex w-full items-center justify-center space-x-5">
       {mediaUrl && (
         <a
           href={mediaUrl}
-          className={`${
-            settings.currentSettings.mediaServerType === MediaServerType.PLEX
-              ? 'w-8'
-              : 'w-14'
-          } mx-2 transition duration-300 opacity-50 hover:opacity-100`}
+          className="w-12 opacity-50 transition duration-300 hover:opacity-100"
           target="_blank"
           rel="noreferrer"
         >
@@ -53,7 +50,7 @@ const ExternalLinkBlock: React.FC<ExternalLinkBlockProps> = ({
       {tmdbId && (
         <a
           href={`https://www.themoviedb.org/${mediaType}/${tmdbId}?language=${locale}`}
-          className="w-8 transition duration-300 opacity-50 hover:opacity-100"
+          className="w-8 opacity-50 transition duration-300 hover:opacity-100"
           target="_blank"
           rel="noreferrer"
         >
@@ -63,7 +60,7 @@ const ExternalLinkBlock: React.FC<ExternalLinkBlockProps> = ({
       {tvdbId && mediaType === MediaType.TV && (
         <a
           href={`http://www.thetvdb.com/?tab=series&id=${tvdbId}`}
-          className="transition duration-300 opacity-50 w-9 hover:opacity-100"
+          className="w-9 opacity-50 transition duration-300 hover:opacity-100"
           target="_blank"
           rel="noreferrer"
         >
@@ -73,7 +70,7 @@ const ExternalLinkBlock: React.FC<ExternalLinkBlockProps> = ({
       {imdbId && (
         <a
           href={`https://www.imdb.com/title/${imdbId}`}
-          className="w-8 transition duration-300 opacity-50 hover:opacity-100"
+          className="w-8 opacity-50 transition duration-300 hover:opacity-100"
           target="_blank"
           rel="noreferrer"
         >
@@ -83,11 +80,23 @@ const ExternalLinkBlock: React.FC<ExternalLinkBlockProps> = ({
       {rtUrl && (
         <a
           href={`${rtUrl}`}
-          className="transition duration-300 opacity-50 w-14 hover:opacity-100"
+          className="w-14 opacity-50 transition duration-300 hover:opacity-100"
           target="_blank"
           rel="noreferrer"
         >
           <RTLogo />
+        </a>
+      )}
+      {tmdbId && (
+        <a
+          href={`https://trakt.tv/search/tmdb/${tmdbId}?id_type=${
+            mediaType === 'movie' ? 'movie' : 'show'
+          }`}
+          className="w-8 opacity-50 transition duration-300 hover:opacity-100"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <TraktLogo />
         </a>
       )}
     </div>

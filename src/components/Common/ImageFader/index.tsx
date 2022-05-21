@@ -59,13 +59,13 @@ const ImageFader: ForwardRefRenderFunction<HTMLDivElement, ImageFaderProps> = (
       {backgroundImages.map((imageUrl, i) => (
         <div
           key={`banner-image-${i}`}
-          className={`absolute absolute-top-shift inset-0 bg-cover bg-center transition-opacity duration-300 ease-in ${
+          className={`absolute-top-shift absolute inset-0 bg-cover bg-center transition-opacity duration-300 ease-in ${
             i === activeIndex ? 'opacity-100' : 'opacity-0'
           }`}
           {...props}
         >
           <CachedImage
-            className="absolute inset-0 w-full h-full"
+            className="absolute inset-0 h-full w-full"
             alt=""
             src={imageUrl}
             layout="fill"

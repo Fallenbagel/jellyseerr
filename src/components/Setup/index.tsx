@@ -2,7 +2,8 @@ import axios from 'axios';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import { mutate } from 'swr';
+import useSWR, { mutate } from 'swr';
+import { MediaServerType } from '../../../server/constants/server';
 import useLocale from '../../hooks/useLocale';
 import AppDataWarning from '../AppDataWarning';
 import Badge from '../Common/Badge';
@@ -35,7 +36,9 @@ const Setup: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [mediaServerSettingsComplete, setMediaServerSettingsComplete] =
     useState(false);
-  const [mediaServerType, setMediaServerType] = useState('');
+  const [mediaServerType, setMediaServerType] = useState(
+    MediaServerType.NOT_CONFIGURED
+  );
   const router = useRouter();
   const { locale } = useLocale();
 
@@ -54,38 +57,35 @@ const Setup: React.FC = () => {
     }
   };
 
-  const getMediaServerType = async () => {
-    const MainSettings = await axios.get('/api/v1/settings/main');
-    setMediaServerType(MainSettings.data.mediaServerType);
-    return;
-  };
+  const { data: backdrops } = useSWR<string[]>('/api/v1/backdrops', {
+    refreshInterval: 0,
+    refreshWhenHidden: false,
+    revalidateOnFocus: false,
+  });
 
   return (
-    <div className="relative flex flex-col justify-center min-h-screen py-12 bg-gray-900">
+    <div className="relative flex min-h-screen flex-col justify-center bg-gray-900 py-12">
       <PageTitle title={intl.formatMessage(messages.setup)} />
       <ImageFader
-        backgroundImages={[
-          '/images/rotate1.jpg',
-          '/images/rotate2.jpg',
-          '/images/rotate3.jpg',
-          '/images/rotate4.jpg',
-          '/images/rotate5.jpg',
-          '/images/rotate6.jpg',
-        ]}
+        backgroundImages={
+          backdrops?.map(
+            (backdrop) => `https://www.themoviedb.org/t/p/original${backdrop}`
+          ) ?? []
+        }
       />
-      <div className="absolute z-50 top-4 right-4">
+      <div className="absolute top-4 right-4 z-50">
         <LanguagePicker />
       </div>
       <div className="relative z-40 px-4 sm:mx-auto sm:w-full sm:max-w-4xl">
         <img
           src="/logo_stacked.svg"
-          className="max-w-full mb-10 sm:max-w-md sm:mx-auto"
+          className="mb-10 max-w-full sm:mx-auto sm:max-w-md"
           alt="Logo"
         />
         <AppDataWarning />
         <nav className="relative z-50">
           <ul
-            className="bg-gray-800 bg-opacity-50 border border-gray-600 divide-y divide-gray-600 rounded-md md:flex md:divide-y-0"
+            className="divide-y divide-gray-600 rounded-md border border-gray-600 bg-gray-800 bg-opacity-50 md:flex md:divide-y-0"
             style={{ backdropFilter: 'blur(5px)' }}
           >
             <SetupSteps
@@ -108,27 +108,24 @@ const Setup: React.FC = () => {
             />
           </ul>
         </nav>
-        <div
-          style={{ backdropFilter: 'blur(5px)' }}
-          className="w-full p-4 mt-10 text-white bg-gray-800 border border-gray-600 rounded-md bg-opacity-40"
-        >
+        <div className="mt-10 w-full rounded-md border border-gray-600 bg-gray-800 bg-opacity-50 p-4 text-white">
           {currentStep === 1 && (
             <SetupLogin
-              onComplete={() => {
-                getMediaServerType().then(() => {
-                  setCurrentStep(2);
-                });
+              onComplete={(mServerType) => {
+                setMediaServerType(mServerType);
+                setCurrentStep(2);
               }}
             />
           )}
           {currentStep === 2 && (
             <div>
-              {mediaServerType == 'PLEX' ? (
+              {mediaServerType === MediaServerType.PLEX ? (
                 <SettingsPlex
                   onComplete={() => setMediaServerSettingsComplete(true)}
                 />
               ) : (
                 <SettingsJellyfin
+                  showAdvancedSettings={false}
                   onComplete={() => setMediaServerSettingsComplete(true)}
                 />
               )}
@@ -140,7 +137,7 @@ const Setup: React.FC = () => {
               </div>
               <div className="actions">
                 <div className="flex justify-end">
-                  <span className="inline-flex ml-3 rounded-md shadow-sm">
+                  <span className="ml-3 inline-flex rounded-md shadow-sm">
                     <Button
                       buttonType="primary"
                       disabled={!mediaServerSettingsComplete}
@@ -158,7 +155,7 @@ const Setup: React.FC = () => {
               <SettingsServices />
               <div className="actions">
                 <div className="flex justify-end">
-                  <span className="inline-flex ml-3 rounded-md shadow-sm">
+                  <span className="ml-3 inline-flex rounded-md shadow-sm">
                     <Button
                       buttonType="primary"
                       onClick={() => finishSetup()}

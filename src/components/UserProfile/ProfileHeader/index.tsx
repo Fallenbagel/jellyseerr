@@ -40,11 +40,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
   return (
     <div className="relative z-40 mt-6 mb-12 lg:flex lg:items-end lg:justify-between lg:space-x-5">
-      <div className="flex items-end space-x-5 justify-items-end">
+      <div className="flex items-end justify-items-end space-x-5">
         <div className="flex-shrink-0">
           <div className="relative">
             <img
-              className="w-24 h-24 bg-gray-600 rounded-full ring-1 ring-gray-700"
+              className="h-24 w-24 rounded-full bg-gray-600 ring-1 ring-gray-700"
               src={user.avatar}
               alt=""
             />
@@ -55,18 +55,18 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           </div>
         </div>
         <div className="pt-1.5">
-          <h1 className="flex flex-col mb-1 sm:items-center sm:flex-row">
+          <h1 className="mb-1 flex flex-col sm:flex-row sm:items-center">
             <Link
               href={
                 user.id === loggedInUser?.id ? '/profile' : `/users/${user.id}`
               }
             >
-              <a className="text-lg font-bold text-transparent sm:text-2xl bg-clip-text bg-gradient-to-br from-indigo-400 to-purple-400 hover:to-purple-200">
+              <a className="bg-gradient-to-br from-indigo-400 to-purple-400 bg-clip-text text-lg font-bold text-transparent hover:to-purple-200 sm:text-2xl">
                 {user.displayName}
               </a>
             </Link>
             {user.email && user.displayName.toLowerCase() !== user.email && (
-              <span className="text-sm text-gray-400 sm:text-lg sm:ml-2">
+              <span className="text-sm text-gray-400 sm:ml-2 sm:text-lg">
                 ({user.email})
               </span>
             )}
@@ -80,7 +80,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           </p>
         </div>
       </div>
-      <div className="flex flex-col-reverse mt-6 space-y-4 space-y-reverse justify-stretch lg:flex-row lg:justify-end lg:space-x-reverse lg:space-y-0 lg:space-x-3">
+      <div className="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse lg:flex-row lg:justify-end lg:space-y-0 lg:space-x-3 lg:space-x-reverse">
         {(loggedInUser?.id === user.id ||
           (user.id !== 1 && hasPermission(Permission.MANAGE_USERS))) &&
         !isSettingsPage ? (

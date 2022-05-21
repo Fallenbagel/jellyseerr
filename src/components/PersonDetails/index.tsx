@@ -5,7 +5,7 @@ import { defineMessages, useIntl } from 'react-intl';
 import TruncateMarkup from 'react-truncate-markup';
 import useSWR from 'swr';
 import type { PersonCombinedCreditsResponse } from '../../../server/interfaces/api/personInterfaces';
-import type { PersonDetail } from '../../../server/models/Person';
+import type { PersonDetails as PersonDetailsType } from '../../../server/models/Person';
 import Ellipsis from '../../assets/ellipsis.svg';
 import globalMessages from '../../i18n/globalMessages';
 import Error from '../../pages/_error';
@@ -27,7 +27,7 @@ const messages = defineMessages({
 const PersonDetails: React.FC = () => {
   const intl = useIntl();
   const router = useRouter();
-  const { data, error } = useSWR<PersonDetail>(
+  const { data, error } = useSWR<PersonDetailsType>(
     `/api/v1/person/${router.query.personId}`
   );
   const [showBio, setShowBio] = useState(false);
@@ -145,7 +145,7 @@ const PersonDetails: React.FC = () => {
                 canExpand
               />
               {media.character && (
-                <div className="w-full mt-2 text-xs text-center text-gray-300 truncate">
+                <div className="mt-2 w-full truncate text-center text-xs text-gray-300">
                   {intl.formatMessage(messages.ascharacter, {
                     character: media.character,
                   })}
@@ -185,7 +185,7 @@ const PersonDetails: React.FC = () => {
                 canExpand
               />
               {media.job && (
-                <div className="w-full mt-2 text-xs text-center text-gray-300 truncate">
+                <div className="mt-2 w-full truncate text-center text-xs text-gray-300">
                   {media.job}
                 </div>
               )}
@@ -214,12 +214,12 @@ const PersonDetails: React.FC = () => {
         </div>
       )}
       <div
-        className={`relative z-10 flex flex-col items-center mt-4 mb-8 lg:flex-row ${
+        className={`relative z-10 mt-4 mb-8 flex flex-col items-center lg:flex-row ${
           data.biography ? 'lg:items-start' : ''
         }`}
       >
         {data.profilePath && (
-          <div className="relative flex-shrink-0 mb-6 mr-0 overflow-hidden rounded-full w-36 h-36 lg:w-44 lg:h-44 lg:mb-0 lg:mr-6 ring-1 ring-gray-700">
+          <div className="relative mb-6 mr-0 h-36 w-36 flex-shrink-0 overflow-hidden rounded-full ring-1 ring-gray-700 lg:mb-0 lg:mr-6 lg:h-44 lg:w-44">
             <CachedImage
               src={`https://image.tmdb.org/t/p/w600_and_h900_bestv2${data.profilePath}`}
               alt=""
@@ -249,7 +249,7 @@ const PersonDetails: React.FC = () => {
             <div className="relative text-left">
               {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
               <div
-                className="outline-none group ring-0"
+                className="group outline-none ring-0"
                 onClick={() => setShowBio((show) => !show)}
                 role="button"
                 tabIndex={-1}
@@ -257,7 +257,7 @@ const PersonDetails: React.FC = () => {
                 <TruncateMarkup
                   lines={showBio ? 200 : 6}
                   ellipsis={
-                    <Ellipsis className="relative inline-block ml-2 -top-0.5 opacity-70 group-hover:opacity-100 transition duration-300" />
+                    <Ellipsis className="relative -top-0.5 ml-2 inline-block opacity-70 transition duration-300 group-hover:opacity-100" />
                   }
                 >
                   <p className="pt-2 text-sm lg:text-base">{data.biography}</p>

@@ -19,7 +19,7 @@ const messages = defineMessages({
   discordsettingsfailed: 'Discord notification settings failed to save.',
   discordId: 'User ID',
   discordIdTip:
-    'The <FindDiscordIdLink>ID number</FindDiscordIdLink> for your user account',
+    'The <FindDiscordIdLink>multi-digit ID number</FindDiscordIdLink> associated with your user account',
   validationDiscordId: 'You must provide a valid user ID',
 });
 
@@ -28,14 +28,19 @@ const UserNotificationsDiscord: React.FC = () => {
   const { addToast } = useToasts();
   const router = useRouter();
   const { user } = useUser({ id: Number(router.query.userId) });
-  const { data, error, revalidate } = useSWR<UserSettingsNotificationsResponse>(
+  const { user: currentUser } = useUser();
+  const {
+    data,
+    error,
+    mutate: revalidate,
+  } = useSWR<UserSettingsNotificationsResponse>(
     user ? `/api/v1/user/${user?.id}/settings/notifications` : null
   );
 
   const UserNotificationsDiscordSchema = Yup.object().shape({
     discordId: Yup.string()
       .when('types', {
-        is: (value: unknown) => !!value,
+        is: (types: number) => !!types,
         then: Yup.string()
           .nullable()
           .required(intl.formatMessage(messages.validationDiscordId)),
@@ -63,6 +68,9 @@ const UserNotificationsDiscord: React.FC = () => {
           await axios.post(`/api/v1/user/${user?.id}/settings/notifications`, {
             pgpKey: data?.pgpKey,
             discordId: values.discordId,
+            pushbulletAccessToken: data?.pushbulletAccessToken,
+            pushoverApplicationToken: data?.pushoverApplicationToken,
+            pushoverUserKey: data?.pushoverUserKey,
             telegramChatId: data?.telegramChatId,
             telegramSendSilently: data?.telegramSendSilently,
             notificationTypes: {
@@ -100,23 +108,25 @@ const UserNotificationsDiscord: React.FC = () => {
                 {!!data?.discordEnabledTypes && (
                   <span className="label-required">*</span>
                 )}
-                <span className="label-tip">
-                  {intl.formatMessage(messages.discordIdTip, {
-                    FindDiscordIdLink: function FindDiscordIdLink(msg) {
-                      return (
-                        <a
-                          href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {msg}
-                        </a>
-                      );
-                    },
-                  })}
-                </span>
+                {currentUser?.id === user?.id && (
+                  <span className="label-tip">
+                    {intl.formatMessage(messages.discordIdTip, {
+                      FindDiscordIdLink: function FindDiscordIdLink(msg) {
+                        return (
+                          <a
+                            href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {msg}
+                          </a>
+                        );
+                      },
+                    })}
+                  </span>
+                )}
               </label>
-              <div className="form-input">
+              <div className="form-input-area">
                 <div className="form-input-field">
                   <Field id="discordId" name="discordId" type="text" />
                 </div>
@@ -141,7 +151,7 @@ const UserNotificationsDiscord: React.FC = () => {
             />
             <div className="actions">
               <div className="flex justify-end">
-                <span className="inline-flex ml-3 rounded-md shadow-sm">
+                <span className="ml-3 inline-flex rounded-md shadow-sm">
                   <Button
                     buttonType="primary"
                     type="submit"

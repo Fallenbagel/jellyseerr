@@ -1,11 +1,11 @@
 import type {
   TmdbPersonCreditCast,
   TmdbPersonCreditCrew,
-  TmdbPersonDetail,
+  TmdbPersonDetails,
 } from '../api/themoviedb/interfaces';
 import Media from '../entity/Media';
 
-export interface PersonDetail {
+export interface PersonDetails {
   id: number;
   name: string;
   birthday: string;
@@ -14,7 +14,7 @@ export interface PersonDetail {
   alsoKnownAs?: string[];
   gender: number;
   biography: string;
-  popularity: string;
+  popularity: number;
   placeOfBirth?: string;
   profilePath?: string;
   adult: boolean;
@@ -62,7 +62,7 @@ export interface CombinedCredit {
   crew: PersonCreditCrew[];
 }
 
-export const mapPersonDetails = (person: TmdbPersonDetail): PersonDetail => ({
+export const mapPersonDetails = (person: TmdbPersonDetails): PersonDetails => ({
   id: person.id,
   name: person.name,
   birthday: person.birthday,

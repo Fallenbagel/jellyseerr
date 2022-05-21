@@ -1,7 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class SonarrRadarrSyncServiceFields1611757511674
-  implements MigrationInterface {
+  implements MigrationInterface
+{
   name = 'SonarrRadarrSyncServiceFields1611757511674';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

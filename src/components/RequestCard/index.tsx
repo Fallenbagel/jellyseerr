@@ -114,7 +114,7 @@ const RequestCard: React.FC<RequestCardProps> = ({ request, onTitleData }) => {
     error: requestError,
     mutate: revalidate,
   } = useSWR<MediaRequest>(`/api/v1/request/${request.id}`, {
-    initialData: request,
+    fallbackData: request,
   });
 
   const modifyRequest = async (type: 'approve' | 'decline') => {
@@ -279,7 +279,7 @@ const RequestCard: React.FC<RequestCardProps> = ({ request, onTitleData }) => {
               MediaStatus.UNKNOWN ? (
               <Badge
                 badgeType="danger"
-                //href={`/${requestData.type}/${requestData.media.tmdbId}?manage=1`}
+                href={`/${requestData.type}/${requestData.media.tmdbId}?manage=1`}
               >
                 {intl.formatMessage(globalMessages.failed)}
               </Badge>

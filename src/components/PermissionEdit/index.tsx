@@ -9,21 +9,24 @@ export const messages = defineMessages({
     'Full administrator access. Bypasses all other permission checks.',
   users: 'Manage Users',
   usersDescription:
-    'Grant permission to manage Jellyseerr users. Users with this permission cannot modify users with or grant the Admin privilege.',
+    'Grant permission to manage users. Users with this permission cannot modify users with or grant the Admin privilege.',
   settings: 'Manage Settings',
   settingsDescription:
-    'Grant permission to modify Jellyseerr settings. A user must have this permission to grant it to others.',
+    'Grant permission to modify global settings. A user must have this permission to grant it to others.',
   managerequests: 'Manage Requests',
   managerequestsDescription:
-    'Grant permission to manage Jellyseerr requests. All requests made by a user with this permission will be automatically approved.',
+    'Grant permission to manage media requests. All requests made by a user with this permission will be automatically approved.',
   request: 'Request',
-  requestDescription: 'Grant permission to request non-4K media.',
+  requestDescription: 'Grant permission to submit requests for non-4K media.',
   requestMovies: 'Request Movies',
-  requestMoviesDescription: 'Grant permission to request non-4K movies.',
+  requestMoviesDescription:
+    'Grant permission to submit requests for non-4K movies.',
   requestTv: 'Request Series',
-  requestTvDescription: 'Grant permission to request non-4K series.',
+  requestTvDescription:
+    'Grant permission to submit requests for non-4K series.',
   autoapprove: 'Auto-Approve',
-  autoapproveDescription: 'Grant automatic approval for all non-4K requests.',
+  autoapproveDescription:
+    'Grant automatic approval for all non-4K media requests.',
   autoapproveMovies: 'Auto-Approve Movies',
   autoapproveMoviesDescription:
     'Grant automatic approval for non-4K movie requests.',
@@ -31,7 +34,8 @@ export const messages = defineMessages({
   autoapproveSeriesDescription:
     'Grant automatic approval for non-4K series requests.',
   autoapprove4k: 'Auto-Approve 4K',
-  autoapprove4kDescription: 'Grant automatic approval for all 4K requests.',
+  autoapprove4kDescription:
+    'Grant automatic approval for all 4K media requests.',
   autoapprove4kMovies: 'Auto-Approve 4K Movies',
   autoapprove4kMoviesDescription:
     'Grant automatic approval for 4K movie requests.',
@@ -39,16 +43,25 @@ export const messages = defineMessages({
   autoapprove4kSeriesDescription:
     'Grant automatic approval for 4K series requests.',
   request4k: 'Request 4K',
-  request4kDescription: 'Grant permission to request 4K media.',
+  request4kDescription: 'Grant permission to submit requests for 4K media.',
   request4kMovies: 'Request 4K Movies',
-  request4kMoviesDescription: 'Grant permission to request 4K movies.',
+  request4kMoviesDescription:
+    'Grant permission to submit requests for 4K movies.',
   request4kTv: 'Request 4K Series',
-  request4kTvDescription: 'Grant permission to request 4K series.',
+  request4kTvDescription: 'Grant permission to submit requests for 4K series.',
   advancedrequest: 'Advanced Requests',
   advancedrequestDescription:
-    'Grant permission to use advanced request options.',
+    'Grant permission to modify advanced media request options.',
   viewrequests: 'View Requests',
-  viewrequestsDescription: "Grant permission to view other users' requests.",
+  viewrequestsDescription:
+    'Grant permission to view media requests submitted by other users.',
+  manageissues: 'Manage Issues',
+  manageissuesDescription: 'Grant permission to manage media issues.',
+  createissues: 'Report Issues',
+  createissuesDescription: 'Grant permission to report media issues.',
+  viewissues: 'View Issues',
+  viewissuesDescription:
+    'Grant permission to view media issues reported by other users.',
 });
 
 interface PermissionEditProps {
@@ -220,6 +233,26 @@ export const PermissionEdit: React.FC<PermissionEditProps> = ({
               type: 'or',
             },
           ],
+        },
+      ],
+    },
+    {
+      id: 'manageissues',
+      name: intl.formatMessage(messages.manageissues),
+      description: intl.formatMessage(messages.manageissuesDescription),
+      permission: Permission.MANAGE_ISSUES,
+      children: [
+        {
+          id: 'createissues',
+          name: intl.formatMessage(messages.createissues),
+          description: intl.formatMessage(messages.createissuesDescription),
+          permission: Permission.CREATE_ISSUES,
+        },
+        {
+          id: 'viewissues',
+          name: intl.formatMessage(messages.viewissues),
+          description: intl.formatMessage(messages.viewissuesDescription),
+          permission: Permission.VIEW_ISSUES,
         },
       ],
     },

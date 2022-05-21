@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import Button from '../Common/Button';
 
@@ -7,7 +7,6 @@ import * as Yup from 'yup';
 import axios from 'axios';
 import { useToasts } from 'react-toast-notifications';
 import useSettings from '../../hooks/useSettings';
-import AddEmailModal from './AddEmailModal';
 
 const messages = defineMessages({
   username: 'Username',
@@ -38,9 +37,6 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
   revalidate,
   initial,
 }) => {
-  const [requiresEmail, setRequiresEmail] = useState<number>(0);
-  const [username, setUsername] = useState<string>();
-  const [password, setPassword] = useState<string>();
   const toasts = useToasts();
   const intl = useIntl();
   const settings = useSettings();
@@ -103,7 +99,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
               <label htmlFor="host" className="text-label">
                 {intl.formatMessage(messages.host)}
               </label>
-              <div className="mt-1 mb-2 sm:mt-0 sm:col-span-2">
+              <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
                 <div className="flex rounded-md shadow-sm">
                   <Field
                     id="host"
@@ -119,7 +115,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
               <label htmlFor="email" className="text-label">
                 {intl.formatMessage(messages.email)}
               </label>
-              <div className="mt-1 mb-2 sm:mt-0 sm:col-span-2">
+              <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
                 <div className="flex rounded-md shadow-sm">
                   <Field
                     id="email"
@@ -135,7 +131,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
               <label htmlFor="username" className="text-label">
                 {intl.formatMessage(messages.username)}
               </label>
-              <div className="mt-1 mb-2 sm:mt-0 sm:col-span-2">
+              <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
                 <div className="flex rounded-md shadow-sm">
                   <Field
                     id="username"
@@ -151,8 +147,8 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
               <label htmlFor="password" className="text-label">
                 {intl.formatMessage(messages.password)}
               </label>
-              <div className="mt-1 mb-2 sm:mt-0 sm:col-span-2">
-                <div className="shadow-sm flexrounded-md">
+              <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
+                <div className="flexrounded-md shadow-sm">
                   <Field
                     id="password"
                     name="password"
@@ -165,7 +161,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                 )}
               </div>
             </div>
-            <div className="pt-5 mt-8 border-t border-gray-700">
+            <div className="mt-8 border-t border-gray-700 pt-5">
               <div className="flex justify-end">
                 <span className="inline-flex rounded-md shadow-sm">
                   <Button
@@ -195,14 +191,6 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
     });
     return (
       <div>
-        {requiresEmail == 1 && (
-          <AddEmailModal
-            username={username ?? ''}
-            password={password ?? ''}
-            onSave={revalidate}
-            onClose={() => setRequiresEmail(0)}
-          ></AddEmailModal>
-        )}
         <Formik
           initialValues={{
             username: '',
@@ -214,25 +202,20 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
               await axios.post('/api/v1/auth/jellyfin', {
                 username: values.username,
                 password: values.password,
+                email: values.username,
               });
             } catch (e) {
-              if (e.message === 'Request failed with status code 406') {
-                setUsername(values.username);
-                setPassword(values.password);
-                setRequiresEmail(1);
-              } else {
-                toasts.addToast(
-                  intl.formatMessage(
-                    e.message == 'Request failed with status code 401'
-                      ? messages.credentialerror
-                      : messages.loginerror
-                  ),
-                  {
-                    autoDismiss: true,
-                    appearance: 'error',
-                  }
-                );
-              }
+              toasts.addToast(
+                intl.formatMessage(
+                  e.message == 'Request failed with status code 401'
+                    ? messages.credentialerror
+                    : messages.loginerror
+                ),
+                {
+                  autoDismiss: true,
+                  appearance: 'error',
+                }
+              );
             } finally {
               revalidate();
             }
@@ -246,7 +229,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                     <label htmlFor="username" className="text-label">
                       {intl.formatMessage(messages.username)}
                     </label>
-                    <div className="mt-1 mb-2 sm:mt-0 sm:col-span-2">
+                    <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
                       <div className="flex max-w-lg rounded-md shadow-sm">
                         <Field
                           id="username"
@@ -262,7 +245,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                     <label htmlFor="password" className="text-label">
                       {intl.formatMessage(messages.password)}
                     </label>
-                    <div className="mt-1 mb-2 sm:mt-0 sm:col-span-2">
+                    <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
                       <div className="flex max-w-lg rounded-md shadow-sm">
                         <Field
                           id="password"
@@ -276,7 +259,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                       )}
                     </div>
                   </div>
-                  <div className="pt-5 mt-8 border-t border-gray-700">
+                  <div className="mt-8 border-t border-gray-700 pt-5">
                     <div className="flex justify-between">
                       <span className="inline-flex rounded-md shadow-sm">
                         <Button

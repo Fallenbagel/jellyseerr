@@ -1,26 +1,26 @@
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { defineMessages, FormattedMessage } from 'react-intl';
-import { MediaServerType } from '../../../server/constants/server';
 import { useUser } from '../../hooks/useUser';
-import Accordion from '../Common/Accordion';
-import JellyfinLogin from '../Login/JellyfinLogin';
 import PlexLoginButton from '../PlexLoginButton';
+import JellyfinLogin from '../Login/JellyfinLogin';
+import axios from 'axios';
+import { defineMessages, FormattedMessage } from 'react-intl';
+import Accordion from '../Common/Accordion';
+import { MediaServerType } from '../../../server/constants/server';
 
 const messages = defineMessages({
-  welcome: 'Welcome to Jellyseerr',
+  welcome: 'Welcome to Overseerr',
   signinMessage: 'Get started by signing in',
   signinWithJellyfin: 'Use your Jellyfin account',
   signinWithPlex: 'Use your Plex account',
 });
 
 interface LoginWithMediaServerProps {
-  onComplete: () => void;
+  onComplete: (onComplete: MediaServerType) => void;
 }
 
 const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
   const [authToken, setAuthToken] = useState<string | undefined>(undefined);
-  const [mediaServerType, setMediaServerType] = useState<number>(
+  const [mediaServerType, setMediaServerType] = useState<MediaServerType>(
     MediaServerType.NOT_CONFIGURED
   );
   const { user, revalidate } = useUser();
@@ -46,23 +46,23 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
 
   useEffect(() => {
     if (user) {
-      onComplete();
+      onComplete(mediaServerType);
     }
-  }, [user, onComplete]);
+  }, [user, mediaServerType, onComplete]);
 
   return (
     <div>
-      <div className="flex justify-center mb-2 text-xl font-bold">
+      <div className="mb-2 flex justify-center text-xl font-bold">
         <FormattedMessage {...messages.welcome} />
       </div>
-      <div className="flex justify-center pb-6 mb-2 text-sm">
+      <div className="mb-2 flex justify-center pb-6 text-sm">
         <FormattedMessage {...messages.signinMessage} />
       </div>
       <Accordion single atLeastOne>
         {({ openIndexes, handleClick, AccordionContent }) => (
           <>
             <button
-              className={`w-full py-2 text-sm text-center hover:bg-gray-700 hover:cursor-pointer text-gray-400 transition-colors duration-200 bg-gray-900 cursor-default focus:outline-none sm:rounded-t-lg ${
+              className={`w-full cursor-default bg-gray-900 py-2 text-center text-sm text-gray-400 transition-colors duration-200 hover:cursor-pointer hover:bg-gray-700 focus:outline-none sm:rounded-t-lg ${
                 openIndexes.includes(0) && 'text-indigo-500'
               } ${openIndexes.includes(1) && 'border-b border-gray-500'}`}
               onClick={() => handleClick(0)}
@@ -84,7 +84,7 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
             </AccordionContent>
             <div>
               <button
-                className={`w-full py-2 text-sm text-center text-gray-400 transition-colors duration-200 bg-gray-900 cursor-default focus:outline-none hover:bg-gray-700 hover:cursor-pointer ${
+                className={`w-full cursor-default bg-gray-900 py-2 text-center text-sm text-gray-400 transition-colors duration-200 hover:cursor-pointer hover:bg-gray-700 focus:outline-none ${
                   openIndexes.includes(1)
                     ? 'text-indigo-500'
                     : 'sm:rounded-b-lg'
@@ -95,7 +95,7 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
               </button>
               <AccordionContent isOpen={openIndexes.includes(1)}>
                 <div
-                  className="px-10 py-8 rounded-b-lg"
+                  className="rounded-b-lg px-10 py-8"
                   style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
                 >
                   <JellyfinLogin initial={true} revalidate={revalidate} />

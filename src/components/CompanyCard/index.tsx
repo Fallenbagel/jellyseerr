@@ -13,10 +13,10 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ image, url, name }) => {
   return (
     <Link href={url}>
       <a
-        className={`relative flex items-center justify-center h-32 w-56 sm:h-36 sm:w-72 p-8 shadow transition ease-in-out duration-300 cursor-pointer transform-gpu ring-1 ${
+        className={`relative flex h-32 w-56 transform-gpu cursor-pointer items-center justify-center p-8 shadow ring-1 transition duration-300 ease-in-out sm:h-36 sm:w-72 ${
           isHovered
-            ? 'bg-gray-700 scale-105 ring-gray-500'
-            : 'bg-gray-800 scale-100 ring-gray-700'
+            ? 'scale-105 bg-gray-700 ring-gray-500'
+            : 'scale-100 bg-gray-800 ring-gray-700'
         } rounded-xl`}
         onMouseEnter={() => {
           setHovered(true);
@@ -33,10 +33,10 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ image, url, name }) => {
         <img
           src={image}
           alt={name}
-          className="relative z-40 max-w-full max-h-full"
+          className="relative z-40 max-h-full max-w-full"
         />
         <div
-          className={`absolute bottom-0 left-0 right-0 h-12 rounded-b-xl bg-gradient-to-t z-0 ${
+          className={`absolute bottom-0 left-0 right-0 z-0 h-12 rounded-b-xl bg-gradient-to-t ${
             isHovered ? 'from-gray-800' : 'from-gray-900'
           }`}
         />

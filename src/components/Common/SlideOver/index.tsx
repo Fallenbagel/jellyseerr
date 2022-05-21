@@ -7,7 +7,7 @@ import Transition from '../../Transition';
 
 interface SlideOverProps {
   show?: boolean;
-  title: string;
+  title: React.ReactNode;
   subText?: string;
   onClose: () => void;
 }
@@ -44,7 +44,7 @@ const SlideOver: React.FC<SlideOverProps> = ({
     >
       {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
       <div
-        className={`z-50 fixed inset-0 overflow-hidden bg-opacity-70 bg-gray-800`}
+        className={`fixed inset-0 z-50 overflow-hidden bg-gray-800 bg-opacity-70`}
         onClick={() => onClose()}
         onKeyDown={(e) => {
           if (e.key === 'Escape') {
@@ -70,19 +70,19 @@ const SlideOver: React.FC<SlideOverProps> = ({
                 ref={slideoverRef}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex flex-col h-full overflow-y-scroll bg-gray-700 shadow-xl">
-                  <header className="px-4 space-y-1 bg-indigo-600 slideover">
+                <div className="flex h-full flex-col overflow-y-scroll bg-gray-700 shadow-xl">
+                  <header className="slideover space-y-1 bg-indigo-600 px-4">
                     <div className="flex items-center justify-between space-x-3">
                       <h2 className="text-lg font-bold leading-7 text-white">
                         {title}
                       </h2>
-                      <div className="flex items-center h-7">
+                      <div className="flex h-7 items-center">
                         <button
                           aria-label="Close panel"
                           className="text-indigo-200 transition duration-150 ease-in-out hover:text-white"
                           onClick={() => onClose()}
                         >
-                          <XIcon className="w-6 h-6" />
+                          <XIcon className="h-6 w-6" />
                         </button>
                       </div>
                     </div>

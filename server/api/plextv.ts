@@ -224,7 +224,7 @@ class PlexTvAPI {
 
       const users = friends.MediaContainer.User;
 
-      const user = users.find((u) => Number(u.$.id) === userId);
+      const user = users.find((u) => parseInt(u.$.id) === userId);
 
       if (!user) {
         throw new Error(

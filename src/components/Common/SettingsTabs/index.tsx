@@ -120,7 +120,7 @@ const SettingsTabs: React.FC<{
       </div>
       {tabType === 'button' ? (
         <div className="hidden sm:block">
-          <nav className="flex flex-wrap -mx-2 -my-1" aria-label="Tabs">
+          <nav className="-mx-2 -my-1 flex flex-wrap" aria-label="Tabs">
             {settingsRoutes.map((route, index) => (
               <SettingsLink
                 tabType={tabType}
@@ -136,7 +136,7 @@ const SettingsTabs: React.FC<{
           </nav>
         </div>
       ) : (
-        <div className="hidden overflow-x-scroll border-b border-gray-600 sm:block hide-scrollbar">
+        <div className="hide-scrollbar hidden overflow-x-scroll border-b border-gray-600 sm:block">
           <nav className="flex">
             {settingsRoutes
               .filter(

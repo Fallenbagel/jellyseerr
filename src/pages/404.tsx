@@ -23,9 +23,9 @@ const Custom404: React.FC = () => {
         })}
       </div>
       <Link href="/">
-        <a className="flex mt-2">
+        <a className="mt-2 flex">
           {intl.formatMessage(messages.returnHome)}
-          <ArrowCircleRightIcon className="w-6 h-6 ml-2" />
+          <ArrowCircleRightIcon className="ml-2 h-6 w-6" />
         </a>
       </Link>
     </div>

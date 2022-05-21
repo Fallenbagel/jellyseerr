@@ -1,12 +1,12 @@
 import { EmailOptions } from 'email-templates';
 import path from 'path';
 import { getRepository } from 'typeorm';
-import { Notification } from '..';
+import { Notification, shouldSendAdminNotification } from '..';
+import { IssueType, IssueTypeName } from '../../../constants/issue';
 import { MediaType } from '../../../constants/media';
 import { User } from '../../../entity/User';
 import logger from '../../../logger';
 import PreparedEmail from '../../email';
-import { Permission } from '../../permissions';
 import {
   getSettings,
   NotificationAgentEmail,
@@ -16,7 +16,8 @@ import { BaseAgent, NotificationAgent, NotificationPayload } from './agent';
 
 class EmailAgent
   extends BaseAgent<NotificationAgentEmail>
-  implements NotificationAgent {
+  implements NotificationAgent
+{
   protected getSettings(): NotificationAgentEmail {
     if (this.settings) {
       return this.settings;
@@ -45,7 +46,8 @@ class EmailAgent
   private buildMessage(
     type: Notification,
     payload: NotificationPayload,
-    toEmail: string
+    recipientEmail: string,
+    recipientName?: string
   ): EmailOptions | undefined {
     const { applicationUrl, applicationTitle } = getSettings().main;
 
@@ -53,69 +55,59 @@ class EmailAgent
       return {
         template: path.join(__dirname, '../../../templates/email/test-email'),
         message: {
-          to: toEmail,
+          to: recipientEmail,
         },
         locals: {
           body: payload.message,
           applicationUrl,
           applicationTitle,
+          recipientName,
+          recipientEmail,
         },
       };
     }
 
-    if (payload.media) {
-      let requestType = '';
+    const mediaType = payload.media
+      ? payload.media.mediaType === MediaType.MOVIE
+        ? 'movie'
+        : 'series'
+      : undefined;
+    const is4k = payload.request?.is4k;
+
+    if (payload.request) {
       let body = '';
 
       switch (type) {
         case Notification.MEDIA_PENDING:
-          requestType = `New ${
-            payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-          } Request`;
-          body = `A user has requested a new ${
-            payload.media?.mediaType === MediaType.TV ? 'series' : 'movie'
-          }!`;
+          body = `A new request for the following ${mediaType} ${
+            is4k ? 'in 4K ' : ''
+          }is pending approval:`;
           break;
         case Notification.MEDIA_APPROVED:
-          requestType = `${
-            payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-          } Request Approved`;
-          body = `Your request for the following ${
-            payload.media?.mediaType === MediaType.TV ? 'series' : 'movie'
-          } has been approved:`;
+          body = `Your request for the following ${mediaType} ${
+            is4k ? 'in 4K ' : ''
+          }has been approved:`;
           break;
         case Notification.MEDIA_AUTO_APPROVED:
-          requestType = `${
-            payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-          } Request Automatically Approved`;
-          body = `A new request for the following ${
-            payload.media?.mediaType === MediaType.TV ? 'series' : 'movie'
-          } has been automatically approved:`;
+          body = `A new request for the following ${mediaType} ${
+            is4k ? 'in 4K ' : ''
+          }has been automatically approved:`;
           break;
         case Notification.MEDIA_AVAILABLE:
-          requestType = `${
-            payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-          } Now Available`;
-          body = `The following ${
-            payload.media?.mediaType === MediaType.TV ? 'series' : 'movie'
-          } you requested is now available!`;
+          body = `Your request for the following ${mediaType} ${
+            is4k ? 'in 4K ' : ''
+          }is now available:`;
           break;
         case Notification.MEDIA_DECLINED:
-          requestType = `${
-            payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-          } Request Declined`;
-          body = `Your request for the following ${
-            payload.media?.mediaType === MediaType.TV ? 'series' : 'movie'
-          } was declined:`;
+          body = `Your request for the following ${mediaType} ${
+            is4k ? 'in 4K ' : ''
+          }was declined:`;
           break;
         case Notification.MEDIA_FAILED:
-          requestType = `Failed ${
-            payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-          } Request`;
-          body = `A new request for the following ${
-            payload.media?.mediaType === MediaType.TV ? 'series' : 'movie'
-          } could not be added to ${
-            payload.media?.mediaType === MediaType.TV ? 'Sonarr' : 'Radarr'
+          body = `A request for the following ${mediaType} ${
+            is4k ? 'in 4K ' : ''
+          }failed to be added to ${
+            payload.media?.mediaType === MediaType.MOVIE ? 'Radarr' : 'Sonarr'
           }:`;
           break;
       }
@@ -126,22 +118,69 @@ class EmailAgent
           '../../../templates/email/media-request'
         ),
         message: {
-          to: toEmail,
+          to: recipientEmail,
         },
         locals: {
-          requestType,
+          event: payload.event,
           body,
           mediaName: payload.subject,
-          mediaPlot: payload.message,
           mediaExtra: payload.extra ?? [],
           imageUrl: payload.image,
           timestamp: new Date().toTimeString(),
-          requestedBy: payload.request?.requestedBy.displayName,
+          requestedBy: payload.request.requestedBy.displayName,
           actionUrl: applicationUrl
             ? `${applicationUrl}/${payload.media?.mediaType}/${payload.media?.tmdbId}`
             : undefined,
           applicationUrl,
           applicationTitle,
+          recipientName,
+          recipientEmail,
+        },
+      };
+    } else if (payload.issue) {
+      const issueType =
+        payload.issue && payload.issue.issueType !== IssueType.OTHER
+          ? `${IssueTypeName[payload.issue.issueType].toLowerCase()} issue`
+          : 'issue';
+
+      let body = '';
+
+      switch (type) {
+        case Notification.ISSUE_CREATED:
+          body = `A new ${issueType} has been reported by ${payload.issue.createdBy.displayName} for the ${mediaType} ${payload.subject}:`;
+          break;
+        case Notification.ISSUE_COMMENT:
+          body = `${payload.comment?.user.displayName} commented on the ${issueType} for the ${mediaType} ${payload.subject}:`;
+          break;
+        case Notification.ISSUE_RESOLVED:
+          body = `The ${issueType} for the ${mediaType} ${payload.subject} was marked as resolved by ${payload.issue.modifiedBy?.displayName}!`;
+          break;
+        case Notification.ISSUE_REOPENED:
+          body = `The ${issueType} for the ${mediaType} ${payload.subject} was reopened by ${payload.issue.modifiedBy?.displayName}.`;
+          break;
+      }
+
+      return {
+        template: path.join(__dirname, '../../../templates/email/media-issue'),
+        message: {
+          to: recipientEmail,
+        },
+        locals: {
+          event: payload.event,
+          body,
+          issueDescription: payload.message,
+          issueComment: payload.comment?.message,
+          mediaName: payload.subject,
+          extra: payload.extra ?? [],
+          imageUrl: payload.image,
+          timestamp: new Date().toTimeString(),
+          actionUrl: applicationUrl
+            ? `${applicationUrl}/issues/${payload.issue.id}`
+            : undefined,
+          applicationUrl,
+          applicationTitle,
+          recipientName,
+          recipientEmail,
         },
       };
     }
@@ -154,7 +193,6 @@ class EmailAgent
     payload: NotificationPayload
   ): Promise<boolean> {
     if (payload.notifyUser) {
-      // Send notification to the user who submitted the request
       if (
         !payload.notifyUser.settings ||
         // Check if user has email notifications enabled and fallback to true if undefined
@@ -178,7 +216,12 @@ class EmailAgent
             payload.notifyUser.settings?.pgpKey
           );
           await email.send(
-            this.buildMessage(type, payload, payload.notifyUser.email)
+            this.buildMessage(
+              type,
+              payload,
+              payload.notifyUser.email,
+              payload.notifyUser.displayName
+            )
           );
         } catch (e) {
           logger.error('Error sending email notification', {
@@ -192,8 +235,9 @@ class EmailAgent
           return false;
         }
       }
-    } else {
-      // Send notifications to all users with the Manage Requests permission
+    }
+
+    if (payload.notifyAdmin) {
       const userRepository = getRepository(User);
       const users = await userRepository.find();
 
@@ -201,7 +245,6 @@ class EmailAgent
         users
           .filter(
             (user) =>
-              user.hasPermission(Permission.MANAGE_REQUESTS) &&
               (!user.settings ||
                 // Check if user has email notifications enabled and fallback to true if undefined
                 // since email should default to true
@@ -210,9 +253,7 @@ class EmailAgent
                   type
                 ) ??
                   true)) &&
-              // Check if it's the user's own auto-approved request
-              (type !== Notification.MEDIA_AUTO_APPROVED ||
-                user.id !== payload.request?.requestedBy.id)
+              shouldSendAdminNotification(type, user, payload)
           )
           .map(async (user) => {
             logger.debug('Sending email notification', {
@@ -227,7 +268,9 @@ class EmailAgent
                 this.getSettings(),
                 user.settings?.pgpKey
               );
-              await email.send(this.buildMessage(type, payload, user.email));
+              await email.send(
+                this.buildMessage(type, payload, user.email, user.displayName)
+              );
             } catch (e) {
               logger.error('Error sending email notification', {
                 label: 'Notifications',

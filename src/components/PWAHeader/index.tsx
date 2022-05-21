@@ -4,7 +4,9 @@ interface PWAHeaderProps {
   applicationTitle?: string;
 }
 
-const PWAHeader: React.FC<PWAHeaderProps> = ({ applicationTitle }) => {
+const PWAHeader: React.FC<PWAHeaderProps> = ({
+  applicationTitle = 'Overseerr',
+}) => {
   return (
     <>
       <link
@@ -164,14 +166,7 @@ const PWAHeader: React.FC<PWAHeaderProps> = ({ applicationTitle }) => {
         href="/site.webmanifest"
         crossOrigin="use-credentials"
       />
-      <meta
-        name="application-name"
-        content={applicationTitle ?? 'Jellyseerr'}
-      />
-      <meta
-        name="apple-mobile-web-app-title"
-        content={applicationTitle ?? 'Jellyseerr'}
-      />
+      <meta name="apple-mobile-web-app-title" content={applicationTitle} />
       <meta
         name="description"
         content="Request and Media Discovery Application"
@@ -179,6 +174,7 @@ const PWAHeader: React.FC<PWAHeaderProps> = ({ applicationTitle }) => {
       <meta name="format-detection" content="telephone=no" />
       <meta name="mobile-web-app-capable" content="yes" />
       <meta name="theme-color" content="#1f2937" />
+      <meta name="application-name" content={applicationTitle} />
     </>
   );
 };

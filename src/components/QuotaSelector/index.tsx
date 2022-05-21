@@ -56,7 +56,7 @@ const QuotaSelector: React.FC<QuotaSelectorProps> = ({
         {
           quotaLimit: (
             <select
-              className="inline short"
+              className="short inline"
               value={limitOverride ?? quotaLimit}
               onChange={(e) => setQuotaLimit(Number(e.target.value))}
               disabled={isDisabled}
@@ -73,7 +73,7 @@ const QuotaSelector: React.FC<QuotaSelectorProps> = ({
           ),
           quotaDays: (
             <select
-              className="inline short"
+              className="short inline"
               value={dayOverride ?? quotaDays}
               onChange={(e) => setQuotaDays(Number(e.target.value))}
               disabled={isDisabled}

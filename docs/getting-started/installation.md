@@ -1,7 +1,7 @@
 # Installation
 
 {% hint style="danger" %}
-**Overseerr is currently in BETA.** If you would like to help test the bleeding edge, please use the image **`sctx/overseerr:develop`**!
+**Overseerr is currently in BETA.** If you would like to help test the bleeding edge, please use the image **`fallenbagel/jellyseerr:develop`**!
 {% endhint %}
 
 {% hint style="info" %}
@@ -10,8 +10,18 @@ After running Overseerr for the first time, configure it by visiting the web UI 
 
 ## Docker
 
+{% hint style="warning" %}
+Be sure to replace `/path/to/appdata/config` in the below examples with a valid host directory path. If this volume mount is not configured correctly, your Overseerr settings/data will not be persisted when the container is recreated (e.g., when updating the image or rebooting your machine).
+
+The `TZ` environment variable value should also be set to the [TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) of your time zone!
+{% endhint %}
+
 {% tabs %}
-{% tab title="Basic" %}
+{% tab title="Docker CLI" %}
+
+For details on the Docker CLI, please [review the official `docker run` documentation](https://docs.docker.com/engine/reference/run/).
+
+**Installation:**
 
 ```bash
 docker run -d \
@@ -21,14 +31,44 @@ docker run -d \
   -p 5055:5055 \
   -v /path/to/appdata/config:/app/config \
   --restart unless-stopped \
-  sctx/overseerr
+  fallenbagel/jellyseerr
 ```
+
+To run the container as a specific user/group, you may optionally add `--user=[ user | user:group | uid | uid:gid | user:gid | uid:group ]` to the above command.
+
+**Updating:**
+
+Stop and remove the existing container:
+
+```bash
+docker stop overseerr && docker rm overseerr
+```
+
+Pull the latest image:
+
+```bash
+docker pull fallenbagel/jellyseerr
+```
+
+Finally, run the container with the same parameters originally used to create the container:
+
+```bash
+docker run -d ...
+```
+
+{% hint style="info" %}
+You may alternatively use a third-party updating mechanism, such as [Watchtower](https://github.com/containrrr/watchtower) or [Ouroboros](https://github.com/pyouroboros/ouroboros), to keep Overseerr up-to-date automatically.
+{% endhint %}
 
 {% endtab %}
 
-{% tab title="Compose" %}
+{% tab title="Docker Compose" %}
 
-**docker-compose.yml:**
+For details on how to use Docker Compose, please [review the official Compose documentation](https://docs.docker.com/compose/reference/).
+
+**Installation:**
+
+Define the `overseerr` service in your `docker-compose.yml` as follows:
 
 ```yaml
 ---
@@ -36,7 +76,7 @@ version: '3'
 
 services:
   overseerr:
-    image: sctx/overseerr:latest
+    image: fallenbagel/jellyseerr:latest
     container_name: overseerr
     environment:
       - LOG_LEVEL=debug
@@ -48,46 +88,28 @@ services:
     restart: unless-stopped
 ```
 
-{% endtab %}
-
-{% tab title="UID/GID" %}
-
-```text
-docker run -d \
-  --name overseerr \
-  --user=[ user | user:group | uid | uid:gid | user:gid | uid:group ] \
-  -e LOG_LEVEL=debug \
-  -e TZ=Asia/Tokyo \
-  -p 5055:5055 \
-  -v /path/to/appdata/config:/app/config \
-  --restart unless-stopped \
-   sctx/overseerr
-```
-
-{% endtab %}
-
-{% tab title="Manual Update" %}
+Then, start all services defined in the your Compose file:
 
 ```bash
-# Stop the Overseerr container
-docker stop overseerr
+docker-compose up -d
+```
 
-# Remove the Overseerr container
-docker rm overseerr
+**Updating:**
 
-# Pull the latest update
-docker pull sctx/overseerr
+Pull the latest image:
 
-# Run the Overseerr container with the same parameters as before
-docker run -d ...
+```bash
+docker-compose pull overseerr
+```
+
+Then, restart all services defined in the Compose file:
+
+```bash
+docker-compose up -d
 ```
 
 {% endtab %}
 {% endtabs %}
-
-{% hint style="info" %}
-Use a 3rd party updating mechanism such as [Watchtower](https://github.com/containrrr/watchtower) or [Ouroboros](https://github.com/pyouroboros/ouroboros) to keep Overseerr up-to-date automatically.
-{% endhint %}
 
 ## Unraid
 
@@ -121,7 +143,7 @@ or the Docker Desktop app:
 Then, create and start the Overseerr container:
 
 ```bash
-docker run -d -e LOG_LEVEL=debug -e TZ=Asia/Tokyo -p 5055:5055 -v "overseerr-data:/app/config" --restart unless-stopped sctx/overseerr
+docker run -d --name overseerr -e LOG_LEVEL=debug -e TZ=Asia/Tokyo -p 5055:5055 -v "overseerr-data:/app/config" --restart unless-stopped fallenbagel/jellyseerr:latest
 ```
 
 If using a named volume like above, you can safely ignore the warning about the `/app/config` folder being incorrectly mounted on the setup page.
@@ -144,28 +166,23 @@ The [Overseerr snap](https://snapcraft.io/overseerr) is the only officially supp
 Currently, the listening port cannot be changed, so port `5055` will need to be available on your host. To install `snapd`, please refer to the [Snapcraft documentation](https://snapcraft.io/docs/installing-snapd).
 {% endhint %}
 
-**To install:**
+**Installation:**
 
 ```
 sudo snap install overseerr
 ```
 
+{% hint style="danger" %}
+To install the development build, add the `--edge` argument to the above command (i.e., `sudo snap install overseerr --edge`). However, note that this version can break any moment. Be prepared to troubleshoot any issues that arise!
+{% endhint %}
+
 **Updating:**
+
 Snap will keep Overseerr up-to-date automatically. You can force a refresh by using the following command.
 
-```
+```bash
 sudo snap refresh
 ```
-
-**To install the development build:**
-
-```
-sudo snap install overseerr --edge
-```
-
-{% hint style="danger" %}
-This version can break any moment. Be prepared to troubleshoot any issues that arise!
-{% endhint %}
 
 ## Third-Party
 

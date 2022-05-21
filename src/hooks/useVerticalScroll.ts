@@ -17,9 +17,8 @@ const useVerticalScroll = (
   const [isScrolling, setScrolling] = useState(false);
 
   type SetTimeoutReturnType = ReturnType<typeof setTimeout>;
-  const scrollingTimer: MutableRefObject<
-    SetTimeoutReturnType | undefined
-  > = useRef();
+  const scrollingTimer: MutableRefObject<SetTimeoutReturnType | undefined> =
+    useRef();
 
   const runCallback = () => {
     if (shouldFetch) {

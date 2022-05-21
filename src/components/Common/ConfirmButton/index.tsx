@@ -34,7 +34,7 @@ const ConfirmButton: React.FC<ConfirmButtonProps> = ({
       &nbsp;
       <div
         ref={ref}
-        className={`absolute flex items-center justify-center inset-0 w-full h-full duration-300 transition transform-gpu ${
+        className={`absolute inset-0 flex h-full w-full transform-gpu items-center justify-center transition duration-300 ${
           isClicked
             ? '-translate-y-full opacity-0'
             : 'translate-y-0 opacity-100'
@@ -44,7 +44,7 @@ const ConfirmButton: React.FC<ConfirmButtonProps> = ({
       </div>
       <div
         ref={ref}
-        className={`absolute flex items-center justify-center inset-0 w-full h-full duration-300 transition transform-gpu ${
+        className={`absolute inset-0 flex h-full w-full transform-gpu items-center justify-center transition duration-300 ${
           isClicked ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
         }`}
       >

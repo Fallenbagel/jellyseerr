@@ -30,7 +30,7 @@ const ListView: React.FC<ListViewProps> = ({
   return (
     <>
       {isEmpty && (
-        <div className="w-full mt-64 text-2xl text-center text-gray-400">
+        <div className="mt-64 w-full text-center text-2xl text-gray-400">
           {intl.formatMessage(globalMessages.noresults)}
         </div>
       )}

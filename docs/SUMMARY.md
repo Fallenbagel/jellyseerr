@@ -14,6 +14,7 @@
   - [Email](using-overseerr/notifications/email.md)
   - [Web Push](using-overseerr/notifications/webpush.md)
   - [Discord](using-overseerr/notifications/discord.md)
+  - [Gotify](using-overseerr/notifications/gotify.md)
   - [LunaSea](using-overseerr/notifications/lunasea.md)
   - [Pushbullet](using-overseerr/notifications/pushbullet.md)
   - [Pushover](using-overseerr/notifications/pushover.md)

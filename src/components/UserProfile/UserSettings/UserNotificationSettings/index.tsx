@@ -5,6 +5,8 @@ import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
 import { UserSettingsNotificationsResponse } from '../../../../../server/interfaces/api/userSettingsInterfaces';
 import DiscordLogo from '../../../../assets/extlogos/discord.svg';
+import PushbulletLogo from '../../../../assets/extlogos/pushbullet.svg';
+import PushoverLogo from '../../../../assets/extlogos/pushover.svg';
 import TelegramLogo from '../../../../assets/extlogos/telegram.svg';
 import { useUser } from '../../../../hooks/useUser';
 import globalMessages from '../../../../i18n/globalMessages';
@@ -33,7 +35,7 @@ const UserNotificationSettings: React.FC = ({ children }) => {
       text: intl.formatMessage(messages.email),
       content: (
         <span className="flex items-center">
-          <MailIcon className="h-4 mr-2" />
+          <MailIcon className="mr-2 h-4" />
           {intl.formatMessage(messages.email)}
         </span>
       ),
@@ -45,7 +47,7 @@ const UserNotificationSettings: React.FC = ({ children }) => {
       text: intl.formatMessage(messages.webpush),
       content: (
         <span className="flex items-center">
-          <CloudIcon className="h-4 mr-2" />
+          <CloudIcon className="mr-2 h-4" />
           {intl.formatMessage(messages.webpush)}
         </span>
       ),
@@ -57,18 +59,41 @@ const UserNotificationSettings: React.FC = ({ children }) => {
       text: 'Discord',
       content: (
         <span className="flex items-center">
-          <DiscordLogo className="h-4 mr-2" />
+          <DiscordLogo className="mr-2 h-4" />
           Discord
         </span>
       ),
       route: '/settings/notifications/discord',
       regex: /\/settings\/notifications\/discord/,
+      hidden: !data?.discordEnabled,
+    },
+    {
+      text: 'Pushbullet',
+      content: (
+        <span className="flex items-center">
+          <PushbulletLogo className="mr-2 h-4" />
+          Pushbullet
+        </span>
+      ),
+      route: '/settings/notifications/pushbullet',
+      regex: /\/settings\/notifications\/pushbullet/,
+    },
+    {
+      text: 'Pushover',
+      content: (
+        <span className="flex items-center">
+          <PushoverLogo className="mr-2 h-4" />
+          Pushover
+        </span>
+      ),
+      route: '/settings/notifications/pushover',
+      regex: /\/settings\/notifications\/pushover/,
     },
     {
       text: 'Telegram',
       content: (
         <span className="flex items-center">
-          <TelegramLogo className="h-4 mr-2" />
+          <TelegramLogo className="mr-2 h-4" />
           Telegram
         </span>
       ),

@@ -24,13 +24,13 @@ const LanguagePicker: React.FC = () => {
     <div className="relative">
       <div>
         <button
-          className={`p-1 rounded-full sm:p-2 hover:bg-gray-600 hover:text-white focus:outline-none focus:bg-gray-600 focus:ring-1 focus:ring-gray-500 focus:text-white ${
+          className={`rounded-full p-1 hover:bg-gray-600 hover:text-white focus:bg-gray-600 focus:text-white focus:outline-none focus:ring-1 focus:ring-gray-500 sm:p-2 ${
             isDropdownOpen ? 'bg-gray-600 text-white' : 'text-gray-400'
           }`}
           aria-label="Language Picker"
           onClick={() => setDropdownOpen(true)}
         >
-          <TranslateIcon className="w-6 h-6" />
+          <TranslateIcon className="h-6 w-6" />
         </button>
       </div>
       <Transition
@@ -43,10 +43,10 @@ const LanguagePicker: React.FC = () => {
         leaveTo="transform opacity-0 scale-95"
       >
         <div
-          className="absolute right-0 w-56 mt-2 origin-top-right rounded-md shadow-lg"
+          className="absolute right-0 mt-2 w-56 origin-top-right rounded-md shadow-lg"
           ref={dropdownRef}
         >
-          <div className="px-3 py-2 bg-gray-700 rounded-md ring-1 ring-black ring-opacity-5">
+          <div className="rounded-md bg-gray-700 px-3 py-2 ring-1 ring-black ring-opacity-5">
             <div>
               <label
                 htmlFor="language"

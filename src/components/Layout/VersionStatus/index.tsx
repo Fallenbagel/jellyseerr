@@ -11,8 +11,8 @@ import useSWR from 'swr';
 import { StatusResponse } from '../../../../server/interfaces/api/settingsInterfaces';
 
 const messages = defineMessages({
-  streamdevelop: 'Jellyseerr Develop',
-  streamstable: 'Jellyseerr Stable',
+  streamdevelop: 'Overseerr Develop',
+  streamstable: 'Overseerr Stable',
   outofdate: 'Out of Date',
   commitsbehind:
     '{commitsBehind} {commitsBehind, plural, one {commit} other {commits}} behind',
@@ -50,20 +50,20 @@ const VersionStatus: React.FC<VersionStatusProps> = ({ onClick }) => {
         }}
         role="button"
         tabIndex={0}
-        className={`flex items-center p-2 mx-2 text-xs transition duration-300 rounded-lg ring-1 ring-gray-700 ${
+        className={`mx-2 flex items-center rounded-lg p-2 text-xs ring-1 ring-gray-700 transition duration-300 ${
           data.updateAvailable
             ? 'bg-yellow-500 text-white hover:bg-yellow-400'
             : 'bg-gray-900 text-gray-300 hover:bg-gray-800'
         }`}
       >
         {data.commitTag === 'local' ? (
-          <CodeIcon className="w-6 h-6" />
+          <CodeIcon className="h-6 w-6" />
         ) : data.version.startsWith('develop-') ? (
-          <BeakerIcon className="w-6 h-6" />
+          <BeakerIcon className="h-6 w-6" />
         ) : (
-          <ServerIcon className="w-6 h-6" />
+          <ServerIcon className="h-6 w-6" />
         )}
-        <div className="flex flex-col flex-1 min-w-0 px-2 truncate last:pr-0">
+        <div className="flex min-w-0 flex-1 flex-col truncate px-2 last:pr-0">
           <span className="font-bold">{versionStream}</span>
           <span className="truncate">
             {data.commitTag === 'local' ? (
@@ -75,13 +75,13 @@ const VersionStatus: React.FC<VersionStatusProps> = ({ onClick }) => {
             ) : data.commitsBehind === -1 ? (
               intl.formatMessage(messages.outofdate)
             ) : (
-              <code className="p-0 bg-transparent">
+              <code className="bg-transparent p-0">
                 {data.version.replace('develop-', '')}
               </code>
             )}
           </span>
         </div>
-        {data.updateAvailable && <ArrowCircleUpIcon className="w-6 h-6" />}
+        {data.updateAvailable && <ArrowCircleUpIcon className="h-6 w-6" />}
       </a>
     </Link>
   );

@@ -39,17 +39,17 @@ const PersonCard: React.FC<PersonCardProps> = ({
         <div
           className={`relative ${
             canExpand ? 'w-full' : 'w-36 sm:w-36 md:w-44'
-          } rounded-xl text-white shadow transition ease-in-out duration-150 cursor-pointer transform-gpu ring-1 ${
+          } transform-gpu cursor-pointer rounded-xl text-white shadow ring-1 transition duration-150 ease-in-out ${
             isHovered
-              ? 'bg-gray-700 scale-105 ring-gray-500'
-              : 'bg-gray-800 scale-100 ring-gray-700'
+              ? 'scale-105 bg-gray-700 ring-gray-500'
+              : 'scale-100 bg-gray-800 ring-gray-700'
           }`}
         >
           <div style={{ paddingBottom: '150%' }}>
-            <div className="absolute inset-0 flex flex-col items-center w-full h-full p-2">
-              <div className="relative flex justify-center w-full mt-2 mb-4 h-1/2">
+            <div className="absolute inset-0 flex h-full w-full flex-col items-center p-2">
+              <div className="relative mt-2 mb-4 flex h-1/2 w-full justify-center">
                 {profilePath ? (
-                  <div className="relative w-3/4 h-full overflow-hidden rounded-full ring-1 ring-gray-700">
+                  <div className="relative h-full w-3/4 overflow-hidden rounded-full ring-1 ring-gray-700">
                     <CachedImage
                       src={`https://image.tmdb.org/t/p/w600_and_h900_bestv2${profilePath}`}
                       alt=""
@@ -61,12 +61,12 @@ const PersonCard: React.FC<PersonCardProps> = ({
                   <UserCircleIcon className="h-full" />
                 )}
               </div>
-              <div className="w-full font-bold text-center truncate">
+              <div className="w-full truncate text-center font-bold">
                 {name}
               </div>
               {subName && (
                 <div
-                  className="overflow-hidden text-sm text-center text-gray-300 whitespace-normal"
+                  className="overflow-hidden whitespace-normal text-center text-sm text-gray-300"
                   style={{
                     WebkitLineClamp: 2,
                     display: '-webkit-box',

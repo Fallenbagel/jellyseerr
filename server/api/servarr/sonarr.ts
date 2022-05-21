@@ -63,7 +63,7 @@ export interface SonarrSeries {
   };
 }
 
-interface AddSeriesOptions {
+export interface AddSeriesOptions {
   tvdbid: number;
   title: string;
   profileId: number;
@@ -149,6 +149,7 @@ class SonarrAPI extends ServarrBase<{ seriesId: number; episodeId: number }> {
 
       // If the series already exists, we will simply just update it
       if (series.id) {
+        series.monitored = options.monitored ?? series.monitored;
         series.tags = options.tags ?? series.tags;
         series.seasons = this.buildSeasonList(options.seasons, series.seasons);
 

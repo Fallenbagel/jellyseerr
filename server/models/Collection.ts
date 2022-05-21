@@ -1,3 +1,4 @@
+import { sortBy } from 'lodash';
 import type { TmdbCollection } from '../api/themoviedb/interfaces';
 import { MediaType } from '../constants/media';
 import Media from '../entity/Media';
@@ -21,7 +22,7 @@ export const mapCollection = (
   overview: collection.overview,
   posterPath: collection.poster_path,
   backdropPath: collection.backdrop_path,
-  parts: collection.parts.map((part) =>
+  parts: sortBy(collection.parts, 'release_date').map((part) =>
     mapMovieResult(
       part,
       media?.find(

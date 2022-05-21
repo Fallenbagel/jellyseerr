@@ -1,8 +1,18 @@
 import axios from 'axios';
-import { hasNotificationType, Notification } from '..';
-import { MediaType } from '../../../constants/media';
+import { getRepository } from 'typeorm';
+import {
+  hasNotificationType,
+  Notification,
+  shouldSendAdminNotification,
+} from '..';
+import { IssueStatus, IssueTypeName } from '../../../constants/issue';
+import { User } from '../../../entity/User';
 import logger from '../../../logger';
-import { getSettings, NotificationAgentPushover } from '../../settings';
+import {
+  getSettings,
+  NotificationAgentKey,
+  NotificationAgentPushover,
+} from '../../settings';
 import { BaseAgent, NotificationAgent, NotificationPayload } from './agent';
 
 interface PushoverPayload {
@@ -18,7 +28,8 @@ interface PushoverPayload {
 
 class PushoverAgent
   extends BaseAgent<NotificationAgentPushover>
-  implements NotificationAgent {
+  implements NotificationAgent
+{
   protected getSettings(): NotificationAgentPushover {
     if (this.settings) {
       return this.settings;
@@ -30,130 +41,89 @@ class PushoverAgent
   }
 
   public shouldSend(): boolean {
-    const settings = this.getSettings();
-
-    if (
-      settings.enabled &&
-      settings.options.accessToken &&
-      settings.options.userToken
-    ) {
-      return true;
-    }
-
-    return false;
+    return true;
   }
 
-  private constructMessageDetails(
+  private getNotificationPayload(
     type: Notification,
     payload: NotificationPayload
-  ): {
-    title: string;
-    message: string;
-    url: string | undefined;
-    url_title: string | undefined;
-    priority: number;
-  } {
-    const settings = getSettings();
-    let messageTitle = '';
-    let message = '';
-    let url: string | undefined;
-    let url_title: string | undefined;
+  ): Partial<PushoverPayload> {
+    const { applicationUrl, applicationTitle } = getSettings().main;
+
+    const title = payload.event ?? payload.subject;
+    let message = payload.event ? `<b>${payload.subject}</b>` : '';
     let priority = 0;
 
-    const title = payload.subject;
-    const plot = payload.message;
-    const username = payload.request?.requestedBy.displayName;
+    if (payload.message) {
+      message += `<small>${message ? '\n' : ''}${payload.message}</small>`;
+    }
 
-    switch (type) {
-      case Notification.MEDIA_PENDING:
-        messageTitle = `New ${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Request`;
-        message += `<b>${title}</b>`;
-        if (plot) {
-          message += `<small>\n${plot}</small>`;
-        }
-        message += `<small>\n\n<b>Requested By</b>\n${username}</small>`;
-        message += `<small>\n\n<b>Status</b>\nPending Approval</small>`;
-        break;
-      case Notification.MEDIA_APPROVED:
-        messageTitle = `${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Request Approved`;
-        message += `<b>${title}</b>`;
-        if (plot) {
-          message += `<small>\n${plot}</small>`;
-        }
-        message += `<small>\n\n<b>Requested By</b>\n${username}</small>`;
-        message += `<small>\n\n<b>Status</b>\nProcessing</small>`;
-        break;
-      case Notification.MEDIA_AUTO_APPROVED:
-        messageTitle = `${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Request Automatically Approved`;
-        message += `<b>${title}</b>`;
-        if (plot) {
-          message += `<small>\n${plot}</small>`;
-        }
-        message += `<small>\n\n<b>Requested By</b>\n${username}</small>`;
-        message += `<small>\n\n<b>Status</b>\nProcessing</small>`;
-        break;
-      case Notification.MEDIA_AVAILABLE:
-        messageTitle = `${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Now Available`;
-        message += `<b>${title}</b>`;
-        if (plot) {
-          message += `<small>\n${plot}</small>`;
-        }
-        message += `<small>\n\n<b>Requested By</b>\n${username}</small>`;
-        message += `<small>\n\n<b>Status</b>\nAvailable</small>`;
-        break;
-      case Notification.MEDIA_DECLINED:
-        messageTitle = `${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Request Declined`;
-        message += `<b>${title}</b>`;
-        if (plot) {
-          message += `<small>\n${plot}</small>`;
-        }
-        message += `<small>\n\n<b>Requested By</b>\n${username}</small>`;
-        message += `<small>\n\n<b>Status</b>\nDeclined</small>`;
+    if (payload.request) {
+      message += `<small>\n\n<b>Requested By:</b> ${payload.request.requestedBy.displayName}</small>`;
+
+      let status = '';
+      switch (type) {
+        case Notification.MEDIA_PENDING:
+          status = 'Pending Approval';
+          break;
+        case Notification.MEDIA_APPROVED:
+        case Notification.MEDIA_AUTO_APPROVED:
+          status = 'Processing';
+          break;
+        case Notification.MEDIA_AVAILABLE:
+          status = 'Available';
+          break;
+        case Notification.MEDIA_DECLINED:
+          status = 'Declined';
+          priority = 1;
+          break;
+        case Notification.MEDIA_FAILED:
+          status = 'Failed';
+          priority = 1;
+          break;
+      }
+
+      if (status) {
+        message += `<small>\n<b>Request Status:</b> ${status}</small>`;
+      }
+    } else if (payload.comment) {
+      message += `<small>\n\n<b>Comment from ${payload.comment.user.displayName}:</b> ${payload.comment.message}</small>`;
+    } else if (payload.issue) {
+      message += `<small>\n\n<b>Reported By:</b> ${payload.issue.createdBy.displayName}</small>`;
+      message += `<small>\n<b>Issue Type:</b> ${
+        IssueTypeName[payload.issue.issueType]
+      }</small>`;
+      message += `<small>\n<b>Issue Status:</b> ${
+        payload.issue.status === IssueStatus.OPEN ? 'Open' : 'Resolved'
+      }</small>`;
+
+      if (type === Notification.ISSUE_CREATED) {
         priority = 1;
-        break;
-      case Notification.MEDIA_FAILED:
-        messageTitle = `Failed ${
-          payload.media?.mediaType === MediaType.TV ? 'Series' : 'Movie'
-        } Request`;
-        message += `<b>${title}</b>`;
-        if (plot) {
-          message += `<small>\n${plot}</small>`;
-        }
-        message += `<small>\n\n<b>Requested By</b>\n${username}</small>`;
-        message += `<small>\n\n<b>Status</b>\nFailed</small>`;
-        priority = 1;
-        break;
-      case Notification.TEST_NOTIFICATION:
-        messageTitle = 'Test Notification';
-        message += `<small>${plot}</small>`;
-        break;
+      }
     }
 
     for (const extra of payload.extra ?? []) {
-      message += `<small>\n\n<b>${extra.name}</b>\n${extra.value}</small>`;
+      message += `<small>\n<b>${extra.name}:</b> ${extra.value}</small>`;
     }
 
-    if (settings.main.applicationUrl && payload.media) {
-      url = `${settings.main.applicationUrl}/${payload.media.mediaType}/${payload.media.tmdbId}`;
-      url_title = `Open in ${settings.main.applicationTitle}`;
-    }
+    const url = applicationUrl
+      ? payload.issue
+        ? `${applicationUrl}/issues/${payload.issue.id}`
+        : payload.media
+        ? `${applicationUrl}/${payload.media.mediaType}/${payload.media.tmdbId}`
+        : undefined
+      : undefined;
+    const url_title = url
+      ? `View ${payload.issue ? 'Issue' : 'Media'} in ${applicationTitle}`
+      : undefined;
 
     return {
-      title: messageTitle,
+      title,
       message,
       url,
       url_title,
       priority,
+      html: 1,
     };
   }
 
@@ -162,50 +132,134 @@ class PushoverAgent
     payload: NotificationPayload
   ): Promise<boolean> {
     const settings = this.getSettings();
+    const endpoint = 'https://api.pushover.net/1/messages.json';
+    const notificationPayload = this.getNotificationPayload(type, payload);
 
-    if (!hasNotificationType(type, settings.types ?? 0)) {
-      return true;
-    }
-
-    logger.debug('Sending Pushover notification', {
-      label: 'Notifications',
-      type: Notification[type],
-      subject: payload.subject,
-    });
-    try {
-      const endpoint = 'https://api.pushover.net/1/messages.json';
-
-      const {
-        title,
-        message,
-        url,
-        url_title,
-        priority,
-      } = this.constructMessageDetails(type, payload);
-
-      await axios.post(endpoint, {
-        token: settings.options.accessToken,
-        user: settings.options.userToken,
-        title: title,
-        message: message,
-        url: url,
-        url_title: url_title,
-        priority: priority,
-        html: 1,
-      } as PushoverPayload);
-
-      return true;
-    } catch (e) {
-      logger.error('Error sending Pushover notification', {
+    // Send system notification
+    if (
+      hasNotificationType(type, settings.types ?? 0) &&
+      settings.enabled &&
+      settings.options.accessToken &&
+      settings.options.userToken
+    ) {
+      logger.debug('Sending Pushover notification', {
         label: 'Notifications',
         type: Notification[type],
         subject: payload.subject,
-        errorMessage: e.message,
-        response: e.response?.data,
       });
 
-      return false;
+      try {
+        await axios.post(endpoint, {
+          ...notificationPayload,
+          token: settings.options.accessToken,
+          user: settings.options.userToken,
+        } as PushoverPayload);
+      } catch (e) {
+        logger.error('Error sending Pushover notification', {
+          label: 'Notifications',
+          type: Notification[type],
+          subject: payload.subject,
+          errorMessage: e.message,
+          response: e.response?.data,
+        });
+
+        return false;
+      }
     }
+
+    if (payload.notifyUser) {
+      if (
+        payload.notifyUser.settings?.hasNotificationType(
+          NotificationAgentKey.PUSHOVER,
+          type
+        ) &&
+        payload.notifyUser.settings.pushoverApplicationToken &&
+        payload.notifyUser.settings.pushoverUserKey &&
+        (payload.notifyUser.settings.pushoverApplicationToken !==
+          settings.options.accessToken ||
+          payload.notifyUser.settings.pushoverUserKey !==
+            settings.options.userToken)
+      ) {
+        logger.debug('Sending Pushover notification', {
+          label: 'Notifications',
+          recipient: payload.notifyUser.displayName,
+          type: Notification[type],
+          subject: payload.subject,
+        });
+
+        try {
+          await axios.post(endpoint, {
+            ...notificationPayload,
+            token: payload.notifyUser.settings.pushoverApplicationToken,
+            user: payload.notifyUser.settings.pushoverUserKey,
+          } as PushoverPayload);
+        } catch (e) {
+          logger.error('Error sending Pushover notification', {
+            label: 'Notifications',
+            recipient: payload.notifyUser.displayName,
+            type: Notification[type],
+            subject: payload.subject,
+            errorMessage: e.message,
+            response: e.response?.data,
+          });
+
+          return false;
+        }
+      }
+    }
+
+    if (payload.notifyAdmin) {
+      const userRepository = getRepository(User);
+      const users = await userRepository.find();
+
+      await Promise.all(
+        users
+          .filter(
+            (user) =>
+              user.settings?.hasNotificationType(
+                NotificationAgentKey.PUSHOVER,
+                type
+              ) && shouldSendAdminNotification(type, user, payload)
+          )
+          .map(async (user) => {
+            if (
+              user.settings?.pushoverApplicationToken &&
+              user.settings?.pushoverUserKey &&
+              user.settings.pushoverApplicationToken !==
+                settings.options.accessToken &&
+              user.settings.pushoverUserKey !== settings.options.userToken
+            ) {
+              logger.debug('Sending Pushover notification', {
+                label: 'Notifications',
+                recipient: user.displayName,
+                type: Notification[type],
+                subject: payload.subject,
+              });
+
+              try {
+                await axios.post(endpoint, {
+                  ...notificationPayload,
+                  token: user.settings.pushoverApplicationToken,
+                  user: user.settings.pushoverUserKey,
+                } as PushoverPayload);
+              } catch (e) {
+                logger.error('Error sending Pushover notification', {
+                  label: 'Notifications',
+                  recipient: user.displayName,
+                  type: Notification[type],
+                  subject: payload.subject,
+                  errorMessage: e.message,
+                  response: e.response?.data,
+                });
+
+                return false;
+              }
+            }
+          })
+      );
+    }
+
+    return true;
   }
 }
 

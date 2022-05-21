@@ -45,7 +45,11 @@ const UserPasswordChange: React.FC = () => {
   const router = useRouter();
   const { user: currentUser } = useUser();
   const { user, hasPermission } = useUser({ id: Number(router.query.userId) });
-  const { data, error, revalidate } = useSWR<{ hasPassword: boolean }>(
+  const {
+    data,
+    error,
+    mutate: revalidate,
+  } = useSWR<{ hasPassword: boolean }>(
     user ? `/api/v1/user/${user?.id}/settings/password` : null
   );
 
@@ -158,11 +162,11 @@ const UserPasswordChange: React.FC = () => {
                 />
               )}
               {data.hasPassword && user?.id === currentUser?.id && (
-                <div className="pb-6 form-row">
+                <div className="form-row pb-6">
                   <label htmlFor="currentPassword" className="text-label">
                     {intl.formatMessage(messages.currentpassword)}
                   </label>
-                  <div className="form-input">
+                  <div className="form-input-area">
                     <div className="form-input-field">
                       <SensitiveInput
                         as="field"
@@ -182,7 +186,7 @@ const UserPasswordChange: React.FC = () => {
                 <label htmlFor="newPassword" className="text-label">
                   {intl.formatMessage(messages.newpassword)}
                 </label>
-                <div className="form-input">
+                <div className="form-input-area">
                   <div className="form-input-field">
                     <SensitiveInput
                       as="field"
@@ -201,7 +205,7 @@ const UserPasswordChange: React.FC = () => {
                 <label htmlFor="confirmPassword" className="text-label">
                   {intl.formatMessage(messages.confirmpassword)}
                 </label>
-                <div className="form-input">
+                <div className="form-input-area">
                   <div className="form-input-field">
                     <SensitiveInput
                       as="field"
@@ -218,7 +222,7 @@ const UserPasswordChange: React.FC = () => {
               </div>
               <div className="actions">
                 <div className="flex justify-end">
-                  <span className="inline-flex ml-3 rounded-md shadow-sm">
+                  <span className="ml-3 inline-flex rounded-md shadow-sm">
                     <Button
                       buttonType="primary"
                       type="submit"

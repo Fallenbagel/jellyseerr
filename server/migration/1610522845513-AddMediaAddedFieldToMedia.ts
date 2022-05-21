@@ -1,7 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddMediaAddedFieldToMedia1610522845513
-  implements MigrationInterface {
+  implements MigrationInterface
+{
   name = 'AddMediaAddedFieldToMedia1610522845513';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

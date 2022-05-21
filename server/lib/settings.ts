@@ -39,8 +39,17 @@ export interface PlexSettings {
 export interface JellyfinSettings {
   name: string;
   hostname?: string;
+  externalHostname?: string;
   libraries: Library[];
   serverId: string;
+}
+export interface TautulliSettings {
+  hostname?: string;
+  port?: number;
+  useSsl?: boolean;
+  urlBase?: string;
+  apiKey?: string;
+  externalUrl?: string;
 }
 
 export interface DVRSettings {
@@ -125,6 +134,7 @@ interface FullPublicSettings extends PublicSettings {
   enablePushRegistration: boolean;
   locale: string;
   emailEnabled: boolean;
+  newPlexLogin: boolean;
 }
 
 export interface NotificationAgentConfig {
@@ -137,6 +147,7 @@ export interface NotificationAgentDiscord extends NotificationAgentConfig {
     botUsername?: string;
     botAvatarUrl?: string;
     webhookUrl: string;
+    enableMentions: boolean;
   };
 }
 
@@ -182,6 +193,7 @@ export interface NotificationAgentTelegram extends NotificationAgentConfig {
 export interface NotificationAgentPushbullet extends NotificationAgentConfig {
   options: {
     accessToken: string;
+    channelTag?: string;
   };
 }
 
@@ -200,9 +212,17 @@ export interface NotificationAgentWebhook extends NotificationAgentConfig {
   };
 }
 
+export interface NotificationAgentGotify extends NotificationAgentConfig {
+  options: {
+    url: string;
+    token: string;
+  };
+}
+
 export enum NotificationAgentKey {
   DISCORD = 'discord',
   EMAIL = 'email',
+  GOTIFY = 'gotify',
   PUSHBULLET = 'pushbullet',
   PUSHOVER = 'pushover',
   SLACK = 'slack',
@@ -214,6 +234,7 @@ export enum NotificationAgentKey {
 interface NotificationAgents {
   discord: NotificationAgentDiscord;
   email: NotificationAgentEmail;
+  gotify: NotificationAgentGotify;
   lunasea: NotificationAgentLunaSea;
   pushbullet: NotificationAgentPushbullet;
   pushover: NotificationAgentPushover;
@@ -227,6 +248,20 @@ interface NotificationSettings {
   agents: NotificationAgents;
 }
 
+interface JobSettings {
+  schedule: string;
+}
+
+export type JobId =
+  | 'plex-recently-added-scan'
+  | 'plex-full-scan'
+  | 'radarr-scan'
+  | 'sonarr-scan'
+  | 'download-sync'
+  | 'download-sync-reset'
+  | 'jellyfin-recently-added-sync'
+  | 'jellyfin-full-sync';
+
 interface AllSettings {
   clientId: string;
   vapidPublic: string;
@@ -234,10 +269,12 @@ interface AllSettings {
   main: MainSettings;
   plex: PlexSettings;
   jellyfin: JellyfinSettings;
+  tautulli: TautulliSettings;
   radarr: RadarrSettings[];
   sonarr: SonarrSettings[];
   public: PublicSettings;
   notifications: NotificationSettings;
+  jobs: Record<JobId, JobSettings>;
 }
 
 const SETTINGS_PATH = process.env.CONFIG_DIRECTORY
@@ -283,9 +320,11 @@ class Settings {
       jellyfin: {
         name: '',
         hostname: '',
+        externalHostname: '',
         libraries: [],
         serverId: '',
       },
+      tautulli: {},
       radarr: [],
       sonarr: [],
       public: {
@@ -303,7 +342,7 @@ class Settings {
               ignoreTls: false,
               requireTls: false,
               allowSelfSigned: false,
-              senderName: 'Jellyseerr',
+              senderName: 'Overseerr',
             },
           },
           discord: {
@@ -311,6 +350,7 @@ class Settings {
             types: 0,
             options: {
               webhookUrl: '',
+              enableMentions: true,
             },
           },
           lunasea: {
@@ -357,13 +397,47 @@ class Settings {
             options: {
               webhookUrl: '',
               jsonPayload:
-                'IntcbiAgICBcIm5vdGlmaWNhdGlvbl90eXBlXCI6IFwie3tub3RpZmljYXRpb25fdHlwZX19XCIsXG4gICAgXCJzdWJqZWN0XCI6IFwie3tzdWJqZWN0fX1cIixcbiAgICBcIm1lc3NhZ2VcIjogXCJ7e21lc3NhZ2V9fVwiLFxuICAgIFwiaW1hZ2VcIjogXCJ7e2ltYWdlfX1cIixcbiAgICBcImVtYWlsXCI6IFwie3tub3RpZnl1c2VyX2VtYWlsfX1cIixcbiAgICBcInVzZXJuYW1lXCI6IFwie3tub3RpZnl1c2VyX3VzZXJuYW1lfX1cIixcbiAgICBcImF2YXRhclwiOiBcInt7bm90aWZ5dXNlcl9hdmF0YXJ9fVwiLFxuICAgIFwie3ttZWRpYX19XCI6IHtcbiAgICAgICAgXCJtZWRpYV90eXBlXCI6IFwie3ttZWRpYV90eXBlfX1cIixcbiAgICAgICAgXCJ0bWRiSWRcIjogXCJ7e21lZGlhX3RtZGJpZH19XCIsXG4gICAgICAgIFwiaW1kYklkXCI6IFwie3ttZWRpYV9pbWRiaWR9fVwiLFxuICAgICAgICBcInR2ZGJJZFwiOiBcInt7bWVkaWFfdHZkYmlkfX1cIixcbiAgICAgICAgXCJzdGF0dXNcIjogXCJ7e21lZGlhX3N0YXR1c319XCIsXG4gICAgICAgIFwic3RhdHVzNGtcIjogXCJ7e21lZGlhX3N0YXR1czRrfX1cIlxuICAgIH0sXG4gICAgXCJ7e2V4dHJhfX1cIjogW10sXG4gICAgXCJ7e3JlcXVlc3R9fVwiOiB7XG4gICAgICAgIFwicmVxdWVzdF9pZFwiOiBcInt7cmVxdWVzdF9pZH19XCIsXG4gICAgICAgIFwicmVxdWVzdGVkQnlfZW1haWxcIjogXCJ7e3JlcXVlc3RlZEJ5X2VtYWlsfX1cIixcbiAgICAgICAgXCJyZXF1ZXN0ZWRCeV91c2VybmFtZVwiOiBcInt7cmVxdWVzdGVkQnlfdXNlcm5hbWV9fVwiLFxuICAgICAgICBcInJlcXVlc3RlZEJ5X2F2YXRhclwiOiBcInt7cmVxdWVzdGVkQnlfYXZhdGFyfX1cIlxuICAgIH1cbn0i',
+                'IntcbiAgICBcIm5vdGlmaWNhdGlvbl90eXBlXCI6IFwie3tub3RpZmljYXRpb25fdHlwZX19XCIsXG4gICAgXCJldmVudFwiOiBcInt7ZXZlbnR9fVwiLFxuICAgIFwic3ViamVjdFwiOiBcInt7c3ViamVjdH19XCIsXG4gICAgXCJtZXNzYWdlXCI6IFwie3ttZXNzYWdlfX1cIixcbiAgICBcImltYWdlXCI6IFwie3tpbWFnZX19XCIsXG4gICAgXCJ7e21lZGlhfX1cIjoge1xuICAgICAgICBcIm1lZGlhX3R5cGVcIjogXCJ7e21lZGlhX3R5cGV9fVwiLFxuICAgICAgICBcInRtZGJJZFwiOiBcInt7bWVkaWFfdG1kYmlkfX1cIixcbiAgICAgICAgXCJ0dmRiSWRcIjogXCJ7e21lZGlhX3R2ZGJpZH19XCIsXG4gICAgICAgIFwic3RhdHVzXCI6IFwie3ttZWRpYV9zdGF0dXN9fVwiLFxuICAgICAgICBcInN0YXR1czRrXCI6IFwie3ttZWRpYV9zdGF0dXM0a319XCJcbiAgICB9LFxuICAgIFwie3tyZXF1ZXN0fX1cIjoge1xuICAgICAgICBcInJlcXVlc3RfaWRcIjogXCJ7e3JlcXVlc3RfaWR9fVwiLFxuICAgICAgICBcInJlcXVlc3RlZEJ5X2VtYWlsXCI6IFwie3tyZXF1ZXN0ZWRCeV9lbWFpbH19XCIsXG4gICAgICAgIFwicmVxdWVzdGVkQnlfdXNlcm5hbWVcIjogXCJ7e3JlcXVlc3RlZEJ5X3VzZXJuYW1lfX1cIixcbiAgICAgICAgXCJyZXF1ZXN0ZWRCeV9hdmF0YXJcIjogXCJ7e3JlcXVlc3RlZEJ5X2F2YXRhcn19XCJcbiAgICB9LFxuICAgIFwie3tpc3N1ZX19XCI6IHtcbiAgICAgICAgXCJpc3N1ZV9pZFwiOiBcInt7aXNzdWVfaWR9fVwiLFxuICAgICAgICBcImlzc3VlX3R5cGVcIjogXCJ7e2lzc3VlX3R5cGV9fVwiLFxuICAgICAgICBcImlzc3VlX3N0YXR1c1wiOiBcInt7aXNzdWVfc3RhdHVzfX1cIixcbiAgICAgICAgXCJyZXBvcnRlZEJ5X2VtYWlsXCI6IFwie3tyZXBvcnRlZEJ5X2VtYWlsfX1cIixcbiAgICAgICAgXCJyZXBvcnRlZEJ5X3VzZXJuYW1lXCI6IFwie3tyZXBvcnRlZEJ5X3VzZXJuYW1lfX1cIixcbiAgICAgICAgXCJyZXBvcnRlZEJ5X2F2YXRhclwiOiBcInt7cmVwb3J0ZWRCeV9hdmF0YXJ9fVwiXG4gICAgfSxcbiAgICBcInt7Y29tbWVudH19XCI6IHtcbiAgICAgICAgXCJjb21tZW50X21lc3NhZ2VcIjogXCJ7e2NvbW1lbnRfbWVzc2FnZX19XCIsXG4gICAgICAgIFwiY29tbWVudGVkQnlfZW1haWxcIjogXCJ7e2NvbW1lbnRlZEJ5X2VtYWlsfX1cIixcbiAgICAgICAgXCJjb21tZW50ZWRCeV91c2VybmFtZVwiOiBcInt7Y29tbWVudGVkQnlfdXNlcm5hbWV9fVwiLFxuICAgICAgICBcImNvbW1lbnRlZEJ5X2F2YXRhclwiOiBcInt7Y29tbWVudGVkQnlfYXZhdGFyfX1cIlxuICAgIH0sXG4gICAgXCJ7e2V4dHJhfX1cIjogW11cbn0i',
             },
           },
           webpush: {
             enabled: false,
             options: {},
           },
+          gotify: {
+            enabled: false,
+            types: 0,
+            options: {
+              url: '',
+              token: '',
+            },
+          },
+        },
+      },
+      jobs: {
+        'plex-recently-added-scan': {
+          schedule: '0 */5 * * * *',
+        },
+        'plex-full-scan': {
+          schedule: '0 0 3 * * *',
+        },
+        'radarr-scan': {
+          schedule: '0 0 4 * * *',
+        },
+        'sonarr-scan': {
+          schedule: '0 30 4 * * *',
+        },
+        'download-sync': {
+          schedule: '0 * * * * *',
+        },
+        'download-sync-reset': {
+          schedule: '0 0 1 * * *',
+        },
+        'jellyfin-recently-added-sync': {
+          schedule: '0 */5 * * * *',
+        },
+        'jellyfin-full-sync': {
+          schedule: '0 0 3 * * *',
         },
       },
     };
@@ -398,6 +472,14 @@ class Settings {
 
   set jellyfin(data: JellyfinSettings) {
     this.data.jellyfin = data;
+  }
+
+  get tautulli(): TautulliSettings {
+    return this.data.tautulli;
+  }
+
+  set tautulli(data: TautulliSettings) {
+    this.data.tautulli = data;
   }
 
   get radarr(): RadarrSettings[] {
@@ -447,6 +529,7 @@ class Settings {
       enablePushRegistration: this.data.notifications.agents.webpush.enabled,
       locale: this.data.main.locale,
       emailEnabled: this.data.notifications.agents.email.enabled,
+      newPlexLogin: this.data.main.newPlexLogin,
     };
   }
 
@@ -456,6 +539,14 @@ class Settings {
 
   set notifications(data: NotificationSettings) {
     this.data.notifications = data;
+  }
+
+  get jobs(): Record<JobId, JobSettings> {
+    return this.data.jobs;
+  }
+
+  set jobs(data: Record<JobId, JobSettings>) {
+    this.data.jobs = data;
   }
 
   get clientId(): string {

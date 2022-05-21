@@ -39,6 +39,7 @@ config/settings.json
 config/logs/*.log*
 config/logs/*.json
 config/logs/*.log.gz
+config/logs/*.json.gz
 config/logs/*-audit.json
 
 # anidb mapping file

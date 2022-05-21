@@ -21,13 +21,13 @@ const GenreCard: React.FC<GenreCardProps> = ({
   return (
     <Link href={url}>
       <a
-        className={`relative flex items-center justify-center h-32 sm:h-36 ${
+        className={`relative flex h-32 items-center justify-center sm:h-36 ${
           canExpand ? 'w-full' : 'w-56 sm:w-72'
-        } p-8 shadow transition ease-in-out duration-300 cursor-pointer transform-gpu ring-1 ${
+        } transform-gpu cursor-pointer p-8 shadow ring-1 transition duration-300 ease-in-out ${
           isHovered
-            ? 'bg-gray-700 scale-105 ring-gray-500 bg-opacity-100'
-            : 'bg-gray-800 scale-100 ring-gray-700 bg-opacity-80'
-        } rounded-xl bg-cover bg-center overflow-hidden`}
+            ? 'scale-105 bg-gray-700 bg-opacity-100 ring-gray-500'
+            : 'scale-100 bg-gray-800 bg-opacity-80 ring-gray-700'
+        } overflow-hidden rounded-xl bg-cover bg-center`}
         onMouseEnter={() => {
           setHovered(true);
         }}
@@ -42,11 +42,11 @@ const GenreCard: React.FC<GenreCardProps> = ({
       >
         <CachedImage src={image} alt="" layout="fill" objectFit="cover" />
         <div
-          className={`absolute z-10 inset-0 w-full h-full transition duration-300 bg-gray-800 ${
+          className={`absolute inset-0 z-10 h-full w-full bg-gray-800 transition duration-300 ${
             isHovered ? 'bg-opacity-10' : 'bg-opacity-30'
           }`}
         />
-        <div className="relative z-20 w-full text-2xl font-bold text-center text-white truncate whitespace-normal sm:text-3xl">
+        <div className="relative z-20 w-full truncate whitespace-normal text-center text-2xl font-bold text-white sm:text-3xl">
           {name}
         </div>
       </a>
@@ -57,7 +57,7 @@ const GenreCard: React.FC<GenreCardProps> = ({
 const GenreCardPlaceholder: React.FC = () => {
   return (
     <div
-      className={`relative h-32 w-56 sm:h-40 sm:w-72 animate-pulse rounded-xl bg-gray-700`}
+      className={`relative h-32 w-56 animate-pulse rounded-xl bg-gray-700 sm:h-40 sm:w-72`}
     ></div>
   );
 };

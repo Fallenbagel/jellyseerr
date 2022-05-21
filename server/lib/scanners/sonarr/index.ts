@@ -1,6 +1,7 @@
 import { uniqWith } from 'lodash';
 import { getRepository } from 'typeorm';
 import SonarrAPI, { SonarrSeries } from '../../../api/servarr/sonarr';
+import { TmdbTvDetails } from '../../../api/themoviedb/interfaces';
 import Media from '../../../entity/Media';
 import { getSettings, SonarrSettings } from '../../settings';
 import BaseScanner, {
@@ -16,7 +17,8 @@ type SyncStatus = StatusBase & {
 
 class SonarrScanner
   extends BaseScanner<SonarrSeries>
-  implements RunnableScanner<SyncStatus> {
+  implements RunnableScanner<SyncStatus>
+{
   private servers: SonarrSettings[];
   private currentServer: SonarrSettings;
   private sonarrApi: SonarrAPI;
@@ -82,24 +84,26 @@ class SonarrScanner
       const mediaRepository = getRepository(Media);
       const server4k = this.enable4kShow && this.currentServer.is4k;
       const processableSeasons: ProcessableSeason[] = [];
-      let tmdbId: number;
+      let tvShow: TmdbTvDetails;
 
       const media = await mediaRepository.findOne({
         where: { tvdbId: sonarrSeries.tvdbId },
       });
 
       if (!media || !media.tmdbId) {
-        const tvShow = await this.tmdb.getShowByTvdbId({
+        tvShow = await this.tmdb.getShowByTvdbId({
           tvdbId: sonarrSeries.tvdbId,
         });
-
-        tmdbId = tvShow.id;
       } else {
-        tmdbId = media.tmdbId;
+        tvShow = await this.tmdb.getTvShow({ tvId: media.tmdbId });
       }
 
+      const tmdbId = tvShow.id;
+
       const filteredSeasons = sonarrSeries.seasons.filter(
-        (sn) => sn.seasonNumber !== 0
+        (sn) =>
+          sn.seasonNumber !== 0 &&
+          tvShow.seasons.find((s) => s.season_number === sn.seasonNumber)
       );
 
       for (const season of filteredSeasons) {

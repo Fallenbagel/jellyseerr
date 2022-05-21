@@ -15,7 +15,7 @@ const Alert: React.FC<AlertProps> = ({ title, children, type }) => {
     bgColor: 'bg-yellow-600',
     titleColor: 'text-yellow-100',
     textColor: 'text-yellow-300',
-    svg: <ExclamationIcon className="w-5 h-5" />,
+    svg: <ExclamationIcon className="h-5 w-5" />,
   };
 
   switch (type) {
@@ -24,7 +24,7 @@ const Alert: React.FC<AlertProps> = ({ title, children, type }) => {
         bgColor: 'bg-indigo-600',
         titleColor: 'text-indigo-100',
         textColor: 'text-indigo-300',
-        svg: <InformationCircleIcon className="w-5 h-5" />,
+        svg: <InformationCircleIcon className="h-5 w-5" />,
       };
       break;
     case 'error':
@@ -32,13 +32,13 @@ const Alert: React.FC<AlertProps> = ({ title, children, type }) => {
         bgColor: 'bg-red-600',
         titleColor: 'text-red-100',
         textColor: 'text-red-300',
-        svg: <XCircleIcon className="w-5 h-5" />,
+        svg: <XCircleIcon className="h-5 w-5" />,
       };
       break;
   }
 
   return (
-    <div className={`rounded-md p-4 mb-4 ${design.bgColor}`}>
+    <div className={`mb-4 rounded-md p-4 ${design.bgColor}`}>
       <div className="flex">
         <div className={`flex-shrink-0 ${design.titleColor}`}>{design.svg}</div>
         <div className="ml-3">
@@ -48,7 +48,7 @@ const Alert: React.FC<AlertProps> = ({ title, children, type }) => {
             </div>
           )}
           {children && (
-            <div className={`mt-2 first:mt-0 text-sm ${design.textColor}`}>
+            <div className={`mt-2 text-sm first:mt-0 ${design.textColor}`}>
               {children}
             </div>
           )}

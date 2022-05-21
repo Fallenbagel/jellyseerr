@@ -1,11 +1,11 @@
 import { getRepository } from 'typeorm';
 import webpush from 'web-push';
-import { Notification } from '..';
+import { Notification, shouldSendAdminNotification } from '..';
+import { IssueType, IssueTypeName } from '../../../constants/issue';
 import { MediaType } from '../../../constants/media';
 import { User } from '../../../entity/User';
 import { UserPushSubscription } from '../../../entity/UserPushSubscription';
 import logger from '../../../logger';
-import { Permission } from '../../permissions';
 import {
   getSettings,
   NotificationAgentConfig,
@@ -15,18 +15,18 @@ import { BaseAgent, NotificationAgent, NotificationPayload } from './agent';
 
 interface PushNotificationPayload {
   notificationType: string;
-  mediaType?: 'movie' | 'tv';
-  tmdbId?: number;
   subject: string;
   message?: string;
   image?: string;
   actionUrl?: string;
+  actionUrlTitle?: string;
   requestId?: number;
 }
 
 class WebPushAgent
   extends BaseAgent<NotificationAgentConfig>
-  implements NotificationAgent {
+  implements NotificationAgent
+{
   protected getSettings(): NotificationAgentConfig {
     if (this.settings) {
       return this.settings;
@@ -41,97 +41,92 @@ class WebPushAgent
     type: Notification,
     payload: NotificationPayload
   ): PushNotificationPayload {
+    const mediaType = payload.media
+      ? payload.media.mediaType === MediaType.MOVIE
+        ? 'movie'
+        : 'series'
+      : undefined;
+    const is4k = payload.request?.is4k;
+
+    const issueType = payload.issue
+      ? payload.issue.issueType !== IssueType.OTHER
+        ? `${IssueTypeName[payload.issue.issueType].toLowerCase()} issue`
+        : 'issue'
+      : undefined;
+
+    let message: string | undefined;
     switch (type) {
-      case Notification.NONE:
+      case Notification.TEST_NOTIFICATION:
+        message = payload.message;
+        break;
+      case Notification.MEDIA_APPROVED:
+        message = `Your ${
+          is4k ? '4K ' : ''
+        }${mediaType} request has been approved.`;
+        break;
+      case Notification.MEDIA_AUTO_APPROVED:
+        message = `Automatically approved a new ${
+          is4k ? '4K ' : ''
+        }${mediaType} request from ${
+          payload.request?.requestedBy.displayName
+        }.`;
+        break;
+      case Notification.MEDIA_AVAILABLE:
+        message = `Your ${
+          is4k ? '4K ' : ''
+        }${mediaType} request is now available!`;
+        break;
+      case Notification.MEDIA_DECLINED:
+        message = `Your ${is4k ? '4K ' : ''}${mediaType} request was declined.`;
+        break;
+      case Notification.MEDIA_FAILED:
+        message = `Failed to process ${is4k ? '4K ' : ''}${mediaType} request.`;
+        break;
+      case Notification.MEDIA_PENDING:
+        message = `Approval required for a new ${
+          is4k ? '4K ' : ''
+        }${mediaType} request from ${
+          payload.request?.requestedBy.displayName
+        }.`;
+        break;
+      case Notification.ISSUE_CREATED:
+        message = `A new ${issueType} was reported by ${payload.issue?.createdBy.displayName}.`;
+        break;
+      case Notification.ISSUE_COMMENT:
+        message = `${payload.comment?.user.displayName} commented on the ${issueType}.`;
+        break;
+      case Notification.ISSUE_RESOLVED:
+        message = `The ${issueType} was marked as resolved by ${payload.issue?.modifiedBy?.displayName}!`;
+        break;
+      case Notification.ISSUE_REOPENED:
+        message = `The ${issueType} was reopened by ${payload.issue?.modifiedBy?.displayName}.`;
+        break;
+      default:
         return {
           notificationType: Notification[type],
           subject: 'Unknown',
         };
-      case Notification.TEST_NOTIFICATION:
-        return {
-          notificationType: Notification[type],
-          subject: payload.subject,
-          message: payload.message,
-        };
-      case Notification.MEDIA_APPROVED:
-        return {
-          notificationType: Notification[type],
-          subject: payload.subject,
-          message: `Your ${
-            payload.media?.mediaType === MediaType.MOVIE ? 'movie' : 'series'
-          } request has been approved.`,
-          image: payload.image,
-          mediaType: payload.media?.mediaType,
-          tmdbId: payload.media?.tmdbId,
-          requestId: payload.request?.id,
-          actionUrl: `/${payload.media?.mediaType}/${payload.media?.tmdbId}`,
-        };
-      case Notification.MEDIA_AUTO_APPROVED:
-        return {
-          notificationType: Notification[type],
-          subject: payload.subject,
-          message: `Automatically approved a new ${
-            payload.media?.mediaType === MediaType.MOVIE ? 'movie' : 'series'
-          } request from ${payload.request?.requestedBy.displayName}.`,
-          image: payload.image,
-          mediaType: payload.media?.mediaType,
-          tmdbId: payload.media?.tmdbId,
-          requestId: payload.request?.id,
-          actionUrl: `/${payload.media?.mediaType}/${payload.media?.tmdbId}`,
-        };
-      case Notification.MEDIA_AVAILABLE:
-        return {
-          notificationType: Notification[type],
-          subject: payload.subject,
-          message: `Your ${
-            payload.media?.mediaType === MediaType.MOVIE ? 'movie' : 'series'
-          } request is now available!`,
-          image: payload.image,
-          mediaType: payload.media?.mediaType,
-          tmdbId: payload.media?.tmdbId,
-          requestId: payload.request?.id,
-          actionUrl: `/${payload.media?.mediaType}/${payload.media?.tmdbId}`,
-        };
-      case Notification.MEDIA_DECLINED:
-        return {
-          notificationType: Notification[type],
-          subject: payload.subject,
-          message: `Your ${
-            payload.media?.mediaType === MediaType.MOVIE ? 'movie' : 'series'
-          } request was declined.`,
-          image: payload.image,
-          mediaType: payload.media?.mediaType,
-          tmdbId: payload.media?.tmdbId,
-          requestId: payload.request?.id,
-          actionUrl: `/${payload.media?.mediaType}/${payload.media?.tmdbId}`,
-        };
-      case Notification.MEDIA_FAILED:
-        return {
-          notificationType: Notification[type],
-          subject: payload.subject,
-          message: `Failed to process ${
-            payload.media?.mediaType === MediaType.MOVIE ? 'movie' : 'series'
-          } request.`,
-          image: payload.image,
-          mediaType: payload.media?.mediaType,
-          tmdbId: payload.media?.tmdbId,
-          requestId: payload.request?.id,
-          actionUrl: `/${payload.media?.mediaType}/${payload.media?.tmdbId}`,
-        };
-      case Notification.MEDIA_PENDING:
-        return {
-          notificationType: Notification[type],
-          subject: payload.subject,
-          message: `Approval required for new ${
-            payload.media?.mediaType === MediaType.MOVIE ? 'movie' : 'series'
-          } request from ${payload.request?.requestedBy.displayName}.`,
-          image: payload.image,
-          mediaType: payload.media?.mediaType,
-          tmdbId: payload.media?.tmdbId,
-          requestId: payload.request?.id,
-          actionUrl: `/${payload.media?.mediaType}/${payload.media?.tmdbId}`,
-        };
     }
+
+    const actionUrl = payload.issue
+      ? `/issues/${payload.issue.id}`
+      : payload.media
+      ? `/${payload.media.mediaType}/${payload.media.tmdbId}`
+      : undefined;
+
+    const actionUrlTitle = actionUrl
+      ? `View ${payload.issue ? 'Issue' : 'Media'}`
+      : undefined;
+
+    return {
+      notificationType: Notification[type],
+      subject: payload.subject,
+      message,
+      image: payload.image,
+      requestId: payload.request?.id,
+      actionUrl,
+      actionUrlTitle,
+    };
   }
 
   public shouldSend(): boolean {
@@ -150,7 +145,7 @@ class WebPushAgent
     const userPushSubRepository = getRepository(UserPushSubscription);
     const settings = getSettings();
 
-    let pushSubs: UserPushSubscription[] = [];
+    const pushSubs: UserPushSubscription[] = [];
 
     const mainUser = await userRepository.findOne({ where: { id: 1 } });
 
@@ -168,13 +163,14 @@ class WebPushAgent
         where: { user: payload.notifyUser.id },
       });
 
-      pushSubs = notifySubs;
-    } else if (!payload.notifyUser) {
+      pushSubs.push(...notifySubs);
+    }
+
+    if (payload.notifyAdmin) {
       const users = await userRepository.find();
 
       const manageUsers = users.filter(
         (user) =>
-          user.hasPermission(Permission.MANAGE_REQUESTS) &&
           // Check if user has webpush notifications enabled and fallback to true if undefined
           // since web push should default to true
           (user.settings?.hasNotificationType(
@@ -182,9 +178,7 @@ class WebPushAgent
             type
           ) ??
             true) &&
-          // Check if it's the user's own auto-approved request
-          (type !== Notification.MEDIA_AUTO_APPROVED ||
-            user.id !== payload.request?.requestedBy.id)
+          shouldSendAdminNotification(type, user, payload)
       );
 
       const allSubs = await userPushSubRepository
@@ -195,7 +189,7 @@ class WebPushAgent
         })
         .getMany();
 
-      pushSubs = allSubs;
+      pushSubs.push(...allSubs);
     }
 
     if (mainUser && pushSubs.length > 0) {
@@ -203,6 +197,11 @@ class WebPushAgent
         `mailto:${mainUser.email}`,
         settings.vapidPublic,
         settings.vapidPrivate
+      );
+
+      const notificationPayload = Buffer.from(
+        JSON.stringify(this.getNotificationPayload(type, payload)),
+        'utf-8'
       );
 
       await Promise.all(
@@ -223,10 +222,7 @@ class WebPushAgent
                   p256dh: sub.p256dh,
                 },
               },
-              Buffer.from(
-                JSON.stringify(this.getNotificationPayload(type, payload)),
-                'utf-8'
-              )
+              notificationPayload
             );
           } catch (e) {
             logger.error(

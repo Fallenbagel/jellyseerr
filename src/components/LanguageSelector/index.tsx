@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { sortBy } from 'lodash';
-import dynamic from 'next/dynamic';
 import React, { useMemo } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import type { OptionsType, OptionTypeBase } from 'react-select';
+import Select, { CSSObjectWithLabel } from 'react-select';
 import useSWR from 'swr';
 import { Language } from '../../../server/lib/settings';
 import globalMessages from '../../i18n/globalMessages';
@@ -13,8 +11,6 @@ const messages = defineMessages({
   languageServerDefault: 'Default ({language})',
 });
 
-const Select = dynamic(() => import('react-select'), { ssr: false });
-
 type OptionType = {
   value: string;
   label: string;
@@ -22,11 +18,11 @@ type OptionType = {
 };
 
 const selectStyles = {
-  multiValueLabel: (base: any, state: { data: { isFixed?: boolean } }) => {
-    return state.data.isFixed ? { ...base, paddingRight: 6 } : base;
+  multiValueLabel: (base: CSSObjectWithLabel, props: { data: OptionType }) => {
+    return props.data?.isFixed ? { ...base, paddingRight: 6 } : base;
   },
-  multiValueRemove: (base: any, state: { data: { isFixed?: boolean } }) => {
-    return state.data.isFixed ? { ...base, display: 'none' } : base;
+  multiValueRemove: (base: CSSObjectWithLabel, props: { data: OptionType }) => {
+    return props.data?.isFixed ? { ...base, display: 'none' } : base;
   },
 };
 
@@ -95,7 +91,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   });
 
   return (
-    <Select
+    <Select<OptionType, true>
       options={options}
       isMulti
       className="react-select-container"
@@ -125,36 +121,30 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               }),
               isFixed: true,
             }
-          : value?.split('|').map((code) => {
-              const matchedLanguage = sortedLanguages?.find(
-                (lang) => lang.iso_639_1 === code
-              );
+          : (value
+              ?.split('|')
+              .map((code) => {
+                const matchedLanguage = sortedLanguages?.find(
+                  (lang) => lang.iso_639_1 === code
+                );
 
-              if (!matchedLanguage) {
-                return undefined;
-              }
+                if (!matchedLanguage) {
+                  return undefined;
+                }
 
-              return {
-                label: matchedLanguage.name,
-                value: matchedLanguage.iso_639_1,
-              };
-            }) ?? undefined
+                return {
+                  label: matchedLanguage.name,
+                  value: matchedLanguage.iso_639_1,
+                };
+              })
+              .filter((option) => option !== undefined) as OptionType[])
       }
-      onChange={(
-        value: OptionTypeBase | OptionsType<OptionType> | null,
-        options
-      ) => {
-        if (!Array.isArray(value)) {
-          return;
-        }
-
+      onChange={(value, options) => {
         if (
           (options &&
             options.action === 'select-option' &&
             options.option?.value === 'server') ||
-          value?.every(
-            (v: { value: string; label: string }) => v.value === 'server'
-          )
+          value.every((v) => v.value === 'server')
         ) {
           return setFieldValue('originalLanguage', '');
         }
@@ -163,9 +153,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           (options &&
             options.action === 'select-option' &&
             options.option?.value === 'all') ||
-          value?.every(
-            (v: { value: string; label: string }) => v.value === 'all'
-          )
+          value.every((v) => v.value === 'all')
         ) {
           return setFieldValue('originalLanguage', isUserSettings ? 'all' : '');
         }
@@ -173,7 +161,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         setFieldValue(
           'originalLanguage',
           value
-            ?.map((lang) => lang.value)
+            .map((lang) => lang.value)
             .filter((v) => v !== 'all')
             .join('|')
         );

@@ -145,8 +145,7 @@ location ^~ /overseerr {
     sub_filter '/android-' '/$app/android-';
     sub_filter '/apple-' '/$app/apple-';
     sub_filter '/favicon' '/$app/favicon';
-    sub_filter '/logo_full.svg' '/$app/logo_full.svg';
-    sub_filter '/logo_stacked.svg' '/$app/logo_stacked.svg';
+    sub_filter '/logo_' '/$app/logo_';
     sub_filter '/site.webmanifest' '/$app/site.webmanifest';
 }
 ```

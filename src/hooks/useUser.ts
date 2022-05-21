@@ -1,4 +1,4 @@
-import useSwr from 'swr';
+import useSWR from 'swr';
 import { MutatorCallback } from 'swr/dist/types';
 import { UserType } from '../../server/constants/user';
 import {
@@ -40,8 +40,7 @@ interface UserHookResponse {
   user?: User;
   loading: boolean;
   error: string;
-  revalidate: () => Promise<boolean>;
-  mutate: (
+  revalidate: (
     data?: User | Promise<User> | MutatorCallback<User> | undefined,
     shouldRevalidate?: boolean | undefined
   ) => Promise<User | undefined>;
@@ -55,15 +54,16 @@ export const useUser = ({
   id,
   initialData,
 }: { id?: number; initialData?: User } = {}): UserHookResponse => {
-  const { data, error, revalidate, mutate } = useSwr<User>(
-    id ? `/api/v1/user/${id}` : `/api/v1/auth/me`,
-    {
-      initialData,
-      refreshInterval: 30000,
-      errorRetryInterval: 30000,
-      shouldRetryOnError: false,
-    }
-  );
+  const {
+    data,
+    error,
+    mutate: revalidate,
+  } = useSWR<User>(id ? `/api/v1/user/${id}` : `/api/v1/auth/me`, {
+    fallbackData: initialData,
+    refreshInterval: 30000,
+    errorRetryInterval: 30000,
+    shouldRetryOnError: false,
+  });
 
   const checkPermission = (
     permission: Permission | Permission[],
@@ -76,8 +76,7 @@ export const useUser = ({
     user: data,
     loading: !data && !error,
     error,
-    revalidate,
     hasPermission: checkPermission,
-    mutate,
+    revalidate,
   };
 };

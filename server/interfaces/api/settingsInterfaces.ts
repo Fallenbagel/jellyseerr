@@ -3,7 +3,7 @@ import type { PaginatedResponse } from './common';
 export type LogMessage = {
   timestamp: string;
   level: string;
-  label: string;
+  label?: string;
   message: string;
   data?: Record<string, unknown>;
 };
@@ -17,6 +17,7 @@ export interface SettingsAboutResponse {
   totalRequests: number;
   totalMediaItems: number;
   tz?: string;
+  appDataPath: string;
 }
 
 export interface PublicSettingsResponse {
@@ -38,6 +39,7 @@ export interface PublicSettingsResponse {
   enablePushRegistration: boolean;
   locale: string;
   emailEnabled: boolean;
+  newPlexLogin: boolean;
 }
 
 export interface CacheItem {

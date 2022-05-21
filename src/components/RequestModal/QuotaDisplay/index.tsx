@@ -46,7 +46,7 @@ const QuotaDisplay: React.FC<QuotaDisplayProps> = ({
   const [showDetails, setShowDetails] = useState(false);
   return (
     <div
-      className="flex flex-col p-4 my-4 bg-gray-800 rounded-md"
+      className="my-4 flex flex-col rounded-md bg-gray-800 p-4"
       onClick={() => setShowDetails((s) => !s)}
       onKeyDown={(e) => {
         if (e.key === 'Enter') {
@@ -58,7 +58,7 @@ const QuotaDisplay: React.FC<QuotaDisplayProps> = ({
     >
       <div className="flex items-center">
         <ProgressCircle
-          className="w-8 h-8"
+          className="h-8 w-8"
           progress={Math.round(
             ((remaining ?? quota?.remaining ?? 0) / (quota?.limit ?? 1)) * 100
           )}
@@ -85,11 +85,11 @@ const QuotaDisplay: React.FC<QuotaDisplayProps> = ({
                 })}
           </div>
         </div>
-        <div className="flex justify-end flex-1">
+        <div className="flex flex-1 justify-end">
           {showDetails ? (
-            <ChevronUpIcon className="w-6 h-6" />
+            <ChevronUpIcon className="h-6 w-6" />
           ) : (
-            <ChevronDownIcon className="w-6 h-6" />
+            <ChevronDownIcon className="h-6 w-6" />
           )}
         </div>
       </div>
@@ -99,8 +99,8 @@ const QuotaDisplay: React.FC<QuotaDisplayProps> = ({
             <div className="mb-2">
               {intl.formatMessage(
                 userOverride
-                  ? messages.requiredquota
-                  : messages.requiredquotaUser,
+                  ? messages.requiredquotaUser
+                  : messages.requiredquota,
                 {
                   seasons: overLimit,
                   strong: function strong(msg) {

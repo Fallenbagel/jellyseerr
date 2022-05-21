@@ -20,12 +20,12 @@ const DownloadBlock: React.FC<DownloadBlockProps> = ({
 
   return (
     <div className="p-4">
-      <div className="w-56 mb-2 text-sm truncate sm:w-80 md:w-full">
+      <div className="mb-2 w-56 truncate text-sm sm:w-80 md:w-full">
         {downloadItem.title}
       </div>
-      <div className="relative h-6 min-w-0 mb-2 overflow-hidden bg-gray-700 rounded-full">
+      <div className="relative mb-2 h-6 min-w-0 overflow-hidden rounded-full bg-gray-700">
         <div
-          className="h-8 transition-all duration-200 ease-in-out bg-indigo-600"
+          className="h-8 bg-indigo-600 transition-all duration-200 ease-in-out"
           style={{
             width: `${
               downloadItem.size
@@ -38,7 +38,7 @@ const DownloadBlock: React.FC<DownloadBlockProps> = ({
             }%`,
           }}
         />
-        <div className="absolute inset-0 flex items-center justify-center w-full h-6 text-xs">
+        <div className="absolute inset-0 flex h-6 w-full items-center justify-center text-xs">
           <span>
             {downloadItem.size
               ? Math.round(

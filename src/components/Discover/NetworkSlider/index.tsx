@@ -39,10 +39,22 @@ const networks: Network[] = [
     url: '/discover/tv/network/2552',
   },
   {
+    name: 'Hulu',
+    image:
+      'https://image.tmdb.org/t/p/w780_filter(duotone,ffffff,bababa)/pqUTCleNUiTLAVlelGxUgWn1ELh.png',
+    url: '/discover/tv/network/453',
+  },
+  {
     name: 'HBO',
     image:
       'https://image.tmdb.org/t/p/w780_filter(duotone,ffffff,bababa)/tuomPhY2UtuPTqqFnKMVHvSb724.png',
     url: '/discover/tv/network/49',
+  },
+  {
+    name: 'Discovery+',
+    image:
+      'https://image.tmdb.org/t/p/w780_filter(duotone,ffffff,bababa)/1D1bS3Dyw4ScYnFWTlBOvJXC3nb.png',
+    url: '/discover/tv/network/4353',
   },
   {
     name: 'ABC',

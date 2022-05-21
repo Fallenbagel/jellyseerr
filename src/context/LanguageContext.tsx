@@ -2,6 +2,8 @@ import React, { ReactNode } from 'react';
 
 export type AvailableLocale =
   | 'ca'
+  | 'cs'
+  | 'da'
   | 'de'
   | 'en'
   | 'el'
@@ -12,9 +14,11 @@ export type AvailableLocale =
   | 'hu'
   | 'nb-NO'
   | 'nl'
+  | 'pl'
   | 'pt-BR'
   | 'pt-PT'
   | 'ru'
+  | 'sq'
   | 'sr'
   | 'sv'
   | 'zh-CN'
@@ -29,6 +33,14 @@ export const availableLanguages: AvailableLanguageObject = {
   ca: {
     code: 'ca',
     display: 'Català',
+  },
+  cs: {
+    code: 'cs',
+    display: 'Čeština',
+  },
+  da: {
+    code: 'da',
+    display: 'Dansk',
   },
   de: {
     code: 'de',
@@ -62,6 +74,10 @@ export const availableLanguages: AvailableLanguageObject = {
     code: 'nb-NO',
     display: 'Norsk Bokmål',
   },
+  pl: {
+    code: 'pl',
+    display: 'Polski',
+  },
   'pt-BR': {
     code: 'pt-BR',
     display: 'Português (Brasil)',
@@ -69,6 +85,10 @@ export const availableLanguages: AvailableLanguageObject = {
   'pt-PT': {
     code: 'pt-PT',
     display: 'Português (Portugal)',
+  },
+  sq: {
+    code: 'sq',
+    display: 'Shqip',
   },
   sv: {
     code: 'sv',
@@ -84,7 +104,7 @@ export const availableLanguages: AvailableLanguageObject = {
   },
   sr: {
     code: 'sr',
-    display: 'српски језик‬',
+    display: 'српски језик',
   },
   ja: {
     code: 'ja',
@@ -92,11 +112,11 @@ export const availableLanguages: AvailableLanguageObject = {
   },
   'zh-TW': {
     code: 'zh-TW',
-    display: '‪繁體中文‬',
+    display: '繁體中文',
   },
   'zh-CN': {
     code: 'zh-CN',
-    display: '‪简体中文‬',
+    display: '简体中文',
   },
 };
 

@@ -2,6 +2,35 @@ import cacheManager, { AvailableCacheIds } from '../../lib/cache';
 import { DVRSettings } from '../../lib/settings';
 import ExternalAPI from '../externalapi';
 
+export interface SystemStatus {
+  version: string;
+  buildTime: Date;
+  isDebug: boolean;
+  isProduction: boolean;
+  isAdmin: boolean;
+  isUserInteractive: boolean;
+  startupPath: string;
+  appData: string;
+  osName: string;
+  osVersion: string;
+  isNetCore: boolean;
+  isMono: boolean;
+  isLinux: boolean;
+  isOsx: boolean;
+  isWindows: boolean;
+  isDocker: boolean;
+  mode: string;
+  branch: string;
+  authentication: string;
+  sqliteVersion: string;
+  migrationVersion: number;
+  urlBase: string;
+  runtimeVersion: string;
+  runtimeName: string;
+  startTime: Date;
+  packageUpdateMechanism: string;
+}
+
 export interface RootFolder {
   id: number;
   path: string;
@@ -80,6 +109,18 @@ class ServarrBase<QueueItemAppendT> extends ExternalAPI {
 
     this.apiName = apiName;
   }
+
+  public getSystemStatus = async (): Promise<SystemStatus> => {
+    try {
+      const response = await this.axios.get<SystemStatus>('/system/status');
+
+      return response.data;
+    } catch (e) {
+      throw new Error(
+        `[${this.apiName}] Failed to retrieve system status: ${e.message}`
+      );
+    }
+  };
 
   public getProfiles = async (): Promise<QualityProfile[]> => {
     try {

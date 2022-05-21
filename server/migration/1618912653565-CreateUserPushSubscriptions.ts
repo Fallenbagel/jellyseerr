@@ -1,7 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class CreateUserPushSubscriptions1618912653565
-  implements MigrationInterface {
+  implements MigrationInterface
+{
   name = 'CreateUserPushSubscriptions1618912653565';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

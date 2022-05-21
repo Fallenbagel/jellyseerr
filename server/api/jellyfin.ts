@@ -15,6 +15,10 @@ export interface JellyfinLoginResponse {
   AccessToken: string;
 }
 
+export interface JellyfinUserListResponse {
+  users: Array<JellyfinUserResponse>;
+}
+
 export interface JellyfinLibrary {
   type: 'show' | 'movie';
   key: string;
@@ -81,9 +85,9 @@ class JellyfinAPI {
 
     let authHeaderVal = '';
     if (this.authToken) {
-      authHeaderVal = `MediaBrowser Client="Jellyseerr", Device="Axios", DeviceId="${deviceId}", Version="10.8.0", Token="${authToken}"`;
+      authHeaderVal = `MediaBrowser Client="Overseerr", Device="Axios", DeviceId="${deviceId}", Version="10.8.0", Token="${authToken}"`;
     } else {
-      authHeaderVal = `MediaBrowser Client="Jellyseerr", Device="Axios", DeviceId="${deviceId}", Version="10.8.0"`;
+      authHeaderVal = `MediaBrowser Client="Overseerr", Device="Axios", DeviceId="${deviceId}", Version="10.8.0"`;
     }
 
     this.axios = axios.create({
@@ -122,7 +126,7 @@ class JellyfinAPI {
   public async getServerName(): Promise<string> {
     try {
       const account = await this.axios.get<JellyfinUserResponse>(
-        `/System/Info/Public'}`
+        "/System/Info/Public'}"
       );
       return account.data.ServerName;
     } catch (e) {
@@ -131,6 +135,19 @@ class JellyfinAPI {
         { label: 'Jellyfin API' }
       );
       throw new Error('girl idk');
+    }
+  }
+
+  public async getUsers(): Promise<JellyfinUserListResponse> {
+    try {
+      const account = await this.axios.get(`/Users`);
+      return { users: account.data };
+    } catch (e) {
+      logger.error(
+        `Something went wrong while getting the account from the Jellyfin server: ${e.message}`,
+        { label: 'Jellyfin API' }
+      );
+      throw new Error('Invalid auth token');
     }
   }
 

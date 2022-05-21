@@ -1,7 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddLastSeasonChangeMedia1608477467935
-  implements MigrationInterface {
+  implements MigrationInterface
+{
   name = 'AddLastSeasonChangeMedia1608477467935';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

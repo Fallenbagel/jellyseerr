@@ -13,8 +13,11 @@ import {
   RelationCount,
   UpdateDateColumn,
 } from 'typeorm';
-import RadarrAPI from '../api/servarr/radarr';
-import SonarrAPI, { SonarrSeries } from '../api/servarr/sonarr';
+import RadarrAPI, { RadarrMovieOptions } from '../api/servarr/radarr';
+import SonarrAPI, {
+  AddSeriesOptions,
+  SonarrSeries,
+} from '../api/servarr/sonarr';
 import TheMovieDb from '../api/themoviedb';
 import { ANIME_KEYWORD_ID } from '../api/themoviedb/constants';
 import { MediaRequestStatus, MediaStatus, MediaType } from '../constants/media';
@@ -135,51 +138,15 @@ export class MediaRequest {
         where: { id: this.media.id },
       });
       if (!media) {
-        logger.error('No parent media!', { label: 'Media Request' });
+        logger.error('Media data not found', {
+          label: 'Media Request',
+          requestId: this.id,
+          mediaId: this.media.id,
+        });
         return;
       }
-      const tmdb = new TheMovieDb();
-      if (this.type === MediaType.MOVIE) {
-        const movie = await tmdb.getMovie({ movieId: media.tmdbId });
-        notificationManager.sendNotification(Notification.MEDIA_PENDING, {
-          subject: `${movie.title}${
-            movie.release_date ? ` (${movie.release_date.slice(0, 4)})` : ''
-          }`,
-          message: truncate(movie.overview, {
-            length: 500,
-            separator: /\s/,
-            omission: '…',
-          }),
-          image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`,
-          media,
-          request: this,
-        });
-      }
 
-      if (this.type === MediaType.TV) {
-        const tv = await tmdb.getTvShow({ tvId: media.tmdbId });
-        notificationManager.sendNotification(Notification.MEDIA_PENDING, {
-          subject: `${tv.name}${
-            tv.first_air_date ? ` (${tv.first_air_date.slice(0, 4)})` : ''
-          }`,
-          message: truncate(tv.overview, {
-            length: 500,
-            separator: /\s/,
-            omission: '…',
-          }),
-          image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${tv.poster_path}`,
-          media,
-          extra: [
-            {
-              name: 'Seasons',
-              value: this.seasons
-                .map((season) => season.seasonNumber)
-                .join(', '),
-            },
-          ],
-          request: this,
-        });
-      }
+      this.sendNotification(media, Notification.MEDIA_PENDING);
     }
   }
 
@@ -200,74 +167,30 @@ export class MediaRequest {
         where: { id: this.media.id },
       });
       if (!media) {
-        logger.error('No parent media!', { label: 'Media Request' });
+        logger.error('Media data not found', {
+          label: 'Media Request',
+          requestId: this.id,
+          mediaId: this.media.id,
+        });
         return;
       }
 
       if (media[this.is4k ? 'status4k' : 'status'] === MediaStatus.AVAILABLE) {
         logger.warn(
-          'Media became available before request was approved. Approval notification will be skipped.',
-          { label: 'Media Request' }
+          'Media became available before request was approved. Skipping approval notification',
+          { label: 'Media Request', requestId: this.id, mediaId: this.media.id }
         );
         return;
       }
 
-      const tmdb = new TheMovieDb();
-      if (this.media.mediaType === MediaType.MOVIE) {
-        const movie = await tmdb.getMovie({ movieId: this.media.tmdbId });
-        notificationManager.sendNotification(
-          this.status === MediaRequestStatus.APPROVED
-            ? autoApproved
-              ? Notification.MEDIA_AUTO_APPROVED
-              : Notification.MEDIA_APPROVED
-            : Notification.MEDIA_DECLINED,
-          {
-            subject: `${movie.title}${
-              movie.release_date ? ` (${movie.release_date.slice(0, 4)})` : ''
-            }`,
-            message: truncate(movie.overview, {
-              length: 500,
-              separator: /\s/,
-              omission: '…',
-            }),
-            image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`,
-            notifyUser: autoApproved ? undefined : this.requestedBy,
-            media,
-            request: this,
-          }
-        );
-      } else if (this.media.mediaType === MediaType.TV) {
-        const tv = await tmdb.getTvShow({ tvId: this.media.tmdbId });
-        notificationManager.sendNotification(
-          this.status === MediaRequestStatus.APPROVED
-            ? autoApproved
-              ? Notification.MEDIA_AUTO_APPROVED
-              : Notification.MEDIA_APPROVED
-            : Notification.MEDIA_DECLINED,
-          {
-            subject: `${tv.name}${
-              tv.first_air_date ? ` (${tv.first_air_date.slice(0, 4)})` : ''
-            }`,
-            message: truncate(tv.overview, {
-              length: 500,
-              separator: /\s/,
-              omission: '…',
-            }),
-            image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${tv.poster_path}`,
-            notifyUser: autoApproved ? undefined : this.requestedBy,
-            media,
-            extra: [
-              {
-                name: 'Seasons',
-                value: this.seasons
-                  .map((season) => season.seasonNumber)
-                  .join(', '),
-              },
-            ],
-            request: this,
-          }
-        );
-      }
+      this.sendNotification(
+        media,
+        this.status === MediaRequestStatus.APPROVED
+          ? autoApproved
+            ? Notification.MEDIA_AUTO_APPROVED
+            : Notification.MEDIA_APPROVED
+          : Notification.MEDIA_DECLINED
+      );
     }
   }
 
@@ -287,7 +210,11 @@ export class MediaRequest {
       relations: ['requests'],
     });
     if (!media) {
-      logger.error('No parent media!', { label: 'Media Request' });
+      logger.error('Media data not found', {
+        label: 'Media Request',
+        requestId: this.id,
+        mediaId: this.media.id,
+      });
       return;
     }
     const seasonRequestRepository = getRepository(SeasonRequest);
@@ -375,8 +302,12 @@ export class MediaRequest {
         const settings = getSettings();
         if (settings.radarr.length === 0 && !settings.radarr[0]) {
           logger.info(
-            'Skipped Radarr request as there is no Radarr server configured',
-            { label: 'Media Request' }
+            'No Radarr server configured, skipping request processing',
+            {
+              label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
+            }
           );
           return;
         }
@@ -395,18 +326,26 @@ export class MediaRequest {
           );
           logger.info(
             `Request has an override server: ${radarrSettings?.name}`,
-            { label: 'Media Request' }
+            {
+              label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
+            }
           );
         }
 
         if (!radarrSettings) {
-          logger.info(
+          logger.warn(
             `There is no default ${
               this.is4k ? '4K ' : ''
             }Radarr server configured. Did you set any of your ${
               this.is4k ? '4K ' : ''
             }Radarr servers as default?`,
-            { label: 'Media Request' }
+            {
+              label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
+            }
           );
           return;
         }
@@ -423,6 +362,8 @@ export class MediaRequest {
           rootFolder = this.rootFolder;
           logger.info(`Request has an override root folder: ${rootFolder}`, {
             label: 'Media Request',
+            requestId: this.id,
+            mediaId: this.media.id,
           });
         }
 
@@ -431,15 +372,22 @@ export class MediaRequest {
           this.profileId !== radarrSettings.activeProfileId
         ) {
           qualityProfile = this.profileId;
-          logger.info(`Request has an override profile id: ${qualityProfile}`, {
-            label: 'Media Request',
-          });
+          logger.info(
+            `Request has an override quality profile ID: ${qualityProfile}`,
+            {
+              label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
+            }
+          );
         }
 
         if (this.tags && !isEqual(this.tags, radarrSettings.tags)) {
           tags = this.tags;
           logger.info(`Request has override tags`, {
             label: 'Media Request',
+            requestId: this.id,
+            mediaId: this.media.id,
             tagIds: tags,
           });
         }
@@ -456,7 +404,11 @@ export class MediaRequest {
         });
 
         if (!media) {
-          logger.error('Media not present');
+          logger.error('Media data not found', {
+            label: 'Media Request',
+            requestId: this.id,
+            mediaId: this.media.id,
+          });
           return;
         }
 
@@ -466,20 +418,22 @@ export class MediaRequest {
           throw new Error('Media already available');
         }
 
+        const radarrMovieOptions: RadarrMovieOptions = {
+          profileId: qualityProfile,
+          qualityProfileId: qualityProfile,
+          rootFolderPath: rootFolder,
+          minimumAvailability: radarrSettings.minimumAvailability,
+          title: movie.title,
+          tmdbId: movie.id,
+          year: Number(movie.release_date.slice(0, 4)),
+          monitored: true,
+          tags,
+          searchNow: !radarrSettings.preventSearch,
+        };
+
         // Run this asynchronously so we don't wait for it on the UI side
         radarr
-          .addMovie({
-            profileId: qualityProfile,
-            qualityProfileId: qualityProfile,
-            rootFolderPath: rootFolder,
-            minimumAvailability: radarrSettings.minimumAvailability,
-            title: movie.title,
-            tmdbId: movie.id,
-            year: Number(movie.release_date.slice(0, 4)),
-            monitored: true,
-            tags,
-            searchNow: !radarrSettings.preventSearch,
-          })
+          .addMovie(radarrMovieOptions)
           .then(async (radarrMovie) => {
             // We grab media again here to make sure we have the latest version of it
             const media = await mediaRepository.findOne({
@@ -487,7 +441,7 @@ export class MediaRequest {
             });
 
             if (!media) {
-              throw new Error('Media data is missing');
+              throw new Error('Media data not found');
             }
 
             media[this.is4k ? 'externalServiceId4k' : 'externalServiceId'] =
@@ -501,34 +455,30 @@ export class MediaRequest {
             media[this.is4k ? 'status4k' : 'status'] = MediaStatus.UNKNOWN;
             await mediaRepository.save(media);
             logger.warn(
-              'Newly added movie request failed to add to Radarr, marking as unknown',
+              'Something went wrong sending movie request to Radarr, marking status as UNKNOWN',
               {
                 label: 'Media Request',
+                requestId: this.id,
+                mediaId: this.media.id,
+                radarrMovieOptions,
               }
             );
 
-            notificationManager.sendNotification(Notification.MEDIA_FAILED, {
-              subject: `${movie.title}${
-                movie.release_date ? ` (${movie.release_date.slice(0, 4)})` : ''
-              }`,
-              message: truncate(movie.overview, {
-                length: 500,
-                separator: /\s/,
-                omission: '…',
-              }),
-              media,
-              image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`,
-              request: this,
-            });
+            this.sendNotification(media, Notification.MEDIA_FAILED);
           });
-        logger.info('Sent request to Radarr', { label: 'Media Request' });
-      } catch (e) {
-        const errorMessage = `Request failed to send to Radarr: ${e.message}`;
-        logger.error('Request failed to send to Radarr', {
+        logger.info('Sent request to Radarr', {
           label: 'Media Request',
-          errorMessage,
+          requestId: this.id,
+          mediaId: this.media.id,
         });
-        throw new Error(errorMessage);
+      } catch (e) {
+        logger.error('Something went wrong sending request to Radarr', {
+          label: 'Media Request',
+          errorMessage: e.message,
+          requestId: this.id,
+          mediaId: this.media.id,
+        });
+        throw new Error(e.message);
       }
     }
   }
@@ -542,9 +492,13 @@ export class MediaRequest {
         const mediaRepository = getRepository(Media);
         const settings = getSettings();
         if (settings.sonarr.length === 0 && !settings.sonarr[0]) {
-          logger.info(
-            'Skipped Sonarr request as there is no Sonarr server configured',
-            { label: 'Media Request' }
+          logger.warn(
+            'No Sonarr server configured, skipping request processing',
+            {
+              label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
+            }
           );
           return;
         }
@@ -563,18 +517,26 @@ export class MediaRequest {
           );
           logger.info(
             `Request has an override server: ${sonarrSettings?.name}`,
-            { label: 'Media Request' }
+            {
+              label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
+            }
           );
         }
 
         if (!sonarrSettings) {
-          logger.info(
+          logger.warn(
             `There is no default ${
               this.is4k ? '4K ' : ''
             }Sonarr server configured. Did you set any of your ${
               this.is4k ? '4K ' : ''
             }Sonarr servers as default?`,
-            { label: 'Media Request' }
+            {
+              label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
+            }
           );
           return;
         }
@@ -585,7 +547,7 @@ export class MediaRequest {
         });
 
         if (!media) {
-          throw new Error('Media data is missing');
+          throw new Error('Media data not found');
         }
 
         if (
@@ -606,7 +568,7 @@ export class MediaRequest {
           const requestRepository = getRepository(MediaRequest);
           await mediaRepository.remove(media);
           await requestRepository.remove(this);
-          throw new Error('Series was missing tvdb id');
+          throw new Error('TVDB ID not found');
         }
 
         let seriesType: SonarrSeries['seriesType'] = 'standard';
@@ -628,12 +590,10 @@ export class MediaRequest {
           seriesType === 'anime' && sonarrSettings.activeAnimeProfileId
             ? sonarrSettings.activeAnimeProfileId
             : sonarrSettings.activeProfileId;
-
         let languageProfile =
           seriesType === 'anime' && sonarrSettings.activeAnimeLanguageProfileId
             ? sonarrSettings.activeAnimeLanguageProfileId
             : sonarrSettings.activeLanguageProfileId;
-
         let tags =
           seriesType === 'anime'
             ? sonarrSettings.animeTags
@@ -647,14 +607,21 @@ export class MediaRequest {
           rootFolder = this.rootFolder;
           logger.info(`Request has an override root folder: ${rootFolder}`, {
             label: 'Media Request',
+            requestId: this.id,
+            mediaId: this.media.id,
           });
         }
 
         if (this.profileId && this.profileId !== qualityProfile) {
           qualityProfile = this.profileId;
-          logger.info(`Request has an override profile ID: ${qualityProfile}`, {
-            label: 'Media Request',
-          });
+          logger.info(
+            `Request has an override quality profile ID: ${qualityProfile}`,
+            {
+              label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
+            }
+          );
         }
 
         if (
@@ -663,9 +630,11 @@ export class MediaRequest {
         ) {
           languageProfile = this.languageProfileId;
           logger.info(
-            `Request has an override Language Profile: ${languageProfile}`,
+            `Request has an override language profile ID: ${languageProfile}`,
             {
               label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
             }
           );
         }
@@ -674,25 +643,29 @@ export class MediaRequest {
           tags = this.tags;
           logger.info(`Request has override tags`, {
             label: 'Media Request',
+            requestId: this.id,
+            mediaId: this.media.id,
             tagIds: tags,
           });
         }
 
+        const sonarrSeriesOptions: AddSeriesOptions = {
+          profileId: qualityProfile,
+          languageProfileId: languageProfile,
+          rootFolderPath: rootFolder,
+          title: series.name,
+          tvdbid: tvdbId,
+          seasons: this.seasons.map((season) => season.seasonNumber),
+          seasonFolder: sonarrSettings.enableSeasonFolders,
+          seriesType,
+          tags,
+          monitored: true,
+          searchNow: !sonarrSettings.preventSearch,
+        };
+
         // Run this asynchronously so we don't wait for it on the UI side
         sonarr
-          .addSeries({
-            profileId: qualityProfile,
-            languageProfileId: languageProfile,
-            rootFolderPath: rootFolder,
-            title: series.name,
-            tvdbid: tvdbId,
-            seasons: this.seasons.map((season) => season.seasonNumber),
-            seasonFolder: sonarrSettings.enableSeasonFolders,
-            seriesType,
-            tags,
-            monitored: true,
-            searchNow: !sonarrSettings.preventSearch,
-          })
+          .addSeries(sonarrSeriesOptions)
           .then(async (sonarrSeries) => {
             // We grab media again here to make sure we have the latest version of it
             const media = await mediaRepository.findOne({
@@ -701,7 +674,7 @@ export class MediaRequest {
             });
 
             if (!media) {
-              throw new Error('Media data is missing');
+              throw new Error('Media data not found');
             }
 
             media[this.is4k ? 'externalServiceId4k' : 'externalServiceId'] =
@@ -715,45 +688,116 @@ export class MediaRequest {
             media[this.is4k ? 'status4k' : 'status'] = MediaStatus.UNKNOWN;
             await mediaRepository.save(media);
             logger.warn(
-              'Newly added series request failed to add to Sonarr, marking as unknown',
+              'Something went wrong sending series request to Sonarr, marking status as UNKNOWN',
               {
                 label: 'Media Request',
+                requestId: this.id,
+                mediaId: this.media.id,
+                sonarrSeriesOptions,
               }
             );
 
-            notificationManager.sendNotification(Notification.MEDIA_FAILED, {
-              subject: `${series.name}${
-                series.first_air_date
-                  ? ` (${series.first_air_date.slice(0, 4)})`
-                  : ''
-              }`,
-              message: truncate(series.overview, {
-                length: 500,
-                separator: /\s/,
-                omission: '…',
-              }),
-              image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${series.poster_path}`,
-              media,
-              extra: [
-                {
-                  name: 'Seasons',
-                  value: this.seasons
-                    .map((season) => season.seasonNumber)
-                    .join(', '),
-                },
-              ],
-              request: this,
-            });
+            this.sendNotification(media, Notification.MEDIA_FAILED);
           });
-        logger.info('Sent request to Sonarr', { label: 'Media Request' });
-      } catch (e) {
-        const errorMessage = `Request failed to send to Sonarr: ${e.message}`;
-        logger.error('Request failed to send to Sonarr', {
+        logger.info('Sent request to Sonarr', {
           label: 'Media Request',
-          errorMessage,
+          requestId: this.id,
+          mediaId: this.media.id,
         });
-        throw new Error(errorMessage);
+      } catch (e) {
+        logger.error('Something went wrong sending request to Sonarr', {
+          label: 'Media Request',
+          errorMessage: e.message,
+          requestId: this.id,
+          mediaId: this.media.id,
+        });
+        throw new Error(e.message);
       }
+    }
+  }
+
+  private async sendNotification(media: Media, type: Notification) {
+    const tmdb = new TheMovieDb();
+
+    try {
+      const mediaType = this.type === MediaType.MOVIE ? 'Movie' : 'Series';
+      let event: string | undefined;
+      let notifyAdmin = true;
+
+      switch (type) {
+        case Notification.MEDIA_APPROVED:
+          event = `${this.is4k ? '4K ' : ''}${mediaType} Request Approved`;
+          notifyAdmin = false;
+          break;
+        case Notification.MEDIA_DECLINED:
+          event = `${this.is4k ? '4K ' : ''}${mediaType} Request Declined`;
+          notifyAdmin = false;
+          break;
+        case Notification.MEDIA_PENDING:
+          event = `New ${this.is4k ? '4K ' : ''}${mediaType} Request`;
+          break;
+        case Notification.MEDIA_AUTO_APPROVED:
+          event = `${
+            this.is4k ? '4K ' : ''
+          }${mediaType} Request Automatically Approved`;
+          break;
+        case Notification.MEDIA_FAILED:
+          event = `${this.is4k ? '4K ' : ''}${mediaType} Request Failed`;
+          break;
+      }
+
+      if (this.type === MediaType.MOVIE) {
+        const movie = await tmdb.getMovie({ movieId: media.tmdbId });
+        notificationManager.sendNotification(type, {
+          media,
+          request: this,
+          notifyAdmin,
+          notifyUser: notifyAdmin ? undefined : this.requestedBy,
+          event,
+          subject: `${movie.title}${
+            movie.release_date ? ` (${movie.release_date.slice(0, 4)})` : ''
+          }`,
+          message: truncate(movie.overview, {
+            length: 500,
+            separator: /\s/,
+            omission: '…',
+          }),
+          image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`,
+        });
+      } else if (this.type === MediaType.TV) {
+        const tv = await tmdb.getTvShow({ tvId: media.tmdbId });
+        notificationManager.sendNotification(type, {
+          media,
+          request: this,
+          notifyAdmin,
+          notifyUser: notifyAdmin ? undefined : this.requestedBy,
+          event,
+          subject: `${tv.name}${
+            tv.first_air_date ? ` (${tv.first_air_date.slice(0, 4)})` : ''
+          }`,
+          message: truncate(tv.overview, {
+            length: 500,
+            separator: /\s/,
+            omission: '…',
+          }),
+          image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${tv.poster_path}`,
+          extra: [
+            {
+              name: 'Requested Seasons',
+              value: this.seasons
+                .map((season) => season.seasonNumber)
+                .join(', '),
+            },
+          ],
+        });
+      }
+    } catch (e) {
+      logger.error('Something went wrong sending media notification(s)', {
+        label: 'Notifications',
+        errorMessage: e.message,
+        requestId: this.id,
+        mediaId: this.media.id,
+      });
     }
   }
 }

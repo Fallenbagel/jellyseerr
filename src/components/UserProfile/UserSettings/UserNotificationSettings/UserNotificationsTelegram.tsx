@@ -30,14 +30,18 @@ const UserTelegramSettings: React.FC = () => {
   const { addToast } = useToasts();
   const router = useRouter();
   const { user } = useUser({ id: Number(router.query.userId) });
-  const { data, error, revalidate } = useSWR<UserSettingsNotificationsResponse>(
+  const {
+    data,
+    error,
+    mutate: revalidate,
+  } = useSWR<UserSettingsNotificationsResponse>(
     user ? `/api/v1/user/${user?.id}/settings/notifications` : null
   );
 
   const UserNotificationsTelegramSchema = Yup.object().shape({
     telegramChatId: Yup.string()
       .when('types', {
-        is: (value: unknown) => !!value,
+        is: (types: number) => !!types,
         then: Yup.string()
           .nullable()
           .required(intl.formatMessage(messages.validationTelegramChatId)),
@@ -67,6 +71,9 @@ const UserTelegramSettings: React.FC = () => {
           await axios.post(`/api/v1/user/${user?.id}/settings/notifications`, {
             pgpKey: data?.pgpKey,
             discordId: data?.discordId,
+            pushbulletAccessToken: data?.pushbulletAccessToken,
+            pushoverApplicationToken: data?.pushoverApplicationToken,
+            pushoverUserKey: data?.pushoverUserKey,
             telegramChatId: values.telegramChatId,
             telegramSendSilently: values.telegramSendSilently,
             notificationTypes: {
@@ -134,7 +141,7 @@ const UserTelegramSettings: React.FC = () => {
                   </span>
                 )}
               </label>
-              <div className="form-input">
+              <div className="form-input-area">
                 <div className="form-input-field">
                   <Field
                     id="telegramChatId"
@@ -154,7 +161,7 @@ const UserTelegramSettings: React.FC = () => {
                   {intl.formatMessage(messages.sendSilentlyDescription)}
                 </span>
               </label>
-              <div className="form-input">
+              <div className="form-input-area">
                 <Field
                   type="checkbox"
                   id="telegramSendSilently"
@@ -177,7 +184,7 @@ const UserTelegramSettings: React.FC = () => {
             />
             <div className="actions">
               <div className="flex justify-end">
-                <span className="inline-flex ml-3 rounded-md shadow-sm">
+                <span className="ml-3 inline-flex rounded-md shadow-sm">
                   <Button
                     buttonType="primary"
                     type="submit"

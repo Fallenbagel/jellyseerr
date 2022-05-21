@@ -1,6 +1,7 @@
 import {
   ClockIcon,
   CogIcon,
+  ExclamationIcon,
   SparklesIcon,
   UsersIcon,
   XIcon,
@@ -17,6 +18,7 @@ import VersionStatus from '../VersionStatus';
 const messages = defineMessages({
   dashboard: 'Discover',
   requests: 'Requests',
+  issues: 'Issues',
   users: 'Users',
   settings: 'Settings',
 });
@@ -33,32 +35,47 @@ interface SidebarLinkProps {
   activeRegExp: RegExp;
   as?: string;
   requiredPermission?: Permission | Permission[];
+  permissionType?: 'and' | 'or';
 }
 
 const SidebarLinks: SidebarLinkProps[] = [
   {
     href: '/',
     messagesKey: 'dashboard',
-    svgIcon: <SparklesIcon className="w-6 h-6 mr-3" />,
+    svgIcon: <SparklesIcon className="mr-3 h-6 w-6" />,
     activeRegExp: /^\/(discover\/?(movies|tv)?)?$/,
   },
   {
     href: '/requests',
     messagesKey: 'requests',
-    svgIcon: <ClockIcon className="w-6 h-6 mr-3" />,
+    svgIcon: <ClockIcon className="mr-3 h-6 w-6" />,
     activeRegExp: /^\/requests/,
+  },
+  {
+    href: '/issues',
+    messagesKey: 'issues',
+    svgIcon: (
+      <ExclamationIcon className="mr-3 h-6 w-6 text-gray-300 transition duration-150 ease-in-out group-hover:text-gray-100 group-focus:text-gray-300" />
+    ),
+    activeRegExp: /^\/issues/,
+    requiredPermission: [
+      Permission.MANAGE_ISSUES,
+      Permission.CREATE_ISSUES,
+      Permission.VIEW_ISSUES,
+    ],
+    permissionType: 'or',
   },
   {
     href: '/users',
     messagesKey: 'users',
-    svgIcon: <UsersIcon className="w-6 h-6 mr-3" />,
+    svgIcon: <UsersIcon className="mr-3 h-6 w-6" />,
     activeRegExp: /^\/users/,
     requiredPermission: Permission.MANAGE_USERS,
   },
   {
     href: '/settings',
     messagesKey: 'settings',
-    svgIcon: <CogIcon className="w-6 h-6 mr-3" />,
+    svgIcon: <CogIcon className="mr-3 h-6 w-6" />,
     activeRegExp: /^\/settings/,
     requiredPermission: Permission.MANAGE_SETTINGS,
   },
@@ -97,31 +114,33 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setClosed }) => {
               leaveTo="-translate-x-full"
             >
               <>
-                <div className="relative flex flex-col flex-1 w-full max-w-xs bg-gray-800 sidebar">
-                  <div className="absolute top-0 right-0 p-1 sidebar-close-button -mr-14">
+                <div className="sidebar relative flex w-full max-w-xs flex-1 flex-col bg-gray-800">
+                  <div className="sidebar-close-button absolute top-0 right-0 -mr-14 p-1">
                     <button
-                      className="flex items-center justify-center w-12 h-12 rounded-full focus:outline-none focus:bg-gray-600"
+                      className="flex h-12 w-12 items-center justify-center rounded-full focus:bg-gray-600 focus:outline-none"
                       aria-label="Close sidebar"
                       onClick={() => setClosed()}
                     >
-                      <XIcon className="w-6 h-6 text-white" />
+                      <XIcon className="h-6 w-6 text-white" />
                     </button>
                   </div>
                   <div
                     ref={navRef}
-                    className="flex flex-col flex-1 h-0 pt-8 pb-8 overflow-y-auto sm:pb-4"
+                    className="flex h-0 flex-1 flex-col overflow-y-auto pt-8 pb-8 sm:pb-4"
                   >
-                    <div className="flex items-center flex-shrink-0 px-2">
+                    <div className="flex flex-shrink-0 items-center px-2">
                       <span className="px-4 text-xl text-gray-50">
                         <a href="/">
                           <img src="/logo_full.svg" alt="Logo" />
                         </a>
                       </span>
                     </div>
-                    <nav className="flex-1 px-4 mt-16 space-y-4">
+                    <nav className="mt-16 flex-1 space-y-4 px-4">
                       {SidebarLinks.filter((link) =>
                         link.requiredPermission
-                          ? hasPermission(link.requiredPermission)
+                          ? hasPermission(link.requiredPermission, {
+                              type: link.permissionType ?? 'and',
+                            })
                           : true
                       ).map((sidebarLink) => {
                         return (
@@ -139,7 +158,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setClosed }) => {
                               }}
                               role="button"
                               tabIndex={0}
-                              className={`flex items-center px-2 py-2 text-base leading-6 font-medium rounded-md text-white focus:outline-none transition ease-in-out duration-150
+                              className={`flex items-center rounded-md px-2 py-2 text-base font-medium leading-6 text-white transition duration-150 ease-in-out focus:outline-none
                                 ${
                                   router.pathname.match(
                                     sidebarLink.activeRegExp
@@ -165,7 +184,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setClosed }) => {
                     )}
                   </div>
                 </div>
-                <div className="flex-shrink-0 w-14">
+                <div className="w-14 flex-shrink-0">
                   {/* <!-- Force sidebar to shrink to fit close icon --> */}
                 </div>
               </>
@@ -175,20 +194,22 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setClosed }) => {
       </div>
 
       <div className="fixed top-0 bottom-0 left-0 z-30 hidden lg:flex lg:flex-shrink-0">
-        <div className="flex flex-col w-64 sidebar">
-          <div className="flex flex-col flex-1 h-0">
-            <div className="flex flex-col flex-1 pt-8 pb-4 overflow-y-auto">
-              <div className="flex items-center flex-shrink-0">
+        <div className="sidebar flex w-64 flex-col">
+          <div className="flex h-0 flex-1 flex-col">
+            <div className="flex flex-1 flex-col overflow-y-auto pt-8 pb-4">
+              <div className="flex flex-shrink-0 items-center">
                 <span className="px-4 text-2xl text-gray-50">
                   <a href="/">
                     <img src="/logo_full.svg" alt="Logo" />
                   </a>
                 </span>
               </div>
-              <nav className="flex-1 px-4 mt-16 space-y-4">
+              <nav className="mt-16 flex-1 space-y-4 px-4">
                 {SidebarLinks.filter((link) =>
                   link.requiredPermission
-                    ? hasPermission(link.requiredPermission)
+                    ? hasPermission(link.requiredPermission, {
+                        type: link.permissionType ?? 'and',
+                      })
                     : true
                 ).map((sidebarLink) => {
                   return (
@@ -198,7 +219,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setClosed }) => {
                       as={sidebarLink.as}
                     >
                       <a
-                        className={`flex group items-center px-2 py-2 text-lg leading-6 font-medium rounded-md text-white focus:outline-none transition ease-in-out duration-150
+                        className={`group flex items-center rounded-md px-2 py-2 text-lg font-medium leading-6 text-white transition duration-150 ease-in-out focus:outline-none
                                 ${
                                   router.pathname.match(
                                     sidebarLink.activeRegExp

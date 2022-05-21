@@ -1,19 +1,19 @@
-name: jellyseerr
-adopt-info: jellyseerr
+name: overseerr
+adopt-info: overseerr
 license: MIT
 summary: Request management and media discovery tool for the Plex ecosystem.
 description: >
-  Jellyseerr is a free and open source software application for managing requests for your media library.
+  Overseerr is a free and open source software application for managing requests for your media library.
   It integrates with your existing services such as Sonarr, Radarr and Plex!
 base: core18
 confinement: strict
 
 parts:
-  jellyseerr:
+  overseerr:
     plugin: nodejs
-    nodejs-version: '14.17.0'
+    nodejs-version: '16.14.0'
     nodejs-package-manager: 'yarn'
-    nodejs-yarn-version: v1.22.10
+    nodejs-yarn-version: v1.22.17
     build-packages:
       - git
       - on arm64:
@@ -88,7 +88,7 @@ apps:
       - network-bind
     environment:
       PATH: '$SNAP/usr/sbin:$SNAP/usr/bin:$SNAP/sbin:$SNAP/bin:$PATH'
-      JELLYSEERR_SNAP: 'True'
+      OVERSEERR_SNAP: 'True'
       CONFIG_DIRECTORY: $SNAP_USER_COMMON
       LOG_LEVEL: 'debug'
       NODE_ENV: 'production'
