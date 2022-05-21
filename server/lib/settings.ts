@@ -291,7 +291,7 @@ class Settings {
       vapidPublic: '',
       main: {
         apiKey: '',
-        applicationTitle: 'Overseerr',
+        applicationTitle: 'Jellyseerr',
         applicationUrl: '',
         csrfProtection: false,
         cacheImages: false,
