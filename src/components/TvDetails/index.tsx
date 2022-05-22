@@ -124,10 +124,7 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
     })
   ) {
     mediaLinks.push({
-      text:
-        settings.currentSettings.mediaServerType === MediaServerType.JELLYFIN
-          ? intl.formatMessage(messages.play, { mediaServerName: 'Jellyfin' })
-          : intl.formatMessage(messages.play, { mediaServerName: 'Plex' }),
+      text: getAvalaibleMediaServerName(),
       url: data.mediaInfo?.mediaUrl,
       svg: <PlayIcon />,
     });
@@ -227,6 +224,18 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
   const streamingProviders =
     data?.watchProviders?.find((provider) => provider.iso_3166_1 === region)
       ?.flatrate ?? [];
+
+  function getAvalaibleMediaServerName() {
+    if (process.env.JELLYFIN_TYPE === 'emby') {
+      return intl.formatMessage(messages.play, { mediaServerName: 'Emby' });
+    }
+
+    if (settings.currentSettings.mediaServerType === MediaServerType.PLEX) {
+      return intl.formatMessage(messages.play, { mediaServerName: 'Plex' });
+    }
+
+    return intl.formatMessage(messages.play, { mediaServerName: 'Jellyfin' });
+  }
 
   return (
     <div
