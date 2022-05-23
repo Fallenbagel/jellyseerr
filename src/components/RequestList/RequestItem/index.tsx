@@ -337,6 +337,7 @@ const RequestItem: React.FC<RequestItemProps> = ({
                               src={requestData.requestedBy.avatar}
                               alt=""
                               className="avatar-sm ml-1.5"
+                              style={{ objectFit: 'cover' }}
                             />
                             <span className="truncate text-sm font-semibold group-hover:text-white group-hover:underline">
                               {requestData.requestedBy.displayName}
@@ -391,6 +392,7 @@ const RequestItem: React.FC<RequestItemProps> = ({
                             src={requestData.modifiedBy.avatar}
                             alt=""
                             className="avatar-sm ml-1.5"
+                            style={{ objectFit: 'cover' }}
                           />
                           <span className="truncate text-sm font-semibold group-hover:text-white group-hover:underline">
                             {requestData.modifiedBy.displayName}
