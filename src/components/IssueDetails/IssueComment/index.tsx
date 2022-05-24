@@ -91,6 +91,7 @@ const IssueComment: React.FC<IssueCommentProps> = ({
             src={comment.user.avatar}
             alt=""
             className="h-10 w-10 scale-100 transform-gpu rounded-full ring-1 ring-gray-500 transition duration-300 hover:scale-105"
+            style={{ objectFit: 'cover' }}
           />
         </a>
       </Link>

@@ -597,6 +597,7 @@ const UserList: React.FC = () => {
                     <a className="h-10 w-10 flex-shrink-0">
                       <img
                         className="h-10 w-10 rounded-full"
+                        style={{ objectFit: 'cover' }}
                         src={user.avatar}
                         alt=""
                       />

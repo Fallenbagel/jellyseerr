@@ -45,6 +45,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <div className="relative">
             <img
               className="h-24 w-24 rounded-full bg-gray-600 ring-1 ring-gray-700"
+              style={{ objectFit: 'cover' }}
               src={user.avatar}
               alt=""
             />
