@@ -269,6 +269,7 @@
   "components.QuotaSelector.unlimited": "Unlimited",
   "components.RegionSelector.regionDefault": "All Regions",
   "components.RegionSelector.regionServerDefault": "Default ({region})",
+  "components.RequestBlock.languageprofile": "Language Profile",
   "components.RequestBlock.profilechanged": "Quality Profile",
   "components.RequestBlock.requestoverrides": "Request Overrides",
   "components.RequestBlock.rootfolder": "Root Folder",
