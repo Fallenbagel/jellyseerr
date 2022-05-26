@@ -1,7 +1,6 @@
 module.exports = {
   env: {
     commitTag: process.env.COMMIT_TAG || 'local',
-    JELLYFIN_TYPE: 'emby',
   },
   images: {
     domains: ['image.tmdb.org'],
