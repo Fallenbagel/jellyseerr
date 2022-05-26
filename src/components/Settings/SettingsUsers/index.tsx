@@ -131,16 +131,20 @@ const SettingsUsers: React.FC = () => {
                   <label htmlFor="newPlexLogin" className="checkbox-label">
                     {intl.formatMessage(messages.newPlexLogin, {
                       mediaServerName:
-                        settings.currentSettings.mediaServerType ===
-                        MediaServerType.PLEX
+                        process.env.JELLYFIN_TYPE == 'emby'
+                          ? 'Emby'
+                          : settings.currentSettings.mediaServerType ===
+                            MediaServerType.PLEX
                           ? 'Plex'
                           : 'Jellyfin',
                     })}
                     <span className="label-tip">
                       {intl.formatMessage(messages.newPlexLoginTip, {
                         mediaServerName:
-                          settings.currentSettings.mediaServerType ===
-                          MediaServerType.PLEX
+                          process.env.JELLYFIN_TYPE == 'emby'
+                            ? 'Emby'
+                            : settings.currentSettings.mediaServerType ===
+                              MediaServerType.PLEX
                             ? 'Plex'
                             : 'Jellyfin',
                       })}
