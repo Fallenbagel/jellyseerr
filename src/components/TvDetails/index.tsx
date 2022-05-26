@@ -138,10 +138,7 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
     })
   ) {
     mediaLinks.push({
-      text:
-        settings.currentSettings.mediaServerType === MediaServerType.JELLYFIN
-          ? intl.formatMessage(messages.play4k, { mediaServerName: 'Jellyfin' })
-          : intl.formatMessage(messages.play4k, { mediaServerName: 'Plex' }),
+      text: getAvalaibleMediaServerName(),
       url: data.mediaInfo?.mediaUrl4k,
       svg: <PlayIcon />,
     });
