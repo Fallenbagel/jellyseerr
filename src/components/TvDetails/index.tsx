@@ -138,7 +138,7 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
     })
   ) {
     mediaLinks.push({
-      text: getAvalaibleMediaServerName(),
+      text: getAvalaible4kMediaServerName(),
       url: data.mediaInfo?.mediaUrl4k,
       svg: <PlayIcon />,
     });
@@ -232,6 +232,18 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
     }
 
     return intl.formatMessage(messages.play, { mediaServerName: 'Jellyfin' });
+  }
+
+  function getAvalaible4kMediaServerName() {
+    if (process.env.JELLYFIN_TYPE === 'emby') {
+      return intl.formatMessage(messages.play4k, { mediaServerName: 'Emby' });
+    }
+
+    if (settings.currentSettings.mediaServerType === MediaServerType.PLEX) {
+      return intl.formatMessage(messages.play4k, { mediaServerName: 'Plex' });
+    }
+
+    return intl.formatMessage(messages.play4k, { mediaServerName: 'Jellyfin' });
   }
 
   return (
