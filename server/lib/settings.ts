@@ -259,6 +259,7 @@ export type JobId =
   | 'sonarr-scan'
   | 'download-sync'
   | 'download-sync-reset'
+  | 'request-cleanup'
   | 'jellyfin-recently-added-sync'
   | 'jellyfin-full-sync';
 
@@ -432,6 +433,9 @@ class Settings {
         },
         'download-sync-reset': {
           schedule: '0 0 1 * * *',
+        },
+        'request-cleanup': {
+          schedule: '0 * * * * *',
         },
         'jellyfin-recently-added-sync': {
           schedule: '0 */5 * * * *',

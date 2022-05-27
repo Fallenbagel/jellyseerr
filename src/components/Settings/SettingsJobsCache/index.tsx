@@ -57,6 +57,7 @@ const messages: { [messageName: string]: MessageDescriptor } = defineMessages({
   'sonarr-scan': 'Sonarr Scan',
   'download-sync': 'Download Sync',
   'download-sync-reset': 'Download Sync Reset',
+  'request-cleanup': 'Request Cleanup',
   editJobSchedule: 'Modify Job',
   jobScheduleEditSaved: 'Job edited successfully!',
   jobScheduleEditFailed: 'Something went wrong while saving the job.',
