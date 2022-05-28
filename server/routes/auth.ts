@@ -196,10 +196,8 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
     settings.jellyfin.hostname !== ''
   ) {
     return res.status(500).json({ error: 'Jellyfin login is disabled' });
-  } else if (!body.username || !body.password) {
-    return res
-      .status(500)
-      .json({ error: 'You must provide an username and a password' });
+  } else if (!body.username) {
+    return res.status(500).json({ error: 'You must provide an username' });
   } else if (settings.jellyfin.hostname !== '' && body.hostname) {
     return res
       .status(500)
@@ -332,7 +330,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         const passedExplicitPassword =
           body.password && body.password.length > 0;
         if (passedExplicitPassword) {
-          await user.setPassword(body.password);
+          await user.setPassword(body.password ?? '');
         }
         await userRepository.save(user);
       }
