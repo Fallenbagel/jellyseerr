@@ -494,6 +494,11 @@ router.post(
 
       const jellyfinUsersResponse = await jellyfinClient.getUsers();
       const createdUsers: User[] = [];
+      const { hostname, externalHostname } = getSettings().jellyfin;
+      const jellyfinHost =
+        externalHostname && externalHostname.length > 0
+          ? externalHostname
+          : hostname;
       for (const account of jellyfinUsersResponse.users) {
         if (account.Name) {
           const user = await userRepository
@@ -505,7 +510,7 @@ router.post(
             .getOne();
 
           const avatar = account.PrimaryImageTag
-            ? `${settings.jellyfin.hostname}/Users/${account.Id}/Images/Primary/?tag=${account.PrimaryImageTag}&quality=90`
+            ? `${jellyfinHost}/Users/${account.Id}/Images/Primary/?tag=${account.PrimaryImageTag}&quality=90`
             : '/os_logo_square.png';
 
           if (user) {
