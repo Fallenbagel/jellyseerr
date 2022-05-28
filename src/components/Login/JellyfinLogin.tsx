@@ -1,12 +1,11 @@
+import axios from 'axios';
+import { Field, Form, Formik } from 'formik';
 import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import Button from '../Common/Button';
-
-import { Field, Form, Formik } from 'formik';
-import * as Yup from 'yup';
-import axios from 'axios';
 import { useToasts } from 'react-toast-notifications';
+import * as Yup from 'yup';
 import useSettings from '../../hooks/useSettings';
+import Button from '../Common/Button';
 
 const messages = defineMessages({
   username: 'Username',
@@ -63,9 +62,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
       username: Yup.string().required(
         intl.formatMessage(messages.validationusernamerequired)
       ),
-      password: Yup.string().required(
-        intl.formatMessage(messages.validationpasswordrequired)
-      ),
+      password: Yup.string(),
     });
     return (
       <Formik
@@ -201,9 +198,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
       username: Yup.string().required(
         intl.formatMessage(messages.validationusernamerequired)
       ),
-      password: Yup.string().required(
-        intl.formatMessage(messages.validationpasswordrequired)
-      ),
+      password: Yup.string(),
     });
     return (
       <div>
