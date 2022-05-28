@@ -1,6 +1,7 @@
 import schedule from 'node-schedule';
 import { MediaServerType } from '../constants/server';
 import downloadTracker from '../lib/downloadtracker';
+import requestCleanup from '../lib/requestCleanup';
 import { plexFullScanner, plexRecentScanner } from '../lib/scanners/plex';
 import { radarrScanner } from '../lib/scanners/radarr';
 import { sonarrScanner } from '../lib/scanners/sonarr';
@@ -152,6 +153,20 @@ export const startJobs = (): void => {
         label: 'Jobs',
       });
       downloadTracker.resetDownloadTracker();
+    }),
+  });
+
+  // Check for Available Requests to clear Every Minute
+  scheduledJobs.push({
+    id: 'request-cleanup',
+    name: 'Request Cleanup',
+    type: 'command',
+    interval: 'fixed',
+    job: schedule.scheduleJob(jobs['request-cleanup'].schedule, () => {
+      logger.debug('Starting scheduled job: Request Cleanup', {
+        label: 'Jobs',
+      });
+      requestCleanup.removeAvailable();
     }),
   });
 
