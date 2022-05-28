@@ -11,9 +11,9 @@ import useSettings from '../../hooks/useSettings';
 const messages = defineMessages({
   username: 'Username',
   password: 'Password',
-  host: 'Jellyfin URL',
+  host: '{mediaServerName} URL',
   email: 'Email',
-  validationhostrequired: 'Jellyfin URL required',
+  validationhostrequired: '{mediaServerName} URL required',
   validationhostformat: 'Valid URL required',
   validationemailrequired: 'Email required',
   validationemailformat: 'Valid email required',
@@ -46,9 +46,17 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
       host: Yup.string()
         .matches(
           /^(?:(?:(?:https?):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*\.?)(?::\d{2,5})?(?:[/?#]\S*)?$/,
-          intl.formatMessage(messages.validationhostformat)
+          intl.formatMessage(messages.validationhostformat, {
+            mediaServerName:
+              process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+          })
         )
-        .required(intl.formatMessage(messages.validationhostrequired)),
+        .required(
+          intl.formatMessage(messages.validationhostrequired, {
+            mediaServerName:
+              process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+          })
+        ),
       email: Yup.string()
         .email(intl.formatMessage(messages.validationemailformat))
         .required(intl.formatMessage(messages.validationemailrequired)),
@@ -97,7 +105,10 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
           <Form>
             <div className="sm:border-t sm:border-gray-800">
               <label htmlFor="host" className="text-label">
-                {intl.formatMessage(messages.host)}
+                {intl.formatMessage(messages.host, {
+                  mediaServerName:
+                    process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+                })}
               </label>
               <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
                 <div className="flex rounded-md shadow-sm">
@@ -105,7 +116,12 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                     id="host"
                     name="host"
                     type="text"
-                    placeholder={intl.formatMessage(messages.host)}
+                    placeholder={intl.formatMessage(messages.host, {
+                      mediaServerName:
+                        process.env.JELLYFIN_TYPE == 'emby'
+                          ? 'Emby'
+                          : 'Jellyfin',
+                    })}
                   />
                 </div>
                 {errors.host && touched.host && (

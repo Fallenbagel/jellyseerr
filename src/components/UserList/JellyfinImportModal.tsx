@@ -15,15 +15,15 @@ interface JellyfinImportProps {
 }
 
 const messages = defineMessages({
-  importfromJellyfin: 'Import Jellyfin Users',
+  importfromJellyfin: 'Import {mediaServerName} Users',
   importfromJellyfinerror:
-    'Something went wrong while importing Jellyfin users.',
+    'Something went wrong while importing {mediaServerName} users.',
   importedfromJellyfin:
-    '<strong>{userCount}</strong> Jellyfin {userCount, plural, one {user} other {users}} imported successfully!',
+    '<strong>{userCount}</strong> {mediaServerName} {userCount, plural, one {user} other {users}} imported successfully!',
   user: 'User',
-  noJellyfinuserstoimport: 'There are no Jellyfin users to import.',
+  noJellyfinuserstoimport: 'There are no {mediaServerName} users to import.',
   newJellyfinsigninenabled:
-    'The <strong>Enable New Jellyfin Sign-In</strong> setting is currently enabled. Jellyfin users with library access do not need to be imported in order to sign in.',
+    'The <strong>Enable New {mediaServerName} Sign-In</strong> setting is currently enabled. {mediaServerName} users with library access do not need to be imported in order to sign in.',
 });
 
 const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
@@ -66,6 +66,8 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
           strong: function strong(msg) {
             return <strong>{msg}</strong>;
           },
+          mediaServerName:
+            process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
         }),
         {
           autoDismiss: true,
@@ -77,10 +79,16 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
         onComplete();
       }
     } catch (e) {
-      addToast(intl.formatMessage(messages.importfromJellyfinerror), {
-        autoDismiss: true,
-        appearance: 'error',
-      });
+      addToast(
+        intl.formatMessage(messages.importfromJellyfinerror, {
+          mediaServerName:
+            process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+        }),
+        {
+          autoDismiss: true,
+          appearance: 'error',
+        }
+      );
     } finally {
       setImporting(false);
     }
@@ -110,7 +118,10 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
   return (
     <Modal
       loading={!data && !error}
-      title={intl.formatMessage(messages.importfromJellyfin)}
+      title={intl.formatMessage(messages.importfromJellyfin, {
+        mediaServerName:
+          process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+      })}
       iconSvg={<InboxInIcon />}
       onOk={() => {
         importUsers();
@@ -126,6 +137,8 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
           {settings.currentSettings.newPlexLogin && (
             <Alert
               title={intl.formatMessage(messages.newJellyfinsigninenabled, {
+                mediaServerName:
+                  process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
                 strong: function strong(msg) {
                   return (
                     <strong className="font-semibold text-white">{msg}</strong>
@@ -240,7 +253,10 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
         </>
       ) : (
         <Alert
-          title={intl.formatMessage(messages.noJellyfinuserstoimport)}
+          title={intl.formatMessage(messages.noJellyfinuserstoimport, {
+            mediaServerName:
+              process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+          })}
           type="info"
         />
       )}

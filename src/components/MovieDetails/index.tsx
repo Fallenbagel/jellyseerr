@@ -130,10 +130,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
 
   if (data.mediaInfo?.mediaUrl) {
     mediaLinks.push({
-      text:
-        settings.currentSettings.mediaServerType === MediaServerType.JELLYFIN
-          ? intl.formatMessage(messages.play, { mediaServerName: 'Jellyfin' })
-          : intl.formatMessage(messages.play, { mediaServerName: 'Plex' }),
+      text: getAvalaibleMediaServerName(),
       url: data.mediaInfo?.mediaUrl,
       svg: <PlayIcon />,
     });
@@ -146,10 +143,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
     })
   ) {
     mediaLinks.push({
-      text:
-        settings.currentSettings.mediaServerType === MediaServerType.JELLYFIN
-          ? intl.formatMessage(messages.play4k, { mediaServerName: 'Jellyfin' })
-          : intl.formatMessage(messages.play4k, { mediaServerName: 'Plex' }),
+      text: getAvalaible4kMediaServerName(),
       url: data.mediaInfo?.mediaUrl4k,
       svg: <PlayIcon />,
     });
@@ -227,6 +221,30 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
   const streamingProviders =
     data?.watchProviders?.find((provider) => provider.iso_3166_1 === region)
       ?.flatrate ?? [];
+
+  function getAvalaibleMediaServerName() {
+    if (process.env.JELLYFIN_TYPE === 'emby') {
+      return intl.formatMessage(messages.play, { mediaServerName: 'Emby' });
+    }
+
+    if (settings.currentSettings.mediaServerType === MediaServerType.PLEX) {
+      return intl.formatMessage(messages.play, { mediaServerName: 'Plex' });
+    }
+
+    return intl.formatMessage(messages.play, { mediaServerName: 'Jellyfin' });
+  }
+
+  function getAvalaible4kMediaServerName() {
+    if (process.env.JELLYFIN_TYPE === 'emby') {
+      return intl.formatMessage(messages.play4k, { mediaServerName: 'Emby' });
+    }
+
+    if (settings.currentSettings.mediaServerType === MediaServerType.PLEX) {
+      return intl.formatMessage(messages.play4k, { mediaServerName: 'Plex' });
+    }
+
+    return intl.formatMessage(messages.play4k, { mediaServerName: 'Jellyfin' });
+  }
 
   return (
     <div

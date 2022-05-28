@@ -8,7 +8,7 @@ const messages = defineMessages({
   menuGeneralSettings: 'General',
   menuUsers: 'Users',
   menuPlexSettings: 'Plex',
-  menuJellyfinSettings: 'Jellyfin',
+  menuJellyfinSettings: '{mediaServerName}',
   menuServices: 'Services',
   menuNotifications: 'Notifications',
   menuLogs: 'Logs',
@@ -18,7 +18,6 @@ const messages = defineMessages({
 
 const SettingsLayout: React.FC = ({ children }) => {
   const intl = useIntl();
-
   const settingsRoutes: SettingsRoute[] = [
     {
       text: intl.formatMessage(messages.menuGeneralSettings),
@@ -36,7 +35,7 @@ const SettingsLayout: React.FC = ({ children }) => {
       regex: /^\/settings\/plex/,
     },
     {
-      text: intl.formatMessage(messages.menuJellyfinSettings),
+      text: getAvalaibleMediaServerName(),
       route: '/settings/jellyfin',
       regex: /^\/settings\/jellyfin/,
     },
@@ -76,6 +75,17 @@ const SettingsLayout: React.FC = ({ children }) => {
       <div className="mt-10 text-white">{children}</div>
     </>
   );
+  function getAvalaibleMediaServerName() {
+    if (process.env.JELLYFIN_TYPE === 'emby') {
+      return intl.formatMessage(messages.menuJellyfinSettings, {
+        mediaServerName: 'Emby',
+      });
+    }
+
+    return intl.formatMessage(messages.menuJellyfinSettings, {
+      mediaServerName: 'Jellyfin',
+    });
+  }
 };
 
 export default SettingsLayout;

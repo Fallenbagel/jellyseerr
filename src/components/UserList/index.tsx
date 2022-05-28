@@ -503,13 +503,18 @@ const UserList: React.FC = () => {
             >
               <InboxInIcon />
               <span>
-                {intl.formatMessage(messages.importfromplex, {
-                  mediaServerName:
-                    settings.currentSettings.mediaServerType ===
+                {process.env.JELLYFIN_TYPE == 'emby'
+                  ? intl.formatMessage(messages.importfromplex, {
+                      mediaServerName: 'Emby',
+                    })
+                  : settings.currentSettings.mediaServerType ===
                     MediaServerType.PLEX
-                      ? 'Plex'
-                      : 'Jellyfin',
-                })}
+                  ? intl.formatMessage(messages.importfromplex, {
+                      mediaServerName: 'Plex',
+                    })
+                  : intl.formatMessage(messages.importfromplex, {
+                      mediaServerName: 'Jellyfin',
+                    })}
               </span>
             </Button>
           </div>
@@ -636,17 +641,23 @@ const UserList: React.FC = () => {
                   <Badge badgeType="warning">
                     {intl.formatMessage(messages.plexuser)}
                   </Badge>
-                ) : (
+                ) : user.userType === UserType.LOCAL ? (
                   <Badge badgeType="default">
+                    {intl.formatMessage(messages.localuser)}
+                  </Badge>
+                ) : process.env.JELLYFIN_TYPE == 'emby' ? (
+                  <Badge badgeType="success">
                     {intl.formatMessage(messages.mediaServerUser, {
-                      mediaServerName:
-                        settings.currentSettings.mediaServerType ===
-                        MediaServerType.PLEX
-                          ? 'Plex'
-                          : 'Jellyfin',
+                      mediaServerName: 'Emby',
                     })}
                   </Badge>
-                )}
+                ) : user.userType === UserType.JELLYFIN ? (
+                  <Badge badgeType="default">
+                    {intl.formatMessage(messages.mediaServerUser, {
+                      mediaServerName: 'Jellyfin',
+                    })}
+                  </Badge>
+                ) : null}
               </Table.TD>
               <Table.TD>
                 {user.id === 1
