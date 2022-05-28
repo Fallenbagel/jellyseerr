@@ -282,8 +282,11 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                           as="a"
                           buttonType="ghost"
                           href={
-                            settings.currentSettings.jellyfinHost +
-                            '/web/#!/forgotpassword.html'
+                            process.env.JELLYFIN_TYPE == 'emby'
+                              ? settings.currentSettings.jellyfinHost +
+                                '/web/index.html#!/startup/forgotpassword.html'
+                              : settings.currentSettings.jellyfinHost +
+                                '/web/index.html#!/forgotpassword.html'
                           }
                         >
                           {intl.formatMessage(messages.forgotpassword)}
