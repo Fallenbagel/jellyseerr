@@ -267,7 +267,7 @@ const IssueDetails: React.FC = () => {
                 >
                   <a className="group ml-1 inline-flex h-full items-center xl:ml-1.5">
                     <img
-                      className="mr-0.5 h-5 w-5 scale-100 transform-gpu rounded-full transition duration-300 group-hover:scale-105 xl:mr-1 xl:h-6 xl:w-6"
+                      className="mr-0.5 h-5 w-5 scale-100 transform-gpu rounded-full object-cover transition duration-300 group-hover:scale-105 xl:mr-1 xl:h-6 xl:w-6"
                       src={issueData.createdBy.avatar}
                       alt=""
                     />

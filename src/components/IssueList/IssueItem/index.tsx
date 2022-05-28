@@ -228,7 +228,7 @@ const IssueItem: React.FC<IssueItemProps> = ({ issue }) => {
                           <img
                             src={issue.createdBy.avatar}
                             alt=""
-                            className="avatar-sm ml-1.5"
+                            className="avatar-sm ml-1.5 object-cover"
                           />
                           <span className="truncate text-sm font-semibold group-hover:text-white group-hover:underline">
                             {issue.createdBy.displayName}

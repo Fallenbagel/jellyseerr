@@ -231,7 +231,7 @@ const RequestCard: React.FC<RequestCardProps> = ({ request, onTitleData }) => {
                   <img
                     src={requestData.requestedBy.avatar}
                     alt=""
-                    className="avatar-sm"
+                    className="avatar-sm object-cover"
                   />
                   <span className="truncate font-semibold group-hover:text-white group-hover:underline">
                     {requestData.requestedBy.displayName}

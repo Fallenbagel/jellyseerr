@@ -272,7 +272,7 @@ const ManageSlideOver: React.FC<
                                   <img
                                     src={user.avatar}
                                     alt={user.displayName}
-                                    className="h-8 w-8 scale-100 transform-gpu rounded-full ring-1 ring-gray-500 transition duration-300 hover:scale-105"
+                                    className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
                                   />
                                 </a>
                               </Link>
@@ -387,7 +387,7 @@ const ManageSlideOver: React.FC<
                                   <img
                                     src={user.avatar}
                                     alt={user.displayName}
-                                    className="h-8 w-8 scale-100 transform-gpu rounded-full ring-1 ring-gray-500 transition duration-300 hover:scale-105"
+                                    className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
                                   />
                                 </a>
                               </Link>
