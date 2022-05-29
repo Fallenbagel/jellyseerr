@@ -12,6 +12,7 @@ import Badge from '../Common/Badge';
 import Button from '../Common/Button';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import LibraryItem from './LibraryItem';
+import getConfig from 'next/config';
 
 const messages = defineMessages({
   jellyfinsettings: '{mediaServerName} Settings',
@@ -80,6 +81,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
   );
   const intl = useIntl();
   const { addToast } = useToasts();
+  const { publicRuntimeConfig } = getConfig();
 
   const JellyfinSettingsSchema = Yup.object().shape({
     jellyfinExternalUrl: Yup.string().matches(
@@ -161,7 +163,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
     <>
       <div className="mb-6">
         <h3 className="heading">
-          {process.env.JELLYFIN_TYPE == 'emby'
+          {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
             ? intl.formatMessage(messages.jellyfinlibraries, {
                 mediaServerName: 'Emby',
               })
@@ -170,7 +172,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
               })}
         </h3>
         <p className="description">
-          {process.env.JELLYFIN_TYPE == 'emby'
+          {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
             ? intl.formatMessage(messages.jellyfinlibrariesDescription, {
                 mediaServerName: 'Emby',
               })
@@ -213,7 +215,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
           <FormattedMessage {...messages.manualscanJellyfin} />
         </h3>
         <p className="description">
-          {process.env.JELLYFIN_TYPE == 'emby'
+          {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
             ? intl.formatMessage(messages.manualscanDescriptionJellyfin, {
                 mediaServerName: 'Emby',
               })
@@ -323,7 +325,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
         <>
           <div className="mt-10 mb-6">
             <h3 className="heading">
-              {process.env.JELLYFIN_TYPE == 'emby'
+              {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
                 ? intl.formatMessage(messages.jellyfinSettings, {
                     mediaServerName: 'Emby',
                   })
@@ -332,7 +334,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                   })}
             </h3>
             <p className="description">
-              {process.env.JELLYFIN_TYPE == 'emby'
+              {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
                 ? intl.formatMessage(messages.jellyfinSettingsDescription, {
                     mediaServerName: 'Emby',
                   })
@@ -355,7 +357,9 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                 addToast(
                   intl.formatMessage(messages.jellyfinSettingsSuccess, {
                     mediaServerName:
-                      process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+                      publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                        ? 'Emby'
+                        : 'Jellyfin',
                   }),
                   {
                     autoDismiss: true,
@@ -366,7 +370,9 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                 addToast(
                   intl.formatMessage(messages.jellyfinSettingsFailure, {
                     mediaServerName:
-                      process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+                      publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                        ? 'Emby'
+                        : 'Jellyfin',
                   }),
                   {
                     autoDismiss: true,

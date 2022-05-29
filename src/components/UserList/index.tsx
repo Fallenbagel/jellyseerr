@@ -36,6 +36,7 @@ import Transition from '../Transition';
 import BulkEditModal from './BulkEditModal';
 import JellyfinImportModal from './JellyfinImportModal';
 import PlexImportModal from './PlexImportModal';
+import getConfig from 'next/config';
 
 const messages = defineMessages({
   users: 'Users',
@@ -87,6 +88,7 @@ const UserList: React.FC = () => {
   const intl = useIntl();
   const router = useRouter();
   const settings = useSettings();
+  const { publicRuntimeConfig } = getConfig();
   const { addToast } = useToasts();
   const { user: currentUser, hasPermission: currentHasPermission } = useUser();
   const [currentSort, setCurrentSort] = useState<Sort>('displayname');
@@ -503,7 +505,7 @@ const UserList: React.FC = () => {
             >
               <InboxInIcon />
               <span>
-                {process.env.JELLYFIN_TYPE == 'emby'
+                {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
                   ? intl.formatMessage(messages.importfromplex, {
                       mediaServerName: 'Emby',
                     })
@@ -645,7 +647,7 @@ const UserList: React.FC = () => {
                   <Badge badgeType="default">
                     {intl.formatMessage(messages.localuser)}
                   </Badge>
-                ) : process.env.JELLYFIN_TYPE == 'emby' ? (
+                ) : publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? (
                   <Badge badgeType="success">
                     {intl.formatMessage(messages.mediaServerUser, {
                       mediaServerName: 'Emby',

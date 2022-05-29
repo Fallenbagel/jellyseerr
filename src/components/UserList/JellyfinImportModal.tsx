@@ -8,6 +8,7 @@ import useSettings from '../../hooks/useSettings';
 import globalMessages from '../../i18n/globalMessages';
 import Alert from '../Common/Alert';
 import Modal from '../Common/Modal';
+import getConfig from 'next/config';
 
 interface JellyfinImportProps {
   onCancel?: () => void;
@@ -32,6 +33,7 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
 }) => {
   const intl = useIntl();
   const settings = useSettings();
+  const { publicRuntimeConfig } = getConfig();
   const { addToast } = useToasts();
   const [isImporting, setImporting] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
@@ -67,7 +69,7 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
             return <strong>{msg}</strong>;
           },
           mediaServerName:
-            process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+            publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
         }),
         {
           autoDismiss: true,
@@ -82,7 +84,7 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
       addToast(
         intl.formatMessage(messages.importfromJellyfinerror, {
           mediaServerName:
-            process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+            publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
         }),
         {
           autoDismiss: true,
@@ -120,7 +122,7 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
       loading={!data && !error}
       title={intl.formatMessage(messages.importfromJellyfin, {
         mediaServerName:
-          process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+          publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
       })}
       iconSvg={<InboxInIcon />}
       onOk={() => {
@@ -138,7 +140,9 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
             <Alert
               title={intl.formatMessage(messages.newJellyfinsigninenabled, {
                 mediaServerName:
-                  process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+                  publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                    ? 'Emby'
+                    : 'Jellyfin',
                 strong: function strong(msg) {
                   return (
                     <strong className="font-semibold text-white">{msg}</strong>
@@ -255,7 +259,7 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
         <Alert
           title={intl.formatMessage(messages.noJellyfinuserstoimport, {
             mediaServerName:
-              process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+              publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
           })}
           type="info"
         />

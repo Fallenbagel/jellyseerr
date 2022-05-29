@@ -6,6 +6,7 @@ import axios from 'axios';
 import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 import Accordion from '../Common/Accordion';
 import { MediaServerType } from '../../../server/constants/server';
+import getConfig from 'next/config';
 
 const messages = defineMessages({
   welcome: 'Welcome to Overseerr',
@@ -25,6 +26,7 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
   );
   const { user, revalidate } = useUser();
   const intl = useIntl();
+  const { publicRuntimeConfig } = getConfig();
   // Effect that is triggered when the `authToken` comes back from the Plex OAuth
   // We take the token and attempt to login. If we get a success message, we will
   // ask swr to revalidate the user which _shouid_ come back with a valid user.
@@ -91,7 +93,7 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
                 }`}
                 onClick={() => handleClick(1)}
               >
-                {process.env.JELLYFIN_TYPE == 'emby'
+                {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
                   ? intl.formatMessage(messages.signinWithJellyfin, {
                       mediaServerName: 'Emby',
                     })

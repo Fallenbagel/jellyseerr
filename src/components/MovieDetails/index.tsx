@@ -48,6 +48,7 @@ import PersonCard from '../PersonCard';
 import RequestButton from '../RequestButton';
 import Slider from '../Slider';
 import StatusBadge from '../StatusBadge';
+import getConfig from 'next/config';
 
 const messages = defineMessages({
   originaltitle: 'Original Title',
@@ -95,6 +96,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
   const minStudios = 3;
   const [showMoreStudios, setShowMoreStudios] = useState(false);
   const [showIssueModal, setShowIssueModal] = useState(false);
+  const { publicRuntimeConfig } = getConfig();
 
   const {
     data,
@@ -223,7 +225,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
       ?.flatrate ?? [];
 
   function getAvalaibleMediaServerName() {
-    if (process.env.JELLYFIN_TYPE === 'emby') {
+    if (publicRuntimeConfig.JELLYFIN_TYPE === 'emby') {
       return intl.formatMessage(messages.play, { mediaServerName: 'Emby' });
     }
 
@@ -235,7 +237,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
   }
 
   function getAvalaible4kMediaServerName() {
-    if (process.env.JELLYFIN_TYPE === 'emby') {
+    if (publicRuntimeConfig.JELLYFIN_TYPE === 'emby') {
       return intl.formatMessage(messages.play4k, { mediaServerName: 'Emby' });
     }
 

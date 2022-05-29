@@ -6,6 +6,7 @@ import { useToasts } from 'react-toast-notifications';
 import * as Yup from 'yup';
 import useSettings from '../../hooks/useSettings';
 import Button from '../Common/Button';
+import getConfig from 'next/config';
 
 const messages = defineMessages({
   username: 'Username',
@@ -39,21 +40,19 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
   const toasts = useToasts();
   const intl = useIntl();
   const settings = useSettings();
+  const { publicRuntimeConfig } = getConfig();
 
   if (initial) {
     const LoginSchema = Yup.object().shape({
       host: Yup.string()
         .matches(
           /^(?:(?:(?:https?):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*\.?)(?::\d{2,5})?(?:[/?#]\S*)?$/,
-          intl.formatMessage(messages.validationhostformat, {
-            mediaServerName:
-              process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
-          })
+          intl.formatMessage(messages.validationhostformat)
         )
         .required(
           intl.formatMessage(messages.validationhostrequired, {
             mediaServerName:
-              process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+              publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
           })
         ),
       email: Yup.string()
@@ -104,7 +103,9 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
               <label htmlFor="host" className="text-label">
                 {intl.formatMessage(messages.host, {
                   mediaServerName:
-                    process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+                    publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                      ? 'Emby'
+                      : 'Jellyfin',
                 })}
               </label>
               <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
@@ -115,7 +116,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                     type="text"
                     placeholder={intl.formatMessage(messages.host, {
                       mediaServerName:
-                        process.env.JELLYFIN_TYPE == 'emby'
+                        publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
                           ? 'Emby'
                           : 'Jellyfin',
                     })}
