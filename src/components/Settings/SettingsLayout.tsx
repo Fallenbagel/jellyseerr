@@ -3,6 +3,7 @@ import { defineMessages, useIntl } from 'react-intl';
 import globalMessages from '../../i18n/globalMessages';
 import PageTitle from '../Common/PageTitle';
 import SettingsTabs, { SettingsRoute } from '../Common/SettingsTabs';
+import getConfig from 'next/config';
 
 const messages = defineMessages({
   menuGeneralSettings: 'General',
@@ -18,6 +19,7 @@ const messages = defineMessages({
 
 const SettingsLayout: React.FC = ({ children }) => {
   const intl = useIntl();
+  const { publicRuntimeConfig } = getConfig();
   const settingsRoutes: SettingsRoute[] = [
     {
       text: intl.formatMessage(messages.menuGeneralSettings),
@@ -76,7 +78,7 @@ const SettingsLayout: React.FC = ({ children }) => {
     </>
   );
   function getAvalaibleMediaServerName() {
-    if (process.env.JELLYFIN_TYPE === 'emby') {
+    if (publicRuntimeConfig.JELLYFIN_TYPE === 'emby') {
       return intl.formatMessage(messages.menuJellyfinSettings, {
         mediaServerName: 'Emby',
       });

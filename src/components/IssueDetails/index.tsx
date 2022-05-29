@@ -35,6 +35,7 @@ import IssueComment from './IssueComment';
 import IssueDescription from './IssueDescription';
 import { MediaServerType } from '../../../server/constants/server';
 import useSettings from '../../hooks/useSettings';
+import getConfig from 'next/config';
 
 const messages = defineMessages({
   openedby: '#{issueId} opened {relativeTime} by {username}',
@@ -99,6 +100,7 @@ const IssueDetails: React.FC = () => {
     (opt) => opt.issueType === issueData?.issueType
   );
   const settings = useSettings();
+  const { publicRuntimeConfig } = getConfig();
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -366,7 +368,7 @@ const IssueDetails: React.FC = () => {
                 >
                   <PlayIcon />
                   <span>
-                    {process.env.JELLYFIN_TYPE == 'emby'
+                    {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
                       ? intl.formatMessage(messages.playonplex, {
                           mediaServerName: 'Emby',
                         })
@@ -412,7 +414,7 @@ const IssueDetails: React.FC = () => {
                 >
                   <PlayIcon />
                   <span>
-                    {process.env.JELLYFIN_TYPE == 'emby'
+                    {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
                       ? intl.formatMessage(messages.play4konplex, {
                           mediaServerName: 'Emby',
                         })
@@ -628,7 +630,7 @@ const IssueDetails: React.FC = () => {
               >
                 <PlayIcon />
                 <span>
-                  {process.env.JELLYFIN_TYPE == 'emby'
+                  {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
                     ? intl.formatMessage(messages.playonplex, {
                         mediaServerName: 'Emby',
                       })
@@ -674,7 +676,7 @@ const IssueDetails: React.FC = () => {
               >
                 <PlayIcon />
                 <span>
-                  {process.env.JELLYFIN_TYPE == 'emby'
+                  {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
                     ? intl.formatMessage(messages.play4konplex, {
                         mediaServerName: 'Emby',
                       })
