@@ -7,7 +7,6 @@ import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
-import { MediaServerType } from '../../../../../server/constants/server';
 import { UserSettingsGeneralResponse } from '../../../../../server/interfaces/api/userSettingsInterfaces';
 import {
   availableLanguages,
@@ -25,6 +24,7 @@ import PageTitle from '../../../Common/PageTitle';
 import LanguageSelector from '../../../LanguageSelector';
 import QuotaSelector from '../../../QuotaSelector';
 import RegionSelector from '../../../RegionSelector';
+import getConfig from 'next/config';
 
 const messages = defineMessages({
   general: 'General',
@@ -59,7 +59,7 @@ const messages = defineMessages({
 
 const UserGeneralSettings: React.FC = () => {
   const intl = useIntl();
-  const settings = useSettings();
+  const { publicRuntimeConfig } = getConfig();
   const { addToast } = useToasts();
   const { locale, setLocale } = useLocale();
   const [movieQuotaEnabled, setMovieQuotaEnabled] = useState(false);
@@ -189,19 +189,25 @@ const UserGeneralSettings: React.FC = () => {
                   <div className="flex max-w-lg items-center">
                     {user?.userType === UserType.PLEX ? (
                       <Badge badgeType="warning">
+                        {intl.formatMessage(messages.plexuser)}
+                      </Badge>
+                    ) : user?.userType === UserType.LOCAL ? (
+                      <Badge badgeType="default">
                         {intl.formatMessage(messages.localuser)}
                       </Badge>
-                    ) : (
-                      <Badge badgeType="default">
+                    ) : publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? (
+                      <Badge badgeType="success">
                         {intl.formatMessage(messages.mediaServerUser, {
-                          mediaServerName:
-                            settings.currentSettings.mediaServerType ===
-                            MediaServerType.PLEX
-                              ? 'Plex'
-                              : 'Jellyfin',
+                          mediaServerName: 'Emby',
                         })}
                       </Badge>
-                    )}
+                    ) : user?.userType === UserType.JELLYFIN ? (
+                      <Badge badgeType="default">
+                        {intl.formatMessage(messages.mediaServerUser, {
+                          mediaServerName: 'Jellyfin',
+                        })}
+                      </Badge>
+                    ) : null}
                   </div>
                 </div>
               </div>
