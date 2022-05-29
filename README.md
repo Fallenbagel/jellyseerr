@@ -41,7 +41,7 @@ yarn start
 
 ### Packages:
 
-Archlinux: [AUR](https://aur.archlinux.org/jellyseerr)
+Archlinux: [AUR](https://aur.archlinux.org/packages/jellyseerr)
 
 ## Preview
 
