@@ -5,7 +5,11 @@ import { MediaType } from '../constants/media';
 import Media from '../entity/Media';
 import logger from '../logger';
 import { mapTvResult } from '../models/Search';
-import { mapSeasonWithEpisodes, mapTvDetails } from '../models/Tv';
+import {
+  mapSeasonWithEpisodes,
+  mapTvDetails,
+  mapTvSeasons,
+} from '../models/Tv';
 
 const tvRoutes = Router();
 
@@ -29,6 +33,29 @@ tvRoutes.get('/:id', async (req, res, next) => {
     return next({
       status: 500,
       message: 'Unable to retrieve series.',
+    });
+  }
+});
+
+tvRoutes.get('/:id/seasons', async (req, res, next) => {
+  const tmdb = new TheMovieDb();
+  try {
+    const seasons = await tmdb.getTvSeasons({
+      tvId: Number(req.params.id),
+      page: Number(req.query.page),
+      language: req.locale ?? (req.query.language as string),
+    });
+
+    return res.status(200).json(mapTvSeasons(seasons));
+  } catch (e) {
+    logger.debug('Something went wrong retrieving seasons', {
+      label: 'API',
+      errorMessage: e.message,
+      tvId: req.params.id,
+    });
+    return next({
+      status: 500,
+      message: 'Unable to retrieve seasons.',
     });
   }
 });

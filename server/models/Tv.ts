@@ -48,6 +48,10 @@ interface Season {
   seasonNumber: number;
 }
 
+export interface TvSeasons {
+  seasons: Season[];
+}
+
 export interface SeasonWithEpisodes extends Season {
   episodes: Episode[];
   externalIds: ExternalIds;
@@ -222,4 +226,8 @@ export const mapTvDetails = (
   })),
   mediaInfo: media,
   watchProviders: mapWatchProviders(show['watch/providers']?.results ?? {}),
+});
+
+export const mapTvSeasons = (seasons: TmdbTvSeasonResult[]): TvSeasons => ({
+  seasons: seasons.map(mapSeasonResult),
 });

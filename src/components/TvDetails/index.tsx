@@ -672,6 +672,14 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
           </div>
         </div>
       </div>
+      <MediaSlider
+        sliderKey="seasons"
+        title={intl.formatMessage(messages.seasons)}
+        url={`/api/v1/tv/${data.id}/seasons`}
+        linkUrl={`/tv/${data.id}/seasons`}
+        hideWhenEmpty={false}
+      />
+
       {data.credits.cast.length > 0 && (
         <>
           <div className="slider-header">

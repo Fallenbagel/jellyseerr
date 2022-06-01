@@ -18,6 +18,7 @@ import {
   TmdbSearchTvResponse,
   TmdbSeasonWithEpisodes,
   TmdbTvDetails,
+  TmdbTvSeasonResult,
   TmdbUpcomingMoviesResponse,
 } from './interfaces';
 
@@ -268,6 +269,32 @@ class TheMovieDb extends ExternalAPI {
       return data;
     } catch (e) {
       throw new Error(`[TMDb] Failed to fetch TV show details: ${e.message}`);
+    }
+  };
+
+  public getTvSeasons = async ({
+    tvId,
+    page = 1,
+    language = 'en',
+  }: {
+    tvId: number;
+    page: number;
+    language?: string;
+  }): Promise<TmdbTvSeasonResult[]> => {
+    try {
+      const data = await this.get<TmdbTvDetails>(
+        `/tv/${tvId}`,
+        {
+          params: {
+            page,
+            language,
+          },
+        },
+        43200
+      );
+      return data.seasons;
+    } catch (e) {
+      throw new Error(`[TMDb] Failed to fetch TV show seasons: ${e.message}`);
     }
   };
 
