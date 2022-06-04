@@ -253,7 +253,7 @@ class JellyfinAPI {
       const contents = await this.axios.get<any>(`/Shows/${seriesID}/Seasons`);
 
       return contents.data.Items.filter(
-        (item: JellyfinLibraryItem) => item.LocationType !== "Virtual"
+        (item: JellyfinLibraryItem) => item.LocationType !== 'Virtual'
       );
     } catch (e) {
       logger.error(
