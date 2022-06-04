@@ -31,6 +31,7 @@ export interface JellyfinLibraryItem {
   Id: string;
   HasSubtitles: boolean;
   Type: 'Movie' | 'Episode' | 'Season' | 'Series';
+  LocationType: 'FileSystem' | 'Offline' | 'Remote' | 'Virtual';
   SeriesName?: string;
   SeriesId?: string;
   SeasonId?: string;
@@ -251,7 +252,9 @@ class JellyfinAPI {
     try {
       const contents = await this.axios.get<any>(`/Shows/${seriesID}/Seasons`);
 
-      return contents.data.Items;
+      return contents.data.Items.filter(
+        (item: JellyfinLibraryItem) => item.LocationType !== 'Virtual'
+      );
     } catch (e) {
       logger.error(
         `Something went wrong while getting the list of seasons from the Jellyfin server: ${e.message}`,
