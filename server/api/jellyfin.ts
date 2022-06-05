@@ -206,7 +206,9 @@ class JellyfinAPI {
         `/Users/${this.userId}/Items?SortBy=SortName&SortOrder=Ascending&IncludeItemTypes=Series,Movie&Recursive=true&StartIndex=0&ParentId=${id}`
       );
 
-      return contents.data.Items;
+      return contents.data.Items.filter(
+        (item: JellyfinLibraryItem) => item.LocationType !== 'Virtual'
+      );
     } catch (e) {
       logger.error(
         `Something went wrong while getting library content from the Jellyfin server: ${e.message}`,
@@ -222,7 +224,9 @@ class JellyfinAPI {
         `/Users/${this.userId}/Items/Latest?Limit=12&ParentId=${id}`
       );
 
-      return contents.data;
+      return contents.data.filter(
+        (item: JellyfinLibraryItem) => item.LocationType !== 'Virtual'
+      );
     } catch (e) {
       logger.error(
         `Something went wrong while getting library content from the Jellyfin server: ${e.message}`,
@@ -238,7 +242,9 @@ class JellyfinAPI {
         `/Users/${this.userId}/Items/${id}`
       );
 
-      return contents.data;
+      return contents.data.filter(
+        (item: JellyfinLibraryItem) => item.LocationType !== 'Virtual'
+      );
     } catch (e) {
       logger.error(
         `Something went wrong while getting library content from the Jellyfin server: ${e.message}`,
@@ -273,7 +279,9 @@ class JellyfinAPI {
         `/Shows/${seriesID}/Episodes?seasonId=${seasonID}`
       );
 
-      return contents.data.Items;
+      return contents.data.Items.filter(
+        (item: JellyfinLibraryItem) => item.LocationType !== 'Virtual'
+      );
     } catch (e) {
       logger.error(
         `Something went wrong while getting the list of episodes from the Jellyfin server: ${e.message}`,
