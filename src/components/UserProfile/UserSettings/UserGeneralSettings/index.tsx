@@ -30,6 +30,7 @@ const messages = defineMessages({
   general: 'General',
   generalsettings: 'General Settings',
   displayName: 'Display Name',
+  email: 'Email',
   save: 'Save Changes',
   saving: 'Saving…',
   mediaServerUser: '{mediaServerName} User',
@@ -121,6 +122,7 @@ const UserGeneralSettings: React.FC = () => {
       <Formik
         initialValues={{
           displayName: data?.username,
+          email: data?.email,
           discordId: data?.discordId,
           locale: data?.locale,
           region: data?.region,
@@ -136,6 +138,7 @@ const UserGeneralSettings: React.FC = () => {
           try {
             await axios.post(`/api/v1/user/${user?.id}/settings/main`, {
               username: values.displayName,
+              email: values.email,
               discordId: values.discordId,
               locale: values.locale,
               region: values.region,
@@ -242,6 +245,24 @@ const UserGeneralSettings: React.FC = () => {
                   </div>
                   {errors.displayName && touched.displayName && (
                     <div className="error">{errors.displayName}</div>
+                  )}
+                </div>
+              </div>
+              <div className="form-row">
+                <label htmlFor="email" className="text-label">
+                  {intl.formatMessage(messages.email)}
+                </label>
+                <div className="form-input-area">
+                  <div className="form-input-field">
+                    <Field
+                      id="email"
+                      name="email"
+                      type="text"
+                      placeholder={user?.email}
+                    />
+                  </div>
+                  {errors.email && touched.email && (
+                    <div className="error">{errors.email}</div>
                   )}
                 </div>
               </div>
