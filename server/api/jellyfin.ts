@@ -224,9 +224,7 @@ class JellyfinAPI {
         `/Users/${this.userId}/Items/Latest?Limit=12&ParentId=${id}`
       );
 
-      return contents.data.filter(
-        (item: JellyfinLibraryItem) => item.LocationType !== 'Virtual'
-      );
+      return contents.data;
     } catch (e) {
       logger.error(
         `Something went wrong while getting library content from the Jellyfin server: ${e.message}`,
@@ -242,9 +240,7 @@ class JellyfinAPI {
         `/Users/${this.userId}/Items/${id}`
       );
 
-      return contents.data.filter(
-        (item: JellyfinLibraryItem) => item.LocationType !== 'Virtual'
-      );
+      return contents.data;
     } catch (e) {
       logger.error(
         `Something went wrong while getting library content from the Jellyfin server: ${e.message}`,
