@@ -1031,13 +1031,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/WatchProviders'
-    TvSeasons:
-      type: object
-      properties:
-        seasons:
-          type: array
-          items:
-            $ref: '#/components/schemas/Season'
     MediaRequest:
       type: object
       properties:
@@ -5089,37 +5082,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TvDetails'
-  /tv/{tvId}/seasons:
-    get:
-      summary: Get TV seasons
-      description: Returns TV seasons based on the provided tvId in a JSON object.
-      tags:
-        - tv
-      parameters:
-        - in: path
-          name: tvId
-          required: true
-          schema:
-            type: number
-            example: 76479
-        - in: query
-          name: page
-          schema:
-            type: number
-            example: 1
-            default: 1
-        - in: query
-          name: language
-          schema:
-            type: string
-            example: en
-      responses:
-        '200':
-          description: TV seasons
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TvSeasons'
   /tv/{tvId}/season/{seasonId}:
     get:
       summary: Get season details and episode list
