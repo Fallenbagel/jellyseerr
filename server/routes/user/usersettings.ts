@@ -51,6 +51,7 @@ userSettingsRoutes.get<{ id: string }, UserSettingsGeneralResponse>(
 
       return res.status(200).json({
         username: user.username,
+        email: user.email,
         discordId: user.settings?.discordId,
         locale: user.settings?.locale,
         region: user.settings?.region,
