@@ -251,6 +251,9 @@ const UserGeneralSettings: React.FC = () => {
               <div className="form-row">
                 <label htmlFor="email" className="text-label">
                   {intl.formatMessage(messages.email)}
+                  {user?.warnings.find((w) => w === 'emailRequired') && (
+                    <span className="label-required">*</span>
+                  )}
                 </label>
                 <div className="form-input-area">
                   <div
