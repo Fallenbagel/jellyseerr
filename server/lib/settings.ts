@@ -160,6 +160,7 @@ export interface NotificationAgentSlack extends NotificationAgentConfig {
 export interface NotificationAgentEmail extends NotificationAgentConfig {
   options: {
     emailFrom: string;
+    emailRequired: boolean;
     smtpHost: string;
     smtpPort: number;
     secure: boolean;
@@ -336,13 +337,14 @@ class Settings {
             enabled: false,
             options: {
               emailFrom: '',
+              emailRequired: false,
               smtpHost: '',
               smtpPort: 587,
               secure: false,
               ignoreTls: false,
               requireTls: false,
               allowSelfSigned: false,
-              senderName: 'Overseerr',
+              senderName: 'Jellyseerr',
             },
           },
           discord: {

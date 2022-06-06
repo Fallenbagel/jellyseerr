@@ -14,6 +14,7 @@ import useClickOutside from '../../../hooks/useClickOutside';
 import { Permission, useUser } from '../../../hooks/useUser';
 import Transition from '../../Transition';
 import VersionStatus from '../VersionStatus';
+import UserWarnings from '../UserWarnings';
 
 const messages = defineMessages({
   dashboard: 'Discover',
@@ -236,6 +237,9 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setClosed }) => {
                   );
                 })}
               </nav>
+              <div className="px-2">
+                <UserWarnings />
+              </div>
               {hasPermission(Permission.ADMIN) && (
                 <div className="px-2">
                   <VersionStatus />

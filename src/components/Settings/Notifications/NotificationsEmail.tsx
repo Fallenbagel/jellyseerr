@@ -16,6 +16,7 @@ const messages = defineMessages({
   validationSmtpHostRequired: 'You must provide a valid hostname or IP address',
   validationSmtpPortRequired: 'You must provide a valid port number',
   agentenabled: 'Enable Agent',
+  emailrequired: 'Require Email for all users',
   emailsender: 'Sender Address',
   smtpHost: 'SMTP Host',
   smtpPort: 'SMTP Port',
@@ -125,6 +126,7 @@ const NotificationsEmail: React.FC = () => {
     <Formik
       initialValues={{
         enabled: data.enabled,
+        emailRequired: data.options.emailRequired,
         emailFrom: data.options.emailFrom,
         smtpHost: data.options.smtpHost,
         smtpPort: data.options.smtpPort ?? 587,
@@ -149,6 +151,7 @@ const NotificationsEmail: React.FC = () => {
             enabled: values.enabled,
             options: {
               emailFrom: values.emailFrom,
+              emailRequired: values.emailRequired,
               smtpHost: values.smtpHost,
               smtpPort: Number(values.smtpPort),
               secure: values.encryption === 'implicit',
@@ -239,6 +242,18 @@ const NotificationsEmail: React.FC = () => {
               </label>
               <div className="form-input-area">
                 <Field type="checkbox" id="enabled" name="enabled" />
+              </div>
+            </div>
+            <div className="form-row">
+              <label htmlFor="emailRequired" className="label">
+                {intl.formatMessage(messages.emailrequired)}
+              </label>
+              <div className="form-input-area">
+                <Field
+                  type="checkbox"
+                  id="emailRequired"
+                  name="emailRequired"
+                />
               </div>
             </div>
             <div className="form-row">

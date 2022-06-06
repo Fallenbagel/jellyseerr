@@ -37,6 +37,7 @@
     "country-flag-icons": "^1.4.21",
     "csurf": "^1.11.0",
     "email-templates": "^8.0.10",
+    "email-validator": "^2.0.4",
     "express": "^4.17.3",
     "express-openapi-validator": "^4.13.6",
     "express-rate-limit": "^6.3.0",

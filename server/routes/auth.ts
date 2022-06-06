@@ -9,6 +9,7 @@ import { Permission } from '../lib/permissions';
 import { getSettings } from '../lib/settings';
 import logger from '../logger';
 import { isAuthenticated } from '../middleware/auth';
+import * as EmailValidator from 'email-validator';
 
 const authRoutes = Router();
 
@@ -23,6 +24,16 @@ authRoutes.get('/me', isAuthenticated(), async (req, res) => {
   const user = await userRepository.findOneOrFail({
     where: { id: req.user.id },
   });
+
+  // check if email is required in settings and if users email is valid
+  const settings = await getSettings();
+  if (
+    settings.notifications.agents.email.options.emailRequired &&
+    !EmailValidator.validate(user.email)
+  ) {
+    user.warnings.push('emailRequired');
+    logger.warn(`User ${user.id} has no email address.`);
+  }
 
   return res.status(200).json(user);
 });

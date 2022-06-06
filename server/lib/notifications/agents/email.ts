@@ -13,6 +13,7 @@ import {
   NotificationAgentKey,
 } from '../../settings';
 import { BaseAgent, NotificationAgent, NotificationPayload } from './agent';
+import * as EmailValidator from 'email-validator';
 
 class EmailAgent
   extends BaseAgent<NotificationAgentEmail>
@@ -215,14 +216,18 @@ class EmailAgent
             this.getSettings(),
             payload.notifyUser.settings?.pgpKey
           );
-          await email.send(
-            this.buildMessage(
-              type,
-              payload,
-              payload.notifyUser.email,
-              payload.notifyUser.displayName
-            )
-          );
+          if (EmailValidator.validate(payload.notifyUser.email)) {
+            await email.send(
+              this.buildMessage(
+                type,
+                payload,
+                payload.notifyUser.email,
+                payload.notifyUser.displayName
+              )
+            );
+          } else {
+            return false;
+          }
         } catch (e) {
           logger.error('Error sending email notification', {
             label: 'Notifications',
