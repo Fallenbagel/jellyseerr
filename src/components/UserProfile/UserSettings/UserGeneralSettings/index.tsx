@@ -253,7 +253,13 @@ const UserGeneralSettings: React.FC = () => {
                   {intl.formatMessage(messages.email)}
                 </label>
                 <div className="form-input-area">
-                  <div className="form-input-field">
+                  <div
+                    className={`form-input-field ${
+                      user?.warnings.find((w) => w === 'emailRequired')
+                        ? 'border border-red-400'
+                        : ''
+                    }`}
+                  >
                     <Field
                       id="email"
                       name="email"

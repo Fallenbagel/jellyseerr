@@ -47,7 +47,7 @@ const UserWarnings: React.FC<UserWarningsProps> = ({ onClick }) => {
             }}
             role="button"
             tabIndex={0}
-            className="mx-2 flex items-center rounded-lg bg-yellow-500 p-2 text-xs text-white ring-1 ring-gray-700 transition duration-300 hover:bg-yellow-400"
+            className="mx-2 mb-2 flex items-center rounded-lg bg-yellow-500 p-2 text-xs text-white ring-1 ring-gray-700 transition duration-300 hover:bg-yellow-400"
           >
             <ExclamationIcon className="h-6 w-6" />
             <div className="flex min-w-0 flex-1 flex-col truncate px-2 last:pr-0">
