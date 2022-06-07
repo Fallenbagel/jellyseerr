@@ -27,6 +27,7 @@ export interface PublicSettingsResponse {
   applicationTitle: string;
   applicationUrl: string;
   hideAvailable: boolean;
+  combinedLogin: boolean;
   localLogin: boolean;
   movie4kEnabled: boolean;
   series4kEnabled: boolean;
@@ -40,6 +41,7 @@ export interface PublicSettingsResponse {
   locale: string;
   emailEnabled: boolean;
   newPlexLogin: boolean;
+  jellyfinLogin: boolean;
 }
 
 export interface CacheItem {

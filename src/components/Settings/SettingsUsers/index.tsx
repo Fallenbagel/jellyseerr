@@ -22,12 +22,18 @@ const messages = defineMessages({
   userSettingsDescription: 'Configure global and default user settings.',
   toastSettingsSuccess: 'User settings saved successfully!',
   toastSettingsFailure: 'Something went wrong while saving settings.',
+  loginMethods: 'Login Methods',
+  loginMethodsTip: 'Configure login methods for users.',
+  combinedLogin: 'Combined Login',
+  combinedLoginTip: 'Allow users to login with their local and jellyfin login.',
   localLogin: 'Enable Local Sign-In',
   localLoginTip:
-    'Allow users to sign in using their email address and password, instead of Plex OAuth',
+    "Allow users to sign in using their email address and password, instead of Jellyfin's built-in sign-in.",
   newPlexLogin: 'Enable New {mediaServerName} Sign-In',
   newPlexLoginTip:
     'Allow {mediaServerName} users to sign in without first being imported',
+  jellyfinLogin: 'Enable Jellyfin Sign-In',
+  jellyfinLoginTip: 'Allow users to sign in using their Jellyfin account.',
   movieRequestLimitLabel: 'Global Movie Request Limit',
   tvRequestLimitLabel: 'Global Series Request Limit',
   defaultPermissions: 'Default Permissions',
@@ -66,8 +72,10 @@ const SettingsUsers: React.FC = () => {
       <div className="section">
         <Formik
           initialValues={{
+            combinedLogin: data?.combinedLogin,
             localLogin: data?.localLogin,
             newPlexLogin: data?.newPlexLogin,
+            jellyfinLogin: data?.jellyfinLogin,
             movieQuotaLimit: data?.defaultQuotas.movie.quotaLimit ?? 0,
             movieQuotaDays: data?.defaultQuotas.movie.quotaDays ?? 7,
             tvQuotaLimit: data?.defaultQuotas.tv.quotaLimit ?? 0,
@@ -80,6 +88,8 @@ const SettingsUsers: React.FC = () => {
               await axios.post('/api/v1/settings/main', {
                 localLogin: values.localLogin,
                 newPlexLogin: values.newPlexLogin,
+                combinedLogin: values.combinedLogin,
+                jellyfinLogin: values.jellyfinLogin,
                 defaultQuotas: {
                   movie: {
                     quotaLimit: values.movieQuotaLimit,
@@ -111,22 +121,127 @@ const SettingsUsers: React.FC = () => {
           {({ isSubmitting, values, setFieldValue }) => {
             return (
               <Form className="section">
-                <div className="form-row">
-                  <label htmlFor="localLogin" className="checkbox-label">
-                    {intl.formatMessage(messages.localLogin)}
+                <div
+                  className="form-row"
+                  role={`group`}
+                  aria-label={`login-group`}
+                >
+                  <label htmlFor="localLogin" className={`checkbox-label`}>
+                    {intl.formatMessage(messages.loginMethods)}
                     <span className="label-tip">
-                      {intl.formatMessage(messages.localLoginTip)}
+                      {intl.formatMessage(messages.loginMethodsTip)}
                     </span>
                   </label>
                   <div className="form-input-area">
-                    <Field
-                      type="checkbox"
-                      id="localLogin"
-                      name="localLogin"
-                      onChange={() => {
-                        setFieldValue('localLogin', !values.localLogin);
-                      }}
-                    />
+                    <div className={`max-w-lg`}>
+                      {/*Combined local and Jellyfin sign-in*/}
+                      <div
+                        className={`relative mt-4 flex items-start first:mt-0`}
+                      >
+                        <div className={`flex h-6 items-center`}>
+                          <Field
+                            type="checkbox"
+                            id="combinedLogin"
+                            name="combinedLogin"
+                            onChange={() => {
+                              setFieldValue(
+                                'combinedLogin',
+                                !values.combinedLogin
+                              );
+                              setFieldValue(
+                                'localLogin',
+                                !values.combinedLogin
+                              );
+                              setFieldValue(
+                                'jellyfinLogin',
+                                !values.combinedLogin
+                              );
+                            }}
+                          />
+                        </div>
+                        <div className="ml-3 text-sm leading-6">
+                          <label htmlFor={`combinedLogin`} className="block">
+                            <div className="flex flex-col">
+                              <span className="font-medium text-white">
+                                {intl.formatMessage(messages.combinedLogin)}
+                              </span>
+                              <span className="font-normal text-gray-400">
+                                {intl.formatMessage(messages.combinedLoginTip)}
+                              </span>
+                            </div>
+                          </label>
+                        </div>
+                      </div>
+                      {/*Local sign-in*/}
+                      <div className={`mt-4 pl-10`}>
+                        <div
+                          className={`relative mt-4 flex items-start first:mt-0 ${
+                            values.combinedLogin ? 'disabled opacity-50' : ''
+                          }`}
+                        >
+                          <div className="flex h-6 items-center">
+                            <Field
+                              type="checkbox"
+                              id="localLogin"
+                              name="localLogin"
+                              onChange={() => {
+                                setFieldValue('localLogin', !values.localLogin);
+                              }}
+                              disabled={values.combinedLogin}
+                            />
+                          </div>
+                          <div className="ml-3 text-sm leading-6">
+                            <label htmlFor="localLogin" className="block">
+                              <div className="flex flex-col">
+                                <span className="font-medium text-white">
+                                  {intl.formatMessage(messages.localLogin)}
+                                </span>
+                                <span className="font-normal text-gray-400">
+                                  {intl.formatMessage(messages.localLoginTip)}
+                                </span>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                      {/*Jellyfin signin*/}
+                      <div className={`mt-4 pl-10`}>
+                        <div
+                          className={`relative mt-4 flex items-start first:mt-0 ${
+                            values.combinedLogin ? 'opacity-50' : ''
+                          }`}
+                        >
+                          <div className="flex h-6 items-center">
+                            <Field
+                              type="checkbox"
+                              id="jellyfinLogin"
+                              name="jellyfinLogin"
+                              onChange={() => {
+                                setFieldValue(
+                                  'jellyfinLogin',
+                                  !values.jellyfinLogin
+                                );
+                              }}
+                              disabled={values.combinedLogin}
+                            />
+                          </div>
+                          <div className="ml-3 text-sm leading-6">
+                            <label htmlFor="jellyfinLogin" className="block">
+                              <div className="flex flex-col">
+                                <span className="font-medium text-white">
+                                  {intl.formatMessage(messages.jellyfinLogin)}
+                                </span>
+                                <span className="font-normal text-gray-400">
+                                  {intl.formatMessage(
+                                    messages.jellyfinLoginTip
+                                  )}
+                                </span>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="form-row">
@@ -163,6 +278,7 @@ const SettingsUsers: React.FC = () => {
                     />
                   </div>
                 </div>
+
                 <div className="form-row">
                   <label htmlFor="applicationTitle" className="text-label">
                     {intl.formatMessage(messages.movieRequestLimitLabel)}

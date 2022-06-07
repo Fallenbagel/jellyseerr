@@ -102,8 +102,10 @@ export interface MainSettings {
     tv: Quota;
   };
   hideAvailable: boolean;
+  combinedLogin: boolean;
   localLogin: boolean;
   newPlexLogin: boolean;
+  jellyfinLogin: boolean;
   region: string;
   originalLanguage: string;
   trustProxy: boolean;
@@ -120,6 +122,7 @@ interface FullPublicSettings extends PublicSettings {
   applicationTitle: string;
   applicationUrl: string;
   hideAvailable: boolean;
+  combinedLogin: boolean;
   localLogin: boolean;
   movie4kEnabled: boolean;
   series4kEnabled: boolean;
@@ -135,6 +138,7 @@ interface FullPublicSettings extends PublicSettings {
   locale: string;
   emailEnabled: boolean;
   newPlexLogin: boolean;
+  jellyfinLogin: boolean;
 }
 
 export interface NotificationAgentConfig {
@@ -302,8 +306,10 @@ class Settings {
           tv: {},
         },
         hideAvailable: false,
+        combinedLogin: true,
         localLogin: true,
         newPlexLogin: true,
+        jellyfinLogin: true,
         region: '',
         originalLanguage: '',
         trustProxy: false,
@@ -514,6 +520,7 @@ class Settings {
       applicationTitle: this.data.main.applicationTitle,
       applicationUrl: this.data.main.applicationUrl,
       hideAvailable: this.data.main.hideAvailable,
+      combinedLogin: this.data.main.combinedLogin,
       localLogin: this.data.main.localLogin,
       movie4kEnabled: this.data.radarr.some(
         (radarr) => radarr.is4k && radarr.isDefault
@@ -532,6 +539,7 @@ class Settings {
       locale: this.data.main.locale,
       emailEnabled: this.data.notifications.agents.email.enabled,
       newPlexLogin: this.data.main.newPlexLogin,
+      jellyfinLogin: this.data.main.jellyfinLogin,
     };
   }
 

@@ -15,6 +15,7 @@ import PlexLoginButton from '../PlexLoginButton';
 import Transition from '../Transition';
 import JellyfinLogin from './JellyfinLogin';
 import LocalLogin from './LocalLogin';
+import CombinedLogin from './CombinedLogin';
 
 const messages = defineMessages({
   signin: 'Sign In',
@@ -89,6 +90,7 @@ const Login: React.FC = () => {
           {intl.formatMessage(messages.signinheader)}
         </h2>
       </div>
+
       <div className="relative z-50 mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div
           className="bg-gray-800 bg-opacity-50 shadow sm:rounded-lg"
@@ -117,62 +119,68 @@ const Login: React.FC = () => {
                 </div>
               </div>
             </Transition>
-            <Accordion single atLeastOne>
-              {({ openIndexes, handleClick, AccordionContent }) => (
-                <>
-                  <button
-                    className={`w-full cursor-default bg-gray-800 bg-opacity-70 py-2 text-center text-sm font-bold text-gray-400 transition-colors duration-200 focus:outline-none sm:rounded-t-lg ${
-                      openIndexes.includes(0) && 'text-indigo-500'
-                    } ${
-                      settings.currentSettings.localLogin &&
-                      'hover:cursor-pointer hover:bg-gray-700'
-                    }`}
-                    onClick={() => handleClick(0)}
-                    disabled={!settings.currentSettings.localLogin}
-                  >
-                    {settings.currentSettings.mediaServerType ==
-                    MediaServerType.PLEX
-                      ? intl.formatMessage(messages.signinwithplex)
-                      : intl.formatMessage(messages.signinwithjellyfin)}
-                  </button>
-                  <AccordionContent isOpen={openIndexes.includes(0)}>
-                    <div className="px-10 py-8">
+            {!settings.currentSettings.combinedLogin ? (
+              <Accordion single atLeastOne>
+                {({ openIndexes, handleClick, AccordionContent }) => (
+                  <>
+                    <button
+                      className={`w-full cursor-default bg-gray-800 bg-opacity-70 py-2 text-center text-sm font-bold text-gray-400 transition-colors duration-200 focus:outline-none sm:rounded-t-lg ${
+                        openIndexes.includes(0) && 'text-indigo-500'
+                      } ${
+                        settings.currentSettings.localLogin &&
+                        'hover:cursor-pointer hover:bg-gray-700'
+                      }`}
+                      onClick={() => handleClick(0)}
+                      disabled={!settings.currentSettings.localLogin}
+                    >
                       {settings.currentSettings.mediaServerType ==
-                      MediaServerType.PLEX ? (
-                        <PlexLoginButton
-                          isProcessing={isProcessing}
-                          onAuthToken={(authToken) => setAuthToken(authToken)}
-                        />
-                      ) : (
-                        <JellyfinLogin revalidate={revalidate} />
-                      )}
-                    </div>
-                  </AccordionContent>
-                  {settings.currentSettings.localLogin && (
-                    <div>
-                      <button
-                        className={`w-full cursor-default bg-gray-800 bg-opacity-70 py-2 text-center text-sm font-bold text-gray-400 transition-colors duration-200 hover:cursor-pointer hover:bg-gray-700 focus:outline-none ${
-                          openIndexes.includes(1)
-                            ? 'text-indigo-500'
-                            : 'sm:rounded-b-lg'
-                        }`}
-                        onClick={() => handleClick(1)}
-                      >
-                        {intl.formatMessage(messages.signinwithoverseerr, {
-                          applicationTitle:
-                            settings.currentSettings.applicationTitle,
-                        })}
-                      </button>
-                      <AccordionContent isOpen={openIndexes.includes(1)}>
-                        <div className="px-10 py-8">
-                          <LocalLogin revalidate={revalidate} />
-                        </div>
-                      </AccordionContent>
-                    </div>
-                  )}
-                </>
-              )}
-            </Accordion>
+                      MediaServerType.PLEX
+                        ? intl.formatMessage(messages.signinwithplex)
+                        : intl.formatMessage(messages.signinwithjellyfin)}
+                    </button>
+                    <AccordionContent isOpen={openIndexes.includes(0)}>
+                      <div className="px-10 py-8">
+                        {settings.currentSettings.mediaServerType ==
+                        MediaServerType.PLEX ? (
+                          <PlexLoginButton
+                            isProcessing={isProcessing}
+                            onAuthToken={(authToken) => setAuthToken(authToken)}
+                          />
+                        ) : (
+                          <JellyfinLogin revalidate={revalidate} />
+                        )}
+                      </div>
+                    </AccordionContent>
+                    {settings.currentSettings.localLogin && (
+                      <div>
+                        <button
+                          className={`w-full cursor-default bg-gray-800 bg-opacity-70 py-2 text-center text-sm font-bold text-gray-400 transition-colors duration-200 hover:cursor-pointer hover:bg-gray-700 focus:outline-none ${
+                            openIndexes.includes(1)
+                              ? 'text-indigo-500'
+                              : 'sm:rounded-b-lg'
+                          }`}
+                          onClick={() => handleClick(1)}
+                        >
+                          {intl.formatMessage(messages.signinwithoverseerr, {
+                            applicationTitle:
+                              settings.currentSettings.applicationTitle,
+                          })}
+                        </button>
+                        <AccordionContent isOpen={openIndexes.includes(1)}>
+                          <div className="px-10 py-8">
+                            <LocalLogin revalidate={revalidate} />
+                          </div>
+                        </AccordionContent>
+                      </div>
+                    )}
+                  </>
+                )}
+              </Accordion>
+            ) : (
+              <div className="px-10 py-8">
+                <CombinedLogin revalidate={revalidate} />
+              </div>
+            )}
           </>
         </div>
       </div>

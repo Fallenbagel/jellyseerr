@@ -9,9 +9,10 @@ export interface SettingsContextProps {
 
 const defaultSettings = {
   initialized: false,
-  applicationTitle: 'Overseerr',
+  applicationTitle: 'Jellyseerr',
   applicationUrl: '',
   hideAvailable: false,
+  combinedLogin: true,
   localLogin: true,
   movie4kEnabled: false,
   series4kEnabled: false,
@@ -25,6 +26,7 @@ const defaultSettings = {
   locale: 'en',
   emailEnabled: false,
   newPlexLogin: true,
+  jellyfinLogin: true,
 };
 
 export const SettingsContext = React.createContext<SettingsContextProps>({
