@@ -256,18 +256,17 @@ const UserGeneralSettings: React.FC = () => {
                   )}
                 </label>
                 <div className="form-input-area">
-                  <div
-                    className={`form-input-field ${
-                      user?.warnings.find((w) => w === 'emailRequired')
-                        ? 'border border-red-400'
-                        : ''
-                    }`}
-                  >
+                  <div className={`form-input-field`}>
                     <Field
                       id="email"
                       name="email"
                       type="text"
                       placeholder={user?.email}
+                      className={
+                        user?.warnings.find((w) => w === 'emailRequired')
+                          ? 'border-2 border-red-400 focus:border-blue-600'
+                          : ''
+                      }
                     />
                   </div>
                   {errors.email && touched.email && (
