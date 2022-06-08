@@ -31,6 +31,7 @@ export interface JellyfinLibraryItem {
   Id: string;
   HasSubtitles: boolean;
   Type: 'Movie' | 'Episode' | 'Season' | 'Series';
+  LocationType: 'FileSystem' | 'Offline' | 'Remote' | 'Virtual';
   SeriesName?: string;
   SeriesId?: string;
   SeasonId?: string;
@@ -205,7 +206,9 @@ class JellyfinAPI {
         `/Users/${this.userId}/Items?SortBy=SortName&SortOrder=Ascending&IncludeItemTypes=Series,Movie&Recursive=true&StartIndex=0&ParentId=${id}`
       );
 
-      return contents.data.Items;
+      return contents.data.Items.filter(
+        (item: JellyfinLibraryItem) => item.LocationType !== 'Virtual'
+      );
     } catch (e) {
       logger.error(
         `Something went wrong while getting library content from the Jellyfin server: ${e.message}`,
@@ -251,7 +254,9 @@ class JellyfinAPI {
     try {
       const contents = await this.axios.get<any>(`/Shows/${seriesID}/Seasons`);
 
-      return contents.data.Items;
+      return contents.data.Items.filter(
+        (item: JellyfinLibraryItem) => item.LocationType !== 'Virtual'
+      );
     } catch (e) {
       logger.error(
         `Something went wrong while getting the list of seasons from the Jellyfin server: ${e.message}`,
@@ -270,7 +275,9 @@ class JellyfinAPI {
         `/Shows/${seriesID}/Episodes?seasonId=${seasonID}`
       );
 
-      return contents.data.Items;
+      return contents.data.Items.filter(
+        (item: JellyfinLibraryItem) => item.LocationType !== 'Virtual'
+      );
     } catch (e) {
       logger.error(
         `Something went wrong while getting the list of episodes from the Jellyfin server: ${e.message}`,

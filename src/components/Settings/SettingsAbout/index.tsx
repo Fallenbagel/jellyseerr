@@ -189,35 +189,6 @@ const SettingsAbout: React.FC = () => {
         </List>
       </div>
       <div className="section">
-        <List title={intl.formatMessage(messages.supportoverseerr)}>
-          <List.Item
-            title={`${intl.formatMessage(messages.helppaycoffee)} ☕️`}
-          >
-            <a
-              href="https://github.com/sponsors/sct"
-              target="_blank"
-              rel="noreferrer"
-              className="text-indigo-500 transition duration-300 hover:underline"
-            >
-              https://github.com/sponsors/sct
-            </a>
-            <Badge className="ml-2">
-              {intl.formatMessage(messages.preferredmethod)}
-            </Badge>
-          </List.Item>
-          <List.Item title="">
-            <a
-              href="https://patreon.com/overseerr"
-              target="_blank"
-              rel="noreferrer"
-              className="text-indigo-500 transition duration-300 hover:underline"
-            >
-              https://patreon.com/overseerr
-            </a>
-          </List.Item>
-        </List>
-      </div>
-      <div className="section">
         <Releases currentVersion={data.version} />
       </div>
     </>
