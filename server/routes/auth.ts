@@ -263,6 +263,15 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         user.avatar = '/os_logo_square.png';
       }
 
+      // check if they have set a password
+      if (user.password === '' || user.password === undefined) {
+        // check if body pasword is set
+        if (body.password !== '' && body.password !== undefined) {
+          // save their password
+          await user.setPassword(body.password);
+        }
+      }
+
       user.jellyfinUsername = account.User.Name;
 
       if (user.username === account.User.Name) {

@@ -7,6 +7,7 @@ import { ExclamationIcon } from '@heroicons/react/outline';
 const messages = defineMessages({
   emailRequired: 'An email address is required.',
   emailInvalid: 'Email address is invalid.',
+  passwordRequired: 'A password is required.',
 });
 
 interface UserWarningsProps {
