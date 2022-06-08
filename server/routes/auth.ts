@@ -307,6 +307,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         );
         user = new User({
           email: body.email,
+          username: account.User.Name,
           jellyfinUsername: account.User.Name,
           jellyfinUserId: account.User.Id,
           jellyfinDeviceId: deviceId,
@@ -317,6 +318,9 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
             : '/os_logo_square.png',
           userType: UserType.JELLYFIN,
         });
+        if (body.password !== '' && body.password !== undefined) {
+          await user.setPassword(body.password);
+        }
         await userRepository.save(user);
 
         //Update hostname in settings if it doesn't exist (initial configuration)
