@@ -163,6 +163,7 @@ CoreApp.getInitialProps = async (initialProps) => {
     hideAvailable: false,
     movie4kEnabled: false,
     series4kEnabled: false,
+    combinedLogin: true,
     localLogin: true,
     region: '',
     originalLanguage: '',
@@ -174,6 +175,7 @@ CoreApp.getInitialProps = async (initialProps) => {
     locale: 'en',
     emailEnabled: false,
     newPlexLogin: true,
+    jellyfinLogin: false,
   };
 
   if (ctx.res) {
