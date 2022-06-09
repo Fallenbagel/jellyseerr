@@ -70,6 +70,9 @@ authRoutes.post('/plex', async (req, res, next) => {
         userType: UserType.PLEX,
       });
 
+      settings.main.mediaServerType = MediaServerType.PLEX;
+      settings.save();
+
       await userRepository.save(user);
     } else {
       const mainUser = await userRepository.findOneOrFail({
