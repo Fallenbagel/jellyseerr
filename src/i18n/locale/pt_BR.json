@@ -228,7 +228,7 @@
   "components.MovieDetails.viewfullcrew": "Ver Equipe Técnica Completa",
   "components.MovieDetails.MovieCrew.fullcrew": "Equipe Técnica Completa",
   "components.UserList.importfromplexerror": "Algo deu errado ao importar usuários do Plex.",
-  "components.UserList.importfromplex": "Importar Usuários do {mediaServerName}",
+  "components.UserList.importfromplex": "Importar Usuários do Plex",
   "components.UserList.importedfromplex": "<strong>{userCount}</strong> {userCount, plural, one {usuário Plex importado} other {usuários Plex importados}} com sucesso!",
   "components.Settings.Notifications.NotificationsSlack.agentenabled": "Habilitar Agente",
   "components.RequestList.RequestItem.failedretry": "Algo deu errado ao retentar fazer a solicitação.",

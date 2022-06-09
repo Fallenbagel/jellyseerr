@@ -222,7 +222,7 @@
   "components.Settings.SettingsAbout.Releases.releasedataMissing": "Versionsdata är för närvarande inte tillgänglig.",
   "components.Settings.SettingsAbout.Releases.latestversion": "Senaste Versionen",
   "components.Settings.SettingsAbout.Releases.currentversion": "Aktuell",
-  "components.UserList.importfromplex": "Importera  {mediaServerName}användare",
+  "components.UserList.importfromplex": "Importera Plexanvändare",
   "components.UserList.importfromplexerror": "Något gick fel när Plexanvändare importerades.",
   "components.TvDetails.watchtrailer": "Kolla Trailer",
   "components.Settings.Notifications.allowselfsigned": "Tillåt Självsignerade Certifikat",

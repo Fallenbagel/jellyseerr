@@ -223,7 +223,7 @@
   "components.Settings.SettingsAbout.Releases.currentversion": "Actual",
   "components.MovieDetails.studio": "{studioCount, plural, one {Estudio} other {Estudios}}",
   "components.UserList.importfromplexerror": "Algo salió mal importando usuarios de Plex.",
-  "components.UserList.importfromplex": "Importar Usuarios de {mediaServerName}",
+  "components.UserList.importfromplex": "Importar Usuarios de Plex",
   "components.UserList.importedfromplex": "¡{userCount, plural, one {# nuevo usuario} other {# nuevos usuarios}} importado/s de Plex con éxito!",
   "components.TvDetails.viewfullcrew": "Ver Equipo Completo",
   "components.TvDetails.firstAirDate": "Primera fecha de emisión",

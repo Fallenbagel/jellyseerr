@@ -194,7 +194,7 @@
   "components.UserList.userssaved": "Brukertillatelsene ble lagret!",
   "components.UserList.users": "Brukere",
   "components.UserList.importfromplexerror": "Noe gikk galt ved importering av brukere fra Plex.",
-  "components.UserList.importfromplex": "Importer brukere fra {mediaServerName}",
+  "components.UserList.importfromplex": "Importer brukere fra Plex",
   "components.UserList.importedfromplex": "<strong>{userCount}</strong> {userCount, plural, one {ny bruker} other {nye brukere}} ble importert fra Plex!",
   "components.Settings.menuUsers": "Brukere",
   "components.Settings.SettingsUsers.users": "Brukere",
