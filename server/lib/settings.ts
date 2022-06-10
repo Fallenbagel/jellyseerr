@@ -134,6 +134,7 @@ interface FullPublicSettings extends PublicSettings {
   enablePushRegistration: boolean;
   locale: string;
   emailEnabled: boolean;
+  userEmailRequired: boolean;
   newPlexLogin: boolean;
 }
 
@@ -159,6 +160,7 @@ export interface NotificationAgentSlack extends NotificationAgentConfig {
 
 export interface NotificationAgentEmail extends NotificationAgentConfig {
   options: {
+    userEmailRequired: boolean;
     emailFrom: string;
     smtpHost: string;
     smtpPort: number;
@@ -335,6 +337,7 @@ class Settings {
           email: {
             enabled: false,
             options: {
+              userEmailRequired: false,
               emailFrom: '',
               smtpHost: '',
               smtpPort: 587,
@@ -529,6 +532,8 @@ class Settings {
       enablePushRegistration: this.data.notifications.agents.webpush.enabled,
       locale: this.data.main.locale,
       emailEnabled: this.data.notifications.agents.email.enabled,
+      userEmailRequired:
+        this.data.notifications.agents.email.options.userEmailRequired,
       newPlexLogin: this.data.main.newPlexLogin,
     };
   }
