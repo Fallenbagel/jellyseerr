@@ -516,7 +516,7 @@ router.post(
           if (user) {
             // Update the user's avatar with their Jellyfin thumbnail, in case it changed
             user.avatar = avatar;
-            user.email = account.Name;
+            // user.email = account.Name;
             user.jellyfinUsername = account.Name;
 
             // In case the user was previously a local account
