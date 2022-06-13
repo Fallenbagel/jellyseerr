@@ -602,6 +602,7 @@
   "components.UserList.localuser": "Τοπικός χρήστης",
   "components.UserList.localLoginDisabled": "Η ρύθμιση <strong>Ενεργοποίηση τοπικής σύνδεσης</strong> είναι προς το παρόν απενεργοποιημένη.",
   "components.UserList.importfromplexerror": "Κάτι πήγε στραβά κατά την εισαγωγή χρηστών από το Plex.",
+  "components.UserList.importfrommediaserver": "Εισαγωγή χρηστών από το {mediaServerName}",
   "components.UserList.importfromplex": "Εισαγωγή χρηστών από το Plex",
   "components.UserList.importedfromplex": "{userCount, plural, one {# νέου χρήστη} other {#νέοι χρήστες}} εισήχθησαν απο το Plex επιτυχώς!",
   "components.UserList.email": "Διεύθυνση ηλεκτρονικού ταχυδρομείου",

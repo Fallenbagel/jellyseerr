@@ -231,6 +231,7 @@
   "components.TvDetails.watchtrailer": "予告編を見る",
   "components.MovieDetails.watchtrailer": "予告編を見る",
   "components.UserList.importfromplexerror": "Plexからユーザーをインポート中に問題が発生しました。",
+  "components.UserList.importfrommediaserver": "{mediaServerName}からユーザーをインポート",
   "components.UserList.importfromplex": "Plexからユーザーをインポート",
   "components.UserList.importedfromplex": "Plex から新ユーザー {userCount} 名をインポートしました。",
   "components.TvDetails.viewfullcrew": "フルクルーを表示",

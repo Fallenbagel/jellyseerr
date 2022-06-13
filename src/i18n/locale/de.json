@@ -223,6 +223,7 @@
   "components.Settings.SettingsAbout.Releases.latestversion": "Neuste",
   "components.Settings.SettingsAbout.Releases.currentversion": "Aktuell",
   "components.UserList.importfromplexerror": "Beim Importieren von Plex-Benutzern ist etwas schief gelaufen.",
+  "components.UserList.importfrommediaserver": "{mediaServerName}-Benutzer importieren",
   "components.UserList.importfromplex": "Plex-Benutzer importieren",
   "components.TvDetails.viewfullcrew": "Komplette Crew anzeigen",
   "components.TvDetails.TvCrew.fullseriescrew": "Komplette Serien-Crew",
