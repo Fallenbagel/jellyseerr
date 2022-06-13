@@ -51,6 +51,18 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
     revalidateOnMount: true,
   });
 
+  const { data: existingUsers } = useSWR<UserResultsResponse>(
+    `/api/v1/user?take=${children}`
+  );
+
+  data?.forEach((user, pos) => {
+    if (
+      existingUsers?.results.some((data) => data.jellyfinUserId === user.id)
+    ) {
+      data?.splice(pos, 1);
+    }
+  });
+
   const importUsers = async () => {
     setImporting(true);
 
@@ -118,20 +130,6 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
       setSelectedUsers([]);
     }
   };
-
-  const { data: existingUsers } = useSWR<UserResultsResponse>(
-    `/api/v1/user?take=${children}`
-  );
-
-  data?.forEach((user, pos) => {
-    if (
-      existingUsers?.results.some(
-        (existingUser) => existingUser.jellyfinUserId === user.id
-      )
-    ) {
-      delete data[pos];
-    }
-  });
 
   return (
     <Modal
