@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import gravatarUrl from 'gravatar-url';
-import { findIndex, forEach, sortBy } from 'lodash';
+import { findIndex, sortBy } from 'lodash';
 import { getRepository, In, Not } from 'typeorm';
 import JellyfinAPI from '../../api/jellyfin';
 import PlexTvAPI from '../../api/plextv';
@@ -500,9 +500,13 @@ router.post(
           ? externalHostname
           : hostname;
 
-      forEach(body.jellyfinUserIds, async (jellyfinUserId) => {
-        jellyfinClient.setUserId(jellyfinUserId);
-        const jellyfinUser = await jellyfinClient.getUser();
+      jellyfinClient.setUserId(admin.jellyfinUserId ?? '');
+      const jellyfinUsers = await jellyfinClient.getUsers();
+
+      for (const jellyfinUserId of body.jellyfinUserIds) {
+        const jellyfinUser = jellyfinUsers.users.find(
+          (user) => user.Id === jellyfinUserId
+        );
 
         const user = await userRepository.findOne({
           select: ['id', 'jellyfinUserId'],
@@ -511,14 +515,14 @@ router.post(
 
         if (!user) {
           const newUser = new User({
-            jellyfinUsername: jellyfinUser.Name,
-            jellyfinUserId: jellyfinUser.Id,
+            jellyfinUsername: jellyfinUser?.Name,
+            jellyfinUserId: jellyfinUser?.Id,
             jellyfinDeviceId: Buffer.from(
-              `BOT_jellyseerr_${jellyfinUser.Name ?? ''}`
+              `BOT_jellyseerr_${jellyfinUser?.Name ?? ''}`
             ).toString('base64'),
-            email: jellyfinUser.Name,
+            email: jellyfinUser?.Name,
             permissions: settings.main.defaultPermissions,
-            avatar: jellyfinUser.PrimaryImageTag
+            avatar: jellyfinUser?.PrimaryImageTag
               ? `${jellyfinHost}/Users/${jellyfinUser.Id}/Images/Primary/?tag=${jellyfinUser.PrimaryImageTag}&quality=90`
               : '/os_logo_square.png',
             userType: UserType.JELLYFIN,
@@ -527,9 +531,8 @@ router.post(
           await userRepository.save(newUser);
           createdUsers.push(newUser);
         }
-
-        return res.status(201).json(User.filterMany(createdUsers));
-      });
+      }
+      return res.status(201).json(User.filterMany(createdUsers));
     } catch (e) {
       next({ status: 500, message: e.message });
     }
