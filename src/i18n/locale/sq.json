@@ -1006,6 +1006,7 @@
   "components.UserProfile.UserSettings.UserPermissions.toastSettingsFailure": "Diçka shkoi keq duke ruajtur cilësimet.",
   "components.Settings.webAppUrlTip": "Në mënyrë opsionale drejto përdoruesit në aplikacionin web në serverin tënd në vend të atij web",
   "components.TvDetails.episodeRuntimeMinutes": "{runtime} minuta",
+  "components.UserList.importfrommediaserver": "Importoni përdoruesit {mediaServerName}",
   "components.UserList.importfromplex": "Importoni përdoruesit Plex",
   "components.UserList.importfromplexerror": "Diçka shkoi keq duke importuar përdoruesit Plex.",
   "components.TvDetails.firstAirDate": "Data e parë e transmetimit",

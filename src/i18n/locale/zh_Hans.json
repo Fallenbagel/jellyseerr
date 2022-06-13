@@ -24,6 +24,7 @@
   "components.UserList.localuser": "本地用户",
   "components.UserList.localLoginDisabled": "<strong>允许本地登录</strong>的设置目前被禁用。",
   "components.UserList.importfromplexerror": "导入 Plex 用户时出错。",
+  "components.UserList.importfrommediaserver": "导入 {mediaServerName} 用户",
   "components.UserList.importfromplex": "导入 Plex 用户",
   "components.UserList.importedfromplex": "<strong>{userCount}</strong> Plex {userCount, plural, one {user} other {users}} 成功导入！",
   "components.UserList.email": "电子邮件地址",

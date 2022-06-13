@@ -793,6 +793,7 @@
   "components.UserList.usercreatedfailed": "Что-то пошло не так при создании пользователя.",
   "components.UserList.passwordinfodescription": "Настройте URL-адрес приложения и включите уведомления по электронной почте, чтобы обеспечить возможность автоматической генерации пароля.",
   "components.UserList.importfromplexerror": "Что-то пошло не так при импорте пользователей из Plex.",
+  "components.UserList.importfrommediaserver": "Импортировать пользователей из {mediaServerName}",
   "components.UserList.importfromplex": "Импортировать пользователей из Plex",
   "components.UserList.importedfromplex": "{userCount, plural, one {# новый пользователь} other {# новых пользователя(ей)}} успешно импортированы из Plex!",
   "components.UserList.edituser": "Изменить разрешения пользователя",

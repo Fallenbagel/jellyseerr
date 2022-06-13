@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/solid';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
+import getConfig from 'next/config';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -36,12 +37,11 @@ import Transition from '../Transition';
 import BulkEditModal from './BulkEditModal';
 import JellyfinImportModal from './JellyfinImportModal';
 import PlexImportModal from './PlexImportModal';
-import getConfig from 'next/config';
 
 const messages = defineMessages({
   users: 'Users',
   userlist: 'User List',
-  importfromplex: 'Import {mediaServerName} Users',
+  importfrommediaserver: 'Import {mediaServerName} Users',
   user: 'User',
   totalrequests: 'Requests',
   accounttype: 'Type',
@@ -506,15 +506,15 @@ const UserList: React.FC = () => {
               <InboxInIcon />
               <span>
                 {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                  ? intl.formatMessage(messages.importfromplex, {
+                  ? intl.formatMessage(messages.importfrommediaserver, {
                       mediaServerName: 'Emby',
                     })
                   : settings.currentSettings.mediaServerType ===
                     MediaServerType.PLEX
-                  ? intl.formatMessage(messages.importfromplex, {
+                  ? intl.formatMessage(messages.importfrommediaserver, {
                       mediaServerName: 'Plex',
                     })
-                  : intl.formatMessage(messages.importfromplex, {
+                  : intl.formatMessage(messages.importfrommediaserver, {
                       mediaServerName: 'Jellyfin',
                     })}
               </span>

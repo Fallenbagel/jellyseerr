@@ -199,6 +199,7 @@
   "components.UserList.passwordinfodescription": "Configurar um URL de aplicação e ativar as notificações por e-mail para permitir a geração automática de palavra-passe.",
   "components.UserList.localuser": "Utilizador Local",
   "components.UserList.importfromplexerror": "Ocorreu um erro ao importar utilizadores do Plex.",
+  "components.UserList.importfrommediaserver": "Importar Utilizadores do {mediaServerName}",
   "components.UserList.importfromplex": "Importar Utilizadores do Plex",
   "components.UserList.importedfromplex": "{userCount, plural, one {# novo utilizador} other {# novos utilizadores}} importados do Plex com sucesso!",
   "components.UserList.email": "Endereço de E-mail",

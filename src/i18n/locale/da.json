@@ -850,6 +850,7 @@
   "components.UserList.nouserstoimport": "Ingen nye brugere som kan importeres fra Plex.",
   "components.UserList.edituser": "Redigér Brugertilladelser",
   "components.UserList.email": "Email Adresse",
+  "components.UserList.importfrommediaserver": "Importér Brugere fra {mediaServerName}",
   "components.UserList.importfromplex": "Importér Brugere fra Plex",
   "components.UserList.owner": "Ejer",
   "components.UserList.password": "Kodeord",

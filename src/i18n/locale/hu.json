@@ -165,6 +165,7 @@
   "components.UserList.password": "Jelszó",
   "components.UserList.localuser": "Helyi felhasználó",
   "components.UserList.importfromplexerror": "Hiba történt a felhasználók Plex-ről történő importálása közben.",
+  "components.UserList.importfrommediaserver": "Felhasználók importálása {mediaServerName}-ről",
   "components.UserList.importfromplex": "Felhasználók importálása Plex-ről",
   "components.UserList.importedfromplex": "{userCount, plural, =0 {Nem lett új} one {# új} other {# új}} felhasználó importálva Plex-ről!",
   "components.UserList.email": "E-mail-cím",
