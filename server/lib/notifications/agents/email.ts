@@ -13,6 +13,7 @@ import {
   NotificationAgentKey,
 } from '../../settings';
 import { BaseAgent, NotificationAgent, NotificationPayload } from './agent';
+import * as EmailValidator from 'email-validator';
 
 class EmailAgent
   extends BaseAgent<NotificationAgentEmail>
@@ -215,14 +216,23 @@ class EmailAgent
             this.getSettings(),
             payload.notifyUser.settings?.pgpKey
           );
-          await email.send(
-            this.buildMessage(
-              type,
-              payload,
-              payload.notifyUser.email,
-              payload.notifyUser.displayName
-            )
-          );
+          if (EmailValidator.validate(payload.notifyUser.email)) {
+            await email.send(
+              this.buildMessage(
+                type,
+                payload,
+                payload.notifyUser.email,
+                payload.notifyUser.displayName
+              )
+            );
+          } else {
+            logger.warn('Invalid email address provided for user', {
+              label: 'Notifications',
+              recipient: payload.notifyUser.displayName,
+              type: Notification[type],
+              subject: payload.subject,
+            });
+          }
         } catch (e) {
           logger.error('Error sending email notification', {
             label: 'Notifications',
@@ -268,9 +278,18 @@ class EmailAgent
                 this.getSettings(),
                 user.settings?.pgpKey
               );
-              await email.send(
-                this.buildMessage(type, payload, user.email, user.displayName)
-              );
+              if (EmailValidator.validate(user.email)) {
+                await email.send(
+                  this.buildMessage(type, payload, user.email, user.displayName)
+                );
+              } else {
+                logger.warn('Invalid email address provided for user', {
+                  label: 'Notifications',
+                  recipient: user.displayName,
+                  type: Notification[type],
+                  subject: payload.subject,
+                });
+              }
             } catch (e) {
               logger.error('Error sending email notification', {
                 label: 'Notifications',
