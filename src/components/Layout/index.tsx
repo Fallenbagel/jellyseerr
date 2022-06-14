@@ -50,6 +50,7 @@ const Layout: React.FC = ({ children }) => {
       <div className="absolute top-0 h-64 w-full bg-gradient-to-bl from-gray-800 to-gray-900">
         <div className="relative inset-0 h-full w-full bg-gradient-to-t from-gray-900 to-transparent" />
       </div>
+
       <Sidebar open={isSidebarOpen} setClosed={() => setSidebarOpen(false)} />
 
       <div className="relative mb-16 flex w-0 min-w-0 flex-1 flex-col lg:ml-64">

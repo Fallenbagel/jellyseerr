@@ -482,7 +482,9 @@ const UserList: React.FC = () => {
               setShowImportModal(false);
               revalidate();
             }}
-          />
+          >
+            {data.pageInfo.results}
+          </JellyfinImportModal>
         )}
       </Transition>
 

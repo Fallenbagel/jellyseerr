@@ -13,6 +13,7 @@ export type { PermissionCheckOptions };
 
 export interface User {
   id: number;
+  warnings: string[];
   plexUsername?: string;
   username?: string;
   displayName: string;
