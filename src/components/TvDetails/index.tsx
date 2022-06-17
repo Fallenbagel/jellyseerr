@@ -45,6 +45,7 @@ import RequestModal from '../RequestModal';
 import Slider from '../Slider';
 import StatusBadge from '../StatusBadge';
 import getConfig from 'next/config';
+import SeasonCard from '../SeasonCard';
 
 const messages = defineMessages({
   firstAirDate: 'First Air Date',
@@ -64,6 +65,7 @@ const messages = defineMessages({
   play: 'Play on {mediaServerName}',
   play4k: 'Play 4K on {mediaServerName}',
   seasons: '{seasonCount, plural, one {# Season} other {# Seasons}}',
+  seasonsTitle: '{seasonCount, plural, one {Season} other {Seasons}}',
   episodeRuntime: 'Episode Runtime',
   episodeRuntimeMinutes: '{runtime} minutes',
   streamingproviders: 'Currently Streaming On',
@@ -672,6 +674,35 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
           </div>
         </div>
       </div>
+
+      <div className="slider-header">
+        <div className="slider-title">
+          <span>
+            {intl.formatMessage(messages.seasonsTitle, {
+              seasonCount: seasonCount,
+            })}
+          </span>
+        </div>
+      </div>
+      <Slider
+        sliderKey="seasons"
+        isLoading={false}
+        isEmpty={false}
+        items={data.seasons.slice(0, 10).map((season) => (
+          <>
+            <SeasonCard
+              tvId={Number(router.query.tvId)}
+              image={season.posterPath}
+              seasonNumber={season.seasonNumber}
+              airDate={new Date(season.airDate)}
+              title={season.name}
+              summary={season.overview}
+              episodeCount={season.episodeCount}
+            />
+          </>
+        ))}
+      />
+
       {data.credits.cast.length > 0 && (
         <>
           <div className="slider-header">
