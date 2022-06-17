@@ -698,6 +698,11 @@ const TvDetails: React.FC<TvDetailsProps> = ({ tv }) => {
               title={season.name}
               summary={season.overview}
               episodeCount={season.episodeCount}
+              status={
+                data?.mediaInfo?.seasons?.find(
+                  (s) => s.seasonNumber === season.seasonNumber
+                )?.status
+              }
             />
           </>
         ))}

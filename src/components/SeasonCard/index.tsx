@@ -20,12 +20,13 @@ interface SeasonCardProps {
   summary: string;
   canExpand?: boolean;
   episodeCount?: number;
+  availableEpisodes?: number;
 }
 
 const SeasonCard: React.FC<SeasonCardProps> = ({
   tvId,
   image,
-  status,
+  status = MediaStatus.UNKNOWN,
   inProgress = false,
   seasonNumber,
   airDate,
@@ -33,6 +34,7 @@ const SeasonCard: React.FC<SeasonCardProps> = ({
   summary,
   canExpand = false,
   episodeCount = 0,
+  availableEpisodes = 0,
 }) => {
   const isTouch = useIsTouch();
   const [isUpdating] = useState(false);
@@ -176,7 +178,7 @@ const SeasonCard: React.FC<SeasonCardProps> = ({
                           background: 'rgba(0,0,0,.8)',
                         }}
                       >
-                        0/{episodeCount}
+                        {availableEpisodes}/{episodeCount}
                       </div>
                     </div>
                   </div>
