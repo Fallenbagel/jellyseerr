@@ -278,7 +278,7 @@ const SeasonDetails: React.FC<SeasonDetailsProps> = ({ season, tv }) => {
               episodeCount: seasonData.episodes.length,
             })}
           </h2>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid md:grid-cols-2 md:gap-2 lg:grid-cols-4 lg:gap-2">
             {seasonData.episodes.map((episode) => (
               <>
                 <div className="season-episode">
