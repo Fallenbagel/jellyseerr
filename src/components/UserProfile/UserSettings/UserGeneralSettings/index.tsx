@@ -121,9 +121,9 @@ const UserGeneralSettings: React.FC = () => {
       </div>
       <Formik
         initialValues={{
-          displayName: data?.username,
-          email: data?.email,
-          discordId: data?.discordId,
+          displayName: data?.username ?? '',
+          email: data?.email ?? '',
+          discordId: data?.discordId ?? '',
           locale: data?.locale,
           region: data?.region,
           originalLanguage: data?.originalLanguage,
@@ -251,6 +251,9 @@ const UserGeneralSettings: React.FC = () => {
               <div className="form-row">
                 <label htmlFor="email" className="text-label">
                   {intl.formatMessage(messages.email)}
+                  {user?.warnings.find((w) => w === 'userEmailRequired') && (
+                    <span className="label-required">*</span>
+                  )}
                 </label>
                 <div className="form-input-area">
                   <div className="form-input-field">
@@ -258,7 +261,12 @@ const UserGeneralSettings: React.FC = () => {
                       id="email"
                       name="email"
                       type="text"
-                      placeholder={user?.email}
+                      placeholder="example@domain.com"
+                      className={
+                        user?.warnings.find((w) => w === 'userEmailRequired')
+                          ? 'border-2 border-red-400 focus:border-blue-600'
+                          : ''
+                      }
                     />
                   </div>
                   {errors.email && touched.email && (

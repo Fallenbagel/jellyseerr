@@ -137,6 +137,8 @@ export class User {
   @UpdateDateColumn()
   public updatedAt: Date;
 
+  public warnings: string[] = [];
+
   constructor(init?: Partial<User>) {
     Object.assign(this, init);
   }
