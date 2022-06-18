@@ -22,7 +22,7 @@ jobs:
         name: Login to private registery
         uses: docker/login-action@v2.0.0
         with:
-          registry: https://${{ secrets.REGISTRY_URL }}
+          registry: ${{ secrets.REGISTRY_URL }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
@@ -34,6 +34,6 @@ jobs:
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: '${{ secrets.REGISTRY_URL }}/Fallenbagel/jellyseerr:${{ github.sha }}'
-          cache-from: 'type=registry,ref=${{ secrets.REGISTRY_URL }}/Fallenbagel/jellyseerr:buildcache'
-          cache-to: 'type=registry,ref=${{ secrets.REGISTRY_URL }}/Fallenbagel/jellyseerr:buildcache,mode=max'
+          tags: '${{ secrets.REGISTRY_URL }}/fallenbagel/jellyseerr:${{ github.sha }}'
+          cache-from: 'type=registry,ref=${{ secrets.REGISTRY_URL }}/fallenbagel/jellyseerr:buildcache'
+          cache-to: 'type=registry,ref=${{ secrets.REGISTRY_URL }}/fallenbagel/jellyseerr:buildcache,mode=max'
