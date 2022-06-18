@@ -20,7 +20,7 @@ jobs:
 
       -
         name: Login to private registery
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2.0.0
         with:
           registry: ${{ secrets.REGISTRY_URL }}
           username: ${{ secrets.REGISTRY_USERNAME }}
