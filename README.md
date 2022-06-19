@@ -13,8 +13,10 @@
 
 - Jellyfin Support
 - Emby Support
+  (Upcoming Features include: Multiple Server Instances, Music Support, Ability to change email address and much more!)
 
 Along with all the existing Overseerr features:
+
 - Full Plex integration. Authenticate and manage user access with Plex!
 - Easy integration with your existing services. Currently, Jellyseerr supports Sonarr and Radarr. More to come!
 - Plex library scan, to keep track of the titles which are already available.
