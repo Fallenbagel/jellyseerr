@@ -36,7 +36,7 @@ const messages = defineMessages({
   syncJellyfin: 'Sync Libraries',
   manualscanJellyfin: 'Manual Library Scan',
   manualscanDescriptionJellyfin:
-    "Normally, this will only be run once every 24 hours. {mediaServerName} will check your {mediaServerName} server's recently added more aggressively. If this is your first time configuring {mediaServerName}, a one-time full manual library scan is recommended!",
+    "Normally, this will only be run once every 24 hours. Jellyseerr will check your {mediaServerName} server's recently added more aggressively. If this is your first time configuring {mediaServerName}, a one-time full manual library scan is recommended!",
   notrunning: 'Not Running',
   currentlibrary: 'Current Library: {name}',
   librariesRemaining: 'Libraries Remaining: {count}',
