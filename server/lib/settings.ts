@@ -345,7 +345,7 @@ class Settings {
               ignoreTls: false,
               requireTls: false,
               allowSelfSigned: false,
-              senderName: 'Overseerr',
+              senderName: 'Jellyseerr',
             },
           },
           discord: {
