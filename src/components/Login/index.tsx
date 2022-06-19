@@ -15,12 +15,13 @@ import PlexLoginButton from '../PlexLoginButton';
 import Transition from '../Transition';
 import JellyfinLogin from './JellyfinLogin';
 import LocalLogin from './LocalLogin';
+import getConfig from 'next/config';
 
 const messages = defineMessages({
   signin: 'Sign In',
   signinheader: 'Sign in to continue',
   signinwithplex: 'Use your Plex account',
-  signinwithjellyfin: 'Use your Jellyfin account',
+  signinwithjellyfin: 'Use your {mediaServerName} account',
   signinwithoverseerr: 'Use your {applicationTitle} account',
 });
 
@@ -32,6 +33,7 @@ const Login: React.FC = () => {
   const { user, revalidate } = useUser();
   const router = useRouter();
   const settings = useSettings();
+  const { publicRuntimeConfig } = getConfig();
 
   // Effect that is triggered when the `authToken` comes back from the Plex OAuth
   // We take the token and attempt to sign in. If we get a success message, we will
@@ -133,7 +135,12 @@ const Login: React.FC = () => {
                     {settings.currentSettings.mediaServerType ==
                     MediaServerType.PLEX
                       ? intl.formatMessage(messages.signinwithplex)
-                      : intl.formatMessage(messages.signinwithjellyfin)}
+                      : intl.formatMessage(messages.signinwithjellyfin, {
+                          mediaServerName:
+                            publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                              ? 'Emby'
+                              : 'Jellyfin',
+                        })}
                   </button>
                   <AccordionContent isOpen={openIndexes.includes(0)}>
                     <div className="px-10 py-8">
