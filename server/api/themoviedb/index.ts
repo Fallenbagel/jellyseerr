@@ -129,7 +129,13 @@ class TheMovieDb extends ExternalAPI {
   }: SingleSearchOptions): Promise<TmdbSearchMovieResponse> => {
     try {
       const data = await this.get<TmdbSearchMovieResponse>('/search/movie', {
-        params: { query, page, include_adult: includeAdult, language, year },
+        params: {
+          query,
+          page,
+          include_adult: includeAdult,
+          language,
+          primary_release_year: year,
+        },
       });
 
       return data;

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getRepository } from 'typeorm';
-import { IssueStatus } from '../constants/issue';
+import { IssueStatus, IssueType } from '../constants/issue';
 import Issue from '../entity/Issue';
 import IssueComment from '../entity/IssueComment';
 import Media from '../entity/Media';
@@ -145,6 +145,68 @@ issueRoutes.post<
     return res.status(200).json(newIssue);
   }
 );
+
+issueRoutes.get('/count', async (req, res, next) => {
+  const issueRepository = getRepository(Issue);
+
+  try {
+    const query = issueRepository.createQueryBuilder('issue');
+
+    const totalCount = await query.getCount();
+
+    const videoCount = await query
+      .where('issue.issueType = :issueType', {
+        issueType: IssueType.VIDEO,
+      })
+      .getCount();
+
+    const audioCount = await query
+      .where('issue.issueType = :issueType', {
+        issueType: IssueType.AUDIO,
+      })
+      .getCount();
+
+    const subtitlesCount = await query
+      .where('issue.issueType = :issueType', {
+        issueType: IssueType.SUBTITLES,
+      })
+      .getCount();
+
+    const othersCount = await query
+      .where('issue.issueType = :issueType', {
+        issueType: IssueType.OTHER,
+      })
+      .getCount();
+
+    const openCount = await query
+      .where('issue.status = :issueStatus', {
+        issueStatus: IssueStatus.OPEN,
+      })
+      .getCount();
+
+    const closedCount = await query
+      .where('issue.status = :issueStatus', {
+        issueStatus: IssueStatus.RESOLVED,
+      })
+      .getCount();
+
+    return res.status(200).json({
+      total: totalCount,
+      video: videoCount,
+      audio: audioCount,
+      subtitles: subtitlesCount,
+      others: othersCount,
+      open: openCount,
+      closed: closedCount,
+    });
+  } catch (e) {
+    logger.debug('Something went wrong retrieving issue counts.', {
+      label: 'API',
+      errorMessage: e.message,
+    });
+    next({ status: 500, message: 'Unable to retrieve issue counts.' });
+  }
+});
 
 issueRoutes.get<{ issueId: string }>(
   '/:issueId',

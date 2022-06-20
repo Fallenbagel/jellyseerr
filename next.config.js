@@ -2,6 +2,10 @@ module.exports = {
   env: {
     commitTag: process.env.COMMIT_TAG || 'local',
   },
+  publicRuntimeConfig: {
+    // Will be available on both server and client
+    JELLYFIN_TYPE: process.env.JELLYFIN_TYPE,
+  },
   images: {
     domains: ['image.tmdb.org'],
   },

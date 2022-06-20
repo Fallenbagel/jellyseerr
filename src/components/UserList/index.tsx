@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/solid';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
+import getConfig from 'next/config';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -40,7 +41,7 @@ import PlexImportModal from './PlexImportModal';
 const messages = defineMessages({
   users: 'Users',
   userlist: 'User List',
-  importfromplex: 'Import {mediaServerName} Users',
+  importfrommediaserver: 'Import {mediaServerName} Users',
   user: 'User',
   totalrequests: 'Requests',
   accounttype: 'Type',
@@ -87,6 +88,7 @@ const UserList: React.FC = () => {
   const intl = useIntl();
   const router = useRouter();
   const settings = useSettings();
+  const { publicRuntimeConfig } = getConfig();
   const { addToast } = useToasts();
   const { user: currentUser, hasPermission: currentHasPermission } = useUser();
   const [currentSort, setCurrentSort] = useState<Sort>('displayname');
@@ -480,7 +482,9 @@ const UserList: React.FC = () => {
               setShowImportModal(false);
               revalidate();
             }}
-          />
+          >
+            {data.pageInfo.results}
+          </JellyfinImportModal>
         )}
       </Transition>
 
@@ -503,13 +507,18 @@ const UserList: React.FC = () => {
             >
               <InboxInIcon />
               <span>
-                {intl.formatMessage(messages.importfromplex, {
-                  mediaServerName:
-                    settings.currentSettings.mediaServerType ===
+                {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                  ? intl.formatMessage(messages.importfrommediaserver, {
+                      mediaServerName: 'Emby',
+                    })
+                  : settings.currentSettings.mediaServerType ===
                     MediaServerType.PLEX
-                      ? 'Plex'
-                      : 'Jellyfin',
-                })}
+                  ? intl.formatMessage(messages.importfrommediaserver, {
+                      mediaServerName: 'Plex',
+                    })
+                  : intl.formatMessage(messages.importfrommediaserver, {
+                      mediaServerName: 'Jellyfin',
+                    })}
               </span>
             </Button>
           </div>
@@ -596,7 +605,7 @@ const UserList: React.FC = () => {
                   <Link href={`/users/${user.id}`}>
                     <a className="h-10 w-10 flex-shrink-0">
                       <img
-                        className="h-10 w-10 rounded-full"
+                        className="h-10 w-10 rounded-full object-cover"
                         src={user.avatar}
                         alt=""
                       />
@@ -636,17 +645,23 @@ const UserList: React.FC = () => {
                   <Badge badgeType="warning">
                     {intl.formatMessage(messages.plexuser)}
                   </Badge>
-                ) : (
+                ) : user.userType === UserType.LOCAL ? (
                   <Badge badgeType="default">
+                    {intl.formatMessage(messages.localuser)}
+                  </Badge>
+                ) : publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? (
+                  <Badge badgeType="success">
                     {intl.formatMessage(messages.mediaServerUser, {
-                      mediaServerName:
-                        settings.currentSettings.mediaServerType ===
-                        MediaServerType.PLEX
-                          ? 'Plex'
-                          : 'Jellyfin',
+                      mediaServerName: 'Emby',
                     })}
                   </Badge>
-                )}
+                ) : user.userType === UserType.JELLYFIN ? (
+                  <Badge badgeType="default">
+                    {intl.formatMessage(messages.mediaServerUser, {
+                      mediaServerName: 'Jellyfin',
+                    })}
+                  </Badge>
+                ) : null}
               </Table.TD>
               <Table.TD>
                 {user.id === 1

@@ -111,6 +111,12 @@ const networks: Network[] = [
     url: '/discover/tv/network/16',
   },
   {
+    name: 'Paramount+',
+    image:
+      'https://image.tmdb.org/t/p/w780_filter(duotone,ffffff,bababa)/fi83B1oztoS47xxcemFdPMhIzK.png',
+    url: '/discover/tv/network/4330',
+  },
+  {
     name: 'BBC One',
     image:
       'https://image.tmdb.org/t/p/w780_filter(duotone,ffffff,bababa)/mVn7xESaTNmjBUyUtGNvDQd3CT1.png',

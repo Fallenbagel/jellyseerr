@@ -14,6 +14,7 @@ import LoadingSpinner from '../../Common/LoadingSpinner';
 import PageTitle from '../../Common/PageTitle';
 import PermissionEdit from '../../PermissionEdit';
 import QuotaSelector from '../../QuotaSelector';
+import getConfig from 'next/config';
 
 const messages = defineMessages({
   users: 'Users',
@@ -42,6 +43,7 @@ const SettingsUsers: React.FC = () => {
     mutate: revalidate,
   } = useSWR<MainSettings>('/api/v1/settings/main');
   const settings = useSettings();
+  const { publicRuntimeConfig } = getConfig();
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -131,16 +133,20 @@ const SettingsUsers: React.FC = () => {
                   <label htmlFor="newPlexLogin" className="checkbox-label">
                     {intl.formatMessage(messages.newPlexLogin, {
                       mediaServerName:
-                        settings.currentSettings.mediaServerType ===
-                        MediaServerType.PLEX
+                        publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                          ? 'Emby'
+                          : settings.currentSettings.mediaServerType ===
+                            MediaServerType.PLEX
                           ? 'Plex'
                           : 'Jellyfin',
                     })}
                     <span className="label-tip">
                       {intl.formatMessage(messages.newPlexLoginTip, {
                         mediaServerName:
-                          settings.currentSettings.mediaServerType ===
-                          MediaServerType.PLEX
+                          publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                            ? 'Emby'
+                            : settings.currentSettings.mediaServerType ===
+                              MediaServerType.PLEX
                             ? 'Plex'
                             : 'Jellyfin',
                       })}

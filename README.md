@@ -32,6 +32,18 @@ With more features on the way! Check out our [issue tracker](https://github.com/
 Check out our dockerhub for instructions on how to install and run Jellyseerr:
 https://hub.docker.com/r/fallenbagel/jellyseerr
 
+### Launching Jellyseerr manually:
+
+```bash
+yarn install
+yarn run build
+yarn start
+```
+
+### Packages:
+
+Archlinux: [AUR](https://aur.archlinux.org/packages/jellyseerr)
+
 ## Preview
 
 <img src="./public/preview.jpg">

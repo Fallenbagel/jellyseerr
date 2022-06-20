@@ -10,9 +10,11 @@ import {
 } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
+import { MediaServerType } from '../../../../server/constants/server';
 import { CacheItem } from '../../../../server/interfaces/api/settingsInterfaces';
 import { JobId } from '../../../../server/lib/settings';
 import Spinner from '../../../assets/spinner.svg';
+import useSettings from '../../../hooks/useSettings';
 import globalMessages from '../../../i18n/globalMessages';
 import { formatBytes } from '../../../utils/numberHelpers';
 import Badge from '../../Common/Badge';
@@ -102,6 +104,7 @@ const SettingsJobs: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [jobScheduleMinutes, setJobScheduleMinutes] = useState(5);
   const [jobScheduleHours, setJobScheduleHours] = useState(1);
+  const settings = useSettings();
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -369,22 +372,33 @@ const SettingsJobs: React.FC = () => {
             </tr>
           </thead>
           <Table.TBody>
-            {cacheData?.map((cache) => (
-              <tr key={`cache-list-${cache.id}`}>
-                <Table.TD>{cache.name}</Table.TD>
-                <Table.TD>{intl.formatNumber(cache.stats.hits)}</Table.TD>
-                <Table.TD>{intl.formatNumber(cache.stats.misses)}</Table.TD>
-                <Table.TD>{intl.formatNumber(cache.stats.keys)}</Table.TD>
-                <Table.TD>{formatBytes(cache.stats.ksize)}</Table.TD>
-                <Table.TD>{formatBytes(cache.stats.vsize)}</Table.TD>
-                <Table.TD alignText="right">
-                  <Button buttonType="danger" onClick={() => flushCache(cache)}>
-                    <TrashIcon />
-                    <span>{intl.formatMessage(messages.flushcache)}</span>
-                  </Button>
-                </Table.TD>
-              </tr>
-            ))}
+            {cacheData
+              ?.filter(
+                (cache) =>
+                  !(
+                    settings.currentSettings.mediaServerType !==
+                      MediaServerType.PLEX && cache.id === 'plexguid'
+                  )
+              )
+              .map((cache) => (
+                <tr key={`cache-list-${cache.id}`}>
+                  <Table.TD>{cache.name}</Table.TD>
+                  <Table.TD>{intl.formatNumber(cache.stats.hits)}</Table.TD>
+                  <Table.TD>{intl.formatNumber(cache.stats.misses)}</Table.TD>
+                  <Table.TD>{intl.formatNumber(cache.stats.keys)}</Table.TD>
+                  <Table.TD>{formatBytes(cache.stats.ksize)}</Table.TD>
+                  <Table.TD>{formatBytes(cache.stats.vsize)}</Table.TD>
+                  <Table.TD alignText="right">
+                    <Button
+                      buttonType="danger"
+                      onClick={() => flushCache(cache)}
+                    >
+                      <TrashIcon />
+                      <span>{intl.formatMessage(messages.flushcache)}</span>
+                    </Button>
+                  </Table.TD>
+                </tr>
+              ))}
           </Table.TBody>
         </Table>
       </div>

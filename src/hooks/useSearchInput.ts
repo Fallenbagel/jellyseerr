@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import type { UrlObject } from 'url';
-import { useEffect, useState, Dispatch, SetStateAction } from 'react';
-import useDebouncedState from './useDebouncedState';
 import { useRouter } from 'next/router';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import type { UrlObject } from 'url';
 import type { Nullable } from '../utils/typeHelpers';
+import useDebouncedState from './useDebouncedState';
 
 type Url = string | UrlObject;
 
@@ -48,7 +48,7 @@ const useSearchInput = (): SearchObject => {
    * in a new route. If we are, then we only replace the history.
    */
   useEffect(() => {
-    if (debouncedValue !== '') {
+    if (debouncedValue !== '' && searchOpen) {
       if (router.pathname.startsWith('/search')) {
         router.replace({
           pathname: router.pathname,

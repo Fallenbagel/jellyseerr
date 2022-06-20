@@ -5815,6 +5815,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Issue'
+
+  /issue/count:
+    get:
+      summary: Gets issue counts
+      description: |
+        Returns the number of open and closed issues, as well as the number of issues of each type.
+      tags:
+        - issue
+      responses:
+        '200':
+          description: Issue counts returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: number
+                  video:
+                    type: number
+                  audio:
+                    type: number
+                  subtitles:
+                    type: number
+                  others:
+                    type: number
+                  open:
+                    type: number
+                  closed:
+                    type: number
   /issue/{issueId}:
     get:
       summary: Get issue

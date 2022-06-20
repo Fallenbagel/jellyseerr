@@ -12,30 +12,31 @@ import Badge from '../Common/Badge';
 import Button from '../Common/Button';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import LibraryItem from './LibraryItem';
+import getConfig from 'next/config';
 
 const messages = defineMessages({
-  jellyfinsettings: 'Jellyfin Settings',
+  jellyfinsettings: '{mediaServerName} Settings',
   jellyfinsettingsDescription:
-    'Configure the settings for your Jellyfin server. Jellyfin scans your Jellyfin libraries to see what content is available.',
+    'Configure the settings for your {mediaServerName} server. {mediaServerName} scans your {mediaServerName} libraries to see what content is available.',
   timeout: 'Timeout',
   save: 'Save Changes',
   saving: 'Saving…',
-  jellyfinlibraries: 'Jellyfin Libraries',
+  jellyfinlibraries: '{mediaServerName} Libraries',
   jellyfinlibrariesDescription:
-    'The libraries Jellyfin scans for titles. Click the button below if no libraries are listed.',
+    'The libraries {mediaServerName} scans for titles. Click the button below if no libraries are listed.',
   jellyfinSettingsFailure:
-    'Something went wrong while saving Jellyfin settings.',
-  jellyfinSettingsSuccess: 'Jellyfin settings saved successfully!',
-  jellyfinSettings: 'Jellyfin Settings',
+    'Something went wrong while saving {mediaServerName} settings.',
+  jellyfinSettingsSuccess: '{mediaServerName} settings saved successfully!',
+  jellyfinSettings: '{mediaServerName} Settings',
   jellyfinSettingsDescription:
-    'Optionally configure an external player endpoint for your jellyfin server that is different to the internal URL used during setup',
+    'Optionally configure an external player endpoint for your {mediaServerName} server that is different to the internal URL used during setup',
   externalUrl: 'External URL',
   validationUrl: 'You must provide a valid URL',
   syncing: 'Syncing',
   syncJellyfin: 'Sync Libraries',
   manualscanJellyfin: 'Manual Library Scan',
   manualscanDescriptionJellyfin:
-    "Normally, this will only be run once every 24 hours. Jellyfin will check your Jellyfin server's recently added more aggressively. If this is your first time configuring Jellyfin, a one-time full manual library scan is recommended!",
+    "Normally, this will only be run once every 24 hours. Jellyseerr will check your {mediaServerName} server's recently added more aggressively. If this is your first time configuring Jellyseerr, a one-time full manual library scan is recommended!",
   notrunning: 'Not Running',
   currentlibrary: 'Current Library: {name}',
   librariesRemaining: 'Libraries Remaining: {count}',
@@ -80,6 +81,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
   );
   const intl = useIntl();
   const { addToast } = useToasts();
+  const { publicRuntimeConfig } = getConfig();
 
   const JellyfinSettingsSchema = Yup.object().shape({
     jellyfinExternalUrl: Yup.string().matches(
@@ -161,10 +163,22 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
     <>
       <div className="mb-6">
         <h3 className="heading">
-          <FormattedMessage {...messages.jellyfinlibraries} />
+          {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+            ? intl.formatMessage(messages.jellyfinlibraries, {
+                mediaServerName: 'Emby',
+              })
+            : intl.formatMessage(messages.jellyfinlibraries, {
+                mediaServerName: 'Jellyfin',
+              })}
         </h3>
         <p className="description">
-          <FormattedMessage {...messages.jellyfinlibrariesDescription} />
+          {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+            ? intl.formatMessage(messages.jellyfinlibrariesDescription, {
+                mediaServerName: 'Emby',
+              })
+            : intl.formatMessage(messages.jellyfinlibrariesDescription, {
+                mediaServerName: 'Jellyfin',
+              })}
         </p>
       </div>
       <div className="section">
@@ -201,7 +215,13 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
           <FormattedMessage {...messages.manualscanJellyfin} />
         </h3>
         <p className="description">
-          <FormattedMessage {...messages.manualscanDescriptionJellyfin} />
+          {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+            ? intl.formatMessage(messages.manualscanDescriptionJellyfin, {
+                mediaServerName: 'Emby',
+              })
+            : intl.formatMessage(messages.manualscanDescriptionJellyfin, {
+                mediaServerName: 'Jellyfin',
+              })}
         </p>
       </div>
       <div className="section">
@@ -305,10 +325,22 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
         <>
           <div className="mt-10 mb-6">
             <h3 className="heading">
-              {intl.formatMessage(messages.jellyfinSettings)}
+              {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                ? intl.formatMessage(messages.jellyfinSettings, {
+                    mediaServerName: 'Emby',
+                  })
+                : intl.formatMessage(messages.jellyfinSettings, {
+                    mediaServerName: 'Jellyfin',
+                  })}
             </h3>
             <p className="description">
-              {intl.formatMessage(messages.jellyfinSettingsDescription)}
+              {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                ? intl.formatMessage(messages.jellyfinSettingsDescription, {
+                    mediaServerName: 'Emby',
+                  })
+                : intl.formatMessage(messages.jellyfinSettingsDescription, {
+                    mediaServerName: 'Jellyfin',
+                  })}
             </p>
           </div>
           <Formik
@@ -322,15 +354,31 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                   externalHostname: values.jellyfinExternalUrl,
                 } as JellyfinSettings);
 
-                addToast(intl.formatMessage(messages.jellyfinSettingsSuccess), {
-                  autoDismiss: true,
-                  appearance: 'success',
-                });
+                addToast(
+                  intl.formatMessage(messages.jellyfinSettingsSuccess, {
+                    mediaServerName:
+                      publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                        ? 'Emby'
+                        : 'Jellyfin',
+                  }),
+                  {
+                    autoDismiss: true,
+                    appearance: 'success',
+                  }
+                );
               } catch (e) {
-                addToast(intl.formatMessage(messages.jellyfinSettingsFailure), {
-                  autoDismiss: true,
-                  appearance: 'error',
-                });
+                addToast(
+                  intl.formatMessage(messages.jellyfinSettingsFailure, {
+                    mediaServerName:
+                      publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                        ? 'Emby'
+                        : 'Jellyfin',
+                  }),
+                  {
+                    autoDismiss: true,
+                    appearance: 'error',
+                  }
+                );
               } finally {
                 revalidate();
               }

@@ -51,6 +51,7 @@ userSettingsRoutes.get<{ id: string }, UserSettingsGeneralResponse>(
 
       return res.status(200).json({
         username: user.username,
+        email: user.email,
         discordId: user.settings?.discordId,
         locale: user.settings?.locale,
         region: user.settings?.region,
@@ -120,6 +121,7 @@ userSettingsRoutes.post<
       user.settings.locale = req.body.locale;
       user.settings.region = req.body.region;
       user.settings.originalLanguage = req.body.originalLanguage;
+      user.email = req.body.email ?? user.email;
     }
 
     await userRepository.save(user);
@@ -130,6 +132,7 @@ userSettingsRoutes.post<
       locale: user.settings.locale,
       region: user.settings.region,
       originalLanguage: user.settings.originalLanguage,
+      email: user.email,
     });
   } catch (e) {
     next({ status: 500, message: e.message });

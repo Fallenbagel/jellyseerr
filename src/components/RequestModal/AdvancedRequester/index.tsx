@@ -534,7 +534,7 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
                           <img
                             src={selectedUser.avatar}
                             alt=""
-                            className="h-6 w-6 flex-shrink-0 rounded-full"
+                            className="h-6 w-6 flex-shrink-0 rounded-full object-cover"
                           />
                           <span className="ml-3 block">
                             {selectedUser.displayName}
@@ -584,7 +584,7 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
                                   <img
                                     src={user.avatar}
                                     alt=""
-                                    className="h-6 w-6 flex-shrink-0 rounded-full"
+                                    className="h-6 w-6 flex-shrink-0 rounded-full object-cover"
                                   />
                                   <span className="ml-3 block flex-shrink-0">
                                     {user.displayName}

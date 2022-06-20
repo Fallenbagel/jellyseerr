@@ -35,6 +35,7 @@ import IssueComment from './IssueComment';
 import IssueDescription from './IssueDescription';
 import { MediaServerType } from '../../../server/constants/server';
 import useSettings from '../../hooks/useSettings';
+import getConfig from 'next/config';
 
 const messages = defineMessages({
   openedby: '#{issueId} opened {relativeTime} by {username}',
@@ -99,6 +100,7 @@ const IssueDetails: React.FC = () => {
     (opt) => opt.issueType === issueData?.issueType
   );
   const settings = useSettings();
+  const { publicRuntimeConfig } = getConfig();
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -267,7 +269,7 @@ const IssueDetails: React.FC = () => {
                 >
                   <a className="group ml-1 inline-flex h-full items-center xl:ml-1.5">
                     <img
-                      className="mr-0.5 h-5 w-5 scale-100 transform-gpu rounded-full transition duration-300 group-hover:scale-105 xl:mr-1 xl:h-6 xl:w-6"
+                      className="mr-0.5 h-5 w-5 scale-100 transform-gpu rounded-full object-cover transition duration-300 group-hover:scale-105 xl:mr-1 xl:h-6 xl:w-6"
                       src={issueData.createdBy.avatar}
                       alt=""
                     />
@@ -366,13 +368,18 @@ const IssueDetails: React.FC = () => {
                 >
                   <PlayIcon />
                   <span>
-                    {intl.formatMessage(messages.playonplex, {
-                      mediaServerName:
-                        settings.currentSettings.mediaServerType ===
+                    {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                      ? intl.formatMessage(messages.playonplex, {
+                          mediaServerName: 'Emby',
+                        })
+                      : settings.currentSettings.mediaServerType ===
                         MediaServerType.PLEX
-                          ? 'Plex'
-                          : 'Jellyfin',
-                    })}
+                      ? intl.formatMessage(messages.playonplex, {
+                          mediaServerName: 'Plex',
+                        })
+                      : intl.formatMessage(messages.playonplex, {
+                          mediaServerName: 'Jellyfin',
+                        })}
                   </span>
                 </Button>
               )}
@@ -407,13 +414,18 @@ const IssueDetails: React.FC = () => {
                 >
                   <PlayIcon />
                   <span>
-                    {intl.formatMessage(messages.play4konplex, {
-                      mediaServerName:
-                        settings.currentSettings.mediaServerType ===
+                    {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                      ? intl.formatMessage(messages.play4konplex, {
+                          mediaServerName: 'Emby',
+                        })
+                      : settings.currentSettings.mediaServerType ===
                         MediaServerType.PLEX
-                          ? 'Plex'
-                          : 'Jellyfin',
-                    })}
+                      ? intl.formatMessage(messages.play4konplex, {
+                          mediaServerName: 'Plex',
+                        })
+                      : intl.formatMessage(messages.play4konplex, {
+                          mediaServerName: 'Jellyfin',
+                        })}
                   </span>
                 </Button>
               )}
@@ -618,13 +630,18 @@ const IssueDetails: React.FC = () => {
               >
                 <PlayIcon />
                 <span>
-                  {intl.formatMessage(messages.playonplex, {
-                    mediaServerName:
-                      settings.currentSettings.mediaServerType ===
+                  {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                    ? intl.formatMessage(messages.playonplex, {
+                        mediaServerName: 'Emby',
+                      })
+                    : settings.currentSettings.mediaServerType ===
                       MediaServerType.PLEX
-                        ? 'Plex'
-                        : 'Jellyfin',
-                  })}
+                    ? intl.formatMessage(messages.playonplex, {
+                        mediaServerName: 'Plex',
+                      })
+                    : intl.formatMessage(messages.playonplex, {
+                        mediaServerName: 'Jellyfin',
+                      })}
                 </span>
               </Button>
             )}
@@ -659,13 +676,18 @@ const IssueDetails: React.FC = () => {
               >
                 <PlayIcon />
                 <span>
-                  {intl.formatMessage(messages.play4konplex, {
-                    mediaServerName:
-                      settings.currentSettings.mediaServerType ===
+                  {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                    ? intl.formatMessage(messages.play4konplex, {
+                        mediaServerName: 'Emby',
+                      })
+                    : settings.currentSettings.mediaServerType ===
                       MediaServerType.PLEX
-                        ? 'Plex'
-                        : 'Jellyfin',
-                  })}
+                    ? intl.formatMessage(messages.play4konplex, {
+                        mediaServerName: 'Plex',
+                      })
+                    : intl.formatMessage(messages.play4konplex, {
+                        mediaServerName: 'Jellyfin',
+                      })}
                 </span>
               </Button>
             )}

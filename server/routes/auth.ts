@@ -9,6 +9,7 @@ import { Permission } from '../lib/permissions';
 import { getSettings } from '../lib/settings';
 import logger from '../logger';
 import { isAuthenticated } from '../middleware/auth';
+import * as EmailValidator from 'email-validator';
 
 const authRoutes = Router();
 
@@ -23,6 +24,16 @@ authRoutes.get('/me', isAuthenticated(), async (req, res) => {
   const user = await userRepository.findOneOrFail({
     where: { id: req.user.id },
   });
+
+  // check if email is required in settings and if user has an valid email
+  const settings = await getSettings();
+  if (
+    settings.notifications.agents.email.options.userEmailRequired &&
+    !EmailValidator.validate(user.email)
+  ) {
+    user.warnings.push('userEmailRequired');
+    logger.warn(`User ${user.username} has no valid email address`);
+  }
 
   return res.status(200).json(user);
 });
@@ -69,6 +80,9 @@ authRoutes.post('/plex', async (req, res, next) => {
         avatar: account.thumb,
         userType: UserType.PLEX,
       });
+
+      settings.main.mediaServerType = MediaServerType.PLEX;
+      settings.save();
 
       await userRepository.save(user);
     } else {
@@ -196,10 +210,8 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
     settings.jellyfin.hostname !== ''
   ) {
     return res.status(500).json({ error: 'Jellyfin login is disabled' });
-  } else if (!body.username || !body.password) {
-    return res
-      .status(500)
-      .json({ error: 'You must provide an username and a password' });
+  } else if (!body.username) {
+    return res.status(500).json({ error: 'You must provide an username' });
   } else if (settings.jellyfin.hostname !== '' && body.hostname) {
     return res
       .status(500)
@@ -213,6 +225,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
       settings.jellyfin.hostname !== ''
         ? settings.jellyfin.hostname
         : body.hostname;
+    const { externalHostname } = getSettings().jellyfin;
 
     // Try to find deviceId that corresponds to jellyfin user, else generate a new one
     let user = await userRepository.findOne({
@@ -229,6 +242,10 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
     }
     // First we need to attempt to log the user in to jellyfin
     const jellyfinserver = new JellyfinAPI(hostname ?? '', undefined, deviceId);
+    const jellyfinHost =
+      externalHostname && externalHostname.length > 0
+        ? externalHostname
+        : hostname;
 
     const account = await jellyfinserver.login(body.username, body.password);
     // Next let's see if the user already exists
@@ -244,7 +261,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
 
       // Update the users avatar with their jellyfin profile pic (incase it changed)
       if (account.User.PrimaryImageTag) {
-        user.avatar = `${hostname}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`;
+        user.avatar = `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`;
       } else {
         user.avatar = '/os_logo_square.png';
       }
@@ -290,7 +307,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
           jellyfinAuthToken: account.AccessToken,
           permissions: Permission.ADMIN,
           avatar: account.User.PrimaryImageTag
-            ? `${hostname}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
+            ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
             : '/os_logo_square.png',
           userType: UserType.JELLYFIN,
         });
@@ -319,7 +336,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
           jellyfinAuthToken: account.AccessToken,
           permissions: settings.main.defaultPermissions,
           avatar: account.User.PrimaryImageTag
-            ? `${hostname}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
+            ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
             : '/os_logo_square.png',
           userType: UserType.JELLYFIN,
         });
@@ -327,7 +344,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         const passedExplicitPassword =
           body.password && body.password.length > 0;
         if (passedExplicitPassword) {
-          await user.setPassword(body.password);
+          await user.setPassword(body.password ?? '');
         }
         await userRepository.save(user);
       }

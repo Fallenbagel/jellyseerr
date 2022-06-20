@@ -7,7 +7,6 @@ import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
-import { MediaServerType } from '../../../../../server/constants/server';
 import { UserSettingsGeneralResponse } from '../../../../../server/interfaces/api/userSettingsInterfaces';
 import {
   availableLanguages,
@@ -25,11 +24,13 @@ import PageTitle from '../../../Common/PageTitle';
 import LanguageSelector from '../../../LanguageSelector';
 import QuotaSelector from '../../../QuotaSelector';
 import RegionSelector from '../../../RegionSelector';
+import getConfig from 'next/config';
 
 const messages = defineMessages({
   general: 'General',
   generalsettings: 'General Settings',
   displayName: 'Display Name',
+  email: 'Email',
   save: 'Save Changes',
   saving: 'Saving…',
   mediaServerUser: '{mediaServerName} User',
@@ -59,7 +60,7 @@ const messages = defineMessages({
 
 const UserGeneralSettings: React.FC = () => {
   const intl = useIntl();
-  const settings = useSettings();
+  const { publicRuntimeConfig } = getConfig();
   const { addToast } = useToasts();
   const { locale, setLocale } = useLocale();
   const [movieQuotaEnabled, setMovieQuotaEnabled] = useState(false);
@@ -120,8 +121,9 @@ const UserGeneralSettings: React.FC = () => {
       </div>
       <Formik
         initialValues={{
-          displayName: data?.username,
-          discordId: data?.discordId,
+          displayName: data?.username ?? '',
+          email: data?.email ?? '',
+          discordId: data?.discordId ?? '',
           locale: data?.locale,
           region: data?.region,
           originalLanguage: data?.originalLanguage,
@@ -136,6 +138,7 @@ const UserGeneralSettings: React.FC = () => {
           try {
             await axios.post(`/api/v1/user/${user?.id}/settings/main`, {
               username: values.displayName,
+              email: values.email,
               discordId: values.discordId,
               locale: values.locale,
               region: values.region,
@@ -189,19 +192,25 @@ const UserGeneralSettings: React.FC = () => {
                   <div className="flex max-w-lg items-center">
                     {user?.userType === UserType.PLEX ? (
                       <Badge badgeType="warning">
+                        {intl.formatMessage(messages.plexuser)}
+                      </Badge>
+                    ) : user?.userType === UserType.LOCAL ? (
+                      <Badge badgeType="default">
                         {intl.formatMessage(messages.localuser)}
                       </Badge>
-                    ) : (
-                      <Badge badgeType="default">
+                    ) : publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? (
+                      <Badge badgeType="success">
                         {intl.formatMessage(messages.mediaServerUser, {
-                          mediaServerName:
-                            settings.currentSettings.mediaServerType ===
-                            MediaServerType.PLEX
-                              ? 'Plex'
-                              : 'Jellyfin',
+                          mediaServerName: 'Emby',
                         })}
                       </Badge>
-                    )}
+                    ) : user?.userType === UserType.JELLYFIN ? (
+                      <Badge badgeType="default">
+                        {intl.formatMessage(messages.mediaServerUser, {
+                          mediaServerName: 'Jellyfin',
+                        })}
+                      </Badge>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -236,6 +245,32 @@ const UserGeneralSettings: React.FC = () => {
                   </div>
                   {errors.displayName && touched.displayName && (
                     <div className="error">{errors.displayName}</div>
+                  )}
+                </div>
+              </div>
+              <div className="form-row">
+                <label htmlFor="email" className="text-label">
+                  {intl.formatMessage(messages.email)}
+                  {user?.warnings.find((w) => w === 'userEmailRequired') && (
+                    <span className="label-required">*</span>
+                  )}
+                </label>
+                <div className="form-input-area">
+                  <div className="form-input-field">
+                    <Field
+                      id="email"
+                      name="email"
+                      type="text"
+                      placeholder="example@domain.com"
+                      className={
+                        user?.warnings.find((w) => w === 'userEmailRequired')
+                          ? 'border-2 border-red-400 focus:border-blue-600'
+                          : ''
+                      }
+                    />
+                  </div>
+                  {errors.email && touched.email && (
+                    <div className="error">{errors.email}</div>
                   )}
                 </div>
               </div>

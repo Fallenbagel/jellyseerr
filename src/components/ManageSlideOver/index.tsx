@@ -210,7 +210,7 @@ const ManageSlideOver: React.FC<
         {hasPermission(Permission.ADMIN) &&
           (data.mediaInfo?.serviceUrl ||
             data.mediaInfo?.tautulliUrl ||
-            watchData?.data?.playCount) && (
+            !!watchData?.data?.playCount) && (
             <div>
               <h3 className="mb-2 text-xl font-bold">
                 {intl.formatMessage(messages.manageModalMedia)}
@@ -272,7 +272,7 @@ const ManageSlideOver: React.FC<
                                   <img
                                     src={user.avatar}
                                     alt={user.displayName}
-                                    className="h-8 w-8 scale-100 transform-gpu rounded-full ring-1 ring-gray-500 transition duration-300 hover:scale-105"
+                                    className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
                                   />
                                 </a>
                               </Link>
@@ -325,7 +325,7 @@ const ManageSlideOver: React.FC<
         {hasPermission(Permission.ADMIN) &&
           (data.mediaInfo?.serviceUrl4k ||
             data.mediaInfo?.tautulliUrl4k ||
-            watchData?.data4k?.playCount) && (
+            !!watchData?.data4k?.playCount) && (
             <div>
               <h3 className="mb-2 text-xl font-bold">
                 {intl.formatMessage(messages.manageModalMedia4k)}
@@ -387,7 +387,7 @@ const ManageSlideOver: React.FC<
                                   <img
                                     src={user.avatar}
                                     alt={user.displayName}
-                                    className="h-8 w-8 scale-100 transform-gpu rounded-full ring-1 ring-gray-500 transition duration-300 hover:scale-105"
+                                    className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
                                   />
                                 </a>
                               </Link>
