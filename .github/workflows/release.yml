@@ -27,6 +27,8 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Install dependencies
+      - name: Install Yarn
+        run: npm install -g yarn
         run: yarn
       - name: Release
         env:
