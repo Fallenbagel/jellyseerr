@@ -1,4 +1,4 @@
-# [1.2.0](https://github.com/fallenbagel/jellyseerr/compare/v1.1.0...v1.2.0) (2022-06-20)
+# [1.1.1](https://github.com/fallenbagel/jellyseerr/compare/v1.1.0...v1.1.1) (2022-06-20)
 
 
 ### Bug Fixes
