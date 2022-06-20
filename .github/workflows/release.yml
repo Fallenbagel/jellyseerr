@@ -5,7 +5,7 @@ on: workflow_dispatch
 jobs:
   semantic-release:
     name: Tag and release latest version
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
     env:
       HUSKY: 0
     steps:
@@ -39,7 +39,7 @@ jobs:
     name: Send Discord Notification
     needs: semantic-release
     if: always()
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
     steps:
       - name: Get Build Job Status
         uses: technote-space/workflow-conclusion-action@v2
