@@ -1,3 +1,57 @@
+# [1.2.0](https://github.com/fallenbagel/jellyseerr/compare/v1.1.0...v1.2.0) (2022-06-20)
+
+
+### Bug Fixes
+
+* conditional media server name for 4k url to add emby to tvdetails ([ddd773c](https://github.com/fallenbagel/jellyseerr/commit/ddd773c03ff61654490644dec21f406d03374b3d))
+* don't show 0 playcount in slideover ([dec4062](https://github.com/fallenbagel/jellyseerr/commit/dec4062cdcecbe297f72364ede6a000b863117f4))
+* fix mediaServerType not set for Plex which leads to Plex users seeing Jellyfin settings ([94ade93](https://github.com/fallenbagel/jellyseerr/commit/94ade93e16f02b372dafd2765bea475117431975))
+* fixes jellyfin forgot password and adds emby support to the forgot password link ([0259975](https://github.com/fallenbagel/jellyseerr/commit/02599754026e6a66662f753bb6b6117dfabb5f9a)), closes [#99](https://github.com/fallenbagel/jellyseerr/issues/99)
+* hide plex guid cache settings from ui when running in jellyfin/emby mode ([7450138](https://github.com/fallenbagel/jellyseerr/commit/7450138ac12640797952c1a2d5e1e111d17a11e1))
+* **import all:** fis for import all ([29478fc](https://github.com/fallenbagel/jellyseerr/commit/29478fc19534589db37499f1cdcc21ea4d389a74))
+* **jellyfin:** ignore additional items with virtual location type ([c811548](https://github.com/fallenbagel/jellyseerr/commit/c81154800fd7dc48fe890f4dd57ff33cbab973bb))
+* **jellyfinimportmodal:** fix for importing all jellyfin users ([a483ca9](https://github.com/fallenbagel/jellyseerr/commit/a483ca9837e12e2385d0e2407e52d6c64ae435e2))
+* **jellyfin:** sync errors ([d1dbd6e](https://github.com/fallenbagel/jellyseerr/commit/d1dbd6e3b9b1134e06150fc5eb21f729f64c0955))
+* manual browser refresh would redirect to home on search page ([9ded45f](https://github.com/fallenbagel/jellyseerr/commit/9ded45fef80b4a7e0be237fbe0301629f862fff9))
+* manual browser refresh would redirect to home on search page ([#2692](https://github.com/fallenbagel/jellyseerr/issues/2692)) ([b287839](https://github.com/fallenbagel/jellyseerr/commit/b2878390b486e338151f26a2354711147012f88e)), closes [#2683](https://github.com/fallenbagel/jellyseerr/issues/2683)
+* only show mediaserver settings for current active mediaserver ([739f5f9](https://github.com/fallenbagel/jellyseerr/commit/739f5f9c9ade8a1680bcb374f6c9e919a9e1426c))
+* **recommendations:** fixed recommendations page causing infinite network requests to tmdb api ([4f972be](https://github.com/fallenbagel/jellyseerr/commit/4f972be8584e48f544268aef9d1d05769ba2e38e))
+* **recommendations:** only load more titles if there can be more than 40 ([#2749](https://github.com/fallenbagel/jellyseerr/issues/2749)) ([14519ef](https://github.com/fallenbagel/jellyseerr/commit/14519ef5559038b0d9d037a2bdc5d98e63c9db6f)), closes [#2710](https://github.com/fallenbagel/jellyseerr/issues/2710)
+* remove internal Overseerr sponsor link, this is remaining on the main github page instead ([4b7bdd3](https://github.com/fallenbagel/jellyseerr/commit/4b7bdd3d7d608fe0bf52f494766fd7c40bede859))
+* **scan:** ignore virtual seasons ([6574e18](https://github.com/fallenbagel/jellyseerr/commit/6574e18516201bc11b5f0c422bf6b432c722e067)), closes [#119](https://github.com/fallenbagel/jellyseerr/issues/119)
+* **search:** use correct param to filter movies by year ([b07f703](https://github.com/fallenbagel/jellyseerr/commit/b07f7032ad89ccb359f3a6a4f4508de6b59ec393))
+* **search:** use correct param to filter movies by year ([#2727](https://github.com/fallenbagel/jellyseerr/issues/2727)) ([1054b4e](https://github.com/fallenbagel/jellyseerr/commit/1054b4e2d7262d841fa83cde624f1138ad7bd23a))
+* **setup&login:** fix a description error in the manual scan in setup and add emby to login page ([8810c20](https://github.com/fallenbagel/jellyseerr/commit/8810c20fc18a55c2f6768ddc40830a8494946072))
+* **ui:** don't show 0 playcount in slideover ([#2714](https://github.com/fallenbagel/jellyseerr/issues/2714)) ([29be659](https://github.com/fallenbagel/jellyseerr/commit/29be6595125017700eccb34d33a0e852f23c97ba))
+* **ui:** fix Avatar being broken when setup using internal ip ([01e81a7](https://github.com/fallenbagel/jellyseerr/commit/01e81a73a3ae3c4692d0b9b68dc27fe1a54b1a1d)), closes [#110](https://github.com/fallenbagel/jellyseerr/issues/110)
+* **ui:** fix translation errors for all locales in the import plex user button ([0fb5803](https://github.com/fallenbagel/jellyseerr/commit/0fb5803eb9a7589141a63e13df9a8aa8ea4cebf2))
+* **ui:** fix ui elements not reflecting the env variable ([722dda5](https://github.com/fallenbagel/jellyseerr/commit/722dda585631be365a2fb400b62dbc201f2b80de))
+* **ui:** fixed translation issue where it showed as import {mediaServerName} user ([819190c](https://github.com/fallenbagel/jellyseerr/commit/819190ce98720d8d66a07c98a4f12e3c8cdcac94))
+* **ui:** rectangular avatars getting stretched ([#2782](https://github.com/fallenbagel/jellyseerr/issues/2782)) ([db05172](https://github.com/fallenbagel/jellyseerr/commit/db05172d8b924a591ece4fae72d076eb59ee5f82))
+* **ui:** replaced {mediaServerName} in the plex variable in NL locale ([d417fca](https://github.com/fallenbagel/jellyseerr/commit/d417fcafa1e38c6d56ed8360ae451e8b8ff82a8d))
+
+
+### Features
+
+* add Paramount+ to network slider ([d22bc09](https://github.com/fallenbagel/jellyseerr/commit/d22bc09652e5d4e703fca6838d06e4908432fe06))
+* **api:** add issue counts endpoint ([af23a25](https://github.com/fallenbagel/jellyseerr/commit/af23a257d5795b5c3930cd3884a84a2e2eeeb1dc))
+* **api:** add issue counts endpoint ([#2713](https://github.com/fallenbagel/jellyseerr/issues/2713)) ([e4039d0](https://github.com/fallenbagel/jellyseerr/commit/e4039d09c0380d80f03c7a00b51a150f88c02cca))
+* conditional media server name ([2bfdf02](https://github.com/fallenbagel/jellyseerr/commit/2bfdf02c7942762bd9f5201459b1a9ad6003b9a6))
+* conditional media server name to add emby to tvdetails ([e75b71b](https://github.com/fallenbagel/jellyseerr/commit/e75b71b8168b4a661971b809c88f9910c4206545))
+* conditional media server name to add emby to tvdetails ([ff3e3ce](https://github.com/fallenbagel/jellyseerr/commit/ff3e3ce841f0676713242d0c8e3a977ef65530d8))
+* **discover:** add Paramount+ to network slider ([#2608](https://github.com/fallenbagel/jellyseerr/issues/2608)) ([1d00229](https://github.com/fallenbagel/jellyseerr/commit/1d00229a485bb2b376e9f63b52c70c7719f5f023))
+* email ([a8bc0c0](https://github.com/fallenbagel/jellyseerr/commit/a8bc0c068b305710a224fa56a3725cc7e0758eb7)), closes [#122](https://github.com/fallenbagel/jellyseerr/issues/122)
+* **email validation:** email requirement and validation + better importer ([d835336](https://github.com/fallenbagel/jellyseerr/commit/d835336d330abfef5b15bc9febcb748a8154c7df))
+* **manage slideover:** show more request override details ([#2772](https://github.com/fallenbagel/jellyseerr/issues/2772)) ([90095bb](https://github.com/fallenbagel/jellyseerr/commit/90095bb18548dfd663a78df1908c40dbf2f99faf))
+* **uesrprofile:** email requirement and validation ([543859e](https://github.com/fallenbagel/jellyseerr/commit/543859e6f3b3a8cd4c61499a74bda610d3217626))
+* **ui:** add emby as a mediaServerType to the import user button ([6a6bfe0](https://github.com/fallenbagel/jellyseerr/commit/6a6bfe0c6875a1d8ccb1a6fdc409f595202ef38e))
+* **ui:** add emby user badge to the user list and fix local user badge ([410b536](https://github.com/fallenbagel/jellyseerr/commit/410b536c9474806ab9f7f5f097cedfafde1fbf67))
+* **ui:** add emby user badge to the userProfile ([b9546e6](https://github.com/fallenbagel/jellyseerr/commit/b9546e6daa8583c60fac7961447a13715bbc7f6b))
+* **ui:** conditional media server name to add emby to issuedetails play on button ([377a4fd](https://github.com/fallenbagel/jellyseerr/commit/377a4fd85b7194afb48a8ba9bfa4ce4ccf996be8))
+* **ui:** conditional media server name to add emby to moviedetails ([14d2937](https://github.com/fallenbagel/jellyseerr/commit/14d293799bb37f45449c201ab03638af257623be))
+* **user email setting:** added field to save user email ([30c48f1](https://github.com/fallenbagel/jellyseerr/commit/30c48f16ca0a74e7551b533bd75bc43304f946b1)), closes [#122](https://github.com/fallenbagel/jellyseerr/issues/122)
+* **user settings:** added email field to user profiel settings ([b22f20b](https://github.com/fallenbagel/jellyseerr/commit/b22f20b6fa5f68398850ccbf9b6e1cc233b3c8f4)), closes [#122](https://github.com/fallenbagel/jellyseerr/issues/122)
+
 # [1.1.0](https://github.com/fallenbagel/jellyseerr/compare/v1.0.2...v1.1.0) (2022-05-21)
 
 
