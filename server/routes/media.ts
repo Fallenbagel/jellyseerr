@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import { FindOneOptions, FindOperator, getRepository, In } from 'typeorm';
+import RadarrAPI from '../api/servarr/radarr';
+import SonarrAPI from '../api/servarr/sonarr';
 import TautulliAPI from '../api/tautulli';
+import TheMovieDb from '../api/themoviedb';
 import { MediaStatus, MediaType } from '../constants/media';
 import Media from '../entity/Media';
 import { User } from '../entity/User';
@@ -155,6 +158,100 @@ mediaRoutes.delete(
       });
 
       await mediaRepository.remove(media);
+
+      return res.status(204).send();
+    } catch (e) {
+      logger.error('Something went wrong fetching media in delete request', {
+        label: 'Media',
+        message: e.message,
+      });
+      next({ status: 404, message: 'Media not found' });
+    }
+  }
+);
+
+mediaRoutes.delete(
+  '/:id/file',
+  isAuthenticated(Permission.MANAGE_REQUESTS),
+  async (req, res, next) => {
+    try {
+      const settings = getSettings();
+      const mediaRepository = getRepository(Media);
+      const media = await mediaRepository.findOneOrFail({
+        where: { id: req.params.id },
+      });
+      const is4k = media.serviceUrl4k !== undefined;
+      const isMovie = media.mediaType === MediaType.MOVIE;
+      let serviceSettings;
+      if (isMovie) {
+        serviceSettings = settings.radarr.find(
+          (radarr) => radarr.isDefault && radarr.is4k === is4k
+        );
+      } else {
+        serviceSettings = settings.sonarr.find(
+          (sonarr) => sonarr.isDefault && sonarr.is4k === is4k
+        );
+      }
+
+      if (
+        media.serviceId &&
+        media.serviceId >= 0 &&
+        serviceSettings?.id !== media.serviceId
+      ) {
+        if (isMovie) {
+          serviceSettings = settings.radarr.find(
+            (radarr) => radarr.id === media.serviceId
+          );
+        } else {
+          serviceSettings = settings.sonarr.find(
+            (sonarr) => sonarr.id === media.serviceId
+          );
+        }
+      }
+      if (!serviceSettings) {
+        logger.warn(
+          `There is no default ${
+            is4k ? '4K ' : '' + isMovie ? 'Radarr' : 'Sonarr'
+          }/ server configured. Did you set any of your ${
+            is4k ? '4K ' : '' + isMovie ? 'Radarr' : 'Sonarr'
+          } servers as default?`,
+          {
+            label: 'Media Request',
+            mediaId: media.id,
+          }
+        );
+        return;
+      }
+      let service;
+      if (isMovie) {
+        service = new RadarrAPI({
+          apiKey: serviceSettings?.apiKey,
+          url: RadarrAPI.buildUrl(serviceSettings, '/api/v3'),
+        });
+      } else {
+        service = new SonarrAPI({
+          apiKey: serviceSettings?.apiKey,
+          url: SonarrAPI.buildUrl(serviceSettings, '/api/v3'),
+        });
+      }
+
+      if (isMovie) {
+        await (service as RadarrAPI).removeMovie(
+          parseInt(
+            is4k
+              ? (media.externalServiceSlug4k as string)
+              : (media.externalServiceSlug as string)
+          )
+        );
+      } else {
+        const tmdb = new TheMovieDb();
+        const series = await tmdb.getTvShow({ tvId: media.tmdbId });
+        const tvdbId = series.external_ids.tvdb_id ?? media.tvdbId;
+        if (!tvdbId) {
+          throw new Error('TVDB ID not found');
+        }
+        await (service as SonarrAPI).removeSerie(tvdbId);
+      }
 
       return res.status(204).send();
     } catch (e) {

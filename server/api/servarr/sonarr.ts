@@ -302,6 +302,20 @@ class SonarrAPI extends ServarrBase<{ seriesId: number; episodeId: number }> {
 
     return newSeasons;
   }
+  public removeSerie = async (serieId: number): Promise<void> => {
+    try {
+      const { id, title } = await this.getSeriesByTvdbId(serieId);
+      await this.axios.delete(`/series/${id}`, {
+        params: {
+          deleteFiles: true,
+          addImportExclusion: false,
+        },
+      });
+      logger.info(`[Radarr] Removed serie ${title}`);
+    } catch (e) {
+      throw new Error(`[Radarr] Failed to remove serie: ${e.message}`);
+    }
+  };
 }
 
 export default SonarrAPI;
