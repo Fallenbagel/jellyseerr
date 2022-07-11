@@ -1,5 +1,3 @@
-import { XCircleIcon } from '@heroicons/react/solid';
-import axios from 'axios';
 import getConfig from 'next/config';
 import { useRouter } from 'next/dist/client/router';
 import React, { useEffect, useState } from 'react';
@@ -13,11 +11,11 @@ import ImageFader from '../Common/ImageFader';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import PageTitle from '../Common/PageTitle';
 import LanguagePicker from '../Layout/LanguagePicker';
-import PlexLoginButton from '../PlexLoginButton';
-import Transition from '../Transition';
+import ErrorCallout from './ErrorCallout';
 import JellyfinLogin from './JellyfinLogin';
 import LocalLogin from './LocalLogin';
 import OidcLogin from './OidcLogin';
+import PlexLogin from './PlexLogin';
 
 const messages = defineMessages({
   signin: 'Sign In',
@@ -33,34 +31,10 @@ const Login: React.FC = () => {
   const intl = useIntl();
   const [error, setError] = useState('');
   const [isProcessing, setProcessing] = useState(false);
-  const [authToken, setAuthToken] = useState<string | undefined>(undefined);
   const { user, revalidate } = useUser();
   const router = useRouter();
   const settings = useSettings();
   const { publicRuntimeConfig } = getConfig();
-
-  // Effect that is triggered when the `authToken` comes back from the Plex OAuth
-  // We take the token and attempt to sign in. If we get a success message, we will
-  // ask swr to revalidate the user which _should_ come back with a valid user.
-  useEffect(() => {
-    const login = async () => {
-      setProcessing(true);
-      try {
-        const response = await axios.post('/api/v1/auth/plex', { authToken });
-
-        if (response.data?.id) {
-          revalidate();
-        }
-      } catch (e) {
-        setError(e.response.data.message);
-        setAuthToken(undefined);
-        setProcessing(false);
-      }
-    };
-    if (authToken) {
-      login();
-    }
-  }, [authToken, revalidate]);
 
   // Effect that is triggered whenever `useUser`'s user changes. If we get a new
   // valid user, we redirect the user to the home page as the login was successful.
@@ -101,28 +75,7 @@ const Login: React.FC = () => {
           style={{ backdropFilter: 'blur(5px)' }}
         >
           <>
-            <Transition
-              show={!!error}
-              enter="opacity-0 transition duration-300"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-              leave="opacity-100 transition duration-300"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
-            >
-              <div className="mb-4 rounded-md bg-red-600 p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <XCircleIcon className="h-5 w-5 text-red-300" />
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-300">
-                      {error}
-                    </h3>
-                  </div>
-                </div>
-              </div>
-            </Transition>
+            <ErrorCallout error={error} />
             {isProcessing ? (
               <div className="px-10 py-8">
                 <h3 className="text-center text-xl font-semibold text-gray-400">
@@ -154,9 +107,11 @@ const Login: React.FC = () => {
                       <div className="px-10 py-8">
                         {settings.currentSettings.mediaServerType ==
                         MediaServerType.PLEX ? (
-                          <PlexLoginButton
+                          <PlexLogin
+                            onAuthenticated={revalidate}
                             isProcessing={isProcessing}
-                            onAuthToken={(authToken) => setAuthToken(authToken)}
+                            setProcessing={setProcessing}
+                            onError={(err) => setError(err)}
                           />
                         ) : (
                           <JellyfinLogin revalidate={revalidate} />

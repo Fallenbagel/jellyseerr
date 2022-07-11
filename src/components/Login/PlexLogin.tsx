@@ -1,5 +1,6 @@
 import { LoginIcon } from '@heroicons/react/outline';
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import globalMessages from '../../i18n/globalMessages';
 import PlexOAuth from '../../utils/plex';
@@ -11,30 +12,54 @@ const messages = defineMessages({
 
 const plexOAuth = new PlexOAuth();
 
-interface PlexLoginButtonProps {
-  onAuthToken: (authToken: string) => void;
+interface PlexLoginProps {
+  onAuthenticated: () => void;
   isProcessing?: boolean;
+  setProcessing?: (state: boolean) => void;
   onError?: (message: string) => void;
 }
 
-const PlexLoginButton: React.FC<PlexLoginButtonProps> = ({
-  onAuthToken,
+const PlexLogin: React.FC<PlexLoginProps> = ({
+  onAuthenticated,
   onError,
   isProcessing,
+  setProcessing,
 }) => {
   const intl = useIntl();
   const [loading, setLoading] = useState(false);
+  const [authToken, setAuthToken] = useState<string | undefined>(undefined);
+
+  // Effect that is triggered when the `authToken` comes back from the Plex OAuth
+  // We take the token and attempt to sign in. If we get a success message, we will
+  // ask swr to revalidate the user which _should_ come back with a valid user.
+  useEffect(() => {
+    const login = async () => {
+      if (setProcessing) setProcessing(true);
+      try {
+        const response = await axios.post('/api/v1/auth/plex', { authToken });
+
+        if (response.data?.id) {
+          onAuthenticated();
+        }
+      } catch (e) {
+        if (onError) onError(e.response.data.message);
+        setAuthToken(undefined);
+        if (setProcessing) setProcessing(false);
+      }
+    };
+    if (authToken) {
+      login();
+    }
+  }, [authToken, onAuthenticated, onError, setProcessing]);
 
   const getPlexLogin = async () => {
     setLoading(true);
     try {
       const authToken = await plexOAuth.login();
       setLoading(false);
-      onAuthToken(authToken);
+      setAuthToken(authToken);
     } catch (e) {
-      if (onError) {
-        onError(e.message);
-      }
+      if (onError) onError(e.message);
       setLoading(false);
     }
   };
@@ -62,4 +87,4 @@ const PlexLoginButton: React.FC<PlexLoginButtonProps> = ({
   );
 };
 
-export default PlexLoginButton;
+export default PlexLogin;

@@ -123,11 +123,13 @@ const Setup: React.FC = () => {
                 <SettingsPlex
                   onComplete={() => setMediaServerSettingsComplete(true)}
                 />
-              ) : (
+              ) : mediaServerType === MediaServerType.JELLYFIN ? (
                 <SettingsJellyfin
                   showAdvancedSettings={false}
                   onComplete={() => setMediaServerSettingsComplete(true)}
                 />
+              ) : (
+                <p>This should not happen</p>
               )}
               <div className="mt-4 text-sm text-gray-500">
                 <span className="mr-2">
