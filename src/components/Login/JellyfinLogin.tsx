@@ -1,12 +1,12 @@
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
+import getConfig from 'next/config';
 import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import * as Yup from 'yup';
 import useSettings from '../../hooks/useSettings';
 import Button from '../Common/Button';
-import getConfig from 'next/config';
 
 const messages = defineMessages({
   username: 'Username',
@@ -22,7 +22,7 @@ const messages = defineMessages({
   loginerror: 'Something went wrong while trying to sign in.',
   credentialerror: 'The username or password is incorrect.',
   signingin: 'Signing in…',
-  signin: 'Sign In',
+  signin: 'Sign in',
   initialsigningin: 'Connecting…',
   initialsignin: 'Connect',
   forgotpassword: 'Forgot Password?',

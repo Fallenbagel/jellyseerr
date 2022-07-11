@@ -20,10 +20,10 @@ import PlexLogin from './PlexLogin';
 const messages = defineMessages({
   signin: 'Sign In',
   signinheader: 'Sign in to continue',
-  signinwithplex: 'Use your Plex account',
-  signinwithjellyfin: 'Use your {mediaServerName} account',
-  signinwithoverseerr: 'Use your {applicationTitle} account',
-  signinwithoidc: 'Use your {OIDCProvider} account',
+  useplexaccount: 'Use your Plex account',
+  usejellyfinaccount: 'Use your {mediaServerName} account',
+  useoverseeerraccount: 'Use your {applicationTitle} account',
+  useoidcaccount: 'Use your {OIDCProvider} account',
   authprocessing: 'Authentication in progress...',
 });
 
@@ -95,8 +95,8 @@ const Login: React.FC = () => {
                     >
                       {settings.currentSettings.mediaServerType ==
                       MediaServerType.PLEX
-                        ? intl.formatMessage(messages.signinwithplex)
-                        : intl.formatMessage(messages.signinwithjellyfin, {
+                        ? intl.formatMessage(messages.useplexaccount)
+                        : intl.formatMessage(messages.usejellyfinaccount, {
                             mediaServerName:
                               publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
                                 ? 'Emby'
@@ -128,7 +128,7 @@ const Login: React.FC = () => {
                           }`}
                           onClick={() => handleClick(2)}
                         >
-                          {intl.formatMessage(messages.signinwithoidc, {
+                          {intl.formatMessage(messages.useoidcaccount, {
                             OIDCProvider:
                               settings.currentSettings.oidcProviderName,
                           })}
@@ -155,7 +155,7 @@ const Login: React.FC = () => {
                           }`}
                           onClick={() => handleClick(1)}
                         >
-                          {intl.formatMessage(messages.signinwithoverseerr, {
+                          {intl.formatMessage(messages.useoverseeerraccount, {
                             applicationTitle:
                               settings.currentSettings.applicationTitle,
                           })}

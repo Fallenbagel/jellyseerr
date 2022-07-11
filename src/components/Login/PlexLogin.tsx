@@ -6,8 +6,8 @@ import globalMessages from '../../i18n/globalMessages';
 import PlexOAuth from '../../utils/plex';
 
 const messages = defineMessages({
-  signinwithplex: 'Sign In',
-  signingin: 'Signing In…',
+  signinwithplex: 'Sign in with Plex',
+  signingin: 'Signing in…',
 });
 
 const plexOAuth = new PlexOAuth();
