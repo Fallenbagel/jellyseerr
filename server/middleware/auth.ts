@@ -1,5 +1,8 @@
+import { expressjwt as jwt, GetVerificationKey } from 'express-jwt';
+import jwksRsa from 'jwks-rsa';
 import { getRepository } from 'typeorm';
 import { User } from '../entity/User';
+import { getOidcInfo } from '../lib/oidc';
 import { Permission, PermissionCheckOptions } from '../lib/permissions';
 import { getSettings } from '../lib/settings';
 
@@ -52,4 +55,32 @@ export const isAuthenticated = (
     }
   };
   return authMiddleware;
+};
+
+// checking the JWT
+export const checkJwt = (): Middleware => {
+  const settings = getSettings();
+  settings.load();
+
+  const getSecret: GetVerificationKey = async function (req, token) {
+    const oidcInfo = await getOidcInfo(settings.fullPublicSettings.oidcIssuer);
+
+    const secret = (
+      jwksRsa.expressJwtSecret({
+        cache: true,
+        rateLimit: true,
+        jwksRequestsPerMinute: 5,
+        jwksUri: oidcInfo.jwksUri,
+      }) as GetVerificationKey
+    )(req, token);
+
+    return secret;
+  };
+
+  return jwt({
+    // Dynamically provide a signing key based on the kid in the header and the signing keys provided by the JWKS endpoint
+    secret: getSecret,
+    issuer: settings.fullPublicSettings.oidcIssuer,
+    algorithms: ['RS256'],
+  });
 };

@@ -104,6 +104,10 @@ export interface MainSettings {
   hideAvailable: boolean;
   localLogin: boolean;
   newPlexLogin: boolean;
+  oidcLogin: boolean;
+  oidcIssuer: string;
+  oidcProviderName: string;
+  oidcClientId: string;
   region: string;
   originalLanguage: string;
   trustProxy: boolean;
@@ -121,6 +125,10 @@ interface FullPublicSettings extends PublicSettings {
   applicationUrl: string;
   hideAvailable: boolean;
   localLogin: boolean;
+  oidcLogin: boolean;
+  oidcIssuer: string;
+  oidcProviderName: string;
+  oidcClientId: string;
   movie4kEnabled: boolean;
   series4kEnabled: boolean;
   region: string;
@@ -305,6 +313,10 @@ class Settings {
         hideAvailable: false,
         localLogin: true,
         newPlexLogin: true,
+        oidcLogin: false,
+        oidcIssuer: '',
+        oidcProviderName: 'OpenID Connect',
+        oidcClientId: '',
         region: '',
         originalLanguage: '',
         trustProxy: false,
@@ -516,6 +528,10 @@ class Settings {
       applicationUrl: this.data.main.applicationUrl,
       hideAvailable: this.data.main.hideAvailable,
       localLogin: this.data.main.localLogin,
+      oidcLogin: this.data.main.oidcLogin,
+      oidcIssuer: this.data.main.oidcIssuer,
+      oidcProviderName: this.data.main.oidcProviderName,
+      oidcClientId: this.data.main.oidcClientId,
       movie4kEnabled: this.data.radarr.some(
         (radarr) => radarr.is4k && radarr.isDefault
       ),

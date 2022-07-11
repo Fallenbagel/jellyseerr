@@ -4,7 +4,9 @@ import axios from 'axios';
 import Link from 'next/link';
 import React, { useRef, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
+import { useAuth } from 'react-oidc-context';
 import useClickOutside from '../../../hooks/useClickOutside';
+import useSettings from '../../../hooks/useSettings';
 import { useUser } from '../../../hooks/useUser';
 import Transition from '../../Transition';
 
@@ -15,7 +17,9 @@ const messages = defineMessages({
 });
 
 const UserDropdown: React.FC = () => {
+  const settings = useSettings();
   const intl = useIntl();
+  const auth = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, revalidate } = useUser();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
@@ -23,6 +27,9 @@ const UserDropdown: React.FC = () => {
 
   const logout = async () => {
     const response = await axios.post('/api/v1/auth/logout');
+    if (settings.currentSettings.oidcLogin && auth.isAuthenticated) {
+      await auth.signoutRedirect();
+    }
 
     if (response.data?.status === 'ok') {
       revalidate();

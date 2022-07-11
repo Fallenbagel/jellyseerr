@@ -1,6 +1,7 @@
 import { SaveIcon } from '@heroicons/react/outline';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
+import getConfig from 'next/config';
 import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
@@ -14,7 +15,6 @@ import LoadingSpinner from '../../Common/LoadingSpinner';
 import PageTitle from '../../Common/PageTitle';
 import PermissionEdit from '../../PermissionEdit';
 import QuotaSelector from '../../QuotaSelector';
-import getConfig from 'next/config';
 
 const messages = defineMessages({
   users: 'Users',
@@ -28,6 +28,15 @@ const messages = defineMessages({
   newPlexLogin: 'Enable New {mediaServerName} Sign-In',
   newPlexLoginTip:
     'Allow {mediaServerName} users to sign in without first being imported',
+  oidcLogin: 'Enable OIDC Sign-In',
+  oidcLoginTip: 'Allow users to sign in using an OIDC identity provider',
+  oidcIssuer: 'OIDC Issuer URL',
+  oidcIssuerTip: "The base URL of the identity provider's OIDC endpoint",
+  oidcProviderName: 'OIDC Provider Name',
+  oidcProviderNameTip:
+    'Name of the OIDC Provider which appears on the login screen',
+  oidcClientId: 'OIDC Client ID',
+  oidcClientIdTip: 'The OIDC Client ID assigned to Jellyseerr',
   movieRequestLimitLabel: 'Global Movie Request Limit',
   tvRequestLimitLabel: 'Global Series Request Limit',
   defaultPermissions: 'Default Permissions',
@@ -68,6 +77,10 @@ const SettingsUsers: React.FC = () => {
           initialValues={{
             localLogin: data?.localLogin,
             newPlexLogin: data?.newPlexLogin,
+            oidcLogin: data?.oidcLogin,
+            oidcIssuer: data?.oidcIssuer,
+            oidcProviderName: data?.oidcProviderName,
+            oidcClientId: data?.oidcClientId,
             movieQuotaLimit: data?.defaultQuotas.movie.quotaLimit ?? 0,
             movieQuotaDays: data?.defaultQuotas.movie.quotaDays ?? 7,
             tvQuotaLimit: data?.defaultQuotas.tv.quotaLimit ?? 0,
@@ -80,6 +93,10 @@ const SettingsUsers: React.FC = () => {
               await axios.post('/api/v1/settings/main', {
                 localLogin: values.localLogin,
                 newPlexLogin: values.newPlexLogin,
+                oidcLogin: values.oidcLogin,
+                oidcIssuer: values.oidcIssuer,
+                oidcProviderName: values.oidcProviderName,
+                oidcClientId: values.oidcClientId,
                 defaultQuotas: {
                   movie: {
                     quotaLimit: values.movieQuotaLimit,
@@ -163,6 +180,69 @@ const SettingsUsers: React.FC = () => {
                     />
                   </div>
                 </div>
+                <div className="form-row">
+                  <label htmlFor="oidcLogin" className="checkbox-label">
+                    {intl.formatMessage(messages.oidcLogin)}
+                    <span className="label-tip">
+                      {intl.formatMessage(messages.oidcLoginTip)}
+                    </span>
+                  </label>
+                  <div className="form-input-area">
+                    <Field
+                      type="checkbox"
+                      id="oidcLogin"
+                      name="oidcLogin"
+                      onChange={() => {
+                        setFieldValue('oidcLogin', !values.oidcLogin);
+                      }}
+                    />
+                  </div>
+                </div>
+                {values.oidcLogin && (
+                  <>
+                    <div className="form-row">
+                      <label htmlFor="oidcIssuer" className="text-label">
+                        {intl.formatMessage(messages.oidcIssuer)}
+                        <span className="label-tip">
+                          {intl.formatMessage(messages.oidcIssuerTip)}
+                        </span>
+                      </label>
+                      <div className="form-input-area">
+                        <Field id="oidcIssuer" name="oidcIssuer" type="text" />
+                      </div>
+                    </div>
+                    <div className="form-row">
+                      <label htmlFor="oidcProviderName" className="text-label">
+                        {intl.formatMessage(messages.oidcProviderName)}
+                        <span className="label-tip">
+                          {intl.formatMessage(messages.oidcProviderNameTip)}
+                        </span>
+                      </label>
+                      <div className="form-input-area">
+                        <Field
+                          id="oidcProviderName"
+                          name="oidcProviderName"
+                          type="text"
+                        />
+                      </div>
+                    </div>
+                    <div className="form-row">
+                      <label htmlFor="oidcClientId" className="text-label">
+                        {intl.formatMessage(messages.oidcClientId)}
+                        <span className="label-tip">
+                          {intl.formatMessage(messages.oidcClientIdTip)}
+                        </span>
+                      </label>
+                      <div className="form-input-area">
+                        <Field
+                          id="oidcClientId"
+                          name="oidcClientId"
+                          type="text"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
                 <div className="form-row">
                   <label htmlFor="applicationTitle" className="text-label">
                     {intl.formatMessage(messages.movieRequestLimitLabel)}
