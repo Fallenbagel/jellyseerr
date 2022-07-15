@@ -87,8 +87,18 @@ app
       new WebPushAgent(),
     ]);
 
-    // Start Jobs
-    startJobs();
+    const userRepository = getRepository(User);
+    const totalUsers = await userRepository.count();
+    if (totalUsers > 0) {
+      startJobs();
+    } else {
+      logger.info(
+        `Skipping starting the scheduled jobs as we have no Plex/Jellyfin/Emby servers setup yet`,
+        {
+          label: 'Server',
+        }
+      );
+    }
 
     const server = express();
     if (settings.main.trustProxy) {

@@ -9,6 +9,7 @@ import { MediaServerType } from '../constants/server';
 import { UserType } from '../constants/user';
 import { User } from '../entity/User';
 import { getOidcInfo } from '../lib/oidc';
+import { startJobs } from '../job/schedule';
 import { Permission } from '../lib/permissions';
 import { getSettings } from '../lib/settings';
 import logger from '../logger';
@@ -86,6 +87,7 @@ authRoutes.post('/plex', async (req, res, next) => {
 
       settings.main.mediaServerType = MediaServerType.PLEX;
       settings.save();
+      startJobs();
 
       await userRepository.save(user);
     } else {
@@ -323,6 +325,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
           settings.jellyfin.hostname = body.hostname ?? '';
           settings.jellyfin.serverId = account.User.ServerId;
           settings.save();
+          startJobs();
         }
       }
 
