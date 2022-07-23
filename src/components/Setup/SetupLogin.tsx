@@ -2,7 +2,7 @@ import getConfig from 'next/config';
 import React, { useEffect, useState } from 'react';
 import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 import { MediaServerType } from '../../../server/constants/server';
-import { useUser } from '../../hooks/useUser';
+import { UserType, useUser } from '../../hooks/useUser';
 import Accordion from '../Common/Accordion';
 import ErrorCallout from '../Login/ErrorCallout';
 import JellyfinLogin from '../Login/JellyfinLogin';
@@ -30,7 +30,20 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
 
   useEffect(() => {
     if (user) {
-      onComplete(mediaServerType);
+      if (mediaServerType === MediaServerType.NOT_CONFIGURED) {
+        switch (user.userType) {
+          case UserType.PLEX:
+            setMediaServerType(MediaServerType.PLEX);
+            onComplete(MediaServerType.PLEX);
+            break;
+          case UserType.JELLYFIN:
+            setMediaServerType(MediaServerType.JELLYFIN);
+            onComplete(MediaServerType.JELLYFIN);
+            break;
+        }
+      } else {
+        onComplete(mediaServerType);
+      }
     }
   }, [user, mediaServerType, onComplete]);
 
@@ -90,7 +103,13 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
                   className="rounded-b-lg px-10 py-8"
                   style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
                 >
-                  <JellyfinLogin initial={true} revalidate={revalidate} />
+                  <JellyfinLogin
+                    initial={true}
+                    onAuthenticated={() => {
+                      setMediaServerType(MediaServerType.JELLYFIN);
+                      revalidate();
+                    }}
+                  />
                 </div>
               </AccordionContent>
             </div>

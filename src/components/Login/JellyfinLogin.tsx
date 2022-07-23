@@ -29,12 +29,12 @@ const messages = defineMessages({
 });
 
 interface JellyfinLoginProps {
-  revalidate: () => void;
+  onAuthenticated: () => void;
   initial?: boolean;
 }
 
 const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
-  revalidate,
+  onAuthenticated,
   initial,
 }) => {
   const toasts = useToasts();
@@ -93,7 +93,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
               }
             );
           } finally {
-            revalidate();
+            onAuthenticated();
           }
         }}
       >
@@ -229,7 +229,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                 }
               );
             } finally {
-              revalidate();
+              onAuthenticated();
             }
           }}
         >

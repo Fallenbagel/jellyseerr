@@ -114,7 +114,7 @@ const Login: React.FC = () => {
                             onError={(err) => setError(err)}
                           />
                         ) : (
-                          <JellyfinLogin revalidate={revalidate} />
+                          <JellyfinLogin onAuthenticated={revalidate} />
                         )}
                       </div>
                     </AccordionContent>
