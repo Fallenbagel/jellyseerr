@@ -74,7 +74,7 @@
   "components.IssueList.IssueItem.episodes": "集数",
   "components.IssueList.IssueItem.issuestatus": "状态",
   "components.IssueList.IssueItem.issuetype": "类型",
-  "components.IssueList.IssueItem.opened": "打开"
+  "components.IssueList.IssueItem.opened": "打开",
   "components.IssueList.IssueItem.openeduserdate": "{date} by {user}",
   "components.IssueList.IssueItem.problemepisode": "受影响的剧集",
   "components.IssueList.IssueItem.seasons": "{seasonCount, plural, one {Season} other {Seasons}}",
@@ -90,7 +90,7 @@
   "components.IssueModal.CreateIssueModal.extras": "额外集",
   "components.IssueModal.CreateIssueModal.issomethingwrong": "{title} 有问题吗？",
   "components.IssueModal.CreateIssueModal.problemepisode": "受影响的集",
-  "components.IssueModal.CreateIssueModal.problemseason": "受影响的季,
+  "components.IssueModal.CreateIssueModal.problemseason": "受影响的季",
   "components.IssueModal.CreateIssueModal.providedetail": "请提供你所遇到问题的详情",
   "components.IssueModal.CreateIssueModal.reportissue": "报告问题",
   "components.IssueModal.CreateIssueModal.season": "第 {seasonNumber} 季",
@@ -986,5 +986,5 @@
   "pages.pagenotfound": "页面不存在",
   "pages.returnHome": "返回首页",
   "pages.serviceunavailable": "服务器无法使用",
-  "pages.somethingwentwrong": "出了点问题",
+  "pages.somethingwentwrong": "出了点问题"
 }
