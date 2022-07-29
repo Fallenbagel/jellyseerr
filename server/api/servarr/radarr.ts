@@ -213,6 +213,20 @@ class RadarrAPI extends ServarrBase<{ movieId: number }> {
       );
     }
   }
+  public removeMovie = async (movieId: number): Promise<void> => {
+    try {
+      const { id, title } = await this.getMovieByTmdbId(movieId);
+      await this.axios.delete(`/movie/${id}`, {
+        params: {
+          deleteFiles: true,
+          addImportExclusion: false,
+        },
+      });
+      logger.info(`[Radarr] Removed movie ${title}`);
+    } catch (e) {
+      throw new Error(`[Radarr] Failed to remove movie: ${e.message}`);
+    }
+  };
 }
 
 export default RadarrAPI;

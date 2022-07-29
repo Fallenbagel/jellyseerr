@@ -1,5 +1,9 @@
 import { ServerIcon, ViewListIcon } from '@heroicons/react/outline';
-import { CheckCircleIcon, DocumentRemoveIcon } from '@heroicons/react/solid';
+import {
+  CheckCircleIcon,
+  DocumentRemoveIcon,
+  TrashIcon,
+} from '@heroicons/react/solid';
 import axios from 'axios';
 import Link from 'next/link';
 import React from 'react';
@@ -34,8 +38,12 @@ const messages = defineMessages({
   manageModalClearMedia: 'Clear Data',
   manageModalClearMediaWarning:
     '* This will irreversibly remove all data for this {mediaType}, including any requests. If this item exists in your Plex library, the media information will be recreated during the next scan.',
+  manageModalRemoveMediaWarning:
+    '* This will irreversibly remove this {mediaType} from {arr}, including all files.',
   openarr: 'Open in {arr}',
+  removearr: 'Remove from {arr}',
   openarr4k: 'Open in 4K {arr}',
+  removearr4k: 'Remove from 4K {arr}',
   downloadstatus: 'Downloads',
   markavailable: 'Mark as Available',
   mark4kavailable: 'Mark as Available in 4K',
@@ -86,6 +94,13 @@ const ManageSlideOver: React.FC<
 
   const deleteMedia = async () => {
     if (data.mediaInfo) {
+      await axios.delete(`/api/v1/media/${data.mediaInfo.id}`);
+      revalidate();
+    }
+  };
+  const deleteMediaFile = async () => {
+    if (data.mediaInfo) {
+      await axios.delete(`/api/v1/media/${data.mediaInfo.id}/file`);
       await axios.delete(`/api/v1/media/${data.mediaInfo.id}`);
       revalidate();
     }
@@ -319,6 +334,39 @@ const ManageSlideOver: React.FC<
                     </Button>
                   </a>
                 )}
+
+                {hasPermission(Permission.ADMIN) &&
+                  data?.mediaInfo?.serviceUrl && (
+                    <div>
+                      <ConfirmButton
+                        onClick={() => deleteMediaFile()}
+                        confirmText={intl.formatMessage(
+                          globalMessages.areyousure
+                        )}
+                        className="w-full"
+                      >
+                        <TrashIcon />
+                        <span>
+                          {intl.formatMessage(messages.removearr, {
+                            arr: mediaType === 'movie' ? 'Radarr' : 'Sonarr',
+                          })}
+                        </span>
+                      </ConfirmButton>
+                      <div className="mt-1 text-xs text-gray-400">
+                        {intl.formatMessage(
+                          messages.manageModalRemoveMediaWarning,
+                          {
+                            mediaType: intl.formatMessage(
+                              mediaType === 'movie'
+                                ? messages.movie
+                                : messages.tvshow
+                            ),
+                            arr: mediaType === 'movie' ? 'Radarr' : 'Sonarr',
+                          }
+                        )}
+                      </div>
+                    </div>
+                  )}
               </div>
             </div>
           )}
@@ -418,21 +466,52 @@ const ManageSlideOver: React.FC<
                   </div>
                 )}
                 {data?.mediaInfo?.serviceUrl4k && (
-                  <a
-                    href={data?.mediaInfo?.serviceUrl4k}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block"
-                  >
-                    <Button buttonType="ghost" className="w-full">
-                      <ServerIcon />
-                      <span>
-                        {intl.formatMessage(messages.openarr4k, {
-                          arr: mediaType === 'movie' ? 'Radarr' : 'Sonarr',
-                        })}
-                      </span>
-                    </Button>
-                  </a>
+                  <>
+                    <a
+                      href={data?.mediaInfo?.serviceUrl4k}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block"
+                    >
+                      <Button buttonType="ghost" className="w-full">
+                        <ServerIcon />
+                        <span>
+                          {intl.formatMessage(messages.openarr4k, {
+                            arr: mediaType === 'movie' ? 'Radarr' : 'Sonarr',
+                          })}
+                        </span>
+                      </Button>
+                    </a>
+                    <div>
+                      <ConfirmButton
+                        onClick={() => deleteMediaFile()}
+                        confirmText={intl.formatMessage(
+                          globalMessages.areyousure
+                        )}
+                        className="w-full"
+                      >
+                        <TrashIcon />
+                        <span>
+                          {intl.formatMessage(messages.removearr4k, {
+                            arr: mediaType === 'movie' ? 'Radarr' : 'Sonarr',
+                          })}
+                        </span>
+                      </ConfirmButton>
+                      <div className="mt-1 text-xs text-gray-400">
+                        {intl.formatMessage(
+                          messages.manageModalRemoveMediaWarning,
+                          {
+                            mediaType: intl.formatMessage(
+                              mediaType === 'movie'
+                                ? messages.movie
+                                : messages.tvshow
+                            ),
+                            arr: mediaType === 'movie' ? 'Radarr' : 'Sonarr',
+                          }
+                        )}
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
