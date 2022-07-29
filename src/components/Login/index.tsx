@@ -1,5 +1,4 @@
-import { XCircleIcon } from '@heroicons/react/solid';
-import axios from 'axios';
+import getConfig from 'next/config';
 import { useRouter } from 'next/dist/client/router';
 import React, { useEffect, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
@@ -9,54 +8,33 @@ import useSettings from '../../hooks/useSettings';
 import { useUser } from '../../hooks/useUser';
 import Accordion from '../Common/Accordion';
 import ImageFader from '../Common/ImageFader';
+import LoadingSpinner from '../Common/LoadingSpinner';
 import PageTitle from '../Common/PageTitle';
 import LanguagePicker from '../Layout/LanguagePicker';
-import PlexLoginButton from '../PlexLoginButton';
-import Transition from '../Transition';
+import ErrorCallout from './ErrorCallout';
 import JellyfinLogin from './JellyfinLogin';
 import LocalLogin from './LocalLogin';
-import getConfig from 'next/config';
+import OidcLogin from './OidcLogin';
+import PlexLogin from './PlexLogin';
 
 const messages = defineMessages({
   signin: 'Sign In',
   signinheader: 'Sign in to continue',
-  signinwithplex: 'Use your Plex account',
-  signinwithjellyfin: 'Use your {mediaServerName} account',
-  signinwithoverseerr: 'Use your {applicationTitle} account',
+  useplexaccount: 'Use your Plex account',
+  usejellyfinaccount: 'Use your {mediaServerName} account',
+  useoverseeerraccount: 'Use your {applicationTitle} account',
+  useoidcaccount: 'Use your {OIDCProvider} account',
+  authprocessing: 'Authentication in progress...',
 });
 
 const Login: React.FC = () => {
   const intl = useIntl();
   const [error, setError] = useState('');
   const [isProcessing, setProcessing] = useState(false);
-  const [authToken, setAuthToken] = useState<string | undefined>(undefined);
   const { user, revalidate } = useUser();
   const router = useRouter();
   const settings = useSettings();
   const { publicRuntimeConfig } = getConfig();
-
-  // Effect that is triggered when the `authToken` comes back from the Plex OAuth
-  // We take the token and attempt to sign in. If we get a success message, we will
-  // ask swr to revalidate the user which _should_ come back with a valid user.
-  useEffect(() => {
-    const login = async () => {
-      setProcessing(true);
-      try {
-        const response = await axios.post('/api/v1/auth/plex', { authToken });
-
-        if (response.data?.id) {
-          revalidate();
-        }
-      } catch (e) {
-        setError(e.response.data.message);
-        setAuthToken(undefined);
-        setProcessing(false);
-      }
-    };
-    if (authToken) {
-      login();
-    }
-  }, [authToken, revalidate]);
 
   // Effect that is triggered whenever `useUser`'s user changes. If we get a new
   // valid user, we redirect the user to the home page as the login was successful.
@@ -97,89 +75,102 @@ const Login: React.FC = () => {
           style={{ backdropFilter: 'blur(5px)' }}
         >
           <>
-            <Transition
-              show={!!error}
-              enter="opacity-0 transition duration-300"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-              leave="opacity-100 transition duration-300"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
-            >
-              <div className="mb-4 rounded-md bg-red-600 p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <XCircleIcon className="h-5 w-5 text-red-300" />
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-300">
-                      {error}
-                    </h3>
-                  </div>
-                </div>
+            <ErrorCallout error={error} />
+            {isProcessing ? (
+              <div className="px-10 py-8">
+                <h3 className="text-center text-xl font-semibold text-gray-400">
+                  {intl.formatMessage(messages.authprocessing)}
+                </h3>
+                <LoadingSpinner />
               </div>
-            </Transition>
-            <Accordion single atLeastOne>
-              {({ openIndexes, handleClick, AccordionContent }) => (
-                <>
-                  <button
-                    className={`w-full cursor-default bg-gray-800 bg-opacity-70 py-2 text-center text-sm font-bold text-gray-400 transition-colors duration-200 focus:outline-none sm:rounded-t-lg ${
-                      openIndexes.includes(0) && 'text-indigo-500'
-                    } ${
-                      settings.currentSettings.localLogin &&
-                      'hover:cursor-pointer hover:bg-gray-700'
-                    }`}
-                    onClick={() => handleClick(0)}
-                    disabled={!settings.currentSettings.localLogin}
-                  >
-                    {settings.currentSettings.mediaServerType ==
-                    MediaServerType.PLEX
-                      ? intl.formatMessage(messages.signinwithplex)
-                      : intl.formatMessage(messages.signinwithjellyfin, {
-                          mediaServerName:
-                            publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                              ? 'Emby'
-                              : 'Jellyfin',
-                        })}
-                  </button>
-                  <AccordionContent isOpen={openIndexes.includes(0)}>
-                    <div className="px-10 py-8">
+            ) : (
+              <Accordion single atLeastOne>
+                {({ openIndexes, handleClick, AccordionContent }) => (
+                  <>
+                    <button
+                      className={`w-full cursor-default bg-gray-800 bg-opacity-70 py-2 text-center text-sm font-bold text-gray-400 transition-colors duration-200 hover:cursor-pointer hover:bg-gray-700 focus:outline-none sm:rounded-t-lg ${
+                        openIndexes.includes(0) && 'text-indigo-500'
+                      }`}
+                      onClick={() => handleClick(0)}
+                    >
                       {settings.currentSettings.mediaServerType ==
-                      MediaServerType.PLEX ? (
-                        <PlexLoginButton
-                          isProcessing={isProcessing}
-                          onAuthToken={(authToken) => setAuthToken(authToken)}
-                        />
-                      ) : (
-                        <JellyfinLogin revalidate={revalidate} />
-                      )}
-                    </div>
-                  </AccordionContent>
-                  {settings.currentSettings.localLogin && (
-                    <div>
-                      <button
-                        className={`w-full cursor-default bg-gray-800 bg-opacity-70 py-2 text-center text-sm font-bold text-gray-400 transition-colors duration-200 hover:cursor-pointer hover:bg-gray-700 focus:outline-none ${
-                          openIndexes.includes(1)
-                            ? 'text-indigo-500'
-                            : 'sm:rounded-b-lg'
-                        }`}
-                        onClick={() => handleClick(1)}
-                      >
-                        {intl.formatMessage(messages.signinwithoverseerr, {
-                          applicationTitle:
-                            settings.currentSettings.applicationTitle,
-                        })}
-                      </button>
-                      <AccordionContent isOpen={openIndexes.includes(1)}>
-                        <div className="px-10 py-8">
-                          <LocalLogin revalidate={revalidate} />
-                        </div>
-                      </AccordionContent>
-                    </div>
-                  )}
-                </>
-              )}
-            </Accordion>
+                      MediaServerType.PLEX
+                        ? intl.formatMessage(messages.useplexaccount)
+                        : intl.formatMessage(messages.usejellyfinaccount, {
+                            mediaServerName:
+                              publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                                ? 'Emby'
+                                : 'Jellyfin',
+                          })}
+                    </button>
+                    <AccordionContent isOpen={openIndexes.includes(0)}>
+                      <div className="px-10 py-8">
+                        {settings.currentSettings.mediaServerType ==
+                        MediaServerType.PLEX ? (
+                          <PlexLogin
+                            onAuthenticated={revalidate}
+                            isProcessing={isProcessing}
+                            setProcessing={setProcessing}
+                            onError={(err) => setError(err)}
+                          />
+                        ) : (
+                          <JellyfinLogin onAuthenticated={revalidate} />
+                        )}
+                      </div>
+                    </AccordionContent>
+                    {settings.currentSettings.oidcLogin && (
+                      <div>
+                        <button
+                          className={`w-full cursor-default bg-gray-800 bg-opacity-70 py-2 text-center text-sm font-bold text-gray-400 transition-colors duration-200 hover:cursor-pointer hover:bg-gray-700 focus:outline-none ${
+                            openIndexes.includes(2)
+                              ? 'text-indigo-500'
+                              : 'sm:rounded-b-lg'
+                          }`}
+                          onClick={() => handleClick(2)}
+                        >
+                          {intl.formatMessage(messages.useoidcaccount, {
+                            OIDCProvider:
+                              settings.currentSettings.oidcProviderName,
+                          })}
+                        </button>
+                        <AccordionContent isOpen={openIndexes.includes(2)}>
+                          <div className="px-10 py-8">
+                            <OidcLogin
+                              revalidate={revalidate}
+                              setError={setError}
+                              isProcessing={isProcessing}
+                              setProcessing={setProcessing}
+                            />
+                          </div>
+                        </AccordionContent>
+                      </div>
+                    )}
+                    {settings.currentSettings.localLogin && (
+                      <div>
+                        <button
+                          className={`w-full cursor-default bg-gray-800 bg-opacity-70 py-2 text-center text-sm font-bold text-gray-400 transition-colors duration-200 hover:cursor-pointer hover:bg-gray-700 focus:outline-none ${
+                            openIndexes.includes(1)
+                              ? 'text-indigo-500'
+                              : 'sm:rounded-b-lg'
+                          }`}
+                          onClick={() => handleClick(1)}
+                        >
+                          {intl.formatMessage(messages.useoverseeerraccount, {
+                            applicationTitle:
+                              settings.currentSettings.applicationTitle,
+                          })}
+                        </button>
+                        <AccordionContent isOpen={openIndexes.includes(1)}>
+                          <div className="px-10 py-8">
+                            <LocalLogin revalidate={revalidate} />
+                          </div>
+                        </AccordionContent>
+                      </div>
+                    )}
+                  </>
+                )}
+              </Accordion>
+            )}
           </>
         </div>
       </div>

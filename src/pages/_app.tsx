@@ -3,6 +3,7 @@ import App, { AppInitialProps, AppProps } from 'next/app';
 import Head from 'next/head';
 import React, { useEffect, useState } from 'react';
 import { IntlProvider } from 'react-intl';
+import { AuthProvider } from 'react-oidc-context';
 import { ToastProvider } from 'react-toast-notifications';
 import { SWRConfig } from 'swr';
 import { MediaServerType } from '../../server/constants/server';
@@ -121,34 +122,52 @@ const CoreApp: Omit<NextAppComponentType, 'origGetInitialProps'> = ({
         fetcher: (url) => axios.get(url).then((res) => res.data),
       }}
     >
-      <LanguageContext.Provider value={{ locale: currentLocale, setLocale }}>
-        <IntlProvider
-          locale={currentLocale}
-          defaultLocale="en"
-          messages={loadedMessages}
-        >
-          <LoadingBar />
-          <SettingsProvider currentSettings={currentSettings}>
-            <InteractionProvider>
-              <ToastProvider components={{ Toast, ToastContainer }}>
-                <Head>
-                  <title>{currentSettings.applicationTitle}</title>
-                  <meta
-                    name="viewport"
-                    content="initial-scale=1, viewport-fit=cover, width=device-width"
-                  ></meta>
-                  <PWAHeader
-                    applicationTitle={currentSettings.applicationTitle}
-                  />
-                </Head>
-                <StatusChecker />
-                <ServiceWorkerSetup />
-                <UserContext initialUser={user}>{component}</UserContext>
-              </ToastProvider>
-            </InteractionProvider>
-          </SettingsProvider>
-        </IntlProvider>
-      </LanguageContext.Provider>
+      <AuthProvider
+        authority={currentSettings.oidcIssuer}
+        client_id={currentSettings.oidcClientId}
+        scope="openid profile email"
+        redirect_uri={`${
+          process.env.NODE_ENV !== 'production'
+            ? 'http://localhost:5055'
+            : currentSettings.applicationUrl
+        }/login`}
+        onSigninCallback={() => {
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
+          );
+        }}
+      >
+        <LanguageContext.Provider value={{ locale: currentLocale, setLocale }}>
+          <IntlProvider
+            locale={currentLocale}
+            defaultLocale="en"
+            messages={loadedMessages}
+          >
+            <LoadingBar />
+            <SettingsProvider currentSettings={currentSettings}>
+              <InteractionProvider>
+                <ToastProvider components={{ Toast, ToastContainer }}>
+                  <Head>
+                    <title>{currentSettings.applicationTitle}</title>
+                    <meta
+                      name="viewport"
+                      content="initial-scale=1, viewport-fit=cover, width=device-width"
+                    ></meta>
+                    <PWAHeader
+                      applicationTitle={currentSettings.applicationTitle}
+                    />
+                  </Head>
+                  <StatusChecker />
+                  <ServiceWorkerSetup />
+                  <UserContext initialUser={user}>{component}</UserContext>
+                </ToastProvider>
+              </InteractionProvider>
+            </SettingsProvider>
+          </IntlProvider>
+        </LanguageContext.Provider>
+      </AuthProvider>
     </SWRConfig>
   );
 };
@@ -164,6 +183,10 @@ CoreApp.getInitialProps = async (initialProps) => {
     movie4kEnabled: false,
     series4kEnabled: false,
     localLogin: true,
+    oidcLogin: false,
+    oidcIssuer: '',
+    oidcProviderName: 'OpenID Connect',
+    oidcClientId: '',
     region: '',
     originalLanguage: '',
     mediaServerType: MediaServerType.NOT_CONFIGURED,
