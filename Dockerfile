@@ -28,6 +28,9 @@ RUN yarn install --production --ignore-scripts --prefer-offline
 
 RUN rm -rf src server .next/cache
 
+#safety for when the config folder does not exicsts
+RUN mkdir -p config
+
 RUN touch config/DOCKER
 
 RUN echo "{\"commitTag\": \"${COMMIT_TAG}\"}" > committag.json
