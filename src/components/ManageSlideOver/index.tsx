@@ -13,8 +13,10 @@ import { IssueStatus } from '../../../server/constants/issue';
 import {
   MediaRequestStatus,
   MediaStatus,
+  MediaType,
 } from '../../../server/constants/media';
 import { MediaWatchDataResponse } from '../../../server/interfaces/api/mediaInterfaces';
+import { RadarrSettings, SonarrSettings } from '../../../server/lib/settings';
 import { MovieDetails } from '../../../server/models/Movie';
 import { TvDetails } from '../../../server/models/Tv';
 import useSettings from '../../hooks/useSettings';
@@ -91,6 +93,12 @@ const ManageSlideOver: React.FC<
       ? `/api/v1/media/${data.mediaInfo.id}/watch_data`
       : null
   );
+  const { data: radarrData } = useSWR<RadarrSettings[]>(
+    '/api/v1/settings/radarr'
+  );
+  const { data: sonarrData } = useSWR<SonarrSettings[]>(
+    '/api/v1/settings/sonarr'
+  );
 
   const deleteMedia = async () => {
     if (data.mediaInfo) {
@@ -104,6 +112,27 @@ const ManageSlideOver: React.FC<
       await axios.delete(`/api/v1/media/${data.mediaInfo.id}`);
       revalidate();
     }
+  };
+
+  const isDefaultService = () => {
+    if (data.mediaInfo) {
+      if (data.mediaInfo.mediaType === MediaType.MOVIE) {
+        return (
+          radarrData?.find(
+            (radarr) =>
+              radarr.isDefault && radarr.id === data.mediaInfo?.serviceId
+          ) !== undefined
+        );
+      } else {
+        return (
+          sonarrData?.find(
+            (sonarr) =>
+              sonarr.isDefault && sonarr.id === data.mediaInfo?.serviceId
+          ) !== undefined
+        );
+      }
+    }
+    return false;
   };
 
   const markAvailable = async (is4k = false) => {
@@ -336,7 +365,8 @@ const ManageSlideOver: React.FC<
                 )}
 
                 {hasPermission(Permission.ADMIN) &&
-                  data?.mediaInfo?.serviceUrl && (
+                  data?.mediaInfo?.serviceUrl &&
+                  isDefaultService() && (
                     <div>
                       <ConfirmButton
                         onClick={() => deleteMediaFile()}
@@ -482,35 +512,37 @@ const ManageSlideOver: React.FC<
                         </span>
                       </Button>
                     </a>
-                    <div>
-                      <ConfirmButton
-                        onClick={() => deleteMediaFile()}
-                        confirmText={intl.formatMessage(
-                          globalMessages.areyousure
-                        )}
-                        className="w-full"
-                      >
-                        <TrashIcon />
-                        <span>
-                          {intl.formatMessage(messages.removearr4k, {
-                            arr: mediaType === 'movie' ? 'Radarr' : 'Sonarr',
-                          })}
-                        </span>
-                      </ConfirmButton>
-                      <div className="mt-1 text-xs text-gray-400">
-                        {intl.formatMessage(
-                          messages.manageModalRemoveMediaWarning,
-                          {
-                            mediaType: intl.formatMessage(
-                              mediaType === 'movie'
-                                ? messages.movie
-                                : messages.tvshow
-                            ),
-                            arr: mediaType === 'movie' ? 'Radarr' : 'Sonarr',
-                          }
-                        )}
+                    {isDefaultService() && (
+                      <div>
+                        <ConfirmButton
+                          onClick={() => deleteMediaFile()}
+                          confirmText={intl.formatMessage(
+                            globalMessages.areyousure
+                          )}
+                          className="w-full"
+                        >
+                          <TrashIcon />
+                          <span>
+                            {intl.formatMessage(messages.removearr4k, {
+                              arr: mediaType === 'movie' ? 'Radarr' : 'Sonarr',
+                            })}
+                          </span>
+                        </ConfirmButton>
+                        <div className="mt-1 text-xs text-gray-400">
+                          {intl.formatMessage(
+                            messages.manageModalRemoveMediaWarning,
+                            {
+                              mediaType: intl.formatMessage(
+                                mediaType === 'movie'
+                                  ? messages.movie
+                                  : messages.tvshow
+                              ),
+                              arr: mediaType === 'movie' ? 'Radarr' : 'Sonarr',
+                            }
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </>
                 )}
               </div>
