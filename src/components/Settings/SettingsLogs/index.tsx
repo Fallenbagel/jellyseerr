@@ -1,3 +1,14 @@
+import Badge from '@app/components/Common/Badge';
+import Button from '@app/components/Common/Button';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import Modal from '@app/components/Common/Modal';
+import PageTitle from '@app/components/Common/PageTitle';
+import Table from '@app/components/Common/Table';
+import Tooltip from '@app/components/Common/Tooltip';
+import { useUpdateQueryParams } from '@app/hooks/useUpdateQueryParams';
+import globalMessages from '@app/i18n/globalMessages';
+import Error from '@app/pages/_error';
+import { Transition } from '@headlessui/react';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -7,26 +18,16 @@ import {
   PauseIcon,
   PlayIcon,
 } from '@heroicons/react/solid';
+import type {
+  LogMessage,
+  LogsResultsResponse,
+} from '@server/interfaces/api/settingsInterfaces';
 import copy from 'copy-to-clipboard';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
-import {
-  LogMessage,
-  LogsResultsResponse,
-} from '../../../../server/interfaces/api/settingsInterfaces';
-import { useUpdateQueryParams } from '../../../hooks/useUpdateQueryParams';
-import globalMessages from '../../../i18n/globalMessages';
-import Error from '../../../pages/_error';
-import Badge from '../../Common/Badge';
-import Button from '../../Common/Button';
-import LoadingSpinner from '../../Common/LoadingSpinner';
-import Modal from '../../Common/Modal';
-import PageTitle from '../../Common/PageTitle';
-import Table from '../../Common/Table';
-import Transition from '../../Transition';
 
 const messages = defineMessages({
   logs: 'Logs',
@@ -47,18 +48,22 @@ const messages = defineMessages({
   logDetails: 'Log Details',
   extraData: 'Additional Data',
   copiedLogMessage: 'Copied log message to clipboard.',
+  viewdetails: 'View Details',
 });
 
 type Filter = 'debug' | 'info' | 'warn' | 'error';
 
-const SettingsLogs: React.FC = () => {
+const SettingsLogs = () => {
   const router = useRouter();
   const intl = useIntl();
   const { addToast } = useToasts();
   const [currentFilter, setCurrentFilter] = useState<Filter>('debug');
   const [currentPageSize, setCurrentPageSize] = useState(25);
   const [refreshInterval, setRefreshInterval] = useState(5000);
-  const [activeLog, setActiveLog] = useState<LogMessage | null>(null);
+  const [activeLog, setActiveLog] = useState<{
+    isOpen: boolean;
+    log?: LogMessage;
+  }>({ isOpen: false });
 
   const page = router.query.page ? Number(router.query.page) : 1;
   const pageIndex = page - 1;
@@ -133,6 +138,7 @@ const SettingsLogs: React.FC = () => {
         ]}
       />
       <Transition
+        as={Fragment}
         enter="opacity-0 transition duration-300"
         enterFrom="opacity-0"
         enterTo="opacity-100"
@@ -140,14 +146,15 @@ const SettingsLogs: React.FC = () => {
         leaveFrom="opacity-100"
         leaveTo="opacity-0"
         appear
-        show={!!activeLog}
+        show={activeLog.isOpen}
       >
         <Modal
           title={intl.formatMessage(messages.logDetails)}
-          iconSvg={<DocumentSearchIcon />}
-          onCancel={() => setActiveLog(null)}
+          onCancel={() => setActiveLog({ log: activeLog.log, isOpen: false })}
           cancelText={intl.formatMessage(globalMessages.close)}
-          onOk={() => (activeLog ? copyLogString(activeLog) : undefined)}
+          onOk={() =>
+            activeLog.log ? copyLogString(activeLog.log) : undefined
+          }
           okText={intl.formatMessage(messages.copyToClipboard)}
           okButtonType="primary"
         >
@@ -159,7 +166,7 @@ const SettingsLogs: React.FC = () => {
                 </div>
                 <div className="mb-1 text-sm font-medium leading-5 text-gray-400 sm:mt-2">
                   <div className="flex max-w-lg items-center">
-                    {intl.formatDate(activeLog.timestamp, {
+                    {intl.formatDate(activeLog.log?.timestamp, {
                       year: 'numeric',
                       month: 'short',
                       day: '2-digit',
@@ -178,16 +185,16 @@ const SettingsLogs: React.FC = () => {
                   <div className="flex max-w-lg items-center">
                     <Badge
                       badgeType={
-                        activeLog.level === 'error'
+                        activeLog.log?.level === 'error'
                           ? 'danger'
-                          : activeLog.level === 'warn'
+                          : activeLog.log?.level === 'warn'
                           ? 'warning'
-                          : activeLog.level === 'info'
+                          : activeLog.log?.level === 'info'
                           ? 'success'
                           : 'default'
                       }
                     >
-                      {activeLog.level.toUpperCase()}
+                      {activeLog.log?.level.toUpperCase()}
                     </Badge>
                   </div>
                 </div>
@@ -198,7 +205,7 @@ const SettingsLogs: React.FC = () => {
                 </div>
                 <div className="mb-1 text-sm font-medium leading-5 text-gray-400 sm:mt-2">
                   <div className="flex max-w-lg items-center">
-                    {activeLog.label}
+                    {activeLog.log?.label}
                   </div>
                 </div>
               </div>
@@ -208,18 +215,18 @@ const SettingsLogs: React.FC = () => {
                 </div>
                 <div className="col-span-2 mb-1 text-sm font-medium leading-5 text-gray-400 sm:mt-2">
                   <div className="flex max-w-lg items-center">
-                    {activeLog.message}
+                    {activeLog.log?.message}
                   </div>
                 </div>
               </div>
-              {activeLog.data && (
+              {activeLog.log?.data && (
                 <div className="form-row">
                   <div className="text-label">
                     {intl.formatMessage(messages.extraData)}
                   </div>
                   <div className="col-span-2 mb-1 text-sm font-medium leading-5 text-gray-400 sm:mt-2">
                     <code className="block max-h-64 w-full overflow-auto whitespace-pre bg-gray-800 px-6 py-4 ring-1 ring-gray-700">
-                      {JSON.stringify(activeLog.data, null, ' ')}
+                      {JSON.stringify(activeLog.log?.data, null, ' ')}
                     </code>
                   </div>
                 </div>
@@ -232,9 +239,9 @@ const SettingsLogs: React.FC = () => {
         <h3 className="heading">{intl.formatMessage(messages.logs)}</h3>
         <p className="description">
           {intl.formatMessage(messages.logsDescription, {
-            code: function code(msg) {
-              return <code className="bg-opacity-50">{msg}</code>;
-            },
+            code: (msg: React.ReactNode) => (
+              <code className="bg-opacity-50">{msg}</code>
+            ),
             appDataPath: appData ? appData.appDataPath : '/app/config',
           })}
         </p>
@@ -327,23 +334,33 @@ const SettingsLogs: React.FC = () => {
                   <Table.TD className="text-gray-300">{row.message}</Table.TD>
                   <Table.TD className="-m-1 flex flex-wrap items-center justify-end">
                     {row.data && (
+                      <Tooltip
+                        content={intl.formatMessage(messages.viewdetails)}
+                      >
+                        <Button
+                          buttonType="primary"
+                          buttonSize="sm"
+                          onClick={() =>
+                            setActiveLog({ log: row, isOpen: true })
+                          }
+                          className="m-1"
+                        >
+                          <DocumentSearchIcon className="icon-md" />
+                        </Button>
+                      </Tooltip>
+                    )}
+                    <Tooltip
+                      content={intl.formatMessage(messages.copyToClipboard)}
+                    >
                       <Button
                         buttonType="primary"
                         buttonSize="sm"
-                        onClick={() => setActiveLog(row)}
+                        onClick={() => copyLogString(row)}
                         className="m-1"
                       >
-                        <DocumentSearchIcon className="icon-md" />
+                        <ClipboardCopyIcon className="icon-md" />
                       </Button>
-                    )}
-                    <Button
-                      buttonType="primary"
-                      buttonSize="sm"
-                      onClick={() => copyLogString(row)}
-                      className="m-1"
-                    >
-                      <ClipboardCopyIcon className="icon-md" />
-                    </Button>
+                    </Tooltip>
                   </Table.TD>
                 </tr>
               );
@@ -388,9 +405,9 @@ const SettingsLogs: React.FC = () => {
                                 data.results.length
                               : (pageIndex + 1) * currentPageSize,
                           total: data.pageInfo.results,
-                          strong: function strong(msg) {
-                            return <span className="font-medium">{msg}</span>;
-                          },
+                          strong: (msg: React.ReactNode) => (
+                            <span className="font-medium">{msg}</span>
+                          ),
                         })}
                     </p>
                   </div>

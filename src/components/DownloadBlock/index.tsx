@@ -1,7 +1,6 @@
-import React from 'react';
+import Badge from '@app/components/Common/Badge';
+import type { DownloadingItem } from '@server/lib/downloadtracker';
 import { defineMessages, FormattedRelativeTime, useIntl } from 'react-intl';
-import { DownloadingItem } from '../../../server/lib/downloadtracker';
-import Badge from '../Common/Badge';
 
 const messages = defineMessages({
   estimatedtime: 'Estimated {time}',
@@ -12,10 +11,7 @@ interface DownloadBlockProps {
   is4k?: boolean;
 }
 
-const DownloadBlock: React.FC<DownloadBlockProps> = ({
-  downloadItem,
-  is4k = false,
-}) => {
+const DownloadBlock = ({ downloadItem, is4k = false }: DownloadBlockProps) => {
   const intl = useIntl();
 
   return (

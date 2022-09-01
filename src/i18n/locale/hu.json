@@ -484,7 +484,7 @@
   "components.Settings.SettingsAbout.totalrequests": "Összes kérés",
   "components.Settings.SettingsAbout.totalmedia": "Teljes média",
   "components.Settings.SettingsAbout.timezone": "Időzóna",
-  "components.Settings.SettingsAbout.supportoverseerr": "Overseerr támogatása",
+  "components.Settings.SettingsAbout.supportoverseerr": "Jellyseerr támogatása",
   "components.Settings.SettingsAbout.preferredmethod": "Előnyben részesített",
   "components.Settings.SettingsAbout.overseerrinformation": "Jellyseerr információk",
   "components.Settings.SettingsAbout.outofdate": "Lejárt",

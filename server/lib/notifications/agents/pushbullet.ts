@@ -1,19 +1,18 @@
+import { IssueStatus, IssueTypeName } from '@server/constants/issue';
+import { MediaStatus } from '@server/constants/media';
+import { getRepository } from '@server/datasource';
+import { User } from '@server/entity/User';
+import type { NotificationAgentPushbullet } from '@server/lib/settings';
+import { getSettings, NotificationAgentKey } from '@server/lib/settings';
+import logger from '@server/logger';
 import axios from 'axios';
-import { getRepository } from 'typeorm';
 import {
   hasNotificationType,
   Notification,
   shouldSendAdminNotification,
 } from '..';
-import { IssueStatus, IssueTypeName } from '../../../constants/issue';
-import { User } from '../../../entity/User';
-import logger from '../../../logger';
-import {
-  getSettings,
-  NotificationAgentKey,
-  NotificationAgentPushbullet,
-} from '../../settings';
-import { BaseAgent, NotificationAgent, NotificationPayload } from './agent';
+import type { NotificationAgent, NotificationPayload } from './agent';
+import { BaseAgent } from './agent';
 
 interface PushbulletPayload {
   type: string;
@@ -54,6 +53,12 @@ class PushbulletAgent
 
       let status = '';
       switch (type) {
+        case Notification.MEDIA_AUTO_REQUESTED:
+          status =
+            payload.media?.status === MediaStatus.PENDING
+              ? 'Pending Approval'
+              : 'Processing';
+          break;
         case Notification.MEDIA_PENDING:
           status = 'Pending Approval';
           break;
@@ -106,6 +111,7 @@ class PushbulletAgent
 
     // Send system notification
     if (
+      payload.notifySystem &&
       hasNotificationType(type, settings.types ?? 0) &&
       settings.enabled &&
       settings.options.accessToken

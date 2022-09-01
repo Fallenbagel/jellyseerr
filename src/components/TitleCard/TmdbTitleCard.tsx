@@ -1,20 +1,31 @@
-import React from 'react';
+import TitleCard from '@app/components/TitleCard';
+import { Permission, useUser } from '@app/hooks/useUser';
+import type { MovieDetails } from '@server/models/Movie';
+import type { TvDetails } from '@server/models/Tv';
 import { useInView } from 'react-intersection-observer';
 import useSWR from 'swr';
-import TitleCard from '.';
-import type { MovieDetails } from '../../../server/models/Movie';
-import type { TvDetails } from '../../../server/models/Tv';
 
-interface TmdbTitleCardProps {
+export interface TmdbTitleCardProps {
+  id: number;
   tmdbId: number;
+  tvdbId?: number;
   type: 'movie' | 'tv';
+  canExpand?: boolean;
 }
 
 const isMovie = (movie: MovieDetails | TvDetails): movie is MovieDetails => {
   return (movie as MovieDetails).title !== undefined;
 };
 
-const TmdbTitleCard: React.FC<TmdbTitleCardProps> = ({ tmdbId, type }) => {
+const TmdbTitleCard = ({
+  id,
+  tmdbId,
+  tvdbId,
+  type,
+  canExpand,
+}: TmdbTitleCardProps) => {
+  const { hasPermission } = useUser();
+
   const { ref, inView } = useInView({
     triggerOnce: true,
   });
@@ -27,13 +38,20 @@ const TmdbTitleCard: React.FC<TmdbTitleCardProps> = ({ tmdbId, type }) => {
   if (!title && !error) {
     return (
       <div ref={ref}>
-        <TitleCard.Placeholder />
+        <TitleCard.Placeholder canExpand={canExpand} />
       </div>
     );
   }
 
   if (!title) {
-    return <TitleCard.Placeholder />;
+    return hasPermission(Permission.ADMIN) ? (
+      <TitleCard.ErrorCard
+        id={id}
+        tmdbId={tmdbId}
+        tvdbId={tvdbId}
+        type={type}
+      />
+    ) : null;
   }
 
   return isMovie(title) ? (
@@ -46,6 +64,7 @@ const TmdbTitleCard: React.FC<TmdbTitleCardProps> = ({ tmdbId, type }) => {
       userScore={title.voteAverage}
       year={title.releaseDate}
       mediaType={'movie'}
+      canExpand={canExpand}
     />
   ) : (
     <TitleCard
@@ -57,6 +76,7 @@ const TmdbTitleCard: React.FC<TmdbTitleCardProps> = ({ tmdbId, type }) => {
       userScore={title.voteAverage}
       year={title.firstAirDate}
       mediaType={'tv'}
+      canExpand={canExpand}
     />
   );
 };

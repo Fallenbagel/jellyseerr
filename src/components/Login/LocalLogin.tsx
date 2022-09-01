@@ -1,13 +1,13 @@
+import Button from '@app/components/Common/Button';
+import SensitiveInput from '@app/components/Common/SensitiveInput';
+import useSettings from '@app/hooks/useSettings';
 import { LoginIcon, SupportIcon } from '@heroicons/react/outline';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import * as Yup from 'yup';
-import useSettings from '../../hooks/useSettings';
-import Button from '../Common/Button';
-import SensitiveInput from '../Common/SensitiveInput';
 
 const messages = defineMessages({
   username: 'Username',
@@ -25,7 +25,7 @@ interface LocalLoginProps {
   revalidate: () => void;
 }
 
-const LocalLogin: React.FC<LocalLoginProps> = ({ revalidate }) => {
+const LocalLogin = ({ revalidate }: LocalLoginProps) => {
   const intl = useIntl();
   const settings = useSettings();
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -80,11 +80,14 @@ const LocalLogin: React.FC<LocalLoginProps> = ({ revalidate }) => {
                       name="email"
                       type="text"
                       inputMode="email"
+                      data-testid="email"
                     />
                   </div>
-                  {errors.email && touched.email && (
-                    <div className="error">{errors.email}</div>
-                  )}
+                  {errors.email &&
+                    touched.email &&
+                    typeof errors.email === 'string' && (
+                      <div className="error">{errors.email}</div>
+                    )}
                 </div>
                 <label htmlFor="password" className="text-label">
                   {intl.formatMessage(messages.password)}
@@ -97,11 +100,14 @@ const LocalLogin: React.FC<LocalLoginProps> = ({ revalidate }) => {
                       name="password"
                       type="password"
                       autoComplete="current-password"
+                      data-testid="password"
                     />
                   </div>
-                  {errors.password && touched.password && (
-                    <div className="error">{errors.password}</div>
-                  )}
+                  {errors.password &&
+                    touched.password &&
+                    typeof errors.password === 'string' && (
+                      <div className="error">{errors.password}</div>
+                    )}
                 </div>
                 {loginError && (
                   <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
@@ -116,6 +122,7 @@ const LocalLogin: React.FC<LocalLoginProps> = ({ revalidate }) => {
                       buttonType="primary"
                       type="submit"
                       disabled={isSubmitting || !isValid}
+                      data-testid="local-signin-button"
                     >
                       <LoginIcon />
                       <span>

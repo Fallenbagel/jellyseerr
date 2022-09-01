@@ -1,19 +1,17 @@
+import type { AvailableLocale } from '@app/context/LanguageContext';
+import { availableLanguages } from '@app/context/LanguageContext';
+import useClickOutside from '@app/hooks/useClickOutside';
+import useLocale from '@app/hooks/useLocale';
+import { Transition } from '@headlessui/react';
 import { TranslateIcon } from '@heroicons/react/solid';
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import {
-  availableLanguages,
-  AvailableLocale,
-} from '../../../context/LanguageContext';
-import useClickOutside from '../../../hooks/useClickOutside';
-import useLocale from '../../../hooks/useLocale';
-import Transition from '../../Transition';
 
 const messages = defineMessages({
   displaylanguage: 'Display Language',
 });
 
-const LanguagePicker: React.FC = () => {
+const LanguagePicker = () => {
   const intl = useIntl();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { locale, setLocale } = useLocale();
@@ -34,6 +32,7 @@ const LanguagePicker: React.FC = () => {
         </button>
       </div>
       <Transition
+        as="div"
         show={isDropdownOpen}
         enter="transition ease-out duration-100 opacity-0"
         enterFrom="transform opacity-0 scale-95"

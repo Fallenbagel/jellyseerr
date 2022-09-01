@@ -1,4 +1,4 @@
-import logger from '../../logger';
+import logger from '@server/logger';
 import ServarrBase from './base';
 
 export interface RadarrMovieOptions {
@@ -69,7 +69,7 @@ class RadarrAPI extends ServarrBase<{ movieId: number }> {
 
       return response.data[0];
     } catch (e) {
-      logger.error('Error retrieving movie by TMDb ID', {
+      logger.error('Error retrieving movie by TMDB ID', {
         label: 'Radarr API',
         errorMessage: e.message,
         tmdbId: id,

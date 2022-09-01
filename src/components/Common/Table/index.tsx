@@ -1,17 +1,20 @@
-import React, { AllHTMLAttributes } from 'react';
-import { withProperties } from '../../../utils/typeHelpers';
+import { withProperties } from '@app/utils/typeHelpers';
 
-const TBody: React.FC = ({ children }) => {
+type TBodyProps = {
+  children: React.ReactNode;
+};
+
+const TBody = ({ children }: TBodyProps) => {
   return (
     <tbody className="divide-y divide-gray-700 bg-gray-800">{children}</tbody>
   );
 };
 
-const TH: React.FC<AllHTMLAttributes<HTMLTableHeaderCellElement>> = ({
+const TH = ({
   children,
   className,
   ...props
-}) => {
+}: React.ComponentPropsWithoutRef<'th'>) => {
   const style = [
     'px-4 py-3 bg-gray-500 text-left text-xs leading-4 font-medium text-gray-200 uppercase tracking-wider truncate',
   ];
@@ -27,18 +30,18 @@ const TH: React.FC<AllHTMLAttributes<HTMLTableHeaderCellElement>> = ({
   );
 };
 
-interface TDProps extends AllHTMLAttributes<HTMLTableCellElement> {
+type TDProps = {
   alignText?: 'left' | 'center' | 'right';
   noPadding?: boolean;
-}
+};
 
-const TD: React.FC<TDProps> = ({
+const TD = ({
   children,
   alignText = 'left',
   noPadding,
   className,
   ...props
-}) => {
+}: TDProps & React.ComponentPropsWithoutRef<'td'>) => {
   const style = ['text-sm leading-5 text-white'];
 
   switch (alignText) {
@@ -68,7 +71,11 @@ const TD: React.FC<TDProps> = ({
   );
 };
 
-const Table: React.FC = ({ children }) => {
+type TableProps = {
+  children: React.ReactNode;
+};
+
+const Table = ({ children }: TableProps) => {
   return (
     <div className="flex flex-col">
       <div className="my-2 -mx-4 overflow-x-auto md:mx-0 lg:mx-0">

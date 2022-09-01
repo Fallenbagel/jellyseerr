@@ -1,20 +1,19 @@
+import Header from '@app/components/Common/Header';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import PageTitle from '@app/components/Common/PageTitle';
+import PersonCard from '@app/components/PersonCard';
+import Error from '@app/pages/_error';
+import type { TvDetails } from '@server/models/Tv';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
-import type { TvDetails } from '../../../../server/models/Tv';
-import Error from '../../../pages/_error';
-import Header from '../../Common/Header';
-import LoadingSpinner from '../../Common/LoadingSpinner';
-import PageTitle from '../../Common/PageTitle';
-import PersonCard from '../../PersonCard';
 
 const messages = defineMessages({
   fullseriescrew: 'Full Series Crew',
 });
 
-const TvCrew: React.FC = () => {
+const TvCrew = () => {
   const router = useRouter();
   const intl = useIntl();
   const { data, error } = useSWR<TvDetails>(`/api/v1/tv/${router.query.tvId}`);

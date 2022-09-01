@@ -1,23 +1,20 @@
+import ButtonWithDropdown from '@app/components/Common/ButtonWithDropdown';
+import RequestModal from '@app/components/RequestModal';
+import useSettings from '@app/hooks/useSettings';
+import { Permission, useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
 import { DownloadIcon } from '@heroicons/react/outline';
 import {
   CheckIcon,
   InformationCircleIcon,
   XIcon,
 } from '@heroicons/react/solid';
+import { MediaRequestStatus, MediaStatus } from '@server/constants/media';
+import type Media from '@server/entity/Media';
+import type { MediaRequest } from '@server/entity/MediaRequest';
 import axios from 'axios';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import {
-  MediaRequestStatus,
-  MediaStatus,
-} from '../../../server/constants/media';
-import Media from '../../../server/entity/Media';
-import { MediaRequest } from '../../../server/entity/MediaRequest';
-import useSettings from '../../hooks/useSettings';
-import { Permission, useUser } from '../../hooks/useUser';
-import globalMessages from '../../i18n/globalMessages';
-import ButtonWithDropdown from '../Common/ButtonWithDropdown';
-import RequestModal from '../RequestModal';
 
 const messages = defineMessages({
   viewrequest: 'View Request',
@@ -54,14 +51,14 @@ interface RequestButtonProps {
   is4kShowComplete?: boolean;
 }
 
-const RequestButton: React.FC<RequestButtonProps> = ({
+const RequestButton = ({
   tmdbId,
   onUpdate,
   media,
   mediaType,
   isShowComplete = false,
   is4kShowComplete = false,
-}) => {
+}: RequestButtonProps) => {
   const intl = useIntl();
   const settings = useSettings();
   const { user, hasPermission } = useUser();
@@ -77,13 +74,13 @@ const RequestButton: React.FC<RequestButtonProps> = ({
     (request) => request.status === MediaRequestStatus.PENDING && request.is4k
   );
 
+  // Current user's pending request, or the first pending request
   const activeRequest = useMemo(() => {
     return activeRequests && activeRequests.length > 0
       ? activeRequests.find((request) => request.requestedBy.id === user?.id) ??
           activeRequests[0]
       : undefined;
   }, [activeRequests, user]);
-
   const active4kRequest = useMemo(() => {
     return active4kRequests && active4kRequests.length > 0
       ? active4kRequests.find(
@@ -121,6 +118,151 @@ const RequestButton: React.FC<RequestButtonProps> = ({
   };
 
   const buttons: ButtonOption[] = [];
+
+  // If there are pending requests, show request management options first
+  if (activeRequest || active4kRequest) {
+    if (
+      activeRequest &&
+      (activeRequest.requestedBy.id === user?.id ||
+        (activeRequests?.length === 1 &&
+          hasPermission(Permission.MANAGE_REQUESTS)))
+    ) {
+      buttons.push({
+        id: 'active-request',
+        text: intl.formatMessage(messages.viewrequest),
+        action: () => {
+          setEditRequest(true);
+          setShowRequestModal(true);
+        },
+        svg: <InformationCircleIcon />,
+      });
+    }
+
+    if (
+      activeRequest &&
+      hasPermission(Permission.MANAGE_REQUESTS) &&
+      mediaType === 'movie'
+    ) {
+      buttons.push(
+        {
+          id: 'approve-request',
+          text: intl.formatMessage(messages.approverequest),
+          action: () => {
+            modifyRequest(activeRequest, 'approve');
+          },
+          svg: <CheckIcon />,
+        },
+        {
+          id: 'decline-request',
+          text: intl.formatMessage(messages.declinerequest),
+          action: () => {
+            modifyRequest(activeRequest, 'decline');
+          },
+          svg: <XIcon />,
+        }
+      );
+    } else if (
+      activeRequests &&
+      activeRequests.length > 0 &&
+      hasPermission(Permission.MANAGE_REQUESTS) &&
+      mediaType === 'tv'
+    ) {
+      buttons.push(
+        {
+          id: 'approve-request-batch',
+          text: intl.formatMessage(messages.approverequests, {
+            requestCount: activeRequests.length,
+          }),
+          action: () => {
+            modifyRequests(activeRequests, 'approve');
+          },
+          svg: <CheckIcon />,
+        },
+        {
+          id: 'decline-request-batch',
+          text: intl.formatMessage(messages.declinerequests, {
+            requestCount: activeRequests.length,
+          }),
+          action: () => {
+            modifyRequests(activeRequests, 'decline');
+          },
+          svg: <XIcon />,
+        }
+      );
+    }
+
+    if (
+      active4kRequest &&
+      (active4kRequest.requestedBy.id === user?.id ||
+        (active4kRequests?.length === 1 &&
+          hasPermission(Permission.MANAGE_REQUESTS)))
+    ) {
+      buttons.push({
+        id: 'active-4k-request',
+        text: intl.formatMessage(messages.viewrequest4k),
+        action: () => {
+          setEditRequest(true);
+          setShowRequest4kModal(true);
+        },
+        svg: <InformationCircleIcon />,
+      });
+    }
+
+    if (
+      active4kRequest &&
+      hasPermission(Permission.MANAGE_REQUESTS) &&
+      mediaType === 'movie'
+    ) {
+      buttons.push(
+        {
+          id: 'approve-4k-request',
+          text: intl.formatMessage(messages.approverequest4k),
+          action: () => {
+            modifyRequest(active4kRequest, 'approve');
+          },
+          svg: <CheckIcon />,
+        },
+        {
+          id: 'decline-4k-request',
+          text: intl.formatMessage(messages.declinerequest4k),
+          action: () => {
+            modifyRequest(active4kRequest, 'decline');
+          },
+          svg: <XIcon />,
+        }
+      );
+    } else if (
+      active4kRequests &&
+      active4kRequests.length > 0 &&
+      hasPermission(Permission.MANAGE_REQUESTS) &&
+      mediaType === 'tv'
+    ) {
+      buttons.push(
+        {
+          id: 'approve-4k-request-batch',
+          text: intl.formatMessage(messages.approve4krequests, {
+            requestCount: active4kRequests.length,
+          }),
+          action: () => {
+            modifyRequests(active4kRequests, 'approve');
+          },
+          svg: <CheckIcon />,
+        },
+        {
+          id: 'decline-4k-request-batch',
+          text: intl.formatMessage(messages.decline4krequests, {
+            requestCount: active4kRequests.length,
+          }),
+          action: () => {
+            modifyRequests(active4kRequests, 'decline');
+          },
+          svg: <XIcon />,
+        }
+      );
+    }
+  }
+
+  // Standard request button
   if (
     (!media || media.status === MediaStatus.UNKNOWN) &&
     hasPermission(
@@ -142,8 +284,28 @@ const RequestButton: React.FC<RequestButtonProps> = ({
       },
       svg: <DownloadIcon />,
     });
+  } else if (
+    mediaType === 'tv' &&
+    (!activeRequest || activeRequest.requestedBy.id !== user?.id) &&
+    hasPermission([Permission.REQUEST, Permission.REQUEST_TV], {
+      type: 'or',
+    }) &&
+    media &&
+    media.status !== MediaStatus.AVAILABLE &&
+    !isShowComplete
+  ) {
+    buttons.push({
+      id: 'request-more',
+      text: intl.formatMessage(messages.requestmore),
+      action: () => {
+        setEditRequest(false);
+        setShowRequestModal(true);
+      },
+      svg: <DownloadIcon />,
+    });
   }
 
+  // 4K request button
   if (
     (!media || media.status4k === MediaStatus.UNKNOWN) &&
     hasPermission(
@@ -167,175 +329,7 @@ const RequestButton: React.FC<RequestButtonProps> = ({
       },
       svg: <DownloadIcon />,
     });
-  }
-
-  if (
-    activeRequest &&
-    (activeRequest.requestedBy.id === user?.id ||
-      (activeRequests?.length === 1 &&
-        hasPermission(Permission.MANAGE_REQUESTS)))
-  ) {
-    buttons.push({
-      id: 'active-request',
-      text: intl.formatMessage(messages.viewrequest),
-      action: () => {
-        setEditRequest(true);
-        setShowRequestModal(true);
-      },
-      svg: <InformationCircleIcon />,
-    });
-  }
-
-  if (
-    active4kRequest &&
-    (active4kRequest.requestedBy.id === user?.id ||
-      (active4kRequests?.length === 1 &&
-        hasPermission(Permission.MANAGE_REQUESTS)))
-  ) {
-    buttons.push({
-      id: 'active-4k-request',
-      text: intl.formatMessage(messages.viewrequest4k),
-      action: () => {
-        setEditRequest(true);
-        setShowRequest4kModal(true);
-      },
-      svg: <InformationCircleIcon />,
-    });
-  }
-
-  if (
-    activeRequest &&
-    hasPermission(Permission.MANAGE_REQUESTS) &&
-    mediaType === 'movie'
-  ) {
-    buttons.push(
-      {
-        id: 'approve-request',
-        text: intl.formatMessage(messages.approverequest),
-        action: () => {
-          modifyRequest(activeRequest, 'approve');
-        },
-        svg: <CheckIcon />,
-      },
-      {
-        id: 'decline-request',
-        text: intl.formatMessage(messages.declinerequest),
-        action: () => {
-          modifyRequest(activeRequest, 'decline');
-        },
-        svg: <XIcon />,
-      }
-    );
-  }
-
-  if (
-    activeRequests &&
-    activeRequests.length > 0 &&
-    hasPermission(Permission.MANAGE_REQUESTS) &&
-    mediaType === 'tv'
-  ) {
-    buttons.push(
-      {
-        id: 'approve-request-batch',
-        text: intl.formatMessage(messages.approverequests, {
-          requestCount: activeRequests.length,
-        }),
-        action: () => {
-          modifyRequests(activeRequests, 'approve');
-        },
-        svg: <CheckIcon />,
-      },
-      {
-        id: 'decline-request-batch',
-        text: intl.formatMessage(messages.declinerequests, {
-          requestCount: activeRequests.length,
-        }),
-        action: () => {
-          modifyRequests(activeRequests, 'decline');
-        },
-        svg: <XIcon />,
-      }
-    );
-  }
-
-  if (
-    active4kRequest &&
-    hasPermission(Permission.MANAGE_REQUESTS) &&
-    mediaType === 'movie'
-  ) {
-    buttons.push(
-      {
-        id: 'approve-4k-request',
-        text: intl.formatMessage(messages.approverequest4k),
-        action: () => {
-          modifyRequest(active4kRequest, 'approve');
-        },
-        svg: <CheckIcon />,
-      },
-      {
-        id: 'decline-4k-request',
-        text: intl.formatMessage(messages.declinerequest4k),
-        action: () => {
-          modifyRequest(active4kRequest, 'decline');
-        },
-        svg: <XIcon />,
-      }
-    );
-  }
-
-  if (
-    active4kRequests &&
-    active4kRequests.length > 0 &&
-    hasPermission(Permission.MANAGE_REQUESTS) &&
-    mediaType === 'tv'
-  ) {
-    buttons.push(
-      {
-        id: 'approve-4k-request-batch',
-        text: intl.formatMessage(messages.approve4krequests, {
-          requestCount: active4kRequests.length,
-        }),
-        action: () => {
-          modifyRequests(active4kRequests, 'approve');
-        },
-        svg: <CheckIcon />,
-      },
-      {
-        id: 'decline-4k-request-batch',
-        text: intl.formatMessage(messages.decline4krequests, {
-          requestCount: active4kRequests.length,
-        }),
-        action: () => {
-          modifyRequests(active4kRequests, 'decline');
-        },
-        svg: <XIcon />,
-      }
-    );
-  }
-
-  if (
-    mediaType === 'tv' &&
-    (!activeRequest || activeRequest.requestedBy.id !== user?.id) &&
-    hasPermission([Permission.REQUEST, Permission.REQUEST_TV], {
-      type: 'or',
-    }) &&
-    media &&
-    media.status !== MediaStatus.AVAILABLE &&
-    media.status !== MediaStatus.UNKNOWN &&
-    !isShowComplete
-  ) {
-    buttons.push({
-      id: 'request-more',
-      text: intl.formatMessage(messages.requestmore),
-      action: () => {
-        setEditRequest(false);
-        setShowRequestModal(true);
-      },
-      svg: <DownloadIcon />,
-    });
-  }
-
-  if (
+  } else if (
     mediaType === 'tv' &&
     (!active4kRequest || active4kRequest.requestedBy.id !== user?.id) &&
     hasPermission([Permission.REQUEST_4K, Permission.REQUEST_4K_TV], {
@@ -343,7 +337,6 @@ const RequestButton: React.FC<RequestButtonProps> = ({
     }) &&
     media &&
     media.status4k !== MediaStatus.AVAILABLE &&
-    media.status4k !== MediaStatus.UNKNOWN &&
     !is4kShowComplete &&
     settings.currentSettings.series4kEnabled
   ) {

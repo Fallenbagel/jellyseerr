@@ -1,4 +1,4 @@
-import cacheManager from '../lib/cache';
+import cacheManager from '@server/lib/cache';
 import ExternalAPI from './externalapi';
 
 interface RTSearchResult {

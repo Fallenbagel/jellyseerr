@@ -1,11 +1,13 @@
+import { MediaServerType } from '@server/constants/server';
+import downloadTracker from '@server/lib/downloadtracker';
+import { plexFullScanner, plexRecentScanner } from '@server/lib/scanners/plex';
+import { radarrScanner } from '@server/lib/scanners/radarr';
+import { sonarrScanner } from '@server/lib/scanners/sonarr';
+import type { JobId } from '@server/lib/settings';
+import { getSettings } from '@server/lib/settings';
+import watchlistSync from '@server/lib/watchlistsync';
+import logger from '@server/logger';
 import schedule from 'node-schedule';
-import { MediaServerType } from '../constants/server';
-import downloadTracker from '../lib/downloadtracker';
-import { plexFullScanner, plexRecentScanner } from '../lib/scanners/plex';
-import { radarrScanner } from '../lib/scanners/radarr';
-import { sonarrScanner } from '../lib/scanners/sonarr';
-import { getSettings, JobId } from '../lib/settings';
-import logger from '../logger';
 import { jobJellyfinFullSync, jobJellyfinRecentSync } from './jellyfinsync';
 
 interface ScheduledJob {
@@ -98,6 +100,20 @@ export const startJobs = (): void => {
       cancelFn: () => jobJellyfinFullSync.cancel(),
     });
   }
+
+  // Run watchlist sync every 5 minutes
+  scheduledJobs.push({
+    id: 'plex-watchlist-sync',
+    name: 'Plex Watchlist Sync',
+    type: 'process',
+    interval: 'long',
+    job: schedule.scheduleJob(jobs['plex-watchlist-sync'].schedule, () => {
+      logger.info('Starting scheduled job: Plex Watchlist Sync', {
+        label: 'Jobs',
+      });
+      watchlistSync.syncWatchlist();
+    }),
+  });
 
   // Run full radarr scan every 24 hours
   scheduledJobs.push({

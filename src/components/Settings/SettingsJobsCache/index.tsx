@@ -1,29 +1,25 @@
+import Spinner from '@app/assets/spinner.svg';
+import Badge from '@app/components/Common/Badge';
+import Button from '@app/components/Common/Button';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import Modal from '@app/components/Common/Modal';
+import PageTitle from '@app/components/Common/PageTitle';
+import Table from '@app/components/Common/Table';
+import useSettings from '@app/hooks/useSettings';
+import globalMessages from '@app/i18n/globalMessages';
+import { formatBytes } from '@app/utils/numberHelpers';
+import { Transition } from '@headlessui/react';
 import { PlayIcon, StopIcon, TrashIcon } from '@heroicons/react/outline';
 import { PencilIcon } from '@heroicons/react/solid';
+import { MediaServerType } from '@server/constants/server';
+import type { CacheItem } from '@server/interfaces/api/settingsInterfaces';
+import type { JobId } from '@server/lib/settings';
 import axios from 'axios';
-import React, { useState } from 'react';
-import {
-  defineMessages,
-  FormattedRelativeTime,
-  MessageDescriptor,
-  useIntl,
-} from 'react-intl';
+import { Fragment, useState } from 'react';
+import type { MessageDescriptor } from 'react-intl';
+import { defineMessages, FormattedRelativeTime, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
-import { MediaServerType } from '../../../../server/constants/server';
-import { CacheItem } from '../../../../server/interfaces/api/settingsInterfaces';
-import { JobId } from '../../../../server/lib/settings';
-import Spinner from '../../../assets/spinner.svg';
-import useSettings from '../../../hooks/useSettings';
-import globalMessages from '../../../i18n/globalMessages';
-import { formatBytes } from '../../../utils/numberHelpers';
-import Badge from '../../Common/Badge';
-import Button from '../../Common/Button';
-import LoadingSpinner from '../../Common/LoadingSpinner';
-import Modal from '../../Common/Modal';
-import PageTitle from '../../Common/PageTitle';
-import Table from '../../Common/Table';
-import Transition from '../../Transition';
 
 const messages: { [messageName: string]: MessageDescriptor } = defineMessages({
   jobsandcache: 'Jobs & Cache',
@@ -53,6 +49,7 @@ const messages: { [messageName: string]: MessageDescriptor } = defineMessages({
   unknownJob: 'Unknown Job',
   'plex-recently-added-scan': 'Plex Recently Added Scan',
   'plex-full-scan': 'Plex Full Library Scan',
+  'plex-watchlist-sync': 'Plex Watchlist Sync',
   'jellyfin-recently-added-sync': 'Jellyfin Recently Added Scan',
   'jellyfin-full-sync': 'Jellyfin Full Library Scan',
   'radarr-scan': 'Radarr Scan',
@@ -78,7 +75,7 @@ interface Job {
   running: boolean;
 }
 
-const SettingsJobs: React.FC = () => {
+const SettingsJobs = () => {
   const intl = useIntl();
   const { addToast } = useToasts();
   const {
@@ -195,6 +192,7 @@ const SettingsJobs: React.FC = () => {
         ]}
       />
       <Transition
+        as={Fragment}
         enter="opacity-0 transition duration-300"
         enterFrom="opacity-0"
         enterTo="opacity-100"
@@ -210,7 +208,6 @@ const SettingsJobs: React.FC = () => {
               ? intl.formatMessage(globalMessages.saving)
               : intl.formatMessage(globalMessages.save)
           }
-          iconSvg={<PencilIcon />}
           onCancel={() => setJobEditModal({ isOpen: false })}
           okDisabled={isSaving}
           onOk={() => scheduleJob()}
@@ -332,7 +329,7 @@ const SettingsJobs: React.FC = () => {
                       }
                     >
                       <PencilIcon />
-                      {intl.formatMessage(globalMessages.edit)}
+                      <span>{intl.formatMessage(globalMessages.edit)}</span>
                     </Button>
                   )}
                   {job.running ? (
@@ -342,7 +339,7 @@ const SettingsJobs: React.FC = () => {
                     </Button>
                   ) : (
                     <Button buttonType="primary" onClick={() => runJob(job)}>
-                      <PlayIcon className="mr-1 h-5 w-5" />
+                      <PlayIcon />
                       <span>{intl.formatMessage(messages.runnow)}</span>
                     </Button>
                   )}

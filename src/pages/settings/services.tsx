@@ -1,12 +1,11 @@
-import React from 'react';
+import SettingsLayout from '@app/components/Settings/SettingsLayout';
+import SettingsServices from '@app/components/Settings/SettingsServices';
+import useRouteGuard from '@app/hooks/useRouteGuard';
+import { Permission } from '@app/hooks/useUser';
 import type { NextPage } from 'next';
-import SettingsLayout from '../../components/Settings/SettingsLayout';
-import SettingsServices from '../../components/Settings/SettingsServices';
-import { Permission } from '../../hooks/useUser';
-import useRouteGuard from '../../hooks/useRouteGuard';
 
 const ServicesSettingsPage: NextPage = () => {
-  useRouteGuard(Permission.MANAGE_SETTINGS);
+  useRouteGuard(Permission.ADMIN);
   return (
     <SettingsLayout>
       <SettingsServices />

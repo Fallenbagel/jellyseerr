@@ -1,12 +1,12 @@
+import { MediaStatus } from '@server/constants/media';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
   CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { MediaStatus } from '../constants/media';
 import Media from './Media';
 
 @Entity()

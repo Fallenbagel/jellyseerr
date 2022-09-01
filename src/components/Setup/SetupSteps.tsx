@@ -1,5 +1,4 @@
 import { CheckIcon } from '@heroicons/react/solid';
-import React from 'react';
 
 interface CurrentStep {
   stepNumber: number;
@@ -9,13 +8,13 @@ interface CurrentStep {
   isLastStep?: boolean;
 }
 
-const SetupSteps: React.FC<CurrentStep> = ({
+const SetupSteps = ({
   stepNumber,
   description,
   active = false,
   completed = false,
   isLastStep = false,
-}) => {
+}: CurrentStep) => {
   return (
     <li className="relative md:flex md:flex-1">
       <div className="flex items-center space-x-4 px-6 py-4 text-sm font-medium leading-5">

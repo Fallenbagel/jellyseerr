@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import type { User } from '@server/entity/User';
 import type { NextFunction, Request, Response } from 'express';
-import type { User } from '../entity/User';
 
 declare global {
   namespace Express {

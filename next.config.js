@@ -1,3 +1,6 @@
+/**
+ * @type {import('next').NextConfig}
+ */
 module.exports = {
   env: {
     commitTag: process.env.COMMIT_TAG || 'local',

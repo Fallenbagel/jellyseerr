@@ -1,4 +1,20 @@
-import { TrashIcon } from '@heroicons/react/outline';
+import Alert from '@app/components/Common/Alert';
+import Badge from '@app/components/Common/Badge';
+import Button from '@app/components/Common/Button';
+import Header from '@app/components/Common/Header';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import Modal from '@app/components/Common/Modal';
+import PageTitle from '@app/components/Common/PageTitle';
+import SensitiveInput from '@app/components/Common/SensitiveInput';
+import Table from '@app/components/Common/Table';
+import BulkEditModal from '@app/components/UserList/BulkEditModal';
+import PlexImportModal from '@app/components/UserList/PlexImportModal';
+import useSettings from '@app/hooks/useSettings';
+import { useUpdateQueryParams } from '@app/hooks/useUpdateQueryParams';
+import type { User } from '@app/hooks/useUser';
+import { Permission, UserType, useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
+import { Transition } from '@headlessui/react';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -7,36 +23,20 @@ import {
   SortDescendingIcon,
   UserAddIcon,
 } from '@heroicons/react/solid';
+import { MediaServerType } from '@server/constants/server';
+import type { UserResultsResponse } from '@server/interfaces/api/userInterfaces';
+import { hasPermission } from '@server/lib/permissions';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import getConfig from 'next/config';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
-import { MediaServerType } from '../../../server/constants/server';
-import type { UserResultsResponse } from '../../../server/interfaces/api/userInterfaces';
-import { hasPermission } from '../../../server/lib/permissions';
-import useSettings from '../../hooks/useSettings';
-import { useUpdateQueryParams } from '../../hooks/useUpdateQueryParams';
-import { Permission, User, UserType, useUser } from '../../hooks/useUser';
-import globalMessages from '../../i18n/globalMessages';
-import Alert from '../Common/Alert';
-import Badge from '../Common/Badge';
-import Button from '../Common/Button';
-import Header from '../Common/Header';
-import LoadingSpinner from '../Common/LoadingSpinner';
-import Modal from '../Common/Modal';
-import PageTitle from '../Common/PageTitle';
-import SensitiveInput from '../Common/SensitiveInput';
-import Table from '../Common/Table';
-import Transition from '../Transition';
-import BulkEditModal from './BulkEditModal';
 import JellyfinImportModal from './JellyfinImportModal';
-import PlexImportModal from './PlexImportModal';
 
 const messages = defineMessages({
   users: 'Users',
@@ -84,7 +84,7 @@ const messages = defineMessages({
 
 type Sort = 'created' | 'updated' | 'requests' | 'displayname';
 
-const UserList: React.FC = () => {
+const UserList = () => {
   const intl = useIntl();
   const router = useRouter();
   const settings = useSettings();
@@ -187,7 +187,7 @@ const UserList: React.FC = () => {
         autoDismiss: true,
         appearance: 'success',
       });
-      setDeleteModal({ isOpen: false });
+      setDeleteModal({ isOpen: false, user: deleteModal.user });
     } catch (e) {
       addToast(intl.formatMessage(messages.userdeleteerror), {
         autoDismiss: true,
@@ -232,6 +232,7 @@ const UserList: React.FC = () => {
     <>
       <PageTitle title={intl.formatMessage(messages.users)} />
       <Transition
+        as="div"
         enter="opacity-0 transition duration-300"
         enterFrom="opacity-0"
         enterTo="opacity-100"
@@ -249,15 +250,18 @@ const UserList: React.FC = () => {
           }
           okDisabled={isDeleting}
           okButtonType="danger"
-          onCancel={() => setDeleteModal({ isOpen: false })}
+          onCancel={() =>
+            setDeleteModal({ isOpen: false, user: deleteModal.user })
+          }
           title={intl.formatMessage(messages.deleteuser)}
-          iconSvg={<TrashIcon />}
+          subTitle={deleteModal.user?.displayName}
         >
           {intl.formatMessage(messages.deleteconfirm)}
         </Modal>
       </Transition>
 
       <Transition
+        as="div"
         enter="opacity-0 transition duration-300"
         enterFrom="opacity-0"
         enterTo="opacity-100"
@@ -315,7 +319,6 @@ const UserList: React.FC = () => {
             return (
               <Modal
                 title={intl.formatMessage(messages.createlocaluser)}
-                iconSvg={<UserAddIcon />}
                 onOk={() => handleSubmit()}
                 okText={
                   isSubmitting
@@ -329,18 +332,16 @@ const UserList: React.FC = () => {
                 {!settings.currentSettings.localLogin && (
                   <Alert
                     title={intl.formatMessage(messages.localLoginDisabled, {
-                      strong: function strong(msg) {
-                        return (
-                          <strong className="font-semibold text-white">
-                            {msg}
-                          </strong>
-                        );
-                      },
+                      strong: (msg: React.ReactNode) => (
+                        <strong className="font-semibold text-white">
+                          {msg}
+                        </strong>
+                      ),
                     })}
                     type="warning"
                   />
                 )}
-                {currentHasPermission(Permission.MANAGE_SETTINGS) &&
+                {currentHasPermission(Permission.ADMIN) &&
                   !passwordGenerationEnabled && (
                     <Alert
                       title={intl.formatMessage(
@@ -378,9 +379,11 @@ const UserList: React.FC = () => {
                           inputMode="email"
                         />
                       </div>
-                      {errors.email && touched.email && (
-                        <div className="error">{errors.email}</div>
-                      )}
+                      {errors.email &&
+                        touched.email &&
+                        typeof errors.email === 'string' && (
+                          <div className="error">{errors.email}</div>
+                        )}
                     </div>
                   </div>
                   <div
@@ -426,9 +429,11 @@ const UserList: React.FC = () => {
                           disabled={values.genpassword}
                         />
                       </div>
-                      {errors.password && touched.password && (
-                        <div className="error">{errors.password}</div>
-                      )}
+                      {errors.password &&
+                        touched.password &&
+                        typeof errors.password === 'string' && (
+                          <div className="error">{errors.password}</div>
+                        )}
                     </div>
                   </div>
                 </Form>
@@ -439,6 +444,7 @@ const UserList: React.FC = () => {
       </Transition>
 
       <Transition
+        as="div"
         enter="opacity-0 transition duration-300"
         enterFrom="opacity-0"
         enterTo="opacity-100"
@@ -459,6 +465,7 @@ const UserList: React.FC = () => {
       </Transition>
 
       <Transition
+        as="div"
         enter="opacity-0 transition duration-300"
         enterFrom="opacity-0"
         enterTo="opacity-100"
@@ -586,7 +593,7 @@ const UserList: React.FC = () => {
         </thead>
         <Table.TBody>
           {data?.results.map((user) => (
-            <tr key={`user-list-${user.id}`}>
+            <tr key={`user-list-${user.id}`} data-testid="user-list-row">
               <Table.TD>
                 {isUserPermsEditable(user.id) && (
                   <input
@@ -613,7 +620,10 @@ const UserList: React.FC = () => {
                   </Link>
                   <div className="ml-4">
                     <Link href={`/users/${user.id}`}>
-                      <a className="text-base font-bold leading-5 transition duration-300 hover:underline">
+                      <a
+                        className="text-base font-bold leading-5 transition duration-300 hover:underline"
+                        data-testid="user-list-username-link"
+                      >
                         {user.displayName}
                       </a>
                     </Link>
@@ -721,9 +731,9 @@ const UserList: React.FC = () => {
                             ? pageIndex * currentPageSize + data.results.length
                             : (pageIndex + 1) * currentPageSize,
                         total: data.pageInfo.results,
-                        strong: function strong(msg) {
-                          return <span className="font-medium">{msg}</span>;
-                        },
+                        strong: (msg: React.ReactNode) => (
+                          <span className="font-medium">{msg}</span>
+                        ),
                       })}
                   </p>
                 </div>

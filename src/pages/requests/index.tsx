@@ -1,6 +1,5 @@
-import React from 'react';
+import RequestList from '@app/components/RequestList';
 import type { NextPage } from 'next';
-import RequestList from '../../components/RequestList';
 
 const RequestsPage: NextPage = () => {
   return <RequestList />;

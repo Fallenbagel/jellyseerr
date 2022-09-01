@@ -1,32 +1,32 @@
-import { DownloadIcon } from '@heroicons/react/outline';
+import Alert from '@app/components/Common/Alert';
+import Modal from '@app/components/Common/Modal';
+import type { RequestOverrides } from '@app/components/RequestModal/AdvancedRequester';
+import AdvancedRequester from '@app/components/RequestModal/AdvancedRequester';
+import QuotaDisplay from '@app/components/RequestModal/QuotaDisplay';
+import { useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
+import { MediaStatus } from '@server/constants/media';
+import type { MediaRequest } from '@server/entity/MediaRequest';
+import type { QuotaResponse } from '@server/interfaces/api/userInterfaces';
+import { Permission } from '@server/lib/permissions';
+import type { MovieDetails } from '@server/models/Movie';
 import axios from 'axios';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
-import useSWR from 'swr';
-import { MediaStatus } from '../../../server/constants/media';
-import { MediaRequest } from '../../../server/entity/MediaRequest';
-import { QuotaResponse } from '../../../server/interfaces/api/userInterfaces';
-import { Permission } from '../../../server/lib/permissions';
-import { MovieDetails } from '../../../server/models/Movie';
-import { useUser } from '../../hooks/useUser';
-import globalMessages from '../../i18n/globalMessages';
-import Alert from '../Common/Alert';
-import Modal from '../Common/Modal';
-import AdvancedRequester, { RequestOverrides } from './AdvancedRequester';
-import QuotaDisplay from './QuotaDisplay';
+import useSWR, { mutate } from 'swr';
 
 const messages = defineMessages({
   requestadmin: 'This request will be approved automatically.',
   requestSuccess: '<strong>{title}</strong> requested successfully!',
   requestCancel: 'Request for <strong>{title}</strong> canceled.',
-  requesttitle: 'Request {title}',
-  request4ktitle: 'Request {title} in 4K',
+  requestmovietitle: 'Request Movie',
+  requestmovie4ktitle: 'Request Movie in 4K',
   edit: 'Edit Request',
   approve: 'Approve Request',
   cancel: 'Cancel Request',
-  pendingrequest: 'Pending Request for {title}',
-  pending4krequest: 'Pending 4K Request for {title}',
+  pendingrequest: 'Pending Movie Request',
+  pending4krequest: 'Pending 4K Movie Request',
   requestfrom: "{username}'s request is pending approval.",
   errorediting: 'Something went wrong while editing the request.',
   requestedited: 'Request for <strong>{title}</strong> edited successfully!',
@@ -44,14 +44,14 @@ interface RequestModalProps extends React.HTMLAttributes<HTMLDivElement> {
   onUpdating?: (isUpdating: boolean) => void;
 }
 
-const MovieRequestModal: React.FC<RequestModalProps> = ({
+const MovieRequestModal = ({
   onCancel,
   onComplete,
   tmdbId,
   onUpdating,
   editRequest,
   is4k = false,
-}) => {
+}: RequestModalProps) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [requestOverrides, setRequestOverrides] =
     useState<RequestOverrides | null>(null);
@@ -94,6 +94,7 @@ const MovieRequestModal: React.FC<RequestModalProps> = ({
         is4k,
         ...overrideParams,
       });
+      mutate('/api/v1/request?filter=all&take=10&sort=modified&skip=0');
 
       if (response.data) {
         if (onComplete) {
@@ -114,9 +115,7 @@ const MovieRequestModal: React.FC<RequestModalProps> = ({
           <span>
             {intl.formatMessage(messages.requestSuccess, {
               title: data?.title,
-              strong: function strong(msg) {
-                return <strong>{msg}</strong>;
-              },
+              strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
             })}
           </span>,
           { appearance: 'success', autoDismiss: true }
@@ -139,6 +138,7 @@ const MovieRequestModal: React.FC<RequestModalProps> = ({
       const response = await axios.delete<MediaRequest>(
         `/api/v1/request/${editRequest?.id}`
       );
+      mutate('/api/v1/request?filter=all&take=10&sort=modified&skip=0');
 
       if (response.status === 204) {
         if (onComplete) {
@@ -148,9 +148,7 @@ const MovieRequestModal: React.FC<RequestModalProps> = ({
           <span>
             {intl.formatMessage(messages.requestCancel, {
               title: data?.title,
-              strong: function strong(msg) {
-                return <strong>{msg}</strong>;
-              },
+              strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
             })}
           </span>,
           { appearance: 'success', autoDismiss: true }
@@ -177,6 +175,7 @@ const MovieRequestModal: React.FC<RequestModalProps> = ({
       if (alsoApproveRequest) {
         await axios.post(`/api/v1/request/${editRequest?.id}/approve`);
       }
+      mutate('/api/v1/request?filter=all&take=10&sort=modified&skip=0');
 
       addToast(
         <span>
@@ -186,9 +185,7 @@ const MovieRequestModal: React.FC<RequestModalProps> = ({
               : messages.requestedited,
             {
               title: data?.title,
-              strong: function strong(msg) {
-                return <strong>{msg}</strong>;
-              },
+              strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
             }
           )}
         </span>,
@@ -220,9 +217,9 @@ const MovieRequestModal: React.FC<RequestModalProps> = ({
         backgroundClickable
         onCancel={onCancel}
         title={intl.formatMessage(
-          is4k ? messages.pending4krequest : messages.pendingrequest,
-          { title: data?.title }
+          is4k ? messages.pending4krequest : messages.pendingrequest
         )}
+        subTitle={data?.title}
         onOk={() =>
           hasPermission(Permission.MANAGE_REQUESTS)
             ? updateRequest(true)
@@ -266,7 +263,6 @@ const MovieRequestModal: React.FC<RequestModalProps> = ({
         }
         secondaryButtonType="danger"
         cancelText={intl.formatMessage(globalMessages.close)}
-        iconSvg={<DownloadIcon />}
         backdrop={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${data?.backdropPath}`}
       >
         {isOwner
@@ -312,9 +308,9 @@ const MovieRequestModal: React.FC<RequestModalProps> = ({
       onOk={sendRequest}
       okDisabled={isUpdating || quota?.movie.restricted}
       title={intl.formatMessage(
-        is4k ? messages.request4ktitle : messages.requesttitle,
-        { title: data?.title }
+        is4k ? messages.requestmovie4ktitle : messages.requestmovietitle
       )}
+      subTitle={data?.title}
       okText={
         isUpdating
           ? intl.formatMessage(globalMessages.requesting)
@@ -323,7 +319,6 @@ const MovieRequestModal: React.FC<RequestModalProps> = ({
             )
       }
       okButtonType={'primary'}
-      iconSvg={<DownloadIcon />}
       backdrop={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${data?.backdropPath}`}
     >
       {hasAutoApprove && !quota?.movie.restricted && (

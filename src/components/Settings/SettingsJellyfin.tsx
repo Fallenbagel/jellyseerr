@@ -1,18 +1,19 @@
+import Badge from '@app/components/Common/Badge';
+import Button from '@app/components/Common/Button';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import LibraryItem from '@app/components/Settings/LibraryItem';
+import globalMessages from '@app/i18n/globalMessages';
 import { SaveIcon } from '@heroicons/react/outline';
+import type { JellyfinSettings } from '@server/lib/settings';
 import axios from 'axios';
 import { Field, Formik } from 'formik';
-import React, { useState } from 'react';
+import getConfig from 'next/config';
+import type React from 'react';
+import { useState } from 'react';
 import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
-import { JellyfinSettings } from '../../../server/lib/settings';
-import globalMessages from '../../i18n/globalMessages';
-import Badge from '../Common/Badge';
-import Button from '../Common/Button';
-import LoadingSpinner from '../Common/LoadingSpinner';
-import LibraryItem from './LibraryItem';
-import getConfig from 'next/config';
 
 const messages = defineMessages({
   jellyfinsettings: '{mediaServerName} Settings',

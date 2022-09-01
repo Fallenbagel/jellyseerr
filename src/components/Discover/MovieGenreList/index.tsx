@@ -1,19 +1,18 @@
-import React from 'react';
+import Header from '@app/components/Common/Header';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import PageTitle from '@app/components/Common/PageTitle';
+import { genreColorMap } from '@app/components/Discover/constants';
+import GenreCard from '@app/components/GenreCard';
+import Error from '@app/pages/_error';
+import type { GenreSliderItem } from '@server/interfaces/api/discoverInterfaces';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
-import { GenreSliderItem } from '../../../../server/interfaces/api/discoverInterfaces';
-import Error from '../../../pages/_error';
-import Header from '../../Common/Header';
-import LoadingSpinner from '../../Common/LoadingSpinner';
-import PageTitle from '../../Common/PageTitle';
-import GenreCard from '../../GenreCard';
-import { genreColorMap } from '../constants';
 
 const messages = defineMessages({
   moviegenres: 'Movie Genres',
 });
 
-const MovieGenreList: React.FC = () => {
+const MovieGenreList = () => {
   const intl = useIntl();
   const { data, error } = useSWR<GenreSliderItem[]>(
     `/api/v1/discover/genreslider/movie`

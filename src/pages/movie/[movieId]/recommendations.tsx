@@ -1,6 +1,5 @@
-import React from 'react';
-import { NextPage } from 'next';
-import MovieRecommendations from '../../../components/MovieDetails/MovieRecommendations';
+import MovieRecommendations from '@app/components/MovieDetails/MovieRecommendations';
+import type { NextPage } from 'next';
 
 const MovieRecommendationsPage: NextPage = () => {
   return <MovieRecommendations />;

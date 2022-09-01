@@ -1,16 +1,20 @@
+import SearchInput from '@app/components/Layout/SearchInput';
+import Sidebar from '@app/components/Layout/Sidebar';
+import UserDropdown from '@app/components/Layout/UserDropdown';
+import type { AvailableLocale } from '@app/context/LanguageContext';
+import useLocale from '@app/hooks/useLocale';
+import useSettings from '@app/hooks/useSettings';
+import { useUser } from '@app/hooks/useUser';
 import { MenuAlt2Icon } from '@heroicons/react/outline';
 import { ArrowLeftIcon } from '@heroicons/react/solid';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
-import { AvailableLocale } from '../../context/LanguageContext';
-import useLocale from '../../hooks/useLocale';
-import useSettings from '../../hooks/useSettings';
-import { useUser } from '../../hooks/useUser';
-import SearchInput from './SearchInput';
-import Sidebar from './Sidebar';
-import UserDropdown from './UserDropdown';
+import { useEffect, useState } from 'react';
 
-const Layout: React.FC = ({ children }) => {
+type LayoutProps = {
+  children: React.ReactNode;
+};
+
+const Layout = ({ children }: LayoutProps) => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { user } = useUser();
@@ -69,6 +73,7 @@ const Layout: React.FC = ({ children }) => {
             } transition duration-300 focus:outline-none lg:hidden`}
             aria-label="Open sidebar"
             onClick={() => setSidebarOpen(true)}
+            data-testid="sidebar-toggle"
           >
             <MenuAlt2Icon className="h-6 w-6" />
           </button>

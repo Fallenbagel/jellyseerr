@@ -1,20 +1,19 @@
+import Alert from '@app/components/Common/Alert';
+import Button from '@app/components/Common/Button';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import PageTitle from '@app/components/Common/PageTitle';
+import SensitiveInput from '@app/components/Common/SensitiveInput';
+import { Permission, useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
+import Error from '@app/pages/_error';
 import { SaveIcon } from '@heroicons/react/outline';
 import axios from 'axios';
 import { Form, Formik } from 'formik';
 import { useRouter } from 'next/router';
-import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
-import { Permission, useUser } from '../../../../hooks/useUser';
-import globalMessages from '../../../../i18n/globalMessages';
-import Error from '../../../../pages/_error';
-import Alert from '../../../Common/Alert';
-import Button from '../../../Common/Button';
-import LoadingSpinner from '../../../Common/LoadingSpinner';
-import PageTitle from '../../../Common/PageTitle';
-import SensitiveInput from '../../../Common/SensitiveInput';
 
 const messages = defineMessages({
   password: 'Password',
@@ -39,7 +38,7 @@ const messages = defineMessages({
     "You do not have permission to modify this user's password.",
 });
 
-const UserPasswordChange: React.FC = () => {
+const UserPasswordChange = () => {
   const intl = useIntl();
   const { addToast } = useToasts();
   const router = useRouter();
@@ -176,9 +175,11 @@ const UserPasswordChange: React.FC = () => {
                         autoComplete="current-password"
                       />
                     </div>
-                    {errors.currentPassword && touched.currentPassword && (
-                      <div className="error">{errors.currentPassword}</div>
-                    )}
+                    {errors.currentPassword &&
+                      touched.currentPassword &&
+                      typeof errors.currentPassword === 'string' && (
+                        <div className="error">{errors.currentPassword}</div>
+                      )}
                   </div>
                 </div>
               )}
@@ -196,9 +197,11 @@ const UserPasswordChange: React.FC = () => {
                       autoComplete="new-password"
                     />
                   </div>
-                  {errors.newPassword && touched.newPassword && (
-                    <div className="error">{errors.newPassword}</div>
-                  )}
+                  {errors.newPassword &&
+                    touched.newPassword &&
+                    typeof errors.newPassword === 'string' && (
+                      <div className="error">{errors.newPassword}</div>
+                    )}
                 </div>
               </div>
               <div className="form-row">
@@ -215,9 +218,11 @@ const UserPasswordChange: React.FC = () => {
                       autoComplete="new-password"
                     />
                   </div>
-                  {errors.confirmPassword && touched.confirmPassword && (
-                    <div className="error">{errors.confirmPassword}</div>
-                  )}
+                  {errors.confirmPassword &&
+                    touched.confirmPassword &&
+                    typeof errors.confirmPassword === 'string' && (
+                      <div className="error">{errors.confirmPassword}</div>
+                    )}
                 </div>
               </div>
               <div className="actions">

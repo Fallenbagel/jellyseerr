@@ -1,7 +1,7 @@
-import React from 'react';
-import { hasPermission } from '../../../server/lib/permissions';
-import useSettings from '../../hooks/useSettings';
-import { Permission, User } from '../../hooks/useUser';
+import useSettings from '@app/hooks/useSettings';
+import type { User } from '@app/hooks/useUser';
+import { Permission } from '@app/hooks/useUser';
+import { hasPermission } from '@server/lib/permissions';
 
 export interface PermissionItem {
   id: string;
@@ -26,14 +26,14 @@ interface PermissionOptionProps {
   onUpdate: (newPermissions: number) => void;
 }
 
-const PermissionOption: React.FC<PermissionOptionProps> = ({
+const PermissionOption = ({
   option,
   actingUser,
   currentUser,
   currentPermission,
   onUpdate,
   parent,
-}) => {
+}: PermissionOptionProps) => {
   const settings = useSettings();
 
   const autoApprovePermissions = [
@@ -66,14 +66,9 @@ const PermissionOption: React.FC<PermissionOptionProps> = ({
   }
 
   if (
-    // Non-Admin users cannot modify the Admin permission
-    (actingUser &&
-      !hasPermission(Permission.ADMIN, actingUser.permissions) &&
-      option.permission === Permission.ADMIN) ||
-    // Users without the Manage Settings permission cannot modify/grant that permission
-    (actingUser &&
-      !hasPermission(Permission.MANAGE_SETTINGS, actingUser.permissions) &&
-      option.permission === Permission.MANAGE_SETTINGS)
+    // Only the owner can modify the Admin permission
+    actingUser?.id !== 1 &&
+    option.permission === Permission.ADMIN
   ) {
     disabled = true;
   }
