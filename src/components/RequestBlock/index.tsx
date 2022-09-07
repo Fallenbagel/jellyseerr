@@ -1,3 +1,10 @@
+import Badge from '@app/components/Common/Badge';
+import Button from '@app/components/Common/Button';
+import Tooltip from '@app/components/Common/Tooltip';
+import RequestModal from '@app/components/RequestModal';
+import useRequestOverride from '@app/hooks/useRequestOverride';
+import { useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
 import {
   CalendarIcon,
   CheckIcon,
@@ -7,18 +14,12 @@ import {
   UserIcon,
   XIcon,
 } from '@heroicons/react/solid';
+import { MediaRequestStatus } from '@server/constants/media';
+import type { MediaRequest } from '@server/entity/MediaRequest';
 import axios from 'axios';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import { MediaRequestStatus } from '../../../server/constants/media';
-import type { MediaRequest } from '../../../server/entity/MediaRequest';
-import useRequestOverride from '../../hooks/useRequestOverride';
-import { useUser } from '../../hooks/useUser';
-import globalMessages from '../../i18n/globalMessages';
-import Badge from '../Common/Badge';
-import Button from '../Common/Button';
-import RequestModal from '../RequestModal';
 
 const messages = defineMessages({
   seasons: '{seasonCount, plural, one {Season} other {Seasons}}',
@@ -27,6 +28,13 @@ const messages = defineMessages({
   profilechanged: 'Quality Profile',
   rootfolder: 'Root Folder',
   languageprofile: 'Language Profile',
+  requestdate: 'Request Date',
+  requestedby: 'Requested By',
+  lastmodifiedby: 'Last Modified By',
+  approve: 'Approve Request',
+  decline: 'Decline Request',
+  edit: 'Edit Request',
+  delete: 'Delete Request',
 });
 
 interface RequestBlockProps {
@@ -34,7 +42,7 @@ interface RequestBlockProps {
   onUpdate?: () => void;
 }
 
-const RequestBlock: React.FC<RequestBlockProps> = ({ request, onUpdate }) => {
+const RequestBlock = ({ request, onUpdate }: RequestBlockProps) => {
   const { user } = useUser();
   const intl = useIntl();
   const [isUpdating, setIsUpdating] = useState(false);
@@ -83,7 +91,9 @@ const RequestBlock: React.FC<RequestBlockProps> = ({ request, onUpdate }) => {
         <div className="flex items-center justify-between">
           <div className="mr-6 min-w-0 flex-1 flex-col items-center text-sm leading-5">
             <div className="white mb-1 flex flex-nowrap">
-              <UserIcon className="mr-1.5 h-5 w-5 min-w-0 flex-shrink-0" />
+              <Tooltip content={intl.formatMessage(messages.requestedby)}>
+                <UserIcon className="mr-1.5 h-5 w-5 min-w-0 flex-shrink-0" />
+              </Tooltip>
               <span className="w-40 truncate md:w-auto">
                 <Link
                   href={
@@ -100,7 +110,9 @@ const RequestBlock: React.FC<RequestBlockProps> = ({ request, onUpdate }) => {
             </div>
             {request.modifiedBy && (
               <div className="flex flex-nowrap">
-                <EyeIcon className="mr-1.5 h-5 w-5 flex-shrink-0" />
+                <Tooltip content={intl.formatMessage(messages.lastmodifiedby)}>
+                  <EyeIcon className="mr-1.5 h-5 w-5 flex-shrink-0" />
+                </Tooltip>
                 <span className="w-40 truncate md:w-auto">
                   <Link
                     href={
@@ -120,39 +132,47 @@ const RequestBlock: React.FC<RequestBlockProps> = ({ request, onUpdate }) => {
           <div className="ml-2 flex flex-shrink-0 flex-wrap">
             {request.status === MediaRequestStatus.PENDING && (
               <>
-                <Button
-                  buttonType="success"
-                  className="mr-1"
-                  onClick={() => updateRequest('approve')}
-                  disabled={isUpdating}
-                >
-                  <CheckIcon className="icon-sm" />
-                </Button>
-                <Button
-                  buttonType="danger"
-                  className="mr-1"
-                  onClick={() => updateRequest('decline')}
-                  disabled={isUpdating}
-                >
-                  <XIcon />
-                </Button>
-                <Button
-                  buttonType="primary"
-                  onClick={() => setShowEditModal(true)}
-                  disabled={isUpdating}
-                >
-                  <PencilIcon className="icon-sm" />
-                </Button>
+                <Tooltip content={intl.formatMessage(messages.approve)}>
+                  <Button
+                    buttonType="success"
+                    className="mr-1"
+                    onClick={() => updateRequest('approve')}
+                    disabled={isUpdating}
+                  >
+                    <CheckIcon className="icon-sm" />
+                  </Button>
+                </Tooltip>
+                <Tooltip content={intl.formatMessage(messages.decline)}>
+                  <Button
+                    buttonType="danger"
+                    className="mr-1"
+                    onClick={() => updateRequest('decline')}
+                    disabled={isUpdating}
+                  >
+                    <XIcon />
+                  </Button>
+                </Tooltip>
+                <Tooltip content={intl.formatMessage(messages.edit)}>
+                  <Button
+                    buttonType="warning"
+                    onClick={() => setShowEditModal(true)}
+                    disabled={isUpdating}
+                  >
+                    <PencilIcon className="icon-sm" />
+                  </Button>
+                </Tooltip>
               </>
             )}
             {request.status !== MediaRequestStatus.PENDING && (
-              <Button
-                buttonType="danger"
-                onClick={() => deleteRequest()}
-                disabled={isUpdating}
-              >
-                <TrashIcon className="icon-sm" />
-              </Button>
+              <Tooltip content={intl.formatMessage(messages.delete)}>
+                <Button
+                  buttonType="danger"
+                  onClick={() => deleteRequest()}
+                  disabled={isUpdating}
+                >
+                  <TrashIcon className="icon-sm" />
+                </Button>
+              </Tooltip>
             )}
           </div>
         </div>
@@ -179,10 +199,17 @@ const RequestBlock: React.FC<RequestBlockProps> = ({ request, onUpdate }) => {
                   {intl.formatMessage(globalMessages.pending)}
                 </Badge>
               )}
+              {request.status === MediaRequestStatus.FAILED && (
+                <Badge badgeType="danger">
+                  {intl.formatMessage(globalMessages.failed)}
+                </Badge>
+              )}
             </div>
           </div>
           <div className="mt-2 flex items-center text-sm leading-5 sm:mt-0">
-            <CalendarIcon className="mr-1.5 h-5 w-5 flex-shrink-0" />
+            <Tooltip content={intl.formatMessage(messages.requestdate)}>
+              <CalendarIcon className="mr-1.5 h-5 w-5 flex-shrink-0" />
+            </Tooltip>
             <span>
               {intl.formatDate(request.createdAt, {
                 year: 'numeric',

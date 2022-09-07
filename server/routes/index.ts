@@ -1,17 +1,22 @@
+import GithubAPI from '@server/api/github';
+import TheMovieDb from '@server/api/themoviedb';
+import type {
+  TmdbMovieResult,
+  TmdbTvResult,
+} from '@server/api/themoviedb/interfaces';
+import type { StatusResponse } from '@server/interfaces/api/settingsInterfaces';
+import { Permission } from '@server/lib/permissions';
+import { getSettings } from '@server/lib/settings';
+import logger from '@server/logger';
+import { checkUser, isAuthenticated } from '@server/middleware/auth';
+import { mapProductionCompany } from '@server/models/Movie';
+import { mapNetwork } from '@server/models/Tv';
+import settingsRoutes from '@server/routes/settings';
+import { appDataPath, appDataStatus } from '@server/utils/appDataVolume';
+import { getAppVersion, getCommitTag } from '@server/utils/appVersion';
+import restartFlag from '@server/utils/restartFlag';
+import { isPerson } from '@server/utils/typeHelpers';
 import { Router } from 'express';
-import GithubAPI from '../api/github';
-import TheMovieDb from '../api/themoviedb';
-import { TmdbMovieResult, TmdbTvResult } from '../api/themoviedb/interfaces';
-import { StatusResponse } from '../interfaces/api/settingsInterfaces';
-import { Permission } from '../lib/permissions';
-import { getSettings } from '../lib/settings';
-import logger from '../logger';
-import { checkUser, isAuthenticated } from '../middleware/auth';
-import { mapProductionCompany } from '../models/Movie';
-import { mapNetwork } from '../models/Tv';
-import { appDataPath, appDataStatus } from '../utils/appDataVolume';
-import { getAppVersion, getCommitTag } from '../utils/appVersion';
-import { isPerson } from '../utils/typeHelpers';
 import authRoutes from './auth';
 import collectionRoutes from './collection';
 import discoverRoutes, { createTmdbWithRegionLanguage } from './discover';
@@ -23,7 +28,6 @@ import personRoutes from './person';
 import requestRoutes from './request';
 import searchRoutes from './search';
 import serviceRoutes from './service';
-import settingsRoutes from './settings';
 import tvRoutes from './tv';
 import user from './user';
 
@@ -75,6 +79,7 @@ router.get<unknown, StatusResponse>('/status', async (req, res) => {
     commitTag: getCommitTag(),
     updateAvailable,
     commitsBehind,
+    restartRequired: restartFlag.isSet(),
   });
 });
 
@@ -97,11 +102,7 @@ router.get('/settings/public', async (req, res) => {
     return res.status(200).json(settings.fullPublicSettings);
   }
 });
-router.use(
-  '/settings',
-  isAuthenticated(Permission.MANAGE_SETTINGS),
-  settingsRoutes
-);
+router.use('/settings', isAuthenticated(Permission.ADMIN), settingsRoutes);
 router.use('/search', isAuthenticated(), searchRoutes);
 router.use('/discover', isAuthenticated(), discoverRoutes);
 router.use('/request', isAuthenticated(), requestRoutes);

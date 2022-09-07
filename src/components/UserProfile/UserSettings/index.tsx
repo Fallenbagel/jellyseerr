@@ -1,18 +1,18 @@
+import Alert from '@app/components/Common/Alert';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import PageTitle from '@app/components/Common/PageTitle';
+import type { SettingsRoute } from '@app/components/Common/SettingsTabs';
+import SettingsTabs from '@app/components/Common/SettingsTabs';
+import ProfileHeader from '@app/components/UserProfile/ProfileHeader';
+import useSettings from '@app/hooks/useSettings';
+import { useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
+import Error from '@app/pages/_error';
+import type { UserSettingsNotificationsResponse } from '@server/interfaces/api/userSettingsInterfaces';
+import { hasPermission, Permission } from '@server/lib/permissions';
 import { useRouter } from 'next/router';
-import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
-import { UserSettingsNotificationsResponse } from '../../../../server/interfaces/api/userSettingsInterfaces';
-import { hasPermission, Permission } from '../../../../server/lib/permissions';
-import useSettings from '../../../hooks/useSettings';
-import { useUser } from '../../../hooks/useUser';
-import globalMessages from '../../../i18n/globalMessages';
-import Error from '../../../pages/_error';
-import Alert from '../../Common/Alert';
-import LoadingSpinner from '../../Common/LoadingSpinner';
-import PageTitle from '../../Common/PageTitle';
-import SettingsTabs, { SettingsRoute } from '../../Common/SettingsTabs';
-import ProfileHeader from '../ProfileHeader';
 
 const messages = defineMessages({
   menuGeneralSettings: 'General',
@@ -23,7 +23,11 @@ const messages = defineMessages({
     "You do not have permission to modify this user's settings.",
 });
 
-const UserSettings: React.FC = ({ children }) => {
+type UserSettingsProps = {
+  children: React.ReactNode;
+};
+
+const UserSettings = ({ children }: UserSettingsProps) => {
   const router = useRouter();
   const settings = useSettings();
   const { user: currentUser } = useUser();
@@ -53,10 +57,7 @@ const UserSettings: React.FC = ({ children }) => {
       regex: /\/settings\/password/,
       hidden:
         (!settings.currentSettings.localLogin &&
-          !hasPermission(
-            Permission.MANAGE_SETTINGS,
-            currentUser?.permissions ?? 0
-          )) ||
+          !hasPermission(Permission.ADMIN, currentUser?.permissions ?? 0)) ||
         (currentUser?.id !== 1 &&
           currentUser?.id !== user?.id &&
           hasPermission(Permission.ADMIN, user?.permissions ?? 0)),

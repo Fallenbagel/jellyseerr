@@ -1,20 +1,22 @@
+import Button from '@app/components/Common/Button';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import NotificationTypeSelector from '@app/components/NotificationTypeSelector';
+import globalMessages from '@app/i18n/globalMessages';
 import { BeakerIcon, SaveIcon } from '@heroicons/react/outline';
 import { QuestionMarkCircleIcon, RefreshIcon } from '@heroicons/react/solid';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
-import globalMessages from '../../../../i18n/globalMessages';
-import Button from '../../../Common/Button';
-import LoadingSpinner from '../../../Common/LoadingSpinner';
-import NotificationTypeSelector from '../../../NotificationTypeSelector';
 
-const JSONEditor = dynamic(() => import('../../../JSONEditor'), { ssr: false });
+const JSONEditor = dynamic(() => import('@app/components/JSONEditor'), {
+  ssr: false,
+});
 
 const defaultPayload = {
   notification_type: '{{notification_type}}',
@@ -70,7 +72,7 @@ const messages = defineMessages({
   validationTypes: 'You must select at least one notification type',
 });
 
-const NotificationsWebhook: React.FC = () => {
+const NotificationsWebhook = () => {
   const intl = useIntl();
   const { addToast, removeToast } = useToasts();
   const [isTesting, setIsTesting] = useState(false);
@@ -244,9 +246,11 @@ const NotificationsWebhook: React.FC = () => {
                     inputMode="url"
                   />
                 </div>
-                {errors.webhookUrl && touched.webhookUrl && (
-                  <div className="error">{errors.webhookUrl}</div>
-                )}
+                {errors.webhookUrl &&
+                  touched.webhookUrl &&
+                  typeof errors.webhookUrl === 'string' && (
+                    <div className="error">{errors.webhookUrl}</div>
+                  )}
               </div>
             </div>
             <div className="form-row">
@@ -273,9 +277,11 @@ const NotificationsWebhook: React.FC = () => {
                     onBlur={() => setFieldTouched('jsonPayload')}
                   />
                 </div>
-                {errors.jsonPayload && touched.jsonPayload && (
-                  <div className="error">{errors.jsonPayload}</div>
-                )}
+                {errors.jsonPayload &&
+                  touched.jsonPayload &&
+                  typeof errors.jsonPayload === 'string' && (
+                    <div className="error">{errors.jsonPayload}</div>
+                  )}
                 <div className="mt-2">
                   <Button
                     buttonSize="sm"

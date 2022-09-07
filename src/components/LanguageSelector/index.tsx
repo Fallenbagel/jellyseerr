@@ -1,10 +1,11 @@
+import globalMessages from '@app/i18n/globalMessages';
+import type { Language } from '@server/lib/settings';
 import { sortBy } from 'lodash';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import Select, { CSSObjectWithLabel } from 'react-select';
+import type { CSSObjectWithLabel } from 'react-select';
+import Select from 'react-select';
 import useSWR from 'swr';
-import { Language } from '../../../server/lib/settings';
-import globalMessages from '../../i18n/globalMessages';
 
 const messages = defineMessages({
   originalLanguageDefault: 'All Languages',
@@ -33,12 +34,12 @@ interface LanguageSelectorProps {
   isUserSettings?: boolean;
 }
 
-const LanguageSelector: React.FC<LanguageSelectorProps> = ({
+const LanguageSelector = ({
   value,
   setFieldValue,
   serverValue,
   isUserSettings = false,
-}) => {
+}: LanguageSelectorProps) => {
   const intl = useIntl();
   const { data: languages } = useSWR<Language[]>('/api/v1/languages');
 

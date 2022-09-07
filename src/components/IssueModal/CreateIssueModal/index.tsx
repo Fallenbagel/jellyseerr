@@ -1,28 +1,25 @@
+import Button from '@app/components/Common/Button';
+import Modal from '@app/components/Common/Modal';
+import { issueOptions } from '@app/components/IssueModal/constants';
+import useSettings from '@app/hooks/useSettings';
+import { Permission, useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
 import { RadioGroup } from '@headlessui/react';
-import { ExclamationIcon } from '@heroicons/react/outline';
 import { ArrowCircleRightIcon } from '@heroicons/react/solid';
+import { MediaStatus } from '@server/constants/media';
+import type Issue from '@server/entity/Issue';
+import type { MovieDetails } from '@server/models/Movie';
+import type { TvDetails } from '@server/models/Tv';
 import axios from 'axios';
 import { Field, Formik } from 'formik';
 import Link from 'next/link';
-import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
-import { MediaStatus } from '../../../../server/constants/media';
-import type Issue from '../../../../server/entity/Issue';
-import { MovieDetails } from '../../../../server/models/Movie';
-import { TvDetails } from '../../../../server/models/Tv';
-import useSettings from '../../../hooks/useSettings';
-import { Permission, useUser } from '../../../hooks/useUser';
-import globalMessages from '../../../i18n/globalMessages';
-import Button from '../../Common/Button';
-import Modal from '../../Common/Modal';
-import { issueOptions } from '../constants';
 
 const messages = defineMessages({
   validationMessageRequired: 'You must provide a description',
-  issomethingwrong: 'Is there a problem with {title}?',
   whatswrong: "What's wrong?",
   providedetail:
     'Please provide a detailed explanation of the issue you encountered.',
@@ -55,11 +52,11 @@ interface CreateIssueModalProps {
   onCancel?: () => void;
 }
 
-const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
+const CreateIssueModal = ({
   onCancel,
   mediaType,
   tmdbId,
-}) => {
+}: CreateIssueModalProps) => {
   const intl = useIntl();
   const settings = useSettings();
   const { hasPermission } = useUser();
@@ -118,9 +115,7 @@ const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
                 <div>
                   {intl.formatMessage(messages.toastSuccessCreate, {
                     title: isMovie(data) ? data.title : data.name,
-                    strong: function strong(msg) {
-                      return <strong>{msg}</strong>;
-                    },
+                    strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
                   })}
                 </div>
                 <Link href={`/issues/${newIssue.data.id}`}>
@@ -153,23 +148,14 @@ const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
           <Modal
             backgroundClickable
             onCancel={onCancel}
-            iconSvg={<ExclamationIcon />}
             title={intl.formatMessage(messages.reportissue)}
+            subTitle={data && isMovie(data) ? data?.title : data?.name}
             cancelText={intl.formatMessage(globalMessages.close)}
             onOk={() => handleSubmit()}
             okText={intl.formatMessage(messages.submitissue)}
             loading={!data && !error}
             backdrop={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${data?.backdropPath}`}
           >
-            {data && (
-              <div className="flex items-center">
-                <span className="mr-1 font-semibold">
-                  {intl.formatMessage(messages.issomethingwrong, {
-                    title: isMovie(data) ? data.title : data.name,
-                  })}
-                </span>
-              </div>
-            )}
             {mediaType === 'tv' && data && !isMovie(data) && (
               <>
                 <div className="form-row">
@@ -267,7 +253,7 @@ const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
                           ? 'rounded-bl-md rounded-br-md'
                           : '',
                         checked
-                          ? 'z-10 border-indigo-500 bg-indigo-600'
+                          ? 'z-10 border border-indigo-500 bg-indigo-400 bg-opacity-20'
                           : 'border-gray-500',
                         'relative flex cursor-pointer border p-4 focus:outline-none'
                       )
@@ -278,7 +264,7 @@ const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
                         <span
                           className={`${
                             checked
-                              ? 'border-transparent bg-indigo-800'
+                              ? 'border-transparent bg-indigo-600'
                               : 'border-gray-300 bg-white'
                           } ${
                             active ? 'ring-2 ring-indigo-300 ring-offset-2' : ''
@@ -315,9 +301,11 @@ const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
                 className="h-28"
                 placeholder={intl.formatMessage(messages.providedetail)}
               />
-              {errors.message && touched.message && (
-                <div className="error">{errors.message}</div>
-              )}
+              {errors.message &&
+                touched.message &&
+                typeof errors.message === 'string' && (
+                  <div className="error">{errors.message}</div>
+                )}
             </div>
           </Modal>
         );

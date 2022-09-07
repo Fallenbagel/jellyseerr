@@ -1,18 +1,18 @@
+import { genreColorMap } from '@app/components/Discover/constants';
+import GenreCard from '@app/components/GenreCard';
+import Slider from '@app/components/Slider';
 import { ArrowCircleRightIcon } from '@heroicons/react/outline';
+import type { GenreSliderItem } from '@server/interfaces/api/discoverInterfaces';
 import Link from 'next/link';
 import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
-import { GenreSliderItem } from '../../../../server/interfaces/api/discoverInterfaces';
-import GenreCard from '../../GenreCard';
-import Slider from '../../Slider';
-import { genreColorMap } from '../constants';
 
 const messages = defineMessages({
   moviegenres: 'Movie Genres',
 });
 
-const MovieGenreSlider: React.FC = () => {
+const MovieGenreSlider = () => {
   const intl = useIntl();
   const { data, error } = useSWR<GenreSliderItem[]>(
     `/api/v1/discover/genreslider/movie`,

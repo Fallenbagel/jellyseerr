@@ -1,5 +1,7 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import NodeCache from 'node-cache';
+import type { AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios from 'axios';
+import rateLimit from 'axios-rate-limit';
+import type NodeCache from 'node-cache';
 
 // 5 minute default TTL (in seconds)
 const DEFAULT_TTL = 300;
@@ -10,6 +12,10 @@ const DEFAULT_ROLLING_BUFFER = 10000;
 interface ExternalAPIOptions {
   nodeCache?: NodeCache;
   headers?: Record<string, unknown>;
+  rateLimit?: {
+    maxRPS: number;
+    maxRequests: number;
+  };
 }
 
 class ExternalAPI {
@@ -31,6 +37,14 @@ class ExternalAPI {
         ...options.headers,
       },
     });
+
+    if (options.rateLimit) {
+      this.axios = rateLimit(this.axios, {
+        maxRequests: options.rateLimit.maxRequests,
+        maxRPS: options.rateLimit.maxRPS,
+      });
+    }
+
     this.baseUrl = baseUrl;
     this.cache = options.nodeCache;
   }

@@ -1,14 +1,17 @@
-import { uniqWith } from 'lodash';
-import { getRepository } from 'typeorm';
-import SonarrAPI, { SonarrSeries } from '../../../api/servarr/sonarr';
-import { TmdbTvDetails } from '../../../api/themoviedb/interfaces';
-import Media from '../../../entity/Media';
-import { getSettings, SonarrSettings } from '../../settings';
-import BaseScanner, {
+import type { SonarrSeries } from '@server/api/servarr/sonarr';
+import SonarrAPI from '@server/api/servarr/sonarr';
+import type { TmdbTvDetails } from '@server/api/themoviedb/interfaces';
+import { getRepository } from '@server/datasource';
+import Media from '@server/entity/Media';
+import type {
   ProcessableSeason,
   RunnableScanner,
   StatusBase,
-} from '../baseScanner';
+} from '@server/lib/scanners/baseScanner';
+import BaseScanner from '@server/lib/scanners/baseScanner';
+import type { SonarrSettings } from '@server/lib/settings';
+import { getSettings } from '@server/lib/settings';
+import { uniqWith } from 'lodash';
 
 type SyncStatus = StatusBase & {
   currentServer: SonarrSettings;

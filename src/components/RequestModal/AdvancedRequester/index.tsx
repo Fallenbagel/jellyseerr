@@ -1,21 +1,22 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import { SmallLoadingSpinner } from '@app/components/Common/LoadingSpinner';
+import type { User } from '@app/hooks/useUser';
+import { Permission, useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
+import { formatBytes } from '@app/utils/numberHelpers';
 import { Listbox, Transition } from '@headlessui/react';
-import { AdjustmentsIcon } from '@heroicons/react/outline';
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/solid';
-import { isEqual } from 'lodash';
-import React, { useEffect, useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
-import Select from 'react-select';
-import useSWR from 'swr';
 import type {
   ServiceCommonServer,
   ServiceCommonServerWithDetails,
-} from '../../../../server/interfaces/api/serviceInterfaces';
-import type { UserResultsResponse } from '../../../../server/interfaces/api/userInterfaces';
-import { Permission, User, useUser } from '../../../hooks/useUser';
-import globalMessages from '../../../i18n/globalMessages';
-import { formatBytes } from '../../../utils/numberHelpers';
-import { SmallLoadingSpinner } from '../../Common/LoadingSpinner';
+} from '@server/interfaces/api/serviceInterfaces';
+import type { UserResultsResponse } from '@server/interfaces/api/userInterfaces';
+import { hasPermission } from '@server/lib/permissions';
+import { isEqual } from 'lodash';
+import { useEffect, useMemo, useState } from 'react';
+import { defineMessages, useIntl } from 'react-intl';
+import Select from 'react-select';
+import useSWR from 'swr';
 
 type OptionType = {
   value: number;
@@ -55,16 +56,16 @@ interface AdvancedRequesterProps {
   onChange: (overrides: RequestOverrides) => void;
 }
 
-const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
+const AdvancedRequester = ({
   type,
   is4k = false,
   isAnime = false,
   defaultOverrides,
   requestUser,
   onChange,
-}) => {
+}: AdvancedRequesterProps) => {
   const intl = useIntl();
-  const { user, hasPermission } = useUser();
+  const { user: currentUser, hasPermission: currentHasPermission } = useUser();
   const { data, error } = useSWR<ServiceCommonServer[]>(
     `/api/v1/service/${type === 'movie' ? 'radarr' : 'sonarr'}`,
     {
@@ -113,16 +114,41 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
   );
 
   const { data: userData } = useSWR<UserResultsResponse>(
-    hasPermission([Permission.MANAGE_REQUESTS, Permission.MANAGE_USERS])
+    currentHasPermission([Permission.MANAGE_REQUESTS, Permission.MANAGE_USERS])
       ? '/api/v1/user?take=1000&sort=displayname'
       : null
   );
+  const filteredUserData = useMemo(
+    () =>
+      userData?.results.filter((user) =>
+        hasPermission(
+          is4k
+            ? [
+                Permission.REQUEST_4K,
+                type === 'movie'
+                  ? Permission.REQUEST_4K_MOVIE
+                  : Permission.REQUEST_4K_TV,
+              ]
+            : [
+                Permission.REQUEST,
+                type === 'movie'
+                  ? Permission.REQUEST_MOVIE
+                  : Permission.REQUEST_TV,
+              ],
+          user.permissions,
+          { type: 'or' }
+        )
+      ),
+    [userData?.results]
+  );
 
   useEffect(() => {
-    if (userData?.results && !requestUser) {
-      setSelectedUser(userData.results.find((u) => u.id === user?.id) ?? null);
+    if (filteredUserData && !requestUser) {
+      setSelectedUser(
+        filteredUserData.find((u) => u.id === currentUser?.id) ?? null
+      );
     }
-  }, [userData?.results]);
+  }, [filteredUserData]);
 
   useEffect(() => {
     let defaultServer = data?.find(
@@ -273,18 +299,17 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
             serverData.rootFolders.length < 2 &&
             (serverData.languageProfiles ?? []).length < 2 &&
             !serverData.tags?.length)))) &&
-    (!selectedUser || (userData?.results ?? []).length < 2)
+    (!selectedUser || (filteredUserData ?? []).length < 2)
   ) {
     return null;
   }
 
   return (
     <>
-      <div className="mt-4 mb-2 flex items-center font-bold tracking-wider">
-        <AdjustmentsIcon className="mr-1.5 h-5 w-5" />
+      <div className="mt-4 mb-2 flex items-center text-lg font-semibold">
         {intl.formatMessage(messages.advancedoptions)}
       </div>
-      <div className="rounded-md bg-gray-600 p-4 shadow">
+      <div className="rounded-md">
         {!!data && selectedServer !== null && (
           <div className="flex flex-col md:flex-row">
             {data.filter((server) => server.is4k === is4k).length > 1 && (
@@ -513,9 +538,12 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
               />
             </div>
           )}
-        {hasPermission([Permission.MANAGE_REQUESTS, Permission.MANAGE_USERS]) &&
+        {currentHasPermission([
+          Permission.MANAGE_REQUESTS,
+          Permission.MANAGE_USERS,
+        ]) &&
           selectedUser &&
-          (userData?.results ?? []).length > 1 && (
+          (filteredUserData ?? []).length > 1 && (
             <Listbox
               as="div"
               value={selectedUser}
@@ -560,13 +588,13 @@ const AdvancedRequester: React.FC<AdvancedRequesterProps> = ({
                       leave="transition ease-in duration-100"
                       leaveFrom="opacity-100"
                       leaveTo="opacity-0"
-                      className="mt-1 w-full rounded-md bg-gray-800 shadow-lg"
+                      className="mt-1 w-full rounded-md border border-gray-700 bg-gray-800 shadow-lg"
                     >
                       <Listbox.Options
                         static
                         className="shadow-xs max-h-60 overflow-auto rounded-md py-1 text-base leading-6 focus:outline-none sm:text-sm sm:leading-5"
                       >
-                        {userData?.results.map((user) => (
+                        {filteredUserData?.map((user) => (
                           <Listbox.Option key={user.id} value={user}>
                             {({ selected, active }) => (
                               <div

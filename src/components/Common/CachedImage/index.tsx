@@ -1,6 +1,6 @@
-import Image, { ImageProps } from 'next/image';
-import React from 'react';
-import useSettings from '../../../hooks/useSettings';
+import useSettings from '@app/hooks/useSettings';
+import type { ImageProps } from 'next/image';
+import Image from 'next/image';
 
 /**
  * The CachedImage component should be used wherever
@@ -9,7 +9,7 @@ import useSettings from '../../../hooks/useSettings';
  * It uses the `next/image` Image component but overrides
  * the `unoptimized` prop based on the application setting `cacheImages`.
  **/
-const CachedImage: React.FC<ImageProps> = (props) => {
+const CachedImage = (props: ImageProps) => {
   const { currentSettings } = useSettings();
 
   return <Image unoptimized={!currentSettings.cacheImages} {...props} />;

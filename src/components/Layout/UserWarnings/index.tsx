@@ -1,8 +1,8 @@
-import React from 'react';
-import Link from 'next/link';
+import { useUser } from '@app/hooks/useUser';
 import { ExclamationIcon } from '@heroicons/react/outline';
+import Link from 'next/link';
+import type React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import { useUser } from '../../../hooks/useUser';
 
 const messages = defineMessages({
   emailRequired: 'An email address is required.',

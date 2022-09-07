@@ -1,8 +1,8 @@
+import { useUser } from '@app/hooks/useUser';
+import type { Permission } from '@server/lib/permissions';
+import { hasPermission } from '@server/lib/permissions';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React from 'react';
-import { hasPermission, Permission } from '../../../../server/lib/permissions';
-import { useUser } from '../../../hooks/useUser';
 
 export interface SettingsRoute {
   text: string;
@@ -14,14 +14,17 @@ export interface SettingsRoute {
   hidden?: boolean;
 }
 
-const SettingsLink: React.FC<{
+type SettingsLinkProps = {
   tabType: 'default' | 'button';
   currentPath: string;
   route: string;
   regex: RegExp;
   hidden?: boolean;
   isMobile?: boolean;
-}> = ({
+  children: React.ReactNode;
+};
+
+const SettingsLink = ({
   children,
   tabType,
   currentPath,
@@ -29,7 +32,7 @@ const SettingsLink: React.FC<{
   regex,
   hidden = false,
   isMobile = false,
-}) => {
+}: SettingsLinkProps) => {
   if (hidden) {
     return null;
   }
@@ -65,10 +68,13 @@ const SettingsLink: React.FC<{
   );
 };
 
-const SettingsTabs: React.FC<{
+const SettingsTabs = ({
+  tabType = 'default',
+  settingsRoutes,
+}: {
   tabType?: 'default' | 'button';
   settingsRoutes: SettingsRoute[];
-}> = ({ tabType = 'default', settingsRoutes }) => {
+}) => {
   const router = useRouter();
   const { user: currentUser } = useUser();
 
@@ -137,7 +143,7 @@ const SettingsTabs: React.FC<{
         </div>
       ) : (
         <div className="hide-scrollbar hidden overflow-x-scroll border-b border-gray-600 sm:block">
-          <nav className="flex">
+          <nav className="flex" data-testid="settings-nav-desktop">
             {settingsRoutes
               .filter(
                 (route) =>

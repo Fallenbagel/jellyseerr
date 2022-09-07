@@ -1,6 +1,5 @@
-import React from 'react';
-import Transition from '../Transition';
-import CreateIssueModal from './CreateIssueModal';
+import CreateIssueModal from '@app/components/IssueModal/CreateIssueModal';
+import { Transition } from '@headlessui/react';
 
 interface IssueModalProps {
   show?: boolean;
@@ -10,13 +9,9 @@ interface IssueModalProps {
   issueId?: never;
 }
 
-const IssueModal: React.FC<IssueModalProps> = ({
-  show,
-  mediaType,
-  onCancel,
-  tmdbId,
-}) => (
+const IssueModal = ({ show, mediaType, onCancel, tmdbId }: IssueModalProps) => (
   <Transition
+    as="div"
     enter="transition opacity-0 duration-300"
     enterFrom="opacity-0"
     enterTo="opacity-100"

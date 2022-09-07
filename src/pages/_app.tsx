@@ -1,29 +1,34 @@
+import Layout from '@app/components/Layout';
+import LoadingBar from '@app/components/LoadingBar';
+import PWAHeader from '@app/components/PWAHeader';
+import ServiceWorkerSetup from '@app/components/ServiceWorkerSetup';
+import StatusChecker from '@app/components/StatusChecker';
+import Toast from '@app/components/Toast';
+import ToastContainer from '@app/components/ToastContainer';
+import { InteractionProvider } from '@app/context/InteractionContext';
+import type { AvailableLocale } from '@app/context/LanguageContext';
+import { LanguageContext } from '@app/context/LanguageContext';
+import { SettingsProvider } from '@app/context/SettingsContext';
+import { UserContext } from '@app/context/UserContext';
+import type { User } from '@app/hooks/useUser';
+import '@app/styles/globals.css';
+import { polyfillIntl } from '@app/utils/polyfillIntl';
+import { MediaServerType } from '@server/constants/server';
+import type { PublicSettingsResponse } from '@server/interfaces/api/settingsInterfaces';
 import axios from 'axios';
-import App, { AppInitialProps, AppProps } from 'next/app';
+import type { AppInitialProps, AppProps } from 'next/app';
+import App from 'next/app';
 import Head from 'next/head';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IntlProvider } from 'react-intl';
 import { ToastProvider } from 'react-toast-notifications';
 import { SWRConfig } from 'swr';
-import { MediaServerType } from '../../server/constants/server';
-import { PublicSettingsResponse } from '../../server/interfaces/api/settingsInterfaces';
-import Layout from '../components/Layout';
-import LoadingBar from '../components/LoadingBar';
-import PWAHeader from '../components/PWAHeader';
-import ServiceWorkerSetup from '../components/ServiceWorkerSetup';
-import StatusChecker from '../components/StatusChacker';
-import Toast from '../components/Toast';
-import ToastContainer from '../components/ToastContainer';
-import { InteractionProvider } from '../context/InteractionContext';
-import { AvailableLocale, LanguageContext } from '../context/LanguageContext';
-import { SettingsProvider } from '../context/SettingsContext';
-import { UserContext } from '../context/UserContext';
-import { User } from '../hooks/useUser';
-import '../styles/globals.css';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const loadLocaleData = (locale: AvailableLocale): Promise<any> => {
   switch (locale) {
+    case 'ar':
+      return import('../i18n/locale/ar.json');
     case 'ca':
       return import('../i18n/locale/ca.json');
     case 'cs':
@@ -38,12 +43,14 @@ const loadLocaleData = (locale: AvailableLocale): Promise<any> => {
       return import('../i18n/locale/es.json');
     case 'fr':
       return import('../i18n/locale/fr.json');
+    case 'hu':
+      return import('../i18n/locale/hu.json');
     case 'it':
       return import('../i18n/locale/it.json');
     case 'ja':
       return import('../i18n/locale/ja.json');
-    case 'hu':
-      return import('../i18n/locale/hu.json');
+    case 'lt':
+      return import('../i18n/locale/lt.json');
     case 'nb-NO':
       return import('../i18n/locale/nb_NO.json');
     case 'nl':
@@ -119,6 +126,9 @@ const CoreApp: Omit<NextAppComponentType, 'origGetInitialProps'> = ({
     <SWRConfig
       value={{
         fetcher: (url) => axios.get(url).then((res) => res.data),
+        fallback: {
+          '/api/v1/auth/me': user,
+        },
       }}
     >
       <LanguageContext.Provider value={{ locale: currentLocale, setLocale }}>
@@ -237,6 +247,7 @@ CoreApp.getInitialProps = async (initialProps) => {
     : currentSettings.locale;
 
   const messages = await loadLocaleData(locale as AvailableLocale);
+  await polyfillIntl(locale);
 
   return { ...appInitialProps, user, messages, locale, currentSettings };
 };

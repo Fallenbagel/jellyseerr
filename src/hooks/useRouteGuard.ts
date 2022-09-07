@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-import { Permission, PermissionCheckOptions, useUser } from './useUser';
+import type { Permission, PermissionCheckOptions } from './useUser';
+import { useUser } from './useUser';
 
 const useRouteGuard = (
   permission: Permission | Permission[],

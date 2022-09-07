@@ -1,8 +1,7 @@
-import { NextPage } from 'next';
-import React from 'react';
-import IssueDetails from '../../../components/IssueDetails';
-import useRouteGuard from '../../../hooks/useRouteGuard';
-import { Permission } from '../../../hooks/useUser';
+import IssueDetails from '@app/components/IssueDetails';
+import useRouteGuard from '@app/hooks/useRouteGuard';
+import { Permission } from '@app/hooks/useUser';
+import type { NextPage } from 'next';
 
 const IssuePage: NextPage = () => {
   useRouteGuard(

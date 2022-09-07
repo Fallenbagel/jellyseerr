@@ -1,6 +1,5 @@
-import React from 'react';
-import { NextPage } from 'next';
-import Setup from '../components/Setup';
+import Setup from '@app/components/Setup';
+import type { NextPage } from 'next';
 
 const SetupPage: NextPage = () => {
   return <Setup />;

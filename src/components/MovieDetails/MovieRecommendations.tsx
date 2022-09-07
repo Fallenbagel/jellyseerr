@@ -1,21 +1,20 @@
+import Header from '@app/components/Common/Header';
+import ListView from '@app/components/Common/ListView';
+import PageTitle from '@app/components/Common/PageTitle';
+import useDiscover from '@app/hooks/useDiscover';
+import Error from '@app/pages/_error';
+import type { MovieDetails } from '@server/models/Movie';
+import type { MovieResult } from '@server/models/Search';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
-import type { MovieDetails } from '../../../server/models/Movie';
-import type { MovieResult } from '../../../server/models/Search';
-import useDiscover from '../../hooks/useDiscover';
-import Error from '../../pages/_error';
-import Header from '../Common/Header';
-import ListView from '../Common/ListView';
-import PageTitle from '../Common/PageTitle';
 
 const messages = defineMessages({
   recommendations: 'Recommendations',
 });
 
-const MovieRecommendations: React.FC = () => {
+const MovieRecommendations = () => {
   const intl = useIntl();
   const router = useRouter();
   const { data: movieData } = useSWR<MovieDetails>(

@@ -1,21 +1,20 @@
-import React from 'react';
+import Header from '@app/components/Common/Header';
+import ListView from '@app/components/Common/ListView';
+import PageTitle from '@app/components/Common/PageTitle';
+import useDiscover from '@app/hooks/useDiscover';
+import Error from '@app/pages/_error';
 import type {
   MovieResult,
-  TvResult,
   PersonResult,
-} from '../../../server/models/Search';
-import ListView from '../Common/ListView';
+  TvResult,
+} from '@server/models/Search';
 import { defineMessages, useIntl } from 'react-intl';
-import Header from '../Common/Header';
-import PageTitle from '../Common/PageTitle';
-import useDiscover from '../../hooks/useDiscover';
-import Error from '../../pages/_error';
 
 const messages = defineMessages({
   trending: 'Trending',
 });
 
-const Trending: React.FC = () => {
+const Trending = () => {
   const intl = useIntl();
   const {
     isLoadingInitialData,

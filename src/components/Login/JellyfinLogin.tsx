@@ -1,12 +1,12 @@
+import Button from '@app/components/Common/Button';
+import useSettings from '@app/hooks/useSettings';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
-import React from 'react';
+import getConfig from 'next/config';
+import type React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import * as Yup from 'yup';
-import useSettings from '../../hooks/useSettings';
-import Button from '../Common/Button';
-import getConfig from 'next/config';
 
 const messages = defineMessages({
   username: 'Username',

@@ -1,6 +1,6 @@
 import { ArrowCircleRightIcon } from '@heroicons/react/solid';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 
 const messages = defineMessages({
@@ -12,7 +12,7 @@ interface ShowMoreCardProps {
   posters: (string | undefined)[];
 }
 
-const ShowMoreCard: React.FC<ShowMoreCardProps> = ({ url, posters }) => {
+const ShowMoreCard = ({ url, posters }: ShowMoreCardProps) => {
   const intl = useIntl();
   const [isHovered, setHovered] = useState(false);
   return (

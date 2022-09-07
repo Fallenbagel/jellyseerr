@@ -1,3 +1,29 @@
+import JellyfinAPI from '@server/api/jellyfin';
+import PlexAPI from '@server/api/plexapi';
+import PlexTvAPI from '@server/api/plextv';
+import TautulliAPI from '@server/api/tautulli';
+import { getRepository } from '@server/datasource';
+import Media from '@server/entity/Media';
+import { MediaRequest } from '@server/entity/MediaRequest';
+import { User } from '@server/entity/User';
+import type { PlexConnection } from '@server/interfaces/api/plexInterfaces';
+import type {
+  LogMessage,
+  LogsResultsResponse,
+  SettingsAboutResponse,
+} from '@server/interfaces/api/settingsInterfaces';
+import { jobJellyfinFullSync } from '@server/job/jellyfinsync';
+import { scheduledJobs } from '@server/job/schedule';
+import type { AvailableCacheIds } from '@server/lib/cache';
+import cacheManager from '@server/lib/cache';
+import { Permission } from '@server/lib/permissions';
+import { plexFullScanner } from '@server/lib/scanners/plex';
+import type { Library, MainSettings } from '@server/lib/settings';
+import { getSettings } from '@server/lib/settings';
+import logger from '@server/logger';
+import { isAuthenticated } from '@server/middleware/auth';
+import { appDataPath } from '@server/utils/appDataVolume';
+import { getAppVersion } from '@server/utils/appVersion';
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import fs from 'fs';
@@ -5,31 +31,7 @@ import { merge, omit, set, sortBy } from 'lodash';
 import { rescheduleJob } from 'node-schedule';
 import path from 'path';
 import semver from 'semver';
-import { getRepository } from 'typeorm';
 import { URL } from 'url';
-import JellyfinAPI from '../../api/jellyfin';
-import PlexAPI from '../../api/plexapi';
-import PlexTvAPI from '../../api/plextv';
-import TautulliAPI from '../../api/tautulli';
-import Media from '../../entity/Media';
-import { MediaRequest } from '../../entity/MediaRequest';
-import { User } from '../../entity/User';
-import { PlexConnection } from '../../interfaces/api/plexInterfaces';
-import {
-  LogMessage,
-  LogsResultsResponse,
-  SettingsAboutResponse,
-} from '../../interfaces/api/settingsInterfaces';
-import { jobJellyfinFullSync } from '../../job/jellyfinsync';
-import { scheduledJobs } from '../../job/schedule';
-import cacheManager, { AvailableCacheIds } from '../../lib/cache';
-import { Permission } from '../../lib/permissions';
-import { plexFullScanner } from '../../lib/scanners/plex';
-import { getSettings, Library, MainSettings } from '../../lib/settings';
-import logger from '../../logger';
-import { isAuthenticated } from '../../middleware/auth';
-import { appDataPath } from '../../utils/appDataVolume';
-import { getAppVersion } from '../../utils/appVersion';
 import notificationRoutes from './notifications';
 import radarrRoutes from './radarr';
 import sonarrRoutes from './sonarr';
@@ -93,8 +95,8 @@ settingsRoutes.post('/plex', async (req, res, next) => {
   const settings = getSettings();
   try {
     const admin = await userRepository.findOneOrFail({
-      select: ['id', 'plexToken'],
-      order: { id: 'ASC' },
+      select: { id: true, plexToken: true },
+      where: { id: 1 },
     });
 
     Object.assign(settings.plex, req.body);
@@ -129,8 +131,8 @@ settingsRoutes.get('/plex/devices/servers', async (req, res, next) => {
   const userRepository = getRepository(User);
   try {
     const admin = await userRepository.findOneOrFail({
-      select: ['id', 'plexToken'],
-      order: { id: 'ASC' },
+      select: { id: true, plexToken: true },
+      where: { id: 1 },
     });
     const plexTvClient = admin.plexToken
       ? new PlexTvAPI(admin.plexToken)
@@ -208,8 +210,8 @@ settingsRoutes.get('/plex/library', async (req, res) => {
   if (req.query.sync) {
     const userRepository = getRepository(User);
     const admin = await userRepository.findOneOrFail({
-      select: ['id', 'plexToken'],
-      order: { id: 'ASC' },
+      select: { id: true, plexToken: true },
+      where: { id: 1 },
     });
     const plexapi = new PlexAPI({ plexToken: admin.plexToken });
 
@@ -262,6 +264,7 @@ settingsRoutes.get('/jellyfin/library', async (req, res) => {
     const userRepository = getRepository(User);
     const admin = await userRepository.findOneOrFail({
       select: ['id', 'jellyfinAuthToken', 'jellyfinDeviceId', 'jellyfinUserId'],
+      where: { id: 1 },
       order: { id: 'ASC' },
     });
     const jellyfinClient = new JellyfinAPI(
@@ -312,6 +315,7 @@ settingsRoutes.get('/jellyfin/users', async (req, res) => {
   const userRepository = getRepository(User);
   const admin = await userRepository.findOneOrFail({
     select: ['id', 'jellyfinAuthToken', 'jellyfinDeviceId', 'jellyfinUserId'],
+    where: { id: 1 },
     order: { id: 'ASC' },
   });
   const jellyfinClient = new JellyfinAPI(
@@ -390,8 +394,8 @@ settingsRoutes.get(
 
     try {
       const admin = await userRepository.findOneOrFail({
-        select: ['id', 'plexToken'],
-        order: { id: 'ASC' },
+        select: { id: true, plexToken: true },
+        where: { id: 1 },
       });
       const plexApi = new PlexTvAPI(admin.plexToken ?? '');
       const plexUsers = (await plexApi.getUsers()).MediaContainer.User.map(
