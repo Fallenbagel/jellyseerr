@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class ServerTypeEnum1613412948344 implements MigrationInterface {
   name = 'ServerTypeEnum1613412948344';

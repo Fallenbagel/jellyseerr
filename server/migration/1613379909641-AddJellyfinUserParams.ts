@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddJellyfinUserParams1613379909641 implements MigrationInterface {
   name = 'AddJellyfinUserParams1613379909641';
