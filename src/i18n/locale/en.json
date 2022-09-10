@@ -812,7 +812,7 @@
   "components.Settings.radarrsettings": "Radarr Settings",
   "components.Settings.region": "Discover Region",
   "components.Settings.regionTip": "Filter content by regional availability",
-  "components.Settings.restartrequiredTooltip": "Overseerr must be restarted for changes to this setting to take effect",
+  "components.Settings.restartrequiredTooltip": "Jellyseerr must be restarted for changes to this setting to take effect",
   "components.Settings.scan": "Sync Libraries",
   "components.Settings.scanning": "Syncing…",
   "components.Settings.serverLocal": "local",

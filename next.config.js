@@ -21,4 +21,7 @@ module.exports = {
 
     return config;
   },
+  experimental: {
+    scrollRestoration: true,
+  },
 };
