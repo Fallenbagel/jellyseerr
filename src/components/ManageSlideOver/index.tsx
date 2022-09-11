@@ -79,7 +79,9 @@ const ManageSlideOver = ({
   const intl = useIntl();
   const settings = useSettings();
   const { data: watchData } = useSWR<MediaWatchDataResponse>(
-    data.mediaInfo && hasPermission(Permission.ADMIN)
+    settings.currentSettings.mediaServerType === MediaServerType.PLEX &&
+      data.mediaInfo &&
+      hasPermission(Permission.ADMIN)
       ? `/api/v1/media/${data.mediaInfo.id}/watch_data`
       : null
   );
