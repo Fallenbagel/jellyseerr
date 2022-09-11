@@ -194,22 +194,21 @@ class Media {
           if (tautulliUrl) {
             this.tautulliUrl4k = `${tautulliUrl}/info?rating_key=${this.ratingKey4k}`;
           }
-        } else {
-          const pageName =
-            process.env.JELLYFIN_TYPE === 'emby' ? 'item' : 'details';
-          const { serverId, hostname, externalHostname } =
-            getSettings().jellyfin;
-          const jellyfinHost =
-            externalHostname && externalHostname.length > 0
-              ? externalHostname
-              : hostname;
-          if (this.jellyfinMediaId) {
-            this.mediaUrl = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId}&context=home&serverId=${serverId}`;
-          }
-          if (this.jellyfinMediaId4k) {
-            this.mediaUrl4k = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId4k}&context=home&serverId=${serverId}`;
-          }
         }
+      }
+    } else {
+      const pageName =
+        process.env.JELLYFIN_TYPE === 'emby' ? 'item' : 'details';
+      const { serverId, hostname, externalHostname } = getSettings().jellyfin;
+      const jellyfinHost =
+        externalHostname && externalHostname.length > 0
+          ? externalHostname
+          : hostname;
+      if (this.jellyfinMediaId) {
+        this.mediaUrl = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId}&context=home&serverId=${serverId}`;
+      }
+      if (this.jellyfinMediaId4k) {
+        this.mediaUrl4k = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId4k}&context=home&serverId=${serverId}`;
       }
     }
   }
