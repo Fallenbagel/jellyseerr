@@ -11,6 +11,7 @@ import { ServerIcon, ViewListIcon } from '@heroicons/react/outline';
 import { CheckCircleIcon, DocumentRemoveIcon } from '@heroicons/react/solid';
 import { IssueStatus } from '@server/constants/issue';
 import { MediaRequestStatus, MediaStatus } from '@server/constants/media';
+import { MediaServerType } from '@server/constants/server';
 import type { MediaWatchDataResponse } from '@server/interfaces/api/mediaInterfaces';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
@@ -79,7 +80,9 @@ const ManageSlideOver = ({
   const intl = useIntl();
   const settings = useSettings();
   const { data: watchData } = useSWR<MediaWatchDataResponse>(
-    data.mediaInfo && hasPermission(Permission.ADMIN)
+    settings.currentSettings.mediaServerType === MediaServerType.PLEX &&
+      data.mediaInfo &&
+      hasPermission(Permission.ADMIN)
       ? `/api/v1/media/${data.mediaInfo.id}/watch_data`
       : null
   );

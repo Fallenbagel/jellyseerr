@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+import 'cy-mobile-commands';
 
 Cypress.Commands.add('login', (email, password) => {
   cy.session(
