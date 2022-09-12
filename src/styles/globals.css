@@ -11,6 +11,7 @@
 
   body {
     @apply bg-gray-900;
+    overscroll-behavior-y: contain;
   }
 
   code {
@@ -452,4 +453,23 @@
       @apply hidden;
     }
   }
+}
+
+.ptr--ptr {
+  box-shadow: initial !important;
+  position: absolute !important;
+  z-index: 30 !important;
+}
+
+.ptr--refresh {
+  overflow: visible !important;
+  z-index: 30 !important;
+}
+
+.ptr--pull {
+  z-index: 30 !important;
+}
+
+.ptr--ptr .ptr--box {
+  margin-bottom: -13px !important;
 }

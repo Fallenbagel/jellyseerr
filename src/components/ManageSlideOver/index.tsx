@@ -11,6 +11,7 @@ import { ServerIcon, ViewListIcon } from '@heroicons/react/outline';
 import { CheckCircleIcon, DocumentRemoveIcon } from '@heroicons/react/solid';
 import { IssueStatus } from '@server/constants/issue';
 import { MediaRequestStatus, MediaStatus } from '@server/constants/media';
+import { MediaServerType } from '@server/constants/server';
 import type { MediaWatchDataResponse } from '@server/interfaces/api/mediaInterfaces';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';

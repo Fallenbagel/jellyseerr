@@ -3095,6 +3095,11 @@
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.5.tgz#5f19d2b85a98e9558036f6a3cacc8819420f05cf"
   integrity sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==
 
+"@types/pulltorefreshjs@0.1.5":
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/@types/pulltorefreshjs/-/pulltorefreshjs-0.1.5.tgz#f15c9dbc91b8fdd8135093d81ece9e9d4d2324d7"
+  integrity sha512-/VRTgBettvBg1KI8mGnA9oeWs359tTXQ7qsxLuXnksL88jvK6ZNMStG5T9x9vUO9O7jLsgREB0cElz/BWFfdew==
+
 "@types/qs@*":
   version "6.9.7"
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.7.tgz#63bb7d067db107cc1e457c303bc25d511febf6cb"
@@ -4949,6 +4954,11 @@ cron-parser@^3.5.0:
     is-nan "^1.3.2"
     luxon "^1.26.0"
 
+cronstrue@2.11.0:
+  version "2.11.0"
+  resolved "https://registry.yarnpkg.com/cronstrue/-/cronstrue-2.11.0.tgz#18ff1b95a836b9b4e06854f796db2dc8fa98ce41"
+  integrity sha512-iIBCSis5yqtFYWtJAmNOiwDveFWWIn+8uV5UYuPHYu/Aeu5CSSJepSbaHMyfc+pPFgnsCcGzfPQEo7LSGmWbTg==
+
 cross-spawn@^7.0.0, cross-spawn@^7.0.2, cross-spawn@^7.0.3:
   version "7.0.3"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.3.tgz#f73a85b9d5d41d045551c177e2882d4ac85728a6"
@@ -5027,6 +5037,11 @@ csurf@1.11.0:
     cookie-signature "1.0.6"
     csrf "3.1.0"
     http-errors "~1.7.3"
+
+cy-mobile-commands@0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/cy-mobile-commands/-/cy-mobile-commands-0.3.0.tgz#2bf242093149154d846b755977da197b4730429e"
+  integrity sha512-Bj5P2ylw88hPqolLu68xWB6euVH5uNt8zyh+Ju8sBukGv39mWZxpjp6LtnUX/LK/YMthwvILYHhvr9SG1TP+4w==
 
 cypress@10.6.0:
   version "10.6.0"
@@ -10301,6 +10316,11 @@ pug@3.0.2, pug@^3.0.2:
     pug-parser "^6.0.0"
     pug-runtime "^3.0.1"
     pug-strip-comments "^2.0.0"
+
+pulltorefreshjs@0.1.22:
+  version "0.1.22"
+  resolved "https://registry.yarnpkg.com/pulltorefreshjs/-/pulltorefreshjs-0.1.22.tgz#ddb5e3feee0b2a49fd46e1b18e84fffef2c47ac0"
+  integrity sha512-haxNVEHnS4NCQA7NeG7TSV69z4uqy/N7nfPRuc4dPWe8H6ygUrMjdNeohE+6v0lVVX/ukSjbLYwPUGUYtFKfvQ==
 
 pump@^3.0.0:
   version "3.0.0"

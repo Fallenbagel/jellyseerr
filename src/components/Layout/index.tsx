@@ -1,6 +1,7 @@
 import SearchInput from '@app/components/Layout/SearchInput';
 import Sidebar from '@app/components/Layout/Sidebar';
 import UserDropdown from '@app/components/Layout/UserDropdown';
+import PullToRefresh from '@app/components/PullToRefresh';
 import type { AvailableLocale } from '@app/context/LanguageContext';
 import useLocale from '@app/hooks/useLocale';
 import useSettings from '@app/hooks/useSettings';
@@ -58,6 +59,7 @@ const Layout = ({ children }: LayoutProps) => {
       <Sidebar open={isSidebarOpen} setClosed={() => setSidebarOpen(false)} />
 
       <div className="relative mb-16 flex w-0 min-w-0 flex-1 flex-col lg:ml-64">
+        <PullToRefresh />
         <div
           className={`searchbar fixed left-0 right-0 top-0 z-10 flex flex-shrink-0 bg-opacity-80 transition duration-300 ${
             isScrolled ? 'bg-gray-700' : 'bg-transparent'

@@ -2731,6 +2731,12 @@ paths:
             nullable: true
             enum: [debug, info, warn, error]
             default: debug
+        - in: query
+          name: search
+          schema:
+            type: string
+            nullable: true
+            example: plex
       responses:
         '200':
           description: Server log returned
