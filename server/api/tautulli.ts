@@ -1,8 +1,9 @@
-import axios, { AxiosInstance } from 'axios';
+import type { User } from '@server/entity/User';
+import type { TautulliSettings } from '@server/lib/settings';
+import logger from '@server/logger';
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
 import { uniqWith } from 'lodash';
-import { User } from '../entity/User';
-import { TautulliSettings } from '../lib/settings';
-import logger from '../logger';
 
 export interface TautulliHistoryRecord {
   date: number;

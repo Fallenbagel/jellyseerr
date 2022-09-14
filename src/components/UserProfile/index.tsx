@@ -1,30 +1,30 @@
+import ImageFader from '@app/components/Common/ImageFader';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import PageTitle from '@app/components/Common/PageTitle';
+import ProgressCircle from '@app/components/Common/ProgressCircle';
+import RequestCard from '@app/components/RequestCard';
+import Slider from '@app/components/Slider';
+import TmdbTitleCard from '@app/components/TitleCard/TmdbTitleCard';
+import ProfileHeader from '@app/components/UserProfile/ProfileHeader';
+import { Permission, UserType, useUser } from '@app/hooks/useUser';
+import Error from '@app/pages/_error';
 import { ArrowCircleRightIcon } from '@heroicons/react/outline';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import React, { useCallback, useEffect, useState } from 'react';
-import { defineMessages, FormattedNumber, useIntl } from 'react-intl';
-import useSWR from 'swr';
-import {
+import type { WatchlistResponse } from '@server/interfaces/api/discoverInterfaces';
+import type {
   QuotaResponse,
   UserRequestsResponse,
   UserWatchDataResponse,
-} from '../../../server/interfaces/api/userInterfaces';
-import { MovieDetails } from '../../../server/models/Movie';
-import { TvDetails } from '../../../server/models/Tv';
-import { Permission, UserType, useUser } from '../../hooks/useUser';
-import Error from '../../pages/_error';
-import ImageFader from '../Common/ImageFader';
-import LoadingSpinner from '../Common/LoadingSpinner';
-import PageTitle from '../Common/PageTitle';
-import ProgressCircle from '../Common/ProgressCircle';
-import RequestCard from '../RequestCard';
-import Slider from '../Slider';
-import TmdbTitleCard from '../TitleCard/TmdbTitleCard';
-import ProfileHeader from './ProfileHeader';
+} from '@server/interfaces/api/userInterfaces';
+import type { MovieDetails } from '@server/models/Movie';
+import type { TvDetails } from '@server/models/Tv';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useCallback, useEffect, useState } from 'react';
+import { defineMessages, useIntl } from 'react-intl';
+import useSWR from 'swr';
 
 const messages = defineMessages({
   recentrequests: 'Recent Requests',
-  norequests: 'No requests.',
   limit: '{remaining} of {limit}',
   requestsperdays: '{limit} remaining',
   unlimited: 'Unlimited',
@@ -33,11 +33,14 @@ const messages = defineMessages({
   movierequests: 'Movie Requests',
   seriesrequest: 'Series Requests',
   recentlywatched: 'Recently Watched',
+  plexwatchlist: 'Plex Watchlist',
+  emptywatchlist:
+    'Media added to your <PlexWatchlistSupportLink>Plex Watchlist</PlexWatchlistSupportLink> will appear here.',
 });
 
 type MediaTitle = MovieDetails | TvDetails;
 
-const UserProfile: React.FC = () => {
+const UserProfile = () => {
   const intl = useIntl();
   const router = useRouter();
   const { user, error } = useUser({
@@ -68,12 +71,29 @@ const UserProfile: React.FC = () => {
       ? `/api/v1/user/${user.id}/quota`
       : null
   );
-  const { data: watchData } = useSWR<UserWatchDataResponse>(
-    user?.userType === UserType.PLEX &&
-      (user.id === currentUser?.id || currentHasPermission(Permission.ADMIN))
-      ? `/api/v1/user/${user.id}/watch_data`
-      : null
-  );
+  const { data: watchData, error: watchDataError } =
+    useSWR<UserWatchDataResponse>(
+      user?.userType === UserType.PLEX &&
+        (user.id === currentUser?.id || currentHasPermission(Permission.ADMIN))
+        ? `/api/v1/user/${user.id}/watch_data`
+        : null
+    );
+  const { data: watchlistItems, error: watchlistError } =
+    useSWR<WatchlistResponse>(
+      user?.userType === UserType.PLEX &&
+        (user.id === currentUser?.id ||
+          currentHasPermission(
+            [Permission.MANAGE_REQUESTS, Permission.WATCHLIST_VIEW],
+            {
+              type: 'or',
+            }
+          ))
+        ? `/api/v1/user/${user.id}/watchlist`
+        : null,
+      {
+        revalidateOnMount: true,
+      }
+    );
 
   const updateAvailableTitles = useCallback(
     (requestId: number, mediaTitle: MediaTitle) => {
@@ -129,7 +149,15 @@ const UserProfile: React.FC = () => {
                   {intl.formatMessage(messages.totalrequests)}
                 </dt>
                 <dd className="mt-1 text-3xl font-semibold text-white">
-                  <FormattedNumber value={user.requestCount} />
+                  <Link
+                    href={
+                      user.id === currentUser?.id
+                        ? '/profile/requests?filter=all'
+                        : `/users/${user?.id}/requests?filter=all`
+                    }
+                  >
+                    <a>{intl.formatNumber(user.requestCount)}</a>
+                  </Link>
                 </dd>
               </div>
               <div
@@ -249,37 +277,97 @@ const UserProfile: React.FC = () => {
         currentHasPermission(
           [Permission.MANAGE_REQUESTS, Permission.REQUEST_VIEW],
           { type: 'or' }
-        )) && (
-        <>
-          <div className="slider-header">
-            <Link href={`/users/${user?.id}/requests?filter=all`}>
-              <a className="slider-title">
-                <span>{intl.formatMessage(messages.recentrequests)}</span>
-                <ArrowCircleRightIcon />
-              </a>
-            </Link>
-          </div>
-          <Slider
-            sliderKey="requests"
-            isLoading={!requests && !requestError}
-            isEmpty={
-              !!requests && !requestError && requests.results.length === 0
-            }
-            items={(requests?.results ?? []).map((request) => (
-              <RequestCard
-                key={`request-slider-item-${request.id}`}
-                request={request}
-                onTitleData={updateAvailableTitles}
-              />
-            ))}
-            placeholder={<RequestCard.Placeholder />}
-            emptyMessage={intl.formatMessage(messages.norequests)}
-          />
-        </>
-      )}
-      {(user.id === currentUser?.id ||
-        currentHasPermission(Permission.ADMIN)) &&
-        !!watchData?.recentlyWatched.length && (
+        )) &&
+        (!requests || !!requests.results.length) &&
+        !requestError && (
+          <>
+            <div className="slider-header">
+              <Link
+                href={
+                  user.id === currentUser?.id
+                    ? '/profile/requests?filter=all'
+                    : `/users/${user?.id}/requests?filter=all`
+                }
+              >
+                <a className="slider-title">
+                  <span>{intl.formatMessage(messages.recentrequests)}</span>
+                  <ArrowCircleRightIcon />
+                </a>
+              </Link>
+            </div>
+            <Slider
+              sliderKey="requests"
+              isLoading={!requests}
+              items={(requests?.results ?? []).map((request) => (
+                <RequestCard
+                  key={`request-slider-item-${request.id}`}
+                  request={request}
+                  onTitleData={updateAvailableTitles}
+                />
+              ))}
+              placeholder={<RequestCard.Placeholder />}
+            />
+          </>
+        )}
+      {user.userType === UserType.PLEX &&
+        (user.id === currentUser?.id ||
+          currentHasPermission(
+            [Permission.MANAGE_REQUESTS, Permission.WATCHLIST_VIEW],
+            { type: 'or' }
+          )) &&
+        (!watchlistItems ||
+          !!watchlistItems.results.length ||
+          (user.id === currentUser?.id &&
+            (user.settings?.watchlistSyncMovies ||
+              user.settings?.watchlistSyncTv))) &&
+        !watchlistError && (
+          <>
+            <div className="slider-header">
+              <Link
+                href={
+                  user.id === currentUser?.id
+                    ? '/profile/watchlist'
+                    : `/users/${user?.id}/watchlist`
+                }
+              >
+                <a className="slider-title">
+                  <span>{intl.formatMessage(messages.plexwatchlist)}</span>
+                  <ArrowCircleRightIcon />
+                </a>
+              </Link>
+            </div>
+            <Slider
+              sliderKey="watchlist"
+              isLoading={!watchlistItems}
+              isEmpty={!!watchlistItems && watchlistItems.results.length === 0}
+              emptyMessage={intl.formatMessage(messages.emptywatchlist, {
+                PlexWatchlistSupportLink: (msg: React.ReactNode) => (
+                  <a
+                    href="https://support.plex.tv/articles/universal-watchlist/"
+                    className="text-white transition duration-300 hover:underline"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {msg}
+                  </a>
+                ),
+              })}
+              items={watchlistItems?.results.map((item) => (
+                <TmdbTitleCard
+                  id={item.tmdbId}
+                  key={`watchlist-slider-item-${item.ratingKey}`}
+                  tmdbId={item.tmdbId}
+                  type={item.mediaType}
+                />
+              ))}
+            />
+          </>
+        )}
+      {user.userType === UserType.PLEX &&
+        (user.id === currentUser?.id ||
+          currentHasPermission(Permission.ADMIN)) &&
+        (!watchData || !!watchData.recentlyWatched.length) &&
+        !watchDataError && (
           <>
             <div className="slider-header">
               <div className="slider-title">
@@ -289,11 +377,12 @@ const UserProfile: React.FC = () => {
             <Slider
               sliderKey="media"
               isLoading={!watchData}
-              isEmpty={!watchData?.recentlyWatched.length}
-              items={watchData.recentlyWatched.map((item) => (
+              items={watchData?.recentlyWatched.map((item) => (
                 <TmdbTitleCard
                   key={`media-slider-item-${item.id}`}
+                  id={item.id}
                   tmdbId={item.tmdbId}
+                  tvdbId={item.tvdbId}
                   type={item.mediaType}
                 />
               ))}

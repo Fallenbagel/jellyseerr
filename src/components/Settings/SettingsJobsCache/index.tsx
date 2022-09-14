@@ -1,29 +1,27 @@
+import Spinner from '@app/assets/spinner.svg';
+import Badge from '@app/components/Common/Badge';
+import Button from '@app/components/Common/Button';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import Modal from '@app/components/Common/Modal';
+import PageTitle from '@app/components/Common/PageTitle';
+import Table from '@app/components/Common/Table';
+import useLocale from '@app/hooks/useLocale';
+import useSettings from '@app/hooks/useSettings';
+import globalMessages from '@app/i18n/globalMessages';
+import { formatBytes } from '@app/utils/numberHelpers';
+import { Transition } from '@headlessui/react';
 import { PlayIcon, StopIcon, TrashIcon } from '@heroicons/react/outline';
 import { PencilIcon } from '@heroicons/react/solid';
+import { MediaServerType } from '@server/constants/server';
+import type { CacheItem } from '@server/interfaces/api/settingsInterfaces';
+import type { JobId } from '@server/lib/settings';
 import axios from 'axios';
-import React, { useState } from 'react';
-import {
-  defineMessages,
-  FormattedRelativeTime,
-  MessageDescriptor,
-  useIntl,
-} from 'react-intl';
+import cronstrue from 'cronstrue/i18n';
+import { Fragment, useReducer, useState } from 'react';
+import type { MessageDescriptor } from 'react-intl';
+import { defineMessages, FormattedRelativeTime, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
-import { MediaServerType } from '../../../../server/constants/server';
-import { CacheItem } from '../../../../server/interfaces/api/settingsInterfaces';
-import { JobId } from '../../../../server/lib/settings';
-import Spinner from '../../../assets/spinner.svg';
-import useSettings from '../../../hooks/useSettings';
-import globalMessages from '../../../i18n/globalMessages';
-import { formatBytes } from '../../../utils/numberHelpers';
-import Badge from '../../Common/Badge';
-import Button from '../../Common/Button';
-import LoadingSpinner from '../../Common/LoadingSpinner';
-import Modal from '../../Common/Modal';
-import PageTitle from '../../Common/PageTitle';
-import Table from '../../Common/Table';
-import Transition from '../../Transition';
 
 const messages: { [messageName: string]: MessageDescriptor } = defineMessages({
   jobsandcache: 'Jobs & Cache',
@@ -53,6 +51,7 @@ const messages: { [messageName: string]: MessageDescriptor } = defineMessages({
   unknownJob: 'Unknown Job',
   'plex-recently-added-scan': 'Plex Recently Added Scan',
   'plex-full-scan': 'Plex Full Library Scan',
+  'plex-watchlist-sync': 'Plex Watchlist Sync',
   'jellyfin-recently-added-sync': 'Jellyfin Recently Added Scan',
   'jellyfin-full-sync': 'Jellyfin Full Library Scan',
   'radarr-scan': 'Radarr Scan',
@@ -62,7 +61,8 @@ const messages: { [messageName: string]: MessageDescriptor } = defineMessages({
   editJobSchedule: 'Modify Job',
   jobScheduleEditSaved: 'Job edited successfully!',
   jobScheduleEditFailed: 'Something went wrong while saving the job.',
-  editJobSchedulePrompt: 'Frequency',
+  editJobScheduleCurrent: 'Current Frequency',
+  editJobSchedulePrompt: 'New Frequency',
   editJobScheduleSelectorHours:
     'Every {jobScheduleHours, plural, one {hour} other {{jobScheduleHours} hours}}',
   editJobScheduleSelectorMinutes:
@@ -74,12 +74,56 @@ interface Job {
   name: string;
   type: 'process' | 'command';
   interval: 'short' | 'long' | 'fixed';
+  cronSchedule: string;
   nextExecutionTime: string;
   running: boolean;
 }
 
-const SettingsJobs: React.FC = () => {
+type JobModalState = {
+  isOpen?: boolean;
+  job?: Job;
+  scheduleHours: number;
+  scheduleMinutes: number;
+};
+
+type JobModalAction =
+  | { type: 'set'; hours?: number; minutes?: number }
+  | {
+      type: 'close';
+    }
+  | { type: 'open'; job?: Job };
+
+const jobModalReducer = (
+  state: JobModalState,
+  action: JobModalAction
+): JobModalState => {
+  switch (action.type) {
+    case 'close':
+      return {
+        ...state,
+        isOpen: false,
+      };
+
+    case 'open':
+      return {
+        isOpen: true,
+        job: action.job,
+        scheduleHours: 1,
+        scheduleMinutes: 5,
+      };
+
+    case 'set':
+      return {
+        ...state,
+        scheduleHours: action.hours ?? state.scheduleHours,
+        scheduleMinutes: action.minutes ?? state.scheduleMinutes,
+      };
+  }
+};
+
+const SettingsJobs = () => {
   const intl = useIntl();
+  const { locale } = useLocale();
   const { addToast } = useToasts();
   const {
     data,
@@ -95,15 +139,12 @@ const SettingsJobs: React.FC = () => {
     }
   );
 
-  const [jobEditModal, setJobEditModal] = useState<{
-    isOpen: boolean;
-    job?: Job;
-  }>({
+  const [jobModalState, dispatch] = useReducer(jobModalReducer, {
     isOpen: false,
+    scheduleHours: 1,
+    scheduleMinutes: 5,
   });
   const [isSaving, setIsSaving] = useState(false);
-  const [jobScheduleMinutes, setJobScheduleMinutes] = useState(5);
-  const [jobScheduleHours, setJobScheduleHours] = useState(1);
   const settings = useSettings();
 
   if (!data && !error) {
@@ -154,10 +195,10 @@ const SettingsJobs: React.FC = () => {
     const jobScheduleCron = ['0', '0', '*', '*', '*', '*'];
 
     try {
-      if (jobEditModal.job?.interval === 'short') {
-        jobScheduleCron[1] = `*/${jobScheduleMinutes}`;
-      } else if (jobEditModal.job?.interval === 'long') {
-        jobScheduleCron[2] = `*/${jobScheduleHours}`;
+      if (jobModalState.job?.interval === 'short') {
+        jobScheduleCron[1] = `*/${jobModalState.scheduleMinutes}`;
+      } else if (jobModalState.job?.interval === 'long') {
+        jobScheduleCron[2] = `*/${jobModalState.scheduleHours}`;
       } else {
         // jobs with interval: fixed should not be editable
         throw new Error();
@@ -165,16 +206,18 @@ const SettingsJobs: React.FC = () => {
 
       setIsSaving(true);
       await axios.post(
-        `/api/v1/settings/jobs/${jobEditModal.job?.id}/schedule`,
+        `/api/v1/settings/jobs/${jobModalState.job.id}/schedule`,
         {
           schedule: jobScheduleCron.join(' '),
         }
       );
+
       addToast(intl.formatMessage(messages.jobScheduleEditSaved), {
         appearance: 'success',
         autoDismiss: true,
       });
-      setJobEditModal({ isOpen: false });
+
+      dispatch({ type: 'close' });
       revalidate();
     } catch (e) {
       addToast(intl.formatMessage(messages.jobScheduleEditFailed), {
@@ -195,13 +238,14 @@ const SettingsJobs: React.FC = () => {
         ]}
       />
       <Transition
+        as={Fragment}
         enter="opacity-0 transition duration-300"
         enterFrom="opacity-0"
         enterTo="opacity-100"
         leave="opacity-100 transition duration-300"
         leaveFrom="opacity-100"
         leaveTo="opacity-0"
-        show={jobEditModal.isOpen}
+        show={jobModalState.isOpen}
       >
         <Modal
           title={intl.formatMessage(messages.editJobSchedule)}
@@ -210,25 +254,43 @@ const SettingsJobs: React.FC = () => {
               ? intl.formatMessage(globalMessages.saving)
               : intl.formatMessage(globalMessages.save)
           }
-          iconSvg={<PencilIcon />}
-          onCancel={() => setJobEditModal({ isOpen: false })}
+          onCancel={() => dispatch({ type: 'close' })}
           okDisabled={isSaving}
           onOk={() => scheduleJob()}
         >
           <div className="section">
-            <form>
-              <div className="form-row pb-6">
+            <form className="mb-6">
+              <div className="form-row">
+                <label className="text-label">
+                  {intl.formatMessage(messages.editJobScheduleCurrent)}
+                </label>
+                <div className="form-input-area mt-2 mb-1">
+                  <div>
+                    {jobModalState.job &&
+                      cronstrue.toString(jobModalState.job.cronSchedule, {
+                        locale,
+                      })}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {jobModalState.job?.cronSchedule}
+                  </div>
+                </div>
+              </div>
+              <div className="form-row">
                 <label htmlFor="jobSchedule" className="text-label">
                   {intl.formatMessage(messages.editJobSchedulePrompt)}
                 </label>
                 <div className="form-input-area">
-                  {jobEditModal.job?.interval === 'short' ? (
+                  {jobModalState.job?.interval === 'short' ? (
                     <select
                       name="jobScheduleMinutes"
                       className="inline"
-                      value={jobScheduleMinutes}
+                      value={jobModalState.scheduleMinutes}
                       onChange={(e) =>
-                        setJobScheduleMinutes(Number(e.target.value))
+                        dispatch({
+                          type: 'set',
+                          minutes: Number(e.target.value),
+                        })
                       }
                     >
                       {[5, 10, 15, 20, 30, 60].map((v) => (
@@ -246,9 +308,12 @@ const SettingsJobs: React.FC = () => {
                     <select
                       name="jobScheduleHours"
                       className="inline"
-                      value={jobScheduleHours}
+                      value={jobModalState.scheduleHours}
                       onChange={(e) =>
-                        setJobScheduleHours(Number(e.target.value))
+                        dispatch({
+                          type: 'set',
+                          hours: Number(e.target.value),
+                        })
                       }
                     >
                       {[1, 2, 3, 4, 6, 8, 12, 24, 48, 72].map((v) => (
@@ -327,12 +392,10 @@ const SettingsJobs: React.FC = () => {
                     <Button
                       className="mr-2"
                       buttonType="warning"
-                      onClick={() =>
-                        setJobEditModal({ isOpen: true, job: job })
-                      }
+                      onClick={() => dispatch({ type: 'open', job })}
                     >
                       <PencilIcon />
-                      {intl.formatMessage(globalMessages.edit)}
+                      <span>{intl.formatMessage(globalMessages.edit)}</span>
                     </Button>
                   )}
                   {job.running ? (
@@ -342,7 +405,7 @@ const SettingsJobs: React.FC = () => {
                     </Button>
                   ) : (
                     <Button buttonType="primary" onClick={() => runJob(job)}>
-                      <PlayIcon className="mr-1 h-5 w-5" />
+                      <PlayIcon />
                       <span>{intl.formatMessage(messages.runnow)}</span>
                     </Button>
                   )}

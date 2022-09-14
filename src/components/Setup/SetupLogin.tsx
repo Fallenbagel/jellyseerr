@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { useUser } from '../../hooks/useUser';
-import PlexLoginButton from '../PlexLoginButton';
-import JellyfinLogin from '../Login/JellyfinLogin';
+import Accordion from '@app/components/Common/Accordion';
+import JellyfinLogin from '@app/components/Login/JellyfinLogin';
+import PlexLoginButton from '@app/components/PlexLoginButton';
+import { useUser } from '@app/hooks/useUser';
+import { MediaServerType } from '@server/constants/server';
 import axios from 'axios';
-import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
-import Accordion from '../Common/Accordion';
-import { MediaServerType } from '../../../server/constants/server';
 import getConfig from 'next/config';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 
 const messages = defineMessages({
   welcome: 'Welcome to Jellyseerr',

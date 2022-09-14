@@ -1,13 +1,12 @@
-import { InboxInIcon } from '@heroicons/react/solid';
+import Alert from '@app/components/Common/Alert';
+import Modal from '@app/components/Common/Modal';
+import useSettings from '@app/hooks/useSettings';
+import globalMessages from '@app/i18n/globalMessages';
 import axios from 'axios';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
-import useSettings from '../../hooks/useSettings';
-import globalMessages from '../../i18n/globalMessages';
-import Alert from '../Common/Alert';
-import Modal from '../Common/Modal';
 
 interface PlexImportProps {
   onCancel?: () => void;
@@ -25,10 +24,7 @@ const messages = defineMessages({
     'The <strong>Enable New Plex Sign-In</strong> setting is currently enabled. Plex users with library access do not need to be imported in order to sign in.',
 });
 
-const PlexImportModal: React.FC<PlexImportProps> = ({
-  onCancel,
-  onComplete,
-}) => {
+const PlexImportModal = ({ onCancel, onComplete }: PlexImportProps) => {
   const intl = useIntl();
   const settings = useSettings();
   const { addToast } = useToasts();
@@ -62,9 +58,7 @@ const PlexImportModal: React.FC<PlexImportProps> = ({
       addToast(
         intl.formatMessage(messages.importedfromplex, {
           userCount: createdUsers.length,
-          strong: function strong(msg) {
-            return <strong>{msg}</strong>;
-          },
+          strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
         }),
         {
           autoDismiss: true,
@@ -110,7 +104,6 @@ const PlexImportModal: React.FC<PlexImportProps> = ({
     <Modal
       loading={!data && !error}
       title={intl.formatMessage(messages.importfromplex)}
-      iconSvg={<InboxInIcon />}
       onOk={() => {
         importUsers();
       }}
@@ -125,11 +118,9 @@ const PlexImportModal: React.FC<PlexImportProps> = ({
           {settings.currentSettings.newPlexLogin && (
             <Alert
               title={intl.formatMessage(messages.newplexsigninenabled, {
-                strong: function strong(msg) {
-                  return (
-                    <strong className="font-semibold text-white">{msg}</strong>
-                  );
-                },
+                strong: (msg: React.ReactNode) => (
+                  <strong className="font-semibold text-white">{msg}</strong>
+                ),
               })}
               type="info"
             />

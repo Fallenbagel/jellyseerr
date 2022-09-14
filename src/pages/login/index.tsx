@@ -1,6 +1,5 @@
-import React from 'react';
+import Login from '@app/components/Login';
 import type { NextPage } from 'next';
-import Login from '../../components/Login';
 
 const LoginPage: NextPage = () => {
   return <Login />;

@@ -1,3 +1,6 @@
+import type { NotificationAgentTypes } from '@server/interfaces/api/userSettingsInterfaces';
+import { hasNotificationType, Notification } from '@server/lib/notifications';
+import { NotificationAgentKey } from '@server/lib/settings';
 import {
   Column,
   Entity,
@@ -5,9 +8,6 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { NotificationAgentTypes } from '../interfaces/api/userSettingsInterfaces';
-import { hasNotificationType, Notification } from '../lib/notifications';
-import { NotificationAgentKey } from '../lib/settings';
 import { User } from './User';
 
 export const ALL_NOTIFICATIONS = Object.values(Notification)
@@ -56,6 +56,12 @@ export class UserSettings {
 
   @Column({ nullable: true })
   public telegramSendSilently?: boolean;
+
+  @Column({ nullable: true })
+  public watchlistSyncMovies?: boolean;
+
+  @Column({ nullable: true })
+  public watchlistSyncTv?: boolean;
 
   @Column({
     type: 'text',

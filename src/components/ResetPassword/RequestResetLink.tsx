@@ -1,14 +1,14 @@
+import Button from '@app/components/Common/Button';
+import ImageFader from '@app/components/Common/ImageFader';
+import PageTitle from '@app/components/Common/PageTitle';
+import LanguagePicker from '@app/components/Layout/LanguagePicker';
 import { ArrowLeftIcon, MailIcon } from '@heroicons/react/solid';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import * as Yup from 'yup';
-import Button from '../Common/Button';
-import ImageFader from '../Common/ImageFader';
-import PageTitle from '../Common/PageTitle';
-import LanguagePicker from '../Layout/LanguagePicker';
 
 const messages = defineMessages({
   passwordreset: 'Password Reset',
@@ -21,7 +21,7 @@ const messages = defineMessages({
     'A password reset link will be sent to the provided email address if it is associated with a valid user.',
 });
 
-const ResetPassword: React.FC = () => {
+const ResetPassword = () => {
   const intl = useIntl();
   const [hasSubmitted, setSubmitted] = useState(false);
 
@@ -113,9 +113,11 @@ const ResetPassword: React.FC = () => {
                               className="form-input-area block w-full min-w-0 flex-1 rounded-md border border-gray-500 bg-gray-700 text-white transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                             />
                           </div>
-                          {errors.email && touched.email && (
-                            <div className="error">{errors.email}</div>
-                          )}
+                          {errors.email &&
+                            touched.email &&
+                            typeof errors.email === 'string' && (
+                              <div className="error">{errors.email}</div>
+                            )}
                         </div>
                       </div>
                       <div className="mt-4 border-t border-gray-700 pt-5">

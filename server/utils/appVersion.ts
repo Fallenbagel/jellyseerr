@@ -1,6 +1,6 @@
+import logger from '@server/logger';
 import { existsSync } from 'fs';
 import path from 'path';
-import logger from '../logger';
 
 const COMMIT_TAG_PATH = path.join(__dirname, '../../committag.json');
 let commitTag = 'local';

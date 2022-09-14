@@ -1,5 +1,5 @@
-import TheMovieDb from '../api/themoviedb';
-import {
+import TheMovieDb from '@server/api/themoviedb';
+import type {
   TmdbMovieDetails,
   TmdbMovieResult,
   TmdbPersonDetails,
@@ -9,13 +9,17 @@ import {
   TmdbSearchTvResponse,
   TmdbTvDetails,
   TmdbTvResult,
-} from '../api/themoviedb/interfaces';
+} from '@server/api/themoviedb/interfaces';
 import {
   mapMovieDetailsToResult,
   mapPersonDetailsToResult,
   mapTvDetailsToResult,
-} from '../models/Search';
-import { isMovie, isMovieDetails, isTvDetails } from '../utils/typeHelpers';
+} from '@server/models/Search';
+import {
+  isMovie,
+  isMovieDetails,
+  isTvDetails,
+} from '@server/utils/typeHelpers';
 
 interface SearchProvider {
   pattern: RegExp;

@@ -1,20 +1,19 @@
+import Header from '@app/components/Common/Header';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import PageTitle from '@app/components/Common/PageTitle';
+import PersonCard from '@app/components/PersonCard';
+import Error from '@app/pages/_error';
+import type { MovieDetails } from '@server/models/Movie';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
-import { MovieDetails } from '../../../../server/models/Movie';
-import Error from '../../../pages/_error';
-import Header from '../../Common/Header';
-import LoadingSpinner from '../../Common/LoadingSpinner';
-import PageTitle from '../../Common/PageTitle';
-import PersonCard from '../../PersonCard';
 
 const messages = defineMessages({
   fullcast: 'Full Cast',
 });
 
-const MovieCast: React.FC = () => {
+const MovieCast = () => {
   const router = useRouter();
   const intl = useIntl();
   const { data, error } = useSWR<MovieDetails>(

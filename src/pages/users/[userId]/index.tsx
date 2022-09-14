@@ -1,6 +1,5 @@
-import { NextPage } from 'next';
-import React from 'react';
-import UserProfile from '../../../components/UserProfile';
+import UserProfile from '@app/components/UserProfile';
+import type { NextPage } from 'next';
 
 const UserPage: NextPage = () => {
   return <UserProfile />;

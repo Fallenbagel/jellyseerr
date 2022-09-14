@@ -1,7 +1,6 @@
-import React from 'react';
-import LoadingSpinner from '../../../components/Common/LoadingSpinner';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 
-const PlexLoading: React.FC = () => {
+const PlexLoading = () => {
   return (
     <div>
       <LoadingSpinner />

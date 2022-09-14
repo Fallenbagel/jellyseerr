@@ -1,13 +1,13 @@
+import useSettings from '@app/hooks/useSettings';
 import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/solid';
+import type { Region } from '@server/lib/settings';
 import { hasFlag } from 'country-flag-icons';
 import 'country-flag-icons/3x2/flags.css';
 import { sortBy } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
-import type { Region } from '../../../server/lib/settings';
-import useSettings from '../../hooks/useSettings';
 
 const messages = defineMessages({
   regionDefault: 'All Regions',
@@ -21,12 +21,12 @@ interface RegionSelectorProps {
   onChange?: (fieldName: string, region: string) => void;
 }
 
-const RegionSelector: React.FC<RegionSelectorProps> = ({
+const RegionSelector = ({
   name,
   value,
   isUserSetting = false,
   onChange,
-}) => {
+}: RegionSelectorProps) => {
   const { currentSettings } = useSettings();
   const intl = useIntl();
   const { data: regions } = useSWR<Region[]>('/api/v1/regions');

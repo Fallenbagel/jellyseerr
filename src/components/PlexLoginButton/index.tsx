@@ -1,8 +1,8 @@
+import globalMessages from '@app/i18n/globalMessages';
+import PlexOAuth from '@app/utils/plex';
 import { LoginIcon } from '@heroicons/react/outline';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import globalMessages from '../../i18n/globalMessages';
-import PlexOAuth from '../../utils/plex';
 
 const messages = defineMessages({
   signinwithplex: 'Sign In',
@@ -17,11 +17,11 @@ interface PlexLoginButtonProps {
   onError?: (message: string) => void;
 }
 
-const PlexLoginButton: React.FC<PlexLoginButtonProps> = ({
+const PlexLoginButton = ({
   onAuthToken,
   onError,
   isProcessing,
-}) => {
+}: PlexLoginButtonProps) => {
   const intl = useIntl();
   const [loading, setLoading] = useState(false);
 

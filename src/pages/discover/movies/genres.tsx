@@ -1,6 +1,5 @@
-import React from 'react';
-import { NextPage } from 'next';
-import MovieGenreList from '../../../components/Discover/MovieGenreList';
+import MovieGenreList from '@app/components/Discover/MovieGenreList';
+import type { NextPage } from 'next';
 
 const MovieGenresPage: NextPage = () => {
   return <MovieGenreList />;

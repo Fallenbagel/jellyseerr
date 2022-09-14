@@ -1,0 +1,25 @@
+{
+  "page": 1,
+  "totalPages": 1,
+  "totalResults": 3,
+  "results": [
+    {
+      "ratingKey": "5d776be17a53e9001e732ab9",
+      "title": "Top Gun: Maverick",
+      "mediaType": "movie",
+      "tmdbId": 361743
+    },
+    {
+      "ratingKey": "5e16338fbc1372003ea68ab3",
+      "title": "Nope",
+      "mediaType": "movie",
+      "tmdbId": 762504
+    },
+    {
+      "ratingKey": "5f409b8452f200004161e126",
+      "title": "Hocus Pocus 2",
+      "mediaType": "movie",
+      "tmdbId": 642885
+    }
+  ]
+}

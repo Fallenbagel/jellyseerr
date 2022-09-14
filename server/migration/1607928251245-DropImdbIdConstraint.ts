@@ -1,4 +1,5 @@
-import { MigrationInterface, QueryRunner, TableUnique } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
+import { TableUnique } from 'typeorm';
 
 export class DropImdbIdConstraint1607928251245 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {

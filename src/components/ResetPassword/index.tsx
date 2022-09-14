@@ -1,16 +1,16 @@
+import Button from '@app/components/Common/Button';
+import ImageFader from '@app/components/Common/ImageFader';
+import SensitiveInput from '@app/components/Common/SensitiveInput';
+import LanguagePicker from '@app/components/Layout/LanguagePicker';
+import globalMessages from '@app/i18n/globalMessages';
 import { SupportIcon } from '@heroicons/react/outline';
 import axios from 'axios';
 import { Form, Formik } from 'formik';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import * as Yup from 'yup';
-import globalMessages from '../../i18n/globalMessages';
-import Button from '../Common/Button';
-import ImageFader from '../Common/ImageFader';
-import SensitiveInput from '../Common/SensitiveInput';
-import LanguagePicker from '../Layout/LanguagePicker';
 
 const messages = defineMessages({
   passwordreset: 'Password Reset',
@@ -25,7 +25,7 @@ const messages = defineMessages({
   resetpasswordsuccessmessage: 'Password reset successfully!',
 });
 
-const ResetPassword: React.FC = () => {
+const ResetPassword = () => {
   const intl = useIntl();
   const router = useRouter();
   const [hasSubmitted, setSubmitted] = useState(false);
@@ -129,9 +129,11 @@ const ResetPassword: React.FC = () => {
                               className="form-input-area block w-full min-w-0 flex-1 rounded-md border border-gray-500 bg-gray-700 text-white transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                             />
                           </div>
-                          {errors.password && touched.password && (
-                            <div className="error">{errors.password}</div>
-                          )}
+                          {errors.password &&
+                            touched.password &&
+                            typeof errors.password === 'string' && (
+                              <div className="error">{errors.password}</div>
+                            )}
                         </div>
                         <label
                           htmlFor="confirmPassword"

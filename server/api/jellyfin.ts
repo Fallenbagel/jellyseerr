@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import axios, { AxiosInstance } from 'axios';
-import logger from '../logger';
+import logger from '@server/logger';
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
 
 export interface JellyfinUserResponse {
   Name: string;
@@ -16,7 +17,7 @@ export interface JellyfinLoginResponse {
 }
 
 export interface JellyfinUserListResponse {
-  users: Array<JellyfinUserResponse>;
+  users: JellyfinUserResponse[];
 }
 
 export interface JellyfinLibrary {

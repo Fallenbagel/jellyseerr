@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface ProgressCircleProps {
   className?: string;
@@ -6,11 +6,11 @@ interface ProgressCircleProps {
   useHeatLevel?: boolean;
 }
 
-const ProgressCircle: React.FC<ProgressCircleProps> = ({
+const ProgressCircle = ({
   className,
   progress = 0,
   useHeatLevel,
-}) => {
+}: ProgressCircleProps) => {
   const ref = useRef<SVGCircleElement>(null);
 
   let color = '';

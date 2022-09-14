@@ -1,8 +1,7 @@
+import PageTitle from '@app/components/Common/PageTitle';
 import { ArrowCircleRightIcon } from '@heroicons/react/outline';
 import Link from 'next/link';
-import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import PageTitle from '../components/Common/PageTitle';
 
 const messages = defineMessages({
   errormessagewithcode: '{statusCode} - {error}',
@@ -10,7 +9,7 @@ const messages = defineMessages({
   returnHome: 'Return Home',
 });
 
-const Custom404: React.FC = () => {
+const Custom404 = () => {
   const intl = useIntl();
 
   return (

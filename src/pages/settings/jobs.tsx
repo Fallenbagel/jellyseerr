@@ -1,12 +1,11 @@
-import React from 'react';
+import SettingsJobs from '@app/components/Settings/SettingsJobsCache';
+import SettingsLayout from '@app/components/Settings/SettingsLayout';
+import useRouteGuard from '@app/hooks/useRouteGuard';
+import { Permission } from '@app/hooks/useUser';
 import type { NextPage } from 'next';
-import SettingsLayout from '../../components/Settings/SettingsLayout';
-import SettingsJobs from '../../components/Settings/SettingsJobsCache';
-import { Permission } from '../../hooks/useUser';
-import useRouteGuard from '../../hooks/useRouteGuard';
 
 const SettingsMainPage: NextPage = () => {
-  useRouteGuard(Permission.MANAGE_SETTINGS);
+  useRouteGuard(Permission.ADMIN);
   return (
     <SettingsLayout>
       <SettingsJobs />

@@ -1,13 +1,13 @@
-import { Router } from 'express';
-import RadarrAPI from '../api/servarr/radarr';
-import SonarrAPI from '../api/servarr/sonarr';
-import TheMovieDb from '../api/themoviedb';
-import {
+import RadarrAPI from '@server/api/servarr/radarr';
+import SonarrAPI from '@server/api/servarr/sonarr';
+import TheMovieDb from '@server/api/themoviedb';
+import type {
   ServiceCommonServer,
   ServiceCommonServerWithDetails,
-} from '../interfaces/api/serviceInterfaces';
-import { getSettings } from '../lib/settings';
-import logger from '../logger';
+} from '@server/interfaces/api/serviceInterfaces';
+import { getSettings } from '@server/lib/settings';
+import logger from '@server/logger';
+import { Router } from 'express';
 
 const serviceRoutes = Router();
 
@@ -191,7 +191,7 @@ serviceRoutes.get<{ tmdbId: string }>(
     try {
       const tv = await tmdb.getTvShow({
         tvId: Number(req.params.tmdbId),
-        language: req.locale ?? (req.query.language as string),
+        language: 'en',
       });
 
       const response = await sonarr.getSeriesByTitle(tv.name);

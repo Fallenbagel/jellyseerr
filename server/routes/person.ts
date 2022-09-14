@@ -1,12 +1,12 @@
-import { Router } from 'express';
-import TheMovieDb from '../api/themoviedb';
-import Media from '../entity/Media';
-import logger from '../logger';
+import TheMovieDb from '@server/api/themoviedb';
+import Media from '@server/entity/Media';
+import logger from '@server/logger';
 import {
   mapCastCredits,
   mapCrewCredits,
   mapPersonDetails,
-} from '../models/Person';
+} from '@server/models/Person';
+import { Router } from 'express';
 
 const personRoutes = Router();
 

@@ -1,16 +1,16 @@
-import { Router } from 'express';
-import { getRepository } from 'typeorm';
-import JellyfinAPI from '../api/jellyfin';
-import PlexTvAPI from '../api/plextv';
-import { MediaServerType } from '../constants/server';
-import { UserType } from '../constants/user';
-import { User } from '../entity/User';
-import { startJobs } from '../job/schedule';
-import { Permission } from '../lib/permissions';
-import { getSettings } from '../lib/settings';
-import logger from '../logger';
-import { isAuthenticated } from '../middleware/auth';
+import JellyfinAPI from '@server/api/jellyfin';
+import PlexTvAPI from '@server/api/plextv';
+import { MediaServerType } from '@server/constants/server';
+import { UserType } from '@server/constants/user';
+import { getRepository } from '@server/datasource';
+import { User } from '@server/entity/User';
+import { startJobs } from '@server/job/schedule';
+import { Permission } from '@server/lib/permissions';
+import { getSettings } from '@server/lib/settings';
+import logger from '@server/logger';
+import { isAuthenticated } from '@server/middleware/auth';
 import * as EmailValidator from 'email-validator';
+import { Router } from 'express';
 
 const authRoutes = Router();
 
@@ -89,8 +89,8 @@ authRoutes.post('/plex', async (req, res, next) => {
       await userRepository.save(user);
     } else {
       const mainUser = await userRepository.findOneOrFail({
-        select: ['id', 'plexToken', 'plexId'],
-        order: { id: 'ASC' },
+        select: { id: true, plexToken: true, plexId: true },
+        where: { id: 1 },
       });
       const mainPlexTv = new PlexTvAPI(mainUser.plexToken ?? '');
 
@@ -424,8 +424,8 @@ authRoutes.post('/local', async (req, res, next) => {
     }
 
     const mainUser = await userRepository.findOneOrFail({
-      select: ['id', 'plexToken', 'plexId'],
-      order: { id: 'ASC' },
+      select: { id: true, plexToken: true, plexId: true },
+      where: { id: 1 },
     });
     const mainPlexTv = new PlexTvAPI(mainUser.plexToken ?? '');
 

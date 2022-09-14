@@ -1,14 +1,13 @@
+import useSearchInput from '@app/hooks/useSearchInput';
 import { XCircleIcon } from '@heroicons/react/outline';
 import { SearchIcon } from '@heroicons/react/solid';
-import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import useSearchInput from '../../../hooks/useSearchInput';
 
 const messages = defineMessages({
   searchPlaceholder: 'Search Movies & TV',
 });
 
-const SearchInput: React.FC = () => {
+const SearchInput = () => {
   const intl = useIntl();
   const { searchValue, setSearchValue, setIsOpen, clear } = useSearchInput();
   return (

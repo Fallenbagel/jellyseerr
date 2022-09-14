@@ -1,4 +1,4 @@
-import { MessageDescriptor } from 'react-intl';
+import type { MessageDescriptor } from 'react-intl';
 
 declare module 'react-intl' {
   interface ExtractableMessage {

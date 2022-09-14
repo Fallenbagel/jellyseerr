@@ -1,21 +1,21 @@
+import Button from '@app/components/Common/Button';
+import Header from '@app/components/Common/Header';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import PageTitle from '@app/components/Common/PageTitle';
+import IssueItem from '@app/components/IssueList/IssueItem';
+import { useUpdateQueryParams } from '@app/hooks/useUpdateQueryParams';
+import globalMessages from '@app/i18n/globalMessages';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   FilterIcon,
   SortDescendingIcon,
 } from '@heroicons/react/solid';
+import type { IssueResultsResponse } from '@server/interfaces/api/issueInterfaces';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
-import { IssueResultsResponse } from '../../../server/interfaces/api/issueInterfaces';
-import Button from '../../components/Common/Button';
-import { useUpdateQueryParams } from '../../hooks/useUpdateQueryParams';
-import globalMessages from '../../i18n/globalMessages';
-import Header from '../Common/Header';
-import LoadingSpinner from '../Common/LoadingSpinner';
-import PageTitle from '../Common/PageTitle';
-import IssueItem from './IssueItem';
 
 const messages = defineMessages({
   issues: 'Issues',
@@ -32,7 +32,7 @@ enum Filter {
 
 type Sort = 'added' | 'modified';
 
-const IssueList: React.FC = () => {
+const IssueList = () => {
   const intl = useIntl();
   const router = useRouter();
   const [currentFilter, setCurrentFilter] = useState<Filter>(Filter.OPEN);
@@ -194,9 +194,9 @@ const IssueList: React.FC = () => {
                       ? pageIndex * currentPageSize + data.results.length
                       : (pageIndex + 1) * currentPageSize,
                   total: data.pageInfo.results,
-                  strong: function strong(msg) {
-                    return <span className="font-medium">{msg}</span>;
-                  },
+                  strong: (msg: React.ReactNode) => (
+                    <span className="font-medium">{msg}</span>
+                  ),
                 })}
             </p>
           </div>

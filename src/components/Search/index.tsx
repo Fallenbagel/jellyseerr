@@ -1,23 +1,22 @@
-import React from 'react';
-import { useRouter } from 'next/router';
-import {
-  TvResult,
+import Header from '@app/components/Common/Header';
+import ListView from '@app/components/Common/ListView';
+import PageTitle from '@app/components/Common/PageTitle';
+import useDiscover from '@app/hooks/useDiscover';
+import Error from '@app/pages/_error';
+import type {
   MovieResult,
   PersonResult,
-} from '../../../server/models/Search';
-import ListView from '../Common/ListView';
+  TvResult,
+} from '@server/models/Search';
+import { useRouter } from 'next/router';
 import { defineMessages, useIntl } from 'react-intl';
-import Header from '../Common/Header';
-import PageTitle from '../Common/PageTitle';
-import Error from '../../pages/_error';
-import useDiscover from '../../hooks/useDiscover';
 
 const messages = defineMessages({
   search: 'Search',
   searchresults: 'Search Results',
 });
 
-const Search: React.FC = () => {
+const Search = () => {
   const intl = useIntl();
   const router = useRouter();
 

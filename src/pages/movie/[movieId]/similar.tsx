@@ -1,6 +1,5 @@
-import React from 'react';
-import { NextPage } from 'next';
-import MovieSimilar from '../../../components/MovieDetails/MovieSimilar';
+import MovieSimilar from '@app/components/MovieDetails/MovieSimilar';
+import type { NextPage } from 'next';
 
 const MovieSimilarPage: NextPage = () => {
   return <MovieSimilar />;

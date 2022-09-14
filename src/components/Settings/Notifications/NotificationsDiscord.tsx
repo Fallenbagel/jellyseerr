@@ -1,16 +1,16 @@
+import Button from '@app/components/Common/Button';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import NotificationTypeSelector from '@app/components/NotificationTypeSelector';
+import useSettings from '@app/hooks/useSettings';
+import globalMessages from '@app/i18n/globalMessages';
 import { BeakerIcon, SaveIcon } from '@heroicons/react/outline';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
-import useSettings from '../../../hooks/useSettings';
-import globalMessages from '../../../i18n/globalMessages';
-import Button from '../../Common/Button';
-import LoadingSpinner from '../../Common/LoadingSpinner';
-import NotificationTypeSelector from '../../NotificationTypeSelector';
 
 const messages = defineMessages({
   agentenabled: 'Enable Agent',
@@ -29,7 +29,7 @@ const messages = defineMessages({
   enableMentions: 'Enable Mentions',
 });
 
-const NotificationsDiscord: React.FC = () => {
+const NotificationsDiscord = () => {
   const intl = useIntl();
   const settings = useSettings();
   const { addToast, removeToast } = useToasts();
@@ -168,18 +168,16 @@ const NotificationsDiscord: React.FC = () => {
                 <span className="label-required">*</span>
                 <span className="label-tip">
                   {intl.formatMessage(messages.webhookUrlTip, {
-                    DiscordWebhookLink: function DiscordWebhookLink(msg) {
-                      return (
-                        <a
-                          href="https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks"
-                          className="text-white transition duration-300 hover:underline"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {msg}
-                        </a>
-                      );
-                    },
+                    DiscordWebhookLink: (msg: React.ReactNode) => (
+                      <a
+                        href="https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks"
+                        className="text-white transition duration-300 hover:underline"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {msg}
+                      </a>
+                    ),
                   })}
                 </span>
               </label>
@@ -192,9 +190,11 @@ const NotificationsDiscord: React.FC = () => {
                     inputMode="url"
                   />
                 </div>
-                {errors.webhookUrl && touched.webhookUrl && (
-                  <div className="error">{errors.webhookUrl}</div>
-                )}
+                {errors.webhookUrl &&
+                  touched.webhookUrl &&
+                  typeof errors.webhookUrl === 'string' && (
+                    <div className="error">{errors.webhookUrl}</div>
+                  )}
               </div>
             </div>
             <div className="form-row">
@@ -210,9 +210,11 @@ const NotificationsDiscord: React.FC = () => {
                     placeholder={settings.currentSettings.applicationTitle}
                   />
                 </div>
-                {errors.botUsername && touched.botUsername && (
-                  <div className="error">{errors.botUsername}</div>
-                )}
+                {errors.botUsername &&
+                  touched.botUsername &&
+                  typeof errors.botUsername === 'string' && (
+                    <div className="error">{errors.botUsername}</div>
+                  )}
               </div>
             </div>
             <div className="form-row">
@@ -228,9 +230,11 @@ const NotificationsDiscord: React.FC = () => {
                     inputMode="url"
                   />
                 </div>
-                {errors.botAvatarUrl && touched.botAvatarUrl && (
-                  <div className="error">{errors.botAvatarUrl}</div>
-                )}
+                {errors.botAvatarUrl &&
+                  touched.botAvatarUrl &&
+                  typeof errors.botAvatarUrl === 'string' && (
+                    <div className="error">{errors.botAvatarUrl}</div>
+                  )}
               </div>
             </div>
             <div className="form-row">

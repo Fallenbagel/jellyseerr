@@ -1,29 +1,27 @@
+import Button from '@app/components/Common/Button';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import PageTitle from '@app/components/Common/PageTitle';
+import SensitiveInput from '@app/components/Common/SensitiveInput';
+import Tooltip from '@app/components/Common/Tooltip';
+import LanguageSelector from '@app/components/LanguageSelector';
+import RegionSelector from '@app/components/RegionSelector';
+import CopyButton from '@app/components/Settings/CopyButton';
+import SettingsBadge from '@app/components/Settings/SettingsBadge';
+import type { AvailableLocale } from '@app/context/LanguageContext';
+import { availableLanguages } from '@app/context/LanguageContext';
+import useLocale from '@app/hooks/useLocale';
+import { Permission, useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
 import { SaveIcon } from '@heroicons/react/outline';
 import { RefreshIcon } from '@heroicons/react/solid';
+import type { UserSettingsGeneralResponse } from '@server/interfaces/api/userSettingsInterfaces';
+import type { MainSettings } from '@server/lib/settings';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
-import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR, { mutate } from 'swr';
 import * as Yup from 'yup';
-import { UserSettingsGeneralResponse } from '../../../server/interfaces/api/userSettingsInterfaces';
-import type { MainSettings } from '../../../server/lib/settings';
-import {
-  availableLanguages,
-  AvailableLocale,
-} from '../../context/LanguageContext';
-import useLocale from '../../hooks/useLocale';
-import { Permission, useUser } from '../../hooks/useUser';
-import globalMessages from '../../i18n/globalMessages';
-import Badge from '../Common/Badge';
-import Button from '../Common/Button';
-import LoadingSpinner from '../Common/LoadingSpinner';
-import PageTitle from '../Common/PageTitle';
-import SensitiveInput from '../Common/SensitiveInput';
-import LanguageSelector from '../LanguageSelector';
-import RegionSelector from '../RegionSelector';
-import CopyButton from './CopyButton';
 
 const messages = defineMessages({
   general: 'General',
@@ -43,16 +41,15 @@ const messages = defineMessages({
   toastSettingsFailure: 'Something went wrong while saving settings.',
   hideAvailable: 'Hide Available Media',
   csrfProtection: 'Enable CSRF Protection',
-  csrfProtectionTip:
-    'Set external API access to read-only (requires HTTPS, and Overseerr must be reloaded for changes to take effect)',
+  csrfProtectionTip: 'Set external API access to read-only (requires HTTPS)',
   csrfProtectionHoverTip:
     'Do NOT enable this setting unless you understand what you are doing!',
   cacheImages: 'Enable Image Caching',
   cacheImagesTip:
-    'Optimize and store all images locally (consumes a significant amount of disk space)',
+    'Cache and serve optimized images (requires a significant amount of disk space)',
   trustProxy: 'Enable Proxy Support',
   trustProxyTip:
-    'Allow Overseerr to correctly register client IP addresses behind a proxy (Overseerr must be reloaded for changes to take effect)',
+    'Allow Overseerr to correctly register client IP addresses behind a proxy',
   validationApplicationTitle: 'You must provide an application title',
   validationApplicationUrl: 'You must provide a valid URL',
   validationApplicationUrlTrailingSlash: 'URL must not end in a trailing slash',
@@ -60,7 +57,7 @@ const messages = defineMessages({
   locale: 'Display Language',
 });
 
-const SettingsMain: React.FC = () => {
+const SettingsMain = () => {
   const { addToast } = useToasts();
   const { user: currentUser, hasPermission: userHasPermission } = useUser();
   const intl = useIntl();
@@ -136,6 +133,7 @@ const SettingsMain: React.FC = () => {
             originalLanguage: data?.originalLanguage,
             partialRequestsEnabled: data?.partialRequestsEnabled,
             trustProxy: data?.trustProxy,
+            cacheImages: data?.cacheImages,
           }}
           enableReinitialize
           validationSchema={MainSettingsSchema}
@@ -151,8 +149,10 @@ const SettingsMain: React.FC = () => {
                 originalLanguage: values.originalLanguage,
                 partialRequestsEnabled: values.partialRequestsEnabled,
                 trustProxy: values.trustProxy,
+                cacheImages: values.cacheImages,
               });
               mutate('/api/v1/settings/public');
+              mutate('/api/v1/status');
 
               if (setLocale) {
                 setLocale(
@@ -229,9 +229,11 @@ const SettingsMain: React.FC = () => {
                         type="text"
                       />
                     </div>
-                    {errors.applicationTitle && touched.applicationTitle && (
-                      <div className="error">{errors.applicationTitle}</div>
-                    )}
+                    {errors.applicationTitle &&
+                      touched.applicationTitle &&
+                      typeof errors.applicationTitle === 'string' && (
+                        <div className="error">{errors.applicationTitle}</div>
+                      )}
                   </div>
                 </div>
                 <div className="form-row">
@@ -247,14 +249,19 @@ const SettingsMain: React.FC = () => {
                         inputMode="url"
                       />
                     </div>
-                    {errors.applicationUrl && touched.applicationUrl && (
-                      <div className="error">{errors.applicationUrl}</div>
-                    )}
+                    {errors.applicationUrl &&
+                      touched.applicationUrl &&
+                      typeof errors.applicationUrl === 'string' && (
+                        <div className="error">{errors.applicationUrl}</div>
+                      )}
                   </div>
                 </div>
                 <div className="form-row">
                   <label htmlFor="trustProxy" className="checkbox-label">
-                    <span>{intl.formatMessage(messages.trustProxy)}</span>
+                    <span className="mr-2">
+                      {intl.formatMessage(messages.trustProxy)}
+                    </span>
+                    <SettingsBadge badgeType="restartRequired" />
                     <span className="label-tip">
                       {intl.formatMessage(messages.trustProxyTip)}
                     </span>
@@ -275,23 +282,49 @@ const SettingsMain: React.FC = () => {
                     <span className="mr-2">
                       {intl.formatMessage(messages.csrfProtection)}
                     </span>
-                    <Badge badgeType="danger">
-                      {intl.formatMessage(globalMessages.advanced)}
-                    </Badge>
+                    <SettingsBadge badgeType="advanced" className="mr-2" />
+                    <SettingsBadge badgeType="restartRequired" />
                     <span className="label-tip">
                       {intl.formatMessage(messages.csrfProtectionTip)}
                     </span>
                   </label>
                   <div className="form-input-area">
-                    <Field
-                      type="checkbox"
-                      id="csrfProtection"
-                      name="csrfProtection"
-                      title={intl.formatMessage(
+                    <Tooltip
+                      content={intl.formatMessage(
                         messages.csrfProtectionHoverTip
                       )}
+                    >
+                      <Field
+                        type="checkbox"
+                        id="csrfProtection"
+                        name="csrfProtection"
+                        onChange={() => {
+                          setFieldValue(
+                            'csrfProtection',
+                            !values.csrfProtection
+                          );
+                        }}
+                      />
+                    </Tooltip>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label htmlFor="csrfProtection" className="checkbox-label">
+                    <span className="mr-2">
+                      {intl.formatMessage(messages.cacheImages)}
+                    </span>
+                    <SettingsBadge badgeType="experimental" />
+                    <span className="label-tip">
+                      {intl.formatMessage(messages.cacheImagesTip)}
+                    </span>
+                  </label>
+                  <div className="form-input-area">
+                    <Field
+                      type="checkbox"
+                      id="cacheImages"
+                      name="cacheImages"
                       onChange={() => {
-                        setFieldValue('csrfProtection', !values.csrfProtection);
+                        setFieldValue('cacheImages', !values.cacheImages);
                       }}
                     />
                   </div>
@@ -358,9 +391,7 @@ const SettingsMain: React.FC = () => {
                     <span className="mr-2">
                       {intl.formatMessage(messages.hideAvailable)}
                     </span>
-                    <Badge badgeType="warning">
-                      {intl.formatMessage(globalMessages.experimental)}
-                    </Badge>
+                    <SettingsBadge badgeType="experimental" />
                   </label>
                   <div className="form-input-area">
                     <Field

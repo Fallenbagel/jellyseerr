@@ -1,5 +1,4 @@
 import { CheckIcon, XIcon } from '@heroicons/react/solid';
-import React from 'react';
 
 interface LibraryItemProps {
   isEnabled?: boolean;
@@ -7,11 +6,7 @@ interface LibraryItemProps {
   onToggle: () => void;
 }
 
-const LibraryItem: React.FC<LibraryItemProps> = ({
-  isEnabled,
-  name,
-  onToggle,
-}) => {
+const LibraryItem = ({ isEnabled, name, onToggle }: LibraryItemProps) => {
   return (
     <li className="col-span-1 flex rounded-md shadow-sm">
       <div className="flex flex-1 items-center justify-between truncate rounded-md border-t border-b border-r border-gray-700 bg-gray-600">

@@ -1,19 +1,20 @@
-import React, { useRef, useState } from 'react';
-import useClickOutside from '../../../hooks/useClickOutside';
-import Button from '../Button';
+import Button from '@app/components/Common/Button';
+import useClickOutside from '@app/hooks/useClickOutside';
+import { useRef, useState } from 'react';
 
 interface ConfirmButtonProps {
   onClick: () => void;
   confirmText: React.ReactNode;
   className?: string;
+  children: React.ReactNode;
 }
 
-const ConfirmButton: React.FC<ConfirmButtonProps> = ({
+const ConfirmButton = ({
   onClick,
   children,
   confirmText,
   className,
-}) => {
+}: ConfirmButtonProps) => {
   const ref = useRef(null);
   useClickOutside(ref, () => setIsClicked(false));
   const [isClicked, setIsClicked] = useState(false);
