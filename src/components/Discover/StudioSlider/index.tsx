@@ -1,7 +1,6 @@
-import React from 'react';
+import CompanyCard from '@app/components/CompanyCard';
+import Slider from '@app/components/Slider';
 import { defineMessages, useIntl } from 'react-intl';
-import CompanyCard from '../../CompanyCard';
-import Slider from '../../Slider';
 
 const messages = defineMessages({
   studios: 'Studios',
@@ -21,10 +20,10 @@ const studios: Studio[] = [
     url: '/discover/movies/studio/2',
   },
   {
-    name: '20th Century Fox',
+    name: '20th Century Studios',
     image:
-      'https://image.tmdb.org/t/p/w780_filter(duotone,ffffff,bababa)/qZCc1lty5FzX30aOCVRBLzaVmcp.png',
-    url: '/discover/movies/studio/25',
+      'https://image.tmdb.org/t/p/w780_filter(duotone,ffffff,bababa)/h0rjX5vjW5r8yEnUBStFarjcLT4.png',
+    url: '/discover/movies/studio/127928',
   },
   {
     name: 'Sony Pictures',
@@ -76,7 +75,7 @@ const studios: Studio[] = [
   },
 ];
 
-const StudioSlider: React.FC = () => {
+const StudioSlider = () => {
   const intl = useIntl();
 
   return (

@@ -1,11 +1,12 @@
+import Button from '@app/components/Common/Button';
+import useSettings from '@app/hooks/useSettings';
+import globalMessages from '@app/i18n/globalMessages';
 import { LoginIcon } from '@heroicons/react/outline';
 import axios from 'axios';
-import React, { useEffect } from 'react';
+import type React from 'react';
+import { useEffect } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useAuth } from 'react-oidc-context';
-import useSettings from '../../hooks/useSettings';
-import globalMessages from '../../i18n/globalMessages';
-import Button from '../Common/Button';
 
 const messages = defineMessages({
   signinwithoidc: 'Sign in with {OIDCProvider}',

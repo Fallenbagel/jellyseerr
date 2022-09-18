@@ -1,5 +1,5 @@
 import { ClipboardCopyIcon } from '@heroicons/react/solid';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useClipboard from 'react-use-clipboard';
@@ -8,7 +8,7 @@ const messages = defineMessages({
   copied: 'Copied API key to clipboard.',
 });
 
-const CopyButton: React.FC<{ textToCopy: string }> = ({ textToCopy }) => {
+const CopyButton = ({ textToCopy }: { textToCopy: string }) => {
   const intl = useIntl();
   const [isCopied, setCopied] = useClipboard(textToCopy, {
     successDuration: 1000,

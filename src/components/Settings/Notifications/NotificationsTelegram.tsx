@@ -1,16 +1,16 @@
+import Button from '@app/components/Common/Button';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import SensitiveInput from '@app/components/Common/SensitiveInput';
+import NotificationTypeSelector from '@app/components/NotificationTypeSelector';
+import globalMessages from '@app/i18n/globalMessages';
 import { BeakerIcon, SaveIcon } from '@heroicons/react/outline';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
-import globalMessages from '../../../i18n/globalMessages';
-import Button from '../../Common/Button';
-import LoadingSpinner from '../../Common/LoadingSpinner';
-import SensitiveInput from '../../Common/SensitiveInput';
-import NotificationTypeSelector from '../../NotificationTypeSelector';
 
 const messages = defineMessages({
   agentenabled: 'Enable Agent',
@@ -34,7 +34,7 @@ const messages = defineMessages({
   sendSilentlyTip: 'Send notifications with no sound',
 });
 
-const NotificationsTelegram: React.FC = () => {
+const NotificationsTelegram = () => {
   const intl = useIntl();
   const { addToast, removeToast } = useToasts();
   const [isTesting, setIsTesting] = useState(false);
@@ -179,33 +179,29 @@ const NotificationsTelegram: React.FC = () => {
                 <span className="label-required">*</span>
                 <span className="label-tip">
                   {intl.formatMessage(messages.botApiTip, {
-                    CreateBotLink: function CreateBotLink(msg) {
-                      return (
-                        <a
-                          href="https://core.telegram.org/bots#6-botfather"
-                          className="text-white transition duration-300 hover:underline"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {msg}
-                        </a>
-                      );
-                    },
-                    GetIdBotLink: function GetIdBotLink(msg) {
-                      return (
-                        <a
-                          href="https://telegram.me/get_id_bot"
-                          className="text-white transition duration-300 hover:underline"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {msg}
-                        </a>
-                      );
-                    },
-                    code: function code(msg) {
-                      return <code className="bg-opacity-50">{msg}</code>;
-                    },
+                    CreateBotLink: (msg: React.ReactNode) => (
+                      <a
+                        href="https://core.telegram.org/bots#6-botfather"
+                        className="text-white transition duration-300 hover:underline"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {msg}
+                      </a>
+                    ),
+                    GetIdBotLink: (msg: React.ReactNode) => (
+                      <a
+                        href="https://telegram.me/get_id_bot"
+                        className="text-white transition duration-300 hover:underline"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {msg}
+                      </a>
+                    ),
+                    code: (msg: React.ReactNode) => (
+                      <code className="bg-opacity-50">{msg}</code>
+                    ),
                   })}
                 </span>
               </label>
@@ -218,9 +214,11 @@ const NotificationsTelegram: React.FC = () => {
                     autoComplete="one-time-code"
                   />
                 </div>
-                {errors.botAPI && touched.botAPI && (
-                  <div className="error">{errors.botAPI}</div>
-                )}
+                {errors.botAPI &&
+                  touched.botAPI &&
+                  typeof errors.botAPI === 'string' && (
+                    <div className="error">{errors.botAPI}</div>
+                  )}
               </div>
             </div>
             <div className="form-row">
@@ -234,9 +232,11 @@ const NotificationsTelegram: React.FC = () => {
                 <div className="form-input-field">
                   <Field id="botUsername" name="botUsername" type="text" />
                 </div>
-                {errors.botUsername && touched.botUsername && (
-                  <div className="error">{errors.botUsername}</div>
-                )}
+                {errors.botUsername &&
+                  touched.botUsername &&
+                  typeof errors.botUsername === 'string' && (
+                    <div className="error">{errors.botUsername}</div>
+                  )}
               </div>
             </div>
             <div className="form-row">
@@ -245,20 +245,16 @@ const NotificationsTelegram: React.FC = () => {
                 <span className="label-required">*</span>
                 <span className="label-tip">
                   {intl.formatMessage(messages.chatIdTip, {
-                    GetIdBotLink: function GetIdBotLink(msg) {
-                      return (
-                        <a
-                          href="https://telegram.me/get_id_bot"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {msg}
-                        </a>
-                      );
-                    },
-                    code: function code(msg) {
-                      return <code>{msg}</code>;
-                    },
+                    GetIdBotLink: (msg: React.ReactNode) => (
+                      <a
+                        href="https://telegram.me/get_id_bot"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {msg}
+                      </a>
+                    ),
+                    code: (msg: React.ReactNode) => <code>{msg}</code>,
                   })}
                 </span>
               </label>
@@ -266,9 +262,11 @@ const NotificationsTelegram: React.FC = () => {
                 <div className="form-input-field">
                   <Field id="chatId" name="chatId" type="text" />
                 </div>
-                {errors.chatId && touched.chatId && (
-                  <div className="error">{errors.chatId}</div>
-                )}
+                {errors.chatId &&
+                  touched.chatId &&
+                  typeof errors.chatId === 'string' && (
+                    <div className="error">{errors.chatId}</div>
+                  )}
               </div>
             </div>
             <div className="form-row">

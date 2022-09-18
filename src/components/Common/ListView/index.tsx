@@ -1,30 +1,33 @@
-import React from 'react';
-import { useIntl } from 'react-intl';
-import {
+import PersonCard from '@app/components/PersonCard';
+import TitleCard from '@app/components/TitleCard';
+import TmdbTitleCard from '@app/components/TitleCard/TmdbTitleCard';
+import useVerticalScroll from '@app/hooks/useVerticalScroll';
+import globalMessages from '@app/i18n/globalMessages';
+import type { WatchlistItem } from '@server/interfaces/api/discoverInterfaces';
+import type {
   MovieResult,
   PersonResult,
   TvResult,
-} from '../../../../server/models/Search';
-import useVerticalScroll from '../../../hooks/useVerticalScroll';
-import globalMessages from '../../../i18n/globalMessages';
-import PersonCard from '../../PersonCard';
-import TitleCard from '../../TitleCard';
+} from '@server/models/Search';
+import { useIntl } from 'react-intl';
 
-interface ListViewProps {
+type ListViewProps = {
   items?: (TvResult | MovieResult | PersonResult)[];
+  plexItems?: WatchlistItem[];
   isEmpty?: boolean;
   isLoading?: boolean;
   isReachingEnd?: boolean;
   onScrollBottom: () => void;
-}
+};
 
-const ListView: React.FC<ListViewProps> = ({
+const ListView = ({
   items,
   isEmpty,
   isLoading,
   onScrollBottom,
   isReachingEnd,
-}) => {
+  plexItems,
+}: ListViewProps) => {
   const intl = useIntl();
   useVerticalScroll(onScrollBottom, !isLoading && !isEmpty && !isReachingEnd);
   return (
@@ -35,6 +38,18 @@ const ListView: React.FC<ListViewProps> = ({
         </div>
       )}
       <ul className="cards-vertical">
+        {plexItems?.map((title, index) => {
+          return (
+            <li key={`${title.ratingKey}-${index}`}>
+              <TmdbTitleCard
+                id={title.tmdbId}
+                tmdbId={title.tmdbId}
+                type={title.mediaType}
+                canExpand
+              />
+            </li>
+          );
+        })}
         {items?.map((title, index) => {
           let titleCard: React.ReactNode;
 

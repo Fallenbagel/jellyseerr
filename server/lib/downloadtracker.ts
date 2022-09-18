@@ -1,9 +1,9 @@
+import RadarrAPI from '@server/api/servarr/radarr';
+import SonarrAPI from '@server/api/servarr/sonarr';
+import { MediaType } from '@server/constants/media';
+import { getSettings } from '@server/lib/settings';
+import logger from '@server/logger';
 import { uniqWith } from 'lodash';
-import RadarrAPI from '../api/servarr/radarr';
-import SonarrAPI from '../api/servarr/sonarr';
-import { MediaType } from '../constants/media';
-import logger from '../logger';
-import { getSettings } from './settings';
 
 export interface DownloadingItem {
   mediaType: MediaType;

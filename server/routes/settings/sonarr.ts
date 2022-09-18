@@ -1,7 +1,8 @@
+import SonarrAPI from '@server/api/servarr/sonarr';
+import type { SonarrSettings } from '@server/lib/settings';
+import { getSettings } from '@server/lib/settings';
+import logger from '@server/logger';
 import { Router } from 'express';
-import SonarrAPI from '../../api/servarr/sonarr';
-import { getSettings, SonarrSettings } from '../../lib/settings';
-import logger from '../../logger';
 
 const sonarrRoutes = Router();
 

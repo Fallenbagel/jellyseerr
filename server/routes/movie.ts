@@ -1,11 +1,11 @@
+import RottenTomatoes from '@server/api/rottentomatoes';
+import TheMovieDb from '@server/api/themoviedb';
+import { MediaType } from '@server/constants/media';
+import Media from '@server/entity/Media';
+import logger from '@server/logger';
+import { mapMovieDetails } from '@server/models/Movie';
+import { mapMovieResult } from '@server/models/Search';
 import { Router } from 'express';
-import RottenTomatoes from '../api/rottentomatoes';
-import TheMovieDb from '../api/themoviedb';
-import { MediaType } from '../constants/media';
-import Media from '../entity/Media';
-import logger from '../logger';
-import { mapMovieDetails } from '../models/Movie';
-import { mapMovieResult } from '../models/Search';
 
 const movieRoutes = Router();
 

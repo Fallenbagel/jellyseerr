@@ -1,4 +1,4 @@
-import { NotificationAgentKey } from '../../lib/settings';
+import type { NotificationAgentKey } from '@server/lib/settings';
 
 export interface UserSettingsGeneralResponse {
   username?: string;
@@ -15,6 +15,8 @@ export interface UserSettingsGeneralResponse {
   globalMovieQuotaLimit?: number;
   globalTvQuotaLimit?: number;
   globalTvQuotaDays?: number;
+  watchlistSyncMovies?: boolean;
+  watchlistSyncTv?: boolean;
 }
 
 export type NotificationAgentTypes = Record<NotificationAgentKey, number>;

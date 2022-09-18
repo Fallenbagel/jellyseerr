@@ -1,3 +1,29 @@
+import RTAudFresh from '@app/assets/rt_aud_fresh.svg';
+import RTAudRotten from '@app/assets/rt_aud_rotten.svg';
+import RTFresh from '@app/assets/rt_fresh.svg';
+import RTRotten from '@app/assets/rt_rotten.svg';
+import TmdbLogo from '@app/assets/tmdb_logo.svg';
+import Button from '@app/components/Common/Button';
+import CachedImage from '@app/components/Common/CachedImage';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import PageTitle from '@app/components/Common/PageTitle';
+import type { PlayButtonLink } from '@app/components/Common/PlayButton';
+import PlayButton from '@app/components/Common/PlayButton';
+import Tooltip from '@app/components/Common/Tooltip';
+import ExternalLinkBlock from '@app/components/ExternalLinkBlock';
+import IssueModal from '@app/components/IssueModal';
+import ManageSlideOver from '@app/components/ManageSlideOver';
+import MediaSlider from '@app/components/MediaSlider';
+import PersonCard from '@app/components/PersonCard';
+import RequestButton from '@app/components/RequestButton';
+import Slider from '@app/components/Slider';
+import StatusBadge from '@app/components/StatusBadge';
+import useLocale from '@app/hooks/useLocale';
+import useSettings from '@app/hooks/useSettings';
+import { Permission, useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
+import Error from '@app/pages/_error';
+import { sortCrewPriority } from '@app/utils/creditHelpers';
 import {
   ArrowCircleRightIcon,
   CloudIcon,
@@ -11,44 +37,20 @@ import {
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
 } from '@heroicons/react/solid';
+import type { RTRating } from '@server/api/rottentomatoes';
+import { IssueStatus } from '@server/constants/issue';
+import { MediaStatus } from '@server/constants/media';
+import { MediaServerType } from '@server/constants/server';
+import type { MovieDetails as MovieDetailsType } from '@server/models/Movie';
 import { hasFlag } from 'country-flag-icons';
 import 'country-flag-icons/3x2/flags.css';
 import { uniqBy } from 'lodash';
+import getConfig from 'next/config';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
-import type { RTRating } from '../../../server/api/rottentomatoes';
-import { IssueStatus } from '../../../server/constants/issue';
-import { MediaStatus } from '../../../server/constants/media';
-import { MediaServerType } from '../../../server/constants/server';
-import type { MovieDetails as MovieDetailsType } from '../../../server/models/Movie';
-import RTAudFresh from '../../assets/rt_aud_fresh.svg';
-import RTAudRotten from '../../assets/rt_aud_rotten.svg';
-import RTFresh from '../../assets/rt_fresh.svg';
-import RTRotten from '../../assets/rt_rotten.svg';
-import TmdbLogo from '../../assets/tmdb_logo.svg';
-import useLocale from '../../hooks/useLocale';
-import useSettings from '../../hooks/useSettings';
-import { Permission, useUser } from '../../hooks/useUser';
-import globalMessages from '../../i18n/globalMessages';
-import Error from '../../pages/_error';
-import { sortCrewPriority } from '../../utils/creditHelpers';
-import Button from '../Common/Button';
-import CachedImage from '../Common/CachedImage';
-import LoadingSpinner from '../Common/LoadingSpinner';
-import PageTitle from '../Common/PageTitle';
-import PlayButton, { PlayButtonLink } from '../Common/PlayButton';
-import ExternalLinkBlock from '../ExternalLinkBlock';
-import IssueModal from '../IssueModal';
-import ManageSlideOver from '../ManageSlideOver';
-import MediaSlider from '../MediaSlider';
-import PersonCard from '../PersonCard';
-import RequestButton from '../RequestButton';
-import Slider from '../Slider';
-import StatusBadge from '../StatusBadge';
-import getConfig from 'next/config';
 
 const messages = defineMessages({
   originaltitle: 'Original Title',
@@ -78,13 +80,21 @@ const messages = defineMessages({
   streamingproviders: 'Currently Streaming On',
   productioncountries:
     'Production {countryCount, plural, one {Country} other {Countries}}',
+  theatricalrelease: 'Theatrical Release',
+  digitalrelease: 'Digital Release',
+  physicalrelease: 'Physical Release',
+  reportissue: 'Report an Issue',
+  managemovie: 'Manage Movie',
+  rtcriticsscore: 'Rotten Tomatoes Tomatometer',
+  rtaudiencescore: 'Rotten Tomatoes Audience Score',
+  tmdbuserscore: 'TMDB User Score',
 });
 
 interface MovieDetailsProps {
   movie?: MovieDetailsType;
 }
 
-const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
+const MovieDetails = ({ movie }: MovieDetailsProps) => {
   const settings = useSettings();
   const { user, hasPermission } = useUser();
   const router = useRouter();
@@ -119,6 +129,32 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
     setShowManager(router.query.manage == '1' ? true : false);
   }, [router.query.manage]);
 
+  const [plexUrl, setPlexUrl] = useState(data?.mediaInfo?.mediaUrl);
+  const [plexUrl4k, setPlexUrl4k] = useState(data?.mediaInfo?.mediaUrl4k);
+
+  useEffect(() => {
+    if (data) {
+      if (
+        settings.currentSettings.mediaServerType === MediaServerType.PLEX &&
+        (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+          (navigator.userAgent === 'MacIntel' && navigator.maxTouchPoints > 1))
+      ) {
+        setPlexUrl(data.mediaInfo?.iOSPlexUrl);
+        setPlexUrl4k(data.mediaInfo?.iOSPlexUrl4k);
+      } else {
+        setPlexUrl(data.mediaInfo?.mediaUrl);
+        setPlexUrl4k(data.mediaInfo?.mediaUrl4k);
+      }
+    }
+  }, [
+    data,
+    data?.mediaInfo?.iOSPlexUrl,
+    data?.mediaInfo?.iOSPlexUrl4k,
+    data?.mediaInfo?.mediaUrl,
+    data?.mediaInfo?.mediaUrl4k,
+    settings.currentSettings.mediaServerType,
+  ]);
+
   if (!data && !error) {
     return <LoadingSpinner />;
   }
@@ -130,27 +166,32 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
   const showAllStudios = data.productionCompanies.length <= minStudios + 1;
   const mediaLinks: PlayButtonLink[] = [];
 
-  if (data.mediaInfo?.mediaUrl) {
+  if (
+    plexUrl &&
+    hasPermission([Permission.REQUEST, Permission.REQUEST_MOVIE], {
+      type: 'or',
+    })
+  ) {
     mediaLinks.push({
       text: getAvalaibleMediaServerName(),
-      url: data.mediaInfo?.mediaUrl,
+      url: plexUrl,
       svg: <PlayIcon />,
     });
   }
 
   if (
-    data.mediaInfo?.mediaUrl4k &&
-    hasPermission([Permission.REQUEST_4K, Permission.REQUEST_4K_TV], {
+    settings.currentSettings.movie4kEnabled &&
+    plexUrl4k &&
+    hasPermission([Permission.REQUEST_4K, Permission.REQUEST_4K_MOVIE], {
       type: 'or',
     })
   ) {
     mediaLinks.push({
       text: getAvalaible4kMediaServerName(),
-      url: data.mediaInfo?.mediaUrl4k,
+      url: plexUrl4k,
       svg: <PlayIcon />,
     });
   }
-
   const trailerUrl = data.relatedVideos
     ?.filter((r) => r.type === 'Trailer')
     .sort((a, b) => a.size - b.size)
@@ -315,7 +356,8 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
               inProgress={(data.mediaInfo?.downloadStatus ?? []).length > 0}
               tmdbId={data.mediaInfo?.tmdbId}
               mediaType="movie"
-              plexUrl={data.mediaInfo?.mediaUrl}
+              plexUrl={plexUrl}
+              serviceUrl={data.mediaInfo?.serviceUrl}
             />
             {settings.currentSettings.movie4kEnabled &&
               hasPermission(
@@ -336,11 +378,12 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                   }
                   tmdbId={data.mediaInfo?.tmdbId}
                   mediaType="movie"
-                  plexUrl={data.mediaInfo?.mediaUrl4k}
+                  plexUrl={plexUrl}
+                  serviceUrl={data.mediaInfo?.serviceUrl4k}
                 />
               )}
           </div>
-          <h1>
+          <h1 data-testid="media-title">
             {data.title}{' '}
             {data.releaseDate && (
               <span className="media-year">
@@ -384,38 +427,42 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                 type: 'or',
               }
             ) && (
-              <Button
-                buttonType="warning"
-                className="ml-2 first:ml-0"
-                onClick={() => setShowIssueModal(true)}
-              >
-                <ExclamationIcon />
-              </Button>
+              <Tooltip content={intl.formatMessage(messages.reportissue)}>
+                <Button
+                  buttonType="warning"
+                  onClick={() => setShowIssueModal(true)}
+                  className="ml-2 first:ml-0"
+                >
+                  <ExclamationIcon />
+                </Button>
+              </Tooltip>
             )}
           {hasPermission(Permission.MANAGE_REQUESTS) && data.mediaInfo && (
-            <Button
-              buttonType="default"
-              className="relative ml-2 first:ml-0"
-              onClick={() => setShowManager(true)}
-            >
-              <CogIcon className="!mr-0" />
-              {hasPermission(
-                [Permission.MANAGE_ISSUES, Permission.VIEW_ISSUES],
-                {
-                  type: 'or',
-                }
-              ) &&
-                (
-                  data.mediaInfo?.issues.filter(
-                    (issue) => issue.status === IssueStatus.OPEN
-                  ) ?? []
-                ).length > 0 && (
-                  <>
-                    <div className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-red-600" />
-                    <div className="absolute -right-1 -top-1 h-3 w-3 animate-ping rounded-full bg-red-600" />
-                  </>
-                )}
-            </Button>
+            <Tooltip content={intl.formatMessage(messages.managemovie)}>
+              <Button
+                buttonType="ghost"
+                onClick={() => setShowManager(true)}
+                className="relative ml-2 first:ml-0"
+              >
+                <CogIcon className="!mr-0" />
+                {hasPermission(
+                  [Permission.MANAGE_ISSUES, Permission.VIEW_ISSUES],
+                  {
+                    type: 'or',
+                  }
+                ) &&
+                  (
+                    data.mediaInfo?.issues.filter(
+                      (issue) => issue.status === IssueStatus.OPEN
+                    ) ?? []
+                  ).length > 0 && (
+                    <>
+                      <div className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-red-600" />
+                      <div className="absolute -right-1 -top-1 h-3 w-3 animate-ping rounded-full bg-red-600" />
+                    </>
+                  )}
+              </Button>
+            </Tooltip>
           )}
         </div>
       </div>
@@ -489,36 +536,55 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
               (ratingData?.audienceRating && !!ratingData?.audienceScore)) && (
               <div className="media-ratings">
                 {ratingData?.criticsRating && !!ratingData?.criticsScore && (
-                  <>
-                    <span className="media-rating">
+                  <Tooltip
+                    content={intl.formatMessage(messages.rtcriticsscore)}
+                  >
+                    <a
+                      href={ratingData.url}
+                      className="media-rating"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
                       {ratingData.criticsRating === 'Rotten' ? (
-                        <RTRotten className="mr-1 w-6" />
+                        <RTRotten className="w-6" />
                       ) : (
-                        <RTFresh className="mr-1 w-6" />
+                        <RTFresh className="w-6" />
                       )}
-                      {ratingData.criticsScore}%
-                    </span>
-                  </>
+                      <span>{ratingData.criticsScore}%</span>
+                    </a>
+                  </Tooltip>
                 )}
                 {ratingData?.audienceRating && !!ratingData?.audienceScore && (
-                  <>
-                    <span className="media-rating">
+                  <Tooltip
+                    content={intl.formatMessage(messages.rtaudiencescore)}
+                  >
+                    <a
+                      href={ratingData.url}
+                      className="media-rating"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
                       {ratingData.audienceRating === 'Spilled' ? (
-                        <RTAudRotten className="mr-1 w-6" />
+                        <RTAudRotten className="w-6" />
                       ) : (
-                        <RTAudFresh className="mr-1 w-6" />
+                        <RTAudFresh className="w-6" />
                       )}
-                      {ratingData.audienceScore}%
-                    </span>
-                  </>
+                      <span>{ratingData.audienceScore}%</span>
+                    </a>
+                  </Tooltip>
                 )}
                 {!!data.voteCount && (
-                  <>
-                    <span className="media-rating">
-                      <TmdbLogo className="mr-2 w-6" />
-                      {data.voteAverage}/10
-                    </span>
-                  </>
+                  <Tooltip content={intl.formatMessage(messages.tmdbuserscore)}>
+                    <a
+                      href={`https://www.themoviedb.org/movie/${data.id}?language=${locale}`}
+                      className="media-rating"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <TmdbLogo className="mr-1 w-6" />
+                      <span>{Math.round(data.voteAverage * 10)}%</span>
+                    </a>
+                  </Tooltip>
                 )}
               </div>
             )}
@@ -548,22 +614,36 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
                     >
                       {r.type === 3 ? (
                         // Theatrical
-                        <TicketIcon className="h-4 w-4" />
+                        <Tooltip
+                          content={intl.formatMessage(
+                            messages.theatricalrelease
+                          )}
+                        >
+                          <TicketIcon className="h-4 w-4" />
+                        </Tooltip>
                       ) : r.type === 4 ? (
                         // Digital
-                        <CloudIcon className="h-4 w-4" />
+                        <Tooltip
+                          content={intl.formatMessage(messages.digitalrelease)}
+                        >
+                          <CloudIcon className="h-4 w-4" />
+                        </Tooltip>
                       ) : (
                         // Physical
-                        <svg
-                          className="h-4 w-4"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
+                        <Tooltip
+                          content={intl.formatMessage(messages.physicalrelease)}
                         >
-                          <path
-                            d="m12 2c-5.5242 0-10 4.4758-10 10 0 5.5242 4.4758 10 10 10 5.5242 0 10-4.4758 10-10 0-5.5242-4.4758-10-10-10zm0 18.065c-4.4476 0-8.0645-3.6169-8.0645-8.0645 0-4.4476 3.6169-8.0645 8.0645-8.0645 4.4476 0 8.0645 3.6169 8.0645 8.0645 0 4.4476-3.6169 8.0645-8.0645 8.0645zm0-14.516c-3.5565 0-6.4516 2.8952-6.4516 6.4516h1.2903c0-2.8468 2.3145-5.1613 5.1613-5.1613zm0 2.9032c-1.9597 0-3.5484 1.5887-3.5484 3.5484s1.5887 3.5484 3.5484 3.5484 3.5484-1.5887 3.5484-3.5484-1.5887-3.5484-3.5484-3.5484zm0 4.8387c-0.71371 0-1.2903-0.57661-1.2903-1.2903s0.57661-1.2903 1.2903-1.2903 1.2903 0.57661 1.2903 1.2903-0.57661 1.2903-1.2903 1.2903z"
-                            fill="currentColor"
-                          />
-                        </svg>
+                          <svg
+                            className="h-4 w-4"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m12 2c-5.5242 0-10 4.4758-10 10 0 5.5242 4.4758 10 10 10 5.5242 0 10-4.4758 10-10 0-5.5242-4.4758-10-10-10zm0 18.065c-4.4476 0-8.0645-3.6169-8.0645-8.0645 0-4.4476 3.6169-8.0645 8.0645-8.0645 4.4476 0 8.0645 3.6169 8.0645 8.0645 0 4.4476-3.6169 8.0645-8.0645 8.0645zm0-14.516c-3.5565 0-6.4516 2.8952-6.4516 6.4516h1.2903c0-2.8468 2.3145-5.1613 5.1613-5.1613zm0 2.9032c-1.9597 0-3.5484 1.5887-3.5484 3.5484s1.5887 3.5484 3.5484 3.5484 3.5484-1.5887 3.5484-3.5484-1.5887-3.5484-3.5484-3.5484zm0 4.8387c-0.71371 0-1.2903-0.57661-1.2903-1.2903s0.57661-1.2903 1.2903-1.2903 1.2903 0.57661 1.2903 1.2903-0.57661 1.2903-1.2903 1.2903z"
+                              fill="currentColor"
+                            />
+                          </svg>
+                        </Tooltip>
                       )}
                       <span className="ml-1.5">
                         {intl.formatDate(r.release_date, {

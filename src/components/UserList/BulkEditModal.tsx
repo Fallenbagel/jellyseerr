@@ -1,12 +1,12 @@
-import { PencilIcon } from '@heroicons/react/solid';
+import Modal from '@app/components/Common/Modal';
+import PermissionEdit from '@app/components/PermissionEdit';
+import type { User } from '@app/hooks/useUser';
+import { useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
-import { User, useUser } from '../../hooks/useUser';
-import globalMessages from '../../i18n/globalMessages';
-import Modal from '../Common/Modal';
-import PermissionEdit from '../PermissionEdit';
 
 interface BulkEditProps {
   selectedUserIds: number[];
@@ -22,13 +22,13 @@ const messages = defineMessages({
   edituser: 'Edit User Permissions',
 });
 
-const BulkEditModal: React.FC<BulkEditProps> = ({
+const BulkEditModal = ({
   selectedUserIds,
   users,
   onCancel,
   onComplete,
   onSaving,
-}) => {
+}: BulkEditProps) => {
   const { user: currentUser } = useUser();
   const intl = useIntl();
   const { addToast } = useToasts();
@@ -85,7 +85,6 @@ const BulkEditModal: React.FC<BulkEditProps> = ({
   return (
     <Modal
       title={intl.formatMessage(messages.edituser)}
-      iconSvg={<PencilIcon />}
       onOk={() => {
         updateUsers();
       }}

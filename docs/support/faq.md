@@ -45,7 +45,7 @@ Overseerr currently supports the following agents:
 - New Plex TV
 - Legacy Plex TV
 - TheTVDB
-- TMDb
+- TMDB
 - [HAMA](https://github.com/ZeroQI/Hama.bundle)
 
 Please verify that your library is using one of the agents previously listed.
@@ -67,7 +67,7 @@ You can also perform the following to verify the media item has a GUID Overseerr
 1. Go to the media item in Plex and **"Get info"** and click on **"View XML"**.
 2. Verify that the media item's GUID follows one of the below formats:
 
-   1. TMDb agent `guid="com.plexapp.agents.themoviedb://1705"`
+   1. TMDB agent `guid="com.plexapp.agents.themoviedb://1705"`
    2. New Plex Movie agent `<Guid id="tmdb://464052"/>`
    3. TheTVDB agent `guid="com.plexapp.agents.thetvdb://78874/1/1"`
    4. Legacy Plex Movie agent `guid="com.plexapp.agents.imdb://tt0765446"`

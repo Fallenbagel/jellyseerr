@@ -1,17 +1,19 @@
-import { Router } from 'express';
-import { FindOneOptions, FindOperator, getRepository, In } from 'typeorm';
-import TautulliAPI from '../api/tautulli';
-import { MediaStatus, MediaType } from '../constants/media';
-import Media from '../entity/Media';
-import { User } from '../entity/User';
-import {
+import TautulliAPI from '@server/api/tautulli';
+import { MediaStatus, MediaType } from '@server/constants/media';
+import { getRepository } from '@server/datasource';
+import Media from '@server/entity/Media';
+import { User } from '@server/entity/User';
+import type {
   MediaResultsResponse,
   MediaWatchDataResponse,
-} from '../interfaces/api/mediaInterfaces';
-import { Permission } from '../lib/permissions';
-import { getSettings } from '../lib/settings';
-import logger from '../logger';
-import { isAuthenticated } from '../middleware/auth';
+} from '@server/interfaces/api/mediaInterfaces';
+import { Permission } from '@server/lib/permissions';
+import { getSettings } from '@server/lib/settings';
+import logger from '@server/logger';
+import { isAuthenticated } from '@server/middleware/auth';
+import { Router } from 'express';
+import type { FindOneOptions } from 'typeorm';
+import { In } from 'typeorm';
 
 const mediaRoutes = Router();
 
@@ -21,8 +23,7 @@ mediaRoutes.get('/', async (req, res, next) => {
   const pageSize = req.query.take ? Number(req.query.take) : 20;
   const skip = req.query.skip ? Number(req.query.skip) : 0;
 
-  let statusFilter: MediaStatus | FindOperator<MediaStatus> | undefined =
-    undefined;
+  let statusFilter = undefined;
 
   switch (req.query.filter) {
     case 'available':
@@ -66,7 +67,7 @@ mediaRoutes.get('/', async (req, res, next) => {
   try {
     const [media, mediaCount] = await mediaRepository.findAndCount({
       order: sortFilter,
-      where: {
+      where: statusFilter && {
         status: statusFilter,
       },
       take: pageSize,
@@ -151,7 +152,7 @@ mediaRoutes.delete(
       const mediaRepository = getRepository(Media);
 
       const media = await mediaRepository.findOneOrFail({
-        where: { id: req.params.id },
+        where: { id: Number(req.params.id) },
       });
 
       await mediaRepository.remove(media);

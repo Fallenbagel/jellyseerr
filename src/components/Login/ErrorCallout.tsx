@@ -1,6 +1,6 @@
-import React from 'react';
-import Alert from '../Common/Alert';
-import Transition from '../Transition';
+import Alert from '@app/components/Common/Alert';
+import { Transition } from '@headlessui/react';
+import type React from 'react';
 
 interface LoginErrorProps {
   error: string;

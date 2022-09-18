@@ -1,6 +1,5 @@
-import React from 'react';
-import { NextPage } from 'next';
-import PersonDetails from '../../../components/PersonDetails';
+import PersonDetails from '@app/components/PersonDetails';
+import type { NextPage } from 'next';
 
 const MoviePage: NextPage = () => {
   return <PersonDetails />;

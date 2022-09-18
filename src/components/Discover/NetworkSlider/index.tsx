@@ -1,7 +1,6 @@
-import React from 'react';
+import CompanyCard from '@app/components/CompanyCard';
+import Slider from '@app/components/Slider';
 import { defineMessages, useIntl } from 'react-intl';
-import CompanyCard from '../../CompanyCard';
-import Slider from '../../Slider';
 
 const messages = defineMessages({
   networks: 'Networks',
@@ -142,7 +141,7 @@ const networks: Network[] = [
   },
 ];
 
-const NetworkSlider: React.FC = () => {
+const NetworkSlider = () => {
   const intl = useIntl();
 
   return (

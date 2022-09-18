@@ -1,8 +1,9 @@
+import type { TmdbCollection } from '@server/api/themoviedb/interfaces';
+import { MediaType } from '@server/constants/media';
+import type Media from '@server/entity/Media';
 import { sortBy } from 'lodash';
-import type { TmdbCollection } from '../api/themoviedb/interfaces';
-import { MediaType } from '../constants/media';
-import Media from '../entity/Media';
-import { mapMovieResult, MovieResult } from './Search';
+import type { MovieResult } from './Search';
+import { mapMovieResult } from './Search';
 
 export interface Collection {
   id: number;

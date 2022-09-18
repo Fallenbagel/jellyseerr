@@ -1,5 +1,4 @@
-import React, { ReactNode } from 'react';
-import ButtonWithDropdown from '../ButtonWithDropdown';
+import ButtonWithDropdown from '@app/components/Common/ButtonWithDropdown';
 
 interface PlayButtonProps {
   links: PlayButtonLink[];
@@ -8,10 +7,10 @@ interface PlayButtonProps {
 export interface PlayButtonLink {
   text: string;
   url: string;
-  svg: ReactNode;
+  svg: React.ReactNode;
 }
 
-const PlayButton: React.FC<PlayButtonProps> = ({ links }) => {
+const PlayButton = ({ links }: PlayButtonProps) => {
   if (!links || !links.length) {
     return null;
   }

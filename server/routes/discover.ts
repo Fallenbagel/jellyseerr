@@ -1,16 +1,25 @@
+import PlexTvAPI from '@server/api/plextv';
+import TheMovieDb from '@server/api/themoviedb';
+import { MediaType } from '@server/constants/media';
+import { getRepository } from '@server/datasource';
+import Media from '@server/entity/Media';
+import { User } from '@server/entity/User';
+import type {
+  GenreSliderItem,
+  WatchlistResponse,
+} from '@server/interfaces/api/discoverInterfaces';
+import { getSettings } from '@server/lib/settings';
+import logger from '@server/logger';
+import { mapProductionCompany } from '@server/models/Movie';
+import {
+  mapMovieResult,
+  mapPersonResult,
+  mapTvResult,
+} from '@server/models/Search';
+import { mapNetwork } from '@server/models/Tv';
+import { isMovie, isPerson } from '@server/utils/typeHelpers';
 import { Router } from 'express';
 import { sortBy } from 'lodash';
-import TheMovieDb from '../api/themoviedb';
-import { MediaType } from '../constants/media';
-import Media from '../entity/Media';
-import { User } from '../entity/User';
-import { GenreSliderItem } from '../interfaces/api/discoverInterfaces';
-import { getSettings } from '../lib/settings';
-import logger from '../logger';
-import { mapProductionCompany } from '../models/Movie';
-import { mapMovieResult, mapPersonResult, mapTvResult } from '../models/Search';
-import { mapNetwork } from '../models/Tv';
-import { isMovie, isPerson } from '../utils/typeHelpers';
 
 export const createTmdbWithRegionLanguage = (user?: User): TheMovieDb => {
   const settings = getSettings();
@@ -701,6 +710,47 @@ discoverRoutes.get<{ language: string }, GenreSliderItem[]>(
         message: 'Unable to retrieve series genre slider.',
       });
     }
+  }
+);
+
+discoverRoutes.get<{ page?: number }, WatchlistResponse>(
+  '/watchlist',
+  async (req, res) => {
+    const userRepository = getRepository(User);
+    const itemsPerPage = 20;
+    const page = req.params.page ?? 1;
+    const offset = (page - 1) * itemsPerPage;
+
+    const activeUser = await userRepository.findOne({
+      where: { id: req.user?.id },
+      select: ['id', 'plexToken'],
+    });
+
+    if (!activeUser?.plexToken) {
+      // We will just return an empty array if the user has no Plex token
+      return res.json({
+        page: 1,
+        totalPages: 1,
+        totalResults: 0,
+        results: [],
+      });
+    }
+
+    const plexTV = new PlexTvAPI(activeUser.plexToken);
+
+    const watchlist = await plexTV.getWatchlist({ offset });
+
+    return res.json({
+      page,
+      totalPages: Math.ceil(watchlist.size / itemsPerPage),
+      totalResults: watchlist.size,
+      results: watchlist.items.map((item) => ({
+        ratingKey: item.ratingKey,
+        title: item.title,
+        mediaType: item.type === 'show' ? 'tv' : 'movie',
+        tmdbId: item.tmdbId,
+      })),
+    });
   }
 );
 

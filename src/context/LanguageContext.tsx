@@ -1,6 +1,7 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 
 export type AvailableLocale =
+  | 'ar'
   | 'ca'
   | 'cs'
   | 'da'
@@ -8,10 +9,11 @@ export type AvailableLocale =
   | 'en'
   | 'el'
   | 'es'
-  | 'it'
-  | 'ja'
   | 'fr'
   | 'hu'
+  | 'it'
+  | 'ja'
+  | 'lt'
   | 'nb-NO'
   | 'nl'
   | 'pl'
@@ -62,6 +64,10 @@ export const availableLanguages: AvailableLanguageObject = {
     code: 'it',
     display: 'Italiano',
   },
+  lt: {
+    code: 'lt',
+    display: 'Lietuvių',
+  },
   hu: {
     code: 'hu',
     display: 'Magyar',
@@ -106,6 +112,10 @@ export const availableLanguages: AvailableLanguageObject = {
     code: 'sr',
     display: 'српски језик',
   },
+  ar: {
+    code: 'ar',
+    display: 'العربية',
+  },
   ja: {
     code: 'ja',
     display: '日本語',
@@ -122,7 +132,7 @@ export const availableLanguages: AvailableLanguageObject = {
 
 export interface LanguageContextProps {
   locale: AvailableLocale;
-  children: (locale: string) => ReactNode;
+  children: (locale: string) => React.ReactNode;
   setLocale?: React.Dispatch<React.SetStateAction<AvailableLocale>>;
 }
 

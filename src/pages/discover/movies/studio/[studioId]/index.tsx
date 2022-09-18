@@ -1,6 +1,5 @@
-import React from 'react';
-import { NextPage } from 'next';
-import DiscoverMovieStudio from '../../../../../components/Discover/DiscoverStudio';
+import DiscoverMovieStudio from '@app/components/Discover/DiscoverStudio';
+import type { NextPage } from 'next';
 
 const DiscoverMoviesStudioPage: NextPage = () => {
   return <DiscoverMovieStudio />;

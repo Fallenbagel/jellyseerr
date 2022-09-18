@@ -1,11 +1,11 @@
-import React from 'react';
-import Transition from '../Transition';
-import Modal from '../Common/Modal';
-import { Formik, Field } from 'formik';
-import * as Yup from 'yup';
+import Modal from '@app/components/Common/Modal';
+import useSettings from '@app/hooks/useSettings';
+import { Transition } from '@headlessui/react';
 import axios from 'axios';
+import { Field, Formik } from 'formik';
+import type React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import useSettings from '../../hooks/useSettings';
+import * as Yup from 'yup';
 
 const messages = defineMessages({
   title: 'Add Email',

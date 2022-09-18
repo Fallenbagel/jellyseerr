@@ -1,9 +1,10 @@
+import globalMessages from '@app/i18n/globalMessages';
+import PlexOAuth from '@app/utils/plex';
 import { LoginIcon } from '@heroicons/react/outline';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import globalMessages from '../../i18n/globalMessages';
-import PlexOAuth from '../../utils/plex';
 
 const messages = defineMessages({
   signinwithplex: 'Sign in with Plex',

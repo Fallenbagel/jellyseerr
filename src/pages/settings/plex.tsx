@@ -1,12 +1,11 @@
-import React from 'react';
+import SettingsLayout from '@app/components/Settings/SettingsLayout';
+import SettingsPlex from '@app/components/Settings/SettingsPlex';
+import useRouteGuard from '@app/hooks/useRouteGuard';
+import { Permission } from '@app/hooks/useUser';
 import type { NextPage } from 'next';
-import SettingsLayout from '../../components/Settings/SettingsLayout';
-import SettingsPlex from '../../components/Settings/SettingsPlex';
-import { Permission } from '../../hooks/useUser';
-import useRouteGuard from '../../hooks/useRouteGuard';
 
 const PlexSettingsPage: NextPage = () => {
-  useRouteGuard(Permission.MANAGE_SETTINGS);
+  useRouteGuard(Permission.ADMIN);
   return (
     <SettingsLayout>
       <SettingsPlex />

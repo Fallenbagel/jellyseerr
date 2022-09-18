@@ -1,19 +1,18 @@
+import Alert from '@app/components/Common/Alert';
+import Button from '@app/components/Common/Button';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import PageTitle from '@app/components/Common/PageTitle';
+import PermissionEdit from '@app/components/PermissionEdit';
+import { useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
+import Error from '@app/pages/_error';
 import { SaveIcon } from '@heroicons/react/outline';
 import axios from 'axios';
 import { Form, Formik } from 'formik';
 import { useRouter } from 'next/router';
-import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
-import { useUser } from '../../../../hooks/useUser';
-import globalMessages from '../../../../i18n/globalMessages';
-import Error from '../../../../pages/_error';
-import Alert from '../../../Common/Alert';
-import Button from '../../../Common/Button';
-import LoadingSpinner from '../../../Common/LoadingSpinner';
-import PageTitle from '../../../Common/PageTitle';
-import PermissionEdit from '../../../PermissionEdit';
 
 const messages = defineMessages({
   toastSettingsSuccess: 'Permissions saved successfully!',
@@ -22,7 +21,7 @@ const messages = defineMessages({
   unauthorizedDescription: 'You cannot modify your own permissions.',
 });
 
-const UserPermissions: React.FC = () => {
+const UserPermissions = () => {
   const intl = useIntl();
   const { addToast } = useToasts();
   const router = useRouter();

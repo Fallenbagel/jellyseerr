@@ -1,5 +1,5 @@
-import { ISession } from 'connect-typeorm';
-import { Index, Column, PrimaryColumn, Entity } from 'typeorm';
+import type { ISession } from 'connect-typeorm';
+import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Session implements ISession {

@@ -1,17 +1,17 @@
+import Accordion from '@app/components/Common/Accordion';
+import ImageFader from '@app/components/Common/ImageFader';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import PageTitle from '@app/components/Common/PageTitle';
+import LanguagePicker from '@app/components/Layout/LanguagePicker';
+import ErrorCallout from '@app/components/Login/ErrorCallout';
+import useSettings from '@app/hooks/useSettings';
+import { useUser } from '@app/hooks/useUser';
+import { MediaServerType } from '@server/constants/server';
 import getConfig from 'next/config';
 import { useRouter } from 'next/dist/client/router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
-import { MediaServerType } from '../../../server/constants/server';
-import useSettings from '../../hooks/useSettings';
-import { useUser } from '../../hooks/useUser';
-import Accordion from '../Common/Accordion';
-import ImageFader from '../Common/ImageFader';
-import LoadingSpinner from '../Common/LoadingSpinner';
-import PageTitle from '../Common/PageTitle';
-import LanguagePicker from '../Layout/LanguagePicker';
-import ErrorCallout from './ErrorCallout';
 import JellyfinLogin from './JellyfinLogin';
 import LocalLogin from './LocalLogin';
 import OidcLogin from './OidcLogin';
@@ -27,7 +27,7 @@ const messages = defineMessages({
   authprocessing: 'Authentication in progress...',
 });
 
-const Login: React.FC = () => {
+const Login = () => {
   const intl = useIntl();
   const [error, setError] = useState('');
   const [isProcessing, setProcessing] = useState(false);
@@ -56,7 +56,7 @@ const Login: React.FC = () => {
       <ImageFader
         backgroundImages={
           backdrops?.map(
-            (backdrop) => `https://www.themoviedb.org/t/p/original${backdrop}`
+            (backdrop) => `https://image.tmdb.org/t/p/original${backdrop}`
           ) ?? []
         }
       />

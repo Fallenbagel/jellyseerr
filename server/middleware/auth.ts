@@ -1,14 +1,17 @@
-import { expressjwt as jwt, GetVerificationKey } from 'express-jwt';
+import { getRepository } from '@server/datasource';
+import { User } from '@server/entity/User';
+import { getOidcInfo } from '@server/lib/oidc';
+import type {
+  Permission,
+  PermissionCheckOptions,
+} from '@server/lib/permissions';
+import { getSettings } from '@server/lib/settings';
+import { expressjwt as jwt, type GetVerificationKey } from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
-import { getRepository } from 'typeorm';
-import { User } from '../entity/User';
-import { getOidcInfo } from '../lib/oidc';
-import { Permission, PermissionCheckOptions } from '../lib/permissions';
-import { getSettings } from '../lib/settings';
 
 export const checkUser: Middleware = async (req, _res, next) => {
   const settings = getSettings();
-  let user: User | undefined;
+  let user: User | undefined | null;
 
   if (req.header('X-API-Key') === settings.main.apiKey) {
     const userRepository = getRepository(User);

@@ -1,17 +1,16 @@
-import React from 'react';
-import type { TvResult } from '../../../server/models/Search';
-import ListView from '../Common/ListView';
+import Header from '@app/components/Common/Header';
+import ListView from '@app/components/Common/ListView';
+import PageTitle from '@app/components/Common/PageTitle';
+import useDiscover from '@app/hooks/useDiscover';
+import Error from '@app/pages/_error';
+import type { TvResult } from '@server/models/Search';
 import { defineMessages, useIntl } from 'react-intl';
-import Header from '../Common/Header';
-import PageTitle from '../Common/PageTitle';
-import useDiscover from '../../hooks/useDiscover';
-import Error from '../../pages/_error';
 
 const messages = defineMessages({
   upcomingtv: 'Upcoming Series',
 });
 
-const DiscoverTvUpcoming: React.FC = () => {
+const DiscoverTvUpcoming = () => {
   const intl = useIntl();
 
   const {

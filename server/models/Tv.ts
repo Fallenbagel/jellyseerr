@@ -5,24 +5,26 @@ import type {
   TmdbTvEpisodeResult,
   TmdbTvRatingResult,
   TmdbTvSeasonResult,
-} from '../api/themoviedb/interfaces';
-import type Media from '../entity/Media';
-import {
+} from '@server/api/themoviedb/interfaces';
+import type Media from '@server/entity/Media';
+import type {
   Cast,
   Crew,
   ExternalIds,
   Genre,
   Keyword,
+  ProductionCompany,
+  TvNetwork,
+  WatchProviders,
+} from './common';
+import {
   mapAggregateCast,
   mapCrew,
   mapExternalIds,
   mapVideos,
   mapWatchProviders,
-  ProductionCompany,
-  TvNetwork,
-  WatchProviders,
 } from './common';
-import { Video } from './Movie';
+import type { Video } from './Movie';
 
 interface Episode {
   id: number;
