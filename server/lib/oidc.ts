@@ -15,7 +15,7 @@ const oidcConfigurationEndpoint = '.well-known/openid-configuration';
 export const getOidcInfo = async (oidcIssuerUrl: string): Promise<OidcInfo> => {
   const oidcConfigurationUrl = new URL(
     oidcConfigurationEndpoint,
-    oidcIssuerUrl
+    oidcIssuerUrl.slice(-1) == '/' ? oidcIssuerUrl : oidcIssuerUrl + '/'
   );
   const oidcConfiguration: Record<string, string> = (
     await axios.get(oidcConfigurationUrl.href)

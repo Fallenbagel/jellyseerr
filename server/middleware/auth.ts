@@ -65,8 +65,13 @@ export const checkJwt: Middleware = (req, res, next) => {
   const settings = getSettings();
   settings.load();
 
+  const oidcIssuer =
+    settings.fullPublicSettings.oidcIssuer.slice(-1) == '/'
+      ? settings.fullPublicSettings.oidcIssuer.slice(0, -1)
+      : settings.fullPublicSettings.oidcIssuer;
+
   const getSecret: GetVerificationKey = async function (req, token) {
-    const oidcInfo = await getOidcInfo(settings.fullPublicSettings.oidcIssuer);
+    const oidcInfo = await getOidcInfo(oidcIssuer);
 
     const secret = (
       jwksRsa.expressJwtSecret({
@@ -83,7 +88,7 @@ export const checkJwt: Middleware = (req, res, next) => {
   jwt({
     // Dynamically provide a signing key based on the kid in the header and the signing keys provided by the JWKS endpoint
     secret: getSecret,
-    issuer: settings.fullPublicSettings.oidcIssuer,
+    issuer: oidcIssuer,
     algorithms: ['RS256'],
   })(req, res, next);
 };
