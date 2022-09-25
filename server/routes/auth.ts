@@ -519,7 +519,7 @@ authRoutes.post('/local', async (req, res, next) => {
   }
 });
 
-authRoutes.get('/oidc', checkJwt(), async (req, res, next) => {
+authRoutes.get('/oidc', checkJwt, async (req, res, next) => {
   const settings = getSettings();
   const userRepository = getRepository(User);
 
@@ -564,7 +564,7 @@ authRoutes.get('/oidc', checkJwt(), async (req, res, next) => {
     return res.status(200).json(user?.filter() ?? {});
   } catch (e) {
     logger.error('Something went wrong while attempting to authenticate.', {
-      label: 'Auth',
+      label: 'auth',
       error: e.message,
     });
     return next({

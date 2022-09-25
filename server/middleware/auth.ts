@@ -61,7 +61,7 @@ export const isAuthenticated = (
 };
 
 // checking the JWT
-export const checkJwt = (): Middleware => {
+export const checkJwt: Middleware = (req, res, next) => {
   const settings = getSettings();
   settings.load();
 
@@ -80,10 +80,10 @@ export const checkJwt = (): Middleware => {
     return secret;
   };
 
-  return jwt({
+  jwt({
     // Dynamically provide a signing key based on the kid in the header and the signing keys provided by the JWKS endpoint
     secret: getSecret,
     issuer: settings.fullPublicSettings.oidcIssuer,
     algorithms: ['RS256'],
-  });
+  })(req, res, next);
 };
