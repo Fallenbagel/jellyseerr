@@ -16,16 +16,18 @@ const messages = defineMessages({
 
 interface OidcLoginProps {
   revalidate: () => void;
-  setError: (message: string) => void;
   isProcessing: boolean;
   setProcessing: (state: boolean) => void;
+  hasError: boolean;
+  onError?: (message: string) => void;
 }
 
 const OidcLogin: React.FC<OidcLoginProps> = ({
   revalidate,
-  setError,
   isProcessing,
   setProcessing,
+  hasError,
+  onError,
 }) => {
   const intl = useIntl();
   const auth = useAuth();
@@ -41,16 +43,16 @@ const OidcLogin: React.FC<OidcLoginProps> = ({
           headers: { Authorization: `Bearer ${token}` },
         });
       } catch (e) {
-        setError(intl.formatMessage(messages.loginerror));
+        if (onError) onError(intl.formatMessage(messages.loginerror));
         setProcessing(false);
       } finally {
         revalidate();
       }
     };
-    if (auth.isAuthenticated) {
+    if (auth.isAuthenticated && !hasError) {
       login();
     }
-  }, [auth, revalidate, intl, setProcessing, setError]);
+  }, [auth, revalidate, intl, setProcessing, onError, hasError]);
 
   return (
     <span className="block w-full rounded-md shadow-sm">

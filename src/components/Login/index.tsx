@@ -137,7 +137,8 @@ const Login = () => {
                           <div className="px-10 py-8">
                             <OidcLogin
                               revalidate={revalidate}
-                              setError={setError}
+                              hasError={error !== ''}
+                              onError={setError}
                               isProcessing={isProcessing}
                               setProcessing={setProcessing}
                             />
