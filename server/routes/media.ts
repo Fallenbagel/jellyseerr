@@ -1,8 +1,7 @@
-import { FindOneOptions, FindOperator, getRepository, In } from 'typeorm';
 import RadarrAPI from '@server/api/servarr/radarr';
 import SonarrAPI from '@server/api/servarr/sonarr';
-import TheMovieDb from '@server/api/themoviedb';
 import TautulliAPI from '@server/api/tautulli';
+import TheMovieDb from '@server/api/themoviedb';
 import { MediaStatus, MediaType } from '@server/constants/media';
 import { getRepository } from '@server/datasource';
 import Media from '@server/entity/Media';
@@ -16,7 +15,8 @@ import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
 import { Router } from 'express';
-
+import type { FindOneOptions } from 'typeorm';
+import { In } from 'typeorm';
 
 const mediaRoutes = Router();
 
@@ -179,7 +179,7 @@ mediaRoutes.delete(
       const settings = getSettings();
       const mediaRepository = getRepository(Media);
       const media = await mediaRepository.findOneOrFail({
-        where: { id: req.params.id },
+        where: { id: Number(req.params.id) },
       });
       const is4k = media.serviceUrl4k !== undefined;
       const isMovie = media.mediaType === MediaType.MOVIE;

@@ -14,17 +14,20 @@ import {
   TrashIcon,
 } from '@heroicons/react/solid';
 import { IssueStatus } from '@server/constants/issue';
-import { MediaRequestStatus, MediaStatus,MediaType } from '@server/constants/media';
+import {
+  MediaRequestStatus,
+  MediaStatus,
+  MediaType,
+} from '@server/constants/media';
 import { MediaServerType } from '@server/constants/server';
 import type { MediaWatchDataResponse } from '@server/interfaces/api/mediaInterfaces';
+import type { RadarrSettings, SonarrSettings } from '@server/lib/settings';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
 import axios from 'axios';
 import Link from 'next/link';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
-import { RadarrSettings, SonarrSettings } from '@server/lib/settings';
-
 
 const messages = defineMessages({
   manageModalTitle: 'Manage {mediaType}',
@@ -109,6 +112,7 @@ const ManageSlideOver = ({
       revalidate();
     }
   };
+
   const deleteMediaFile = async () => {
     if (data.mediaInfo) {
       await axios.delete(`/api/v1/media/${data.mediaInfo.id}/file`);
