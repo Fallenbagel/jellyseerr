@@ -77,7 +77,7 @@ const StatusBadge = ({
           mediaType === 'movie' ? globalMessages.movie : globalMessages.tvshow
         ),
       });
-    } else if (hasPermission(Permission.ADMIN)) {
+    } else if (hasPermission(Permission.ADMIN) && serviceUrl) {
       mediaLink = serviceUrl;
       mediaLinkDescription = intl.formatMessage(messages.openinarr, {
         arr: mediaType === 'movie' ? 'Radarr' : 'Sonarr',

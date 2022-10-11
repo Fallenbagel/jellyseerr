@@ -20,7 +20,7 @@ const Tooltip = ({ children, content, tooltipConfig }: TooltipProps) => {
   return (
     <>
       {React.cloneElement(children, { ref: setTriggerRef })}
-      {visible && (
+      {visible && content && (
         <div
           ref={setTooltipRef}
           {...getTooltipProps({

@@ -61,7 +61,7 @@ function Button<P extends ElementTypes = 'button'>(
       break;
     case 'warning':
       buttonStyle.push(
-        'text-white border border-yellow-500 backdrop-blur bg-yellow-500 bg-opacity-80 hover:bg-opacity-100 hover:border-yellow-400 focus:border-yellow-700 focus:ring-yellow active:bg-opacity-100 active:border-yellow-700'
+        'text-white border border-yellow-500 bg-yellow-500 bg-opacity-80 hover:bg-opacity-100 hover:border-yellow-400 focus:border-yellow-700 focus:ring-yellow active:bg-opacity-100 active:border-yellow-700'
       );
       break;
     case 'success':

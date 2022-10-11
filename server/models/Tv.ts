@@ -29,7 +29,7 @@ import type { Video } from './Movie';
 interface Episode {
   id: number;
   name: string;
-  airDate: string;
+  airDate: string | null;
   episodeNumber: number;
   overview: string;
   productionCode: string;
@@ -50,7 +50,7 @@ interface Season {
   seasonNumber: number;
 }
 
-export interface SeasonWithEpisodes extends Season {
+export interface SeasonWithEpisodes extends Omit<Season, 'episodeCount'> {
   episodes: Episode[];
   externalIds: ExternalIds;
 }
@@ -141,7 +141,6 @@ export const mapSeasonWithEpisodes = (
   season: TmdbSeasonWithEpisodes
 ): SeasonWithEpisodes => ({
   airDate: season.air_date,
-  episodeCount: season.episode_count,
   episodes: season.episodes.map(mapEpisodeResult),
   externalIds: mapExternalIds(season.external_ids),
   id: season.id,

@@ -121,7 +121,7 @@ const Sidebar = ({ open, setClosed }: SidebarProps) => {
             >
               <>
                 <div className="sidebar relative flex h-full w-full max-w-xs flex-1 flex-col bg-gray-800">
-                  <div className="sidebar-close-button absolute top-0 right-0 -mr-14 p-1">
+                  <div className="sidebar-close-button absolute right-0 -mr-14 p-1">
                     <button
                       className="flex h-12 w-12 items-center justify-center rounded-full focus:bg-gray-600 focus:outline-none"
                       aria-label="Close sidebar"

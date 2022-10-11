@@ -357,20 +357,13 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
                       : request.seasons.length,
                 })}
               </span>
-              {title.seasons.filter((season) => season.seasonNumber !== 0)
-                .length === request.seasons.length ? (
-                <span className="mr-2 uppercase">
-                  <Badge>{intl.formatMessage(globalMessages.all)}</Badge>
-                </span>
-              ) : (
-                <div className="hide-scrollbar overflow-x-scroll">
-                  {request.seasons.map((season) => (
-                    <span key={`season-${season.id}`} className="mr-2">
-                      <Badge>{season.seasonNumber}</Badge>
-                    </span>
-                  ))}
-                </div>
-              )}
+              <div className="hide-scrollbar overflow-x-scroll">
+                {request.seasons.map((season) => (
+                  <span key={`season-${season.id}`} className="mr-2">
+                    <Badge>{season.seasonNumber}</Badge>
+                  </span>
+                ))}
+              </div>
             </div>
           )}
           <div className="mt-2 flex items-center text-sm sm:mt-1">

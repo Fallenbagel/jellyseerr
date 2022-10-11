@@ -232,6 +232,10 @@ class PlexAPI {
       uri: `/library/sections/${id}/all?sort=addedAt%3Adesc&addedAt>>=${Math.floor(
         options.addedAt / 1000
       )}`,
+      extraHeaders: {
+        'X-Plex-Container-Start': `0`,
+        'X-Plex-Container-Size': `500`,
+      },
     });
 
     return response.MediaContainer.Metadata;

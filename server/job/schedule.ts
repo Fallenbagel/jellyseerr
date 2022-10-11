@@ -111,7 +111,7 @@ export const startJobs = (): void => {
     id: 'plex-watchlist-sync',
     name: 'Plex Watchlist Sync',
     type: 'process',
-    interval: 'long',
+    interval: 'short',
     cronSchedule: jobs['plex-watchlist-sync'].schedule,
     job: schedule.scheduleJob(jobs['plex-watchlist-sync'].schedule, () => {
       logger.info('Starting scheduled job: Plex Watchlist Sync', {

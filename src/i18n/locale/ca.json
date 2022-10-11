@@ -924,7 +924,7 @@
   "components.NotificationTypeSelector.adminissuecommentDescription": "Notifica'm quan altres usuaris facin comentaris sobre incidències.",
   "components.ManageSlideOver.tvshow": "sèries",
   "components.Settings.SettingsJobsCache.editJobSchedule": "Modifica la tasca programada",
-  "components.Settings.SettingsJobsCache.editJobSchedulePrompt": "Freqüència",
+  "components.Settings.SettingsJobsCache.editJobSchedulePrompt": "Freqüència nova",
   "components.Settings.SettingsJobsCache.editJobScheduleSelectorHours": "Cada {jobScheduleHours, plural, one {hora} other {{jobScheduleHours} hores}}",
   "components.Settings.SettingsJobsCache.editJobScheduleSelectorMinutes": "Cada {jobScheduleMinutes, plural, one {minut} other {{jobScheduleMinutes} minuts}}",
   "components.UserProfile.UserSettings.UserNotificationSettings.pushoverApplicationTokenTip": "<ApplicationRegistrationLink>Registreu una aplicació</ApplicationRegistrationLink> per utilitzar-la amb {applicationTitle}",
@@ -1121,5 +1121,6 @@
   "components.RequestModal.requestcollectiontitle": "Sol·licitud de col·lecció",
   "components.RequestModal.requestmovie4ktitle": "Sol·licitud de pel·lícula en 4K",
   "components.RequestModal.requestmovietitle": "Sol·licitud de pel·lícula",
-  "components.RequestModal.requestseriestitle": "Sol·licitud de sèries"
+  "components.RequestModal.requestseriestitle": "Sol·licitud de sèries",
+  "components.Settings.SettingsJobsCache.editJobScheduleCurrent": "Freqüència actual"
 }
