@@ -1,9 +1,9 @@
-import * as React from 'react';
+import type * as React from 'react';
 import { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
 
 export interface AccordionProps {
-  children: (args: AccordionChildProps) => React.ReactElement<any, any> | null;
+  children: (args: AccordionChildProps) => JSX.Element;
   /** If true, only one accordion item can be open at any time */
   single?: boolean;
   /** If true, at least one accordion item will always be open */
@@ -13,22 +13,27 @@ export interface AccordionProps {
 export interface AccordionChildProps {
   openIndexes: number[];
   handleClick(index: number): void;
-  AccordionContent: any;
+  AccordionContent: typeof AccordionContent;
 }
 
-export const AccordionContent: React.FC<{ isOpen: boolean }> = ({
+type AccordionContentProps = {
+  isOpen: boolean;
+  children: React.ReactNode;
+};
+
+export const AccordionContent = ({
   isOpen,
   children,
-}) => {
+}: AccordionContentProps) => {
   return <AnimateHeight height={isOpen ? 'auto' : 0}>{children}</AnimateHeight>;
 };
 
-const Accordion: React.FC<AccordionProps> = ({
+const Accordion = ({
   single,
   atLeastOne,
   initialOpenIndexes,
   children,
-}) => {
+}: AccordionProps) => {
   const initialState = initialOpenIndexes || (atLeastOne && [0]) || [];
   const [openIndexes, setOpenIndexes] = useState<number[]>(initialState);
 

@@ -1,31 +1,28 @@
-import { DownloadIcon } from '@heroicons/react/outline';
+import Alert from '@app/components/Common/Alert';
+import Badge from '@app/components/Common/Badge';
+import CachedImage from '@app/components/Common/CachedImage';
+import Modal from '@app/components/Common/Modal';
+import type { RequestOverrides } from '@app/components/RequestModal/AdvancedRequester';
+import AdvancedRequester from '@app/components/RequestModal/AdvancedRequester';
+import QuotaDisplay from '@app/components/RequestModal/QuotaDisplay';
+import { useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
+import { MediaRequestStatus, MediaStatus } from '@server/constants/media';
+import type { MediaRequest } from '@server/entity/MediaRequest';
+import type { QuotaResponse } from '@server/interfaces/api/userInterfaces';
+import { Permission } from '@server/lib/permissions';
+import type { Collection } from '@server/models/Collection';
 import axios from 'axios';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
-import {
-  MediaRequestStatus,
-  MediaStatus,
-} from '../../../server/constants/media';
-import { MediaRequest } from '../../../server/entity/MediaRequest';
-import { QuotaResponse } from '../../../server/interfaces/api/userInterfaces';
-import { Permission } from '../../../server/lib/permissions';
-import { Collection } from '../../../server/models/Collection';
-import { useUser } from '../../hooks/useUser';
-import globalMessages from '../../i18n/globalMessages';
-import Alert from '../Common/Alert';
-import Badge from '../Common/Badge';
-import CachedImage from '../Common/CachedImage';
-import Modal from '../Common/Modal';
-import AdvancedRequester, { RequestOverrides } from './AdvancedRequester';
-import QuotaDisplay from './QuotaDisplay';
 
 const messages = defineMessages({
   requestadmin: 'This request will be approved automatically.',
   requestSuccess: '<strong>{title}</strong> requested successfully!',
-  requesttitle: 'Request {title}',
-  request4ktitle: 'Request {title} in 4K',
+  requestcollectiontitle: 'Request Collection',
+  requestcollection4ktitle: 'Request Collection in 4K',
   requesterror: 'Something went wrong while submitting the request.',
   selectmovies: 'Select Movie(s)',
   requestmovies: 'Request {count} {count, plural, one {Movie} other {Movies}}',
@@ -41,13 +38,13 @@ interface RequestModalProps extends React.HTMLAttributes<HTMLDivElement> {
   onUpdating?: (isUpdating: boolean) => void;
 }
 
-const CollectionRequestModal: React.FC<RequestModalProps> = ({
+const CollectionRequestModal = ({
   onCancel,
   onComplete,
   tmdbId,
   onUpdating,
   is4k = false,
-}) => {
+}: RequestModalProps) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [requestOverrides, setRequestOverrides] =
     useState<RequestOverrides | null>(null);
@@ -220,9 +217,7 @@ const CollectionRequestModal: React.FC<RequestModalProps> = ({
         <span>
           {intl.formatMessage(messages.requestSuccess, {
             title: data?.name,
-            strong: function strong(msg) {
-              return <strong>{msg}</strong>;
-            },
+            strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
           })}
         </span>,
         { appearance: 'success', autoDismiss: true }
@@ -253,9 +248,11 @@ const CollectionRequestModal: React.FC<RequestModalProps> = ({
       onCancel={onCancel}
       onOk={sendRequest}
       title={intl.formatMessage(
-        is4k ? messages.request4ktitle : messages.requesttitle,
-        { title: data?.name }
+        is4k
+          ? messages.requestcollection4ktitle
+          : messages.requestcollectiontitle
       )}
+      subTitle={data?.name}
       okText={
         isUpdating
           ? intl.formatMessage(globalMessages.requesting)
@@ -270,7 +267,6 @@ const CollectionRequestModal: React.FC<RequestModalProps> = ({
       }
       okDisabled={selectedParts.length === 0}
       okButtonType={'primary'}
-      iconSvg={<DownloadIcon />}
       backdrop={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${data?.backdropPath}`}
     >
       {hasAutoApprove && !quota?.movie.restricted && (
@@ -296,11 +292,11 @@ const CollectionRequestModal: React.FC<RequestModalProps> = ({
       <div className="flex flex-col">
         <div className="-mx-4 sm:mx-0">
           <div className="inline-block min-w-full py-2 align-middle">
-            <div className="overflow-hidden shadow sm:rounded-lg">
+            <div className="overflow-hidden border border-gray-700 backdrop-blur sm:rounded-lg">
               <table className="min-w-full">
                 <thead>
                   <tr>
-                    <th className="w-16 bg-gray-500 px-4 py-3">
+                    <th className="w-16 bg-gray-700 bg-opacity-80 px-4 py-3">
                       <span
                         role="checkbox"
                         tabIndex={0}
@@ -332,15 +328,15 @@ const CollectionRequestModal: React.FC<RequestModalProps> = ({
                         ></span>
                       </span>
                     </th>
-                    <th className="bg-gray-500 px-1 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-200 md:px-6">
+                    <th className="bg-gray-700 bg-opacity-80 px-1 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-200 md:px-6">
                       {intl.formatMessage(globalMessages.movie)}
                     </th>
-                    <th className="bg-gray-500 px-2 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-200 md:px-6">
+                    <th className="bg-gray-700 bg-opacity-80 px-2 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-200 md:px-6">
                       {intl.formatMessage(globalMessages.status)}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-700 bg-gray-600">
+                <tbody className="divide-y divide-gray-700">
                   {data?.parts.map((part) => {
                     const partRequest = getPartRequest(part.id);
                     const partMedia =
@@ -382,7 +378,7 @@ const CollectionRequestModal: React.FC<RequestModalProps> = ({
                                 partRequest ||
                                 isSelectedPart(part.id)
                                   ? 'bg-indigo-500'
-                                  : 'bg-gray-800'
+                                  : 'bg-gray-700'
                               } absolute mx-auto h-4 w-9 rounded-full transition-colors duration-200 ease-in-out`}
                             ></span>
                             <span

@@ -1,4 +1,4 @@
-import logger from '../../logger';
+import logger from '@server/logger';
 import ServarrBase from './base';
 
 interface SonarrSeason {

@@ -1,15 +1,15 @@
+import Button from '@app/components/Common/Button';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import NotificationTypeSelector from '@app/components/NotificationTypeSelector';
+import globalMessages from '@app/i18n/globalMessages';
 import { BeakerIcon, SaveIcon } from '@heroicons/react/solid';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
-import globalMessages from '../../../../i18n/globalMessages';
-import Button from '../../../Common/Button';
-import LoadingSpinner from '../../../Common/LoadingSpinner';
-import NotificationTypeSelector from '../../../NotificationTypeSelector';
 
 const messages = defineMessages({
   agentenabled: 'Enable Agent',
@@ -26,7 +26,7 @@ const messages = defineMessages({
   validationTypes: 'You must select at least one notification type',
 });
 
-const NotificationsGotify: React.FC = () => {
+const NotificationsGotify = () => {
   const intl = useIntl();
   const { addToast, removeToast } = useToasts();
   const [isTesting, setIsTesting] = useState(false);
@@ -173,9 +173,11 @@ const NotificationsGotify: React.FC = () => {
                 <div className="form-input-field">
                   <Field id="url" name="url" type="text" />
                 </div>
-                {errors.url && touched.url && (
-                  <div className="error">{errors.url}</div>
-                )}
+                {errors.url &&
+                  touched.url &&
+                  typeof errors.url === 'string' && (
+                    <div className="error">{errors.url}</div>
+                  )}
               </div>
             </div>
             <div className="form-row">
@@ -187,9 +189,11 @@ const NotificationsGotify: React.FC = () => {
                 <div className="form-input-field">
                   <Field id="token" name="token" type="text" />
                 </div>
-                {errors.token && touched.token && (
-                  <div className="error">{errors.token}</div>
-                )}
+                {errors.token &&
+                  touched.token &&
+                  typeof errors.token === 'string' && (
+                    <div className="error">{errors.token}</div>
+                  )}
               </div>
             </div>
             <NotificationTypeSelector

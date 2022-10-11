@@ -1,15 +1,16 @@
-import { Router } from 'express';
-import { getRepository } from 'typeorm';
-import JellyfinAPI from '../api/jellyfin';
-import PlexTvAPI from '../api/plextv';
-import { MediaServerType } from '../constants/server';
-import { UserType } from '../constants/user';
-import { User } from '../entity/User';
-import { Permission } from '../lib/permissions';
-import { getSettings } from '../lib/settings';
-import logger from '../logger';
-import { isAuthenticated } from '../middleware/auth';
+import JellyfinAPI from '@server/api/jellyfin';
+import PlexTvAPI from '@server/api/plextv';
+import { MediaServerType } from '@server/constants/server';
+import { UserType } from '@server/constants/user';
+import { getRepository } from '@server/datasource';
+import { User } from '@server/entity/User';
+import { startJobs } from '@server/job/schedule';
+import { Permission } from '@server/lib/permissions';
+import { getSettings } from '@server/lib/settings';
+import logger from '@server/logger';
+import { isAuthenticated } from '@server/middleware/auth';
 import * as EmailValidator from 'email-validator';
+import { Router } from 'express';
 
 const authRoutes = Router();
 
@@ -83,12 +84,13 @@ authRoutes.post('/plex', async (req, res, next) => {
 
       settings.main.mediaServerType = MediaServerType.PLEX;
       settings.save();
+      startJobs();
 
       await userRepository.save(user);
     } else {
       const mainUser = await userRepository.findOneOrFail({
-        select: ['id', 'plexToken', 'plexId'],
-        order: { id: 'ASC' },
+        select: { id: true, plexToken: true, plexId: true },
+        where: { id: 1 },
       });
       const mainPlexTv = new PlexTvAPI(mainUser.plexToken ?? '');
 
@@ -261,7 +263,10 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
 
       // Update the users avatar with their jellyfin profile pic (incase it changed)
       if (account.User.PrimaryImageTag) {
-        user.avatar = `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`;
+        user.avatar = new URL(
+          `/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`,
+          jellyfinHost
+        ).href;
       } else {
         user.avatar = '/os_logo_square.png';
       }
@@ -307,7 +312,10 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
           jellyfinAuthToken: account.AccessToken,
           permissions: Permission.ADMIN,
           avatar: account.User.PrimaryImageTag
-            ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
+            ? new URL(
+                `/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`,
+                jellyfinHost
+              ).href
             : '/os_logo_square.png',
           userType: UserType.JELLYFIN,
         });
@@ -320,6 +328,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
           settings.jellyfin.hostname = body.hostname ?? '';
           settings.jellyfin.serverId = account.User.ServerId;
           settings.save();
+          startJobs();
         }
       }
 
@@ -336,7 +345,10 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
           jellyfinAuthToken: account.AccessToken,
           permissions: settings.main.defaultPermissions,
           avatar: account.User.PrimaryImageTag
-            ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
+            ? new URL(
+                `/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`,
+                jellyfinHost
+              ).href
             : '/os_logo_square.png',
           userType: UserType.JELLYFIN,
         });
@@ -421,8 +433,8 @@ authRoutes.post('/local', async (req, res, next) => {
     }
 
     const mainUser = await userRepository.findOneOrFail({
-      select: ['id', 'plexToken', 'plexId'],
-      order: { id: 'ASC' },
+      select: { id: true, plexToken: true, plexId: true },
+      where: { id: 1 },
     });
     const mainPlexTv = new PlexTvAPI(mainUser.plexToken ?? '');
 

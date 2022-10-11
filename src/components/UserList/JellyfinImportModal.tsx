@@ -1,19 +1,20 @@
-import { InboxInIcon } from '@heroicons/react/solid';
+import Alert from '@app/components/Common/Alert';
+import Modal from '@app/components/Common/Modal';
+import useSettings from '@app/hooks/useSettings';
+import globalMessages from '@app/i18n/globalMessages';
+import type { UserResultsResponse } from '@server/interfaces/api/userInterfaces';
 import axios from 'axios';
-import React, { useState } from 'react';
+import getConfig from 'next/config';
+import type React from 'react';
+import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
-import useSettings from '../../hooks/useSettings';
-import globalMessages from '../../i18n/globalMessages';
-import Alert from '../Common/Alert';
-import Modal from '../Common/Modal';
-import getConfig from 'next/config';
-import { UserResultsResponse } from '../../../server/interfaces/api/userInterfaces';
 
 interface JellyfinImportProps {
   onCancel?: () => void;
   onComplete?: () => void;
+  children?: React.ReactNode;
 }
 
 const messages = defineMessages({
@@ -79,9 +80,7 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
       addToast(
         intl.formatMessage(messages.importedfromJellyfin, {
           userCount: createdUsers.length,
-          strong: function strong(msg) {
-            return <strong>{msg}</strong>;
-          },
+          strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
           mediaServerName:
             publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
         }),
@@ -138,7 +137,6 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
         mediaServerName:
           publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
       })}
-      iconSvg={<InboxInIcon />}
       onOk={() => {
         importUsers();
       }}
@@ -157,11 +155,9 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
                   publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
                     ? 'Emby'
                     : 'Jellyfin',
-                strong: function strong(msg) {
-                  return (
-                    <strong className="font-semibold text-white">{msg}</strong>
-                  );
-                },
+                strong: (msg: React.ReactNode) => (
+                  <strong className="font-semibold text-white">{msg}</strong>
+                ),
               })}
               type="info"
             />

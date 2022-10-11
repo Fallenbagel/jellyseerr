@@ -1,9 +1,9 @@
+import { MediaServerType } from '@server/constants/server';
 import { randomUUID } from 'crypto';
 import fs from 'fs';
 import { merge } from 'lodash';
 import path from 'path';
 import webpush from 'web-push';
-import { MediaServerType } from '../constants/server';
 import { Permission } from './permissions';
 
 export interface Library {
@@ -257,6 +257,7 @@ interface JobSettings {
 export type JobId =
   | 'plex-recently-added-scan'
   | 'plex-full-scan'
+  | 'plex-watchlist-sync'
   | 'radarr-scan'
   | 'sonarr-scan'
   | 'download-sync'
@@ -423,6 +424,9 @@ class Settings {
         },
         'plex-full-scan': {
           schedule: '0 0 3 * * *',
+        },
+        'plex-watchlist-sync': {
+          schedule: '0 */10 * * * *',
         },
         'radarr-scan': {
           schedule: '0 0 4 * * *',

@@ -1,6 +1,7 @@
+import type { Library, PlexSettings } from '@server/lib/settings';
+import { getSettings } from '@server/lib/settings';
+import logger from '@server/logger';
 import NodePlexAPI from 'plex-api';
-import { getSettings, Library, PlexSettings } from '../lib/settings';
-import logger from '../logger';
 
 export interface PlexLibraryItem {
   ratingKey: string;
@@ -130,7 +131,6 @@ class PlexAPI {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   public async getStatus() {
     return await this.plexClient.query('/');
   }
@@ -232,6 +232,10 @@ class PlexAPI {
       uri: `/library/sections/${id}/all?sort=addedAt%3Adesc&addedAt>>=${Math.floor(
         options.addedAt / 1000
       )}`,
+      extraHeaders: {
+        'X-Plex-Container-Start': `0`,
+        'X-Plex-Container-Size': `500`,
+      },
     });
 
     return response.MediaContainer.Metadata;

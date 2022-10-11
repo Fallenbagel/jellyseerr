@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class ForceDropImdbUniqueConstraint1608477467935
   implements MigrationInterface

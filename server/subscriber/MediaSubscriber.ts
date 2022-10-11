@@ -1,18 +1,18 @@
-import { truncate } from 'lodash';
+import TheMovieDb from '@server/api/themoviedb';
 import {
-  EntitySubscriberInterface,
-  EventSubscriber,
-  getRepository,
-  Not,
-  UpdateEvent,
-} from 'typeorm';
-import TheMovieDb from '../api/themoviedb';
-import { MediaRequestStatus, MediaStatus, MediaType } from '../constants/media';
-import Media from '../entity/Media';
-import { MediaRequest } from '../entity/MediaRequest';
-import Season from '../entity/Season';
-import notificationManager, { Notification } from '../lib/notifications';
-import logger from '../logger';
+  MediaRequestStatus,
+  MediaStatus,
+  MediaType,
+} from '@server/constants/media';
+import { getRepository } from '@server/datasource';
+import Media from '@server/entity/Media';
+import { MediaRequest } from '@server/entity/MediaRequest';
+import Season from '@server/entity/Season';
+import notificationManager, { Notification } from '@server/lib/notifications';
+import logger from '@server/logger';
+import { truncate } from 'lodash';
+import type { EntitySubscriberInterface, UpdateEvent } from 'typeorm';
+import { EventSubscriber, In, Not } from 'typeorm';
 
 @EventSubscriber()
 export class MediaSubscriber implements EntitySubscriberInterface<Media> {
@@ -29,7 +29,9 @@ export class MediaSubscriber implements EntitySubscriberInterface<Media> {
         const requestRepository = getRepository(MediaRequest);
         const relatedRequests = await requestRepository.find({
           where: {
-            media: entity,
+            media: {
+              id: entity.id,
+            },
             is4k,
             status: Not(MediaRequestStatus.DECLINED),
           },
@@ -47,6 +49,7 @@ export class MediaSubscriber implements EntitySubscriberInterface<Media> {
                 {
                   event: `${is4k ? '4K ' : ''}Movie Request Now Available`,
                   notifyAdmin: false,
+                  notifySystem: true,
                   notifyUser: request.requestedBy,
                   subject: `${movie.title}${
                     movie.release_date
@@ -89,7 +92,7 @@ export class MediaSubscriber implements EntitySubscriberInterface<Media> {
       )
       .map((season) => season.seasonNumber);
     const oldSeasonIds = dbEntity.seasons.map((season) => season.id);
-    const oldSeasons = await seasonRepository.findByIds(oldSeasonIds);
+    const oldSeasons = await seasonRepository.findBy({ id: In(oldSeasonIds) });
     const oldAvailableSeasons = oldSeasons
       .filter(
         (season) =>
@@ -109,7 +112,9 @@ export class MediaSubscriber implements EntitySubscriberInterface<Media> {
       for (const changedSeasonNumber of changedSeasons) {
         const requests = await requestRepository.find({
           where: {
-            media: entity,
+            media: {
+              id: entity.id,
+            },
             is4k,
             status: Not(MediaRequestStatus.DECLINED),
           },
@@ -143,6 +148,7 @@ export class MediaSubscriber implements EntitySubscriberInterface<Media> {
                 omission: '…',
               }),
               notifyAdmin: false,
+              notifySystem: true,
               notifyUser: request.requestedBy,
               image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${tv.poster_path}`,
               media: entity,
@@ -172,7 +178,7 @@ export class MediaSubscriber implements EntitySubscriberInterface<Media> {
     const requestRepository = getRepository(MediaRequest);
 
     const requests = await requestRepository.find({
-      where: { media: event.id },
+      where: { media: { id: event.id } },
     });
 
     for (const request of requests) {

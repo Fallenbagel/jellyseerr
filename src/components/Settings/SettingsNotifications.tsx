@@ -1,16 +1,16 @@
+import DiscordLogo from '@app/assets/extlogos/discord.svg';
+import GotifyLogo from '@app/assets/extlogos/gotify.svg';
+import LunaSeaLogo from '@app/assets/extlogos/lunasea.svg';
+import PushbulletLogo from '@app/assets/extlogos/pushbullet.svg';
+import PushoverLogo from '@app/assets/extlogos/pushover.svg';
+import SlackLogo from '@app/assets/extlogos/slack.svg';
+import TelegramLogo from '@app/assets/extlogos/telegram.svg';
+import PageTitle from '@app/components/Common/PageTitle';
+import type { SettingsRoute } from '@app/components/Common/SettingsTabs';
+import SettingsTabs from '@app/components/Common/SettingsTabs';
+import globalMessages from '@app/i18n/globalMessages';
 import { CloudIcon, LightningBoltIcon, MailIcon } from '@heroicons/react/solid';
-import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import DiscordLogo from '../../assets/extlogos/discord.svg';
-import GotifyLogo from '../../assets/extlogos/gotify.svg';
-import LunaSeaLogo from '../../assets/extlogos/lunasea.svg';
-import PushbulletLogo from '../../assets/extlogos/pushbullet.svg';
-import PushoverLogo from '../../assets/extlogos/pushover.svg';
-import SlackLogo from '../../assets/extlogos/slack.svg';
-import TelegramLogo from '../../assets/extlogos/telegram.svg';
-import globalMessages from '../../i18n/globalMessages';
-import PageTitle from '../Common/PageTitle';
-import SettingsTabs, { SettingsRoute } from '../Common/SettingsTabs';
 
 const messages = defineMessages({
   notifications: 'Notifications',
@@ -22,7 +22,11 @@ const messages = defineMessages({
   webpush: 'Web Push',
 });
 
-const SettingsNotifications: React.FC = ({ children }) => {
+type SettingsNotificationsProps = {
+  children: React.ReactNode;
+};
+
+const SettingsNotifications = ({ children }: SettingsNotificationsProps) => {
   const intl = useIntl();
 
   const settingsRoutes: SettingsRoute[] = [

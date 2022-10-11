@@ -8,10 +8,15 @@ description: >
 base: core18
 confinement: strict
 
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+  - build-on: armhf
+
 parts:
   overseerr:
     plugin: nodejs
-    nodejs-version: '16.14.0'
+    nodejs-version: '16.17.0'
     nodejs-package-manager: 'yarn'
     nodejs-yarn-version: v1.22.17
     build-packages:
@@ -31,13 +36,16 @@ parts:
     override-pull: |
       snapcraftctl pull
       # Get information to determine snap grade and version
+      git config --global --add safe.directory /data/parts/overseerr/src
+      #setup yarn.rc
+      echo "--install.frozen-lockfile\n--install.network-timeout 1000000" > .yarnrc
       BRANCH=$(git rev-parse --abbrev-ref HEAD)
       COMMIT=$(git rev-parse HEAD)
       COMMIT_SHORT=$(git rev-parse --short HEAD)
       VERSION='v'$(cat package.json | grep 'version' | head -1 | sed 's/.*"\(.*\)"\,/\1/')
       if [ "$VERSION" = "v0.1.0" ]; then
         SNAP_VERSION=$COMMIT_SHORT
-        GRADE=devel
+        GRADE=stable
       else
         SNAP_VERSION=$VERSION
         GRADE=stable
@@ -57,6 +65,7 @@ parts:
       snapcraftctl set-grade "$GRADE"
     build-environment:
       - PATH: '$SNAPCRAFT_PART_BUILD/node_modules/.bin:$SNAPCRAFT_PART_BUILD/../npm/bin:$PATH'
+      - CYPRESS_INSTALL_BINARY: '0'
     override-build: |
       set -e
       # Set COMMIT_TAG before the build begins
@@ -77,7 +86,7 @@ parts:
     prime: [.next, ./*]
 
 apps:
-  deamon:
+  daemon:
     command: /bin/sh -c "cd $SNAP && node dist/index.js"
     daemon: simple
     restart-condition: on-failure

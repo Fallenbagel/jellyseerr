@@ -1,3 +1,6 @@
+/**
+ * @type {import('next').NextConfig}
+ */
 module.exports = {
   env: {
     commitTag: process.env.COMMIT_TAG || 'local',
@@ -17,5 +20,8 @@ module.exports = {
     });
 
     return config;
+  },
+  experimental: {
+    scrollRestoration: true,
   },
 };

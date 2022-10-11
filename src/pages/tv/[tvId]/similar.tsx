@@ -1,6 +1,5 @@
-import React from 'react';
-import { NextPage } from 'next';
-import TvSimilar from '../../../components/TvDetails/TvSimilar';
+import TvSimilar from '@app/components/TvDetails/TvSimilar';
+import type { NextPage } from 'next';
 
 const TvSimilarPage: NextPage = () => {
   return <TvSimilar />;

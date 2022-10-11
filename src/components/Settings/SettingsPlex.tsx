@@ -1,26 +1,24 @@
+import Alert from '@app/components/Common/Alert';
+import Badge from '@app/components/Common/Badge';
+import Button from '@app/components/Common/Button';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import PageTitle from '@app/components/Common/PageTitle';
+import SensitiveInput from '@app/components/Common/SensitiveInput';
+import LibraryItem from '@app/components/Settings/LibraryItem';
+import SettingsBadge from '@app/components/Settings/SettingsBadge';
+import globalMessages from '@app/i18n/globalMessages';
 import { SaveIcon } from '@heroicons/react/outline';
 import { RefreshIcon, SearchIcon, XIcon } from '@heroicons/react/solid';
+import type { PlexDevice } from '@server/interfaces/api/plexInterfaces';
+import type { PlexSettings, TautulliSettings } from '@server/lib/settings';
 import axios from 'axios';
 import { Field, Formik } from 'formik';
 import { orderBy } from 'lodash';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
-import type { PlexDevice } from '../../../server/interfaces/api/plexInterfaces';
-import type {
-  PlexSettings,
-  TautulliSettings,
-} from '../../../server/lib/settings';
-import globalMessages from '../../i18n/globalMessages';
-import Alert from '../Common/Alert';
-import Badge from '../Common/Badge';
-import Button from '../Common/Button';
-import LoadingSpinner from '../Common/LoadingSpinner';
-import PageTitle from '../Common/PageTitle';
-import SensitiveInput from '../Common/SensitiveInput';
-import LibraryItem from './LibraryItem';
 
 const messages = defineMessages({
   plex: 'Plex',
@@ -107,7 +105,7 @@ interface SettingsPlexProps {
   onComplete?: () => void;
 }
 
-const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
+const SettingsPlex = ({ onComplete }: SettingsPlexProps) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isRefreshingPresets, setIsRefreshingPresets] = useState(false);
   const [availableServers, setAvailableServers] = useState<PlexDevice[] | null>(
@@ -344,18 +342,16 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
           <div className="section">
             <Alert
               title={intl.formatMessage(messages.settingUpPlexDescription, {
-                RegisterPlexTVLink: function RegisterPlexTVLink(msg) {
-                  return (
-                    <a
-                      href="https://plex.tv"
-                      className="text-white transition duration-300 hover:underline"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {msg}
-                    </a>
-                  );
-                },
+                RegisterPlexTVLink: (msg: React.ReactNode) => (
+                  <a
+                    href="https://plex.tv"
+                    className="text-white transition duration-300 hover:underline"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {msg}
+                  </a>
+                ),
               })}
               type="info"
             />
@@ -517,9 +513,11 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
                       className="rounded-r-only"
                     />
                   </div>
-                  {errors.hostname && touched.hostname && (
-                    <div className="error">{errors.hostname}</div>
-                  )}
+                  {errors.hostname &&
+                    touched.hostname &&
+                    typeof errors.hostname === 'string' && (
+                      <div className="error">{errors.hostname}</div>
+                    )}
                 </div>
               </div>
               <div className="form-row">
@@ -535,9 +533,11 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
                     name="port"
                     className="short"
                   />
-                  {errors.port && touched.port && (
-                    <div className="error">{errors.port}</div>
-                  )}
+                  {errors.port &&
+                    touched.port &&
+                    typeof errors.port === 'string' && (
+                      <div className="error">{errors.port}</div>
+                    )}
                 </div>
               </div>
               <div className="form-row">
@@ -558,21 +558,17 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
               <div className="form-row">
                 <label htmlFor="webAppUrl" className="text-label">
                   {intl.formatMessage(messages.webAppUrl, {
-                    WebAppLink: function WebAppLink(msg) {
-                      return (
-                        <a
-                          href="https://support.plex.tv/articles/200288666-opening-plex-web-app/"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {msg}
-                        </a>
-                      );
-                    },
+                    WebAppLink: (msg: React.ReactNode) => (
+                      <a
+                        href="https://support.plex.tv/articles/200288666-opening-plex-web-app/"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {msg}
+                      </a>
+                    ),
                   })}
-                  <Badge badgeType="danger" className="ml-2">
-                    {intl.formatMessage(globalMessages.advanced)}
-                  </Badge>
+                  <SettingsBadge badgeType="advanced" className="ml-2" />
                   <span className="label-tip">
                     {intl.formatMessage(messages.webAppUrlTip)}
                   </span>
@@ -587,9 +583,11 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
                       placeholder="https://app.plex.tv/desktop"
                     />
                   </div>
-                  {errors.webAppUrl && touched.webAppUrl && (
-                    <div className="error">{errors.webAppUrl}</div>
-                  )}
+                  {errors.webAppUrl &&
+                    touched.webAppUrl &&
+                    typeof errors.webAppUrl === 'string' && (
+                      <div className="error">{errors.webAppUrl}</div>
+                    )}
                 </div>
               </div>
               <div className="actions">
@@ -803,9 +801,11 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
                           className="rounded-r-only"
                         />
                       </div>
-                      {errors.tautulliHostname && touched.tautulliHostname && (
-                        <div className="error">{errors.tautulliHostname}</div>
-                      )}
+                      {errors.tautulliHostname &&
+                        touched.tautulliHostname &&
+                        typeof errors.tautulliHostname === 'string' && (
+                          <div className="error">{errors.tautulliHostname}</div>
+                        )}
                     </div>
                   </div>
                   <div className="form-row">
@@ -821,9 +821,11 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
                         name="tautulliPort"
                         className="short"
                       />
-                      {errors.tautulliPort && touched.tautulliPort && (
-                        <div className="error">{errors.tautulliPort}</div>
-                      )}
+                      {errors.tautulliPort &&
+                        touched.tautulliPort &&
+                        typeof errors.tautulliPort === 'string' && (
+                          <div className="error">{errors.tautulliPort}</div>
+                        )}
                     </div>
                   </div>
                   <div className="form-row">
@@ -857,9 +859,11 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
                           name="tautulliUrlBase"
                         />
                       </div>
-                      {errors.tautulliUrlBase && touched.tautulliUrlBase && (
-                        <div className="error">{errors.tautulliUrlBase}</div>
-                      )}
+                      {errors.tautulliUrlBase &&
+                        touched.tautulliUrlBase &&
+                        typeof errors.tautulliUrlBase === 'string' && (
+                          <div className="error">{errors.tautulliUrlBase}</div>
+                        )}
                     </div>
                   </div>
                   <div className="form-row">
@@ -876,9 +880,11 @@ const SettingsPlex: React.FC<SettingsPlexProps> = ({ onComplete }) => {
                           autoComplete="one-time-code"
                         />
                       </div>
-                      {errors.tautulliApiKey && touched.tautulliApiKey && (
-                        <div className="error">{errors.tautulliApiKey}</div>
-                      )}
+                      {errors.tautulliApiKey &&
+                        touched.tautulliApiKey &&
+                        typeof errors.tautulliApiKey === 'string' && (
+                          <div className="error">{errors.tautulliApiKey}</div>
+                        )}
                     </div>
                   </div>
                   <div className="form-row">

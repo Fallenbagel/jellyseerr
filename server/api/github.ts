@@ -1,5 +1,5 @@
-import cacheManager from '../lib/cache';
-import logger from '../logger';
+import cacheManager from '@server/lib/cache';
+import logger from '@server/logger';
 import ExternalAPI from './externalapi';
 
 interface GitHubRelease {

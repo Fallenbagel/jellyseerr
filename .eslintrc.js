@@ -7,6 +7,7 @@ module.exports = {
     'plugin:jsx-a11y/recommended',
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
+    'plugin:react/jsx-runtime',
     'prettier',
   ],
   parserOptions: {
@@ -26,11 +27,21 @@ module.exports = {
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
     '@typescript-eslint/explicit-function-return-type': 'off',
-    'prettier/prettier': ['error', { endOfLine: 'auto' }],
     'formatjs/no-offset': 'error',
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': ['error'],
+    '@typescript-eslint/array-type': ['error', { default: 'array' }],
     'jsx-a11y/no-onchange': 'off',
+    '@typescript-eslint/consistent-type-imports': [
+      'error',
+      {
+        prefer: 'type-imports',
+      },
+    ],
+    'no-relative-import-paths/no-relative-import-paths': [
+      'error',
+      { allowSameFolder: true },
+    ],
   },
   overrides: [
     {
@@ -40,7 +51,7 @@ module.exports = {
       },
     },
   ],
-  plugins: ['jsx-a11y', 'prettier', 'react-hooks', 'formatjs'],
+  plugins: ['jsx-a11y', 'react-hooks', 'formatjs', 'no-relative-import-paths'],
   settings: {
     react: {
       pragma: 'React',

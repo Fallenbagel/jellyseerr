@@ -1,10 +1,10 @@
+import TheMovieDb from '@server/api/themoviedb';
+import type { TmdbSearchMultiResponse } from '@server/api/themoviedb/interfaces';
+import Media from '@server/entity/Media';
+import { findSearchProvider } from '@server/lib/search';
+import logger from '@server/logger';
+import { mapSearchResults } from '@server/models/Search';
 import { Router } from 'express';
-import TheMovieDb from '../api/themoviedb';
-import { TmdbSearchMultiResponse } from '../api/themoviedb/interfaces';
-import Media from '../entity/Media';
-import { findSearchProvider } from '../lib/search';
-import logger from '../logger';
-import { mapSearchResults } from '../models/Search';
 
 const searchRoutes = Router();
 

@@ -1,15 +1,15 @@
+import Button from '@app/components/Common/Button';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import NotificationTypeSelector from '@app/components/NotificationTypeSelector';
+import globalMessages from '@app/i18n/globalMessages';
 import { BeakerIcon, SaveIcon } from '@heroicons/react/outline';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
-import globalMessages from '../../../../i18n/globalMessages';
-import Button from '../../../Common/Button';
-import LoadingSpinner from '../../../Common/LoadingSpinner';
-import NotificationTypeSelector from '../../../NotificationTypeSelector';
 
 const messages = defineMessages({
   agentenabled: 'Enable Agent',
@@ -25,7 +25,7 @@ const messages = defineMessages({
   validationTypes: 'You must select at least one notification type',
 });
 
-const NotificationsSlack: React.FC = () => {
+const NotificationsSlack = () => {
   const intl = useIntl();
   const { addToast, removeToast } = useToasts();
   const [isTesting, setIsTesting] = useState(false);
@@ -150,18 +150,16 @@ const NotificationsSlack: React.FC = () => {
                 <span className="label-required">*</span>
                 <span className="label-tip">
                   {intl.formatMessage(messages.webhookUrlTip, {
-                    WebhookLink: function WebhookLink(msg) {
-                      return (
-                        <a
-                          href="https://my.slack.com/services/new/incoming-webhook/"
-                          className="text-white transition duration-300 hover:underline"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {msg}
-                        </a>
-                      );
-                    },
+                    WebhookLink: (msg: React.ReactNode) => (
+                      <a
+                        href="https://my.slack.com/services/new/incoming-webhook/"
+                        className="text-white transition duration-300 hover:underline"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {msg}
+                      </a>
+                    ),
                   })}
                 </span>
               </label>
@@ -174,9 +172,11 @@ const NotificationsSlack: React.FC = () => {
                     inputMode="url"
                   />
                 </div>
-                {errors.webhookUrl && touched.webhookUrl && (
-                  <div className="error">{errors.webhookUrl}</div>
-                )}
+                {errors.webhookUrl &&
+                  touched.webhookUrl &&
+                  typeof errors.webhookUrl === 'string' && (
+                    <div className="error">{errors.webhookUrl}</div>
+                  )}
               </div>
             </div>
             <NotificationTypeSelector

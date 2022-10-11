@@ -1,17 +1,20 @@
-import { uniqWith } from 'lodash';
-import { getRepository } from 'typeorm';
-import animeList from '../../../api/animelist';
-import PlexAPI, { PlexLibraryItem, PlexMetadata } from '../../../api/plexapi';
-import { TmdbTvDetails } from '../../../api/themoviedb/interfaces';
-import { User } from '../../../entity/User';
-import cacheManager from '../../cache';
-import { getSettings, Library } from '../../settings';
-import BaseScanner, {
+import animeList from '@server/api/animelist';
+import type { PlexLibraryItem, PlexMetadata } from '@server/api/plexapi';
+import PlexAPI from '@server/api/plexapi';
+import type { TmdbTvDetails } from '@server/api/themoviedb/interfaces';
+import { getRepository } from '@server/datasource';
+import { User } from '@server/entity/User';
+import cacheManager from '@server/lib/cache';
+import type {
   MediaIds,
   ProcessableSeason,
   RunnableScanner,
   StatusBase,
-} from '../baseScanner';
+} from '@server/lib/scanners/baseScanner';
+import BaseScanner from '@server/lib/scanners/baseScanner';
+import type { Library } from '@server/lib/settings';
+import { getSettings } from '@server/lib/settings';
+import { uniqWith } from 'lodash';
 
 const imdbRegex = new RegExp(/imdb:\/\/(tt[0-9]+)/);
 const tmdbRegex = new RegExp(/tmdb:\/\/([0-9]+)/);
@@ -59,8 +62,8 @@ class PlexScanner
     try {
       const userRepository = getRepository(User);
       const admin = await userRepository.findOne({
-        select: ['id', 'plexToken'],
-        order: { id: 'ASC' },
+        select: { id: true, plexToken: true },
+        where: { id: 1 },
       });
 
       if (!admin) {
@@ -141,7 +144,9 @@ class PlexScanner
         'info'
       );
     } catch (e) {
-      this.log('Scan interrupted', 'error', { errorMessage: e.message });
+      this.log('Scan interrupted', 'error', {
+        errorMessage: e.message,
+      });
     } finally {
       this.endRun(sessionId);
     }
@@ -369,7 +374,7 @@ class PlexScanner
         }
       });
 
-      // If we got an IMDb ID, but no TMDb ID, lookup the TMDb ID with the IMDb ID
+      // If we got an IMDb ID, but no TMDB ID, lookup the TMDB ID with the IMDb ID
       if (mediaIds.imdbId && !mediaIds.tmdbId) {
         const tmdbMedia = await this.tmdb.getMediaByImdbId({
           imdbId: mediaIds.imdbId,
@@ -390,7 +395,7 @@ class PlexScanner
         });
         mediaIds.tmdbId = tmdbMedia.id;
       }
-      // Check if the agent is TMDb
+      // Check if the agent is TMDB
     } else if (plexitem.guid.match(tmdbRegex)) {
       const tmdbMatch = plexitem.guid.match(tmdbRegex);
       if (tmdbMatch) {
@@ -409,7 +414,7 @@ class PlexScanner
         mediaIds.tvdbId = Number(matchedtvdb[1]);
         mediaIds.tmdbId = show.id;
       }
-      // Check if the agent (for shows) is TMDb
+      // Check if the agent (for shows) is TMDB
     } else if (plexitem.guid.match(tmdbShowRegex)) {
       const matchedtmdb = plexitem.guid.match(tmdbShowRegex);
       if (matchedtmdb) {
@@ -484,10 +489,10 @@ class PlexScanner
     }
 
     if (!mediaIds.tmdbId) {
-      throw new Error('Unable to find TMDb ID');
+      throw new Error('Unable to find TMDB ID');
     }
 
-    // We check above if we have the TMDb ID, so we can safely assert the type below
+    // We check above if we have the TMDB ID, so we can safely assert the type below
     return mediaIds as MediaIds;
   }
 

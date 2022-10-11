@@ -1,34 +1,29 @@
+import useClickOutside from '@app/hooks/useClickOutside';
+import { withProperties } from '@app/utils/typeHelpers';
+import { Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
-import React, {
-  AnchorHTMLAttributes,
-  ButtonHTMLAttributes,
-  ReactNode,
-  useRef,
-  useState,
-} from 'react';
-import useClickOutside from '../../../hooks/useClickOutside';
-import { withProperties } from '../../../utils/typeHelpers';
-import Transition from '../../Transition';
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes } from 'react';
+import { Fragment, useRef, useState } from 'react';
 
 interface DropdownItemProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   buttonType?: 'primary' | 'ghost';
 }
 
-const DropdownItem: React.FC<DropdownItemProps> = ({
+const DropdownItem = ({
   children,
   buttonType = 'primary',
   ...props
-}) => {
+}: DropdownItemProps) => {
   let styleClass = 'button-md text-white';
 
   switch (buttonType) {
     case 'ghost':
       styleClass +=
-        ' bg-gray-700 hover:bg-gray-600 focus:border-gray-500 focus:text-white';
+        ' bg-transparent rounded hover:bg-gradient-to-br from-indigo-600 to-purple-600 text-white focus:border-gray-500 focus:text-white';
       break;
     default:
       styleClass +=
-        ' bg-indigo-600 hover:bg-indigo-500 focus:border-indigo-700 focus:text-white';
+        ' bg-indigo-600 rounded hover:bg-indigo-500 focus:border-indigo-700 focus:text-white';
   }
   return (
     <a
@@ -42,19 +37,19 @@ const DropdownItem: React.FC<DropdownItemProps> = ({
 
 interface ButtonWithDropdownProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
-  text: ReactNode;
-  dropdownIcon?: ReactNode;
+  text: React.ReactNode;
+  dropdownIcon?: React.ReactNode;
   buttonType?: 'primary' | 'ghost';
 }
 
-const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
+const ButtonWithDropdown = ({
   text,
   children,
   dropdownIcon,
   className,
   buttonType = 'primary',
   ...props
-}) => {
+}: ButtonWithDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   useClickOutside(buttonRef, () => setIsOpen(false));
@@ -70,14 +65,15 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
       styleClasses.mainButtonClasses +=
         ' bg-transparent border-gray-600 hover:border-gray-200 focus:border-gray-100 active:border-gray-100';
       styleClasses.dropdownSideButtonClasses = styleClasses.mainButtonClasses;
-      styleClasses.dropdownClasses += ' bg-gray-700';
+      styleClasses.dropdownClasses +=
+        ' bg-gray-800 border border-gray-700 bg-opacity-80 p-1 backdrop-blur';
       break;
     default:
       styleClasses.mainButtonClasses +=
-        ' bg-indigo-600 border-indigo-600 hover:bg-indigo-500 hover:border-indigo-500 active:bg-indigo-700 active:border-indigo-700 focus:ring-blue';
+        ' bg-indigo-600 border-indigo-500 bg-opacity-80 hover:bg-opacity-100 hover:border-indigo-500 active:bg-indigo-700 active:border-indigo-700 focus:ring-blue';
       styleClasses.dropdownSideButtonClasses +=
-        ' bg-indigo-700 border-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 focus:ring-blue';
-      styleClasses.dropdownClasses += ' bg-indigo-600';
+        ' bg-indigo-600 bg-opacity-80 border-indigo-500 hover:bg-opacity-100 active:bg-opacity-100 focus:ring-blue';
+      styleClasses.dropdownClasses += ' bg-indigo-600 p-1';
   }
 
   return (
@@ -103,6 +99,7 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
             {dropdownIcon ? dropdownIcon : <ChevronDownIcon />}
           </button>
           <Transition
+            as={Fragment}
             show={isOpen}
             enter="transition ease-out duration-100 opacity-0"
             enterFrom="transform opacity-0 scale-95"

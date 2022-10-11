@@ -1,15 +1,15 @@
+import Button from '@app/components/Common/Button';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import NotificationTypeSelector from '@app/components/NotificationTypeSelector';
+import globalMessages from '@app/i18n/globalMessages';
 import { BeakerIcon, SaveIcon } from '@heroicons/react/outline';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
-import globalMessages from '../../../../i18n/globalMessages';
-import Button from '../../../Common/Button';
-import LoadingSpinner from '../../../Common/LoadingSpinner';
-import NotificationTypeSelector from '../../../NotificationTypeSelector';
 
 const messages = defineMessages({
   agentenabled: 'Enable Agent',
@@ -29,7 +29,7 @@ const messages = defineMessages({
   validationTypes: 'You must select at least one notification type',
 });
 
-const NotificationsPushover: React.FC = () => {
+const NotificationsPushover = () => {
   const intl = useIntl();
   const { addToast, removeToast } = useToasts();
   const [isTesting, setIsTesting] = useState(false);
@@ -172,19 +172,16 @@ const NotificationsPushover: React.FC = () => {
                 <span className="label-required">*</span>
                 <span className="label-tip">
                   {intl.formatMessage(messages.accessTokenTip, {
-                    ApplicationRegistrationLink:
-                      function ApplicationRegistrationLink(msg) {
-                        return (
-                          <a
-                            href="https://pushover.net/api#registration"
-                            className="text-white transition duration-300 hover:underline"
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            {msg}
-                          </a>
-                        );
-                      },
+                    ApplicationRegistrationLink: (msg: React.ReactNode) => (
+                      <a
+                        href="https://pushover.net/api#registration"
+                        className="text-white transition duration-300 hover:underline"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {msg}
+                      </a>
+                    ),
                   })}
                 </span>
               </label>
@@ -192,9 +189,11 @@ const NotificationsPushover: React.FC = () => {
                 <div className="form-input-field">
                   <Field id="accessToken" name="accessToken" type="text" />
                 </div>
-                {errors.accessToken && touched.accessToken && (
-                  <div className="error">{errors.accessToken}</div>
-                )}
+                {errors.accessToken &&
+                  touched.accessToken &&
+                  typeof errors.accessToken === 'string' && (
+                    <div className="error">{errors.accessToken}</div>
+                  )}
               </div>
             </div>
             <div className="form-row">
@@ -203,18 +202,16 @@ const NotificationsPushover: React.FC = () => {
                 <span className="label-required">*</span>
                 <span className="label-tip">
                   {intl.formatMessage(messages.userTokenTip, {
-                    UsersGroupsLink: function UsersGroupsLink(msg) {
-                      return (
-                        <a
-                          href="https://pushover.net/api#identifiers"
-                          className="text-white transition duration-300 hover:underline"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {msg}
-                        </a>
-                      );
-                    },
+                    UsersGroupsLink: (msg: React.ReactNode) => (
+                      <a
+                        href="https://pushover.net/api#identifiers"
+                        className="text-white transition duration-300 hover:underline"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {msg}
+                      </a>
+                    ),
                   })}
                 </span>
               </label>
@@ -222,9 +219,11 @@ const NotificationsPushover: React.FC = () => {
                 <div className="form-input-field">
                   <Field id="userToken" name="userToken" type="text" />
                 </div>
-                {errors.userToken && touched.userToken && (
-                  <div className="error">{errors.userToken}</div>
-                )}
+                {errors.userToken &&
+                  touched.userToken &&
+                  typeof errors.userToken === 'string' && (
+                    <div className="error">{errors.userToken}</div>
+                  )}
               </div>
             </div>
             <NotificationTypeSelector

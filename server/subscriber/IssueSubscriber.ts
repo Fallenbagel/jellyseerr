@@ -1,17 +1,17 @@
+import TheMovieDb from '@server/api/themoviedb';
+import { IssueStatus, IssueType, IssueTypeName } from '@server/constants/issue';
+import { MediaType } from '@server/constants/media';
+import Issue from '@server/entity/Issue';
+import notificationManager, { Notification } from '@server/lib/notifications';
+import { Permission } from '@server/lib/permissions';
+import logger from '@server/logger';
 import { sortBy } from 'lodash';
-import {
+import type {
   EntitySubscriberInterface,
-  EventSubscriber,
   InsertEvent,
   UpdateEvent,
 } from 'typeorm';
-import TheMovieDb from '../api/themoviedb';
-import { IssueStatus, IssueType, IssueTypeName } from '../constants/issue';
-import { MediaType } from '../constants/media';
-import Issue from '../entity/Issue';
-import notificationManager, { Notification } from '../lib/notifications';
-import { Permission } from '../lib/permissions';
-import logger from '../logger';
+import { EventSubscriber } from 'typeorm';
 
 @EventSubscriber()
 export class IssueSubscriber implements EntitySubscriberInterface<Issue> {
@@ -84,6 +84,7 @@ export class IssueSubscriber implements EntitySubscriberInterface<Issue> {
         image,
         extra,
         notifyAdmin: true,
+        notifySystem: true,
         notifyUser:
           !entity.createdBy.hasPermission(Permission.MANAGE_ISSUES) &&
           (type === Notification.ISSUE_RESOLVED ||

@@ -1,8 +1,7 @@
-import { NextPage } from 'next';
-import React from 'react';
-import UserSettings from '../../../../components/UserProfile/UserSettings';
-import UserNotificationSettings from '../../../../components/UserProfile/UserSettings/UserNotificationSettings';
-import UserNotificationsTelegram from '../../../../components/UserProfile/UserSettings/UserNotificationSettings/UserNotificationsTelegram';
+import UserSettings from '@app/components/UserProfile/UserSettings';
+import UserNotificationSettings from '@app/components/UserProfile/UserSettings/UserNotificationSettings';
+import UserNotificationsTelegram from '@app/components/UserProfile/UserSettings/UserNotificationSettings/UserNotificationsTelegram';
+import type { NextPage } from 'next';
 
 const NotificationsPage: NextPage = () => {
   return (

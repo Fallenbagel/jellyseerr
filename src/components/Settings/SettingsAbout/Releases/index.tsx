@@ -1,14 +1,21 @@
+import Badge from '@app/components/Common/Badge';
+import Button from '@app/components/Common/Button';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import Modal from '@app/components/Common/Modal';
+import globalMessages from '@app/i18n/globalMessages';
+import { Transition } from '@headlessui/react';
 import { DocumentTextIcon } from '@heroicons/react/outline';
-import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
+import { Fragment, useState } from 'react';
 import { defineMessages, FormattedRelativeTime, useIntl } from 'react-intl';
-import ReactMarkdown from 'react-markdown';
 import useSWR from 'swr';
-import globalMessages from '../../../../i18n/globalMessages';
-import Badge from '../../../Common/Badge';
-import Button from '../../../Common/Button';
-import LoadingSpinner from '../../../Common/LoadingSpinner';
-import Modal from '../../../Common/Modal';
-import Transition from '../../../Transition';
+
+// dyanmic is having trouble extracting the props for react-markdown here so we are just ignoring it since its really
+// only children we are using
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ReactMarkdown = dynamic<any>(() => import('react-markdown'), {
+  ssr: false,
+});
 
 const messages = defineMessages({
   releases: 'Releases',
@@ -48,17 +55,14 @@ interface ReleaseProps {
   currentVersion: string;
 }
 
-const Release: React.FC<ReleaseProps> = ({
-  currentVersion,
-  release,
-  isLatest,
-}) => {
+const Release = ({ currentVersion, release, isLatest }: ReleaseProps) => {
   const intl = useIntl();
   const [isModalOpen, setModalOpen] = useState(false);
 
   return (
     <div className="flex w-full flex-col space-y-3 rounded-md bg-gray-800 px-4 py-2 shadow-md ring-1 ring-gray-700 sm:flex-row sm:space-y-0 sm:space-x-3">
       <Transition
+        as={Fragment}
         enter="opacity-0 transition duration-300"
         enterFrom="opacity-0"
         enterTo="opacity-100"
@@ -69,7 +73,6 @@ const Release: React.FC<ReleaseProps> = ({
       >
         <Modal
           onCancel={() => setModalOpen(false)}
-          iconSvg={<DocumentTextIcon />}
           title={intl.formatMessage(messages.versionChangelog, {
             version: release.name,
           })}
@@ -120,7 +123,7 @@ interface ReleasesProps {
   currentVersion: string;
 }
 
-const Releases: React.FC<ReleasesProps> = ({ currentVersion }) => {
+const Releases = ({ currentVersion }: ReleasesProps) => {
   const intl = useIntl();
   const { data, error } = useSWR<GitHubRelease[]>(REPO_RELEASE_API);
 

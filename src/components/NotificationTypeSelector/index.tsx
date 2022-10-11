@@ -1,9 +1,10 @@
+import NotificationType from '@app/components/NotificationTypeSelector/NotificationType';
+import useSettings from '@app/hooks/useSettings';
+import type { User } from '@app/hooks/useUser';
+import { Permission, useUser } from '@app/hooks/useUser';
 import { sortBy } from 'lodash';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import useSettings from '../../hooks/useSettings';
-import { Permission, User, useUser } from '../../hooks/useUser';
-import NotificationType from './NotificationType';
 
 const messages = defineMessages({
   notificationTypes: 'Notification Types',
@@ -59,6 +60,9 @@ const messages = defineMessages({
     'Get notified when issues you reported are reopened.',
   adminissuereopenedDescription:
     'Get notified when issues are reopened by other users.',
+  mediaautorequested: 'Request Automatically Submitted',
+  mediaautorequestedDescription:
+    'Get notified when new media requests are automatically submitted for items on your Plex Watchlist.',
 });
 
 export const hasNotificationType = (
@@ -100,6 +104,7 @@ export enum Notification {
   ISSUE_COMMENT = 512,
   ISSUE_RESOLVED = 1024,
   ISSUE_REOPENED = 2048,
+  MEDIA_AUTO_REQUESTED = 4096,
 }
 
 export const ALL_NOTIFICATIONS = Object.values(Notification)
@@ -124,13 +129,13 @@ interface NotificationTypeSelectorProps {
   error?: string;
 }
 
-const NotificationTypeSelector: React.FC<NotificationTypeSelectorProps> = ({
+const NotificationTypeSelector = ({
   user,
   enabledTypes = ALL_NOTIFICATIONS,
   currentTypes,
   onUpdate,
   error,
-}) => {
+}: NotificationTypeSelectorProps) => {
   const intl = useIntl();
   const settings = useSettings();
   const { hasPermission } = useUser({ id: user?.id });
@@ -190,6 +195,25 @@ const NotificationTypeSelector: React.FC<NotificationTypeSelectorProps> = ({
             ))));
 
     const types: NotificationItem[] = [
+      {
+        id: 'media-auto-requested',
+        name: intl.formatMessage(messages.mediaautorequested),
+        description: intl.formatMessage(messages.mediaautorequestedDescription),
+        value: Notification.MEDIA_AUTO_REQUESTED,
+        hidden:
+          !user ||
+          (!user.settings?.watchlistSyncMovies &&
+            !user.settings?.watchlistSyncTv) ||
+          !hasPermission(
+            [
+              Permission.AUTO_REQUEST,
+              Permission.AUTO_REQUEST_MOVIE,
+              Permission.AUTO_REQUEST_TV,
+            ],
+            { type: 'or' }
+          ),
+        hasNotifyUser: true,
+      },
       {
         id: 'media-requested',
         name: intl.formatMessage(messages.mediarequested),

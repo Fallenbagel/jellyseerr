@@ -1,21 +1,21 @@
+import AppDataWarning from '@app/components/AppDataWarning';
+import Badge from '@app/components/Common/Badge';
+import Button from '@app/components/Common/Button';
+import ImageFader from '@app/components/Common/ImageFader';
+import PageTitle from '@app/components/Common/PageTitle';
+import LanguagePicker from '@app/components/Layout/LanguagePicker';
+import SettingsJellyfin from '@app/components/Settings/SettingsJellyfin';
+import SettingsPlex from '@app/components/Settings/SettingsPlex';
+import SettingsServices from '@app/components/Settings/SettingsServices';
+import SetupSteps from '@app/components/Setup/SetupSteps';
+import useLocale from '@app/hooks/useLocale';
+import { MediaServerType } from '@server/constants/server';
 import axios from 'axios';
 import { useRouter } from 'next/router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR, { mutate } from 'swr';
-import { MediaServerType } from '../../../server/constants/server';
-import useLocale from '../../hooks/useLocale';
-import AppDataWarning from '../AppDataWarning';
-import Badge from '../Common/Badge';
-import Button from '../Common/Button';
-import ImageFader from '../Common/ImageFader';
-import PageTitle from '../Common/PageTitle';
-import LanguagePicker from '../Layout/LanguagePicker';
-import SettingsJellyfin from '../Settings/SettingsJellyfin';
-import SettingsPlex from '../Settings/SettingsPlex';
-import SettingsServices from '../Settings/SettingsServices';
 import SetupLogin from './SetupLogin';
-import SetupSteps from './SetupSteps';
 
 const messages = defineMessages({
   setup: 'Setup',
@@ -30,7 +30,7 @@ const messages = defineMessages({
     'Scanning will run in the background. You can continue the setup process in the meantime.',
 });
 
-const Setup: React.FC = () => {
+const Setup = () => {
   const intl = useIntl();
   const [isUpdating, setIsUpdating] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -69,7 +69,7 @@ const Setup: React.FC = () => {
       <ImageFader
         backgroundImages={
           backdrops?.map(
-            (backdrop) => `https://www.themoviedb.org/t/p/original${backdrop}`
+            (backdrop) => `https://image.tmdb.org/t/p/original${backdrop}`
           ) ?? []
         }
       />

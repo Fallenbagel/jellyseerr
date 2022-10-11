@@ -1,10 +1,9 @@
-import React from 'react';
-import type { MediaStatus } from '../../../server/constants/media';
-import { MediaRequest } from '../../../server/entity/MediaRequest';
-import Transition from '../Transition';
-import CollectionRequestModal from './CollectionRequestModal';
-import MovieRequestModal from './MovieRequestModal';
-import TvRequestModal from './TvRequestModal';
+import CollectionRequestModal from '@app/components/RequestModal/CollectionRequestModal';
+import MovieRequestModal from '@app/components/RequestModal/MovieRequestModal';
+import TvRequestModal from '@app/components/RequestModal/TvRequestModal';
+import { Transition } from '@headlessui/react';
+import type { MediaStatus } from '@server/constants/media';
+import type { MediaRequest } from '@server/entity/MediaRequest';
 
 interface RequestModalProps {
   show: boolean;
@@ -17,7 +16,7 @@ interface RequestModalProps {
   onUpdating?: (isUpdating: boolean) => void;
 }
 
-const RequestModal: React.FC<RequestModalProps> = ({
+const RequestModal = ({
   type,
   show,
   tmdbId,
@@ -26,9 +25,10 @@ const RequestModal: React.FC<RequestModalProps> = ({
   onComplete,
   onUpdating,
   onCancel,
-}) => {
+}: RequestModalProps) => {
   return (
     <Transition
+      as="div"
       enter="transition opacity-0 duration-300"
       enterFrom="opacity-0"
       enterTo="opacity-100"

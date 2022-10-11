@@ -1,7 +1,7 @@
+import CachedImage from '@app/components/Common/CachedImage';
 import { UserCircleIcon } from '@heroicons/react/solid';
 import Link from 'next/link';
-import React, { useState } from 'react';
-import CachedImage from '../Common/CachedImage';
+import { useState } from 'react';
 
 interface PersonCardProps {
   personId: number;
@@ -11,13 +11,13 @@ interface PersonCardProps {
   canExpand?: boolean;
 }
 
-const PersonCard: React.FC<PersonCardProps> = ({
+const PersonCard = ({
   personId,
   name,
   subName,
   profilePath,
   canExpand = false,
-}) => {
+}: PersonCardProps) => {
   const [isHovered, setHovered] = useState(false);
 
   return (

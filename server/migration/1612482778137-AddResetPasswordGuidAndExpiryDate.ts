@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddResetPasswordGuidAndExpiryDate1612482778137
   implements MigrationInterface

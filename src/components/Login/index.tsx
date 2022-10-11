@@ -1,21 +1,21 @@
+import Accordion from '@app/components/Common/Accordion';
+import ImageFader from '@app/components/Common/ImageFader';
+import PageTitle from '@app/components/Common/PageTitle';
+import LanguagePicker from '@app/components/Layout/LanguagePicker';
+import LocalLogin from '@app/components/Login/LocalLogin';
+import PlexLoginButton from '@app/components/PlexLoginButton';
+import useSettings from '@app/hooks/useSettings';
+import { useUser } from '@app/hooks/useUser';
+import { Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/solid';
+import { MediaServerType } from '@server/constants/server';
 import axios from 'axios';
+import getConfig from 'next/config';
 import { useRouter } from 'next/dist/client/router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
-import { MediaServerType } from '../../../server/constants/server';
-import useSettings from '../../hooks/useSettings';
-import { useUser } from '../../hooks/useUser';
-import Accordion from '../Common/Accordion';
-import ImageFader from '../Common/ImageFader';
-import PageTitle from '../Common/PageTitle';
-import LanguagePicker from '../Layout/LanguagePicker';
-import PlexLoginButton from '../PlexLoginButton';
-import Transition from '../Transition';
 import JellyfinLogin from './JellyfinLogin';
-import LocalLogin from './LocalLogin';
-import getConfig from 'next/config';
 
 const messages = defineMessages({
   signin: 'Sign In',
@@ -25,7 +25,7 @@ const messages = defineMessages({
   signinwithoverseerr: 'Use your {applicationTitle} account',
 });
 
-const Login: React.FC = () => {
+const Login = () => {
   const intl = useIntl();
   const [error, setError] = useState('');
   const [isProcessing, setProcessing] = useState(false);
@@ -78,7 +78,7 @@ const Login: React.FC = () => {
       <ImageFader
         backgroundImages={
           backdrops?.map(
-            (backdrop) => `https://www.themoviedb.org/t/p/original${backdrop}`
+            (backdrop) => `https://image.tmdb.org/t/p/original${backdrop}`
           ) ?? []
         }
       />
@@ -98,6 +98,7 @@ const Login: React.FC = () => {
         >
           <>
             <Transition
+              as="div"
               show={!!error}
               enter="opacity-0 transition duration-300"
               enterFrom="opacity-0"

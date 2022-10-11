@@ -1,12 +1,12 @@
+import TheMovieDb from '@server/api/themoviedb';
+import { MediaStatus, MediaType } from '@server/constants/media';
+import { getRepository } from '@server/datasource';
+import Media from '@server/entity/Media';
+import Season from '@server/entity/Season';
+import { getSettings } from '@server/lib/settings';
+import logger from '@server/logger';
+import AsyncLock from '@server/utils/asyncLock';
 import { randomUUID } from 'crypto';
-import { getRepository } from 'typeorm';
-import TheMovieDb from '../../api/themoviedb';
-import { MediaStatus, MediaType } from '../../constants/media';
-import Media from '../../entity/Media';
-import Season from '../../entity/Season';
-import logger from '../../logger';
-import AsyncLock from '../../utils/asyncLock';
-import { getSettings } from '../settings';
 
 // Default scan rates (can be overidden)
 const BUNDLE_SIZE = 20;
@@ -210,7 +210,7 @@ class BaseScanner<T> {
   }
 
   /**
-   * processShow takes a TMDb ID and an array of ProcessableSeasons, which
+   * processShow takes a TMDB ID and an array of ProcessableSeasons, which
    * should include the total episodes a sesaon has + the total available
    * episodes that each season currently has. Unlike processMovie, this method
    * does not take an `is4k` option. We handle both the 4k _and_ non 4k status

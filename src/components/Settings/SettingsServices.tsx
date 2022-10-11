@@ -1,24 +1,21 @@
+import RadarrLogo from '@app/assets/services/radarr.svg';
+import SonarrLogo from '@app/assets/services/sonarr.svg';
+import Alert from '@app/components/Common/Alert';
+import Badge from '@app/components/Common/Badge';
+import Button from '@app/components/Common/Button';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import Modal from '@app/components/Common/Modal';
+import PageTitle from '@app/components/Common/PageTitle';
+import RadarrModal from '@app/components/Settings/RadarrModal';
+import SonarrModal from '@app/components/Settings/SonarrModal';
+import globalMessages from '@app/i18n/globalMessages';
+import { Transition } from '@headlessui/react';
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/solid';
+import type { RadarrSettings, SonarrSettings } from '@server/lib/settings';
 import axios from 'axios';
-import React, { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR, { mutate } from 'swr';
-import type {
-  RadarrSettings,
-  SonarrSettings,
-} from '../../../server/lib/settings';
-import RadarrLogo from '../../assets/services/radarr.svg';
-import SonarrLogo from '../../assets/services/sonarr.svg';
-import globalMessages from '../../i18n/globalMessages';
-import Alert from '../Common/Alert';
-import Badge from '../Common/Badge';
-import Button from '../Common/Button';
-import LoadingSpinner from '../Common/LoadingSpinner';
-import Modal from '../Common/Modal';
-import PageTitle from '../Common/PageTitle';
-import Transition from '../Transition';
-import RadarrModal from './RadarrModal';
-import SonarrModal from './SonarrModal';
 
 const messages = defineMessages({
   services: 'Services',
@@ -43,6 +40,7 @@ const messages = defineMessages({
     'A 4K {serverType} server must be marked as default in order to enable users to submit 4K {mediaType} requests.',
   mediaTypeMovie: 'movie',
   mediaTypeSeries: 'series',
+  deleteServer: 'Delete {serverType} Server',
 });
 
 interface ServerInstanceProps {
@@ -59,7 +57,7 @@ interface ServerInstanceProps {
   onDelete: () => void;
 }
 
-const ServerInstance: React.FC<ServerInstanceProps> = ({
+const ServerInstance = ({
   name,
   hostname,
   port,
@@ -71,7 +69,7 @@ const ServerInstance: React.FC<ServerInstanceProps> = ({
   externalUrl,
   onEdit,
   onDelete,
-}) => {
+}: ServerInstanceProps) => {
   const intl = useIntl();
 
   const internalUrl =
@@ -160,7 +158,7 @@ const ServerInstance: React.FC<ServerInstanceProps> = ({
   );
 };
 
-const SettingsServices: React.FC = () => {
+const SettingsServices = () => {
   const intl = useIntl();
   const {
     data: radarrData,
@@ -247,6 +245,7 @@ const SettingsServices: React.FC = () => {
         />
       )}
       <Transition
+        as={Fragment}
         show={deleteServerModal.open}
         enter="transition ease-in-out duration-300 transform opacity-0"
         enterFrom="opacity-0"
@@ -256,7 +255,7 @@ const SettingsServices: React.FC = () => {
         leaveTo="opacity-0"
       >
         <Modal
-          okText="Delete"
+          okText={intl.formatMessage(globalMessages.delete)}
           okButtonType="danger"
           onOk={() => deleteServer()}
           onCancel={() =>
@@ -266,8 +265,10 @@ const SettingsServices: React.FC = () => {
               type: 'radarr',
             })
           }
-          title="Delete Server"
-          iconSvg={<TrashIcon />}
+          title={intl.formatMessage(messages.deleteServer, {
+            serverType:
+              deleteServerModal.type === 'radarr' ? 'Radarr' : 'Sonarr',
+          })}
         >
           {intl.formatMessage(messages.deleteserverconfirm)}
         </Modal>
@@ -290,13 +291,11 @@ const SettingsServices: React.FC = () => {
                 <Alert
                   title={intl.formatMessage(messages.noDefaultNon4kServer, {
                     serverType: 'Radarr',
-                    strong: function strong(msg) {
-                      return (
-                        <strong className="font-semibold text-white">
-                          {msg}
-                        </strong>
-                      );
-                    },
+                    strong: (msg: React.ReactNode) => (
+                      <strong className="font-semibold text-white">
+                        {msg}
+                      </strong>
+                    ),
                   })}
                 />
               ) : (
@@ -380,13 +379,11 @@ const SettingsServices: React.FC = () => {
                 <Alert
                   title={intl.formatMessage(messages.noDefaultNon4kServer, {
                     serverType: 'Sonarr',
-                    strong: function strong(msg) {
-                      return (
-                        <strong className="font-semibold text-white">
-                          {msg}
-                        </strong>
-                      );
-                    },
+                    strong: (msg: React.ReactNode) => (
+                      <strong className="font-semibold text-white">
+                        {msg}
+                      </strong>
+                    ),
                   })}
                 />
               ) : (

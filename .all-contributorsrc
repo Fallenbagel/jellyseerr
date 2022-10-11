@@ -665,6 +665,78 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "sambartik",
+      "name": "Samuel Bartík",
+      "avatar_url": "https://avatars.githubusercontent.com/u/63553146?v=4",
+      "profile": "https://github.com/sambartik",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "frank-cywong",
+      "name": "Chun Yeung Wong",
+      "avatar_url": "https://avatars.githubusercontent.com/u/90653148?v=4",
+      "profile": "https://github.com/frank-cywong",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "TheMeanCanEHdian",
+      "name": "TheMeanCanEHdian",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16025103?v=4",
+      "profile": "https://github.com/TheMeanCanEHdian",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Gylesie",
+      "name": "Gylesie",
+      "avatar_url": "https://avatars.githubusercontent.com/u/86306812?v=4",
+      "profile": "https://github.com/Gylesie",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Fhd-pro",
+      "name": "Fhd-pro",
+      "avatar_url": "https://avatars.githubusercontent.com/u/82862079?v=4",
+      "profile": "https://github.com/Fhd-pro",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "PovilasID",
+      "name": "PovilasID",
+      "avatar_url": "https://avatars.githubusercontent.com/u/396243?v=4",
+      "profile": "https://github.com/PovilasID",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "byakurau",
+      "name": "byakurau",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1811683?v=4",
+      "profile": "https://github.com/byakurau",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "miknii",
+      "name": "miknii",
+      "avatar_url": "https://avatars.githubusercontent.com/u/109232569?v=4",
+      "profile": "https://github.com/miknii",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "badgeTemplate": "<a href=\"#contributors-\"><img alt=\"All Contributors\" src=\"https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg\"/></a>",
@@ -673,5 +745,5 @@
   "projectOwner": "sct",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "skipCi": true
+  "skipCi": false
 }

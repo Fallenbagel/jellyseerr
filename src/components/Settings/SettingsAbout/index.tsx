@@ -1,19 +1,18 @@
+import Alert from '@app/components/Common/Alert';
+import Badge from '@app/components/Common/Badge';
+import List from '@app/components/Common/List';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import PageTitle from '@app/components/Common/PageTitle';
+import Releases from '@app/components/Settings/SettingsAbout/Releases';
+import globalMessages from '@app/i18n/globalMessages';
+import Error from '@app/pages/_error';
 import { InformationCircleIcon } from '@heroicons/react/solid';
-import React from 'react';
-import { defineMessages, useIntl } from 'react-intl';
-import useSWR from 'swr';
-import {
+import type {
   SettingsAboutResponse,
   StatusResponse,
-} from '../../../../server/interfaces/api/settingsInterfaces';
-import globalMessages from '../../../i18n/globalMessages';
-import Error from '../../../pages/_error';
-import Alert from '../../Common/Alert';
-import Badge from '../../Common/Badge';
-import List from '../../Common/List';
-import LoadingSpinner from '../../Common/LoadingSpinner';
-import PageTitle from '../../Common/PageTitle';
-import Releases from './Releases';
+} from '@server/interfaces/api/settingsInterfaces';
+import { defineMessages, useIntl } from 'react-intl';
+import useSWR from 'swr';
 
 const messages = defineMessages({
   about: 'About',
@@ -37,7 +36,7 @@ const messages = defineMessages({
     'You are running the <code>develop</code> branch of Overseerr, which is only recommended for those contributing to development or assisting with bleeding-edge testing.',
 });
 
-const SettingsAbout: React.FC = () => {
+const SettingsAbout = () => {
   const intl = useIntl();
   const { data, error } = useSWR<SettingsAboutResponse>(
     '/api/v1/settings/about'
@@ -61,19 +60,19 @@ const SettingsAbout: React.FC = () => {
           intl.formatMessage(globalMessages.settings),
         ]}
       />
-      <div className="mt-6 rounded-md bg-indigo-700 p-4">
+      <div className="mt-6 rounded-md border border-indigo-500 bg-indigo-400 bg-opacity-20 p-4 backdrop-blur">
         <div className="flex">
           <div className="flex-shrink-0">
-            <InformationCircleIcon className="h-5 w-5 text-white" />
+            <InformationCircleIcon className="h-5 w-5 text-gray-100" />
           </div>
           <div className="ml-3 flex-1 md:flex md:justify-between">
-            <p className="text-sm leading-5 text-white">
+            <p className="text-sm leading-5 text-gray-100">
               {intl.formatMessage(messages.betawarning)}
             </p>
             <p className="mt-3 text-sm leading-5 md:mt-0 md:ml-6">
               <a
                 href="http://github.com/fallenbagel/jellyseerr"
-                className="whitespace-nowrap font-medium text-indigo-100 transition duration-150 ease-in-out hover:text-white"
+                className="whitespace-nowrap font-medium text-gray-100 transition duration-150 ease-in-out hover:text-white"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -88,9 +87,9 @@ const SettingsAbout: React.FC = () => {
           {data.version.startsWith('develop-') && (
             <Alert
               title={intl.formatMessage(messages.runningDevelop, {
-                code: function code(msg) {
-                  return <code className="bg-opacity-50">{msg}</code>;
-                },
+                code: (msg: React.ReactNode) => (
+                  <code className="bg-opacity-50">{msg}</code>
+                ),
               })}
             />
           )}

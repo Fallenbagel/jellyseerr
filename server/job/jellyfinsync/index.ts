@@ -1,17 +1,19 @@
+import type { JellyfinLibraryItem } from '@server/api/jellyfin';
+import JellyfinAPI from '@server/api/jellyfin';
+import TheMovieDb from '@server/api/themoviedb';
+import type { TmdbTvDetails } from '@server/api/themoviedb/interfaces';
+import { MediaStatus, MediaType } from '@server/constants/media';
+import { MediaServerType } from '@server/constants/server';
+import { getRepository } from '@server/datasource';
+import Media from '@server/entity/Media';
+import Season from '@server/entity/Season';
+import { User } from '@server/entity/User';
+import type { Library } from '@server/lib/settings';
+import { getSettings } from '@server/lib/settings';
+import logger from '@server/logger';
+import AsyncLock from '@server/utils/asyncLock';
 import { randomUUID as uuid } from 'crypto';
 import { uniqWith } from 'lodash';
-import { getRepository } from 'typeorm';
-import JellyfinAPI, { JellyfinLibraryItem } from '../../api/jellyfin';
-import TheMovieDb from '../../api/themoviedb';
-import { TmdbTvDetails } from '../../api/themoviedb/interfaces';
-import { MediaStatus, MediaType } from '../../constants/media';
-import { MediaServerType } from '../../constants/server';
-import Media from '../../entity/Media';
-import Season from '../../entity/Season';
-import { User } from '../../entity/User';
-import { getSettings, Library } from '../../lib/settings';
-import logger from '../../logger';
-import AsyncLock from '../../utils/asyncLock';
 
 const BUNDLE_SIZE = 20;
 const UPDATE_RATE = 4 * 1000;
@@ -552,6 +554,7 @@ class JobJellyfinSync {
       this.running = true;
       const userRepository = getRepository(User);
       const admin = await userRepository.findOne({
+        where: { id: 1 },
         select: [
           'id',
           'jellyfinAuthToken',

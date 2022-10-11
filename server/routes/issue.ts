@@ -1,13 +1,13 @@
+import { IssueStatus, IssueType } from '@server/constants/issue';
+import { getRepository } from '@server/datasource';
+import Issue from '@server/entity/Issue';
+import IssueComment from '@server/entity/IssueComment';
+import Media from '@server/entity/Media';
+import type { IssueResultsResponse } from '@server/interfaces/api/issueInterfaces';
+import { Permission } from '@server/lib/permissions';
+import logger from '@server/logger';
+import { isAuthenticated } from '@server/middleware/auth';
 import { Router } from 'express';
-import { getRepository } from 'typeorm';
-import { IssueStatus, IssueType } from '../constants/issue';
-import Issue from '../entity/Issue';
-import IssueComment from '../entity/IssueComment';
-import Media from '../entity/Media';
-import { IssueResultsResponse } from '../interfaces/api/issueInterfaces';
-import { Permission } from '../lib/permissions';
-import logger from '../logger';
-import { isAuthenticated } from '../middleware/auth';
 
 const issueRoutes = Router();
 
@@ -365,7 +365,7 @@ issueRoutes.delete(
     try {
       const issue = await issueRepository.findOneOrFail({
         where: { id: Number(req.params.issueId) },
-        relations: ['createdBy'],
+        relations: { createdBy: true },
       });
 
       if (

@@ -1,12 +1,12 @@
+import Button from '@app/components/Common/Button';
+import { Permission, useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
 import { Menu, Transition } from '@headlessui/react';
 import { DotsVerticalIcon } from '@heroicons/react/solid';
 import { Field, Form, Formik } from 'formik';
-import React, { Fragment, useState } from 'react';
+import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import ReactMarkdown from 'react-markdown';
-import { Permission, useUser } from '../../../hooks/useUser';
-import globalMessages from '../../../i18n/globalMessages';
-import Button from '../../Common/Button';
 
 const messages = defineMessages({
   description: 'Description',
@@ -22,13 +22,13 @@ interface IssueDescriptionProps {
   onDelete: () => void;
 }
 
-const IssueDescription: React.FC<IssueDescriptionProps> = ({
+const IssueDescription = ({
   description,
   belongsToUser,
   commentCount,
   onEdit,
   onDelete,
-}) => {
+}: IssueDescriptionProps) => {
   const intl = useIntl();
   const { hasPermission } = useUser();
   const [isEditing, setIsEditing] = useState(false);
@@ -52,7 +52,7 @@ const IssueDescription: React.FC<IssueDescriptionProps> = ({
 
                 <Transition
                   show={open}
-                  as={Fragment}
+                  as="div"
                   enter="transition ease-out duration-100"
                   enterFrom="transform opacity-0 scale-95"
                   enterTo="transform opacity-100 scale-100"
