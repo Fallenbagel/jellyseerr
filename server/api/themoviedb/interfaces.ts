@@ -191,7 +191,7 @@ export interface TmdbVideo {
 
 export interface TmdbTvEpisodeResult {
   id: number;
-  air_date: string;
+  air_date: string | null;
   episode_number: number;
   name: string;
   overview: string;
@@ -372,7 +372,8 @@ export interface TmdbPersonCombinedCredits {
   crew: TmdbPersonCreditCrew[];
 }
 
-export interface TmdbSeasonWithEpisodes extends TmdbTvSeasonResult {
+export interface TmdbSeasonWithEpisodes
+  extends Omit<TmdbTvSeasonResult, 'episode_count'> {
   episodes: TmdbTvEpisodeResult[];
   external_ids: TmdbExternalIds;
 }

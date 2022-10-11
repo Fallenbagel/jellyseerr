@@ -309,7 +309,7 @@ const SettingsMain = () => {
                   </div>
                 </div>
                 <div className="form-row">
-                  <label htmlFor="csrfProtection" className="checkbox-label">
+                  <label htmlFor="cacheImages" className="checkbox-label">
                     <span className="mr-2">
                       {intl.formatMessage(messages.cacheImages)}
                     </span>
