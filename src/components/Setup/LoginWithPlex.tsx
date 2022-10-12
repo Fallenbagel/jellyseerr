@@ -1,8 +1,8 @@
+import PlexLoginButton from '@app/components/PlexLoginButton';
+import { useUser } from '@app/hooks/useUser';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import { useUser } from '../../hooks/useUser';
-import PlexLoginButton from '../PlexLoginButton';
 
 const messages = defineMessages({
   welcome: 'Welcome to Jellyseerr',
@@ -13,7 +13,7 @@ interface LoginWithPlexProps {
   onComplete: () => void;
 }
 
-const LoginWithPlex: React.FC<LoginWithPlexProps> = ({ onComplete }) => {
+const LoginWithPlex = ({ onComplete }: LoginWithPlexProps) => {
   const intl = useIntl();
   const [authToken, setAuthToken] = useState<string | undefined>(undefined);
   const { user, revalidate } = useUser();

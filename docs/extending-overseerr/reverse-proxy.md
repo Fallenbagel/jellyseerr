@@ -138,6 +138,7 @@ location ^~ /overseerr {
     sub_filter 'href="/"' 'href="/$app"';
     sub_filter 'href="/login"' 'href="/$app/login"';
     sub_filter 'href:"/"' 'href:"/$app"';
+    sub_filter '\/_next' '\/$app\/_next';
     sub_filter '/_next' '/$app/_next';
     sub_filter '/api/v1' '/$app/api/v1';
     sub_filter '/login/plex/loading' '/$app/login/plex/loading';

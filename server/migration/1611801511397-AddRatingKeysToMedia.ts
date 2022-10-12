@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddRatingKeysToMedia1611801511397 implements MigrationInterface {
   name = 'AddRatingKeysToMedia1611801511397';

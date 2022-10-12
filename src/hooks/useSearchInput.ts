@@ -1,8 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import type { Nullable } from '@app/utils/typeHelpers';
 import { useRouter } from 'next/router';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import { useEffect, useState } from 'react';
 import type { UrlObject } from 'url';
-import type { Nullable } from '../utils/typeHelpers';
 import useDebouncedState from './useDebouncedState';
 
 type Url = string | UrlObject;

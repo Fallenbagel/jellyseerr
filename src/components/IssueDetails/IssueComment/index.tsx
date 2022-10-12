@@ -1,18 +1,16 @@
-import { Menu } from '@headlessui/react';
-import { ExclamationIcon } from '@heroicons/react/outline';
+import Button from '@app/components/Common/Button';
+import Modal from '@app/components/Common/Modal';
+import { Permission, useUser } from '@app/hooks/useUser';
+import { Menu, Transition } from '@headlessui/react';
 import { DotsVerticalIcon } from '@heroicons/react/solid';
+import type { default as IssueCommentType } from '@server/entity/IssueComment';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { defineMessages, FormattedRelativeTime, useIntl } from 'react-intl';
 import ReactMarkdown from 'react-markdown';
 import * as Yup from 'yup';
-import type { default as IssueCommentType } from '../../../../server/entity/IssueComment';
-import { Permission, useUser } from '../../../hooks/useUser';
-import Button from '../../Common/Button';
-import Modal from '../../Common/Modal';
-import Transition from '../../Transition';
 
 const messages = defineMessages({
   postedby: 'Posted {relativeTime} by {username}',
@@ -30,12 +28,12 @@ interface IssueCommentProps {
   onUpdate?: () => void;
 }
 
-const IssueComment: React.FC<IssueCommentProps> = ({
+const IssueComment = ({
   comment,
   isReversed = false,
   isActiveUser = false,
   onUpdate,
-}) => {
+}: IssueCommentProps) => {
   const intl = useIntl();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -66,6 +64,7 @@ const IssueComment: React.FC<IssueCommentProps> = ({
       } mt-4 space-x-4`}
     >
       <Transition
+        as={Fragment}
         enter="transition opacity-0 duration-300"
         enterFrom="opacity-0"
         enterTo="opacity-100"
@@ -80,7 +79,6 @@ const IssueComment: React.FC<IssueCommentProps> = ({
           onOk={() => deleteComment()}
           okText={intl.formatMessage(messages.delete)}
           okButtonType="danger"
-          iconSvg={<ExclamationIcon />}
         >
           {intl.formatMessage(messages.areyousuredelete)}
         </Modal>
@@ -114,6 +112,7 @@ const IssueComment: React.FC<IssueCommentProps> = ({
                   </div>
 
                   <Transition
+                    as={Fragment}
                     show={open}
                     enter="transition ease-out duration-100"
                     enterFrom="transform opacity-0 scale-95"
@@ -195,9 +194,11 @@ const IssueComment: React.FC<IssueCommentProps> = ({
                         name="newMessage"
                         className="h-24"
                       />
-                      {errors.newMessage && touched.newMessage && (
-                        <div className="error">{errors.newMessage}</div>
-                      )}
+                      {errors.newMessage &&
+                        touched.newMessage &&
+                        typeof errors.newMessage === 'string' && (
+                          <div className="error">{errors.newMessage}</div>
+                        )}
                       <div className="mt-4 flex items-center justify-end space-x-2">
                         <Button
                           type="button"

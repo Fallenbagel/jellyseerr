@@ -1,20 +1,21 @@
+import Spinner from '@app/assets/spinner.svg';
+import Button from '@app/components/Common/Button';
+import CachedImage from '@app/components/Common/CachedImage';
+import RequestModal from '@app/components/RequestModal';
+import ErrorCard from '@app/components/TitleCard/ErrorCard';
+import Placeholder from '@app/components/TitleCard/Placeholder';
+import { useIsTouch } from '@app/hooks/useIsTouch';
+import { Permission, useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
+import { withProperties } from '@app/utils/typeHelpers';
+import { Transition } from '@headlessui/react';
 import { DownloadIcon } from '@heroicons/react/outline';
 import { BellIcon, CheckIcon, ClockIcon } from '@heroicons/react/solid';
+import { MediaStatus } from '@server/constants/media';
+import type { MediaType } from '@server/models/Search';
 import Link from 'next/link';
-import React, { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { MediaStatus } from '../../../server/constants/media';
-import type { MediaType } from '../../../server/models/Search';
-import Spinner from '../../assets/spinner.svg';
-import { useIsTouch } from '../../hooks/useIsTouch';
-import { Permission, useUser } from '../../hooks/useUser';
-import globalMessages from '../../i18n/globalMessages';
-import { withProperties } from '../../utils/typeHelpers';
-import Button from '../Common/Button';
-import CachedImage from '../Common/CachedImage';
-import RequestModal from '../RequestModal';
-import Transition from '../Transition';
-import Placeholder from './Placeholder';
 
 interface TitleCardProps {
   id: number;
@@ -29,7 +30,7 @@ interface TitleCardProps {
   inProgress?: boolean;
 }
 
-const TitleCard: React.FC<TitleCardProps> = ({
+const TitleCard = ({
   id,
   image,
   summary,
@@ -39,7 +40,7 @@ const TitleCard: React.FC<TitleCardProps> = ({
   mediaType,
   inProgress = false,
   canExpand = false,
-}) => {
+}: TitleCardProps) => {
   const isTouch = useIsTouch();
   const intl = useIntl();
   const { hasPermission } = useUser();
@@ -78,7 +79,10 @@ const TitleCard: React.FC<TitleCardProps> = ({
   );
 
   return (
-    <div className={canExpand ? 'w-full' : 'w-36 sm:w-36 md:w-44'}>
+    <div
+      className={canExpand ? 'w-full' : 'w-36 sm:w-36 md:w-44'}
+      data-testid="title-card"
+    >
       <RequestModal
         tmdbId={id}
         show={showRequestModal}
@@ -159,6 +163,7 @@ const TitleCard: React.FC<TitleCardProps> = ({
             </div>
           </div>
           <Transition
+            as={Fragment}
             show={isUpdating}
             enter="transition ease-in-out duration-300 transform opacity-0"
             enterFrom="opacity-0"
@@ -173,6 +178,7 @@ const TitleCard: React.FC<TitleCardProps> = ({
           </Transition>
 
           <Transition
+            as={Fragment}
             show={!image || showDetail || showRequestModal}
             enter="transition transform opacity-0"
             enterFrom="opacity-0"
@@ -212,6 +218,7 @@ const TitleCard: React.FC<TitleCardProps> = ({
                           WebkitBoxOrient: 'vertical',
                           wordBreak: 'break-word',
                         }}
+                        data-testid="title-card-title"
                       >
                         {title}
                       </h1>
@@ -262,4 +269,4 @@ const TitleCard: React.FC<TitleCardProps> = ({
   );
 };
 
-export default withProperties(TitleCard, { Placeholder });
+export default withProperties(TitleCard, { Placeholder, ErrorCard });

@@ -1,20 +1,19 @@
+import Badge from '@app/components/Common/Badge';
+import Button from '@app/components/Common/Button';
+import CachedImage from '@app/components/Common/CachedImage';
+import { issueOptions } from '@app/components/IssueModal/constants';
+import { Permission, useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
 import { EyeIcon } from '@heroicons/react/solid';
+import { IssueStatus } from '@server/constants/issue';
+import { MediaType } from '@server/constants/media';
+import type Issue from '@server/entity/Issue';
+import type { MovieDetails } from '@server/models/Movie';
+import type { TvDetails } from '@server/models/Tv';
 import Link from 'next/link';
-import React from 'react';
 import { useInView } from 'react-intersection-observer';
 import { defineMessages, FormattedRelativeTime, useIntl } from 'react-intl';
 import useSWR from 'swr';
-import { IssueStatus } from '../../../../server/constants/issue';
-import { MediaType } from '../../../../server/constants/media';
-import Issue from '../../../../server/entity/Issue';
-import { MovieDetails } from '../../../../server/models/Movie';
-import { TvDetails } from '../../../../server/models/Tv';
-import { Permission, useUser } from '../../../hooks/useUser';
-import globalMessages from '../../../i18n/globalMessages';
-import Badge from '../../Common/Badge';
-import Button from '../../Common/Button';
-import CachedImage from '../../Common/CachedImage';
-import { issueOptions } from '../../IssueModal/constants';
 
 const messages = defineMessages({
   openeduserdate: '{date} by {user}',
@@ -36,7 +35,7 @@ interface IssueItemProps {
   issue: Issue;
 }
 
-const IssueItem: React.FC<IssueItemProps> = ({ issue }) => {
+const IssueItem = ({ issue }: IssueItemProps) => {
   const intl = useIntl();
   const { hasPermission } = useUser();
   const { ref, inView } = useInView({

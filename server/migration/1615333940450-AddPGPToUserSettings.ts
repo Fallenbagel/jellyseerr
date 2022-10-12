@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddPGPToUserSettings1615333940450 implements MigrationInterface {
   name = 'AddPGPToUserSettings1615333940450';

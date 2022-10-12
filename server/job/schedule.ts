@@ -1,11 +1,13 @@
+import { MediaServerType } from '@server/constants/server';
+import downloadTracker from '@server/lib/downloadtracker';
+import { plexFullScanner, plexRecentScanner } from '@server/lib/scanners/plex';
+import { radarrScanner } from '@server/lib/scanners/radarr';
+import { sonarrScanner } from '@server/lib/scanners/sonarr';
+import type { JobId } from '@server/lib/settings';
+import { getSettings } from '@server/lib/settings';
+import watchlistSync from '@server/lib/watchlistsync';
+import logger from '@server/logger';
 import schedule from 'node-schedule';
-import { MediaServerType } from '../constants/server';
-import downloadTracker from '../lib/downloadtracker';
-import { plexFullScanner, plexRecentScanner } from '../lib/scanners/plex';
-import { radarrScanner } from '../lib/scanners/radarr';
-import { sonarrScanner } from '../lib/scanners/sonarr';
-import { getSettings, JobId } from '../lib/settings';
-import logger from '../logger';
 import { jobJellyfinFullSync, jobJellyfinRecentSync } from './jellyfinsync';
 
 interface ScheduledJob {
@@ -14,6 +16,7 @@ interface ScheduledJob {
   name: string;
   type: 'process' | 'command';
   interval: 'short' | 'long' | 'fixed';
+  cronSchedule: string;
   running?: () => boolean;
   cancelFn?: () => void;
 }
@@ -31,6 +34,7 @@ export const startJobs = (): void => {
       name: 'Plex Recently Added Scan',
       type: 'process',
       interval: 'short',
+      cronSchedule: jobs['plex-recently-added-scan'].schedule,
       job: schedule.scheduleJob(
         jobs['plex-recently-added-scan'].schedule,
         () => {
@@ -50,6 +54,7 @@ export const startJobs = (): void => {
       name: 'Plex Full Library Scan',
       type: 'process',
       interval: 'long',
+      cronSchedule: jobs['plex-full-scan'].schedule,
       job: schedule.scheduleJob(jobs['plex-full-scan'].schedule, () => {
         logger.info('Starting scheduled job: Plex Full Library Scan', {
           label: 'Jobs',
@@ -69,6 +74,7 @@ export const startJobs = (): void => {
       name: 'Jellyfin Recently Added Sync',
       type: 'process',
       interval: 'long',
+      cronSchedule: jobs['jellyfin-recently-added-sync'].schedule,
       job: schedule.scheduleJob(
         jobs['jellyfin-recently-added-sync'].schedule,
         () => {
@@ -88,6 +94,7 @@ export const startJobs = (): void => {
       name: 'Jellyfin Full Library Sync',
       type: 'process',
       interval: 'long',
+      cronSchedule: jobs['jellyfin-full-sync'].schedule,
       job: schedule.scheduleJob(jobs['jellyfin-full-sync'].schedule, () => {
         logger.info('Starting scheduled job: Jellyfin Full Sync', {
           label: 'Jobs',
@@ -99,12 +106,28 @@ export const startJobs = (): void => {
     });
   }
 
+  // Run watchlist sync every 5 minutes
+  scheduledJobs.push({
+    id: 'plex-watchlist-sync',
+    name: 'Plex Watchlist Sync',
+    type: 'process',
+    interval: 'short',
+    cronSchedule: jobs['plex-watchlist-sync'].schedule,
+    job: schedule.scheduleJob(jobs['plex-watchlist-sync'].schedule, () => {
+      logger.info('Starting scheduled job: Plex Watchlist Sync', {
+        label: 'Jobs',
+      });
+      watchlistSync.syncWatchlist();
+    }),
+  });
+
   // Run full radarr scan every 24 hours
   scheduledJobs.push({
     id: 'radarr-scan',
     name: 'Radarr Scan',
     type: 'process',
     interval: 'long',
+    cronSchedule: jobs['radarr-scan'].schedule,
     job: schedule.scheduleJob(jobs['radarr-scan'].schedule, () => {
       logger.info('Starting scheduled job: Radarr Scan', { label: 'Jobs' });
       radarrScanner.run();
@@ -119,6 +142,7 @@ export const startJobs = (): void => {
     name: 'Sonarr Scan',
     type: 'process',
     interval: 'long',
+    cronSchedule: jobs['sonarr-scan'].schedule,
     job: schedule.scheduleJob(jobs['sonarr-scan'].schedule, () => {
       logger.info('Starting scheduled job: Sonarr Scan', { label: 'Jobs' });
       sonarrScanner.run();
@@ -133,6 +157,7 @@ export const startJobs = (): void => {
     name: 'Download Sync',
     type: 'command',
     interval: 'fixed',
+    cronSchedule: jobs['download-sync'].schedule,
     job: schedule.scheduleJob(jobs['download-sync'].schedule, () => {
       logger.debug('Starting scheduled job: Download Sync', {
         label: 'Jobs',
@@ -147,6 +172,7 @@ export const startJobs = (): void => {
     name: 'Download Sync Reset',
     type: 'command',
     interval: 'long',
+    cronSchedule: jobs['download-sync-reset'].schedule,
     job: schedule.scheduleJob(jobs['download-sync-reset'].schedule, () => {
       logger.info('Starting scheduled job: Download Sync Reset', {
         label: 'Jobs',

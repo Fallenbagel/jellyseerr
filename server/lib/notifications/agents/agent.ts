@@ -1,14 +1,15 @@
-import { Notification } from '..';
-import type Issue from '../../../entity/Issue';
-import IssueComment from '../../../entity/IssueComment';
-import Media from '../../../entity/Media';
-import { MediaRequest } from '../../../entity/MediaRequest';
-import { User } from '../../../entity/User';
-import { NotificationAgentConfig } from '../../settings';
+import type Issue from '@server/entity/Issue';
+import type IssueComment from '@server/entity/IssueComment';
+import type Media from '@server/entity/Media';
+import type { MediaRequest } from '@server/entity/MediaRequest';
+import type { User } from '@server/entity/User';
+import type { NotificationAgentConfig } from '@server/lib/settings';
+import type { Notification } from '..';
 
 export interface NotificationPayload {
   event?: string;
   subject: string;
+  notifySystem: boolean;
   notifyAdmin: boolean;
   notifyUser?: User;
   media?: Media;

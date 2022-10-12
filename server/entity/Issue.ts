@@ -1,3 +1,5 @@
+import type { IssueType } from '@server/constants/issue';
+import { IssueStatus } from '@server/constants/issue';
 import {
   Column,
   CreateDateColumn,
@@ -7,7 +9,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { IssueStatus, IssueType } from '../constants/issue';
 import IssueComment from './IssueComment';
 import Media from './Media';
 import { User } from './User';

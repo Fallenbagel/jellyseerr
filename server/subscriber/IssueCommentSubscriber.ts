@@ -1,18 +1,15 @@
+import TheMovieDb from '@server/api/themoviedb';
+import { IssueType, IssueTypeName } from '@server/constants/issue';
+import { MediaType } from '@server/constants/media';
+import { getRepository } from '@server/datasource';
+import IssueComment from '@server/entity/IssueComment';
+import Media from '@server/entity/Media';
+import notificationManager, { Notification } from '@server/lib/notifications';
+import { Permission } from '@server/lib/permissions';
+import logger from '@server/logger';
 import { sortBy } from 'lodash';
-import {
-  EntitySubscriberInterface,
-  EventSubscriber,
-  getRepository,
-  InsertEvent,
-} from 'typeorm';
-import TheMovieDb from '../api/themoviedb';
-import { IssueType, IssueTypeName } from '../constants/issue';
-import { MediaType } from '../constants/media';
-import IssueComment from '../entity/IssueComment';
-import Media from '../entity/Media';
-import notificationManager, { Notification } from '../lib/notifications';
-import { Permission } from '../lib/permissions';
-import logger from '../logger';
+import type { EntitySubscriberInterface, InsertEvent } from 'typeorm';
+import { EventSubscriber } from 'typeorm';
 
 @EventSubscriber()
 export class IssueCommentSubscriber
@@ -31,7 +28,7 @@ export class IssueCommentSubscriber
       const issue = (
         await getRepository(IssueComment).findOneOrFail({
           where: { id: entity.id },
-          relations: ['issue'],
+          relations: { issue: true },
         })
       ).issue;
 
@@ -72,6 +69,7 @@ export class IssueCommentSubscriber
           media,
           image,
           notifyAdmin: true,
+          notifySystem: true,
           notifyUser:
             !issue.createdBy.hasPermission(Permission.MANAGE_ISSUES) &&
             issue.createdBy.id !== entity.user.id

@@ -1,3 +1,4 @@
+import { Transition } from '@headlessui/react';
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
@@ -5,19 +6,19 @@ import {
   InformationCircleIcon,
 } from '@heroicons/react/outline';
 import { XIcon } from '@heroicons/react/solid';
-import React from 'react';
+import { Fragment } from 'react';
 import type { ToastProps } from 'react-toast-notifications';
-import Transition from '../Transition';
 
-const Toast: React.FC<ToastProps> = ({
+const Toast = ({
   appearance,
   children,
   onDismiss,
   transitionState,
-}) => {
+}: ToastProps) => {
   return (
     <div className="toast pointer-events-none flex max-w-full items-end justify-center px-2 py-2 sm:items-start sm:justify-end">
       <Transition
+        as={Fragment}
         show={transitionState === 'entered'}
         enter="transition duration-300 transform-gpu"
         enterFrom="opacity-0 scale-95"

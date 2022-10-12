@@ -1,19 +1,19 @@
+import DiscordLogo from '@app/assets/extlogos/discord.svg';
+import PushbulletLogo from '@app/assets/extlogos/pushbullet.svg';
+import PushoverLogo from '@app/assets/extlogos/pushover.svg';
+import TelegramLogo from '@app/assets/extlogos/telegram.svg';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import PageTitle from '@app/components/Common/PageTitle';
+import type { SettingsRoute } from '@app/components/Common/SettingsTabs';
+import SettingsTabs from '@app/components/Common/SettingsTabs';
+import { useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
+import Error from '@app/pages/_error';
 import { CloudIcon, MailIcon } from '@heroicons/react/solid';
+import type { UserSettingsNotificationsResponse } from '@server/interfaces/api/userSettingsInterfaces';
 import { useRouter } from 'next/router';
-import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
-import { UserSettingsNotificationsResponse } from '../../../../../server/interfaces/api/userSettingsInterfaces';
-import DiscordLogo from '../../../../assets/extlogos/discord.svg';
-import PushbulletLogo from '../../../../assets/extlogos/pushbullet.svg';
-import PushoverLogo from '../../../../assets/extlogos/pushover.svg';
-import TelegramLogo from '../../../../assets/extlogos/telegram.svg';
-import { useUser } from '../../../../hooks/useUser';
-import globalMessages from '../../../../i18n/globalMessages';
-import Error from '../../../../pages/_error';
-import LoadingSpinner from '../../../Common/LoadingSpinner';
-import PageTitle from '../../../Common/PageTitle';
-import SettingsTabs, { SettingsRoute } from '../../../Common/SettingsTabs';
 
 const messages = defineMessages({
   notifications: 'Notifications',
@@ -22,7 +22,13 @@ const messages = defineMessages({
   webpush: 'Web Push',
 });
 
-const UserNotificationSettings: React.FC = ({ children }) => {
+type UserNotificationSettingsProps = {
+  children: React.ReactNode;
+};
+
+const UserNotificationSettings = ({
+  children,
+}: UserNotificationSettingsProps) => {
   const intl = useIntl();
   const router = useRouter();
   const { user } = useUser({ id: Number(router.query.userId) });

@@ -1,19 +1,18 @@
-import React from 'react';
-import type { TvResult } from '../../../../server/models/Search';
-import ListView from '../../Common/ListView';
-import { defineMessages, useIntl } from 'react-intl';
-import Header from '../../Common/Header';
-import PageTitle from '../../Common/PageTitle';
+import Header from '@app/components/Common/Header';
+import ListView from '@app/components/Common/ListView';
+import PageTitle from '@app/components/Common/PageTitle';
+import useDiscover from '@app/hooks/useDiscover';
+import globalMessages from '@app/i18n/globalMessages';
+import Error from '@app/pages/_error';
+import type { TvResult } from '@server/models/Search';
 import { useRouter } from 'next/router';
-import globalMessages from '../../../i18n/globalMessages';
-import useDiscover from '../../../hooks/useDiscover';
-import Error from '../../../pages/_error';
+import { defineMessages, useIntl } from 'react-intl';
 
 const messages = defineMessages({
   genreSeries: '{genre} Series',
 });
 
-const DiscoverTvGenre: React.FC = () => {
+const DiscoverTvGenre = () => {
   const router = useRouter();
   const intl = useIntl();
 

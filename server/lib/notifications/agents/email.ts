@@ -1,19 +1,17 @@
-import { EmailOptions } from 'email-templates';
-import path from 'path';
-import { getRepository } from 'typeorm';
-import { Notification, shouldSendAdminNotification } from '..';
-import { IssueType, IssueTypeName } from '../../../constants/issue';
-import { MediaType } from '../../../constants/media';
-import { User } from '../../../entity/User';
-import logger from '../../../logger';
-import PreparedEmail from '../../email';
-import {
-  getSettings,
-  NotificationAgentEmail,
-  NotificationAgentKey,
-} from '../../settings';
-import { BaseAgent, NotificationAgent, NotificationPayload } from './agent';
+import { IssueType, IssueTypeName } from '@server/constants/issue';
+import { MediaType } from '@server/constants/media';
+import { getRepository } from '@server/datasource';
+import { User } from '@server/entity/User';
+import PreparedEmail from '@server/lib/email';
+import type { NotificationAgentEmail } from '@server/lib/settings';
+import { getSettings, NotificationAgentKey } from '@server/lib/settings';
+import logger from '@server/logger';
+import type { EmailOptions } from 'email-templates';
 import * as EmailValidator from 'email-validator';
+import path from 'path';
+import { Notification, shouldSendAdminNotification } from '..';
+import type { NotificationAgent, NotificationPayload } from './agent';
+import { BaseAgent } from './agent';
 
 class EmailAgent
   extends BaseAgent<NotificationAgentEmail>
@@ -83,6 +81,11 @@ class EmailAgent
           body = `A new request for the following ${mediaType} ${
             is4k ? 'in 4K ' : ''
           }is pending approval:`;
+          break;
+        case Notification.MEDIA_AUTO_REQUESTED:
+          body = `A new request for the following ${mediaType} ${
+            is4k ? 'in 4K ' : ''
+          }was automatically submitted:`;
           break;
         case Notification.MEDIA_APPROVED:
           body = `Your request for the following ${mediaType} ${

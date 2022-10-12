@@ -1,3 +1,12 @@
+import Badge from '@app/components/Common/Badge';
+import Button from '@app/components/Common/Button';
+import CachedImage from '@app/components/Common/CachedImage';
+import Tooltip from '@app/components/Common/Tooltip';
+import RequestModal from '@app/components/RequestModal';
+import StatusBadge from '@app/components/StatusBadge';
+import { Permission, useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
+import { withProperties } from '@app/utils/typeHelpers';
 import {
   CheckIcon,
   PencilIcon,
@@ -5,33 +14,28 @@ import {
   TrashIcon,
   XIcon,
 } from '@heroicons/react/solid';
+import { MediaRequestStatus } from '@server/constants/media';
+import type { MediaRequest } from '@server/entity/MediaRequest';
+import type { MovieDetails } from '@server/models/Movie';
+import type { TvDetails } from '@server/models/Tv';
 import axios from 'axios';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR, { mutate } from 'swr';
-import {
-  MediaRequestStatus,
-  MediaStatus,
-} from '../../../server/constants/media';
-import type { MediaRequest } from '../../../server/entity/MediaRequest';
-import type { MovieDetails } from '../../../server/models/Movie';
-import type { TvDetails } from '../../../server/models/Tv';
-import { Permission, useUser } from '../../hooks/useUser';
-import globalMessages from '../../i18n/globalMessages';
-import { withProperties } from '../../utils/typeHelpers';
-import Badge from '../Common/Badge';
-import Button from '../Common/Button';
-import CachedImage from '../Common/CachedImage';
-import RequestModal from '../RequestModal';
-import StatusBadge from '../StatusBadge';
 
 const messages = defineMessages({
   seasons: '{seasonCount, plural, one {Season} other {Seasons}}',
   failedretry: 'Something went wrong while retrying the request.',
-  mediaerror: 'The associated title for this request is no longer available.',
+  mediaerror: '{mediaType} Not Found',
+  tmdbid: 'TMDB ID',
+  tvdbid: 'TheTVDB ID',
+  approverequest: 'Approve Request',
+  declinerequest: 'Decline Request',
+  editrequest: 'Edit Request',
+  cancelrequest: 'Cancel Request',
   deleterequest: 'Delete Request',
 });
 
@@ -39,7 +43,7 @@ const isMovie = (movie: MovieDetails | TvDetails): movie is MovieDetails => {
   return (movie as MovieDetails).title !== undefined;
 };
 
-const RequestCardPlaceholder: React.FC = () => {
+const RequestCardPlaceholder = () => {
   return (
     <div className="relative w-72 animate-pulse rounded-xl bg-gray-700 p-4 sm:w-96">
       <div className="w-20 sm:w-28">
@@ -50,37 +54,133 @@ const RequestCardPlaceholder: React.FC = () => {
 };
 
 interface RequestCardErrorProps {
-  mediaId?: number;
+  requestData?: MediaRequest;
 }
 
-const RequestCardError: React.FC<RequestCardErrorProps> = ({ mediaId }) => {
+const RequestCardError = ({ requestData }: RequestCardErrorProps) => {
   const { hasPermission } = useUser();
   const intl = useIntl();
 
   const deleteRequest = async () => {
-    await axios.delete(`/api/v1/media/${mediaId}`);
+    await axios.delete(`/api/v1/media/${requestData?.media.id}`);
+    mutate('/api/v1/media?filter=allavailable&take=20&sort=mediaAdded');
     mutate('/api/v1/request?filter=all&take=10&sort=modified&skip=0');
   };
 
   return (
-    <div className="relative w-72 rounded-xl bg-gray-800 p-4 ring-1 ring-red-500 sm:w-96">
+    <div
+      className="relative flex w-72 overflow-hidden rounded-xl bg-gray-800 p-4 text-gray-400 shadow ring-1 ring-red-500 sm:w-96"
+      data-testid="request-card"
+    >
       <div className="w-20 sm:w-28">
         <div className="w-full" style={{ paddingBottom: '150%' }}>
-          <div className="absolute inset-0 flex h-full w-full flex-col items-center justify-center px-10">
-            <div className="w-full whitespace-normal text-center text-xs text-gray-300 sm:text-sm">
-              {intl.formatMessage(messages.mediaerror)}
+          <div className="absolute inset-0 z-10 flex min-w-0 flex-1 flex-col p-4">
+            <div
+              className="whitespace-normal text-base font-bold text-white sm:text-lg"
+              data-testid="request-card-title"
+            >
+              {intl.formatMessage(messages.mediaerror, {
+                mediaType: intl.formatMessage(
+                  requestData?.type
+                    ? requestData?.type === 'movie'
+                      ? globalMessages.movie
+                      : globalMessages.tvshow
+                    : globalMessages.request
+                ),
+              })}
             </div>
-            {hasPermission(Permission.MANAGE_REQUESTS) && mediaId && (
-              <Button
-                buttonType="danger"
-                buttonSize="sm"
-                className="mt-4"
-                onClick={() => deleteRequest()}
-              >
-                <TrashIcon />
-                <span>{intl.formatMessage(messages.deleterequest)}</span>
-              </Button>
+            {requestData && (
+              <>
+                {hasPermission(
+                  [Permission.MANAGE_REQUESTS, Permission.REQUEST_VIEW],
+                  { type: 'or' }
+                ) && (
+                  <div className="card-field !hidden sm:!block">
+                    <Link href={`/users/${requestData.requestedBy.id}`}>
+                      <a className="group flex items-center">
+                        <img
+                          src={requestData.requestedBy.avatar}
+                          alt=""
+                          className="avatar-sm"
+                        />
+                        <span className="truncate group-hover:underline">
+                          {requestData.requestedBy.displayName}
+                        </span>
+                      </a>
+                    </Link>
+                  </div>
+                )}
+                <div className="mt-2 flex items-center text-sm sm:mt-1">
+                  <span className="mr-2 hidden font-bold sm:block">
+                    {intl.formatMessage(globalMessages.status)}
+                  </span>
+                  {requestData.status === MediaRequestStatus.DECLINED ||
+                  requestData.status === MediaRequestStatus.FAILED ? (
+                    <Badge badgeType="danger">
+                      {requestData.status === MediaRequestStatus.DECLINED
+                        ? intl.formatMessage(globalMessages.declined)
+                        : intl.formatMessage(globalMessages.failed)}
+                    </Badge>
+                  ) : (
+                    <StatusBadge
+                      status={
+                        requestData.media[
+                          requestData.is4k ? 'status4k' : 'status'
+                        ]
+                      }
+                      inProgress={
+                        (
+                          requestData.media[
+                            requestData.is4k
+                              ? 'downloadStatus4k'
+                              : 'downloadStatus'
+                          ] ?? []
+                        ).length > 0
+                      }
+                      is4k={requestData.is4k}
+                      plexUrl={
+                        requestData.is4k
+                          ? requestData.media.mediaUrl4k
+                          : requestData.media.mediaUrl
+                      }
+                      serviceUrl={
+                        requestData.is4k
+                          ? requestData.media.serviceUrl4k
+                          : requestData.media.serviceUrl
+                      }
+                    />
+                  )}
+                </div>
+              </>
             )}
+            <div className="flex flex-1 items-end space-x-2">
+              {hasPermission(Permission.MANAGE_REQUESTS) &&
+                requestData?.media.id && (
+                  <>
+                    <Button
+                      buttonType="danger"
+                      buttonSize="sm"
+                      className="mt-4 hidden sm:block"
+                      onClick={() => deleteRequest()}
+                    >
+                      <TrashIcon />
+                      <span>{intl.formatMessage(globalMessages.delete)}</span>
+                    </Button>
+                    <Tooltip
+                      content={intl.formatMessage(messages.deleterequest)}
+                    >
+                      <Button
+                        buttonType="danger"
+                        buttonSize="sm"
+                        className="mt-4 sm:hidden"
+                        onClick={() => deleteRequest()}
+                      >
+                        <TrashIcon />
+                      </Button>
+                    </Tooltip>
+                  </>
+                )}
+            </div>
           </div>
         </div>
       </div>
@@ -93,7 +193,7 @@ interface RequestCardProps {
   onTitleData?: (requestId: number, title: MovieDetails | TvDetails) => void;
 }
 
-const RequestCard: React.FC<RequestCardProps> = ({ request, onTitleData }) => {
+const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
   const { ref, inView } = useInView({
     triggerOnce: true,
   });
@@ -168,7 +268,7 @@ const RequestCard: React.FC<RequestCardProps> = ({ request, onTitleData }) => {
   }
 
   if (!title || !requestData) {
-    return <RequestCardError mediaId={requestData?.media.id} />;
+    return <RequestCardError requestData={requestData} />;
   }
 
   return (
@@ -185,7 +285,10 @@ const RequestCard: React.FC<RequestCardProps> = ({ request, onTitleData }) => {
           setShowEditModal(false);
         }}
       />
-      <div className="relative flex w-72 overflow-hidden rounded-xl bg-gray-800 bg-cover bg-center p-4 text-gray-400 shadow ring-1 ring-gray-700 sm:w-96">
+      <div
+        className="relative flex w-72 overflow-hidden rounded-xl bg-gray-800 bg-cover bg-center p-4 text-gray-400 shadow ring-1 ring-gray-700 sm:w-96"
+        data-testid="request-card"
+      >
         {title.backdropPath && (
           <div className="absolute inset-0 z-0">
             <CachedImage
@@ -203,7 +306,10 @@ const RequestCard: React.FC<RequestCardProps> = ({ request, onTitleData }) => {
             />
           </div>
         )}
-        <div className="relative z-10 flex min-w-0 flex-1 flex-col pr-4">
+        <div
+          className="relative z-10 flex min-w-0 flex-1 flex-col pr-4"
+          data-testid="request-card-title"
+        >
           <div className="hidden text-xs font-medium text-white sm:flex">
             {(isMovie(title) ? title.releaseDate : title.firstAirDate)?.slice(
               0,
@@ -251,20 +357,13 @@ const RequestCard: React.FC<RequestCardProps> = ({ request, onTitleData }) => {
                       : request.seasons.length,
                 })}
               </span>
-              {title.seasons.filter((season) => season.seasonNumber !== 0)
-                .length === request.seasons.length ? (
-                <span className="mr-2 uppercase">
-                  <Badge>{intl.formatMessage(globalMessages.all)}</Badge>
-                </span>
-              ) : (
-                <div className="hide-scrollbar overflow-x-scroll">
-                  {request.seasons.map((season) => (
-                    <span key={`season-${season.id}`} className="mr-2">
-                      <Badge>{season.seasonNumber}</Badge>
-                    </span>
-                  ))}
-                </div>
-              )}
+              <div className="hide-scrollbar overflow-x-scroll">
+                {request.seasons.map((season) => (
+                  <span key={`season-${season.id}`} className="mr-2">
+                    <Badge>{season.seasonNumber}</Badge>
+                  </span>
+                ))}
+              </div>
             </div>
           )}
           <div className="mt-2 flex items-center text-sm sm:mt-1">
@@ -275,8 +374,7 @@ const RequestCard: React.FC<RequestCardProps> = ({ request, onTitleData }) => {
               <Badge badgeType="danger">
                 {intl.formatMessage(globalMessages.declined)}
               </Badge>
-            ) : requestData.media[requestData.is4k ? 'status4k' : 'status'] ===
-              MediaStatus.UNKNOWN ? (
+            ) : requestData.status === MediaRequestStatus.FAILED ? (
               <Badge
                 badgeType="danger"
                 href={`/${requestData.type}/${requestData.media.tmdbId}?manage=1`}
@@ -299,17 +397,20 @@ const RequestCard: React.FC<RequestCardProps> = ({ request, onTitleData }) => {
                 tmdbId={requestData.media.tmdbId}
                 mediaType={requestData.type}
                 plexUrl={
-                  requestData.media[
-                    requestData.is4k ? 'mediaUrl4k' : 'mediaUrl'
-                  ]
+                  requestData.is4k
+                    ? requestData.media.mediaUrl4k
+                    : requestData.media.mediaUrl
+                }
+                serviceUrl={
+                  requestData.is4k
+                    ? requestData.media.serviceUrl4k
+                    : requestData.media.serviceUrl
                 }
               />
             )}
           </div>
           <div className="flex flex-1 items-end space-x-2">
-            {requestData.media[requestData.is4k ? 'status4k' : 'status'] ===
-              MediaStatus.UNKNOWN &&
-              requestData.status !== MediaRequestStatus.DECLINED &&
+            {requestData.status === MediaRequestStatus.FAILED &&
               hasPermission(Permission.MANAGE_REQUESTS) && (
                 <Button
                   buttonType="primary"
@@ -329,26 +430,52 @@ const RequestCard: React.FC<RequestCardProps> = ({ request, onTitleData }) => {
             {requestData.status === MediaRequestStatus.PENDING &&
               hasPermission(Permission.MANAGE_REQUESTS) && (
                 <>
-                  <Button
-                    buttonType="success"
-                    buttonSize="sm"
-                    onClick={() => modifyRequest('approve')}
-                  >
-                    <CheckIcon style={{ marginRight: '0' }} />
-                    <span className="ml-1.5 hidden sm:block">
-                      {intl.formatMessage(globalMessages.approve)}
-                    </span>
-                  </Button>
-                  <Button
-                    buttonType="danger"
-                    buttonSize="sm"
-                    onClick={() => modifyRequest('decline')}
-                  >
-                    <XIcon style={{ marginRight: '0' }} />
-                    <span className="ml-1.5 hidden sm:block">
-                      {intl.formatMessage(globalMessages.decline)}
-                    </span>
-                  </Button>
+                  <div>
+                    <Button
+                      buttonType="success"
+                      buttonSize="sm"
+                      className="hidden sm:block"
+                      onClick={() => modifyRequest('approve')}
+                    >
+                      <CheckIcon />
+                      <span>{intl.formatMessage(globalMessages.approve)}</span>
+                    </Button>
+                    <Tooltip
+                      content={intl.formatMessage(messages.approverequest)}
+                    >
+                      <Button
+                        buttonType="success"
+                        buttonSize="sm"
+                        className="sm:hidden"
+                        onClick={() => modifyRequest('approve')}
+                      >
+                        <CheckIcon />
+                      </Button>
+                    </Tooltip>
+                  </div>
+                  <div>
+                    <Button
+                      buttonType="danger"
+                      buttonSize="sm"
+                      className="hidden sm:block"
+                      onClick={() => modifyRequest('decline')}
+                    >
+                      <XIcon />
+                      <span>{intl.formatMessage(globalMessages.decline)}</span>
+                    </Button>
+                    <Tooltip
+                      content={intl.formatMessage(messages.declinerequest)}
+                    >
+                      <Button
+                        buttonType="danger"
+                        buttonSize="sm"
+                        className="sm:hidden"
+                        onClick={() => modifyRequest('decline')}
+                      >
+                        <XIcon />
+                      </Button>
+                    </Tooltip>
+                  </div>
                 </>
               )}
             {requestData.status === MediaRequestStatus.PENDING &&
@@ -356,33 +483,54 @@ const RequestCard: React.FC<RequestCardProps> = ({ request, onTitleData }) => {
               requestData.requestedBy.id === user?.id &&
               (requestData.type === 'tv' ||
                 hasPermission(Permission.REQUEST_ADVANCED)) && (
-                <Button
-                  buttonType="primary"
-                  buttonSize="sm"
-                  onClick={() => setShowEditModal(true)}
-                  className={`${
-                    hasPermission(Permission.MANAGE_REQUESTS) ? 'sm:hidden' : ''
-                  }`}
-                >
-                  <PencilIcon style={{ marginRight: '0' }} />
-                  <span className="ml-1.5 hidden sm:block">
-                    {intl.formatMessage(globalMessages.edit)}
-                  </span>
-                </Button>
+                <div>
+                  {!hasPermission(Permission.MANAGE_REQUESTS) && (
+                    <Button
+                      buttonType="primary"
+                      buttonSize="sm"
+                      className="hidden sm:block"
+                      onClick={() => setShowEditModal(true)}
+                    >
+                      <PencilIcon />
+                      <span>{intl.formatMessage(globalMessages.edit)}</span>
+                    </Button>
+                  )}
+                  <Tooltip content={intl.formatMessage(messages.editrequest)}>
+                    <Button
+                      buttonType="primary"
+                      buttonSize="sm"
+                      className="sm:hidden"
+                      onClick={() => setShowEditModal(true)}
+                    >
+                      <PencilIcon />
+                    </Button>
+                  </Tooltip>
+                </div>
               )}
             {requestData.status === MediaRequestStatus.PENDING &&
               !hasPermission(Permission.MANAGE_REQUESTS) &&
               requestData.requestedBy.id === user?.id && (
-                <Button
-                  buttonType="danger"
-                  buttonSize="sm"
-                  onClick={() => deleteRequest()}
-                >
-                  <XIcon style={{ marginRight: '0' }} />
-                  <span className="ml-1.5 hidden sm:block">
-                    {intl.formatMessage(globalMessages.cancel)}
-                  </span>
-                </Button>
+                <div>
+                  <Button
+                    buttonType="danger"
+                    buttonSize="sm"
+                    className="hidden sm:block"
+                    onClick={() => deleteRequest()}
+                  >
+                    <XIcon />
+                    <span>{intl.formatMessage(globalMessages.cancel)}</span>
+                  </Button>
+                  <Tooltip content={intl.formatMessage(messages.cancelrequest)}>
+                    <Button
+                      buttonType="danger"
+                      buttonSize="sm"
+                      className="sm:hidden"
+                      onClick={() => deleteRequest()}
+                    >
+                      <XIcon />
+                    </Button>
+                  </Tooltip>
+                </div>
               )}
           </div>
         </div>

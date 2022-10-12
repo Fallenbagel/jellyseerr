@@ -1,6 +1,6 @@
-import { User } from '../../entity/User';
-import logger from '../../logger';
-import { Permission } from '../permissions';
+import type { User } from '@server/entity/User';
+import { Permission } from '@server/lib/permissions';
+import logger from '@server/logger';
 import type { NotificationAgent, NotificationPayload } from './agents/agent';
 
 export enum Notification {
@@ -16,6 +16,7 @@ export enum Notification {
   ISSUE_COMMENT = 512,
   ISSUE_RESOLVED = 1024,
   ISSUE_REOPENED = 2048,
+  MEDIA_AUTO_REQUESTED = 4096,
 }
 
 export const hasNotificationType = (

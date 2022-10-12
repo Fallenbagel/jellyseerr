@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class CascadeMigration1606730060700 implements MigrationInterface {
   name = 'CascadeMigration1606730060700';

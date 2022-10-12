@@ -1,3 +1,13 @@
+import { MediaRequestStatus, MediaType } from '@server/constants/media';
+import { UserType } from '@server/constants/user';
+import { getRepository } from '@server/datasource';
+import type { QuotaResponse } from '@server/interfaces/api/userInterfaces';
+import PreparedEmail from '@server/lib/email';
+import type { PermissionCheckOptions } from '@server/lib/permissions';
+import { hasPermission, Permission } from '@server/lib/permissions';
+import { getSettings } from '@server/lib/settings';
+import logger from '@server/logger';
+import { AfterDate } from '@server/utils/dateHelpers';
 import bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import path from 'path';
@@ -7,8 +17,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  getRepository,
-  MoreThan,
   Not,
   OneToMany,
   OneToOne,
@@ -16,17 +24,6 @@ import {
   RelationCount,
   UpdateDateColumn,
 } from 'typeorm';
-import { MediaRequestStatus, MediaType } from '../constants/media';
-import { UserType } from '../constants/user';
-import { QuotaResponse } from '../interfaces/api/userInterfaces';
-import PreparedEmail from '../lib/email';
-import {
-  hasPermission,
-  Permission,
-  PermissionCheckOptions,
-} from '../lib/permissions';
-import { getSettings } from '../lib/settings';
-import logger from '../logger';
 import Issue from './Issue';
 import { MediaRequest } from './MediaRequest';
 import SeasonRequest from './SeasonRequest';
@@ -270,13 +267,14 @@ export class User {
     if (movieQuotaDays) {
       movieDate.setDate(movieDate.getDate() - movieQuotaDays);
     }
-    const movieQuotaStartDate = movieDate.toJSON();
 
     const movieQuotaUsed = movieQuotaLimit
       ? await requestRepository.count({
           where: {
-            requestedBy: this,
-            createdAt: MoreThan(movieQuotaStartDate),
+            requestedBy: {
+              id: this.id,
+            },
+            createdAt: AfterDate(movieDate),
             type: MediaType.MOVIE,
             status: Not(MediaRequestStatus.DECLINED),
           },

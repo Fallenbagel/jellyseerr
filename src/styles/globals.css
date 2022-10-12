@@ -11,6 +11,7 @@
 
   body {
     @apply bg-gray-900;
+    overscroll-behavior-y: contain;
   }
 
   code {
@@ -36,8 +37,8 @@
   }
 
   .slideover {
-    padding-top: calc(1.5rem + env(safe-area-inset-top));
-    padding-bottom: 1.5rem;
+    padding-top: calc(1rem + env(safe-area-inset-top)) !important;
+    padding-bottom: calc(1rem + env(safe-area-inset-top)) !important;
   }
 
   .sidebar-close-button {
@@ -184,11 +185,11 @@
   }
 
   .media-ratings {
-    @apply flex items-center justify-center border-b border-gray-700 px-4 py-2 font-medium last:border-b-0;
+    @apply flex items-center justify-center space-x-5 border-b border-gray-700 px-4 py-2 font-medium last:border-b-0;
   }
 
   .media-rating {
-    @apply mr-4 flex items-center last:mr-0;
+    @apply flex items-center space-x-1;
   }
 
   .error-message {
@@ -307,7 +308,7 @@
   }
 
   button.input-action {
-    @apply relative -ml-px inline-flex items-center border border-gray-500 bg-indigo-600 px-3 py-2 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out last:rounded-r-md hover:bg-indigo-500 active:bg-gray-100 active:text-gray-700 sm:px-3.5;
+    @apply relative -ml-px inline-flex items-center border border-gray-500 bg-indigo-600 bg-opacity-80 px-3 py-2 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out last:rounded-r-md hover:bg-opacity-100 active:bg-gray-100 active:text-gray-700 sm:px-3.5;
   }
 
   .button-md svg,
@@ -318,14 +319,6 @@
 
   .button-sm svg {
     @apply ml-1.5 mr-1.5 h-4 w-4 first:ml-0 last:mr-0;
-  }
-
-  .modal-icon {
-    @apply mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gray-800 text-white ring-1 ring-gray-500 sm:mx-0 sm:h-10 sm:w-10;
-  }
-
-  .modal-icon svg {
-    @apply h-6 w-6;
   }
 
   svg.icon-md {
@@ -451,9 +444,32 @@
     scrollbar-width: none; /* Firefox */
   }
 
+  .text-overseerr {
+    @apply bg-gradient-to-br from-indigo-400 to-purple-400 bg-clip-text text-transparent;
+  }
+
   @media all and (display-mode: browser) {
     .pwa-only {
       @apply hidden;
     }
   }
+}
+
+.ptr--ptr {
+  box-shadow: initial !important;
+  position: absolute !important;
+  z-index: 30 !important;
+}
+
+.ptr--refresh {
+  overflow: visible !important;
+  z-index: 30 !important;
+}
+
+.ptr--pull {
+  z-index: 30 !important;
+}
+
+.ptr--box {
+  margin-bottom: -13px !important;
 }

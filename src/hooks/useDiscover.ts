@@ -1,5 +1,5 @@
+import { MediaStatus } from '@server/constants/media';
 import useSWRInfinite from 'swr/infinite';
-import { MediaStatus } from '../../server/constants/media';
 import useSettings from './useSettings';
 
 export interface BaseSearchResult<T> {

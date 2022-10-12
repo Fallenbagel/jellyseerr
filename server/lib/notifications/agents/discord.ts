@@ -1,19 +1,17 @@
+import { IssueStatus, IssueTypeName } from '@server/constants/issue';
+import { getRepository } from '@server/datasource';
+import { User } from '@server/entity/User';
+import type { NotificationAgentDiscord } from '@server/lib/settings';
+import { getSettings, NotificationAgentKey } from '@server/lib/settings';
+import logger from '@server/logger';
 import axios from 'axios';
-import { getRepository } from 'typeorm';
 import {
   hasNotificationType,
   Notification,
   shouldSendAdminNotification,
 } from '..';
-import { IssueStatus, IssueTypeName } from '../../../constants/issue';
-import { User } from '../../../entity/User';
-import logger from '../../../logger';
-import {
-  getSettings,
-  NotificationAgentDiscord,
-  NotificationAgentKey,
-} from '../../settings';
-import { BaseAgent, NotificationAgent, NotificationPayload } from './agent';
+import type { NotificationAgent, NotificationPayload } from './agent';
+import { BaseAgent } from './agent';
 
 enum EmbedColors {
   DEFAULT = 0,
@@ -245,7 +243,10 @@ class DiscordAgent
   ): Promise<boolean> {
     const settings = this.getSettings();
 
-    if (!hasNotificationType(type, settings.types ?? 0)) {
+    if (
+      !payload.notifySystem ||
+      !hasNotificationType(type, settings.types ?? 0)
+    ) {
       return true;
     }
 

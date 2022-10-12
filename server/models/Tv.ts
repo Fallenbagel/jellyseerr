@@ -5,29 +5,31 @@ import type {
   TmdbTvEpisodeResult,
   TmdbTvRatingResult,
   TmdbTvSeasonResult,
-} from '../api/themoviedb/interfaces';
-import type Media from '../entity/Media';
-import {
+} from '@server/api/themoviedb/interfaces';
+import type Media from '@server/entity/Media';
+import type {
   Cast,
   Crew,
   ExternalIds,
   Genre,
   Keyword,
+  ProductionCompany,
+  TvNetwork,
+  WatchProviders,
+} from './common';
+import {
   mapAggregateCast,
   mapCrew,
   mapExternalIds,
   mapVideos,
   mapWatchProviders,
-  ProductionCompany,
-  TvNetwork,
-  WatchProviders,
 } from './common';
-import { Video } from './Movie';
+import type { Video } from './Movie';
 
 interface Episode {
   id: number;
   name: string;
-  airDate: string;
+  airDate: string | null;
   episodeNumber: number;
   overview: string;
   productionCode: string;
@@ -48,7 +50,7 @@ interface Season {
   seasonNumber: number;
 }
 
-export interface SeasonWithEpisodes extends Season {
+export interface SeasonWithEpisodes extends Omit<Season, 'episodeCount'> {
   episodes: Episode[];
   externalIds: ExternalIds;
 }
@@ -139,7 +141,6 @@ export const mapSeasonWithEpisodes = (
   season: TmdbSeasonWithEpisodes
 ): SeasonWithEpisodes => ({
   airDate: season.air_date,
-  episodeCount: season.episode_count,
   episodes: season.episodes.map(mapEpisodeResult),
   externalIds: mapExternalIds(season.external_ids),
   id: season.id,

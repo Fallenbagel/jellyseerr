@@ -1,18 +1,17 @@
+import Button from '@app/components/Common/Button';
+import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import NotificationTypeSelector from '@app/components/NotificationTypeSelector';
+import useSettings from '@app/hooks/useSettings';
+import { useUser } from '@app/hooks/useUser';
+import globalMessages from '@app/i18n/globalMessages';
+import type { UserSettingsNotificationsResponse } from '@server/interfaces/api/userSettingsInterfaces';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import { useRouter } from 'next/router';
-import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
-import { UserSettingsNotificationsResponse } from '../../../../../server/interfaces/api/userSettingsInterfaces';
-import useSettings from '../../../../hooks/useSettings';
-import { useUser } from '../../../../hooks/useUser';
-import globalMessages from '../../../../i18n/globalMessages';
-import Button from '../../../Common/Button';
-import LoadingSpinner from '../../../Common/LoadingSpinner';
-import NotificationTypeSelector from '../../../NotificationTypeSelector';
 
 const messages = defineMessages({
   pushoversettingssaved: 'Pushover notification settings saved successfully!',
@@ -28,7 +27,7 @@ const messages = defineMessages({
   validationPushoverUserKey: 'You must provide a valid user or group key',
 });
 
-const UserPushoverSettings: React.FC = () => {
+const UserPushoverSettings = () => {
   const intl = useIntl();
   const settings = useSettings();
   const { addToast } = useToasts();
@@ -129,19 +128,16 @@ const UserPushoverSettings: React.FC = () => {
                 <span className="label-required">*</span>
                 <span className="label-tip">
                   {intl.formatMessage(messages.pushoverApplicationTokenTip, {
-                    ApplicationRegistrationLink:
-                      function ApplicationRegistrationLink(msg) {
-                        return (
-                          <a
-                            href="https://pushover.net/api#registration"
-                            className="text-white transition duration-300 hover:underline"
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            {msg}
-                          </a>
-                        );
-                      },
+                    ApplicationRegistrationLink: (msg: React.ReactNode) => (
+                      <a
+                        href="https://pushover.net/api#registration"
+                        className="text-white transition duration-300 hover:underline"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {msg}
+                      </a>
+                    ),
                     applicationTitle: settings.currentSettings.applicationTitle,
                   })}
                 </span>
@@ -167,18 +163,16 @@ const UserPushoverSettings: React.FC = () => {
                 {intl.formatMessage(messages.pushoverUserKey)}
                 <span className="label-tip">
                   {intl.formatMessage(messages.pushoverUserKeyTip, {
-                    UsersGroupsLink: function UsersGroupsLink(msg) {
-                      return (
-                        <a
-                          href="https://pushover.net/api#identifiers"
-                          className="text-white transition duration-300 hover:underline"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {msg}
-                        </a>
-                      );
-                    },
+                    UsersGroupsLink: (msg: React.ReactNode) => (
+                      <a
+                        href="https://pushover.net/api#identifiers"
+                        className="text-white transition duration-300 hover:underline"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {msg}
+                      </a>
+                    ),
                   })}
                 </span>
               </label>
@@ -190,9 +184,11 @@ const UserPushoverSettings: React.FC = () => {
                     type="text"
                   />
                 </div>
-                {errors.pushoverUserKey && touched.pushoverUserKey && (
-                  <div className="error">{errors.pushoverUserKey}</div>
-                )}
+                {errors.pushoverUserKey &&
+                  touched.pushoverUserKey &&
+                  typeof errors.pushoverUserKey === 'string' && (
+                    <div className="error">{errors.pushoverUserKey}</div>
+                  )}
               </div>
             </div>
             <NotificationTypeSelector

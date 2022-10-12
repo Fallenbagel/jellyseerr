@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddJellyfinDeviceId1613670041760 implements MigrationInterface {
   name = 'AddJellyfinDeviceId1613670041760';

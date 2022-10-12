@@ -1,6 +1,5 @@
-import React from 'react';
-import { NextPage } from 'next';
-import DiscoverTvLanguage from '../../../../../components/Discover/DiscoverTvLanguage';
+import DiscoverTvLanguage from '@app/components/Discover/DiscoverTvLanguage';
+import type { NextPage } from 'next';
 
 const DiscoverTvLanguagePage: NextPage = () => {
   return <DiscoverTvLanguage />;

@@ -1,7 +1,8 @@
-import React from 'react';
+import type { PermissionItem } from '@app/components/PermissionOption';
+import PermissionOption from '@app/components/PermissionOption';
+import type { User } from '@app/hooks/useUser';
+import { Permission } from '@app/hooks/useUser';
 import { defineMessages, useIntl } from 'react-intl';
-import { Permission, User } from '../../hooks/useUser';
-import PermissionOption, { PermissionItem } from '../PermissionOption';
 
 export const messages = defineMessages({
   admin: 'Admin',
@@ -10,9 +11,6 @@ export const messages = defineMessages({
   users: 'Manage Users',
   usersDescription:
     'Grant permission to manage users. Users with this permission cannot modify users with or grant the Admin privilege.',
-  settings: 'Manage Settings',
-  settingsDescription:
-    'Grant permission to modify global settings. A user must have this permission to grant it to others.',
   managerequests: 'Manage Requests',
   managerequestsDescription:
     'Grant permission to manage media requests. All requests made by a user with this permission will be automatically approved.',
@@ -52,6 +50,15 @@ export const messages = defineMessages({
   advancedrequest: 'Advanced Requests',
   advancedrequestDescription:
     'Grant permission to modify advanced media request options.',
+  autorequest: 'Auto-Request',
+  autorequestDescription:
+    'Grant permission to automatically submit requests for non-4K media via Plex Watchlist.',
+  autorequestMovies: 'Auto-Request Movies',
+  autorequestMoviesDescription:
+    'Grant permission to automatically submit requests for non-4K movies via Plex Watchlist.',
+  autorequestSeries: 'Auto-Request Series',
+  autorequestSeriesDescription:
+    'Grant permission to automatically submit requests for non-4K series via Plex Watchlist.',
   viewrequests: 'View Requests',
   viewrequestsDescription:
     'Grant permission to view media requests submitted by other users.',
@@ -62,6 +69,12 @@ export const messages = defineMessages({
   viewissues: 'View Issues',
   viewissuesDescription:
     'Grant permission to view media issues reported by other users.',
+  viewrecent: 'View Recently Added',
+  viewrecentDescription:
+    'Grant permission to view the list of recently added media.',
+  viewwatchlists: 'View Plex Watchlists',
+  viewwatchlistsDescription:
+    "Grant permission to view other users' Plex Watchlists.",
 });
 
 interface PermissionEditProps {
@@ -71,12 +84,12 @@ interface PermissionEditProps {
   onUpdate: (newPermissions: number) => void;
 }
 
-export const PermissionEdit: React.FC<PermissionEditProps> = ({
+export const PermissionEdit = ({
   actingUser,
   currentUser,
   currentPermission,
   onUpdate,
-}) => {
+}: PermissionEditProps) => {
   const intl = useIntl();
 
   const permissionList: PermissionItem[] = [
@@ -85,12 +98,6 @@ export const PermissionEdit: React.FC<PermissionEditProps> = ({
       name: intl.formatMessage(messages.admin),
       description: intl.formatMessage(messages.adminDescription),
       permission: Permission.ADMIN,
-    },
-    {
-      id: 'settings',
-      name: intl.formatMessage(messages.settings),
-      description: intl.formatMessage(messages.settingsDescription),
-      permission: Permission.MANAGE_SETTINGS,
     },
     {
       id: 'users',
@@ -115,6 +122,18 @@ export const PermissionEdit: React.FC<PermissionEditProps> = ({
           name: intl.formatMessage(messages.viewrequests),
           description: intl.formatMessage(messages.viewrequestsDescription),
           permission: Permission.REQUEST_VIEW,
+        },
+        {
+          id: 'viewrecent',
+          name: intl.formatMessage(messages.viewrecent),
+          description: intl.formatMessage(messages.viewrecentDescription),
+          permission: Permission.RECENT_VIEW,
+        },
+        {
+          id: 'viewwatchlists',
+          name: intl.formatMessage(messages.viewwatchlists),
+          description: intl.formatMessage(messages.viewwatchlistsDescription),
+          permission: Permission.WATCHLIST_VIEW,
         },
       ],
     },
@@ -166,6 +185,43 @@ export const PermissionEdit: React.FC<PermissionEditProps> = ({
             messages.autoapproveSeriesDescription
           ),
           permission: Permission.AUTO_APPROVE_TV,
+          requires: [
+            {
+              permissions: [Permission.REQUEST, Permission.REQUEST_TV],
+              type: 'or',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'autorequest',
+      name: intl.formatMessage(messages.autorequest),
+      description: intl.formatMessage(messages.autorequestDescription),
+      permission: Permission.AUTO_REQUEST,
+      requires: [{ permissions: [Permission.REQUEST] }],
+      children: [
+        {
+          id: 'autorequestmovies',
+          name: intl.formatMessage(messages.autorequestMovies),
+          description: intl.formatMessage(
+            messages.autorequestMoviesDescription
+          ),
+          permission: Permission.AUTO_REQUEST_MOVIE,
+          requires: [
+            {
+              permissions: [Permission.REQUEST, Permission.REQUEST_MOVIE],
+              type: 'or',
+            },
+          ],
+        },
+        {
+          id: 'autorequesttv',
+          name: intl.formatMessage(messages.autorequestSeries),
+          description: intl.formatMessage(
+            messages.autorequestSeriesDescription
+          ),
+          permission: Permission.AUTO_REQUEST_TV,
           requires: [
             {
               permissions: [Permission.REQUEST, Permission.REQUEST_TV],

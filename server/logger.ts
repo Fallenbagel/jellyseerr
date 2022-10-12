@@ -26,7 +26,7 @@ const hformat = winston.format.printf(
 );
 
 const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'debug',
+  level: process.env.LOG_LEVEL?.toLowerCase() || 'debug',
   format: winston.format.combine(
     winston.format.splat(),
     winston.format.timestamp(),

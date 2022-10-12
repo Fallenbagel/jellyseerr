@@ -1,5 +1,5 @@
-import React from 'react';
-import { hasNotificationType, NotificationItem } from '..';
+import type { NotificationItem } from '@app/components/NotificationTypeSelector';
+import { hasNotificationType } from '@app/components/NotificationTypeSelector';
 
 interface NotificationTypeProps {
   option: NotificationItem;
@@ -8,12 +8,12 @@ interface NotificationTypeProps {
   onUpdate: (newTypes: number) => void;
 }
 
-const NotificationType: React.FC<NotificationTypeProps> = ({
+const NotificationType = ({
   option,
   currentTypes,
   onUpdate,
   parent,
-}) => {
+}: NotificationTypeProps) => {
   return (
     <>
       <div

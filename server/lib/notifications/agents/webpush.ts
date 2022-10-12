@@ -1,17 +1,15 @@
-import { getRepository } from 'typeorm';
+import { IssueType, IssueTypeName } from '@server/constants/issue';
+import { MediaType } from '@server/constants/media';
+import { getRepository } from '@server/datasource';
+import { User } from '@server/entity/User';
+import { UserPushSubscription } from '@server/entity/UserPushSubscription';
+import type { NotificationAgentConfig } from '@server/lib/settings';
+import { getSettings, NotificationAgentKey } from '@server/lib/settings';
+import logger from '@server/logger';
 import webpush from 'web-push';
 import { Notification, shouldSendAdminNotification } from '..';
-import { IssueType, IssueTypeName } from '../../../constants/issue';
-import { MediaType } from '../../../constants/media';
-import { User } from '../../../entity/User';
-import { UserPushSubscription } from '../../../entity/UserPushSubscription';
-import logger from '../../../logger';
-import {
-  getSettings,
-  NotificationAgentConfig,
-  NotificationAgentKey,
-} from '../../settings';
-import { BaseAgent, NotificationAgent, NotificationPayload } from './agent';
+import type { NotificationAgent, NotificationPayload } from './agent';
+import { BaseAgent } from './agent';
 
 interface PushNotificationPayload {
   notificationType: string;
@@ -58,6 +56,11 @@ class WebPushAgent
     switch (type) {
       case Notification.TEST_NOTIFICATION:
         message = payload.message;
+        break;
+      case Notification.MEDIA_AUTO_REQUESTED:
+        message = `Automatically submitted a new ${
+          is4k ? '4K ' : ''
+        }${mediaType} request.`;
         break;
       case Notification.MEDIA_APPROVED:
         message = `Your ${
@@ -160,7 +163,7 @@ class WebPushAgent
         true)
     ) {
       const notifySubs = await userPushSubRepository.find({
-        where: { user: payload.notifyUser.id },
+        where: { user: { id: payload.notifyUser.id } },
       });
 
       pushSubs.push(...notifySubs);

@@ -24,7 +24,7 @@ interface QuotaSelectorProps {
   onChange: (fieldName: string, value: number) => void;
 }
 
-const QuotaSelector: React.FC<QuotaSelectorProps> = ({
+const QuotaSelector = ({
   mediaType,
   dayFieldName,
   limitFieldName,
@@ -34,7 +34,7 @@ const QuotaSelector: React.FC<QuotaSelectorProps> = ({
   limitOverride,
   isDisabled = false,
   onChange,
-}) => {
+}: QuotaSelectorProps) => {
   const initialDays = defaultDays ?? 7;
   const initialLimit = defaultLimit ?? 0;
   const [quotaDays, setQuotaDays] = useState(initialDays);

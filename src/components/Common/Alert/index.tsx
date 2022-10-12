@@ -3,16 +3,17 @@ import {
   InformationCircleIcon,
   XCircleIcon,
 } from '@heroicons/react/solid';
-import React from 'react';
 
 interface AlertProps {
   title?: React.ReactNode;
   type?: 'warning' | 'info' | 'error';
+  children?: React.ReactNode;
 }
 
-const Alert: React.FC<AlertProps> = ({ title, children, type }) => {
+const Alert = ({ title, children, type }: AlertProps) => {
   let design = {
-    bgColor: 'bg-yellow-600',
+    bgColor:
+      'border border-yellow-500 backdrop-blur bg-yellow-400 bg-opacity-20',
     titleColor: 'text-yellow-100',
     textColor: 'text-yellow-300',
     svg: <ExclamationIcon className="h-5 w-5" />,
@@ -21,9 +22,10 @@ const Alert: React.FC<AlertProps> = ({ title, children, type }) => {
   switch (type) {
     case 'info':
       design = {
-        bgColor: 'bg-indigo-600',
-        titleColor: 'text-indigo-100',
-        textColor: 'text-indigo-300',
+        bgColor:
+          'border border-indigo-500 backdrop-blur bg-indigo-400 bg-opacity-20',
+        titleColor: 'text-gray-100',
+        textColor: 'text-gray-300',
         svg: <InformationCircleIcon className="h-5 w-5" />,
       };
       break;

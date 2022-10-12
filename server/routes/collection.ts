@@ -1,8 +1,8 @@
+import TheMovieDb from '@server/api/themoviedb';
+import Media from '@server/entity/Media';
+import logger from '@server/logger';
+import { mapCollection } from '@server/models/Collection';
 import { Router } from 'express';
-import TheMovieDb from '../api/themoviedb';
-import Media from '../entity/Media';
-import logger from '../logger';
-import { mapCollection } from '../models/Collection';
 
 const collectionRoutes = Router();
 

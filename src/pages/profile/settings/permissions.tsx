@@ -1,7 +1,6 @@
-import { NextPage } from 'next';
-import React from 'react';
-import UserSettings from '../../../components/UserProfile/UserSettings';
-import UserPermissions from '../../../components/UserProfile/UserSettings/UserPermissions';
+import UserSettings from '@app/components/UserProfile/UserSettings';
+import UserPermissions from '@app/components/UserProfile/UserSettings/UserPermissions';
+import type { NextPage } from 'next';
 
 const UserPermissionsPage: NextPage = () => {
   return (

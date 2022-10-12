@@ -1,23 +1,24 @@
+import type { User } from '@server/entity/User';
+import { Notification } from '@server/lib/notifications';
+import type { NotificationAgent } from '@server/lib/notifications/agents/agent';
+import DiscordAgent from '@server/lib/notifications/agents/discord';
+import EmailAgent from '@server/lib/notifications/agents/email';
+import GotifyAgent from '@server/lib/notifications/agents/gotify';
+import LunaSeaAgent from '@server/lib/notifications/agents/lunasea';
+import PushbulletAgent from '@server/lib/notifications/agents/pushbullet';
+import PushoverAgent from '@server/lib/notifications/agents/pushover';
+import SlackAgent from '@server/lib/notifications/agents/slack';
+import TelegramAgent from '@server/lib/notifications/agents/telegram';
+import WebhookAgent from '@server/lib/notifications/agents/webhook';
+import WebPushAgent from '@server/lib/notifications/agents/webpush';
+import { getSettings } from '@server/lib/settings';
 import { Router } from 'express';
-import { User } from '../../entity/User';
-import { Notification } from '../../lib/notifications';
-import { NotificationAgent } from '../../lib/notifications/agents/agent';
-import DiscordAgent from '../../lib/notifications/agents/discord';
-import EmailAgent from '../../lib/notifications/agents/email';
-import GotifyAgent from '../../lib/notifications/agents/gotify';
-import LunaSeaAgent from '../../lib/notifications/agents/lunasea';
-import PushbulletAgent from '../../lib/notifications/agents/pushbullet';
-import PushoverAgent from '../../lib/notifications/agents/pushover';
-import SlackAgent from '../../lib/notifications/agents/slack';
-import TelegramAgent from '../../lib/notifications/agents/telegram';
-import WebhookAgent from '../../lib/notifications/agents/webhook';
-import WebPushAgent from '../../lib/notifications/agents/webpush';
-import { getSettings } from '../../lib/settings';
 
 const notificationRoutes = Router();
 
 const sendTestNotification = async (agent: NotificationAgent, user: User) =>
   await agent.send(Notification.TEST_NOTIFICATION, {
+    notifySystem: true,
     notifyAdmin: false,
     notifyUser: user,
     subject: 'Test Notification',
@@ -247,7 +248,7 @@ notificationRoutes.post('/webpush/test', async (req, res, next) => {
   if (!req.user) {
     return next({
       status: 500,
-      message: 'User information missing from request',
+      message: 'User information is missing from the request.',
     });
   }
 
@@ -363,7 +364,7 @@ notificationRoutes.post('/lunasea/test', async (req, res, next) => {
   if (!req.user) {
     return next({
       status: 500,
-      message: 'User information missing from request',
+      message: 'User information is missing from the request.',
     });
   }
 
@@ -384,34 +385,26 @@ notificationRoutes.get('/gotify', (_req, res) => {
   res.status(200).json(settings.notifications.agents.gotify);
 });
 
-notificationRoutes.post('/gotify', (req, rest) => {
+notificationRoutes.post('/gotify', (req, res) => {
   const settings = getSettings();
 
   settings.notifications.agents.gotify = req.body;
   settings.save();
 
-  rest.status(200).json(settings.notifications.agents.gotify);
+  res.status(200).json(settings.notifications.agents.gotify);
 });
 
-notificationRoutes.post('/gotify/test', async (req, rest, next) => {
+notificationRoutes.post('/gotify/test', async (req, res, next) => {
   if (!req.user) {
     return next({
       status: 500,
-      message: 'User information is missing from request',
+      message: 'User information is missing from the request.',
     });
   }
 
   const gotifyAgent = new GotifyAgent(req.body);
-  if (
-    await gotifyAgent.send(Notification.TEST_NOTIFICATION, {
-      notifyAdmin: false,
-      notifyUser: req.user,
-      subject: 'Test Notification',
-      message:
-        'This is a test notification! Check check, 1, 2, 3. Are we coming in clear?',
-    })
-  ) {
-    return rest.status(204).send();
+  if (await sendTestNotification(gotifyAgent, req.user)) {
+    return res.status(204).send();
   } else {
     return next({
       status: 500,

@@ -1,15 +1,27 @@
+import {
+  MediaRequestStatus,
+  MediaStatus,
+  MediaType,
+} from '@server/constants/media';
+import { getRepository } from '@server/datasource';
+import Media from '@server/entity/Media';
+import {
+  DuplicateMediaRequestError,
+  MediaRequest,
+  NoSeasonsAvailableError,
+  QuotaRestrictedError,
+  RequestPermissionError,
+} from '@server/entity/MediaRequest';
+import SeasonRequest from '@server/entity/SeasonRequest';
+import { User } from '@server/entity/User';
+import type {
+  MediaRequestBody,
+  RequestResultsResponse,
+} from '@server/interfaces/api/requestInterfaces';
+import { Permission } from '@server/lib/permissions';
+import logger from '@server/logger';
+import { isAuthenticated } from '@server/middleware/auth';
 import { Router } from 'express';
-import { getRepository } from 'typeorm';
-import TheMovieDb from '../api/themoviedb';
-import { MediaRequestStatus, MediaStatus, MediaType } from '../constants/media';
-import Media from '../entity/Media';
-import { MediaRequest } from '../entity/MediaRequest';
-import SeasonRequest from '../entity/SeasonRequest';
-import { User } from '../entity/User';
-import { RequestResultsResponse } from '../interfaces/api/requestInterfaces';
-import { Permission } from '../lib/permissions';
-import logger from '../logger';
-import { isAuthenticated } from '../middleware/auth';
 
 const requestRoutes = Router();
 
@@ -40,11 +52,15 @@ requestRoutes.get<Record<string, unknown>, RequestResultsResponse>(
             MediaRequestStatus.APPROVED,
           ];
           break;
+        case 'failed':
+          statusFilter = [MediaRequestStatus.FAILED];
+          break;
         default:
           statusFilter = [
             MediaRequestStatus.PENDING,
             MediaRequestStatus.APPROVED,
             MediaRequestStatus.DECLINED,
+            MediaRequestStatus.FAILED,
           ];
       }
 
@@ -142,302 +158,38 @@ requestRoutes.get<Record<string, unknown>, RequestResultsResponse>(
   }
 );
 
-requestRoutes.post('/', async (req, res, next) => {
-  const tmdb = new TheMovieDb();
-  const mediaRepository = getRepository(Media);
-  const requestRepository = getRepository(MediaRequest);
-  const userRepository = getRepository(User);
-
-  try {
-    let requestUser = req.user;
-
-    if (
-      req.body.userId &&
-      !req.user?.hasPermission([
-        Permission.MANAGE_USERS,
-        Permission.MANAGE_REQUESTS,
-      ])
-    ) {
-      return next({
-        status: 403,
-        message: 'You do not have permission to modify the request user.',
-      });
-    } else if (req.body.userId) {
-      requestUser = await userRepository.findOneOrFail({
-        where: { id: req.body.userId },
-      });
-    }
-
-    if (!requestUser) {
-      return next({
-        status: 500,
-        message: 'User missing from request context.',
-      });
-    }
-
-    if (
-      req.body.mediaType === MediaType.MOVIE &&
-      !req.user?.hasPermission(
-        req.body.is4k
-          ? [Permission.REQUEST_4K, Permission.REQUEST_4K_MOVIE]
-          : [Permission.REQUEST, Permission.REQUEST_MOVIE],
-        {
-          type: 'or',
-        }
-      )
-    ) {
-      return next({
-        status: 403,
-        message: `You do not have permission to make ${
-          req.body.is4k ? '4K ' : ''
-        }movie requests.`,
-      });
-    } else if (
-      req.body.mediaType === MediaType.TV &&
-      !req.user?.hasPermission(
-        req.body.is4k
-          ? [Permission.REQUEST_4K, Permission.REQUEST_4K_TV]
-          : [Permission.REQUEST, Permission.REQUEST_TV],
-        {
-          type: 'or',
-        }
-      )
-    ) {
-      return next({
-        status: 403,
-        message: `You do not have permission to make ${
-          req.body.is4k ? '4K ' : ''
-        }series requests.`,
-      });
-    }
-
-    const quotas = await requestUser.getQuota();
-
-    if (req.body.mediaType === MediaType.MOVIE && quotas.movie.restricted) {
-      return next({
-        status: 403,
-        message: 'Movie Quota Exceeded',
-      });
-    } else if (req.body.mediaType === MediaType.TV && quotas.tv.restricted) {
-      return next({
-        status: 403,
-        message: 'Series Quota Exceeded',
-      });
-    }
-
-    const tmdbMedia =
-      req.body.mediaType === MediaType.MOVIE
-        ? await tmdb.getMovie({ movieId: req.body.mediaId })
-        : await tmdb.getTvShow({ tvId: req.body.mediaId });
-
-    let media = await mediaRepository.findOne({
-      where: { tmdbId: req.body.mediaId, mediaType: req.body.mediaType },
-      relations: ['requests'],
-    });
-
-    if (!media) {
-      media = new Media({
-        tmdbId: tmdbMedia.id,
-        tvdbId: req.body.tvdbId ?? tmdbMedia.external_ids.tvdb_id,
-        status: !req.body.is4k ? MediaStatus.PENDING : MediaStatus.UNKNOWN,
-        status4k: req.body.is4k ? MediaStatus.PENDING : MediaStatus.UNKNOWN,
-        mediaType: req.body.mediaType,
-      });
-    } else {
-      if (media.status === MediaStatus.UNKNOWN && !req.body.is4k) {
-        media.status = MediaStatus.PENDING;
-      }
-
-      if (media.status4k === MediaStatus.UNKNOWN && req.body.is4k) {
-        media.status4k = MediaStatus.PENDING;
-      }
-    }
-
-    if (req.body.mediaType === MediaType.MOVIE) {
-      const existing = await requestRepository
-        .createQueryBuilder('request')
-        .leftJoin('request.media', 'media')
-        .where('request.is4k = :is4k', { is4k: req.body.is4k })
-        .andWhere('media.tmdbId = :tmdbId', { tmdbId: tmdbMedia.id })
-        .andWhere('media.mediaType = :mediaType', {
-          mediaType: MediaType.MOVIE,
-        })
-        .andWhere('request.status != :requestStatus', {
-          requestStatus: MediaRequestStatus.DECLINED,
-        })
-        .getOne();
-
-      if (existing) {
-        logger.warn('Duplicate request for media blocked', {
-          tmdbId: tmdbMedia.id,
-          mediaType: req.body.mediaType,
-          is4k: req.body.is4k,
-          label: 'Media Request',
-        });
+requestRoutes.post<never, MediaRequest, MediaRequestBody>(
+  '/',
+  async (req, res, next) => {
+    try {
+      if (!req.user) {
         return next({
-          status: 409,
-          message: 'Request for this media already exists.',
+          status: 401,
+          message: 'You must be logged in to request media.',
         });
       }
+      const request = await MediaRequest.request(req.body, req.user);
 
-      await mediaRepository.save(media);
-
-      const request = new MediaRequest({
-        type: MediaType.MOVIE,
-        media,
-        requestedBy: requestUser,
-        // If the user is an admin or has the "auto approve" permission, automatically approve the request
-        status: req.user?.hasPermission(
-          [
-            req.body.is4k
-              ? Permission.AUTO_APPROVE_4K
-              : Permission.AUTO_APPROVE,
-            req.body.is4k
-              ? Permission.AUTO_APPROVE_4K_MOVIE
-              : Permission.AUTO_APPROVE_MOVIE,
-            Permission.MANAGE_REQUESTS,
-          ],
-          { type: 'or' }
-        )
-          ? MediaRequestStatus.APPROVED
-          : MediaRequestStatus.PENDING,
-        modifiedBy: req.user?.hasPermission(
-          [
-            req.body.is4k
-              ? Permission.AUTO_APPROVE_4K
-              : Permission.AUTO_APPROVE,
-            req.body.is4k
-              ? Permission.AUTO_APPROVE_4K_MOVIE
-              : Permission.AUTO_APPROVE_MOVIE,
-            Permission.MANAGE_REQUESTS,
-          ],
-          { type: 'or' }
-        )
-          ? req.user
-          : undefined,
-        is4k: req.body.is4k,
-        serverId: req.body.serverId,
-        profileId: req.body.profileId,
-        rootFolder: req.body.rootFolder,
-        tags: req.body.tags,
-      });
-
-      await requestRepository.save(request);
       return res.status(201).json(request);
-    } else if (req.body.mediaType === MediaType.TV) {
-      const requestedSeasons = req.body.seasons as number[];
-      let existingSeasons: number[] = [];
-
-      // We need to check existing requests on this title to make sure we don't double up on seasons that were
-      // already requested. In the case they were, we just throw out any duplicates but still approve the request.
-      // (Unless there are no seasons, in which case we abort)
-      if (media.requests) {
-        existingSeasons = media.requests
-          .filter(
-            (request) =>
-              request.is4k === req.body.is4k &&
-              request.status !== MediaRequestStatus.DECLINED
-          )
-          .reduce((seasons, request) => {
-            const combinedSeasons = request.seasons.map(
-              (season) => season.seasonNumber
-            );
-
-            return [...seasons, ...combinedSeasons];
-          }, [] as number[]);
+    } catch (error) {
+      if (!(error instanceof Error)) {
+        return;
       }
 
-      const finalSeasons = requestedSeasons.filter(
-        (rs) => !existingSeasons.includes(rs)
-      );
-
-      if (finalSeasons.length === 0) {
-        return next({
-          status: 202,
-          message: 'No seasons available to request',
-        });
-      } else if (
-        quotas.tv.limit &&
-        finalSeasons.length > (quotas.tv.remaining ?? 0)
-      ) {
-        return next({
-          status: 403,
-          message: 'Series Quota Exceeded',
-        });
+      switch (error.constructor) {
+        case RequestPermissionError:
+        case QuotaRestrictedError:
+          return next({ status: 403, message: error.message });
+        case DuplicateMediaRequestError:
+          return next({ status: 409, message: error.message });
+        case NoSeasonsAvailableError:
+          return next({ status: 202, message: error.message });
+        default:
+          return next({ status: 500, message: error.message });
       }
-
-      await mediaRepository.save(media);
-
-      const request = new MediaRequest({
-        type: MediaType.TV,
-        media,
-        requestedBy: requestUser,
-        // If the user is an admin or has the "auto approve" permission, automatically approve the request
-        status: req.user?.hasPermission(
-          [
-            req.body.is4k
-              ? Permission.AUTO_APPROVE_4K
-              : Permission.AUTO_APPROVE,
-            req.body.is4k
-              ? Permission.AUTO_APPROVE_4K_TV
-              : Permission.AUTO_APPROVE_TV,
-            Permission.MANAGE_REQUESTS,
-          ],
-          { type: 'or' }
-        )
-          ? MediaRequestStatus.APPROVED
-          : MediaRequestStatus.PENDING,
-        modifiedBy: req.user?.hasPermission(
-          [
-            req.body.is4k
-              ? Permission.AUTO_APPROVE_4K
-              : Permission.AUTO_APPROVE,
-            req.body.is4k
-              ? Permission.AUTO_APPROVE_4K_TV
-              : Permission.AUTO_APPROVE_TV,
-            Permission.MANAGE_REQUESTS,
-          ],
-          { type: 'or' }
-        )
-          ? req.user
-          : undefined,
-        is4k: req.body.is4k,
-        serverId: req.body.serverId,
-        profileId: req.body.profileId,
-        rootFolder: req.body.rootFolder,
-        languageProfileId: req.body.languageProfileId,
-        tags: req.body.tags,
-        seasons: finalSeasons.map(
-          (sn) =>
-            new SeasonRequest({
-              seasonNumber: sn,
-              status: req.user?.hasPermission(
-                [
-                  req.body.is4k
-                    ? Permission.AUTO_APPROVE_4K
-                    : Permission.AUTO_APPROVE,
-                  req.body.is4k
-                    ? Permission.AUTO_APPROVE_4K_TV
-                    : Permission.AUTO_APPROVE_TV,
-                  Permission.MANAGE_REQUESTS,
-                ],
-                { type: 'or' }
-              )
-                ? MediaRequestStatus.APPROVED
-                : MediaRequestStatus.PENDING,
-            })
-        ),
-      });
-
-      await requestRepository.save(request);
-      return res.status(201).json(request);
     }
-
-    next({ status: 500, message: 'Invalid media type' });
-  } catch (e) {
-    next({ status: 500, message: e.message });
   }
-});
+);
 
 requestRoutes.get('/count', async (_req, res, next) => {
   const requestRepository = getRepository(MediaRequest);
@@ -528,7 +280,7 @@ requestRoutes.get('/:requestId', async (req, res, next) => {
   try {
     const request = await requestRepository.findOneOrFail({
       where: { id: Number(req.params.requestId) },
-      relations: ['requestedBy', 'modifiedBy'],
+      relations: { requestedBy: true, modifiedBy: true },
     });
 
     if (
@@ -560,9 +312,11 @@ requestRoutes.put<{ requestId: string }>(
     const requestRepository = getRepository(MediaRequest);
     const userRepository = getRepository(User);
     try {
-      const request = await requestRepository.findOne(
-        Number(req.params.requestId)
-      );
+      const request = await requestRepository.findOne({
+        where: {
+          id: Number(req.params.requestId),
+        },
+      });
 
       if (!request) {
         return next({ status: 404, message: 'Request not found.' });
@@ -628,7 +382,7 @@ requestRoutes.put<{ requestId: string }>(
         // Get existing media so we can work with all the requests
         const media = await mediaRepository.findOneOrFail({
           where: { tmdbId: request.media.tmdbId, mediaType: MediaType.TV },
-          relations: ['requests'],
+          relations: { requests: true },
         });
 
         // Get all requested seasons that are not part of this request we are editing
@@ -698,7 +452,7 @@ requestRoutes.delete('/:requestId', async (req, res, next) => {
   try {
     const request = await requestRepository.findOneOrFail({
       where: { id: Number(req.params.requestId) },
-      relations: ['requestedBy', 'modifiedBy'],
+      relations: { requestedBy: true, modifiedBy: true },
     });
 
     if (
@@ -735,7 +489,7 @@ requestRoutes.post<{
     try {
       const request = await requestRepository.findOneOrFail({
         where: { id: Number(req.params.requestId) },
-        relations: ['requestedBy', 'modifiedBy'],
+        relations: { requestedBy: true, modifiedBy: true },
       });
 
       await request.updateParentStatus();
@@ -763,7 +517,7 @@ requestRoutes.post<{
     try {
       const request = await requestRepository.findOneOrFail({
         where: { id: Number(req.params.requestId) },
-        relations: ['requestedBy', 'modifiedBy'],
+        relations: { requestedBy: true, modifiedBy: true },
       });
 
       let newStatus: MediaRequestStatus;
