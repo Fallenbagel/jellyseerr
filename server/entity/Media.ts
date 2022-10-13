@@ -205,16 +205,10 @@ class Media {
           ? externalHostname
           : hostname;
       if (this.jellyfinMediaId) {
-        this.mediaUrl = new URL(
-          `/web/index.html#!/${pageName}?id=${this.jellyfinMediaId}&context=home&serverId=${serverId}`,
-          jellyfinHost
-        ).href;
+        this.mediaUrl = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId}&context=home&serverId=${serverId}`;
       }
       if (this.jellyfinMediaId4k) {
-        this.mediaUrl4k = new URL(
-          `/web/index.html#!/${pageName}?id=${this.jellyfinMediaId4k}&context=home&serverId=${serverId}`,
-          jellyfinHost
-        ).href;
+        this.mediaUrl4k = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId4k}&context=home&serverId=${serverId}`;
       }
     }
   }

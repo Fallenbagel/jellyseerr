@@ -330,10 +330,7 @@ settingsRoutes.get('/jellyfin/users', async (req, res) => {
     username: user.Name,
     id: user.Id,
     thumb: user.PrimaryImageTag
-      ? new URL(
-          `/Users/${user.Id}/Images/Primary/?tag=${user.PrimaryImageTag}&quality=90`,
-          jellyfinHost
-        ).href
+      ? `${jellyfinHost}/Users/${user.Id}/Images/Primary/?tag=${user.PrimaryImageTag}&quality=90`
       : '/os_logo_square.png',
     email: user.Name,
   }));

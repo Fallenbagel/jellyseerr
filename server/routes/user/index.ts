@@ -525,10 +525,7 @@ router.post(
             email: jellyfinUser?.Name,
             permissions: settings.main.defaultPermissions,
             avatar: jellyfinUser?.PrimaryImageTag
-              ? new URL(
-                  `/Users/${jellyfinUser.Id}/Images/Primary/?tag=${jellyfinUser.PrimaryImageTag}&quality=90`,
-                  jellyfinHost
-                ).href
+              ? `${jellyfinHost}/Users/${jellyfinUser.Id}/Images/Primary/?tag=${jellyfinUser.PrimaryImageTag}&quality=90`
               : '/os_logo_square.png',
             userType: UserType.JELLYFIN,
           });
