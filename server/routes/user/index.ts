@@ -497,10 +497,11 @@ router.post(
       //const jellyfinUsersResponse = await jellyfinClient.getUsers();
       const createdUsers: User[] = [];
       const { hostname, externalHostname } = getSettings().jellyfin;
-      const jellyfinHost =
+      let jellyfinHost =
         externalHostname && externalHostname.length > 0
           ? externalHostname
           : hostname;
+      jellyfinHost = jellyfinHost.endsWith("/") ? jellyfinHost.slice(0, -1) : jellyfinHost;
 
       jellyfinClient.setUserId(admin.jellyfinUserId ?? '');
       const jellyfinUsers = await jellyfinClient.getUsers();

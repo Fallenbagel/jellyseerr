@@ -200,10 +200,11 @@ class Media {
       const pageName =
         process.env.JELLYFIN_TYPE === 'emby' ? 'item' : 'details';
       const { serverId, hostname, externalHostname } = getSettings().jellyfin;
-      const jellyfinHost =
+      let jellyfinHost =
         externalHostname && externalHostname.length > 0
           ? externalHostname
           : hostname;
+      jellyfinHost = jellyfinHost.endsWith("/") ? jellyfinHost.slice(0, -1) : jellyfinHost;
       if (this.jellyfinMediaId) {
         this.mediaUrl = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId}&context=home&serverId=${serverId}`;
       }
