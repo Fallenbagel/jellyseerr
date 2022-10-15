@@ -308,11 +308,13 @@ settingsRoutes.get('/jellyfin/users', async (req, res) => {
   const settings = getSettings();
   const { hostname, externalHostname } = getSettings().jellyfin;
   let jellyfinHost =
-  externalHostname && externalHostname.length > 0
-    ? externalHostname
-    : hostname;
-  jellyfinHost = jellyfinHost.endsWith("/") ? jellyfinHost.slice(0, -1) : jellyfinHost;
+    externalHostname && externalHostname.length > 0
+      ? externalHostname
+      : hostname;
 
+  jellyfinHost = jellyfinHost!.endsWith('/')
+    ? jellyfinHost!.slice(0, -1)
+    : jellyfinHost;
   const userRepository = getRepository(User);
   const admin = await userRepository.findOneOrFail({
     select: ['id', 'jellyfinAuthToken', 'jellyfinDeviceId', 'jellyfinUserId'],

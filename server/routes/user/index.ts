@@ -501,8 +501,10 @@ router.post(
         externalHostname && externalHostname.length > 0
           ? externalHostname
           : hostname;
-      jellyfinHost = jellyfinHost.endsWith("/") ? jellyfinHost.slice(0, -1) : jellyfinHost;
 
+      jellyfinHost = jellyfinHost!.endsWith('/')
+        ? jellyfinHost!.slice(0, -1)
+        : jellyfinHost;
       jellyfinClient.setUserId(admin.jellyfinUserId ?? '');
       const jellyfinUsers = await jellyfinClient.getUsers();
 

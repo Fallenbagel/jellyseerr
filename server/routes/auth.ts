@@ -245,10 +245,13 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
     // First we need to attempt to log the user in to jellyfin
     const jellyfinserver = new JellyfinAPI(hostname ?? '', undefined, deviceId);
     let jellyfinHost =
-    externalHostname && externalHostname.length > 0
-      ? externalHostname
-      : hostname;
-    jellyfinHost = jellyfinHost.endsWith("/") ? jellyfinHost.slice(0, -1) : jellyfinHost;
+      externalHostname && externalHostname.length > 0
+        ? externalHostname
+        : hostname;
+
+    jellyfinHost = jellyfinHost!.endsWith('/')
+      ? jellyfinHost!.slice(0, -1)
+      : jellyfinHost;
 
     const account = await jellyfinserver.login(body.username, body.password);
     // Next let's see if the user already exists
