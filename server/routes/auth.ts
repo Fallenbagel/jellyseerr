@@ -244,10 +244,14 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
     }
     // First we need to attempt to log the user in to jellyfin
     const jellyfinserver = new JellyfinAPI(hostname ?? '', undefined, deviceId);
-    const jellyfinHost =
+    let jellyfinHost =
       externalHostname && externalHostname.length > 0
         ? externalHostname
         : hostname;
+
+    jellyfinHost = jellyfinHost!.endsWith('/')
+      ? jellyfinHost!.slice(0, -1)
+      : jellyfinHost;
 
     const account = await jellyfinserver.login(body.username, body.password);
     // Next let's see if the user already exists
@@ -263,10 +267,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
 
       // Update the users avatar with their jellyfin profile pic (incase it changed)
       if (account.User.PrimaryImageTag) {
-        user.avatar = new URL(
-          `/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`,
-          jellyfinHost
-        ).href;
+        user.avatar = `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`;
       } else {
         user.avatar = '/os_logo_square.png';
       }
@@ -312,10 +313,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
           jellyfinAuthToken: account.AccessToken,
           permissions: Permission.ADMIN,
           avatar: account.User.PrimaryImageTag
-            ? new URL(
-                `/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`,
-                jellyfinHost
-              ).href
+            ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
             : '/os_logo_square.png',
           userType: UserType.JELLYFIN,
         });
@@ -345,10 +343,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
           jellyfinAuthToken: account.AccessToken,
           permissions: settings.main.defaultPermissions,
           avatar: account.User.PrimaryImageTag
-            ? new URL(
-                `/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`,
-                jellyfinHost
-              ).href
+            ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
             : '/os_logo_square.png',
           userType: UserType.JELLYFIN,
         });

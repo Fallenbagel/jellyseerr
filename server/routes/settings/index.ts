@@ -307,11 +307,14 @@ settingsRoutes.get('/jellyfin/library', async (req, res) => {
 settingsRoutes.get('/jellyfin/users', async (req, res) => {
   const settings = getSettings();
   const { hostname, externalHostname } = getSettings().jellyfin;
-  const jellyfinHost =
+  let jellyfinHost =
     externalHostname && externalHostname.length > 0
       ? externalHostname
       : hostname;
 
+  jellyfinHost = jellyfinHost!.endsWith('/')
+    ? jellyfinHost!.slice(0, -1)
+    : jellyfinHost;
   const userRepository = getRepository(User);
   const admin = await userRepository.findOneOrFail({
     select: ['id', 'jellyfinAuthToken', 'jellyfinDeviceId', 'jellyfinUserId'],
@@ -330,10 +333,7 @@ settingsRoutes.get('/jellyfin/users', async (req, res) => {
     username: user.Name,
     id: user.Id,
     thumb: user.PrimaryImageTag
-      ? new URL(
-          `/Users/${user.Id}/Images/Primary/?tag=${user.PrimaryImageTag}&quality=90`,
-          jellyfinHost
-        ).href
+      ? `${jellyfinHost}/Users/${user.Id}/Images/Primary/?tag=${user.PrimaryImageTag}&quality=90`
       : '/os_logo_square.png',
     email: user.Name,
   }));
