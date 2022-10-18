@@ -497,11 +497,14 @@ router.post(
       //const jellyfinUsersResponse = await jellyfinClient.getUsers();
       const createdUsers: User[] = [];
       const { hostname, externalHostname } = getSettings().jellyfin;
-      const jellyfinHost =
+      let jellyfinHost =
         externalHostname && externalHostname.length > 0
           ? externalHostname
           : hostname;
 
+      jellyfinHost = jellyfinHost!.endsWith('/')
+        ? jellyfinHost!.slice(0, -1)
+        : jellyfinHost;
       jellyfinClient.setUserId(admin.jellyfinUserId ?? '');
       const jellyfinUsers = await jellyfinClient.getUsers();
 
@@ -525,10 +528,7 @@ router.post(
             email: jellyfinUser?.Name,
             permissions: settings.main.defaultPermissions,
             avatar: jellyfinUser?.PrimaryImageTag
-              ? new URL(
-                  `/Users/${jellyfinUser.Id}/Images/Primary/?tag=${jellyfinUser.PrimaryImageTag}&quality=90`,
-                  jellyfinHost
-                ).href
+              ? `${jellyfinHost}/Users/${jellyfinUser.Id}/Images/Primary/?tag=${jellyfinUser.PrimaryImageTag}&quality=90`
               : '/os_logo_square.png',
             userType: UserType.JELLYFIN,
           });
