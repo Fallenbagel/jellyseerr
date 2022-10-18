@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/fallenbagel/jellyseerr/compare/v1.2.0...v1.2.1) (2022-10-18)
+
+
+### Bug Fixes
+
+* **backend:** fix jellyfinHost to not be undefined ([ab09664](https://github.com/fallenbagel/jellyseerr/commit/ab09664d418e07198ac72e7f342b53ba441ab7c3)), closes [#237](https://github.com/fallenbagel/jellyseerr/issues/237)
+
 # [1.2.0](https://github.com/fallenbagel/jellyseerr/compare/v1.1.1...v1.2.0) (2022-10-12)
 
 
