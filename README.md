@@ -44,7 +44,7 @@ Pre-requisites:
 - Yarn
 
 ```bash
-yarn add -g win-node-env
+npm i -g win-node-env
 yarn install
 yarn run build
 yarn start
