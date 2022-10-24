@@ -42,6 +42,7 @@ https://hub.docker.com/r/fallenbagel/jellyseerr
 Pre-requisites:
 - Nodejs
 - Yarn
+- Download the source code from the github (Either develop branch or main for stable)
 
 ```bash
 npm i -g win-node-env
@@ -57,7 +58,8 @@ Pre-requisites:
 - Git
 
 ```bash
-git clone https://github.com/jellyseerr.git
+git clone https://github.com/jellyseerr.git && cd jellyseerr
+git checkout main #if you want to run stable instead of develop
 yarn install
 yarn run build
 yarn start
