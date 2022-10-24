@@ -40,7 +40,7 @@ https://hub.docker.com/r/fallenbagel/jellyseerr
 
 #### Windows
 Pre-requisites:
-- Nodejs
+- Nodejs (atleast LTS version)
 - Yarn
 - Download the source code from the github (Either develop branch or main for stable)
 
@@ -53,7 +53,7 @@ yarn start
 
 #### Linux
 Pre-requisites:
-- Nodejs
+- Nodejs (atleast LTS version)
 - Yarn
 - Git
 
