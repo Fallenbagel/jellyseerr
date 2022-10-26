@@ -65,10 +65,7 @@ export const checkJwt: Middleware = (req, res, next) => {
   const settings = getSettings();
   settings.load();
 
-  const oidcIssuer =
-    settings.fullPublicSettings.oidcIssuer.slice(-1) == '/'
-      ? settings.fullPublicSettings.oidcIssuer.slice(0, -1)
-      : settings.fullPublicSettings.oidcIssuer;
+  const oidcIssuer = settings.fullPublicSettings.oidcIssuer;
 
   const getSecret: GetVerificationKey = async function (req, token) {
     const oidcInfo = await getOidcInfo(oidcIssuer);
