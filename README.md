@@ -39,7 +39,9 @@ https://hub.docker.com/r/fallenbagel/jellyseerr
 ### Launching Jellyseerr manually:
 
 #### Windows
+
 Pre-requisites:
+
 - Nodejs (atleast LTS version)
 - Yarn
 - Download the source code from the github (Either develop branch or main for stable)
@@ -52,7 +54,9 @@ yarn start
 ```
 
 #### Linux
+
 Pre-requisites:
+
 - Nodejs (atleast LTS version)
 - Yarn
 - Git
@@ -65,11 +69,13 @@ yarn run build
 yarn start
 ```
 
-*Systemd-service:*
-* assuming jellyseerr was cloned to `/opt/`
-and the environmentfile is located at `/etc/jellyseerr`
+_Systemd-service:_
+
+- assuming jellyseerr was cloned to `/opt/`
+  and the environmentfile is located at `/etc/jellyseerr`
 
 service:
+
 ```
 [Unit]
 Description=Jellyseerr Service
@@ -89,6 +95,7 @@ WantedBy=multi-user.target
 ```
 
 Environmentfile:
+
 ```
 # Jellyseerr's default port is 5055, if you want to use both, change this.
 # specify on which port to listen
