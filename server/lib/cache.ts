@@ -7,7 +7,8 @@ export type AvailableCacheIds =
   | 'rt'
   | 'github'
   | 'plexguid'
-  | 'plextv';
+  | 'plextv'
+  | 'oidc';
 
 const DEFAULT_TTL = 300;
 const DEFAULT_CHECK_PERIOD = 120;
@@ -62,6 +63,10 @@ class CacheManager {
     plextv: new Cache('plextv', 'Plex TV', {
       stdTtl: 86400 * 7, // 1 week cache
       checkPeriod: 60,
+    }),
+    oidc: new Cache('oidc', 'Open ID Connect Provider API', {
+      stdTtl: 86400 * 7, // 1 week cache
+      checkPeriod: 60 * 30,
     }),
   };
 

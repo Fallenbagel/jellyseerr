@@ -1,6 +1,6 @@
+import OidcAPI from '@server/api/oidc';
 import { getRepository } from '@server/datasource';
 import { User } from '@server/entity/User';
-import { getOidcInfo } from '@server/lib/oidc';
 import type {
   Permission,
   PermissionCheckOptions,
@@ -70,16 +70,17 @@ export const checkJwt: Middleware = (req, res, next) => {
   settings.load();
 
   const oidcIssuer = settings.fullPublicSettings.oidcIssuer;
+  const oidcApi = new OidcAPI(oidcIssuer);
 
   const getSecret: GetVerificationKey = async function (req, token) {
-    const oidcInfo = await getOidcInfo(oidcIssuer);
+    const oidcInfo = await oidcApi.getOidcInfo();
 
     const secret = (
       jwksRsa.expressJwtSecret({
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
-        jwksUri: oidcInfo.jwksUri,
+        jwksUri: oidcInfo.jwks_uri,
       }) as GetVerificationKey
     )(req, token);
 

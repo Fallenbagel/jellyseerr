@@ -1,11 +1,11 @@
 import JellyfinAPI from '@server/api/jellyfin';
+import OidcAPI from '@server/api/oidc';
 import PlexTvAPI from '@server/api/plextv';
 import { MediaServerType } from '@server/constants/server';
 import { UserType } from '@server/constants/user';
 import { getRepository } from '@server/datasource';
 import { User } from '@server/entity/User';
 import { startJobs } from '@server/job/schedule';
-import { getOidcInfo } from '@server/lib/oidc';
 import { Permission } from '@server/lib/permissions';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
@@ -522,12 +522,14 @@ authRoutes.post('/local', async (req, res, next) => {
 authRoutes.post('/oidc', checkJwt, async (req, res, next) => {
   const settings = getSettings();
   const userRepository = getRepository(User);
+  const oidcApi = new OidcAPI(settings.fullPublicSettings.oidcIssuer);
+
   const body = req.body as { idToken?: string; accessToken?: string };
 
   try {
-    const oidcInfo = await getOidcInfo(settings.fullPublicSettings.oidcIssuer);
+    const oidcInfo = await oidcApi.getOidcInfo();
 
-    const response = await axios.get(oidcInfo.userinfoEndpoint, {
+    const response = await axios.get(oidcInfo.userinfo_endpoint, {
       headers: { Authorization: `Bearer ${body.accessToken}` },
     });
     const { name, email } = response.data;
