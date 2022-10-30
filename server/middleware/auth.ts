@@ -6,7 +6,11 @@ import type {
   PermissionCheckOptions,
 } from '@server/lib/permissions';
 import { getSettings } from '@server/lib/settings';
-import { expressjwt as jwt, type GetVerificationKey } from 'express-jwt';
+import {
+  expressjwt as jwt,
+  type GetVerificationKey,
+  type TokenGetter,
+} from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
 
 export const checkUser: Middleware = async (req, _res, next) => {
@@ -82,10 +86,17 @@ export const checkJwt: Middleware = (req, res, next) => {
     return secret;
   };
 
+  const getToken: TokenGetter = (req) => {
+    const body = req.body as { idToken?: string; accessToken?: string };
+    return body.idToken ?? '';
+  };
+
   jwt({
-    // Dynamically provide a signing key based on the kid in the header and the signing keys provided by the JWKS endpoint
+    // Dynamically provide a signing key based on the kid in the header
+    // and the signing keys provided by the JWKS endpoint
     secret: getSecret,
     issuer: oidcIssuer,
+    getToken,
     algorithms: ['RS256'],
   })(req, res, next);
 };

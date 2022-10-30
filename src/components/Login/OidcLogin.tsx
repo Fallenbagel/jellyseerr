@@ -37,10 +37,9 @@ const OidcLogin: React.FC<OidcLoginProps> = ({
     const login = async () => {
       setProcessing(true);
       try {
-        const token = auth.user?.access_token;
-        // eslint-disable-next-line
-        const response = await axios.get('/api/v1/auth/oidc', {
-          headers: { Authorization: `Bearer ${token}` },
+        await axios.post('/api/v1/auth/oidc', {
+          idToken: auth.user?.id_token,
+          accessToken: auth.user?.access_token,
         });
       } catch (e) {
         if (onError) onError(intl.formatMessage(messages.loginerror));

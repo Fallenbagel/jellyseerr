@@ -3321,7 +3321,7 @@ paths:
                 - username
                 - password
   /auth/oidc:
-    get:
+    post:
       summary: Sign in using a OIDC access token
       description: Sign in using an OIDC access token, requires an OIDC identity provider to be set up.
       security: []
@@ -3334,6 +3334,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                idToken:
+                  type: string
+                accessToken:
+                  type: string
+              required:
+                - idToken
+                - accessToken
   /auth/local:
     post:
       summary: Sign in using a local account

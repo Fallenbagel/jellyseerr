@@ -519,17 +519,16 @@ authRoutes.post('/local', async (req, res, next) => {
   }
 });
 
-authRoutes.get('/oidc', checkJwt, async (req, res, next) => {
+authRoutes.post('/oidc', checkJwt, async (req, res, next) => {
   const settings = getSettings();
   const userRepository = getRepository(User);
+  const body = req.body as { idToken?: string; accessToken?: string };
 
   try {
     const oidcInfo = await getOidcInfo(settings.fullPublicSettings.oidcIssuer);
 
-    const authHeader = req.headers.authorization ?? '';
-
     const response = await axios.get(oidcInfo.userinfoEndpoint, {
-      headers: { Authorization: authHeader },
+      headers: { Authorization: `Bearer ${body.accessToken}` },
     });
     const { name, email } = response.data;
 
