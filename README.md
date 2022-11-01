@@ -62,7 +62,7 @@ Pre-requisites:
 - Git
 
 ```bash
-git clone https://github.com/jellyseerr.git && cd jellyseerr
+git clone https://github.com/Fallenbagel/jellyseerr.git && cd jellyseerr
 git checkout main #if you want to run stable instead of develop
 yarn install
 yarn run build
