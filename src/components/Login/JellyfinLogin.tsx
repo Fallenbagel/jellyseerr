@@ -237,7 +237,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
             return (
               <>
                 <Form>
-                  <div className="sm:border-t sm:border-gray-800">
+                  <div>
                     <label htmlFor="username" className="text-label">
                       {intl.formatMessage(messages.username)}
                     </label>
