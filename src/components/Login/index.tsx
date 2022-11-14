@@ -50,6 +50,57 @@ const Login = () => {
     revalidateOnFocus: false,
   });
 
+  const loginSections = [
+    {
+      // Media Server Login
+      title:
+        settings.currentSettings.mediaServerType == MediaServerType.PLEX
+          ? intl.formatMessage(messages.useplexaccount)
+          : intl.formatMessage(messages.usejellyfinaccount, {
+              mediaServerName:
+                publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                  ? 'Emby'
+                  : 'Jellyfin',
+            }),
+      enabled: settings.currentSettings.newPlexLogin,
+      content:
+        settings.currentSettings.mediaServerType == MediaServerType.PLEX ? (
+          <PlexLogin
+            onAuthenticated={revalidate}
+            isProcessing={isProcessing}
+            setProcessing={setProcessing}
+            onError={(err) => setError(err)}
+          />
+        ) : (
+          <JellyfinLogin onAuthenticated={revalidate} />
+        ),
+    },
+    {
+      // Local Login
+      title: intl.formatMessage(messages.useoverseeerraccount, {
+        applicationTitle: settings.currentSettings.applicationTitle,
+      }),
+      enabled: settings.currentSettings.localLogin,
+      content: <LocalLogin revalidate={revalidate} />,
+    },
+    {
+      // OIDC Login
+      title: intl.formatMessage(messages.useoidcaccount, {
+        OIDCProvider: settings.currentSettings.oidcProviderName,
+      }),
+      enabled: settings.currentSettings.oidcLogin,
+      content: (
+        <OidcLogin
+          revalidate={revalidate}
+          hasError={error !== ''}
+          onError={setError}
+          isProcessing={isProcessing}
+          setProcessing={setProcessing}
+        />
+      ),
+    },
+  ];
+
   return (
     <div className="relative flex min-h-screen flex-col bg-gray-900 py-14">
       <PageTitle title={intl.formatMessage(messages.signin)} />
@@ -87,87 +138,23 @@ const Login = () => {
               <Accordion single atLeastOne>
                 {({ openIndexes, handleClick, AccordionContent }) => (
                   <>
-                    <button
-                      className={`w-full cursor-default bg-gray-800 bg-opacity-70 py-2 text-center text-sm font-bold text-gray-400 transition-colors duration-200 hover:cursor-pointer hover:bg-gray-700 focus:outline-none sm:rounded-t-lg ${
-                        openIndexes.includes(0) && 'text-indigo-500'
-                      }`}
-                      onClick={() => handleClick(0)}
-                    >
-                      {settings.currentSettings.mediaServerType ==
-                      MediaServerType.PLEX
-                        ? intl.formatMessage(messages.useplexaccount)
-                        : intl.formatMessage(messages.usejellyfinaccount, {
-                            mediaServerName:
-                              publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                                ? 'Emby'
-                                : 'Jellyfin',
-                          })}
-                    </button>
-                    <AccordionContent isOpen={openIndexes.includes(0)}>
-                      <div className="px-10 py-8">
-                        {settings.currentSettings.mediaServerType ==
-                        MediaServerType.PLEX ? (
-                          <PlexLogin
-                            onAuthenticated={revalidate}
-                            isProcessing={isProcessing}
-                            setProcessing={setProcessing}
-                            onError={(err) => setError(err)}
-                          />
-                        ) : (
-                          <JellyfinLogin onAuthenticated={revalidate} />
-                        )}
-                      </div>
-                    </AccordionContent>
-                    {settings.currentSettings.oidcLogin && (
-                      <div>
-                        <button
-                          className={`w-full cursor-default bg-gray-800 bg-opacity-70 py-2 text-center text-sm font-bold text-gray-400 transition-colors duration-200 hover:cursor-pointer hover:bg-gray-700 focus:outline-none ${
-                            openIndexes.includes(2)
-                              ? 'text-indigo-500'
-                              : 'sm:rounded-b-lg'
-                          }`}
-                          onClick={() => handleClick(2)}
-                        >
-                          {intl.formatMessage(messages.useoidcaccount, {
-                            OIDCProvider:
-                              settings.currentSettings.oidcProviderName,
-                          })}
-                        </button>
-                        <AccordionContent isOpen={openIndexes.includes(2)}>
-                          <div className="px-10 py-8">
-                            <OidcLogin
-                              revalidate={revalidate}
-                              hasError={error !== ''}
-                              onError={setError}
-                              isProcessing={isProcessing}
-                              setProcessing={setProcessing}
-                            />
-                          </div>
-                        </AccordionContent>
-                      </div>
-                    )}
-                    {settings.currentSettings.localLogin && (
-                      <div>
-                        <button
-                          className={`w-full cursor-default bg-gray-800 bg-opacity-70 py-2 text-center text-sm font-bold text-gray-400 transition-colors duration-200 hover:cursor-pointer hover:bg-gray-700 focus:outline-none ${
-                            openIndexes.includes(1)
-                              ? 'text-indigo-500'
-                              : 'sm:rounded-b-lg'
-                          }`}
-                          onClick={() => handleClick(1)}
-                        >
-                          {intl.formatMessage(messages.useoverseeerraccount, {
-                            applicationTitle:
-                              settings.currentSettings.applicationTitle,
-                          })}
-                        </button>
-                        <AccordionContent isOpen={openIndexes.includes(1)}>
-                          <div className="px-10 py-8">
-                            <LocalLogin revalidate={revalidate} />
-                          </div>
-                        </AccordionContent>
-                      </div>
-                    )}
+                    {loginSections
+                      .filter((section) => section.enabled)
+                      .map((section, i) => (
+                        <div key={i}>
+                          <button
+                            className={`w-full cursor-default bg-gray-800 bg-opacity-70 py-2 text-center text-sm font-bold text-gray-400 transition-colors duration-200 hover:cursor-pointer hover:bg-gray-700 focus:outline-none ${
+                              openIndexes.includes(i) && 'text-indigo-500'
+                            }`}
+                            onClick={() => handleClick(i)}
+                          >
+                            {section.title}
+                          </button>
+                          <AccordionContent isOpen={openIndexes.includes(i)}>
+                            <div className="px-10 py-8">{section.content}</div>
+                          </AccordionContent>
+                        </div>
+                      ))}
                   </>
                 )}
               </Accordion>
