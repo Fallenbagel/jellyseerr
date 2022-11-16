@@ -130,6 +130,21 @@ components:
         localLogin:
           type: boolean
           example: true
+        mediaServerLogin:
+          type: boolean
+          example: true
+        oidcLogin:
+          type: boolean
+          example: true
+        oidcIssuer:
+          type: string
+          example: https://auth.example.com
+        oidcProviderName:
+          type: string
+          example: Keycloak
+        oidcClientId:
+          type: string
+          example: jellyseerr
         mediaServerType:
           type: number
           example: 1

@@ -62,7 +62,7 @@ const Login = () => {
                   ? 'Emby'
                   : 'Jellyfin',
             }),
-      enabled: settings.currentSettings.newPlexLogin,
+      enabled: settings.currentSettings.mediaServerLogin,
       content:
         settings.currentSettings.mediaServerType == MediaServerType.PLEX ? (
           <PlexLogin

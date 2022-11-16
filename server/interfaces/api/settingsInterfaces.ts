@@ -28,6 +28,7 @@ export interface PublicSettingsResponse {
   applicationUrl: string;
   hideAvailable: boolean;
   localLogin: boolean;
+  mediaServerLogin: boolean;
   oidcLogin: boolean;
   oidcIssuer: string;
   oidcProviderName: string;

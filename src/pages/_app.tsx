@@ -193,6 +193,7 @@ CoreApp.getInitialProps = async (initialProps) => {
     movie4kEnabled: false,
     series4kEnabled: false,
     localLogin: true,
+    mediaServerLogin: true,
     oidcLogin: false,
     oidcIssuer: '',
     oidcProviderName: 'OpenID Connect',

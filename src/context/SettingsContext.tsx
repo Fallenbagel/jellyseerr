@@ -14,6 +14,7 @@ const defaultSettings = {
   applicationUrl: '',
   hideAvailable: false,
   localLogin: true,
+  mediaServerLogin: true,
   oidcLogin: false,
   oidcIssuer: '',
   oidcProviderName: 'OpenID Connect',

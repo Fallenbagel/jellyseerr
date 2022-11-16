@@ -1,6 +1,7 @@
 import Button from '@app/components/Common/Button';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import PageTitle from '@app/components/Common/PageTitle';
+import LabeledCheckbox from '@app/components/LabeledCheckbox';
 import PermissionEdit from '@app/components/PermissionEdit';
 import QuotaSelector from '@app/components/QuotaSelector';
 import useSettings from '@app/hooks/useSettings';
@@ -21,12 +22,17 @@ const messages = defineMessages({
   userSettingsDescription: 'Configure global and default user settings.',
   toastSettingsSuccess: 'User settings saved successfully!',
   toastSettingsFailure: 'Something went wrong while saving settings.',
+  loginMethods: 'Login Methods',
+  loginMethodsTip: 'Configure login methods for users.',
   localLogin: 'Enable Local Sign-In',
   localLoginTip:
     'Allow users to sign in using their email address and password, instead of Plex OAuth',
   newPlexLogin: 'Enable New {mediaServerName} Sign-In',
   newPlexLoginTip:
     'Allow {mediaServerName} users to sign in without first being imported',
+  mediaServerLogin: 'Enable {mediaServerName} Sign-In',
+  mediaServerLoginTip:
+    'Allow users to sign in using their {mediaServerName} account',
   oidcLogin: 'Enable OIDC Sign-In',
   oidcLoginTip: 'Allow users to sign in using an OIDC identity provider',
   oidcIssuer: 'OIDC Issuer URL',
@@ -57,6 +63,13 @@ const SettingsUsers = () => {
     return <LoadingSpinner />;
   }
 
+  const mediaServerName =
+    publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+      ? 'Emby'
+      : settings.currentSettings.mediaServerType === MediaServerType.PLEX
+      ? 'Plex'
+      : 'Jellyfin';
+
   return (
     <>
       <PageTitle
@@ -76,6 +89,7 @@ const SettingsUsers = () => {
           initialValues={{
             localLogin: data?.localLogin,
             newPlexLogin: data?.newPlexLogin,
+            mediaServerLogin: data?.mediaServerLogin,
             oidcLogin: data?.oidcLogin,
             oidcIssuer: data?.oidcIssuer,
             oidcProviderName: data?.oidcProviderName,
@@ -92,6 +106,7 @@ const SettingsUsers = () => {
               await axios.post('/api/v1/settings/main', {
                 localLogin: values.localLogin,
                 newPlexLogin: values.newPlexLogin,
+                mediaServerLogin: values.mediaServerLogin,
                 oidcLogin: values.oidcLogin,
                 oidcIssuer: values.oidcIssuer,
                 oidcProviderName: values.oidcProviderName,
@@ -127,74 +142,60 @@ const SettingsUsers = () => {
           {({ isSubmitting, values, setFieldValue }) => {
             return (
               <Form className="section">
-                <div className="form-row">
-                  <label htmlFor="localLogin" className="checkbox-label">
-                    {intl.formatMessage(messages.localLogin)}
-                    <span className="label-tip">
-                      {intl.formatMessage(messages.localLoginTip)}
+                <div
+                  role="group"
+                  aria-labelledby="group-label"
+                  className="form-group"
+                >
+                  <div className="form-row">
+                    <span id="group-label" className="group-label">
+                      {intl.formatMessage(messages.loginMethods)}
+                      <span className="label-tip">
+                        {intl.formatMessage(messages.loginMethodsTip)}
+                      </span>
                     </span>
-                  </label>
-                  <div className="form-input-area">
-                    <Field
-                      type="checkbox"
-                      id="localLogin"
-                      name="localLogin"
-                      onChange={() => {
-                        setFieldValue('localLogin', !values.localLogin);
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="form-row">
-                  <label htmlFor="newPlexLogin" className="checkbox-label">
-                    {intl.formatMessage(messages.newPlexLogin, {
-                      mediaServerName:
-                        publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                          ? 'Emby'
-                          : settings.currentSettings.mediaServerType ===
-                            MediaServerType.PLEX
-                          ? 'Plex'
-                          : 'Jellyfin',
-                    })}
-                    <span className="label-tip">
-                      {intl.formatMessage(messages.newPlexLoginTip, {
-                        mediaServerName:
-                          publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                            ? 'Emby'
-                            : settings.currentSettings.mediaServerType ===
-                              MediaServerType.PLEX
-                            ? 'Plex'
-                            : 'Jellyfin',
-                      })}
-                    </span>
-                  </label>
-                  <div className="form-input-area">
-                    <Field
-                      type="checkbox"
-                      id="newPlexLogin"
-                      name="newPlexLogin"
-                      onChange={() => {
-                        setFieldValue('newPlexLogin', !values.newPlexLogin);
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="form-row">
-                  <label htmlFor="oidcLogin" className="checkbox-label">
-                    {intl.formatMessage(messages.oidcLogin)}
-                    <span className="label-tip">
-                      {intl.formatMessage(messages.oidcLoginTip)}
-                    </span>
-                  </label>
-                  <div className="form-input-area">
-                    <Field
-                      type="checkbox"
-                      id="oidcLogin"
-                      name="oidcLogin"
-                      onChange={() => {
-                        setFieldValue('oidcLogin', !values.oidcLogin);
-                      }}
-                    />
+                    <div className="form-input-area">
+                      <div className="max-w-lg">
+                        <LabeledCheckbox
+                          id="localLogin"
+                          label={intl.formatMessage(messages.localLogin)}
+                          description={intl.formatMessage(
+                            messages.localLoginTip
+                          )}
+                          onChange={() =>
+                            setFieldValue('localLogin', !values.localLogin)
+                          }
+                        />
+                        <LabeledCheckbox
+                          id="mediaServerLogin"
+                          label={intl.formatMessage(messages.mediaServerLogin, {
+                            mediaServerName,
+                          })}
+                          description={intl.formatMessage(
+                            messages.mediaServerLoginTip,
+                            {
+                              mediaServerName,
+                            }
+                          )}
+                          onChange={() =>
+                            setFieldValue(
+                              'mediaServerLogin',
+                              !values.mediaServerLogin
+                            )
+                          }
+                        />
+                        <LabeledCheckbox
+                          id="oidcLogin"
+                          label={intl.formatMessage(messages.oidcLogin)}
+                          description={intl.formatMessage(
+                            messages.oidcLoginTip
+                          )}
+                          onChange={() =>
+                            setFieldValue('oidcLogin', !values.oidcLogin)
+                          }
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
                 {values.oidcLogin && (
@@ -242,6 +243,28 @@ const SettingsUsers = () => {
                     </div>
                   </>
                 )}
+                <div className="form-row">
+                  <label htmlFor="newPlexLogin" className="checkbox-label">
+                    {intl.formatMessage(messages.newPlexLogin, {
+                      mediaServerName,
+                    })}
+                    <span className="label-tip">
+                      {intl.formatMessage(messages.newPlexLoginTip, {
+                        mediaServerName,
+                      })}
+                    </span>
+                  </label>
+                  <div className="form-input-area">
+                    <Field
+                      type="checkbox"
+                      id="newPlexLogin"
+                      name="newPlexLogin"
+                      onChange={() => {
+                        setFieldValue('newPlexLogin', !values.newPlexLogin);
+                      }}
+                    />
+                  </div>
+                </div>
                 <div className="form-row">
                   <label htmlFor="applicationTitle" className="text-label">
                     {intl.formatMessage(messages.movieRequestLimitLabel)}

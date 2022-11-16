@@ -103,6 +103,7 @@ export interface MainSettings {
   };
   hideAvailable: boolean;
   localLogin: boolean;
+  mediaServerLogin: boolean;
   newPlexLogin: boolean;
   oidcLogin: boolean;
   oidcIssuer: string;
@@ -125,6 +126,7 @@ interface FullPublicSettings extends PublicSettings {
   applicationUrl: string;
   hideAvailable: boolean;
   localLogin: boolean;
+  mediaServerLogin: boolean;
   oidcLogin: boolean;
   oidcIssuer: string;
   oidcProviderName: string;
@@ -313,6 +315,7 @@ class Settings {
         },
         hideAvailable: false,
         localLogin: true,
+        mediaServerLogin: true,
         newPlexLogin: true,
         oidcLogin: false,
         oidcIssuer: '',
@@ -532,6 +535,7 @@ class Settings {
       applicationUrl: this.data.main.applicationUrl,
       hideAvailable: this.data.main.hideAvailable,
       localLogin: this.data.main.localLogin,
+      mediaServerLogin: this.data.main.mediaServerLogin,
       oidcLogin: this.data.main.oidcLogin,
       oidcIssuer: this.data.main.oidcIssuer,
       oidcProviderName: this.data.main.oidcProviderName,
