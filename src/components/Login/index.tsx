@@ -86,7 +86,7 @@ const Login = () => {
     {
       // OIDC Login
       title: intl.formatMessage(messages.useoidcaccount, {
-        OIDCProvider: settings.currentSettings.oidcProviderName,
+        OIDCProvider: settings.currentSettings.oidcName,
       }),
       enabled: settings.currentSettings.oidcLogin,
       content: (

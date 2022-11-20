@@ -1,5 +1,4 @@
 import MiniQuotaDisplay from '@app/components/Layout/UserDropdown/MiniQuotaDisplay';
-import useSettings from '@app/hooks/useSettings';
 import { useUser } from '@app/hooks/useUser';
 import { Menu, Transition } from '@headlessui/react';
 import { ClockIcon, LogoutIcon } from '@heroicons/react/outline';
@@ -9,7 +8,6 @@ import type { LinkProps } from 'next/link';
 import Link from 'next/link';
 import { forwardRef, Fragment } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import { useAuth } from 'react-oidc-context';
 
 const messages = defineMessages({
   myprofile: 'Profile',
@@ -34,16 +32,11 @@ const ForwardedLink = forwardRef<
 ForwardedLink.displayName = 'ForwardedLink';
 
 const UserDropdown = () => {
-  const settings = useSettings();
   const intl = useIntl();
-  const auth = useAuth();
   const { user, revalidate } = useUser();
 
   const logout = async () => {
     const response = await axios.post('/api/v1/auth/logout');
-    if (settings.currentSettings.oidcLogin && auth.isAuthenticated) {
-      await auth.signoutRedirect();
-    }
 
     if (response.data?.status === 'ok') {
       revalidate();

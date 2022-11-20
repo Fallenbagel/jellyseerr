@@ -1,12 +1,10 @@
 import Button from '@app/components/Common/Button';
 import useSettings from '@app/hooks/useSettings';
 import globalMessages from '@app/i18n/globalMessages';
+import OIDCAuth from '@app/utils/oidc';
 import { LoginIcon } from '@heroicons/react/outline';
-import axios from 'axios';
 import type React from 'react';
-import { useEffect } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import { useAuth } from 'react-oidc-context';
 
 const messages = defineMessages({
   signinwithoidc: 'Sign in with {OIDCProvider}',
@@ -22,51 +20,48 @@ interface OidcLoginProps {
   onError?: (message: string) => void;
 }
 
+const oidcAuth = new OIDCAuth();
+
 const OidcLogin: React.FC<OidcLoginProps> = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   revalidate,
   isProcessing,
   setProcessing,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   hasError,
   onError,
 }) => {
   const intl = useIntl();
-  const auth = useAuth();
   const settings = useSettings();
 
-  useEffect(() => {
-    const login = async () => {
-      setProcessing(true);
-      try {
-        await axios.post('/api/v1/auth/oidc', {
-          idToken: auth.user?.id_token,
-          accessToken: auth.user?.access_token,
-        });
-      } catch (e) {
-        if (onError) onError(intl.formatMessage(messages.loginerror));
-        setProcessing(false);
-      } finally {
-        revalidate();
-      }
-    };
-    if (auth.isAuthenticated && !hasError) {
-      login();
+  const handleClick = async () => {
+    setProcessing(true);
+    try {
+      await oidcAuth.preparePopup();
+    } catch (e) {
+      let message = 'Unknown Error';
+      if (e instanceof Error) message = e.message;
+      if (onError) onError(message);
+      return;
+    } finally {
+      setProcessing(false);
     }
-  }, [auth, revalidate, intl, setProcessing, onError, hasError]);
+  };
 
   return (
     <span className="block w-full rounded-md shadow-sm">
       <Button
         buttonType="primary"
         className="w-full"
-        onClick={() => auth.signinRedirect()}
-        disabled={auth.isLoading || isProcessing}
+        onClick={handleClick}
+        disabled={isProcessing}
       >
         <LoginIcon />
         <span>
-          {auth.isLoading
+          {isProcessing
             ? intl.formatMessage(globalMessages.loading)
             : intl.formatMessage(messages.signinwithoidc, {
-                OIDCProvider: settings.currentSettings.oidcProviderName,
+                OIDCProvider: settings.currentSettings.oidcName,
               })}
         </span>
       </Button>

@@ -106,9 +106,10 @@ export interface MainSettings {
   mediaServerLogin: boolean;
   newPlexLogin: boolean;
   oidcLogin: boolean;
-  oidcIssuer: string;
-  oidcProviderName: string;
+  oidcName: string;
   oidcClientId: string;
+  oidcClientSecret: string;
+  oidcDomain: string;
   region: string;
   originalLanguage: string;
   trustProxy: boolean;
@@ -128,9 +129,7 @@ interface FullPublicSettings extends PublicSettings {
   localLogin: boolean;
   mediaServerLogin: boolean;
   oidcLogin: boolean;
-  oidcIssuer: string;
-  oidcProviderName: string;
-  oidcClientId: string;
+  oidcName: string;
   movie4kEnabled: boolean;
   series4kEnabled: boolean;
   region: string;
@@ -318,9 +317,10 @@ class Settings {
         mediaServerLogin: true,
         newPlexLogin: true,
         oidcLogin: false,
-        oidcIssuer: '',
-        oidcProviderName: 'OpenID Connect',
+        oidcName: 'OpenID Connect',
         oidcClientId: '',
+        oidcClientSecret: '',
+        oidcDomain: '',
         region: '',
         originalLanguage: '',
         trustProxy: false,
@@ -537,9 +537,7 @@ class Settings {
       localLogin: this.data.main.localLogin,
       mediaServerLogin: this.data.main.mediaServerLogin,
       oidcLogin: this.data.main.oidcLogin,
-      oidcIssuer: this.data.main.oidcIssuer,
-      oidcProviderName: this.data.main.oidcProviderName,
-      oidcClientId: this.data.main.oidcClientId,
+      oidcName: this.data.main.oidcName,
       movie4kEnabled: this.data.radarr.some(
         (radarr) => radarr.is4k && radarr.isDefault
       ),

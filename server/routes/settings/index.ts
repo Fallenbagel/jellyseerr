@@ -63,7 +63,7 @@ settingsRoutes.get('/main', (req, res, next) => {
   res.status(200).json(filteredMainSettings(req.user, settings.main));
 });
 
-settingsRoutes.post('/main', (req, res, next) => {
+settingsRoutes.post('/main', (req, res) => {
   const settings = getSettings();
 
   const newSettings: MainSettings = merge(settings.main, req.body);
@@ -73,7 +73,7 @@ settingsRoutes.post('/main', (req, res, next) => {
     !newSettings.mediaServerLogin &&
     !newSettings.localLogin
   ) {
-    return next({
+    return res.status(500).json({
       status: 500,
       message: 'At least one authentication method must be enabled.',
     });

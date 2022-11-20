@@ -1,4 +1,3 @@
-import OidcAPI from '@server/api/oidc';
 import { getRepository } from '@server/datasource';
 import { User } from '@server/entity/User';
 import type {
@@ -6,12 +5,6 @@ import type {
   PermissionCheckOptions,
 } from '@server/lib/permissions';
 import { getSettings } from '@server/lib/settings';
-import {
-  expressjwt as jwt,
-  type GetVerificationKey,
-  type TokenGetter,
-} from 'express-jwt';
-import jwksRsa from 'jwks-rsa';
 
 export const checkUser: Middleware = async (req, _res, next) => {
   const settings = getSettings();
@@ -62,42 +55,4 @@ export const isAuthenticated = (
     }
   };
   return authMiddleware;
-};
-
-// checking the JWT
-export const checkJwt: Middleware = (req, res, next) => {
-  const settings = getSettings();
-  settings.load();
-
-  const oidcIssuer = settings.fullPublicSettings.oidcIssuer;
-  const oidcApi = new OidcAPI(oidcIssuer);
-
-  const getSecret: GetVerificationKey = async function (req, token) {
-    const oidcInfo = await oidcApi.getOidcInfo();
-
-    const secret = (
-      jwksRsa.expressJwtSecret({
-        cache: true,
-        rateLimit: true,
-        jwksRequestsPerMinute: 5,
-        jwksUri: oidcInfo.jwks_uri,
-      }) as GetVerificationKey
-    )(req, token);
-
-    return secret;
-  };
-
-  const getToken: TokenGetter = (req) => {
-    const body = req.body as { idToken?: string; accessToken?: string };
-    return body.idToken ?? '';
-  };
-
-  jwt({
-    // Dynamically provide a signing key based on the kid in the header
-    // and the signing keys provided by the JWKS endpoint
-    secret: getSecret,
-    issuer: oidcIssuer,
-    getToken,
-    algorithms: ['RS256'],
-  })(req, res, next);
 };

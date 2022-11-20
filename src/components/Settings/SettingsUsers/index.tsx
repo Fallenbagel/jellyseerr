@@ -10,11 +10,12 @@ import { SaveIcon } from '@heroicons/react/outline';
 import { MediaServerType } from '@server/constants/server';
 import type { MainSettings } from '@server/lib/settings';
 import axios from 'axios';
-import { Field, Form, Formik } from 'formik';
+import { ErrorMessage, Field, Form, Formik } from 'formik';
 import getConfig from 'next/config';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR, { mutate } from 'swr';
+import * as yup from 'yup';
 
 const messages = defineMessages({
   users: 'Users',
@@ -35,17 +36,52 @@ const messages = defineMessages({
     'Allow users to sign in using their {mediaServerName} account',
   oidcLogin: 'Enable OIDC Sign-In',
   oidcLoginTip: 'Allow users to sign in using an OIDC identity provider',
-  oidcIssuer: 'OIDC Issuer URL',
-  oidcIssuerTip: "The base URL of the identity provider's OIDC endpoint",
-  oidcProviderName: 'OIDC Provider Name',
-  oidcProviderNameTip:
-    'Name of the OIDC Provider which appears on the login screen',
+  oidcDomain: 'OIDC Issuer URL',
+  oidcDomainTip: "The base URL of the identity provider's OIDC endpoint",
+  oidcName: 'OIDC Provider Name',
+  oidcNameTip: 'Name of the OIDC Provider which appears on the login screen',
   oidcClientId: 'OIDC Client ID',
   oidcClientIdTip: 'The OIDC Client ID assigned to Jellyseerr',
+  oidcClientSecret: 'OIDC Client Secret',
+  oidcClientSecretTip: 'The OIDC Client Secret assigned to Jellyseerr',
   movieRequestLimitLabel: 'Global Movie Request Limit',
   tvRequestLimitLabel: 'Global Series Request Limit',
   defaultPermissions: 'Default Permissions',
   defaultPermissionsTip: 'Initial permissions assigned to new users',
+});
+
+const validationSchema = yup.object().shape({
+  oidcLogin: yup.boolean(),
+  oidcName: yup.string().when('oidcLogin', {
+    is: true,
+    then: yup.string().required(),
+  }),
+  oidcClientId: yup.string().when('oidcLogin', {
+    is: true,
+    then: yup.string().required(),
+  }),
+  oidcClientSecret: yup.string().when('oidcLogin', {
+    is: true,
+    then: yup.string().required(),
+  }),
+  oidcDomain: yup.string().when('oidcLogin', {
+    is: true,
+    then: yup
+      .string()
+      .required()
+      .test({
+        message: 'Must be a valid domain without query string parameters.',
+        test: (val) => {
+          return (
+            !!val &&
+            // Any HTTPS domain without query string
+            /^((?:http:\/\/)|(?:https:\/\/))(www.)?((?:[a-zA-Z0-9]+\.[a-z]{3})|(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?::\d+)?))([/a-zA-Z0-9.]*)$/i.test(
+              val
+            )
+          );
+        },
+      }),
+  }),
 });
 
 const SettingsUsers = () => {
@@ -91,15 +127,17 @@ const SettingsUsers = () => {
             newPlexLogin: data?.newPlexLogin,
             mediaServerLogin: data?.mediaServerLogin,
             oidcLogin: data?.oidcLogin,
-            oidcIssuer: data?.oidcIssuer,
-            oidcProviderName: data?.oidcProviderName,
+            oidcName: data?.oidcName,
             oidcClientId: data?.oidcClientId,
+            oidcClientSecret: data?.oidcClientSecret,
+            oidcDomain: data?.oidcDomain,
             movieQuotaLimit: data?.defaultQuotas.movie.quotaLimit ?? 0,
             movieQuotaDays: data?.defaultQuotas.movie.quotaDays ?? 7,
             tvQuotaLimit: data?.defaultQuotas.tv.quotaLimit ?? 0,
             tvQuotaDays: data?.defaultQuotas.tv.quotaDays ?? 7,
             defaultPermissions: data?.defaultPermissions ?? 0,
           }}
+          validationSchema={validationSchema}
           enableReinitialize
           onSubmit={async (values) => {
             try {
@@ -108,9 +146,10 @@ const SettingsUsers = () => {
                 newPlexLogin: values.newPlexLogin,
                 mediaServerLogin: values.mediaServerLogin,
                 oidcLogin: values.oidcLogin,
-                oidcIssuer: values.oidcIssuer,
-                oidcProviderName: values.oidcProviderName,
+                oidcName: values.oidcName,
                 oidcClientId: values.oidcClientId,
+                oidcClientSecret: values.oidcClientSecret,
+                oidcDomain: values.oidcDomain,
                 defaultQuotas: {
                   movie: {
                     quotaLimit: values.movieQuotaLimit,
@@ -201,34 +240,43 @@ const SettingsUsers = () => {
                 {values.oidcLogin && (
                   <>
                     <div className="form-row">
-                      <label htmlFor="oidcIssuer" className="text-label">
-                        {intl.formatMessage(messages.oidcIssuer)}
+                      <label htmlFor="oidcDomain" className="text-label">
+                        {intl.formatMessage(messages.oidcDomain)}
+                        <span className="label-required">*</span>
                         <span className="label-tip">
-                          {intl.formatMessage(messages.oidcIssuerTip)}
+                          {intl.formatMessage(messages.oidcDomainTip)}
                         </span>
                       </label>
                       <div className="form-input-area">
-                        <Field id="oidcIssuer" name="oidcIssuer" type="text" />
+                        <Field id="oidcDomain" name="oidcDomain" type="text" />
+                        <ErrorMessage
+                          className="error"
+                          component="span"
+                          name="oidcDomain"
+                        />
                       </div>
                     </div>
                     <div className="form-row">
-                      <label htmlFor="oidcProviderName" className="text-label">
-                        {intl.formatMessage(messages.oidcProviderName)}
+                      <label htmlFor="oidcName" className="text-label">
+                        {intl.formatMessage(messages.oidcName)}
+                        <span className="label-required">*</span>
                         <span className="label-tip">
-                          {intl.formatMessage(messages.oidcProviderNameTip)}
+                          {intl.formatMessage(messages.oidcNameTip)}
                         </span>
                       </label>
                       <div className="form-input-area">
-                        <Field
-                          id="oidcProviderName"
-                          name="oidcProviderName"
-                          type="text"
+                        <Field id="oidcName" name="oidcName" type="text" />
+                        <ErrorMessage
+                          className="error"
+                          component="span"
+                          name="oidcName"
                         />
                       </div>
                     </div>
                     <div className="form-row">
                       <label htmlFor="oidcClientId" className="text-label">
                         {intl.formatMessage(messages.oidcClientId)}
+                        <span className="label-required">*</span>
                         <span className="label-tip">
                           {intl.formatMessage(messages.oidcClientIdTip)}
                         </span>
@@ -238,6 +286,32 @@ const SettingsUsers = () => {
                           id="oidcClientId"
                           name="oidcClientId"
                           type="text"
+                        />
+                        <ErrorMessage
+                          className="error"
+                          component="span"
+                          name="oidcClientId"
+                        />
+                      </div>
+                    </div>
+                    <div className="form-row">
+                      <label htmlFor="oidcClientSecret" className="text-label">
+                        {intl.formatMessage(messages.oidcClientSecret)}
+                        <span className="label-required">*</span>
+                        <span className="label-tip">
+                          {intl.formatMessage(messages.oidcClientSecretTip)}
+                        </span>
+                      </label>
+                      <div className="form-input-area">
+                        <Field
+                          id="oidcClientSecret"
+                          name="oidcClientSecret"
+                          type="text"
+                        />
+                        <ErrorMessage
+                          className="error"
+                          component="span"
+                          name="oidcClientSecret"
                         />
                       </div>
                     </div>
