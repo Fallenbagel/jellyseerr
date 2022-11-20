@@ -420,20 +420,13 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                           : request.seasons.length,
                     })}
                   </span>
-                  {title.seasons.filter((season) => season.seasonNumber !== 0)
-                    .length === request.seasons.length ? (
-                    <span className="mr-2 uppercase">
-                      <Badge>{intl.formatMessage(globalMessages.all)}</Badge>
-                    </span>
-                  ) : (
-                    <div className="hide-scrollbar flex flex-nowrap overflow-x-scroll">
-                      {request.seasons.map((season) => (
-                        <span key={`season-${season.id}`} className="mr-2">
-                          <Badge>{season.seasonNumber}</Badge>
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  <div className="hide-scrollbar flex flex-nowrap overflow-x-scroll">
+                    {request.seasons.map((season) => (
+                      <span key={`season-${season.id}`} className="mr-2">
+                        <Badge>{season.seasonNumber}</Badge>
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

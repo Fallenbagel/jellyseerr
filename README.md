@@ -38,10 +38,74 @@ https://hub.docker.com/r/fallenbagel/jellyseerr
 
 ### Launching Jellyseerr manually:
 
+#### Windows
+
+Pre-requisites:
+
+- Nodejs (atleast LTS version)
+- Yarn
+- Download the source code from the github (Either develop branch or main for stable)
+
 ```bash
+npm i -g win-node-env
 yarn install
 yarn run build
 yarn start
+```
+
+#### Linux
+
+Pre-requisites:
+
+- Nodejs (atleast LTS version)
+- Yarn
+- Git
+
+```bash
+git clone https://github.com/Fallenbagel/jellyseerr.git && cd jellyseerr
+git checkout main #if you want to run stable instead of develop
+yarn install
+yarn run build
+yarn start
+```
+
+_Systemd-service:_
+
+- assuming jellyseerr was cloned to `/opt/`
+  and the environmentfile is located at `/etc/jellyseerr`
+
+service:
+
+```
+[Unit]
+Description=Jellyseerr Service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+EnvironmentFile=/etc/jellyseerr/jellyseerr.conf
+Environment=NODE_ENV=production
+Type=exec
+Restart=on-failure
+WorkingDirectory=/opt/jellyseerr
+ExecStart=/root/.nvm/versions/node/v18.7.0/bin/node dist/index.js
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Environmentfile:
+
+```
+# Jellyseerr's default port is 5055, if you want to use both, change this.
+# specify on which port to listen
+PORT=5055
+
+# specify on which interface to listen, by default jellyseerr listens on all interfaces
+#HOST=127.0.0.1
+
+# Uncomment if your media server is emby instead of jellyfin.
+# JELLYFIN_TYPE=emby
 ```
 
 ### Packages:

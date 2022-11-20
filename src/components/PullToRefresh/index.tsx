@@ -12,18 +12,22 @@ const PullToRefresh: React.FC = () => {
         Router.reload();
       },
       iconArrow: ReactDOMServer.renderToString(
-        <RefreshIcon className="z-50 m-auto h-9 w-9 rounded-full border-4 border-gray-800 bg-gray-800 text-indigo-500 ring-1 ring-gray-700" />
+        <div className="p-2">
+          <RefreshIcon className="z-50 m-auto h-9 w-9 rounded-full border-4 border-gray-800 bg-gray-800 text-indigo-500 ring-1 ring-gray-700" />
+        </div>
       ),
       iconRefreshing: ReactDOMServer.renderToString(
-        <RefreshIcon
-          className="z-50 m-auto h-9 w-9 animate-spin rounded-full border-4 border-gray-800 bg-gray-800 text-indigo-500 ring-1 ring-gray-700"
+        <div
+          className="animate-spin p-2"
           style={{ animationDirection: 'reverse' }}
-        />
+        >
+          <RefreshIcon className="z-50 m-auto h-9 w-9 rounded-full border-4 border-gray-800 bg-gray-800 text-indigo-500 ring-1 ring-gray-700" />
+        </div>
       ),
       instructionsPullToRefresh: ReactDOMServer.renderToString(<div />),
       instructionsReleaseToRefresh: ReactDOMServer.renderToString(<div />),
       instructionsRefreshing: ReactDOMServer.renderToString(<div />),
-      distReload: 55,
+      distReload: 60,
     });
     return () => {
       PR.destroyAll();
