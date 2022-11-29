@@ -17,17 +17,15 @@ interface OidcLoginProps {
   isProcessing: boolean;
   setProcessing: (state: boolean) => void;
   hasError: boolean;
-  onError?: (message: string) => void;
+  onError: (message: string) => void;
 }
 
 const oidcAuth = new OIDCAuth();
 
 const OidcLogin: React.FC<OidcLoginProps> = ({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   revalidate,
   isProcessing,
   setProcessing,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   hasError,
   onError,
 }) => {
@@ -38,10 +36,11 @@ const OidcLogin: React.FC<OidcLoginProps> = ({
     setProcessing(true);
     try {
       await oidcAuth.preparePopup();
+      revalidate();
     } catch (e) {
       let message = 'Unknown Error';
       if (e instanceof Error) message = e.message;
-      if (onError) onError(message);
+      onError(message);
       return;
     } finally {
       setProcessing(false);
@@ -54,7 +53,7 @@ const OidcLogin: React.FC<OidcLoginProps> = ({
         buttonType="primary"
         className="w-full"
         onClick={handleClick}
-        disabled={isProcessing}
+        disabled={isProcessing || hasError}
       >
         <LoginIcon />
         <span>
