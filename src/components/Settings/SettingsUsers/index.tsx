@@ -1,6 +1,7 @@
 import Button from '@app/components/Common/Button';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import PageTitle from '@app/components/Common/PageTitle';
+import FormErrorNotification from '@app/components/FormErrorNotification';
 import LabeledCheckbox from '@app/components/LabeledCheckbox';
 import PermissionEdit from '@app/components/PermissionEdit';
 import QuotaSelector from '@app/components/QuotaSelector';
@@ -50,39 +51,57 @@ const messages = defineMessages({
   defaultPermissionsTip: 'Initial permissions assigned to new users',
 });
 
-const validationSchema = yup.object().shape({
-  oidcLogin: yup.boolean(),
-  oidcName: yup.string().when('oidcLogin', {
-    is: true,
-    then: yup.string().required(),
-  }),
-  oidcClientId: yup.string().when('oidcLogin', {
-    is: true,
-    then: yup.string().required(),
-  }),
-  oidcClientSecret: yup.string().when('oidcLogin', {
-    is: true,
-    then: yup.string().required(),
-  }),
-  oidcDomain: yup.string().when('oidcLogin', {
-    is: true,
-    then: yup
-      .string()
-      .required()
-      .test({
-        message: 'Must be a valid domain without query string parameters.',
-        test: (val) => {
-          return (
-            !!val &&
-            // Any HTTPS domain without query string
-            /^((?:http:\/\/)|(?:https:\/\/))(www.)?((?:[a-zA-Z0-9]+\.[a-z]{3})|(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?::\d+)?))([/a-zA-Z0-9.]*)$/i.test(
-              val
-            )
-          );
-        },
-      }),
-  }),
-});
+const validationSchema = yup
+  .object()
+  .shape({
+    localLogin: yup.boolean(),
+    mediaServerLogin: yup.boolean(),
+    oidcLogin: yup.boolean(),
+    oidcName: yup.string().when('oidcLogin', {
+      is: true,
+      then: yup.string().required(),
+    }),
+    oidcClientId: yup.string().when('oidcLogin', {
+      is: true,
+      then: yup.string().required(),
+    }),
+    oidcClientSecret: yup.string().when('oidcLogin', {
+      is: true,
+      then: yup.string().required(),
+    }),
+    oidcDomain: yup.string().when('oidcLogin', {
+      is: true,
+      then: yup
+        .string()
+        .required()
+        .test({
+          message: 'Must be a valid domain without query string parameters.',
+          test: (val) => {
+            return (
+              !!val &&
+              // Any HTTPS domain without query string
+              /^((?:http:\/\/)|(?:https:\/\/))(www.)?((?:[a-zA-Z0-9]+\.[a-z]{3})|(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?::\d+)?))([/a-zA-Z0-9.]*)$/i.test(
+                val
+              )
+            );
+          },
+        }),
+    }),
+  })
+  .test({
+    name: 'atLeastOneAuth',
+    test: function (values) {
+      const isValid = ['localLogin', 'mediaServerLogin', 'oidcLogin'].some(
+        (field) => !!values[field]
+      );
+
+      if (isValid) return true;
+      return this.createError({
+        path: 'localLogin | mediaServerLogin | oidcLogin',
+        message: 'At least one authentication method must be selected.',
+      });
+    },
+  });
 
 const SettingsUsers = () => {
   const { addToast } = useToasts();
@@ -178,7 +197,7 @@ const SettingsUsers = () => {
             }
           }}
         >
-          {({ isSubmitting, values, setFieldValue }) => {
+          {({ isSubmitting, values, setFieldValue, isValid, errors }) => {
             return (
               <Form className="section">
                 <div
@@ -192,6 +211,16 @@ const SettingsUsers = () => {
                       <span className="label-tip">
                         {intl.formatMessage(messages.loginMethodsTip)}
                       </span>
+                      {'localLogin | mediaServerLogin | oidcLogin' in
+                        errors && (
+                        <span className="error">
+                          {
+                            (errors as Record<string, string>)[
+                              'localLogin | mediaServerLogin | oidcLogin'
+                            ]
+                          }
+                        </span>
+                      )}
                     </span>
                     <div className="form-input-area">
                       <div className="max-w-lg">
@@ -395,11 +424,14 @@ const SettingsUsers = () => {
                 </div>
                 <div className="actions">
                   <div className="flex justify-end">
+                    <span className="self-center">
+                      <FormErrorNotification />
+                    </span>
                     <span className="ml-3 inline-flex rounded-md shadow-sm">
                       <Button
                         buttonType="primary"
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !isValid}
                       >
                         <SaveIcon />
                         <span>
