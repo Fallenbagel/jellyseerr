@@ -37,6 +37,7 @@ _*Jellyseerr currently does not support any library types other than *`Shows`* a
 In addition, you will need to turn off in jellyfin `settings > Home > Automatically group content from the following folders into views such as 'Movies', 'Music' and 'TV':`.*_
 
 ### Launching Jellyseerr using Docker
+
 Check out our dockerhub for instructions on how to install and run Jellyseerr:
 https://hub.docker.com/r/fallenbagel/jellyseerr
 
