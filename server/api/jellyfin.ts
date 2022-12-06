@@ -38,6 +38,7 @@ export interface JellyfinLibraryItem {
   SeasonId?: string;
   SeasonName?: string;
   IndexNumber?: number;
+  IndexNumberEnd?: number;
   ParentIndexNumber?: number;
   MediaType: string;
 }
