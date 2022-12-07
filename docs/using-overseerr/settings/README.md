@@ -72,6 +72,22 @@ When disabled, Plex OAuth becomes the only sign-in option, and any "local users"
 
 This setting is **enabled** by default.
 
+## Enable Media Server Sign-In
+
+When enabled, users will be able to sign in on the login screen using their Plex / Jellyfin accounts.
+
+When disabled, local sign-in will be the only option.
+
+This setting is **enabled** by default.
+
+## Enable OIDC Sign-In
+
+When enabled, allows users to sign in to local accounts using an OIDC identity provider, which requires additional configuration.
+
+For this setting to function properly, the OIDC Issuer URL, Provider Name, Client ID, and Client Secret must all be properly set.
+
+This setting is **disabled** by default.
+
 ### Enable New Plex Sign-In
 
 When enabled, users with access to your Plex server will be able to sign in to Overseerr even if they have not yet been imported. Users will be automatically assigned the permissions configured in the [Default Permissions](#default-permissions) setting upon first sign-in.
