@@ -79,10 +79,8 @@ const validationSchema = yup
           test: (val) => {
             return (
               !!val &&
-              // Any HTTPS domain without query string
-              /^((?:http:\/\/)|(?:https:\/\/))(www.)?((?:[a-zA-Z0-9]+\.[a-z]{3})|(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?::\d+)?))([/a-zA-Z0-9.]*)$/i.test(
-                val
-              )
+              // Any HTTP(S) domain without query string
+              /^(https?:\/\/)([A-Za-z0-9-_.!~*'():]*)(((?!\?).)*$)/i.test(val)
             );
           },
         }),
