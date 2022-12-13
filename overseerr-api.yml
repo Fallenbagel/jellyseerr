@@ -3472,6 +3472,7 @@ paths:
       security: []
       summary: The callback endpoint for the OpenID Connect provider redirect
       description: Takes the `code` and `state` parameters from the OpenID Connect provider, and exchanges them for a token.
+      x-allow-unknown-query-parameters: true
       parameters:
         - in: query
           name: code
