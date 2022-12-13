@@ -41,9 +41,8 @@ const OidcLogin: React.FC<OidcLoginProps> = ({
       let message = 'Unknown Error';
       if (e instanceof Error) message = e.message;
       onError(message);
-      return;
-    } finally {
       setProcessing(false);
+      return;
     }
   };
 
