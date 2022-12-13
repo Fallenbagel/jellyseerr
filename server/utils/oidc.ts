@@ -1,4 +1,10 @@
+import type {
+  IdTokenClaims,
+  Mandatory,
+  OidcStandardClaims,
+} from '@server/interfaces/api/oidcInterfaces';
 import { getSettings } from '@server/lib/settings';
+import axios from 'axios';
 import type { Request } from 'express';
 import * as yup from 'yup';
 
@@ -8,13 +14,19 @@ export async function getOIDCWellknownConfiguration(domain: string) {
   const wellKnownUrl = new URL(
     domain.replace(/\/$/, '') + '/.well-known/openid-configuration'
   ).toString();
-  const wellKnownInfo: WellKnownConfiguration = await fetch(wellKnownUrl, {
-    headers: new Headers([['Content-Type', 'application/json']]),
-  }).then((r) => r.json());
+
+  const wellKnownInfo: WellKnownConfiguration = await axios
+    .get(wellKnownUrl, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((r) => r.data);
 
   return wellKnownInfo;
 }
 
+/** Generate authentication request url */
 export async function getOIDCRedirectUrl(req: Request, state: string) {
   const settings = getSettings();
   const { oidcDomain, oidcClientId } = settings.main;
@@ -34,7 +46,50 @@ export async function getOIDCRedirectUrl(req: Request, state: string) {
   return url.toString();
 }
 
-export const createJwtSchema = ({
+/** Exchange authorization code for token data */
+export async function fetchOIDCTokenData(
+  req: Request,
+  wellKnownInfo: WellKnownConfiguration,
+  code: string
+) {
+  const settings = getSettings();
+  const { oidcClientId, oidcClientSecret } = settings.main;
+
+  const callbackUrl = new URL(
+    '/api/v1/auth/oidc-callback',
+    `${req.protocol}://${req.headers.host}`
+  );
+
+  const formData = new URLSearchParams();
+  formData.append('client_secret', oidcClientSecret);
+  formData.append('grant_type', 'authorization_code');
+  formData.append('redirect_uri', callbackUrl.toString());
+  formData.append('client_id', oidcClientId);
+  formData.append('code', code);
+
+  return await axios
+    .post(wellKnownInfo.token_endpoint, formData)
+    .then((r) => r.data);
+}
+
+export async function getOIDCUserInfo(
+  wellKnownInfo: WellKnownConfiguration,
+  authToken: string
+) {
+  const userInfo = await axios
+    .get(wellKnownInfo.userinfo_endpoint, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        Accept: 'application/json',
+      },
+    })
+    .then((r) => r.data);
+
+  return userInfo;
+}
+
+/** Generates a schema to validate ID token JWT and userinfo claims */
+export const createIdTokenSchema = ({
   oidcDomain,
   oidcClientId,
 }: {
@@ -83,10 +138,14 @@ export const createJwtSchema = ({
         }
       ),
     // these should exist because we set the scope to `openid profile email`
+    name: yup.string().required(),
     email: yup.string().email().required(),
     email_verified: yup.boolean().required(),
   });
 };
+
+export type FullUserInfo = IdTokenClaims &
+  Mandatory<OidcStandardClaims, 'name' | 'email' | 'email_verified'>;
 
 export interface WellKnownConfiguration {
   issuer: string;

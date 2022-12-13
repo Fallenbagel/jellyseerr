@@ -4,22 +4,25 @@ import { MediaServerType } from '@server/constants/server';
 import { UserType } from '@server/constants/user';
 import { getRepository } from '@server/datasource';
 import { User } from '@server/entity/User';
+import type { IdTokenClaims } from '@server/interfaces/api/oidcInterfaces';
 import { startJobs } from '@server/job/schedule';
 import { Permission } from '@server/lib/permissions';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
 import {
-  createJwtSchema,
+  createIdTokenSchema,
+  fetchOIDCTokenData,
   getOIDCRedirectUrl,
+  getOIDCUserInfo,
   getOIDCWellknownConfiguration,
+  type FullUserInfo,
 } from '@server/utils/oidc';
 import { randomBytes } from 'crypto';
 import * as EmailValidator from 'email-validator';
 import { Router } from 'express';
 import gravatarUrl from 'gravatar-url';
 import decodeJwt from 'jwt-decode';
-import type { InferType } from 'yup';
 
 const authRoutes = Router();
 
@@ -647,12 +650,15 @@ authRoutes.get('/oidc-login', async (req, res) => {
   return res.redirect(redirectUrl);
 });
 
-authRoutes.get('/oidc-callback', async (req, res) => {
+authRoutes.get('/oidc-callback', async (req, res, next) => {
   const settings = getSettings();
-  const { oidcDomain, oidcClientId, oidcClientSecret } = settings.main;
+  const { oidcDomain, oidcClientId } = settings.main;
 
   if (!settings.main.oidcLogin) {
-    return res.status(500).json({ error: 'OIDC sign-in is disabled.' });
+    return next({
+      status: 500,
+      message: 'OIDC sign-in is disabled.',
+    });
   }
   const cookieState = req.cookies['oidc-state'];
   const url = new URL(req.url, `${req.protocol}://${req.hostname}`);
@@ -669,10 +675,13 @@ authRoutes.get('/oidc-callback', async (req, res) => {
         state: state,
         cookieState: cookieState,
       });
-      return res.redirect('/login');
+      return next({
+        status: 500,
+        message: 'Invalid state.',
+      });
     }
 
-    // Check that a code as been issued
+    // Check that a code has been issued
     const code = url.searchParams.get('code');
     if (!code) {
       logger.info('Failed OIDC login attempt', {
@@ -680,95 +689,117 @@ authRoutes.get('/oidc-callback', async (req, res) => {
         ip: req.ip,
         code: code,
       });
-      return res.redirect('/login');
+      return next({
+        status: 500,
+        message: 'Invalid code.',
+      });
     }
 
     const wellKnownInfo = await getOIDCWellknownConfiguration(oidcDomain);
 
     // Fetch the token data
-    const callbackUrl = new URL(
-      '/api/v1/auth/oidc-callback',
-      `${req.protocol}://${req.headers.host}`
-    );
-
-    const formData = new URLSearchParams();
-    formData.append('client_secret', oidcClientSecret);
-    formData.append('grant_type', 'authorization_code');
-    formData.append('redirect_uri', callbackUrl.toString());
-    formData.append('client_id', oidcClientId);
-    formData.append('code', code);
-    const response = await fetch(wellKnownInfo.token_endpoint, {
-      method: 'POST',
-      headers: new Headers([
-        ['Content-Type', 'application/x-www-form-urlencoded'],
-      ]),
-      body: formData,
-    });
-
-    // Check that the response is valid
-    const body = (await response.json()) as
-      | { id_token: string; error: never }
+    const body = (await fetchOIDCTokenData(req, wellKnownInfo, code)) as
+      | { id_token: string; access_token: string; error: never }
       | { error: string };
+
+    // Validate that the token response is valid and not manipulated
     if (body.error) {
       logger.info('Failed OIDC login attempt', {
         cause: 'Invalid token response',
         ip: req.ip,
         body: body,
       });
-      return res.redirect('/login');
+      return next({
+        status: 500,
+        message: 'Invalid token response.',
+      });
     }
 
-    // Validate that the token response is valid and not manipulated
-    const { id_token: idToken } = body as Extract<
+    // Extract the ID token and access token
+    const { id_token: idToken, access_token: accessToken } = body as Extract<
       typeof body,
-      { id_token: string }
+      { id_token: string; access_token: string }
     >;
-    try {
-      const decoded = decodeJwt(idToken);
-      const jwtSchema = createJwtSchema({
-        oidcClientId: oidcClientId,
-        oidcDomain: oidcDomain,
-      });
 
-      await jwtSchema.validate(decoded);
-    } catch {
+    // Attempt to decode ID token jwt, catch and return any errors
+    const tryDecodeJwt = (): [IdTokenClaims | null, unknown] => {
+      try {
+        const decoded: IdTokenClaims = decodeJwt(idToken);
+        return [decoded, null];
+      } catch (error) {
+        return [null, error];
+      }
+    };
+    const [decoded, err] = tryDecodeJwt();
+
+    if (err != null) {
       logger.info('Failed OIDC login attempt', {
         cause: 'Invalid jwt',
         ip: req.ip,
         idToken: idToken,
       });
-      return res.redirect('/login');
+      return next({
+        status: 500,
+        message: 'Invalid jwt.',
+      });
     }
 
-    // Check that email is verified and map email to user
-    const decoded: InferType<ReturnType<typeof createJwtSchema>> =
-      decodeJwt(idToken);
+    // Merge claims from JWT with data from userinfo endpoint
+    const userInfo = await getOIDCUserInfo(wellKnownInfo, accessToken);
+    const fullUserInfo: FullUserInfo = { ...decoded, ...userInfo };
 
-    if (!decoded.email_verified) {
+    // Validate ID token jwt and user info
+    try {
+      const idTokenSchema = createIdTokenSchema({
+        oidcClientId: oidcClientId,
+        oidcDomain: oidcDomain,
+      });
+      await idTokenSchema.validate(fullUserInfo);
+    } catch (err) {
+      logger.info('Failed OIDC login attempt', {
+        cause: 'Invalid jwt or missing claims',
+        ip: req.ip,
+        idToken: idToken,
+        errorMessage: err.message,
+      });
+      return next({
+        status: 500,
+        message: `Validation failed: ${err.message}.`,
+      });
+    }
+
+    // Check that email is verified
+    if (!fullUserInfo.email_verified) {
       logger.info('Failed OIDC login attempt', {
         cause: 'Email not verified',
         ip: req.ip,
-        email: decoded.email,
+        email: fullUserInfo.email,
       });
-      return res.redirect('/login');
+      return next({
+        status: 500,
+        message: 'Email not verified.',
+      });
     }
 
+    // Map email to user
     const userRepository = getRepository(User);
     let user = await userRepository.findOne({
-      where: { email: decoded.email },
+      where: { email: fullUserInfo.email },
     });
 
-    // Create user if it doesn't exist
+    // Create user if one doesn't already exist
     if (!user) {
-      logger.info(`Creating user for ${decoded.email}`, {
+      logger.info(`Creating user for ${fullUserInfo.email}`, {
         ip: req.ip,
-        email: decoded.email,
+        email: fullUserInfo.email,
       });
-      const avatar = gravatarUrl(decoded.email, { default: 'mm', size: 200 });
+      const avatar =
+        fullUserInfo.picture ??
+        gravatarUrl(fullUserInfo.email, { default: 'mm', size: 200 });
       user = new User({
         avatar: avatar,
-        username: decoded.email,
-        email: decoded.email,
+        username: fullUserInfo.name,
+        email: fullUserInfo.email,
         permissions: settings.main.defaultPermissions,
         plexToken: '',
         userType: UserType.LOCAL,
@@ -780,14 +811,19 @@ authRoutes.get('/oidc-callback', async (req, res) => {
     if (req.session) {
       req.session.userId = user.id;
     }
-    return res.redirect('/');
+
+    // Success!
+    return res.status(200).json({ status: 'ok' });
   } catch (error) {
     logger.error('Failed OIDC login attempt', {
       cause: 'Unknown error',
       ip: req.ip,
       errorMessage: error.message,
     });
-    return res.redirect('/login');
+    return next({
+      status: 500,
+      message: 'An unknown error occurred.',
+    });
   }
 });
 
