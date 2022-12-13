@@ -37,7 +37,7 @@ export async function getOIDCRedirectUrl(req: Request, state: string) {
   url.searchParams.set('client_id', oidcClientId);
 
   const callbackUrl = new URL(
-    '/api/v1/auth/oidc-callback',
+    '/login/oidc/callback',
     `${req.protocol}://${req.headers.host}`
   ).toString();
   url.searchParams.set('redirect_uri', callbackUrl);
@@ -56,7 +56,7 @@ export async function fetchOIDCTokenData(
   const { oidcClientId, oidcClientSecret } = settings.main;
 
   const callbackUrl = new URL(
-    '/api/v1/auth/oidc-callback',
+    '/login/oidc/callback',
     `${req.protocol}://${req.headers.host}`
   );
 
