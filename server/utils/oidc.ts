@@ -104,13 +104,31 @@ export const createIdTokenSchema = ({
         `The token iss value doesn't match the oidc_DOMAIN (${oidcDomain})`
       )
       .required("The token didn't come with an iss value."),
-    aud: yup
-      .string()
-      .oneOf(
-        [oidcClientId],
-        `The token aud value doesn't match the oidc_CLIENT_ID (${oidcClientId})`
-      )
-      .required("The token didn't come with an aud value."),
+    aud: yup.lazy((val) => {
+      // single audience
+      if (typeof val === 'string')
+        return yup
+          .string()
+          .oneOf(
+            [oidcClientId],
+            `The token aud value doesn't match the oidc_CLIENT_ID (${oidcClientId})`
+          )
+          .required("The token didn't come with an aud value.");
+      // several audiences
+      if (typeof val === 'object' && Array.isArray(val))
+        return yup
+          .array()
+          .of(yup.string())
+          .test(
+            'contains-client-id',
+            `The token aud value doesn't contain the oidc_CLIENT_ID (${oidcClientId})`,
+            (value) => !!(value && value.includes(oidcClientId))
+          );
+      // invalid type
+      return yup
+        .mixed()
+        .typeError('The token aud value is not a string or array.');
+    }),
     exp: yup
       .number()
       .required()
