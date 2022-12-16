@@ -5,7 +5,7 @@ summary: Request management and media discovery tool focussing on the Jellyfin/E
 description: >
   Jellyseerr is a free and open source software application for managing requests for your media library.
   It is a a fork of Overseerr built to bring support for & focusing mainly on Jellyfin & Emby media servers!
-  It integrates with your existing services such as Sonarr, Radarr, and Jellyfin/Emby/Plex. 
+  It integrates with your existing services such as Sonarr, Radarr, and Jellyfin/Emby/Plex.
 base: core18
 confinement: strict
 
