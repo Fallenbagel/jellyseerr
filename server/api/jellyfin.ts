@@ -177,11 +177,7 @@ class JellyfinAPI {
 
       const response: JellyfinLibrary[] = account.data.Items.filter(
         (Item: any) => {
-          return (
-            Item.Type === 'CollectionFolder' &&
-            (Item.CollectionType === 'tvshows' ||
-              Item.CollectionType === 'movies')
-          );
+          return Item.Type === 'CollectionFolder';
         }
       ).map((Item: any) => {
         return <JellyfinLibrary>{
@@ -205,7 +201,7 @@ class JellyfinAPI {
   public async getLibraryContents(id: string): Promise<JellyfinLibraryItem[]> {
     try {
       const contents = await this.axios.get<any>(
-        `/Users/${this.userId}/Items?SortBy=SortName&SortOrder=Ascending&IncludeItemTypes=Series,Movie&Recursive=true&StartIndex=0&ParentId=${id}`
+        `/Users/${this.userId}/Items?SortBy=SortName&SortOrder=Ascending&IncludeItemTypes=Series,Movie,Others&Recursive=true&StartIndex=0&ParentId=${id}`
       );
 
       return contents.data.Items.filter(
