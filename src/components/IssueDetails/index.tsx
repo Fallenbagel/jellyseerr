@@ -7,6 +7,7 @@ import PageTitle from '@app/components/Common/PageTitle';
 import IssueComment from '@app/components/IssueDetails/IssueComment';
 import IssueDescription from '@app/components/IssueDetails/IssueDescription';
 import { issueOptions } from '@app/components/IssueModal/constants';
+import useDeepLinks from '@app/hooks/useDeepLinks';
 import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
@@ -90,6 +91,13 @@ const IssueDetails = () => {
       ? `/api/v1/${issueData.media.mediaType}/${issueData.media.tmdbId}`
       : null
   );
+
+  const { mediaUrl, mediaUrl4k } = useDeepLinks({
+    mediaUrl: data?.mediaInfo?.mediaUrl,
+    mediaUrl4k: data?.mediaInfo?.mediaUrl4k,
+    iOSPlexUrl: data?.mediaInfo?.iOSPlexUrl,
+    iOSPlexUrl4k: data?.mediaInfo?.iOSPlexUrl4k,
+  });
 
   const CommentSchema = Yup.object().shape({
     message: Yup.string().required(),
@@ -359,7 +367,7 @@ const IssueDetails = () => {
               {issueData?.media.mediaUrl && (
                 <Button
                   as="a"
-                  href={issueData?.media.mediaUrl}
+                  href={mediaUrl}
                   target="_blank"
                   rel="noreferrer"
                   className="w-full"
@@ -405,7 +413,7 @@ const IssueDetails = () => {
               {issueData?.media.mediaUrl4k && (
                 <Button
                   as="a"
-                  href={issueData?.media.mediaUrl4k}
+                  href={mediaUrl4k}
                   target="_blank"
                   rel="noreferrer"
                   className="w-full"
@@ -621,7 +629,7 @@ const IssueDetails = () => {
             {issueData?.media.mediaUrl && (
               <Button
                 as="a"
-                href={issueData?.media.mediaUrl}
+                href={mediaUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full"
@@ -667,7 +675,7 @@ const IssueDetails = () => {
             {issueData?.media.mediaUrl4k && (
               <Button
                 as="a"
-                href={issueData?.media.mediaUrl4k}
+                href={mediaUrl4k}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full"

@@ -4,6 +4,7 @@ import CachedImage from '@app/components/Common/CachedImage';
 import ConfirmButton from '@app/components/Common/ConfirmButton';
 import RequestModal from '@app/components/RequestModal';
 import StatusBadge from '@app/components/StatusBadge';
+import useDeepLinks from '@app/hooks/useDeepLinks';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import {
@@ -60,6 +61,13 @@ const RequestItemError = ({
     await axios.delete(`/api/v1/media/${requestData?.media.id}`);
     revalidateList();
   };
+
+  const { mediaUrl: plexUrl, mediaUrl4k: plexUrl4k } = useDeepLinks({
+    mediaUrl: requestData?.media?.mediaUrl,
+    mediaUrl4k: requestData?.media?.mediaUrl4k,
+    iOSPlexUrl: requestData?.media?.iOSPlexUrl,
+    iOSPlexUrl4k: requestData?.media?.iOSPlexUrl4k,
+  });
 
   return (
     <div className="flex h-64 w-full flex-col justify-center rounded-xl bg-gray-800 py-4 text-gray-400 shadow-md ring-1 ring-red-500 xl:h-28 xl:flex-row">
@@ -130,11 +138,7 @@ const RequestItemError = ({
                       ).length > 0
                     }
                     is4k={requestData.is4k}
-                    plexUrl={
-                      requestData.is4k
-                        ? requestData.media.mediaUrl4k
-                        : requestData.media.mediaUrl
-                    }
+                    plexUrl={requestData.is4k ? plexUrl4k : plexUrl}
                     serviceUrl={
                       requestData.is4k
                         ? requestData.media.serviceUrl4k
@@ -316,6 +320,13 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
     }
   };
 
+  const { mediaUrl: plexUrl, mediaUrl4k: plexUrl4k } = useDeepLinks({
+    mediaUrl: requestData?.media?.mediaUrl,
+    mediaUrl4k: requestData?.media?.mediaUrl4k,
+    iOSPlexUrl: requestData?.media?.iOSPlexUrl,
+    iOSPlexUrl4k: requestData?.media?.iOSPlexUrl4k,
+  });
+
   if (!title && !error) {
     return (
       <div
@@ -462,11 +473,7 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                   is4k={requestData.is4k}
                   tmdbId={requestData.media.tmdbId}
                   mediaType={requestData.type}
-                  plexUrl={
-                    requestData.is4k
-                      ? requestData.media.mediaUrl4k
-                      : requestData.media.mediaUrl
-                  }
+                  plexUrl={requestData.is4k ? plexUrl4k : plexUrl}
                   serviceUrl={
                     requestData.is4k
                       ? requestData.media.serviceUrl4k

@@ -1,15 +1,17 @@
 import { RefreshIcon } from '@heroicons/react/outline';
-import Router from 'next/router';
+import { useRouter } from 'next/router';
 import PR from 'pulltorefreshjs';
 import { useEffect } from 'react';
 import ReactDOMServer from 'react-dom/server';
 
-const PullToRefresh: React.FC = () => {
+const PullToRefresh = () => {
+  const router = useRouter();
+
   useEffect(() => {
     PR.init({
       mainElement: '#pull-to-refresh',
       onRefresh() {
-        Router.reload();
+        router.reload();
       },
       iconArrow: ReactDOMServer.renderToString(
         <div className="p-2">
@@ -28,11 +30,14 @@ const PullToRefresh: React.FC = () => {
       instructionsReleaseToRefresh: ReactDOMServer.renderToString(<div />),
       instructionsRefreshing: ReactDOMServer.renderToString(<div />),
       distReload: 60,
+      distIgnore: 15,
+      shouldPullToRefresh: () =>
+        !window.scrollY && document.body.style.overflow !== 'hidden',
     });
     return () => {
       PR.destroyAll();
     };
-  }, []);
+  }, [router]);
 
   return <div id="pull-to-refresh"></div>;
 };

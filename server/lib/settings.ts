@@ -38,7 +38,7 @@ export interface PlexSettings {
 
 export interface JellyfinSettings {
   name: string;
-  hostname?: string;
+  hostname: string;
   externalHostname?: string;
   libraries: Library[];
   serverId: string;
@@ -263,7 +263,8 @@ export type JobId =
   | 'download-sync'
   | 'download-sync-reset'
   | 'jellyfin-recently-added-sync'
-  | 'jellyfin-full-sync';
+  | 'jellyfin-full-sync'
+  | 'image-cache-cleanup';
 
 interface AllSettings {
   clientId: string;
@@ -445,6 +446,9 @@ class Settings {
         },
         'jellyfin-full-sync': {
           schedule: '0 0 3 * * *',
+        },
+        'image-cache-cleanup': {
+          schedule: '0 0 5 * * *',
         },
       },
     };

@@ -1,6 +1,8 @@
+import TitleCard from '@app/components/TitleCard';
 import { ArrowCircleRightIcon } from '@heroicons/react/solid';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useInView } from 'react-intersection-observer';
 import { defineMessages, useIntl } from 'react-intl';
 
 const messages = defineMessages({
@@ -15,6 +17,18 @@ interface ShowMoreCardProps {
 const ShowMoreCard = ({ url, posters }: ShowMoreCardProps) => {
   const intl = useIntl();
   const [isHovered, setHovered] = useState(false);
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+  });
+
+  if (!inView) {
+    return (
+      <div ref={ref}>
+        <TitleCard.Placeholder />
+      </div>
+    );
+  }
+
   return (
     <Link href={url}>
       <a
