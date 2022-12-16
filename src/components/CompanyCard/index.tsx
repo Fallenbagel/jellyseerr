@@ -1,3 +1,4 @@
+import CachedImage from '@app/components/Common/CachedImage';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -30,11 +31,15 @@ const CompanyCard = ({ image, url, name }: CompanyCardProps) => {
         role="link"
         tabIndex={0}
       >
-        <img
-          src={image}
-          alt={name}
-          className="relative z-40 max-h-full max-w-full"
-        />
+        <div className="relative h-full w-full">
+          <CachedImage
+            src={image}
+            alt={name}
+            className="relative z-40 h-full w-full"
+            layout="fill"
+            objectFit="contain"
+          />
+        </div>
         <div
           className={`absolute bottom-0 left-0 right-0 z-0 h-12 rounded-b-xl bg-gradient-to-t ${
             isHovered ? 'from-gray-800' : 'from-gray-900'

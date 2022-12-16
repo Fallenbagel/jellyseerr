@@ -13,7 +13,10 @@ import { Transition } from '@headlessui/react';
 import { PlayIcon, StopIcon, TrashIcon } from '@heroicons/react/outline';
 import { PencilIcon } from '@heroicons/react/solid';
 import { MediaServerType } from '@server/constants/server';
-import type { CacheItem } from '@server/interfaces/api/settingsInterfaces';
+import type {
+  CacheItem,
+  CacheResponse,
+} from '@server/interfaces/api/settingsInterfaces';
 import type { JobId } from '@server/lib/settings';
 import axios from 'axios';
 import cronstrue from 'cronstrue/i18n';
@@ -58,6 +61,7 @@ const messages: { [messageName: string]: MessageDescriptor } = defineMessages({
   'sonarr-scan': 'Sonarr Scan',
   'download-sync': 'Download Sync',
   'download-sync-reset': 'Download Sync Reset',
+  'image-cache-cleanup': 'Image Cache Cleanup',
   editJobSchedule: 'Modify Job',
   jobScheduleEditSaved: 'Job edited successfully!',
   jobScheduleEditFailed: 'Something went wrong while saving the job.',
@@ -67,6 +71,11 @@ const messages: { [messageName: string]: MessageDescriptor } = defineMessages({
     'Every {jobScheduleHours, plural, one {hour} other {{jobScheduleHours} hours}}',
   editJobScheduleSelectorMinutes:
     'Every {jobScheduleMinutes, plural, one {minute} other {{jobScheduleMinutes} minutes}}',
+  imagecache: 'Image Cache',
+  imagecacheDescription:
+    'When enabled in settings, Overseerr will proxy and cache images from pre-configured external sources. Cached images are saved into your config folder. You can find the files in <code>{appDataPath}/cache/images</code>.',
+  imagecachecount: 'Images Cached',
+  imagecachesize: 'Total Cache Size',
 });
 
 interface Job {
@@ -132,7 +141,8 @@ const SettingsJobs = () => {
   } = useSWR<Job[]>('/api/v1/settings/jobs', {
     refreshInterval: 5000,
   });
-  const { data: cacheData, mutate: cacheRevalidate } = useSWR<CacheItem[]>(
+  const { data: appData } = useSWR('/api/v1/status/appdata');
+  const { data: cacheData, mutate: cacheRevalidate } = useSWR<CacheResponse>(
     '/api/v1/settings/cache',
     {
       refreshInterval: 10000,
@@ -435,7 +445,7 @@ const SettingsJobs = () => {
             </tr>
           </thead>
           <Table.TBody>
-            {cacheData
+            {cacheData?.apiCaches
               ?.filter(
                 (cache) =>
                   !(
@@ -462,6 +472,41 @@ const SettingsJobs = () => {
                   </Table.TD>
                 </tr>
               ))}
+          </Table.TBody>
+        </Table>
+      </div>
+      <div>
+        <h3 className="heading">{intl.formatMessage(messages.imagecache)}</h3>
+        <p className="description">
+          {intl.formatMessage(messages.imagecacheDescription, {
+            code: (msg: React.ReactNode) => (
+              <code className="bg-opacity-50">{msg}</code>
+            ),
+            appDataPath: appData ? appData.appDataPath : '/app/config',
+          })}
+        </p>
+      </div>
+      <div className="section">
+        <Table>
+          <thead>
+            <tr>
+              <Table.TH>{intl.formatMessage(messages.cachename)}</Table.TH>
+              <Table.TH>
+                {intl.formatMessage(messages.imagecachecount)}
+              </Table.TH>
+              <Table.TH>{intl.formatMessage(messages.imagecachesize)}</Table.TH>
+            </tr>
+          </thead>
+          <Table.TBody>
+            <tr>
+              <Table.TD>The Movie Database (tmdb)</Table.TD>
+              <Table.TD>
+                {intl.formatNumber(cacheData?.imageCache.tmdb.imageCount ?? 0)}
+              </Table.TD>
+              <Table.TD>
+                {formatBytes(cacheData?.imageCache.tmdb.size ?? 0)}
+              </Table.TD>
+            </tr>
           </Table.TBody>
         </Table>
       </div>

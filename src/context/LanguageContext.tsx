@@ -10,6 +10,7 @@ export type AvailableLocale =
   | 'el'
   | 'es'
   | 'fr'
+  | 'hr'
   | 'hu'
   | 'it'
   | 'ja'
@@ -59,6 +60,10 @@ export const availableLanguages: AvailableLanguageObject = {
   fr: {
     code: 'fr',
     display: 'Français',
+  },
+  hr: {
+    code: 'hr',
+    display: 'Hrvatski',
   },
   it: {
     code: 'it',

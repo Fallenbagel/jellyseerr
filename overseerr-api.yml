@@ -2667,29 +2667,44 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                      example: cache-id
-                    name:
-                      type: string
-                      example: cache name
-                    stats:
+                type: object
+                properties:
+                  imageCache:
+                    type: object
+                    properties:
+                      tmdb:
+                        type: object
+                        properties:
+                          size:
+                            type: number
+                            example: 123456
+                          imageCount:
+                            type: number
+                            example: 123
+                  apiCaches:
+                    type: array
+                    items:
                       type: object
                       properties:
-                        hits:
-                          type: number
-                        misses:
-                          type: number
-                        keys:
-                          type: number
-                        ksize:
-                          type: number
-                        vsize:
-                          type: number
+                        id:
+                          type: string
+                          example: cache-id
+                        name:
+                          type: string
+                          example: cache name
+                        stats:
+                          type: object
+                          properties:
+                            hits:
+                              type: number
+                            misses:
+                              type: number
+                            keys:
+                              type: number
+                            ksize:
+                              type: number
+                            vsize:
+                              type: number
   /settings/cache/{cacheId}/flush:
     post:
       summary: Flush a specific cache
@@ -4838,9 +4853,13 @@ paths:
                   type: number
                   example: 123
                 seasons:
-                  type: array
-                  items:
-                    type: number
+                  oneOf:
+                    - type: array
+                      items:
+                        type: number
+                        minimum: 1
+                    - type: string
+                      enum: [all]
                 is4k:
                   type: boolean
                   example: false
@@ -4919,7 +4938,7 @@ paths:
                 $ref: '#/components/schemas/MediaRequest'
     put:
       summary: Update MediaRequest
-      description: Updates a specific media request and returns the request in a JSON object.. Requires the `MANAGE_REQUESTS` permission.
+      description: Updates a specific media request and returns the request in a JSON object. Requires the `MANAGE_REQUESTS` permission.
       tags:
         - request
       parameters:
@@ -4930,6 +4949,37 @@ paths:
           example: '1'
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mediaType:
+                  type: string
+                  enum: [movie, tv]
+                seasons:
+                  type: array
+                  items:
+                    type: number
+                    minimum: 1
+                is4k:
+                  type: boolean
+                  example: false
+                serverId:
+                  type: number
+                profileId:
+                  type: number
+                rootFolder:
+                  type: string
+                languageProfileId:
+                  type: number
+                userId:
+                  type: number
+                  nullable: true
+              required:
+                - mediaType
       responses:
         '200':
           description: Succesfully updated request
