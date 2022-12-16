@@ -177,7 +177,13 @@ class JellyfinAPI {
 
       const response: JellyfinLibrary[] = account.data.Items.filter(
         (Item: any) => {
-          return Item.Type === 'CollectionFolder';
+          return (
+            Item.Type === 'CollectionFolder' &&
+            Item.CollectionType !== 'music' &&
+            Item.CollectionType !== 'books' &&
+            Item.CollectionType !== 'musicvideos' &&
+            Item.CollectionType !== 'homevideos'
+          );
         }
       ).map((Item: any) => {
         return <JellyfinLibrary>{
