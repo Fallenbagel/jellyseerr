@@ -14,9 +14,10 @@ _The original Overseerr team have been busy and Jellyfin/Emby support aren't on 
 ## Current Features
 
 - Jellyfin Support
+  (Ability to change email addresses for smtp purposes)
 - Emby Support
 
-  (Upcoming Features include: Multiple Server Instances, Music Support, Ability to change email address and much more!)
+  (Upcoming Features include: Multiple Server Instances, Music Support, and much more!)
 
 Along with all the existing Overseerr features:
 
