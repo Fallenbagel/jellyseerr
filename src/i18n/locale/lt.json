@@ -329,7 +329,7 @@
   "components.IssueModal.CreateIssueModal.problemseason": "Paveikti sezonai",
   "components.IssueDetails.openedby": "#{issueId} problema atverta {relativeTime}, {username}",
   "components.Layout.VersionStatus.commitsbehind": "{commitsBehind} {commitsBehind, plural, one {komitas} other {komitai}} behind",
-  "components.ManageSlideOver.manageModalClearMediaWarning": "* Tai negyžtamai pašalins {mediaType} tipo duomenis, įskaitant rezervacijas. Plex bibliotekoje esančios medijos informacija bus atkurta kito skanavimo metu.",
+  "components.ManageSlideOver.manageModalClearMediaWarning": "* Tai negyžtamai pašalins {mediaType} tipo duomenis, įskaitant rezervacijas. {mediaServerName} bibliotekoje esančios medijos informacija bus atkurta kito skanavimo metu.",
   "components.NotificationTypeSelector.adminissuecommentDescription": "Gauti pranešimus kai kiti vartotojai komentuoja problemą.",
   "components.NotificationTypeSelector.adminissueresolvedDescription": "Gauti pranešimus kai kiti vartotojai uždaro problemą.",
   "components.NotificationTypeSelector.issuecomment": "Problemos komentaras",
