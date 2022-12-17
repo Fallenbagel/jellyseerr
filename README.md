@@ -13,28 +13,27 @@ _The original Overseerr team have been busy and Jellyfin/Emby support aren't on 
 
 ## Current Features
 
-- Jellyfin Support
-- Emby Support
-
-  (Upcoming Features include: Multiple Server Instances, Music Support, Ability to change email address and much more!)
-
-Along with all the existing Overseerr features:
-
-- Full Plex integration. Authenticate and manage user access with Plex!
+- Full Jellyfin/Emby/Plex integration. Authenticate and manage user access with Jellyfin/Emby/Plex!
+- Supports Movies, Shows, Mixed Libraries!
+- Ability to change email addresses for smtp purposes
+- Ability to import all jellyfin/emby users
 - Easy integration with your existing services. Currently, Jellyseerr supports Sonarr and Radarr. More to come!
-- Plex library scan, to keep track of the titles which are already available.
+- Jellyfin/Emby/Plex library scan, to keep track of the titles which are already available.
 - Customizable request system, which allows users to request individual seasons or movies in a friendly, easy-to-use interface.
 - Incredibly simple request management UI. Don't dig through the app to simply approve recent requests!
 - Granular permission system.
 - Support for various notification agents.
 - Mobile-friendly design, for when you need to approve requests on the go!
 
+  (Upcoming Features include: Multiple Server Instances, Music Support, and much more!)
+
 With more features on the way! Check out our [issue tracker](https://github.com/fallenbagel/jellyseerr/issues) to see the features which have already been requested.
 
 ## Getting Started
 
-_*Jellyseerr currently does not support any library types other than *`Shows`* and *`Movies`*.
-In addition, you will need to turn off in jellyfin `settings > Home > Automatically group content from the following folders into views such as 'Movies', 'Music' and 'TV':`.*_
+#### Pre-requisite (Important)
+
+_*On Jellyfin/Emby, ensure the `settings > Home > Automatically group content from the following folders into views such as 'Movies', 'Music' and 'TV'` is turned off*_
 
 ### Launching Jellyseerr using Docker
 
