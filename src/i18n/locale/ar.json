@@ -37,7 +37,7 @@
   "components.ManageSlideOver.alltime": "جميع الأوقات",
   "components.ManageSlideOver.downloadstatus": "التنزيلات",
   "components.ManageSlideOver.manageModalAdvanced": "متقدم",
-  "components.ManageSlideOver.manageModalClearMediaWarning": "* سيتم سيتم حذف جميع البيانات بشكل نهائي لـ {mediaType},متضمنا جميع الطلبات.إذا كان هذا المحتوى متوفر في مكتبة {mediaServerName}، سيتم إعادة تفاصيل المحتوى في عملية الفحص القادمة.",
+  "components.ManageSlideOver.manageModalClearMediaWarning": "* سيتم حذف جميع البيانات بشكل نهائي لـ {mediaType},متضمنا جميع الطلبات.إذا كان هذا المحتوى متوفر في مكتبة {mediaServerName}، سيتم إعادة تفاصيل المحتوى في عملية الفحص القادمة.",
   "components.ManageSlideOver.manageModalRequests": "الطلبات",
   "components.ManageSlideOver.manageModalTitle": "إدارة {mediaType}",
   "components.ManageSlideOver.manageModalIssues": "المشاكل المفتوحة",
