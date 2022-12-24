@@ -638,9 +638,23 @@ authRoutes.post('/reset-password/:guid', async (req, res, next) => {
   return res.status(200).json({ status: 'ok' });
 });
 
-authRoutes.get('/oidc-login', async (req, res) => {
+authRoutes.get('/oidc-login', async (req, res, next) => {
   const state = randomBytes(32).toString('hex');
-  const redirectUrl = await getOIDCRedirectUrl(req, state);
+  let redirectUrl;
+
+  try {
+    redirectUrl = await getOIDCRedirectUrl(req, state);
+  } catch (err) {
+    logger.info('Failed OIDC login attempt', {
+      cause: 'Failed to fetch OIDC redirect url',
+      ip: req.ip,
+      errorMessage: err.message,
+    });
+    return next({
+      status: 500,
+      message: 'Failed to fetch OIDC redirect url.',
+    });
+  }
 
   res.cookie('oidc-state', state, {
     maxAge: 60000,
@@ -786,6 +800,16 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
     let user = await userRepository.findOne({
       where: { email: fullUserInfo.email },
     });
+
+    // Map username to media server username
+    if (settings.main.oidcMatchUsername && !user) {
+      user = await userRepository.findOne({
+        where: [
+          { plexUsername: fullUserInfo.preferred_username },
+          { jellyfinUsername: fullUserInfo.preferred_username },
+        ],
+      });
+    }
 
     // Create user if one doesn't already exist
     if (!user) {

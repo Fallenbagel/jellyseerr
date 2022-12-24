@@ -148,6 +148,9 @@ components:
         oidcDomain:
           type: string
           example: https://auth.example.com
+        oidcMatchUsername:
+          type: boolean
+          example: true
         mediaServerType:
           type: number
           example: 1

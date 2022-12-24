@@ -45,6 +45,9 @@ const messages = defineMessages({
   oidcClientIdTip: 'The OIDC Client ID assigned to Jellyseerr',
   oidcClientSecret: 'OIDC Client Secret',
   oidcClientSecretTip: 'The OIDC Client Secret assigned to Jellyseerr',
+  oidcMatchUsername: 'OIDC Allow {mediaServerName} Usernames',
+  oidcMatchUsernameTip:
+    'Match OIDC users with their {mediaServerName} accounts based on username',
   movieRequestLimitLabel: 'Global Movie Request Limit',
   tvRequestLimitLabel: 'Global Series Request Limit',
   defaultPermissions: 'Default Permissions',
@@ -148,6 +151,7 @@ const SettingsUsers = () => {
             oidcClientId: data?.oidcClientId,
             oidcClientSecret: data?.oidcClientSecret,
             oidcDomain: data?.oidcDomain,
+            oidcMatchUsername: data?.oidcMatchUsername,
             movieQuotaLimit: data?.defaultQuotas.movie.quotaLimit ?? 0,
             movieQuotaDays: data?.defaultQuotas.movie.quotaDays ?? 7,
             tvQuotaLimit: data?.defaultQuotas.tv.quotaLimit ?? 0,
@@ -167,6 +171,7 @@ const SettingsUsers = () => {
                 oidcClientId: values.oidcClientId,
                 oidcClientSecret: values.oidcClientSecret,
                 oidcDomain: values.oidcDomain,
+                oidcMatchUsername: values.oidcMatchUsername,
                 defaultQuotas: {
                   movie: {
                     quotaLimit: values.movieQuotaLimit,
@@ -339,6 +344,34 @@ const SettingsUsers = () => {
                           className="error"
                           component="span"
                           name="oidcClientSecret"
+                        />
+                      </div>
+                    </div>
+                    <div className="form-row">
+                      <label
+                        htmlFor="oidcMatchUsername"
+                        className="checkbox-label"
+                      >
+                        {intl.formatMessage(messages.oidcMatchUsername, {
+                          mediaServerName,
+                        })}
+                        <span className="label-tip">
+                          {intl.formatMessage(messages.oidcMatchUsernameTip, {
+                            mediaServerName,
+                          })}
+                        </span>
+                      </label>
+                      <div className="form-input-area">
+                        <Field
+                          type="checkbox"
+                          id="oidcMatchUsername"
+                          name="oidcMatchUsername"
+                          onChange={() => {
+                            setFieldValue(
+                              'oidcMatchUsername',
+                              !values.oidcMatchUsername
+                            );
+                          }}
                         />
                       </div>
                     </div>

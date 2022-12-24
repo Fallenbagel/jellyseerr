@@ -110,6 +110,7 @@ export interface MainSettings {
   oidcClientId: string;
   oidcClientSecret: string;
   oidcDomain: string;
+  oidcMatchUsername: boolean;
   region: string;
   originalLanguage: string;
   trustProxy: boolean;
@@ -321,6 +322,7 @@ class Settings {
         oidcClientId: '',
         oidcClientSecret: '',
         oidcDomain: '',
+        oidcMatchUsername: false,
         region: '',
         originalLanguage: '',
         trustProxy: false,
