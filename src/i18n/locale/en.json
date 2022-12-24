@@ -726,6 +726,8 @@
   "components.Settings.SettingsUsers.oidcDomainTip": "The base URL of the identity provider's OIDC endpoint",
   "components.Settings.SettingsUsers.oidcLogin": "Enable OIDC Sign-In",
   "components.Settings.SettingsUsers.oidcLoginTip": "Allow users to sign in using an OIDC identity provider",
+  "components.Settings.SettingsUsers.oidcMatchUsername": "OIDC Allow {mediaServerName} Usernames",
+  "components.Settings.SettingsUsers.oidcMatchUsernameTip": "Match OIDC users with their {mediaServerName} accounts based on username",
   "components.Settings.SettingsUsers.oidcName": "OIDC Provider Name",
   "components.Settings.SettingsUsers.oidcNameTip": "Name of the OIDC Provider which appears on the login screen",
   "components.Settings.SettingsUsers.toastSettingsFailure": "Something went wrong while saving settings.",
