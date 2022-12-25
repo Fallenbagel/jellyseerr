@@ -80,7 +80,7 @@
   "components.ManageSlideOver.movie": "film",
   "components.Login.validationemailrequired": "Morate unijeti valjanu adresu e-pošte",
   "components.ManageSlideOver.manageModalRequests": "Zahtjevi",
-  "components.ManageSlideOver.manageModalClearMediaWarning": "* Ovo će nepovratno ukloniti sve podatke za ovaj {mediaType}, uključujući sve zahtjeve. Ako ova stavka postoji u vašoj Plex biblioteci, informacije o medijima ponovno će se stvoriti tijekom sljedećeg skeniranja.",
+  "components.ManageSlideOver.manageModalClearMediaWarning": "* Ovo će nepovratno ukloniti sve podatke za ovaj {mediaType}, uključujući sve zahtjeve. Ako ova stavka postoji u vašoj {mediaServerName} biblioteci, informacije o medijima ponovno će se stvoriti tijekom sljedećeg skeniranja.",
   "components.ManageSlideOver.manageModalMedia4k": "4K Mediji",
   "components.ManageSlideOver.manageModalNoRequests": "Nema zahtjeva.",
   "components.ManageSlideOver.manageModalMedia": "Mediji",

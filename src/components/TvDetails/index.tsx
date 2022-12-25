@@ -22,6 +22,7 @@ import RequestModal from '@app/components/RequestModal';
 import Slider from '@app/components/Slider';
 import StatusBadge from '@app/components/StatusBadge';
 import Season from '@app/components/TvDetails/Season';
+import useDeepLinks from '@app/hooks/useDeepLinks';
 import useLocale from '@app/hooks/useLocale';
 import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
@@ -125,31 +126,12 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     setShowManager(router.query.manage == '1' ? true : false);
   }, [router.query.manage]);
 
-  const [plexUrl, setPlexUrl] = useState(data?.mediaInfo?.mediaUrl);
-  const [plexUrl4k, setPlexUrl4k] = useState(data?.mediaInfo?.mediaUrl4k);
-
-  useEffect(() => {
-    if (data) {
-      if (
-        settings.currentSettings.mediaServerType === MediaServerType.PLEX &&
-        (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
-          (navigator.userAgent === 'MacIntel' && navigator.maxTouchPoints > 1))
-      ) {
-        setPlexUrl(data.mediaInfo?.iOSPlexUrl);
-        setPlexUrl4k(data.mediaInfo?.iOSPlexUrl4k);
-      } else {
-        setPlexUrl(data.mediaInfo?.mediaUrl);
-        setPlexUrl4k(data.mediaInfo?.mediaUrl4k);
-      }
-    }
-  }, [
-    data,
-    data?.mediaInfo?.iOSPlexUrl,
-    data?.mediaInfo?.iOSPlexUrl4k,
-    data?.mediaInfo?.mediaUrl,
-    data?.mediaInfo?.mediaUrl4k,
-    settings.currentSettings.mediaServerType,
-  ]);
+  const { mediaUrl: plexUrl, mediaUrl4k: plexUrl4k } = useDeepLinks({
+    mediaUrl: data?.mediaInfo?.mediaUrl,
+    mediaUrl4k: data?.mediaInfo?.mediaUrl4k,
+    iOSPlexUrl: data?.mediaInfo?.iOSPlexUrl,
+    iOSPlexUrl4k: data?.mediaInfo?.iOSPlexUrl4k,
+  });
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -984,9 +966,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                 tvdbId={data.externalIds.tvdbId}
                 imdbId={data.externalIds.imdbId}
                 rtUrl={ratingData?.url}
-                mediaUrl={
-                  data.mediaInfo?.mediaUrl ?? data.mediaInfo?.mediaUrl4k
-                }
+                mediaUrl={plexUrl ?? plexUrl4k}
               />
             </div>
           </div>

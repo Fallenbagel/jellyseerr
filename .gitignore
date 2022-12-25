@@ -67,3 +67,6 @@ tsconfig.tsbuildinfo
 
 # Webstorm
 .idea
+
+# Config Cache Directory
+config/cache

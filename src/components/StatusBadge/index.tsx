@@ -5,12 +5,14 @@ import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import { MediaStatus } from '@server/constants/media';
+import { MediaServerType } from '@server/constants/server';
+import getConfig from 'next/config';
 import { defineMessages, useIntl } from 'react-intl';
 
 const messages = defineMessages({
   status: '{status}',
   status4k: '4K {status}',
-  playonplex: 'Play on Plex',
+  playonplex: 'Play on {mediaServerName}',
   openinarr: 'Open in {arr}',
   managemedia: 'Manage {mediaType}',
 });
@@ -37,6 +39,7 @@ const StatusBadge = ({
   const intl = useIntl();
   const { hasPermission } = useUser();
   const settings = useSettings();
+  const { publicRuntimeConfig } = getConfig();
 
   let mediaLink: string | undefined;
   let mediaLinkDescription: string | undefined;
@@ -68,7 +71,14 @@ const StatusBadge = ({
         : settings.currentSettings.series4kEnabled))
   ) {
     mediaLink = plexUrl;
-    mediaLinkDescription = intl.formatMessage(messages.playonplex);
+    mediaLinkDescription = intl.formatMessage(messages.playonplex, {
+      mediaServerName:
+        publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+          ? 'Emby'
+          : settings.currentSettings.mediaServerType === MediaServerType.PLEX
+          ? 'Plex'
+          : 'Jellyfin',
+    });
   } else if (hasPermission(Permission.MANAGE_REQUESTS)) {
     if (mediaType && tmdbId) {
       mediaLink = `/${mediaType}/${tmdbId}?manage=1`;

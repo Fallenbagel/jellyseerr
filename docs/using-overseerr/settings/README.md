@@ -40,6 +40,14 @@ If you enable this setting and find yourself unable to access Overseerr, you can
 
 This setting is **disabled** by default.
 
+### Enable Image Caching
+
+When enabled, Overseerr will proxy and cache images from pre-configured sources (such as TMDB). This can use a significant amount of disk space.
+
+Images are saved in the `config/cache/images` and stale images are cleared out every 24 hours.
+
+You should enable this if you are having issues with loading images directly from TMDB in your browser.
+
 ### Display Language
 
 Set the default display language for Overseerr. Users can override this setting in their user settings.
