@@ -1,28 +1,40 @@
 import cacheManager from '@server/lib/cache';
+import { getSettings } from '@server/lib/settings';
 import ExternalAPI from './externalapi';
 
-interface RTSearchResult {
-  meterClass: 'certified_fresh' | 'fresh' | 'rotten';
-  meterScore: number;
-  url: string;
+interface RTAlgoliaSearchResponse {
+  results: {
+    hits: RTAlgoliaHit[];
+    index: 'content_rt' | 'people_rt';
+  }[];
 }
 
-interface RTTvSearchResult extends RTSearchResult {
+interface RTAlgoliaHit {
+  emsId: string;
+  emsVersionId: string;
+  tmsId: string;
+  type: string;
   title: string;
-  startYear: number;
-  endYear: number;
-}
-interface RTMovieSearchResult extends RTSearchResult {
-  name: string;
-  url: string;
-  year: number;
-}
-
-interface RTMultiSearchResponse {
-  tvCount: number;
-  tvSeries: RTTvSearchResult[];
-  movieCount: number;
-  movies: RTMovieSearchResult[];
+  titles: string[];
+  description: string;
+  releaseYear: string;
+  rating: string;
+  genres: string[];
+  updateDate: string;
+  isEmsSearchable: boolean;
+  rtId: number;
+  vanity: string;
+  aka: string[];
+  posterImageUrl: string;
+  rottenTomatoes: {
+    audienceScore: number;
+    criticsIconUrl: string;
+    wantToSeeCount: number;
+    audienceIconUrl: string;
+    scoreSentiment: string;
+    certifiedFresh: boolean;
+    criticsScore: number;
+  };
 }
 
 export interface RTRating {
@@ -47,13 +59,20 @@ export interface RTRating {
  */
 class RottenTomatoes extends ExternalAPI {
   constructor() {
+    const settings = getSettings();
     super(
-      'https://www.rottentomatoes.com/api/private',
-      {},
+      'https://79frdp12pn-dsn.algolia.net/1/indexes/*',
+      {
+        'x-algolia-agent':
+          'Algolia%20for%20JavaScript%20(4.14.3)%3B%20Browser%20(lite)',
+        'x-algolia-api-key': '175588f6e5f8319b27702e4cc4013561',
+        'x-algolia-application-id': '79FRDP12PN',
+      },
       {
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
+          'x-algolia-usertoken': settings.clientId,
         },
         nodeCache: cacheManager.getCache('rt').data,
       }
@@ -61,13 +80,10 @@ class RottenTomatoes extends ExternalAPI {
   }
 
   /**
-   * Search the 1.0 api for the movie title
+   * Search the RT algolia api for the movie title
    *
    * We compare the release date to make sure its the correct
    * match. But it's not guaranteed to have results.
-   *
-   * We use the 1.0 API here because the 2.0 search api does
-   * not return audience ratings.
    *
    * @param name Movie name
    * @param year Release Year
@@ -77,30 +93,45 @@ class RottenTomatoes extends ExternalAPI {
     year: number
   ): Promise<RTRating | null> {
     try {
-      const data = await this.get<RTMultiSearchResponse>('/v2.0/search/', {
-        params: { q: name, limit: 10 },
+      const data = await this.post<RTAlgoliaSearchResponse>('/queries', {
+        requests: [
+          {
+            indexName: 'content_rt',
+            query: name,
+            params: 'filters=isEmsSearchable%20%3D%201&hitsPerPage=20',
+          },
+        ],
       });
 
+      const contentResults = data.results.find((r) => r.index === 'content_rt');
+
+      if (!contentResults) {
+        return null;
+      }
+
       // First, attempt to match exact name and year
-      let movie = data.movies.find(
-        (movie) => movie.year === year && movie.name === name
+      let movie = contentResults.hits.find(
+        (movie) => movie.releaseYear === year.toString() && movie.title === name
       );
 
       // If we don't find a movie, try to match partial name and year
       if (!movie) {
-        movie = data.movies.find(
-          (movie) => movie.year === year && movie.name.includes(name)
+        movie = contentResults.hits.find(
+          (movie) =>
+            movie.releaseYear === year.toString() && movie.title.includes(name)
         );
       }
 
       // If we still dont find a movie, try to match just on year
       if (!movie) {
-        movie = data.movies.find((movie) => movie.year === year);
+        movie = contentResults.hits.find(
+          (movie) => movie.releaseYear === year.toString()
+        );
       }
 
       // One last try, try exact name match only
       if (!movie) {
-        movie = data.movies.find((movie) => movie.name === name);
+        movie = contentResults.hits.find((movie) => movie.title === name);
       }
 
       if (!movie) {
@@ -108,16 +139,15 @@ class RottenTomatoes extends ExternalAPI {
       }
 
       return {
-        title: movie.name,
-        url: `https://www.rottentomatoes.com${movie.url}`,
-        criticsRating:
-          movie.meterClass === 'certified_fresh'
-            ? 'Certified Fresh'
-            : movie.meterClass === 'fresh'
-            ? 'Fresh'
-            : 'Rotten',
-        criticsScore: movie.meterScore,
-        year: movie.year,
+        title: movie.title,
+        url: `https://www.rottentomatoes.com/m/${movie.vanity}`,
+        criticsRating: movie.rottenTomatoes.certifiedFresh
+          ? 'Certified Fresh'
+          : movie.rottenTomatoes.criticsScore >= 60
+          ? 'Fresh'
+          : 'Rotten',
+        criticsScore: movie.rottenTomatoes.criticsScore,
+        year: Number(movie.releaseYear),
       };
     } catch (e) {
       throw new Error(
@@ -131,14 +161,28 @@ class RottenTomatoes extends ExternalAPI {
     year?: number
   ): Promise<RTRating | null> {
     try {
-      const data = await this.get<RTMultiSearchResponse>('/v2.0/search/', {
-        params: { q: name, limit: 10 },
+      const data = await this.post<RTAlgoliaSearchResponse>('/queries', {
+        requests: [
+          {
+            indexName: 'content_rt',
+            query: name,
+            params: 'filters=isEmsSearchable%20%3D%201&hitsPerPage=20',
+          },
+        ],
       });
 
-      let tvshow: RTTvSearchResult | undefined = data.tvSeries[0];
+      const contentResults = data.results.find((r) => r.index === 'content_rt');
+
+      if (!contentResults) {
+        return null;
+      }
+
+      let tvshow: RTAlgoliaHit | undefined = contentResults.hits[0];
 
       if (year) {
-        tvshow = data.tvSeries.find((series) => series.startYear === year);
+        tvshow = contentResults.hits.find(
+          (series) => series.releaseYear === year.toString()
+        );
       }
 
       if (!tvshow) {
@@ -147,10 +191,11 @@ class RottenTomatoes extends ExternalAPI {
 
       return {
         title: tvshow.title,
-        url: `https://www.rottentomatoes.com${tvshow.url}`,
-        criticsRating: tvshow.meterClass === 'fresh' ? 'Fresh' : 'Rotten',
-        criticsScore: tvshow.meterScore,
-        year: tvshow.startYear,
+        url: `https://www.rottentomatoes.com/tv/${tvshow.vanity}`,
+        criticsRating:
+          tvshow.rottenTomatoes.criticsScore >= 60 ? 'Fresh' : 'Rotten',
+        criticsScore: tvshow.rottenTomatoes.criticsScore,
+        year: Number(tvshow.releaseYear),
       };
     } catch (e) {
       throw new Error(`[RT API] Failed to retrieve tv ratings: ${e.message}`);

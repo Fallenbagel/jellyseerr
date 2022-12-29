@@ -38,6 +38,7 @@ const messages = defineMessages({
   editrequest: 'Edit Request',
   cancelrequest: 'Cancel Request',
   deleterequest: 'Delete Request',
+  unknowntitle: 'Unknown Title',
 });
 
 const isMovie = (movie: MovieDetails | TvDetails): movie is MovieDetails => {
@@ -136,6 +137,14 @@ const RequestCardError = ({ requestData }: RequestCardErrorProps) => {
                           requestData.is4k ? 'status4k' : 'status'
                         ]
                       }
+                      downloadItem={
+                        requestData.media[
+                          requestData.is4k
+                            ? 'downloadStatus4k'
+                            : 'downloadStatus'
+                        ]
+                      }
+                      title={intl.formatMessage(messages.unknowntitle)}
                       inProgress={
                         (
                           requestData.media[
@@ -146,6 +155,7 @@ const RequestCardError = ({ requestData }: RequestCardErrorProps) => {
                         ).length > 0
                       }
                       is4k={requestData.is4k}
+                      mediaType={requestData.type}
                       plexUrl={requestData.is4k ? plexUrl4k : plexUrl}
                       serviceUrl={
                         requestData.is4k
@@ -397,6 +407,12 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
                 status={
                   requestData.media[requestData.is4k ? 'status4k' : 'status']
                 }
+                downloadItem={
+                  requestData.media[
+                    requestData.is4k ? 'downloadStatus4k' : 'downloadStatus'
+                  ]
+                }
+                title={isMovie(title) ? title.title : title.name}
                 inProgress={
                   (
                     requestData.media[
