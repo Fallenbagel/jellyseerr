@@ -16,6 +16,7 @@ import type { MediaWatchDataResponse } from '@server/interfaces/api/mediaInterfa
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
 import axios from 'axios';
+import getConfig from 'next/config';
 import Link from 'next/link';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
@@ -30,7 +31,7 @@ const messages = defineMessages({
   manageModalNoRequests: 'No requests.',
   manageModalClearMedia: 'Clear Data',
   manageModalClearMediaWarning:
-    '* This will irreversibly remove all data for this {mediaType}, including any requests. If this item exists in your Plex library, the media information will be recreated during the next scan.',
+    '* This will irreversibly remove all data for this {mediaType}, including any requests. If this item exists in your {mediaServerName} library, the media information will be recreated during the next scan.',
   openarr: 'Open in {arr}',
   openarr4k: 'Open in 4K {arr}',
   downloadstatus: 'Downloads',
@@ -79,6 +80,7 @@ const ManageSlideOver = ({
   const { user: currentUser, hasPermission } = useUser();
   const intl = useIntl();
   const settings = useSettings();
+  const { publicRuntimeConfig } = getConfig();
   const { data: watchData } = useSWR<MediaWatchDataResponse>(
     settings.currentSettings.mediaServerType === MediaServerType.PLEX &&
       data.mediaInfo &&
@@ -505,6 +507,13 @@ const ManageSlideOver = ({
                     mediaType: intl.formatMessage(
                       mediaType === 'movie' ? messages.movie : messages.tvshow
                     ),
+                    mediaServerName:
+                      publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                        ? 'Emby'
+                        : settings.currentSettings.mediaServerType ===
+                          MediaServerType.PLEX
+                        ? 'Plex'
+                        : 'Jellyfin',
                   })}
                 </div>
               </div>

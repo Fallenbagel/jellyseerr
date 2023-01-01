@@ -16,9 +16,10 @@ import { jobJellyfinFullSync } from '@server/job/jellyfinsync';
 import { scheduledJobs } from '@server/job/schedule';
 import type { AvailableCacheIds } from '@server/lib/cache';
 import cacheManager from '@server/lib/cache';
+import ImageProxy from '@server/lib/imageproxy';
 import { Permission } from '@server/lib/permissions';
 import { plexFullScanner } from '@server/lib/scanners/plex';
-import type { Library, MainSettings } from '@server/lib/settings';
+import type { JobId, Library, MainSettings } from '@server/lib/settings';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
@@ -312,8 +313,8 @@ settingsRoutes.get('/jellyfin/users', async (req, res) => {
       ? externalHostname
       : hostname;
 
-  jellyfinHost = jellyfinHost!.endsWith('/')
-    ? jellyfinHost!.slice(0, -1)
+  jellyfinHost = jellyfinHost.endsWith('/')
+    ? jellyfinHost.slice(0, -1)
     : jellyfinHost;
   const userRepository = getRepository(User);
   const admin = await userRepository.findOneOrFail({
@@ -604,7 +605,7 @@ settingsRoutes.post<{ jobId: string }>('/jobs/:jobId/run', (req, res, next) => {
   });
 });
 
-settingsRoutes.post<{ jobId: string }>(
+settingsRoutes.post<{ jobId: JobId }>(
   '/jobs/:jobId/cancel',
   (req, res, next) => {
     const scheduledJob = scheduledJobs.find(
@@ -631,7 +632,7 @@ settingsRoutes.post<{ jobId: string }>(
   }
 );
 
-settingsRoutes.post<{ jobId: string }>(
+settingsRoutes.post<{ jobId: JobId }>(
   '/jobs/:jobId/schedule',
   (req, res, next) => {
     const scheduledJob = scheduledJobs.find(
@@ -666,16 +667,23 @@ settingsRoutes.post<{ jobId: string }>(
   }
 );
 
-settingsRoutes.get('/cache', (req, res) => {
-  const caches = cacheManager.getAllCaches();
+settingsRoutes.get('/cache', async (_req, res) => {
+  const cacheManagerCaches = cacheManager.getAllCaches();
 
-  return res.status(200).json(
-    Object.values(caches).map((cache) => ({
-      id: cache.id,
-      name: cache.name,
-      stats: cache.getStats(),
-    }))
-  );
+  const apiCaches = Object.values(cacheManagerCaches).map((cache) => ({
+    id: cache.id,
+    name: cache.name,
+    stats: cache.getStats(),
+  }));
+
+  const tmdbImageCache = await ImageProxy.getImageStats('tmdb');
+
+  return res.status(200).json({
+    apiCaches,
+    imageCache: {
+      tmdb: tmdbImageCache,
+    },
+  });
 });
 
 settingsRoutes.post<{ cacheId: AvailableCacheIds }>(

@@ -1,10 +1,11 @@
-name: overseerr
-adopt-info: overseerr
+name: jellyseerr
+adopt-info: jellyseerr
 license: MIT
-summary: Request management and media discovery tool for the Plex ecosystem.
+summary: Request management and media discovery tool for media servers
 description: >
-  Overseerr is a free and open source software application for managing requests for your media library.
-  It integrates with your existing services such as Sonarr, Radarr and Plex!
+  Jellyseerr is a free and open source software application for managing requests for your media library.
+  It is a a fork of Overseerr built to bring support for & focusing mainly on Jellyfin & Emby media servers!
+  It integrates with your existing services such as Sonarr, Radarr, and Jellyfin/Emby/Plex.
 base: core18
 confinement: strict
 
@@ -14,7 +15,7 @@ architectures:
   - build-on: armhf
 
 parts:
-  overseerr:
+  jellyseerr:
     plugin: nodejs
     nodejs-version: '16.17.0'
     nodejs-package-manager: 'yarn'
@@ -36,7 +37,7 @@ parts:
     override-pull: |
       snapcraftctl pull
       # Get information to determine snap grade and version
-      git config --global --add safe.directory /data/parts/overseerr/src
+      git config --global --add safe.directory /data/parts/jellyyseerr/src
       #setup yarn.rc
       echo "--install.frozen-lockfile\n--install.network-timeout 1000000" > .yarnrc
       BRANCH=$(git rev-parse --abbrev-ref HEAD)
