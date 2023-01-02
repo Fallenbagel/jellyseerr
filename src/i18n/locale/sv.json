@@ -951,7 +951,7 @@
   "components.NotificationTypeSelector.issuecreated": "Problem rappoterat",
   "components.PermissionEdit.createissues": "Rapportera problem",
   "components.PermissionEdit.viewissues": "Visa problem",
-  "components.ManageSlideOver.manageModalClearMediaWarning": "* Detta tar bort all data för denna {mediaType}, inklusive eventuella begäranden, på ett oåterkalleligt sätt. Om det här objektet finns i ditt Plex-bibliotek kommer medieinformationen att återskapas vid nästa genomsökning.",
+  "components.ManageSlideOver.manageModalClearMediaWarning": "* Detta tar bort all data för denna {mediaType}, inklusive eventuella begäranden, på ett oåterkalleligt sätt. Om det här objektet finns i ditt {mediaServerName}-bibliotek kommer medieinformationen att återskapas vid nästa genomsökning.",
   "components.ManageSlideOver.manageModalNoRequests": "Inga förfrågningar.",
   "components.NotificationTypeSelector.userissueresolvedDescription": "Få meddelande när dina rapporterade problem har blivit lösta.",
   "components.UserProfile.UserSettings.UserNotificationSettings.pushbulletAccessToken": "Åtkomsttoken",

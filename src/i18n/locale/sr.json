@@ -609,7 +609,7 @@
   "components.Settings.SettingsAbout.uptodate": "Najsvežiji",
   "components.Settings.Notifications.NotificationsWebhook.validationJsonPayloadRequired": "Morate da navedete važeći JSON korisni teret",
   "components.Settings.Notifications.validationChatIdRequired": "Morate da navedete važeći ID za ćaskanje",
-  "components.StatusBadge.playonplex": "Igrajte na Plex-u",
+  "components.StatusBadge.playonplex": "Igrajte na {mediaServerName}-u",
   "components.Settings.Notifications.NotificationsPushbullet.validationAccessTokenRequired": "Morate da obezbedite pristupni token",
   "components.UserList.userssaved": "Korisničke dozvole su uspešno sačuvane!"
 }

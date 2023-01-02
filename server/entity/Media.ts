@@ -205,8 +205,8 @@ class Media {
           ? externalHostname
           : hostname;
 
-      jellyfinHost = jellyfinHost!.endsWith('/')
-        ? jellyfinHost!.slice(0, -1)
+      jellyfinHost = jellyfinHost.endsWith('/')
+        ? jellyfinHost.slice(0, -1)
         : jellyfinHost;
 
       if (this.jellyfinMediaId) {

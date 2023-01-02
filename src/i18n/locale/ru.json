@@ -871,7 +871,7 @@
   "components.IssueDetails.allseasons": "Все сезоны",
   "components.IssueDetails.allepisodes": "Все эпизоды",
   "components.ManageSlideOver.manageModalClearMedia": "Очистить данные",
-  "components.ManageSlideOver.manageModalClearMediaWarning": "* Это приведёт к необратимому удалению всех данных для этого {mediaType}а, включая любые запросы. Если этот элемент существует в вашей библиотеке Plex, мультимедийная информация о нём будет воссоздана во время следующего сканирования.",
+  "components.ManageSlideOver.manageModalClearMediaWarning": "* Это приведёт к необратимому удалению всех данных для этого {mediaType}а, включая любые запросы. Если этот элемент существует в вашей библиотеке {mediaServerName}, мультимедийная информация о нём будет воссоздана во время следующего сканирования.",
   "components.IssueDetails.problemepisode": "Затронутый эпизод",
   "components.ManageSlideOver.manageModalRequests": "Запросы",
   "components.IssueDetails.closeissue": "Закрыть проблему",

@@ -931,7 +931,7 @@
   "components.Layout.Sidebar.issues": "Probleme",
   "components.ManageSlideOver.downloadstatus": "Downloads",
   "components.ManageSlideOver.manageModalClearMedia": "Daten löschen",
-  "components.ManageSlideOver.manageModalClearMediaWarning": "* Dadurch werden alle Daten für diesen {mediaType} unwiderruflich entfernt, einschließlich aller Anfragen. Wenn dieses Element in Ihrer Plex-Bibliothek existiert, werden die Medieninformationen beim nächsten Scan neu erstellt.",
+  "components.ManageSlideOver.manageModalClearMediaWarning": "* Dadurch werden alle Daten für diesen {mediaType} unwiderruflich entfernt, einschließlich aller Anfragen. Wenn dieses Element in Ihrer {mediaServerName}-Bibliothek existiert, werden die Medieninformationen beim nächsten Scan neu erstellt.",
   "components.ManageSlideOver.manageModalIssues": "Problem eröffnen",
   "components.ManageSlideOver.manageModalNoRequests": "Keine Anfragen.",
   "components.ManageSlideOver.manageModalRequests": "Anfragen",

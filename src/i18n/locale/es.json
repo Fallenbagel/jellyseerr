@@ -953,7 +953,7 @@
   "components.IssueModal.issueAudio": "Audio",
   "components.IssueModal.issueSubtitles": "Subtítulo",
   "components.IssueModal.issueVideo": "Vídeo",
-  "components.ManageSlideOver.manageModalClearMediaWarning": "* Esto eliminará irreversiblemente todos los datos de {mediaType}, incluyendo todas las solicitudes. Si este elemento existe en la biblioteca de Plex, la información de los contenidos se recreará en el siguiente escaneado.",
+  "components.ManageSlideOver.manageModalClearMediaWarning": "* Esto eliminará irreversiblemente todos los datos de {mediaType}, incluyendo todas las solicitudes. Si este elemento existe en la biblioteca de {mediaServerName}, la información de los contenidos se recreará en el siguiente escaneado.",
   "components.ManageSlideOver.mark4kavailable": "Marcar como Disponible en 4K",
   "components.ManageSlideOver.openarr4k": "Abrir en 4K {arr}",
   "components.UserProfile.UserSettings.UserNotificationSettings.pushbulletAccessToken": "Token de Acceso",

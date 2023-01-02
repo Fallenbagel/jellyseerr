@@ -503,7 +503,7 @@
   "components.ManageSlideOver.manageModalClearMedia": "データを消去",
   "components.ManageSlideOver.manageModalRequests": "リクエスト",
   "components.ManageSlideOver.openarr": "{arr} を開く",
-  "components.ManageSlideOver.manageModalClearMediaWarning": "※リクエストを含め、すべての詳細情報が消去されます。この操作は元に戻すことができません。この作品が Plex ライブラリに存在する場合、詳細情報は次のスキャンで再作成されます。",
+  "components.ManageSlideOver.manageModalClearMediaWarning": "※リクエストを含め、すべての詳細情報が消去されます。この操作は元に戻すことができません。この作品が {mediaServerName} ライブラリに存在する場合、詳細情報は次のスキャンで再作成されます。",
   "components.ManageSlideOver.openarr4k": "4K {arr} を開く",
   "components.ManageSlideOver.manageModalNoRequests": "リクエストが有りません。",
   "components.ManageSlideOver.manageModalTitle": "{mediaType}を管理",

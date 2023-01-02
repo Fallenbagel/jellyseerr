@@ -950,7 +950,7 @@
   "components.Settings.SettingsJobsCache.jobScheduleEditSaved": "Job modificato correttamente!",
   "components.UserProfile.UserSettings.UserNotificationSettings.pushoversettingsfailed": "Impossibile salvare le impostazioni Pushover.",
   "components.UserProfile.UserSettings.UserNotificationSettings.pushoversettingssaved": "Impostazioni Pushover salvate con successo!",
-  "components.ManageSlideOver.manageModalClearMediaWarning": "* Questo rimuoverà irreversibilmente tutti i dati per questo {mediaType}, incluse eventuali richieste. Se questo elemento esiste nella tua libreria Plex, le informazioni multimediali verranno ricreate durante la scansione successiva.",
+  "components.ManageSlideOver.manageModalClearMediaWarning": "* Questo rimuoverà irreversibilmente tutti i dati per questo {mediaType}, incluse eventuali richieste. Se questo elemento esiste nella tua libreria {mediaServerName}, le informazioni multimediali verranno ricreate durante la scansione successiva.",
   "components.NotificationTypeSelector.issuecreated": "Problema Segnalato",
   "components.NotificationTypeSelector.issuecreatedDescription": "Invia una notifica quando un problema viene segnalato.",
   "components.NotificationTypeSelector.issueresolved": "Problema risolto",

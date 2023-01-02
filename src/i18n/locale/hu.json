@@ -851,7 +851,7 @@
   "components.IssueModal.CreateIssueModal.toastFailedCreate": "Valami hiba történt a probléma elküldése során.",
   "components.IssueDetails.play4konplex": "Lejátszás Plexen 4K-ban",
   "components.IssueModal.CreateIssueModal.toastviewissue": "Probléma Megtekintése",
-  "components.ManageSlideOver.manageModalClearMediaWarning": "* Ez visszafordíthatatlanul eltávolítja az összes adatot ehhez a {mediaType}-hez, beleértve a kéréseket is. Ha ez az elem létezik a Plex könyvtárában, a médiainformáció a következő beolvasás során újra létrejön.",
+  "components.ManageSlideOver.manageModalClearMediaWarning": "* Ez visszafordíthatatlanul eltávolítja az összes adatot ehhez a {mediaType}-hez, beleértve a kéréseket is. Ha ez az elem létezik a {mediaServerName} könyvtárában, a médiainformáció a következő beolvasás során újra létrejön.",
   "components.IssueDetails.commentplaceholder": "Hozzászólás írása…",
   "components.IssueDetails.comments": "Hozzászólások",
   "components.IssueDetails.deleteissue": "Probléma Törlése",

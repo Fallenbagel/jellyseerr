@@ -38,6 +38,7 @@ export interface JellyfinLibraryItem {
   SeasonId?: string;
   SeasonName?: string;
   IndexNumber?: number;
+  IndexNumberEnd?: number;
   ParentIndexNumber?: number;
   MediaType: string;
 }
@@ -178,8 +179,10 @@ class JellyfinAPI {
         (Item: any) => {
           return (
             Item.Type === 'CollectionFolder' &&
-            (Item.CollectionType === 'tvshows' ||
-              Item.CollectionType === 'movies')
+            Item.CollectionType !== 'music' &&
+            Item.CollectionType !== 'books' &&
+            Item.CollectionType !== 'musicvideos' &&
+            Item.CollectionType !== 'homevideos'
           );
         }
       ).map((Item: any) => {
@@ -204,7 +207,7 @@ class JellyfinAPI {
   public async getLibraryContents(id: string): Promise<JellyfinLibraryItem[]> {
     try {
       const contents = await this.axios.get<any>(
-        `/Users/${this.userId}/Items?SortBy=SortName&SortOrder=Ascending&IncludeItemTypes=Series,Movie&Recursive=true&StartIndex=0&ParentId=${id}`
+        `/Users/${this.userId}/Items?SortBy=SortName&SortOrder=Ascending&IncludeItemTypes=Series,Movie,Others&Recursive=true&StartIndex=0&ParentId=${id}`
       );
 
       return contents.data.Items.filter(

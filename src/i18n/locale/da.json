@@ -201,7 +201,7 @@
   "components.IssueModal.issueVideo": "Video",
   "components.Layout.Sidebar.issues": "Problemer",
   "components.ManageSlideOver.manageModalClearMedia": "Ryd Mediedata",
-  "components.ManageSlideOver.manageModalClearMediaWarning": "* Dette vil slette alle data for denne {mediaType} uden mulighed for gendannelse, inklusiv alle forespørgsler. Hvis dette objekt findes i dit Plex bibliotek vil medieinformationen blive genskabt under næste skanning.",
+  "components.ManageSlideOver.manageModalClearMediaWarning": "* Dette vil slette alle data for denne {mediaType} uden mulighed for gendannelse, inklusiv alle forespørgsler. Hvis dette objekt findes i dit {mediaServerName} bibliotek vil medieinformationen blive genskabt under næste skanning.",
   "components.IssueModal.CreateIssueModal.whatswrong": "Hvad er galt?",
   "components.IssueModal.issueAudio": "Lyd",
   "components.IssueModal.issueOther": "Andet",

@@ -46,7 +46,7 @@ const messages = defineMessages({
     'Do NOT enable this setting unless you understand what you are doing!',
   cacheImages: 'Enable Image Caching',
   cacheImagesTip:
-    'Cache and serve optimized images (requires a significant amount of disk space)',
+    'Cache externally sourced images (requires a significant amount of disk space)',
   trustProxy: 'Enable Proxy Support',
   trustProxyTip:
     'Allow Overseerr to correctly register client IP addresses behind a proxy',

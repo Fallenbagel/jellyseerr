@@ -225,7 +225,7 @@
       {
         "path": "semantic-release-docker-buildx",
         "buildArgs": {
-          "COMMIT_TAG": "$GITHUB_SHA"
+          "COMMIT_TAG": "$GIT_SHA"
         },
         "imageNames": [
           "fallenbagel/jellyseerr"

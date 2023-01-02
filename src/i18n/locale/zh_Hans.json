@@ -944,7 +944,7 @@
   "components.NotificationTypeSelector.userissueresolvedDescription": "当您报告的问题解决时获取通知。",
   "components.ManageSlideOver.alltime": "历史",
   "components.ManageSlideOver.manageModalAdvanced": "高级",
-  "components.ManageSlideOver.manageModalClearMediaWarning": "* 这将会删除所有和{mediaType}相关的数据和所有请求。如果{mediaType}在您的Plex服务器存在，数据将会在媒体库扫描时重新建立。",
+  "components.ManageSlideOver.manageModalClearMediaWarning": "* 这将会删除所有和{mediaType}相关的数据和所有请求。如果{mediaType}在您的{mediaServerName}服务器存在，数据将会在媒体库扫描时重新建立。",
   "components.ManageSlideOver.manageModalIssues": "未解决问题",
   "components.ManageSlideOver.manageModalMedia": "媒体",
   "components.ManageSlideOver.manageModalMedia4k": "4K 媒体",

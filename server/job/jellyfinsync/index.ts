@@ -257,8 +257,19 @@ class JobJellyfinSync {
               //use for loop to make sure this loop _completes_ in full
               //before the next section
               for (const episode of episodes) {
+                let episodeCount = 1;
+
+                // count number of combined episodes
+                if (
+                  episode.IndexNumber !== undefined &&
+                  episode.IndexNumberEnd !== undefined
+                ) {
+                  episodeCount =
+                    episode.IndexNumberEnd - episode.IndexNumber + 1;
+                }
+
                 if (!this.enable4kShow) {
-                  totalStandard++;
+                  totalStandard += episodeCount;
                 } else {
                   const ExtendedEpisodeData = await this.jfClient.getItemData(
                     episode.Id
@@ -268,10 +279,10 @@ class JobJellyfinSync {
                     return MediaSource.MediaStreams.some((MediaStream) => {
                       if (MediaStream.Type === 'Video') {
                         if (MediaStream.Width ?? 0 < 2000) {
-                          totalStandard++;
+                          totalStandard += episodeCount;
                         }
                       } else {
-                        total4k++;
+                        total4k += episodeCount;
                       }
                     });
                   });
