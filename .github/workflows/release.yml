@@ -51,15 +51,15 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Switch to master branch
-        run: git checkout master
+      - name: Switch to main branch
+        run: git checkout main
       - name: Pull latest changes
         run: git pull
       - name: Prepare
         id: prepare
         run: |
           git fetch --prune --tags
-          if [[ $GITHUB_REF == refs/tags/* || $GITHUB_REF == refs/heads/master ]]; then
+          if [[ $GITHUB_REF == refs/tags/* || $GITHUB_REF == refs/heads/main ]]; then
             echo ::set-output name=RELEASE::stable
           else
             echo ::set-output name=RELEASE::edge
