@@ -39,6 +39,7 @@ const messages = defineMessages({
   cancelRequest: 'Cancel Request',
   tmdbid: 'TMDB ID',
   tvdbid: 'TheTVDB ID',
+  unknowntitle: 'Unknown Title',
 });
 
 const isMovie = (movie: MovieDetails | TvDetails): movie is MovieDetails => {
@@ -128,6 +129,12 @@ const RequestItemError = ({
                         requestData.is4k ? 'status4k' : 'status'
                       ]
                     }
+                    downloadItem={
+                      requestData.media[
+                        requestData.is4k ? 'downloadStatus4k' : 'downloadStatus'
+                      ]
+                    }
+                    title={intl.formatMessage(messages.unknowntitle)}
                     inProgress={
                       (
                         requestData.media[
@@ -138,6 +145,7 @@ const RequestItemError = ({
                       ).length > 0
                     }
                     is4k={requestData.is4k}
+                    mediaType={requestData.type}
                     plexUrl={requestData.is4k ? plexUrl4k : plexUrl}
                     serviceUrl={
                       requestData.is4k
@@ -463,6 +471,12 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                   status={
                     requestData.media[requestData.is4k ? 'status4k' : 'status']
                   }
+                  downloadItem={
+                    requestData.media[
+                      requestData.is4k ? 'downloadStatus4k' : 'downloadStatus'
+                    ]
+                  }
+                  title={isMovie(title) ? title.title : title.name}
                   inProgress={
                     (
                       requestData.media[

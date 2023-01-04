@@ -13,6 +13,21 @@ interface SonarrSeason {
     percentOfEpisodes: number;
   };
 }
+interface EpisodeResult {
+  seriesId: number;
+  episodeFileId: number;
+  seasonNumber: number;
+  episodeNumber: number;
+  title: string;
+  airDate: string;
+  airDateUtc: string;
+  overview: string;
+  hasFile: boolean;
+  monitored: boolean;
+  absoluteEpisodeNumber: number;
+  unverifiedSceneNumbering: boolean;
+  id: number;
+}
 
 export interface SonarrSeries {
   title: string;
@@ -82,7 +97,11 @@ export interface LanguageProfile {
   name: string;
 }
 
-class SonarrAPI extends ServarrBase<{ seriesId: number; episodeId: number }> {
+class SonarrAPI extends ServarrBase<{
+  seriesId: number;
+  episodeId: number;
+  episode: EpisodeResult;
+}> {
   constructor({ url, apiKey }: { url: string; apiKey: string }) {
     super({ url, apiKey, apiName: 'Sonarr', cacheName: 'sonarr' });
   }

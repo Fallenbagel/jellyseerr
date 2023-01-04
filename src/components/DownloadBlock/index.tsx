@@ -1,23 +1,39 @@
 import Badge from '@app/components/Common/Badge';
+import { Permission, useUser } from '@app/hooks/useUser';
 import type { DownloadingItem } from '@server/lib/downloadtracker';
 import { defineMessages, FormattedRelativeTime, useIntl } from 'react-intl';
 
 const messages = defineMessages({
   estimatedtime: 'Estimated {time}',
+  formattedTitle: '{title}: Season {seasonNumber} Episode {episodeNumber}',
 });
 
 interface DownloadBlockProps {
   downloadItem: DownloadingItem;
   is4k?: boolean;
+  title?: string;
 }
 
-const DownloadBlock = ({ downloadItem, is4k = false }: DownloadBlockProps) => {
+const DownloadBlock = ({
+  downloadItem,
+  is4k = false,
+  title,
+}: DownloadBlockProps) => {
   const intl = useIntl();
+  const { hasPermission } = useUser();
 
   return (
     <div className="p-4">
       <div className="mb-2 w-56 truncate text-sm sm:w-80 md:w-full">
-        {downloadItem.title}
+        {hasPermission(Permission.ADMIN)
+          ? downloadItem.title
+          : downloadItem.episode
+          ? intl.formatMessage(messages.formattedTitle, {
+              title,
+              seasonNumber: downloadItem?.episode?.seasonNumber,
+              episodeNumber: downloadItem?.episode?.episodeNumber,
+            })
+          : title}
       </div>
       <div className="relative mb-2 h-6 min-w-0 overflow-hidden rounded-full bg-gray-700">
         <div
