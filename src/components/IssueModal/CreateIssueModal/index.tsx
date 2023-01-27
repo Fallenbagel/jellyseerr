@@ -5,7 +5,7 @@ import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import { RadioGroup } from '@headlessui/react';
-import { ArrowCircleRightIcon } from '@heroicons/react/solid';
+import { ArrowRightCircleIcon } from '@heroicons/react/24/solid';
 import { MediaStatus } from '@server/constants/media';
 import type Issue from '@server/entity/Issue';
 import type { MovieDetails } from '@server/models/Movie';
@@ -121,7 +121,7 @@ const CreateIssueModal = ({
                 <Link href={`/issues/${newIssue.data.id}`}>
                   <Button as="a" className="mt-4">
                     <span>{intl.formatMessage(messages.toastviewissue)}</span>
-                    <ArrowCircleRightIcon />
+                    <ArrowRightCircleIcon />
                   </Button>
                 </Link>
               </>,

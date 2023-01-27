@@ -4,7 +4,7 @@ import CachedImage from '@app/components/Common/CachedImage';
 import { issueOptions } from '@app/components/IssueModal/constants';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
-import { EyeIcon } from '@heroicons/react/solid';
+import { EyeIcon } from '@heroicons/react/24/solid';
 import { IssueStatus } from '@server/constants/issue';
 import { MediaType } from '@server/constants/media';
 import type Issue from '@server/entity/Issue';

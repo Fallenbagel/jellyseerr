@@ -1,4 +1,4 @@
-import { CheckIcon, XIcon } from '@heroicons/react/solid';
+import { CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
 interface LibraryItemProps {
   isEnabled?: boolean;
@@ -41,7 +41,7 @@ const LibraryItem = ({ isEnabled, name, onToggle }: LibraryItemProps) => {
                     : 'opacity-100 duration-200 ease-in'
                 } absolute inset-0 flex h-full w-full items-center justify-center transition-opacity`}
               >
-                <XIcon className="h-3 w-3 text-gray-400" />
+                <XMarkIcon className="h-3 w-3 text-gray-400" />
               </span>
               <span
                 className={`${

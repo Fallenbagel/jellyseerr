@@ -2,7 +2,7 @@ import Alert from '@app/components/Common/Alert';
 import Button from '@app/components/Common/Button';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import globalMessages from '@app/i18n/globalMessages';
-import { BeakerIcon, SaveIcon } from '@heroicons/react/outline';
+import { ArrowDownOnSquareIcon, BeakerIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
@@ -149,7 +149,7 @@ const NotificationsWebPush = () => {
                       type="submit"
                       disabled={isSubmitting || isTesting}
                     >
-                      <SaveIcon />
+                      <ArrowDownOnSquareIcon />
                       <span>
                         {isSubmitting
                           ? intl.formatMessage(globalMessages.saving)

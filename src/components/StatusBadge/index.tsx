@@ -126,7 +126,7 @@ const StatusBadge = ({
   const badgeDownloadProgress = (
     <div
       className={`
-      absolute top-0 left-0 z-10 flex h-full ${
+      absolute top-0 left-0 z-10 flex h-full bg-opacity-80 ${
         status === MediaStatus.PROCESSING ? 'bg-indigo-500' : 'bg-green-500'
       } transition-all duration-200 ease-in-out
     `}

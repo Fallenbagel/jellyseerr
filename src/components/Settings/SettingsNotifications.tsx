@@ -9,7 +9,7 @@ import PageTitle from '@app/components/Common/PageTitle';
 import type { SettingsRoute } from '@app/components/Common/SettingsTabs';
 import SettingsTabs from '@app/components/Common/SettingsTabs';
 import globalMessages from '@app/i18n/globalMessages';
-import { CloudIcon, LightningBoltIcon, MailIcon } from '@heroicons/react/solid';
+import { BoltIcon, CloudIcon, EnvelopeIcon } from '@heroicons/react/24/solid';
 import { defineMessages, useIntl } from 'react-intl';
 
 const messages = defineMessages({
@@ -34,7 +34,7 @@ const SettingsNotifications = ({ children }: SettingsNotificationsProps) => {
       text: intl.formatMessage(messages.email),
       content: (
         <span className="flex items-center">
-          <MailIcon className="mr-2 h-4" />
+          <EnvelopeIcon className="mr-2 h-4" />
           {intl.formatMessage(messages.email)}
         </span>
       ),
@@ -133,7 +133,7 @@ const SettingsNotifications = ({ children }: SettingsNotificationsProps) => {
       text: intl.formatMessage(messages.webhook),
       content: (
         <span className="flex items-center">
-          <LightningBoltIcon className="mr-2 h-4" />
+          <BoltIcon className="mr-2 h-4" />
           {intl.formatMessage(messages.webhook)}
         </span>
       ),

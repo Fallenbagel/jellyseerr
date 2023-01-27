@@ -755,6 +755,24 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "ceptonit",
+      "name": "ceptonit",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12678743?v=4",
+      "profile": "https://github.com/ceptonit",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "aedelbro",
+      "name": "aedelbro",
+      "avatar_url": "https://avatars.githubusercontent.com/u/36162221?v=4",
+      "profile": "https://github.com/aedelbro",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "badgeTemplate": "<a href=\"#contributors-\"><img alt=\"All Contributors\" src=\"https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg\"/></a>",

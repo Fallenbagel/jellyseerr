@@ -4,6 +4,7 @@ import { MediaType } from '@server/constants/media';
 import { getRepository } from '@server/datasource';
 import IssueComment from '@server/entity/IssueComment';
 import Media from '@server/entity/Media';
+import { User } from '@server/entity/User';
 import notificationManager, { Notification } from '@server/lib/notifications';
 import { Permission } from '@server/lib/permissions';
 import logger from '@server/logger';
@@ -31,6 +32,10 @@ export class IssueCommentSubscriber
           relations: { issue: true },
         })
       ).issue;
+
+      const createdBy = await getRepository(User).findOneOrFail({
+        where: { id: issue.createdBy.id },
+      });
 
       const media = await getRepository(Media).findOneOrFail({
         where: { id: issue.media.id },
@@ -71,9 +76,9 @@ export class IssueCommentSubscriber
           notifyAdmin: true,
           notifySystem: true,
           notifyUser:
-            !issue.createdBy.hasPermission(Permission.MANAGE_ISSUES) &&
-            issue.createdBy.id !== entity.user.id
-              ? issue.createdBy
+            !createdBy.hasPermission(Permission.MANAGE_ISSUES) &&
+            createdBy.id !== entity.user.id
+              ? createdBy
               : undefined,
         });
       }
