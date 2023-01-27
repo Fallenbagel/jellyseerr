@@ -87,6 +87,7 @@ export class IssueSubscriber implements EntitySubscriberInterface<Issue> {
         notifySystem: true,
         notifyUser:
           !entity.createdBy.hasPermission(Permission.MANAGE_ISSUES) &&
+          entity.modifiedBy?.id !== entity.createdBy.id &&
           (type === Notification.ISSUE_RESOLVED ||
             type === Notification.ISSUE_REOPENED)
             ? entity.createdBy

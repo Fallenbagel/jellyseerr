@@ -10,8 +10,8 @@ import useSettings from '@app/hooks/useSettings';
 import globalMessages from '@app/i18n/globalMessages';
 import { formatBytes } from '@app/utils/numberHelpers';
 import { Transition } from '@headlessui/react';
-import { PlayIcon, StopIcon, TrashIcon } from '@heroicons/react/outline';
-import { PencilIcon } from '@heroicons/react/solid';
+import { PlayIcon, StopIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PencilIcon } from '@heroicons/react/24/solid';
 import { MediaServerType } from '@server/constants/server';
 import type {
   CacheItem,

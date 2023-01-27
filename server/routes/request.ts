@@ -492,8 +492,10 @@ requestRoutes.post<{
         relations: { requestedBy: true, modifiedBy: true },
       });
 
-      await request.updateParentStatus();
-      await request.sendMedia();
+      // this also triggers updating the parent media's status & sending to *arr
+      request.status = MediaRequestStatus.APPROVED;
+      await requestRepository.save(request);
+
       return res.status(200).json(request);
     } catch (e) {
       logger.error('Error processing request retry', {

@@ -16,13 +16,13 @@ import { Permission, UserType, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import { Transition } from '@headlessui/react';
 import {
+  BarsArrowDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  InboxInIcon,
+  InboxArrowDownIcon,
   PencilIcon,
-  SortDescendingIcon,
-  UserAddIcon,
-} from '@heroicons/react/solid';
+  UserPlusIcon,
+} from '@heroicons/react/24/solid';
 import { MediaServerType } from '@server/constants/server';
 import type { UserResultsResponse } from '@server/interfaces/api/userInterfaces';
 import { hasPermission } from '@server/lib/permissions';
@@ -504,7 +504,7 @@ const UserList = () => {
               buttonType="primary"
               onClick={() => setCreateModal({ isOpen: true })}
             >
-              <UserAddIcon />
+              <UserPlusIcon />
               <span>{intl.formatMessage(messages.createlocaluser)}</span>
             </Button>
             <Button
@@ -512,7 +512,7 @@ const UserList = () => {
               buttonType="primary"
               onClick={() => setShowImportModal(true)}
             >
-              <InboxInIcon />
+              <InboxArrowDownIcon />
               <span>
                 {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
                   ? intl.formatMessage(messages.importfrommediaserver, {
@@ -531,7 +531,7 @@ const UserList = () => {
           </div>
           <div className="mb-2 flex flex-grow lg:mb-0 lg:flex-grow-0">
             <span className="inline-flex cursor-default items-center rounded-l-md border border-r-0 border-gray-500 bg-gray-800 px-3 text-sm text-gray-100">
-              <SortDescendingIcon className="h-6 w-6" />
+              <BarsArrowDownIcon className="h-6 w-6" />
             </span>
             <select
               id="sort"

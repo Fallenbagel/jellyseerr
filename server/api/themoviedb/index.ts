@@ -3,9 +3,12 @@ import cacheManager from '@server/lib/cache';
 import { sortBy } from 'lodash';
 import type {
   TmdbCollection,
+  TmdbCompanySearchResponse,
   TmdbExternalIdResponse,
   TmdbGenre,
   TmdbGenresResult,
+  TmdbKeyword,
+  TmdbKeywordSearchResponse,
   TmdbLanguage,
   TmdbMovieDetails,
   TmdbNetwork,
@@ -19,6 +22,8 @@ import type {
   TmdbSeasonWithEpisodes,
   TmdbTvDetails,
   TmdbUpcomingMoviesResponse,
+  TmdbWatchProviderDetails,
+  TmdbWatchProviderRegion,
 } from './interfaces';
 
 interface SearchOptions {
@@ -32,30 +37,41 @@ interface SingleSearchOptions extends SearchOptions {
   year?: number;
 }
 
+export type SortOptions =
+  | 'popularity.asc'
+  | 'popularity.desc'
+  | 'release_date.asc'
+  | 'release_date.desc'
+  | 'revenue.asc'
+  | 'revenue.desc'
+  | 'primary_release_date.asc'
+  | 'primary_release_date.desc'
+  | 'original_title.asc'
+  | 'original_title.desc'
+  | 'vote_average.asc'
+  | 'vote_average.desc'
+  | 'vote_count.asc'
+  | 'vote_count.desc'
+  | 'first_air_date.asc'
+  | 'first_air_date.desc';
+
 interface DiscoverMovieOptions {
   page?: number;
   includeAdult?: boolean;
   language?: string;
   primaryReleaseDateGte?: string;
   primaryReleaseDateLte?: string;
+  withRuntimeGte?: string;
+  withRuntimeLte?: string;
+  voteAverageGte?: string;
+  voteAverageLte?: string;
   originalLanguage?: string;
-  genre?: number;
-  studio?: number;
-  sortBy?:
-    | 'popularity.asc'
-    | 'popularity.desc'
-    | 'release_date.asc'
-    | 'release_date.desc'
-    | 'revenue.asc'
-    | 'revenue.desc'
-    | 'primary_release_date.asc'
-    | 'primary_release_date.desc'
-    | 'original_title.asc'
-    | 'original_title.desc'
-    | 'vote_average.asc'
-    | 'vote_average.desc'
-    | 'vote_count.asc'
-    | 'vote_count.desc';
+  genre?: string;
+  studio?: string;
+  keywords?: string;
+  sortBy?: SortOptions;
+  watchRegion?: string;
+  watchProviders?: string;
 }
 
 interface DiscoverTvOptions {
@@ -63,19 +79,18 @@ interface DiscoverTvOptions {
   language?: string;
   firstAirDateGte?: string;
   firstAirDateLte?: string;
+  withRuntimeGte?: string;
+  withRuntimeLte?: string;
+  voteAverageGte?: string;
+  voteAverageLte?: string;
   includeEmptyReleaseDate?: boolean;
   originalLanguage?: string;
-  genre?: number;
+  genre?: string;
   network?: number;
-  sortBy?:
-    | 'popularity.asc'
-    | 'popularity.desc'
-    | 'vote_average.asc'
-    | 'vote_average.desc'
-    | 'vote_count.asc'
-    | 'vote_count.desc'
-    | 'first_air_date.asc'
-    | 'first_air_date.desc';
+  keywords?: string;
+  sortBy?: SortOptions;
+  watchRegion?: string;
+  watchProviders?: string;
 }
 
 class TheMovieDb extends ExternalAPI {
@@ -237,7 +252,7 @@ class TheMovieDb extends ExternalAPI {
           params: {
             language,
             append_to_response:
-              'credits,external_ids,videos,release_dates,watch/providers',
+              'credits,external_ids,videos,keywords,release_dates,watch/providers',
           },
         },
         43200
@@ -440,8 +455,25 @@ class TheMovieDb extends ExternalAPI {
     originalLanguage,
     genre,
     studio,
+    keywords,
+    withRuntimeGte,
+    withRuntimeLte,
+    voteAverageGte,
+    voteAverageLte,
+    watchProviders,
+    watchRegion,
   }: DiscoverMovieOptions = {}): Promise<TmdbSearchMovieResponse> => {
     try {
+      const defaultFutureDate = new Date(
+        Date.now() + 1000 * 60 * 60 * 24 * (365 * 1.5)
+      )
+        .toISOString()
+        .split('T')[0];
+
+      const defaultPastDate = new Date('1900-01-01')
+        .toISOString()
+        .split('T')[0];
+
       const data = await this.get<TmdbSearchMovieResponse>('/discover/movie', {
         params: {
           sort_by: sortBy,
@@ -449,11 +481,31 @@ class TheMovieDb extends ExternalAPI {
           include_adult: includeAdult,
           language,
           region: this.region,
-          with_original_language: originalLanguage ?? this.originalLanguage,
-          'primary_release_date.gte': primaryReleaseDateGte,
-          'primary_release_date.lte': primaryReleaseDateLte,
+          with_original_language:
+            originalLanguage && originalLanguage !== 'all'
+              ? originalLanguage
+              : originalLanguage === 'all'
+              ? undefined
+              : this.originalLanguage,
+          // Set our release date values, but check if one is set and not the other,
+          // so we can force a past date or a future date. TMDB Requires both values if one is set!
+          'primary_release_date.gte':
+            !primaryReleaseDateGte && primaryReleaseDateLte
+              ? defaultPastDate
+              : primaryReleaseDateGte,
+          'primary_release_date.lte':
+            !primaryReleaseDateLte && primaryReleaseDateGte
+              ? defaultFutureDate
+              : primaryReleaseDateLte,
           with_genres: genre,
           with_companies: studio,
+          with_keywords: keywords,
+          'with_runtime.gte': withRuntimeGte,
+          'with_runtime.lte': withRuntimeLte,
+          'vote_average.gte': voteAverageGte,
+          'vote_average.lte': voteAverageLte,
+          watch_region: watchRegion,
+          with_watch_providers: watchProviders,
         },
       });
 
@@ -473,20 +525,57 @@ class TheMovieDb extends ExternalAPI {
     originalLanguage,
     genre,
     network,
+    keywords,
+    withRuntimeGte,
+    withRuntimeLte,
+    voteAverageGte,
+    voteAverageLte,
+    watchProviders,
+    watchRegion,
   }: DiscoverTvOptions = {}): Promise<TmdbSearchTvResponse> => {
     try {
+      const defaultFutureDate = new Date(
+        Date.now() + 1000 * 60 * 60 * 24 * (365 * 1.5)
+      )
+        .toISOString()
+        .split('T')[0];
+
+      const defaultPastDate = new Date('1900-01-01')
+        .toISOString()
+        .split('T')[0];
+
       const data = await this.get<TmdbSearchTvResponse>('/discover/tv', {
         params: {
           sort_by: sortBy,
           page,
           language,
           region: this.region,
-          'first_air_date.gte': firstAirDateGte,
-          'first_air_date.lte': firstAirDateLte,
-          with_original_language: originalLanguage ?? this.originalLanguage,
+          // Set our release date values, but check if one is set and not the other,
+          // so we can force a past date or a future date. TMDB Requires both values if one is set!
+          'first_air_date.gte':
+            !firstAirDateGte && firstAirDateLte
+              ? defaultPastDate
+              : firstAirDateGte,
+          'first_air_date.lte':
+            !firstAirDateLte && firstAirDateGte
+              ? defaultFutureDate
+              : firstAirDateLte,
+          with_original_language:
+            originalLanguage && originalLanguage !== 'all'
+              ? originalLanguage
+              : originalLanguage === 'all'
+              ? undefined
+              : this.originalLanguage,
           include_null_first_air_dates: includeEmptyReleaseDate,
           with_genres: genre,
           with_networks: network,
+          with_keywords: keywords,
+          'with_runtime.gte': withRuntimeGte,
+          'with_runtime.lte': withRuntimeLte,
+          'vote_average.gte': voteAverageGte,
+          'vote_average.lte': voteAverageLte,
+          with_watch_providers: watchProviders,
+          watch_region: watchRegion,
         },
       });
 
@@ -872,6 +961,152 @@ class TheMovieDb extends ExternalAPI {
       return tvGenres;
     } catch (e) {
       throw new Error(`[TMDB] Failed to fetch TV genres: ${e.message}`);
+    }
+  }
+
+  public async getKeywordDetails({
+    keywordId,
+  }: {
+    keywordId: number;
+  }): Promise<TmdbKeyword> {
+    try {
+      const data = await this.get<TmdbKeyword>(
+        `/keyword/${keywordId}`,
+        undefined,
+        604800 // 7 days
+      );
+
+      return data;
+    } catch (e) {
+      throw new Error(`[TMDB] Failed to fetch keyword: ${e.message}`);
+    }
+  }
+
+  public async searchKeyword({
+    query,
+    page = 1,
+  }: {
+    query: string;
+    page?: number;
+  }): Promise<TmdbKeywordSearchResponse> {
+    try {
+      const data = await this.get<TmdbKeywordSearchResponse>(
+        '/search/keyword',
+        {
+          params: {
+            query,
+            page,
+          },
+        },
+        86400 // 24 hours
+      );
+
+      return data;
+    } catch (e) {
+      throw new Error(`[TMDB] Failed to search keyword: ${e.message}`);
+    }
+  }
+
+  public async searchCompany({
+    query,
+    page = 1,
+  }: {
+    query: string;
+    page?: number;
+  }): Promise<TmdbCompanySearchResponse> {
+    try {
+      const data = await this.get<TmdbCompanySearchResponse>(
+        '/search/company',
+        {
+          params: {
+            query,
+            page,
+          },
+        },
+        86400 // 24 hours
+      );
+
+      return data;
+    } catch (e) {
+      throw new Error(`[TMDB] Failed to search companies: ${e.message}`);
+    }
+  }
+
+  public async getAvailableWatchProviderRegions({
+    language,
+  }: {
+    language?: string;
+  }) {
+    try {
+      const data = await this.get<{ results: TmdbWatchProviderRegion[] }>(
+        '/watch/providers/regions',
+        {
+          params: {
+            language: language ?? this.originalLanguage,
+          },
+        },
+        86400 // 24 hours
+      );
+
+      return data.results;
+    } catch (e) {
+      throw new Error(
+        `[TMDB] Failed to fetch available watch regions: ${e.message}`
+      );
+    }
+  }
+
+  public async getMovieWatchProviders({
+    language,
+    watchRegion,
+  }: {
+    language?: string;
+    watchRegion: string;
+  }) {
+    try {
+      const data = await this.get<{ results: TmdbWatchProviderDetails[] }>(
+        '/watch/providers/movie',
+        {
+          params: {
+            language: language ?? this.originalLanguage,
+            watch_region: watchRegion,
+          },
+        },
+        86400 // 24 hours
+      );
+
+      return data.results;
+    } catch (e) {
+      throw new Error(
+        `[TMDB] Failed to fetch movie watch providers: ${e.message}`
+      );
+    }
+  }
+
+  public async getTvWatchProviders({
+    language,
+    watchRegion,
+  }: {
+    language?: string;
+    watchRegion: string;
+  }) {
+    try {
+      const data = await this.get<{ results: TmdbWatchProviderDetails[] }>(
+        '/watch/providers/tv',
+        {
+          params: {
+            language: language ?? this.originalLanguage,
+            watch_region: watchRegion,
+          },
+        },
+        86400 // 24 hours
+      );
+
+      return data.results;
+    } catch (e) {
+      throw new Error(
+        `[TMDB] Failed to fetch TV watch providers: ${e.message}`
+      );
     }
   }
 }

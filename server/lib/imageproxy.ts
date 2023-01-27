@@ -192,9 +192,11 @@ class ImageProxy {
 
       const buffer = Buffer.from(response.data, 'binary');
       const extension = path.split('.').pop() ?? '';
-      const maxAge = Number(response.headers['cache-control'].split('=')[1]);
+      const maxAge = Number(
+        (response.headers['cache-control'] ?? '0').split('=')[1]
+      );
       const expireAt = Date.now() + maxAge * 1000;
-      const etag = response.headers.etag.replace(/"/g, '');
+      const etag = (response.headers.etag ?? '').replace(/"/g, '');
 
       await this.writeToCacheDir(
         directory,

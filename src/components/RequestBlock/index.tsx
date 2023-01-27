@@ -12,8 +12,8 @@ import {
   PencilIcon,
   TrashIcon,
   UserIcon,
-  XIcon,
-} from '@heroicons/react/solid';
+  XMarkIcon,
+} from '@heroicons/react/24/solid';
 import { MediaRequestStatus } from '@server/constants/media';
 import type { MediaRequest } from '@server/entity/MediaRequest';
 import axios from 'axios';
@@ -149,7 +149,7 @@ const RequestBlock = ({ request, onUpdate }: RequestBlockProps) => {
                     onClick={() => updateRequest('decline')}
                     disabled={isUpdating}
                   >
-                    <XIcon />
+                    <XMarkIcon />
                   </Button>
                 </Tooltip>
                 <Tooltip content={intl.formatMessage(messages.edit)}>

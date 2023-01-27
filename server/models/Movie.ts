@@ -9,6 +9,7 @@ import type {
   Crew,
   ExternalIds,
   Genre,
+  Keyword,
   ProductionCompany,
   WatchProviders,
 } from './common';
@@ -83,6 +84,7 @@ export interface MovieDetails {
   externalIds: ExternalIds;
   mediaUrl?: string;
   watchProviders?: WatchProviders[];
+  keywords: Keyword[];
 }
 
 export const mapProductionCompany = (
@@ -142,4 +144,8 @@ export const mapMovieDetails = (
   externalIds: mapExternalIds(movie.external_ids),
   mediaInfo: media,
   watchProviders: mapWatchProviders(movie['watch/providers']?.results ?? {}),
+  keywords: movie.keywords.keywords.map((keyword) => ({
+    id: keyword.id,
+    name: keyword.name,
+  })),
 });
