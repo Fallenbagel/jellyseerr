@@ -3,7 +3,7 @@ import Button from '@app/components/Common/Button';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import LibraryItem from '@app/components/Settings/LibraryItem';
 import globalMessages from '@app/i18n/globalMessages';
-import { SaveIcon } from '@heroicons/react/outline';
+import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
 import type { JellyfinSettings } from '@server/lib/settings';
 import axios from 'axios';
 import { Field, Formik } from 'formik';
@@ -417,7 +417,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                           type="submit"
                           disabled={isSubmitting || !isValid}
                         >
-                          <SaveIcon />
+                          <ArrowDownOnSquareIcon />
                           <span>
                             {isSubmitting
                               ? intl.formatMessage(globalMessages.saving)

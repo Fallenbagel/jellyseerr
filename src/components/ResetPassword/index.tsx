@@ -3,7 +3,7 @@ import ImageFader from '@app/components/Common/ImageFader';
 import SensitiveInput from '@app/components/Common/SensitiveInput';
 import LanguagePicker from '@app/components/Layout/LanguagePicker';
 import globalMessages from '@app/i18n/globalMessages';
-import { SupportIcon } from '@heroicons/react/outline';
+import { LifebuoyIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import { Form, Formik } from 'formik';
 import Link from 'next/link';
@@ -168,7 +168,7 @@ const ResetPassword = () => {
                               type="submit"
                               disabled={isSubmitting || !isValid}
                             >
-                              <SupportIcon />
+                              <LifebuoyIcon />
                               <span>
                                 {isSubmitting
                                   ? intl.formatMessage(globalMessages.saving)

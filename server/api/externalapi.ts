@@ -69,6 +69,30 @@ class ExternalAPI {
     return response.data;
   }
 
+  protected async post<T>(
+    endpoint: string,
+    data: Record<string, unknown>,
+    config?: AxiosRequestConfig,
+    ttl?: number
+  ): Promise<T> {
+    const cacheKey = this.serializeCacheKey(endpoint, {
+      config: config?.params,
+      data,
+    });
+    const cachedItem = this.cache?.get<T>(cacheKey);
+    if (cachedItem) {
+      return cachedItem;
+    }
+
+    const response = await this.axios.post<T>(endpoint, data, config);
+
+    if (this.cache) {
+      this.cache.set(cacheKey, response.data, ttl ?? DEFAULT_TTL);
+    }
+
+    return response.data;
+  }
+
   protected async getRolling<T>(
     endpoint: string,
     config?: AxiosRequestConfig,

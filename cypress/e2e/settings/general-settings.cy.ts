@@ -16,7 +16,7 @@ describe('General Settings', () => {
     cy.visit('/settings');
 
     cy.get('#trustProxy').click();
-    cy.get('form').submit();
+    cy.get('[data-testid=settings-main-form]').submit();
     cy.get('[data-testid=modal-title]').should(
       'contain',
       'Server Restart Required'
@@ -26,7 +26,7 @@ describe('General Settings', () => {
     cy.get('[data-testid=modal-title]').should('not.exist');
 
     cy.get('[type=checkbox]#trustProxy').click();
-    cy.get('form').submit();
+    cy.get('[data-testid=settings-main-form]').submit();
     cy.get('[data-testid=modal-title]').should('not.exist');
   });
 });

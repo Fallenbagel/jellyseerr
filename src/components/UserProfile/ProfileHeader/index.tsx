@@ -1,7 +1,7 @@
 import Button from '@app/components/Common/Button';
 import type { User } from '@app/hooks/useUser';
 import { Permission, useUser } from '@app/hooks/useUser';
-import { CogIcon, UserIcon } from '@heroicons/react/solid';
+import { CogIcon, UserIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { defineMessages, useIntl } from 'react-intl';
 

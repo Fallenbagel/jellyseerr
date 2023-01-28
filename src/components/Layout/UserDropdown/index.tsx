@@ -1,8 +1,11 @@
 import MiniQuotaDisplay from '@app/components/Layout/UserDropdown/MiniQuotaDisplay';
 import { useUser } from '@app/hooks/useUser';
 import { Menu, Transition } from '@headlessui/react';
-import { ClockIcon, LogoutIcon } from '@heroicons/react/outline';
-import { CogIcon, UserIcon } from '@heroicons/react/solid';
+import {
+  ArrowRightOnRectangleIcon,
+  ClockIcon,
+} from '@heroicons/react/24/outline';
+import { CogIcon, UserIcon } from '@heroicons/react/24/solid';
 import axios from 'axios';
 import type { LinkProps } from 'next/link';
 import Link from 'next/link';
@@ -147,7 +150,7 @@ const UserDropdown = () => {
                     }`}
                     onClick={() => logout()}
                   >
-                    <LogoutIcon className="mr-2 inline h-5 w-5" />
+                    <ArrowRightOnRectangleIcon className="mr-2 inline h-5 w-5" />
                     <span>{intl.formatMessage(messages.signout)}</span>
                   </a>
                 )}

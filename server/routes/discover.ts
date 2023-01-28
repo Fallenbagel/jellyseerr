@@ -1,5 +1,7 @@
 import PlexTvAPI from '@server/api/plextv';
+import type { SortOptions } from '@server/api/themoviedb';
 import TheMovieDb from '@server/api/themoviedb';
+import type { TmdbKeyword } from '@server/api/themoviedb/interfaces';
 import { MediaType } from '@server/constants/media';
 import { getRepository } from '@server/datasource';
 import Media from '@server/entity/Media';
@@ -20,6 +22,7 @@ import { mapNetwork } from '@server/models/Tv';
 import { isMovie, isPerson } from '@server/utils/typeHelpers';
 import { Router } from 'express';
 import { sortBy } from 'lodash';
+import { z } from 'zod';
 
 export const createTmdbWithRegionLanguage = (user?: User): TheMovieDb => {
   const settings = getSettings();
@@ -46,25 +49,76 @@ export const createTmdbWithRegionLanguage = (user?: User): TheMovieDb => {
 
 const discoverRoutes = Router();
 
+const QueryFilterOptions = z.object({
+  page: z.coerce.string().optional(),
+  sortBy: z.coerce.string().optional(),
+  primaryReleaseDateGte: z.coerce.string().optional(),
+  primaryReleaseDateLte: z.coerce.string().optional(),
+  firstAirDateGte: z.coerce.string().optional(),
+  firstAirDateLte: z.coerce.string().optional(),
+  studio: z.coerce.string().optional(),
+  genre: z.coerce.string().optional(),
+  keywords: z.coerce.string().optional(),
+  language: z.coerce.string().optional(),
+  withRuntimeGte: z.coerce.string().optional(),
+  withRuntimeLte: z.coerce.string().optional(),
+  voteAverageGte: z.coerce.string().optional(),
+  voteAverageLte: z.coerce.string().optional(),
+  network: z.coerce.string().optional(),
+  watchProviders: z.coerce.string().optional(),
+  watchRegion: z.coerce.string().optional(),
+});
+
+export type FilterOptions = z.infer<typeof QueryFilterOptions>;
+
 discoverRoutes.get('/movies', async (req, res, next) => {
   const tmdb = createTmdbWithRegionLanguage(req.user);
 
   try {
+    const query = QueryFilterOptions.parse(req.query);
+    const keywords = query.keywords;
     const data = await tmdb.getDiscoverMovies({
-      page: Number(req.query.page),
-      language: req.locale ?? (req.query.language as string),
-      genre: req.query.genre ? Number(req.query.genre) : undefined,
-      studio: req.query.studio ? Number(req.query.studio) : undefined,
+      page: Number(query.page),
+      sortBy: query.sortBy as SortOptions,
+      language: req.locale ?? query.language,
+      originalLanguage: query.language,
+      genre: query.genre,
+      studio: query.studio,
+      primaryReleaseDateLte: query.primaryReleaseDateLte
+        ? new Date(query.primaryReleaseDateLte).toISOString().split('T')[0]
+        : undefined,
+      primaryReleaseDateGte: query.primaryReleaseDateGte
+        ? new Date(query.primaryReleaseDateGte).toISOString().split('T')[0]
+        : undefined,
+      keywords,
+      withRuntimeGte: query.withRuntimeGte,
+      withRuntimeLte: query.withRuntimeLte,
+      voteAverageGte: query.voteAverageGte,
+      voteAverageLte: query.voteAverageLte,
+      watchProviders: query.watchProviders,
+      watchRegion: query.watchRegion,
     });
 
     const media = await Media.getRelatedMedia(
       data.results.map((result) => result.id)
     );
 
+    let keywordData: TmdbKeyword[] = [];
+    if (keywords) {
+      const splitKeywords = keywords.split(',');
+
+      keywordData = await Promise.all(
+        splitKeywords.map(async (keywordId) => {
+          return await tmdb.getKeywordDetails({ keywordId: Number(keywordId) });
+        })
+      );
+    }
+
     return res.status(200).json({
       page: data.page,
       totalPages: data.total_pages,
       totalResults: data.total_results,
+      keywords: keywordData,
       results: data.results.map((result) =>
         mapMovieResult(
           result,
@@ -163,7 +217,7 @@ discoverRoutes.get<{ genreId: string }>(
       const data = await tmdb.getDiscoverMovies({
         page: Number(req.query.page),
         language: req.locale ?? (req.query.language as string),
-        genre: Number(req.params.genreId),
+        genre: req.params.genreId as string,
       });
 
       const media = await Media.getRelatedMedia(
@@ -210,7 +264,7 @@ discoverRoutes.get<{ studioId: string }>(
       const data = await tmdb.getDiscoverMovies({
         page: Number(req.query.page),
         language: req.locale ?? (req.query.language as string),
-        studio: Number(req.params.studioId),
+        studio: req.params.studioId as string,
       });
 
       const media = await Media.getRelatedMedia(
@@ -296,21 +350,50 @@ discoverRoutes.get('/tv', async (req, res, next) => {
   const tmdb = createTmdbWithRegionLanguage(req.user);
 
   try {
+    const query = QueryFilterOptions.parse(req.query);
+    const keywords = query.keywords;
     const data = await tmdb.getDiscoverTv({
-      page: Number(req.query.page),
-      language: req.locale ?? (req.query.language as string),
-      genre: req.query.genre ? Number(req.query.genre) : undefined,
-      network: req.query.network ? Number(req.query.network) : undefined,
+      page: Number(query.page),
+      sortBy: query.sortBy as SortOptions,
+      language: req.locale ?? query.language,
+      genre: query.genre,
+      network: query.network ? Number(query.network) : undefined,
+      firstAirDateLte: query.firstAirDateLte
+        ? new Date(query.firstAirDateLte).toISOString().split('T')[0]
+        : undefined,
+      firstAirDateGte: query.firstAirDateGte
+        ? new Date(query.firstAirDateGte).toISOString().split('T')[0]
+        : undefined,
+      originalLanguage: query.language,
+      keywords,
+      withRuntimeGte: query.withRuntimeGte,
+      withRuntimeLte: query.withRuntimeLte,
+      voteAverageGte: query.voteAverageGte,
+      voteAverageLte: query.voteAverageLte,
+      watchProviders: query.watchProviders,
+      watchRegion: query.watchRegion,
     });
 
     const media = await Media.getRelatedMedia(
       data.results.map((result) => result.id)
     );
 
+    let keywordData: TmdbKeyword[] = [];
+    if (keywords) {
+      const splitKeywords = keywords.split(',');
+
+      keywordData = await Promise.all(
+        splitKeywords.map(async (keywordId) => {
+          return await tmdb.getKeywordDetails({ keywordId: Number(keywordId) });
+        })
+      );
+    }
+
     return res.status(200).json({
       page: data.page,
       totalPages: data.total_pages,
       totalResults: data.total_results,
+      keywords: keywordData,
       results: data.results.map((result) =>
         mapTvResult(
           result,
@@ -408,7 +491,7 @@ discoverRoutes.get<{ genreId: string }>(
       const data = await tmdb.getDiscoverTv({
         page: Number(req.query.page),
         language: req.locale ?? (req.query.language as string),
-        genre: Number(req.params.genreId),
+        genre: req.params.genreId,
       });
 
       const media = await Media.getRelatedMedia(
@@ -643,7 +726,9 @@ discoverRoutes.get<{ language: string }, GenreSliderItem[]>(
 
       await Promise.all(
         genres.map(async (genre) => {
-          const genreData = await tmdb.getDiscoverMovies({ genre: genre.id });
+          const genreData = await tmdb.getDiscoverMovies({
+            genre: genre.id.toString(),
+          });
 
           mappedGenres.push({
             id: genre.id,
@@ -685,7 +770,9 @@ discoverRoutes.get<{ language: string }, GenreSliderItem[]>(
 
       await Promise.all(
         genres.map(async (genre) => {
-          const genreData = await tmdb.getDiscoverTv({ genre: genre.id });
+          const genreData = await tmdb.getDiscoverTv({
+            genre: genre.id.toString(),
+          });
 
           mappedGenres.push({
             id: genre.id,

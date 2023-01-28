@@ -1,5 +1,5 @@
 import CachedImage from '@app/components/Common/CachedImage';
-import { UserCircleIcon } from '@heroicons/react/solid';
+import { UserCircleIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useState } from 'react';
 

@@ -2,7 +2,7 @@ import Button from '@app/components/Common/Button';
 import useSettings from '@app/hooks/useSettings';
 import globalMessages from '@app/i18n/globalMessages';
 import OIDCAuth from '@app/utils/oidc';
-import { LoginIcon } from '@heroicons/react/outline';
+import { ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline';
 import type React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 
@@ -54,7 +54,7 @@ const OidcLogin: React.FC<OidcLoginProps> = ({
         onClick={handleClick}
         disabled={isProcessing || hasError}
       >
-        <LoginIcon />
+        <ArrowLeftOnRectangleIcon />
         <span>
           {isProcessing
             ? intl.formatMessage(globalMessages.loading)

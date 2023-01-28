@@ -2,10 +2,10 @@ import { Transition } from '@headlessui/react';
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
-  ExclamationIcon,
+  ExclamationTriangleIcon,
   InformationCircleIcon,
-} from '@heroicons/react/outline';
-import { XIcon } from '@heroicons/react/solid';
+} from '@heroicons/react/24/outline';
+import { XMarkIcon } from '@heroicons/react/24/solid';
 import { Fragment } from 'react';
 import type { ToastProps } from 'react-toast-notifications';
 
@@ -42,7 +42,7 @@ const Toast = ({
                     <InformationCircleIcon className="h-6 w-6 text-indigo-500" />
                   )}
                   {appearance === 'warning' && (
-                    <ExclamationIcon className="h-6 w-6 text-orange-400" />
+                    <ExclamationTriangleIcon className="h-6 w-6 text-orange-400" />
                   )}
                 </div>
                 <div className="ml-3 w-0 flex-1 text-white">{children}</div>
@@ -51,7 +51,7 @@ const Toast = ({
                     onClick={() => onDismiss()}
                     className="inline-flex text-gray-400 transition duration-150 ease-in-out focus:text-gray-500 focus:outline-none"
                   >
-                    <XIcon className="h-5 w-5" />
+                    <XMarkIcon className="h-5 w-5" />
                   </button>
                 </div>
               </div>

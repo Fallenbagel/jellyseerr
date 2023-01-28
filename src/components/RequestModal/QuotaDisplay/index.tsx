@@ -1,5 +1,5 @@
 import ProgressCircle from '@app/components/Common/ProgressCircle';
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/solid';
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid';
 import type { QuotaStatus } from '@server/interfaces/api/userInterfaces';
 import Link from 'next/link';
 import { useState } from 'react';

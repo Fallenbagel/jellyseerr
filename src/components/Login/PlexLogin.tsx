@@ -1,6 +1,6 @@
 import globalMessages from '@app/i18n/globalMessages';
 import PlexOAuth from '@app/utils/plex';
-import { LoginIcon } from '@heroicons/react/outline';
+import { ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import type React from 'react';
 import { useEffect, useState } from 'react';
@@ -75,7 +75,7 @@ const PlexLogin: React.FC<PlexLoginProps> = ({
         disabled={loading || isProcessing}
         className="plex-button"
       >
-        <LoginIcon />
+        <ArrowLeftOnRectangleIcon />
         <span>
           {loading
             ? intl.formatMessage(globalMessages.loading)

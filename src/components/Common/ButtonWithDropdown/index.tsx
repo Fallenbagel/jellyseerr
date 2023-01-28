@@ -1,7 +1,7 @@
 import useClickOutside from '@app/hooks/useClickOutside';
 import { withProperties } from '@app/utils/typeHelpers';
 import { Transition } from '@headlessui/react';
-import { ChevronDownIcon } from '@heroicons/react/solid';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes } from 'react';
 import { Fragment, useRef, useState } from 'react';
 

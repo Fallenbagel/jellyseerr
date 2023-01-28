@@ -1,4 +1,4 @@
-import { EyeIcon, EyeOffIcon } from '@heroicons/react/solid';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid';
 import { Field } from 'formik';
 import { useState } from 'react';
 
@@ -43,7 +43,7 @@ const SensitiveInput = ({ as = 'input', ...props }: SensitiveInputProps) => {
         type="button"
         className="input-action"
       >
-        {isHidden ? <EyeOffIcon /> : <EyeIcon />}
+        {isHidden ? <EyeSlashIcon /> : <EyeIcon />}
       </button>
     </>
   );

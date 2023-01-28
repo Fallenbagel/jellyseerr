@@ -1,4 +1,4 @@
-import { RefreshIcon } from '@heroicons/react/outline';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/router';
 import PR from 'pulltorefreshjs';
 import { useEffect } from 'react';
@@ -15,7 +15,7 @@ const PullToRefresh = () => {
       },
       iconArrow: ReactDOMServer.renderToString(
         <div className="p-2">
-          <RefreshIcon className="z-50 m-auto h-9 w-9 rounded-full border-4 border-gray-800 bg-gray-800 text-indigo-500 ring-1 ring-gray-700" />
+          <ArrowPathIcon className="z-50 m-auto h-9 w-9 rounded-full border-4 border-gray-800 bg-gray-800 text-indigo-500 ring-1 ring-gray-700" />
         </div>
       ),
       iconRefreshing: ReactDOMServer.renderToString(
@@ -23,7 +23,7 @@ const PullToRefresh = () => {
           className="animate-spin p-2"
           style={{ animationDirection: 'reverse' }}
         >
-          <RefreshIcon className="z-50 m-auto h-9 w-9 rounded-full border-4 border-gray-800 bg-gray-800 text-indigo-500 ring-1 ring-gray-700" />
+          <ArrowPathIcon className="z-50 m-auto h-9 w-9 rounded-full border-4 border-gray-800 bg-gray-800 text-indigo-500 ring-1 ring-gray-700" />
         </div>
       ),
       instructionsPullToRefresh: ReactDOMServer.renderToString(<div />),

@@ -2,7 +2,7 @@ import Button from '@app/components/Common/Button';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import { Menu, Transition } from '@headlessui/react';
-import { DotsVerticalIcon } from '@heroicons/react/solid';
+import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 import { Field, Form, Formik } from 'formik';
 import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
@@ -46,7 +46,10 @@ const IssueDescription = ({
                 <div>
                   <Menu.Button className="flex items-center rounded-full text-gray-400 hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100">
                     <span className="sr-only">Open options</span>
-                    <DotsVerticalIcon className="h-5 w-5" aria-hidden="true" />
+                    <EllipsisVerticalIcon
+                      className="h-5 w-5"
+                      aria-hidden="true"
+                    />
                   </Menu.Button>
                 </div>
 

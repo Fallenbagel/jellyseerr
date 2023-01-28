@@ -2,7 +2,7 @@ import Button from '@app/components/Common/Button';
 import ImageFader from '@app/components/Common/ImageFader';
 import PageTitle from '@app/components/Common/PageTitle';
 import LanguagePicker from '@app/components/Layout/LanguagePicker';
-import { ArrowLeftIcon, MailIcon } from '@heroicons/react/solid';
+import { ArrowLeftIcon, EnvelopeIcon } from '@heroicons/react/24/solid';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import Link from 'next/link';
@@ -128,7 +128,7 @@ const ResetPassword = () => {
                               type="submit"
                               disabled={isSubmitting || !isValid}
                             >
-                              <MailIcon />
+                              <EnvelopeIcon />
                               <span>
                                 {intl.formatMessage(messages.emailresetlink)}
                               </span>
