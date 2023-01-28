@@ -9,7 +9,7 @@ import SettingsTabs from '@app/components/Common/SettingsTabs';
 import { useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
-import { CloudIcon, MailIcon } from '@heroicons/react/solid';
+import { CloudIcon, EnvelopeIcon } from '@heroicons/react/24/solid';
 import type { UserSettingsNotificationsResponse } from '@server/interfaces/api/userSettingsInterfaces';
 import { useRouter } from 'next/router';
 import { defineMessages, useIntl } from 'react-intl';
@@ -41,7 +41,7 @@ const UserNotificationSettings = ({
       text: intl.formatMessage(messages.email),
       content: (
         <span className="flex items-center">
-          <MailIcon className="mr-2 h-4" />
+          <EnvelopeIcon className="mr-2 h-4" />
           {intl.formatMessage(messages.email)}
         </span>
       ),

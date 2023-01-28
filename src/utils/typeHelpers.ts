@@ -9,7 +9,10 @@ export type Maybe<T> = T | null | undefined;
  * @param component Main object you want to apply properties to
  * @param properties Object of properties you want to type on the main component
  */
-export function withProperties<A, B>(component: A, properties: B): A & B {
+export function withProperties<A extends object, B extends object>(
+  component: A,
+  properties: B
+): A & B {
   (Object.keys(properties) as (keyof B)[]).forEach((key) => {
     Object.assign(component, { [key]: properties[key] });
   });

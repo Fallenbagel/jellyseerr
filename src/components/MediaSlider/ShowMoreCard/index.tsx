@@ -1,5 +1,5 @@
 import TitleCard from '@app/components/TitleCard';
-import { ArrowCircleRightIcon } from '@heroicons/react/solid';
+import { ArrowRightCircleIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useInView } from 'react-intersection-observer';
@@ -94,7 +94,7 @@ const ShowMoreCard = ({ url, posters }: ShowMoreCardProps) => {
                 )}
               </div>
               <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-white">
-                <ArrowCircleRightIcon className="w-14" />
+                <ArrowRightCircleIcon className="w-14" />
                 <div className="mt-2 font-extrabold">
                   {intl.formatMessage(messages.seemore)}
                 </div>

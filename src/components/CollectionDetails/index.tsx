@@ -10,7 +10,7 @@ import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
-import { DownloadIcon } from '@heroicons/react/outline';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { MediaStatus } from '@server/constants/media';
 import type { Collection } from '@server/models/Collection';
 import { uniq } from 'lodash';
@@ -276,7 +276,7 @@ const CollectionDetails = ({ collection }: CollectionDetailsProps) => {
               }}
               text={
                 <>
-                  <DownloadIcon />
+                  <ArrowDownTrayIcon />
                   <span>
                     {intl.formatMessage(
                       hasRequestable
@@ -295,7 +295,7 @@ const CollectionDetails = ({ collection }: CollectionDetailsProps) => {
                     setIs4k(true);
                   }}
                 >
-                  <DownloadIcon />
+                  <ArrowDownTrayIcon />
                   <span>
                     {intl.formatMessage(messages.requestcollection4k)}
                   </span>

@@ -4,7 +4,7 @@ import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import Modal from '@app/components/Common/Modal';
 import globalMessages from '@app/i18n/globalMessages';
 import { Transition } from '@headlessui/react';
-import { DocumentTextIcon } from '@heroicons/react/outline';
+import { DocumentTextIcon } from '@heroicons/react/24/outline';
 import dynamic from 'next/dynamic';
 import { Fragment, useState } from 'react';
 import { defineMessages, FormattedRelativeTime, useIntl } from 'react-intl';

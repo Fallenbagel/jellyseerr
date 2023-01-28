@@ -1,8 +1,8 @@
 import {
-  ExclamationIcon,
+  ExclamationTriangleIcon,
   InformationCircleIcon,
   XCircleIcon,
-} from '@heroicons/react/solid';
+} from '@heroicons/react/24/solid';
 
 interface AlertProps {
   title?: React.ReactNode;
@@ -16,7 +16,7 @@ const Alert = ({ title, children, type }: AlertProps) => {
       'border border-yellow-500 backdrop-blur bg-yellow-400 bg-opacity-20',
     titleColor: 'text-yellow-100',
     textColor: 'text-yellow-300',
-    svg: <ExclamationIcon className="h-5 w-5" />,
+    svg: <ExclamationTriangleIcon className="h-5 w-5" />,
   };
 
   switch (type) {

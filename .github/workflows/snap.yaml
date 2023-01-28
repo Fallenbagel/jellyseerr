@@ -35,9 +35,9 @@ jobs:
         run: |
           git fetch --prune --unshallow --tags
           if [[ $GITHUB_REF == refs/tags/* || $GITHUB_REF == refs/heads/master ]]; then
-            echo ::set-output name=RELEASE::stable
+            echo "RELEASE=stable" >> $GITHUB_OUTPUT
           else
-            echo ::set-output name=RELEASE::edge
+            echo "RELEASE=edge" >> $GITHUB_OUTPUT
           fi
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v2
@@ -57,8 +57,9 @@ jobs:
           snap: ${{ steps.build.outputs.snap }}
       - name: Publish Snap Package
         uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAP_LOGIN }}
         with:
-          store_login: ${{ secrets.SNAP_LOGIN }}
           snap: ${{ steps.build.outputs.snap }}
           release: ${{ steps.prepare.outputs.RELEASE }}
 
@@ -75,9 +76,9 @@ jobs:
         run: |
           failures=(neutral, skipped, timed_out, action_required)
           if [[ ${array[@]} =~ $WORKFLOW_CONCLUSION ]]; then
-            echo ::set-output name=status::failure
+            echo "status=failure" >> $GITHUB_OUTPUT
           else
-            echo ::set-output name=status::$WORKFLOW_CONCLUSION
+            echo "status=$WORKFLOW_CONCLUSION" >> $GITHUB_OUTPUT
           fi
       - name: Post Status to Discord
         uses: sarisia/actions-status-discord@v1

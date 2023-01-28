@@ -26,6 +26,8 @@ tags:
     description: Endpoints related to retrieving movies and their details.
   - name: tv
     description: Endpoints related to retrieving TV series and their details.
+  - name: other
+    description: Endpoints related to other TMDB data
   - name: person
     description: Endpoints related to retrieving person details.
   - name: media
@@ -648,6 +650,17 @@ components:
         name:
           type: string
           example: Adventure
+    Company:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        logo_path:
+          type: string
+          nullable: true
+        name:
+          type: string
     ProductionCompany:
       type: object
       properties:
@@ -1087,6 +1100,8 @@ components:
           nullable: true
         status:
           type: number
+          example: 0
+          description: Availability of the media. 1 = `UNKNOWN`, 2 = `PENDING`, 3 = `PROCESSING`, 4 = `PARTIALLY_AVAILABLE`, 5 = `AVAILABLE`
         requests:
           type: array
           readOnly: true
@@ -1828,6 +1843,40 @@ components:
         message:
           type: string
           example: A comment
+    DiscoverSlider:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        type:
+          type: number
+          example: 1
+        title:
+          type: string
+          nullable: true
+        isBuiltIn:
+          type: boolean
+        enabled:
+          type: boolean
+        data:
+          type: string
+          example: '1234'
+          nullable: true
+      required:
+        - type
+        - enabled
+        - title
+        - data
+    WatchProviderRegion:
+      type: object
+      properties:
+        iso_3166_1:
+          type: string
+        english_name:
+          type: string
+        native_name:
+          type: string
   securitySchemes:
     cookieAuth:
       type: apiKey
@@ -3234,6 +3283,133 @@ paths:
       responses:
         '204':
           description: Test notification attempted
+  /settings/discover:
+    get:
+      summary: Get all discover sliders
+      description: Returns all discovery sliders. Built-in and custom made.
+      tags:
+        - settings
+      responses:
+        '200':
+          description: Returned all discovery sliders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DiscoverSlider'
+    post:
+      summary: Batch update all sliders.
+      description: |
+        Batch update all sliders at once. Should also be used for creation. Will only update sliders provided
+        and will not delete any sliders not present in the request. If a slider is missing a required field,
+        it will be ignored. Requires the `ADMIN` permission.
+      tags:
+        - settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/DiscoverSlider'
+      responses:
+        '200':
+          description: Returned all newly updated discovery sliders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DiscoverSlider'
+  /settings/discover/{sliderId}:
+    put:
+      summary: Update a single slider
+      description: |
+        Updates a single slider and return the newly updated slider. Requires the `ADMIN` permission.
+      tags:
+        - settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: 'Slider Title'
+                type:
+                  type: number
+                  example: 1
+                data:
+                  type: string
+                  example: '1'
+      responses:
+        '200':
+          description: Returns newly added discovery slider
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverSlider'
+    delete:
+      summary: Delete slider by ID
+      description: Deletes the slider with the provided sliderId. Requires the `ADMIN` permission.
+      tags:
+        - settings
+      parameters:
+        - in: path
+          name: sliderId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Slider successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverSlider'
+  /settings/discover/add:
+    post:
+      summary: Add a new slider
+      description: |
+        Add a single slider and return the newly created slider. Requires the `ADMIN` permission.
+      tags:
+        - settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: 'New Slider'
+                type:
+                  type: number
+                  example: 1
+                data:
+                  type: string
+                  example: '1'
+      responses:
+        '200':
+          description: Returns newly added discovery slider
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverSlider'
+  /settings/discover/reset:
+    get:
+      summary: Reset all discover sliders
+      description: Resets all discovery sliders to the default values. Requires the `ADMIN` permission.
+      tags:
+        - settings
+      responses:
+        '204':
+          description: All sliders reset to defaults
   /settings/about:
     get:
       summary: Get server stats
@@ -4115,6 +4291,86 @@ paths:
                         - $ref: '#/components/schemas/MovieResult'
                         - $ref: '#/components/schemas/TvResult'
                         - $ref: '#/components/schemas/PersonResult'
+  /search/keyword:
+    get:
+      summary: Search for keywords
+      description: Returns a list of TMDB keywords matching the search query
+      tags:
+        - search
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: string
+            example: 'christmas'
+        - in: query
+          name: page
+          schema:
+            type: number
+            example: 1
+            default: 1
+      responses:
+        '200':
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: number
+                    example: 1
+                  totalPages:
+                    type: number
+                    example: 20
+                  totalResults:
+                    type: number
+                    example: 200
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Keyword'
+  /search/company:
+    get:
+      summary: Search for companies
+      description: Returns a list of TMDB companies matching the search query. (Will not return origin country)
+      tags:
+        - search
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: string
+            example: 'Disney'
+        - in: query
+          name: page
+          schema:
+            type: number
+            example: 1
+            default: 1
+      responses:
+        '200':
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: number
+                    example: 1
+                  totalPages:
+                    type: number
+                    example: 20
+                  totalResults:
+                    type: number
+                    example: 200
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Company'
   /discover/movies:
     get:
       summary: Discover movies
@@ -4136,13 +4392,63 @@ paths:
         - in: query
           name: genre
           schema:
-            type: number
+            type: string
             example: 18
         - in: query
           name: studio
           schema:
             type: number
             example: 1
+        - in: query
+          name: keywords
+          schema:
+            type: string
+            example: 1,2
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+            example: popularity.desc
+        - in: query
+          name: primaryReleaseDateGte
+          schema:
+            type: string
+            example: 2022-01-01
+        - in: query
+          name: primaryReleaseDateLte
+          schema:
+            type: string
+            example: 2023-01-01
+        - in: query
+          name: withRuntimeGte
+          schema:
+            type: number
+            example: 60
+        - in: query
+          name: withRuntimeLte
+          schema:
+            type: number
+            example: 120
+        - in: query
+          name: voteAverageGte
+          schema:
+            type: number
+            example: 7
+        - in: query
+          name: voteAverageLte
+          schema:
+            type: number
+            example: 10
+        - in: query
+          name: watchRegion
+          schema:
+            type: string
+            example: US
+        - in: query
+          name: watchProviders
+          schema:
+            type: string
+            example: 8|9
       responses:
         '200':
           description: Results
@@ -4365,13 +4671,63 @@ paths:
         - in: query
           name: genre
           schema:
-            type: number
+            type: string
             example: 18
         - in: query
           name: network
           schema:
             type: number
             example: 1
+        - in: query
+          name: keywords
+          schema:
+            type: string
+            example: 1,2
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+            example: popularity.desc
+        - in: query
+          name: firstAirDateGte
+          schema:
+            type: string
+            example: 2022-01-01
+        - in: query
+          name: firstAirDateLte
+          schema:
+            type: string
+            example: 2023-01-01
+        - in: query
+          name: withRuntimeGte
+          schema:
+            type: number
+            example: 60
+        - in: query
+          name: withRuntimeLte
+          schema:
+            type: number
+            example: 120
+        - in: query
+          name: voteAverageGte
+          schema:
+            type: number
+            example: 7
+        - in: query
+          name: voteAverageLte
+          schema:
+            type: number
+            example: 10
+        - in: query
+          name: watchRegion
+          schema:
+            type: string
+            example: US
+        - in: query
+          name: watchProviders
+          schema:
+            type: string
+            example: 8|9
       responses:
         '200':
           description: Results
@@ -5050,7 +5406,7 @@ paths:
           required: true
           schema:
             type: string
-            enum: [pending, approve, decline, available]
+            enum: [approve, decline]
       responses:
         '200':
           description: Request status changed
@@ -6170,6 +6526,89 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Issue'
+  /keyword/{keywordId}:
+    get:
+      summary: Get keyword
+      description: |
+        Returns a single keyword in JSON format.
+      tags:
+        - other
+      parameters:
+        - in: path
+          name: keywordId
+          required: true
+          schema:
+            type: number
+            example: 1
+      responses:
+        '200':
+          description: Keyword returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Keyword'
+  /watchproviders/regions:
+    get:
+      summary: Get watch provider regions
+      description: |
+        Returns a list of all available watch provider regions.
+      tags:
+        - other
+      responses:
+        '200':
+          description: Watch provider regions returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WatchProviderRegion'
+  /watchproviders/movies:
+    get:
+      summary: Get watch provider movies
+      description: |
+        Returns a list of all available watch providers for movies.
+      tags:
+        - other
+      parameters:
+        - in: query
+          name: watchRegion
+          required: true
+          schema:
+            type: string
+            example: US
+      responses:
+        '200':
+          description: Watch providers for movies returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WatchProviderDetails'
+  /watchproviders/tv:
+    get:
+      summary: Get watch provider series
+      description: |
+        Returns a list of all available watch providers for series.
+      tags:
+        - other
+      parameters:
+        - in: query
+          name: watchRegion
+          required: true
+          schema:
+            type: string
+            example: US
+      responses:
+        '200':
+          description: Watch providers for series returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WatchProviderDetails'
 security:
   - cookieAuth: []
   - apiKey: []

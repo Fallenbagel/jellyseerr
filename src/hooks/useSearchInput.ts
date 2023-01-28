@@ -8,23 +8,6 @@ import useDebouncedState from './useDebouncedState';
 
 type Url = string | UrlObject;
 
-const extraEncodes: [RegExp, string][] = [
-  [/\(/g, '%28'],
-  [/\)/g, '%29'],
-  [/!/g, '%21'],
-  [/\*/g, '%2A'],
-];
-
-const encodeURIExtraParams = (string: string): string => {
-  let finalString = encodeURIComponent(string);
-
-  extraEncodes.forEach((encode) => {
-    finalString = finalString.replace(encode[0], encode[1]);
-  });
-
-  return finalString;
-};
-
 interface SearchObject {
   searchValue: string;
   searchOpen: boolean;
@@ -55,7 +38,7 @@ const useSearchInput = (): SearchObject => {
           pathname: router.pathname,
           query: {
             ...router.query,
-            query: encodeURIExtraParams(debouncedValue),
+            query: debouncedValue,
           },
         });
       } else {
@@ -63,7 +46,7 @@ const useSearchInput = (): SearchObject => {
         router
           .push({
             pathname: '/search',
-            query: { query: encodeURIExtraParams(debouncedValue) },
+            query: { query: debouncedValue },
           })
           .then(() => window.scrollTo(0, 0));
       }
@@ -106,7 +89,7 @@ const useSearchInput = (): SearchObject => {
    * is on /search
    */
   useEffect(() => {
-    if (router.query.query !== encodeURIExtraParams(debouncedValue)) {
+    if (router.query.query !== debouncedValue) {
       setSearchValue(
         router.query.query
           ? decodeURIComponent(router.query.query as string)
