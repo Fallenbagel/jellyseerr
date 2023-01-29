@@ -453,7 +453,15 @@
   }
 
   input[type='range']::-webkit-slider-thumb {
-    @apply rounded-full bg-indigo-500;
+    @apply rounded-full border-0 bg-indigo-500;
+    pointer-events: all;
+    width: 16px;
+    height: 16px;
+    -webkit-appearance: none;
+  }
+
+  input[type='range']::-moz-range-thumb {
+    @apply rounded-full border-0 bg-indigo-500;
     pointer-events: all;
     width: 16px;
     height: 16px;
