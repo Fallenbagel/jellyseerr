@@ -651,6 +651,7 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric',
+                          timeZone: 'UTC',
                         })}
                       </span>
                     </span>
@@ -670,6 +671,7 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
+                      timeZone: 'UTC',
                     })}
                   </span>
                 </div>

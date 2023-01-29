@@ -91,11 +91,13 @@ const PersonDetails = () => {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
+            timeZone: 'UTC',
           }),
           deathdate: intl.formatDate(data.deathday, {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
+            timeZone: 'UTC',
           }),
         })
       );
@@ -106,6 +108,7 @@ const PersonDetails = () => {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
+            timeZone: 'UTC',
           }),
         })
       );

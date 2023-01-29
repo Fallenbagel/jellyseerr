@@ -167,27 +167,29 @@ const MobileMenu = () => {
       </Transition>
       <div className="padding-bottom-safe border-t border-gray-600 bg-gray-800 bg-opacity-90 backdrop-blur">
         <div className="flex h-full items-center justify-between px-6 py-4 text-gray-100">
-          {filteredLinks.slice(0, 4).map((link) => {
-            const isActive =
-              router.pathname.match(link.activeRegExp) && !isOpen;
-            return (
-              <Link key={`mobile-menu-link-${link.href}`} href={link.href}>
-                <a
-                  className={`flex flex-col items-center space-y-1 ${
-                    isActive ? 'text-indigo-500' : ''
-                  }`}
-                >
-                  {cloneElement(
-                    isActive ? link.svgIconSelected : link.svgIcon,
-                    {
-                      className: 'h-6 w-6',
-                    }
-                  )}
-                </a>
-              </Link>
-            );
-          })}
-          {filteredLinks.length > 4 && (
+          {filteredLinks
+            .slice(0, filteredLinks.length === 5 ? 5 : 4)
+            .map((link) => {
+              const isActive =
+                router.pathname.match(link.activeRegExp) && !isOpen;
+              return (
+                <Link key={`mobile-menu-link-${link.href}`} href={link.href}>
+                  <a
+                    className={`flex flex-col items-center space-y-1 ${
+                      isActive ? 'text-indigo-500' : ''
+                    }`}
+                  >
+                    {cloneElement(
+                      isActive ? link.svgIconSelected : link.svgIcon,
+                      {
+                        className: 'h-6 w-6',
+                      }
+                    )}
+                  </a>
+                </Link>
+              );
+            })}
+          {filteredLinks.length > 4 && filteredLinks.length !== 5 && (
             <button
               className={`flex flex-col items-center space-y-1 ${
                 isOpen ? 'text-indigo-500' : ''
