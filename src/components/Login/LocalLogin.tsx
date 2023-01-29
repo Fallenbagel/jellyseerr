@@ -1,7 +1,10 @@
 import Button from '@app/components/Common/Button';
 import SensitiveInput from '@app/components/Common/SensitiveInput';
 import useSettings from '@app/hooks/useSettings';
-import { LoginIcon, SupportIcon } from '@heroicons/react/outline';
+import {
+  ArrowLeftOnRectangleIcon,
+  LifebuoyIcon,
+} from '@heroicons/react/24/outline';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import Link from 'next/link';
@@ -124,7 +127,7 @@ const LocalLogin = ({ revalidate }: LocalLoginProps) => {
                       disabled={isSubmitting || !isValid}
                       data-testid="local-signin-button"
                     >
-                      <LoginIcon />
+                      <ArrowLeftOnRectangleIcon />
                       <span>
                         {isSubmitting
                           ? intl.formatMessage(messages.signingin)
@@ -136,7 +139,7 @@ const LocalLogin = ({ revalidate }: LocalLoginProps) => {
                     <span className="inline-flex rounded-md shadow-sm">
                       <Link href="/resetpassword" passHref>
                         <Button as="a" buttonType="ghost">
-                          <SupportIcon />
+                          <LifebuoyIcon />
                           <span>
                             {intl.formatMessage(messages.forgotpassword)}
                           </span>

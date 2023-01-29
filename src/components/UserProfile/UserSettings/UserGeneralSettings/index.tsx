@@ -12,7 +12,7 @@ import useSettings from '@app/hooks/useSettings';
 import { Permission, UserType, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
-import { SaveIcon } from '@heroicons/react/outline';
+import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
 import type { UserSettingsGeneralResponse } from '@server/interfaces/api/userSettingsInterfaces';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
@@ -566,7 +566,7 @@ const UserGeneralSettings = () => {
                       type="submit"
                       disabled={isSubmitting || !isValid}
                     >
-                      <SaveIcon />
+                      <ArrowDownOnSquareIcon />
                       <span>
                         {isSubmitting
                           ? intl.formatMessage(globalMessages.saving)

@@ -2,8 +2,11 @@ import Button from '@app/components/Common/Button';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import NotificationTypeSelector from '@app/components/NotificationTypeSelector';
 import globalMessages from '@app/i18n/globalMessages';
-import { BeakerIcon, SaveIcon } from '@heroicons/react/outline';
-import { QuestionMarkCircleIcon, RefreshIcon } from '@heroicons/react/solid';
+import { ArrowDownOnSquareIcon, BeakerIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowPathIcon,
+  QuestionMarkCircleIcon,
+} from '@heroicons/react/24/solid';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import dynamic from 'next/dynamic';
@@ -291,7 +294,7 @@ const NotificationsWebhook = () => {
                     }}
                     className="mr-2"
                   >
-                    <RefreshIcon />
+                    <ArrowPathIcon />
                     <span>{intl.formatMessage(messages.resetPayload)}</span>
                   </Button>
                   <Link
@@ -359,7 +362,7 @@ const NotificationsWebhook = () => {
                       (values.enabled && !values.types)
                     }
                   >
-                    <SaveIcon />
+                    <ArrowDownOnSquareIcon />
                     <span>
                       {isSubmitting
                         ? intl.formatMessage(globalMessages.saving)

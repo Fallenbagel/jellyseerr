@@ -7,8 +7,8 @@ import RequestBlock from '@app/components/RequestBlock';
 import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
-import { ServerIcon, ViewListIcon } from '@heroicons/react/outline';
-import { CheckCircleIcon, DocumentRemoveIcon } from '@heroicons/react/solid';
+import { Bars4Icon, ServerIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, DocumentMinusIcon } from '@heroicons/react/24/solid';
 import { IssueStatus } from '@server/constants/issue';
 import { MediaRequestStatus, MediaStatus } from '@server/constants/media';
 import { MediaServerType } from '@server/constants/server';
@@ -302,7 +302,7 @@ const ManageSlideOver = ({
                             watchData?.data ? 'rounded-t-none' : ''
                           }`}
                         >
-                          <ViewListIcon />
+                          <Bars4Icon />
                           <span>
                             {intl.formatMessage(messages.opentautulli)}
                           </span>
@@ -423,7 +423,7 @@ const ManageSlideOver = ({
                             watchData?.data4k ? 'rounded-t-none' : ''
                           }`}
                         >
-                          <ViewListIcon />
+                          <Bars4Icon />
                           <span>
                             {intl.formatMessage(messages.opentautulli)}
                           </span>
@@ -497,7 +497,7 @@ const ManageSlideOver = ({
                   confirmText={intl.formatMessage(globalMessages.areyousure)}
                   className="w-full"
                 >
-                  <DocumentRemoveIcon />
+                  <DocumentMinusIcon />
                   <span>
                     {intl.formatMessage(messages.manageModalClearMedia)}
                   </span>

@@ -767,7 +767,16 @@ export class MediaRequest {
         if (
           media[this.is4k ? 'status4k' : 'status'] === MediaStatus.AVAILABLE
         ) {
-          throw new Error('Media already available');
+          logger.warn('Media already exists, marking request as APPROVED', {
+            label: 'Media Request',
+            requestId: this.id,
+            mediaId: this.media.id,
+          });
+
+          const requestRepository = getRepository(MediaRequest);
+          this.status = MediaRequestStatus.APPROVED;
+          await requestRepository.save(this);
+          return;
         }
 
         const radarrMovieOptions: RadarrMovieOptions = {
@@ -908,7 +917,16 @@ export class MediaRequest {
         if (
           media[this.is4k ? 'status4k' : 'status'] === MediaStatus.AVAILABLE
         ) {
-          throw new Error('Media already available');
+          logger.warn('Media already exists, marking request as APPROVED', {
+            label: 'Media Request',
+            requestId: this.id,
+            mediaId: this.media.id,
+          });
+
+          const requestRepository = getRepository(MediaRequest);
+          this.status = MediaRequestStatus.APPROVED;
+          await requestRepository.save(this);
+          return;
         }
 
         const tmdb = new TheMovieDb();

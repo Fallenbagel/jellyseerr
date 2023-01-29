@@ -1,7 +1,5 @@
 import TheMovieDb from '@server/api/themoviedb';
-import { MediaStatus } from '@server/constants/media';
 import Media from '@server/entity/Media';
-import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import {
   mapCastCredits,
@@ -36,7 +34,6 @@ personRoutes.get('/:id', async (req, res, next) => {
 
 personRoutes.get('/:id/combined_credits', async (req, res, next) => {
   const tmdb = new TheMovieDb();
-  const settings = getSettings();
 
   try {
     const combinedCredits = await tmdb.getPersonCombinedCredits({
@@ -44,29 +41,13 @@ personRoutes.get('/:id/combined_credits', async (req, res, next) => {
       language: req.locale ?? (req.query.language as string),
     });
 
-    let castMedia = await Media.getRelatedMedia(
+    const castMedia = await Media.getRelatedMedia(
       combinedCredits.cast.map((result) => result.id)
     );
 
-    let crewMedia = await Media.getRelatedMedia(
+    const crewMedia = await Media.getRelatedMedia(
       combinedCredits.crew.map((result) => result.id)
     );
-
-    if (settings.main.hideAvailable) {
-      castMedia = castMedia.filter(
-        (media) =>
-          (media.mediaType === 'movie' || media.mediaType === 'tv') &&
-          media.status !== MediaStatus.AVAILABLE &&
-          media.status !== MediaStatus.PARTIALLY_AVAILABLE
-      );
-
-      crewMedia = crewMedia.filter(
-        (media) =>
-          (media.mediaType === 'movie' || media.mediaType === 'tv') &&
-          media.status !== MediaStatus.AVAILABLE &&
-          media.status !== MediaStatus.PARTIALLY_AVAILABLE
-      );
-    }
 
     return res.status(200).json({
       cast: combinedCredits.cast

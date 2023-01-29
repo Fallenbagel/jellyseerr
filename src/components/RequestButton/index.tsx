@@ -3,12 +3,12 @@ import RequestModal from '@app/components/RequestModal';
 import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
-import { DownloadIcon } from '@heroicons/react/outline';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import {
   CheckIcon,
   InformationCircleIcon,
-  XIcon,
-} from '@heroicons/react/solid';
+  XMarkIcon,
+} from '@heroicons/react/24/solid';
 import { MediaRequestStatus, MediaStatus } from '@server/constants/media';
 import type Media from '@server/entity/Media';
 import type { MediaRequest } from '@server/entity/MediaRequest';
@@ -158,7 +158,7 @@ const RequestButton = ({
           action: () => {
             modifyRequest(activeRequest, 'decline');
           },
-          svg: <XIcon />,
+          svg: <XMarkIcon />,
         }
       );
     } else if (
@@ -186,7 +186,7 @@ const RequestButton = ({
           action: () => {
             modifyRequests(activeRequests, 'decline');
           },
-          svg: <XIcon />,
+          svg: <XMarkIcon />,
         }
       );
     }
@@ -228,7 +228,7 @@ const RequestButton = ({
           action: () => {
             modifyRequest(active4kRequest, 'decline');
           },
-          svg: <XIcon />,
+          svg: <XMarkIcon />,
         }
       );
     } else if (
@@ -256,7 +256,7 @@ const RequestButton = ({
           action: () => {
             modifyRequests(active4kRequests, 'decline');
           },
-          svg: <XIcon />,
+          svg: <XMarkIcon />,
         }
       );
     }
@@ -282,7 +282,7 @@ const RequestButton = ({
         setEditRequest(false);
         setShowRequestModal(true);
       },
-      svg: <DownloadIcon />,
+      svg: <ArrowDownTrayIcon />,
     });
   } else if (
     mediaType === 'tv' &&
@@ -301,7 +301,7 @@ const RequestButton = ({
         setEditRequest(false);
         setShowRequestModal(true);
       },
-      svg: <DownloadIcon />,
+      svg: <ArrowDownTrayIcon />,
     });
   }
 
@@ -327,7 +327,7 @@ const RequestButton = ({
         setEditRequest(false);
         setShowRequest4kModal(true);
       },
-      svg: <DownloadIcon />,
+      svg: <ArrowDownTrayIcon />,
     });
   } else if (
     mediaType === 'tv' &&
@@ -347,7 +347,7 @@ const RequestButton = ({
         setEditRequest(false);
         setShowRequest4kModal(true);
       },
-      svg: <DownloadIcon />,
+      svg: <ArrowDownTrayIcon />,
     });
   }
 

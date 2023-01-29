@@ -158,7 +158,12 @@ class ServarrBase<QueueItemAppendT> extends ExternalAPI {
   public getQueue = async (): Promise<(QueueItem & QueueItemAppendT)[]> => {
     try {
       const response = await this.axios.get<QueueResponse<QueueItemAppendT>>(
-        `/queue`
+        `/queue`,
+        {
+          params: {
+            includeEpisode: true,
+          },
+        }
       );
 
       return response.data.records;

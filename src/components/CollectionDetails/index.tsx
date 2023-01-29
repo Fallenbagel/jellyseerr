@@ -10,13 +10,13 @@ import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
-import { DownloadIcon } from '@heroicons/react/outline';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { MediaStatus } from '@server/constants/media';
 import type { Collection } from '@server/models/Collection';
 import { uniq } from 'lodash';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
 
@@ -50,6 +50,28 @@ const CollectionDetails = ({ collection }: CollectionDetailsProps) => {
 
   const { data: genres } =
     useSWR<{ id: number; name: string }[]>(`/api/v1/genres/movie`);
+
+  const [downloadStatus, downloadStatus4k] = useMemo(() => {
+    return [
+      data?.parts.flatMap((item) =>
+        item.mediaInfo?.downloadStatus ? item.mediaInfo?.downloadStatus : []
+      ),
+      data?.parts.flatMap((item) =>
+        item.mediaInfo?.downloadStatus4k ? item.mediaInfo?.downloadStatus4k : []
+      ),
+    ];
+  }, [data?.parts]);
+
+  const [titles, titles4k] = useMemo(() => {
+    return [
+      data?.parts
+        .filter((media) => (media.mediaInfo?.downloadStatus ?? []).length > 0)
+        .map((title) => title.title),
+      data?.parts
+        .filter((media) => (media.mediaInfo?.downloadStatus4k ?? []).length > 0)
+        .map((title) => title.title),
+    ];
+  }, [data?.parts]);
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -205,6 +227,8 @@ const CollectionDetails = ({ collection }: CollectionDetailsProps) => {
           <div className="media-status">
             <StatusBadge
               status={collectionStatus}
+              downloadItem={downloadStatus}
+              title={titles}
               inProgress={data.parts.some(
                 (part) => (part.mediaInfo?.downloadStatus ?? []).length > 0
               )}
@@ -218,6 +242,8 @@ const CollectionDetails = ({ collection }: CollectionDetailsProps) => {
               ) && (
                 <StatusBadge
                   status={collectionStatus4k}
+                  downloadItem={downloadStatus4k}
+                  title={titles4k}
                   is4k
                   inProgress={data.parts.some(
                     (part) =>
@@ -250,7 +276,7 @@ const CollectionDetails = ({ collection }: CollectionDetailsProps) => {
               }}
               text={
                 <>
-                  <DownloadIcon />
+                  <ArrowDownTrayIcon />
                   <span>
                     {intl.formatMessage(
                       hasRequestable
@@ -269,7 +295,7 @@ const CollectionDetails = ({ collection }: CollectionDetailsProps) => {
                     setIs4k(true);
                   }}
                 >
-                  <DownloadIcon />
+                  <ArrowDownTrayIcon />
                   <span>
                     {intl.formatMessage(messages.requestcollection4k)}
                   </span>

@@ -7,8 +7,12 @@ import SensitiveInput from '@app/components/Common/SensitiveInput';
 import LibraryItem from '@app/components/Settings/LibraryItem';
 import SettingsBadge from '@app/components/Settings/SettingsBadge';
 import globalMessages from '@app/i18n/globalMessages';
-import { SaveIcon } from '@heroicons/react/outline';
-import { RefreshIcon, SearchIcon, XIcon } from '@heroicons/react/solid';
+import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowPathIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/solid';
 import type { PlexDevice } from '@server/interfaces/api/plexInterfaces';
 import type { PlexSettings, TautulliSettings } from '@server/lib/settings';
 import axios from 'axios';
@@ -487,7 +491,7 @@ const SettingsPlex = ({ onComplete }: SettingsPlexProps) => {
                       }}
                       className="input-action"
                     >
-                      <RefreshIcon
+                      <ArrowPathIcon
                         className={isRefreshingPresets ? 'animate-spin' : ''}
                         style={{ animationDirection: 'reverse' }}
                       />
@@ -598,7 +602,7 @@ const SettingsPlex = ({ onComplete }: SettingsPlexProps) => {
                       type="submit"
                       disabled={isSubmitting || !isValid}
                     >
-                      <SaveIcon />
+                      <ArrowDownOnSquareIcon />
                       <span>
                         {isSubmitting
                           ? intl.formatMessage(globalMessages.saving)
@@ -625,7 +629,7 @@ const SettingsPlex = ({ onComplete }: SettingsPlexProps) => {
           onClick={() => syncLibraries()}
           disabled={isSyncing || !data?.ip || !data?.port}
         >
-          <RefreshIcon
+          <ArrowPathIcon
             className={isSyncing ? 'animate-spin' : ''}
             style={{ animationDirection: 'reverse' }}
           />
@@ -708,12 +712,12 @@ const SettingsPlex = ({ onComplete }: SettingsPlexProps) => {
                   onClick={() => startScan()}
                   disabled={isSyncing || !activeLibraries.length}
                 >
-                  <SearchIcon />
+                  <MagnifyingGlassIcon />
                   <span>{intl.formatMessage(messages.startscan)}</span>
                 </Button>
               ) : (
                 <Button buttonType="danger" onClick={() => cancelScan()}>
-                  <XIcon />
+                  <XMarkIcon />
                   <span>{intl.formatMessage(messages.cancelscan)}</span>
                 </Button>
               )}
@@ -916,7 +920,7 @@ const SettingsPlex = ({ onComplete }: SettingsPlexProps) => {
                           type="submit"
                           disabled={isSubmitting || !isValid}
                         >
-                          <SaveIcon />
+                          <ArrowDownOnSquareIcon />
                           <span>
                             {isSubmitting
                               ? intl.formatMessage(globalMessages.saving)

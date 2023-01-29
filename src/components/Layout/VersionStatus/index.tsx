@@ -1,9 +1,9 @@
 import {
-  ArrowCircleUpIcon,
+  ArrowUpCircleIcon,
   BeakerIcon,
-  CodeIcon,
+  CodeBracketIcon,
   ServerIcon,
-} from '@heroicons/react/outline';
+} from '@heroicons/react/24/outline';
 import type { StatusResponse } from '@server/interfaces/api/settingsInterfaces';
 import Link from 'next/link';
 import { defineMessages, useIntl } from 'react-intl';
@@ -56,7 +56,7 @@ const VersionStatus = ({ onClick }: VersionStatusProps) => {
         }`}
       >
         {data.commitTag === 'local' ? (
-          <CodeIcon className="h-6 w-6" />
+          <CodeBracketIcon className="h-6 w-6" />
         ) : data.version.startsWith('develop-') ? (
           <BeakerIcon className="h-6 w-6" />
         ) : (
@@ -80,7 +80,7 @@ const VersionStatus = ({ onClick }: VersionStatusProps) => {
             )}
           </span>
         </div>
-        {data.updateAvailable && <ArrowCircleUpIcon className="h-6 w-6" />}
+        {data.updateAvailable && <ArrowUpCircleIcon className="h-6 w-6" />}
       </a>
     </Link>
   );

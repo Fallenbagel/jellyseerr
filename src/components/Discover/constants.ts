@@ -1,3 +1,7 @@
+import type { ParsedUrlQuery } from 'querystring';
+import { defineMessages } from 'react-intl';
+import { z } from 'zod';
+
 type AvailableColors =
   | 'black'
   | 'red'
@@ -60,4 +64,143 @@ export const genreColorMap: Record<number, [string, string]> = {
   10766: colorTones.pink, // Soap
   10767: colorTones.lightgreen, // Talk
   10768: colorTones.darkred, // War & Politics
+};
+
+export const sliderTitles = defineMessages({
+  recentrequests: 'Recent Requests',
+  popularmovies: 'Popular Movies',
+  populartv: 'Popular Series',
+  upcomingtv: 'Upcoming Series',
+  recentlyAdded: 'Recently Added',
+  upcoming: 'Upcoming Movies',
+  trending: 'Trending',
+  plexwatchlist: 'Your Plex Watchlist',
+  moviegenres: 'Movie Genres',
+  tvgenres: 'Series Genres',
+  studios: 'Studios',
+  networks: 'Networks',
+  tmdbmoviekeyword: 'TMDB Movie Keyword',
+  tmdbtvkeyword: 'TMDB Series Keyword',
+  tmdbmoviegenre: 'TMDB Movie Genre',
+  tmdbtvgenre: 'TMDB Series Genre',
+  tmdbnetwork: 'TMDB Network',
+  tmdbstudio: 'TMDB Studio',
+  tmdbsearch: 'TMDB Search',
+});
+
+export const QueryFilterOptions = z.object({
+  sortBy: z.string().optional(),
+  primaryReleaseDateGte: z.string().optional(),
+  primaryReleaseDateLte: z.string().optional(),
+  firstAirDateGte: z.string().optional(),
+  firstAirDateLte: z.string().optional(),
+  studio: z.string().optional(),
+  genre: z.string().optional(),
+  keywords: z.string().optional(),
+  language: z.string().optional(),
+  withRuntimeGte: z.string().optional(),
+  withRuntimeLte: z.string().optional(),
+  voteAverageGte: z.string().optional(),
+  voteAverageLte: z.string().optional(),
+  watchRegion: z.string().optional(),
+  watchProviders: z.string().optional(),
+});
+
+export type FilterOptions = z.infer<typeof QueryFilterOptions>;
+
+export const prepareFilterValues = (
+  inputValues: ParsedUrlQuery
+): FilterOptions => {
+  const filterValues: FilterOptions = {};
+
+  const values = QueryFilterOptions.parse(inputValues);
+
+  if (values.sortBy) {
+    filterValues.sortBy = values.sortBy;
+  }
+
+  if (values.primaryReleaseDateGte) {
+    filterValues.primaryReleaseDateGte = values.primaryReleaseDateGte;
+  }
+
+  if (values.primaryReleaseDateLte) {
+    filterValues.primaryReleaseDateLte = values.primaryReleaseDateLte;
+  }
+
+  if (values.firstAirDateGte) {
+    filterValues.firstAirDateGte = values.firstAirDateGte;
+  }
+
+  if (values.firstAirDateLte) {
+    filterValues.firstAirDateLte = values.firstAirDateLte;
+  }
+
+  if (values.studio) {
+    filterValues.studio = values.studio;
+  }
+
+  if (values.genre) {
+    filterValues.genre = values.genre;
+  }
+
+  if (values.keywords) {
+    filterValues.keywords = values.keywords;
+  }
+
+  if (values.language) {
+    filterValues.language = values.language;
+  }
+
+  if (values.withRuntimeGte) {
+    filterValues.withRuntimeGte = values.withRuntimeGte;
+  }
+
+  if (values.withRuntimeLte) {
+    filterValues.withRuntimeLte = values.withRuntimeLte;
+  }
+
+  if (values.voteAverageGte) {
+    filterValues.voteAverageGte = values.voteAverageGte;
+  }
+
+  if (values.voteAverageLte) {
+    filterValues.voteAverageLte = values.voteAverageLte;
+  }
+
+  if (values.watchProviders) {
+    filterValues.watchProviders = values.watchProviders;
+  }
+
+  if (values.watchRegion) {
+    filterValues.watchRegion = values.watchRegion;
+  }
+
+  return filterValues;
+};
+
+export const countActiveFilters = (filterValues: FilterOptions): number => {
+  let totalCount = 0;
+  const clonedFilters = Object.assign({}, filterValues);
+
+  if (clonedFilters.voteAverageGte || filterValues.voteAverageLte) {
+    totalCount += 1;
+    delete clonedFilters.voteAverageGte;
+    delete clonedFilters.voteAverageLte;
+  }
+
+  if (clonedFilters.withRuntimeGte || filterValues.withRuntimeLte) {
+    totalCount += 1;
+    delete clonedFilters.withRuntimeGte;
+    delete clonedFilters.withRuntimeLte;
+  }
+
+  if (clonedFilters.watchProviders) {
+    totalCount += 1;
+    delete clonedFilters.watchProviders;
+    delete clonedFilters.watchRegion;
+  }
+
+  totalCount += Object.keys(clonedFilters).length;
+
+  return totalCount;
 };

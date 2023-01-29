@@ -308,7 +308,9 @@ issueRoutes.post<{ issueId: string }, Issue, { message: string }>(
 
 issueRoutes.post<{ issueId: string; status: string }, Issue>(
   '/:issueId/:status',
-  isAuthenticated(Permission.MANAGE_ISSUES),
+  isAuthenticated([Permission.MANAGE_ISSUES, Permission.CREATE_ISSUES], {
+    type: 'or',
+  }),
   async (req, res, next) => {
     const issueRepository = getRepository(Issue);
     // Satisfy typescript here. User is set, we assure you!
@@ -320,6 +322,16 @@ issueRoutes.post<{ issueId: string; status: string }, Issue>(
       const issue = await issueRepository.findOneOrFail({
         where: { id: Number(req.params.issueId) },
       });
+
+      if (
+        !req.user?.hasPermission(Permission.MANAGE_ISSUES) &&
+        issue.createdBy.id !== req.user?.id
+      ) {
+        return next({
+          status: 401,
+          message: 'You do not have permission to modify this issue.',
+        });
+      }
 
       let newStatus: IssueStatus | undefined;
 

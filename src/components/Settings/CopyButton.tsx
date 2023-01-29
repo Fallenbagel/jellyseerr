@@ -1,4 +1,4 @@
-import { ClipboardCopyIcon } from '@heroicons/react/solid';
+import { ClipboardDocumentIcon } from '@heroicons/react/24/solid';
 import { useEffect } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
@@ -32,7 +32,7 @@ const CopyButton = ({ textToCopy }: { textToCopy: string }) => {
       }}
       className="input-action"
     >
-      <ClipboardCopyIcon />
+      <ClipboardDocumentIcon />
     </button>
   );
 };

@@ -3,7 +3,7 @@ import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import SensitiveInput from '@app/components/Common/SensitiveInput';
 import NotificationTypeSelector from '@app/components/NotificationTypeSelector';
 import globalMessages from '@app/i18n/globalMessages';
-import { BeakerIcon, SaveIcon } from '@heroicons/react/outline';
+import { ArrowDownOnSquareIcon, BeakerIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import { useState } from 'react';
@@ -239,7 +239,7 @@ const NotificationsPushbullet = () => {
                       (values.enabled && !values.types)
                     }
                   >
-                    <SaveIcon />
+                    <ArrowDownOnSquareIcon />
                     <span>
                       {isSubmitting
                         ? intl.formatMessage(globalMessages.saving)
