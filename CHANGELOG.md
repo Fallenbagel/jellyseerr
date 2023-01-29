@@ -1,3 +1,57 @@
+# [1.4.0](https://github.com/fallenbagel/jellyseerr/compare/v1.3.0...v1.4.0) (2023-01-29)
+
+
+### Bug Fixes
+
+* add bg-opacity to in-progress status badges ([#3190](https://github.com/fallenbagel/jellyseerr/issues/3190)) ([68223f4](https://github.com/fallenbagel/jellyseerr/commit/68223f4b1e98b01825516dcba39cbb2d3df31a70))
+* added download status and title to request card/item error components ([#3186](https://github.com/fallenbagel/jellyseerr/issues/3186)) ([3309f77](https://github.com/fallenbagel/jellyseerr/commit/3309f77aa4be1d70b27693531c119a8e26822518))
+* arrow icons were misplaced on mobile in slider edit ([#3260](https://github.com/fallenbagel/jellyseerr/issues/3260)) ([d328485](https://github.com/fallenbagel/jellyseerr/commit/d328485161b9cae6a70ef0713b4878207bc6015e))
+* **build:** update usage of publish snap action ([#3272](https://github.com/fallenbagel/jellyseerr/issues/3272)) ([51b05cd](https://github.com/fallenbagel/jellyseerr/commit/51b05cd8fbb5d332807d8c00b2ffb7b10c3d0179))
+* changed overflow scroll to only if necessary ([#3184](https://github.com/fallenbagel/jellyseerr/issues/3184)) ([27feeea](https://github.com/fallenbagel/jellyseerr/commit/27feeea69121336557deda1f32b65a5daa146f82))
+* convert genre/studio to string in create slider ([#3201](https://github.com/fallenbagel/jellyseerr/issues/3201)) ([93afead](https://github.com/fallenbagel/jellyseerr/commit/93afead92e497f2e5bce67a34fffdaa08d20c7f2))
+* correct checkbox position (again) for slider edits ([#3227](https://github.com/fallenbagel/jellyseerr/issues/3227)) ([3ba6df1](https://github.com/fallenbagel/jellyseerr/commit/3ba6df1a41c084c4a6a90354338047623abef521))
+* correct grid sizing for webkit on streaming services ([#3248](https://github.com/fallenbagel/jellyseerr/issues/3248)) ([6fd11cf](https://github.com/fallenbagel/jellyseerr/commit/6fd11cf4254e1a19310592bec78a6de52bc073a8))
+* correct issue detail bottom padding on mobile displays ([#3268](https://github.com/fallenbagel/jellyseerr/issues/3268)) ([3db010b](https://github.com/fallenbagel/jellyseerr/commit/3db010b9eaec62aa08d973a61caf1801471bbf3e))
+* correct link to correct keyword results for series ([#3208](https://github.com/fallenbagel/jellyseerr/issues/3208)) ([4e9be7a](https://github.com/fallenbagel/jellyseerr/commit/4e9be7a3f7304ee7be5ee6fd34b1ea8f6c0cf399))
+* correct spacing between sliders ([#3225](https://github.com/fallenbagel/jellyseerr/issues/3225)) ([62e2de7](https://github.com/fallenbagel/jellyseerr/commit/62e2de70bf37b72d5f63370b662d4103a642775b))
+* correctly check mobile menu permissions ([#3271](https://github.com/fallenbagel/jellyseerr/issues/3271)) ([f4a22dc](https://github.com/fallenbagel/jellyseerr/commit/f4a22dc437404558f301ccfc195cf0a300dd1ff2))
+* correctly restore selected streaming service filters ([#3249](https://github.com/fallenbagel/jellyseerr/issues/3249)) ([154f3e7](https://github.com/fallenbagel/jellyseerr/commit/154f3e72efbf0b663358b3029156f54516f01a2f))
+* create shared class to add bottom spacing ([#3269](https://github.com/fallenbagel/jellyseerr/issues/3269)) ([5d1c6f7](https://github.com/fallenbagel/jellyseerr/commit/5d1c6f706555613d97ed9e61d8b665543c2f239b))
+* **deps:** pin dependency @headlessui/react to 1.7.7 ([#3194](https://github.com/fallenbagel/jellyseerr/issues/3194)) [skip ci] ([c4b16ab](https://github.com/fallenbagel/jellyseerr/commit/c4b16abc62647c74215155942a4230a31a238677))
+* **deps:** update dependency @heroicons/react to v2 ([#2970](https://github.com/fallenbagel/jellyseerr/issues/2970)) ([dd48d59](https://github.com/fallenbagel/jellyseerr/commit/dd48d59b20e2d1800ea30912116f4a4f1bb7928f))
+* **deps:** update dependency axios to v1 ([#3202](https://github.com/fallenbagel/jellyseerr/issues/3202)) ([421029e](https://github.com/fallenbagel/jellyseerr/commit/421029ebab66c9a6622ba47e56d7f6473524cce4))
+* **deps:** update dependency swr to v2 ([#3212](https://github.com/fallenbagel/jellyseerr/issues/3212)) ([7b6db50](https://github.com/fallenbagel/jellyseerr/commit/7b6db50ae55b1fc60d19a5cff62dd46bb989fa51))
+* **experimental:** use new RT API (sorta) ([#3179](https://github.com/fallenbagel/jellyseerr/issues/3179)) ([357cab8](https://github.com/fallenbagel/jellyseerr/commit/357cab87ac7752b8e119b51c938b343c661d83c2))
+* improve small screen layout for discover editing ([#3221](https://github.com/fallenbagel/jellyseerr/issues/3221)) ([d23b213](https://github.com/fallenbagel/jellyseerr/commit/d23b2132de05f072f7f9daad83d81421d747cf99))
+* include new package calendar css in build ([#3235](https://github.com/fallenbagel/jellyseerr/issues/3235)) ([c2a1a20](https://github.com/fallenbagel/jellyseerr/commit/c2a1a20a3bb20039a1936c7fe0ecb9e8311a0aea))
+* issues with issues ([#3267](https://github.com/fallenbagel/jellyseerr/issues/3267)) ([fd21971](https://github.com/fallenbagel/jellyseerr/commit/fd219717c01c558814d7a80de6304272b5a7944e))
+* multiple genre filtering now works ([#3282](https://github.com/fallenbagel/jellyseerr/issues/3282)) ([5076938](https://github.com/fallenbagel/jellyseerr/commit/507693881b939819413f0959df5ef6b7a357eb5c))
+* prevent double encode if we are on /search endpoint ([#3238](https://github.com/fallenbagel/jellyseerr/issues/3238)) ([a343f8a](https://github.com/fallenbagel/jellyseerr/commit/a343f8ad915491a9c81512c7e541a1dac8906025))
+* **request:** approve request when retrying request ([#3234](https://github.com/fallenbagel/jellyseerr/issues/3234)) ([b515701](https://github.com/fallenbagel/jellyseerr/commit/b5157010c46cd9083993d5ee0172007b83d631da))
+* **request:** mark request as approved if media is already available when retrying failed request ([#3244](https://github.com/fallenbagel/jellyseerr/issues/3244)) ([cb65074](https://github.com/fallenbagel/jellyseerr/commit/cb650745f6a33e69391a633e6d272831f314e098))
+* restore border to ghost button and fix discover slider visibility toggle position ([#3226](https://github.com/fallenbagel/jellyseerr/issues/3226)) ([2eebb7f](https://github.com/fallenbagel/jellyseerr/commit/2eebb7fd3941b34fe9472aaf9d28265df8cce311))
+* restore status badges on titles on actors page when hide available media enabled ([#3206](https://github.com/fallenbagel/jellyseerr/issues/3206)) ([9d3446d](https://github.com/fallenbagel/jellyseerr/commit/9d3446d370499c3251159393e5c791b01225e05c))
+* screen would zoom on mobile if date picker input was selected ([#3241](https://github.com/fallenbagel/jellyseerr/issues/3241)) ([3aefddd](https://github.com/fallenbagel/jellyseerr/commit/3aefddd48834d86150d5f5cceb2d08af3a78847b))
+* series displayed an empty season with series list/request modal ([#3147](https://github.com/fallenbagel/jellyseerr/issues/3147)) ([2179637](https://github.com/fallenbagel/jellyseerr/commit/2179637d437999290eaa4152f6f37c71fc3d8ba3))
+* tooltip shows properly if not in progress ([#3185](https://github.com/fallenbagel/jellyseerr/issues/3185)) ([6face8c](https://github.com/fallenbagel/jellyseerr/commit/6face8cc4564b978fb98af32659b326d8c5cede8))
+* **ui:** series first air date sorting ([#3283](https://github.com/fallenbagel/jellyseerr/issues/3283)) ([374c78c](https://github.com/fallenbagel/jellyseerr/commit/374c78c989cc86bb144a954a91d5d183c4b591c0))
+* update StatusBadgeMini to shrink on title cards (and remove ring) ([#3210](https://github.com/fallenbagel/jellyseerr/issues/3210)) ([042a1a9](https://github.com/fallenbagel/jellyseerr/commit/042a1a950fdd4d4a61edf4bc19657f9b7a526da8))
+
+
+### Features
+
+* add discover customization ([#3182](https://github.com/fallenbagel/jellyseerr/issues/3182)) ([cd35748](https://github.com/fallenbagel/jellyseerr/commit/cd3574851a12517cbfadc109e6412a7a9e44c114))
+* add keywords to movie/series detail pages ([#3204](https://github.com/fallenbagel/jellyseerr/issues/3204)) ([e084649](https://github.com/fallenbagel/jellyseerr/commit/e084649878a58c296786141d12dd69a69a27ee85))
+* add streaming services filter ([#3247](https://github.com/fallenbagel/jellyseerr/issues/3247)) ([1154156](https://github.com/fallenbagel/jellyseerr/commit/1154156459403494e8daf0c89a3ba356aeea1d97))
+* discover inline customization ([#3220](https://github.com/fallenbagel/jellyseerr/issues/3220)) ([8bd10b5](https://github.com/fallenbagel/jellyseerr/commit/8bd10b5bf3d1b8069872b616c7c8596caeb4937e))
+* discover overhaul (filters!) ([#3232](https://github.com/fallenbagel/jellyseerr/issues/3232)) ([dd00e48](https://github.com/fallenbagel/jellyseerr/commit/dd00e48f59054b44bef6b32a2c169e59f6175051))
+* discover slider edit arrow buttons for reordering ([#3259](https://github.com/fallenbagel/jellyseerr/issues/3259)) ([da00d45](https://github.com/fallenbagel/jellyseerr/commit/da00d454e17e8b00d04f6e26f6dd5153ed6ced81))
+* **lang:** translations update from Hosted Weblate ([#3030](https://github.com/fallenbagel/jellyseerr/issues/3030)) ([0d8b390](https://github.com/fallenbagel/jellyseerr/commit/0d8b390b678731e76bd1f0f8a0a4952c11e77f4d))
+* new mobile menu ([#3251](https://github.com/fallenbagel/jellyseerr/issues/3251)) ([fcbca17](https://github.com/fallenbagel/jellyseerr/commit/fcbca1722f31f32633a57bc5048f46c9da057d87))
+* translations update from Hosted Weblate ([#3218](https://github.com/fallenbagel/jellyseerr/issues/3218)) ([5940ff7](https://github.com/fallenbagel/jellyseerr/commit/5940ff7f5f62eed9ac5aa6f02803418aaa09813a))
+* **ui:** add episode number to front of episode name in season details ([#3086](https://github.com/fallenbagel/jellyseerr/issues/3086)) ([a672b32](https://github.com/fallenbagel/jellyseerr/commit/a672b324ec391a20f6f3a1daed82a8d276a52c2c))
+* **ui:** request card progress bar ([#3123](https://github.com/fallenbagel/jellyseerr/issues/3123)) ([03853a1](https://github.com/fallenbagel/jellyseerr/commit/03853a1b9155c8a2153c8885022a74619af1bc15))
+
 # [1.3.0](https://github.com/fallenbagel/jellyseerr/compare/v1.2.1...v1.3.0) (2023-01-02)
 
 ### Bug Fixes
