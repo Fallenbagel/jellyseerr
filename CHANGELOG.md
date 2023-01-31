@@ -1,3 +1,14 @@
+## [1.4.1](https://github.com/fallenbagel/jellyseerr/compare/v1.4.0...v1.4.1) (2023-01-31)
+
+
+### Bug Fixes
+
+* pass in library type when scanning recently added items ([#3287](https://github.com/fallenbagel/jellyseerr/issues/3287)) ([8942eb8](https://github.com/fallenbagel/jellyseerr/commit/8942eb8b7c4fa1d16aa2e72e8ba7120a653c9aa2))
+* **ui:** air date will use UTC for timezone ([#3297](https://github.com/fallenbagel/jellyseerr/issues/3297)) ([3e43586](https://github.com/fallenbagel/jellyseerr/commit/3e43586acc0804c3fff524509caa890a104e132b))
+* **ui:** correct range slider styling in chrome ([#3299](https://github.com/fallenbagel/jellyseerr/issues/3299)) ([d954328](https://github.com/fallenbagel/jellyseerr/commit/d9543289111d72245564d25d300a71b0ea3954ba))
+* **ui:** show 5 icons when possible on mobile menu ([#3298](https://github.com/fallenbagel/jellyseerr/issues/3298)) ([7040da1](https://github.com/fallenbagel/jellyseerr/commit/7040da1334f6d18e19a494c73caa17f7df552dfe))
+* **ui:** style range thumbs correctly for firefox ([#3294](https://github.com/fallenbagel/jellyseerr/issues/3294)) ([9d10e6a](https://github.com/fallenbagel/jellyseerr/commit/9d10e6a88c0996671f1d9d20792e1930dbc82329))
+
 # [1.4.0](https://github.com/fallenbagel/jellyseerr/compare/v1.3.0...v1.4.0) (2023-01-29)
 
 
