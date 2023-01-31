@@ -876,6 +876,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
+                    timeZone: 'UTC',
                   })}
                 </span>
               </div>
@@ -890,6 +891,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
+                      timeZone: 'UTC',
                     })}
                   </span>
                 </div>
