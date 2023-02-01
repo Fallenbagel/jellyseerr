@@ -6,7 +6,7 @@ import PageTitle from '@app/components/Common/PageTitle';
 import Releases from '@app/components/Settings/SettingsAbout/Releases';
 import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
-import { InformationCircleIcon } from '@heroicons/react/solid';
+import { InformationCircleIcon } from '@heroicons/react/24/solid';
 import type {
   SettingsAboutResponse,
   StatusResponse,

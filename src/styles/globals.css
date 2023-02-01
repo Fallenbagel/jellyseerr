@@ -6,7 +6,13 @@
   html {
     min-height: calc(100% + env(safe-area-inset-top));
     padding: env(safe-area-inset-top) env(safe-area-inset-right)
-      env(safe-area-inset-bottom) env(safe-area-inset-left);
+      calc(4rem + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+  }
+
+  @media (min-width: 640px) {
+    html {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
   }
 
   body {
@@ -417,11 +423,67 @@
   .react-select-container .react-select__input-container {
     @apply text-white;
   }
+
+  .react-select-container .react-select__single-value {
+    @apply text-sm text-gray-100;
+  }
+
+  .react-select-container .react-select__placeholder {
+    @apply text-sm text-gray-500;
+  }
+
+  .datepicker-wrapper > button {
+    @apply top-0;
+  }
+
+  .datepicker-wrapper > div {
+    @apply fixed left-0 right-0 w-full px-4 md:w-auto;
+  }
+
+  .datepicker-wrapper > div > div:nth-child(2) > div {
+    @apply !flex-col;
+  }
+
+  .datepicker-wrapper > div > div:nth-child(2) > div > div > div {
+    @apply !w-full !min-w-full;
+  }
+
+  .datepicker-wrapper > div > div:first-child {
+    @apply hidden;
+  }
+
+  input[type='range']::-webkit-slider-thumb {
+    @apply rounded-full border-0 bg-indigo-500;
+    pointer-events: all;
+    width: 16px;
+    height: 16px;
+    -webkit-appearance: none;
+  }
+
+  input[type='range']::-moz-range-thumb {
+    @apply rounded-full border-0 bg-indigo-500;
+    pointer-events: all;
+    width: 16px;
+    height: 16px;
+    -webkit-appearance: none;
+  }
 }
 
 @layer utilities {
   .absolute-top-shift {
     top: calc(-4rem - env(safe-area-inset-top));
+  }
+
+  .absolute-bottom-shift {
+    bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+
+  .safe-shift-edit-menu {
+    bottom: calc(54px + env(safe-area-inset-bottom));
+  }
+
+  .padding-bottom-safe {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   .min-h-screen-shift {
@@ -452,6 +514,10 @@
     .pwa-only {
       @apply hidden;
     }
+  }
+
+  .extra-bottom-space {
+    height: calc(4rem + env(safe-area-inset-bottom));
   }
 }
 

@@ -1,5 +1,5 @@
 import { useUser } from '@app/hooks/useUser';
-import { ExclamationIcon } from '@heroicons/react/outline';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import type React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
@@ -49,7 +49,7 @@ const UserWarnings: React.FC<UserWarningsProps> = ({ onClick }) => {
             tabIndex={0}
             className="mx-2 mb-2 flex items-center rounded-lg bg-yellow-500 p-2 text-xs text-white ring-1 ring-gray-700 transition duration-300 hover:bg-yellow-400"
           >
-            <ExclamationIcon className="h-6 w-6" />
+            <ExclamationTriangleIcon className="h-6 w-6" />
             <div className="flex min-w-0 flex-1 flex-col truncate px-2 last:pr-0">
               <span className="font-bold">{warningTitle}</span>
               <span className="truncate">{warningText}</span>

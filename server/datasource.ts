@@ -34,7 +34,7 @@ const dataSource = new DataSource(
   process.env.NODE_ENV !== 'production' ? devConfig : prodConfig
 );
 
-export const getRepository = <Entity>(
+export const getRepository = <Entity extends object>(
   target: EntityTarget<Entity>
 ): Repository<Entity> => {
   return dataSource.getRepository(target);

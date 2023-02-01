@@ -3,10 +3,10 @@ import { issueOptions } from '@app/components/IssueModal/constants';
 import { useUser } from '@app/hooks/useUser';
 import {
   CalendarIcon,
-  ExclamationIcon,
+  ExclamationTriangleIcon,
   EyeIcon,
   UserIcon,
-} from '@heroicons/react/solid';
+} from '@heroicons/react/24/solid';
 import type Issue from '@server/entity/Issue';
 import Link from 'next/link';
 import { useIntl } from 'react-intl';
@@ -31,7 +31,7 @@ const IssueBlock = ({ issue }: IssueBlockProps) => {
       <div className="flex items-center justify-between">
         <div className="mr-6 min-w-0 flex-1 flex-col items-center text-sm leading-5">
           <div className="flex flex-nowrap">
-            <ExclamationIcon className="mr-1.5 h-5 w-5 flex-shrink-0" />
+            <ExclamationTriangleIcon className="mr-1.5 h-5 w-5 flex-shrink-0" />
             <span className="w-40 truncate md:w-auto">
               {intl.formatMessage(issueOption.name)}
             </span>

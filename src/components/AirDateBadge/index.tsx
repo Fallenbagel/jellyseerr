@@ -37,6 +37,7 @@ const AirDateBadge = ({ airDate }: AirDateBadgeProps) => {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
+          timeZone: 'UTC',
         })}
       </Badge>
       {showRelative && (

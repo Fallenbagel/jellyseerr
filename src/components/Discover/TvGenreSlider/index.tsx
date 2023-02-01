@@ -1,7 +1,7 @@
 import { genreColorMap } from '@app/components/Discover/constants';
 import GenreCard from '@app/components/GenreCard';
 import Slider from '@app/components/Slider';
-import { ArrowCircleRightIcon } from '@heroicons/react/outline';
+import { ArrowRightCircleIcon } from '@heroicons/react/24/outline';
 import type { GenreSliderItem } from '@server/interfaces/api/discoverInterfaces';
 import Link from 'next/link';
 import React from 'react';
@@ -28,7 +28,7 @@ const TvGenreSlider = () => {
         <Link href="/discover/tv/genres">
           <a className="slider-title">
             <span>{intl.formatMessage(messages.tvgenres)}</span>
-            <ArrowCircleRightIcon />
+            <ArrowRightCircleIcon />
           </a>
         </Link>
       </div>
@@ -43,7 +43,7 @@ const TvGenreSlider = () => {
             image={`https://image.tmdb.org/t/p/w1280_filter(duotone,${
               genreColorMap[genre.id] ?? genreColorMap[0]
             })${genre.backdrops[4]}`}
-            url={`/discover/tv/genre/${genre.id}`}
+            url={`/discover/tv?genre=${genre.id}`}
           />
         ))}
         placeholder={<GenreCard.Placeholder />}

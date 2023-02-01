@@ -27,9 +27,30 @@ interface DiscoverResult<T, S> {
   firstResultData?: BaseSearchResult<T> & S;
 }
 
-const useDiscover = <T extends BaseMedia, S = Record<string, never>>(
+const extraEncodes: [RegExp, string][] = [
+  [/\(/g, '%28'],
+  [/\)/g, '%29'],
+  [/!/g, '%21'],
+  [/\*/g, '%2A'],
+];
+
+export const encodeURIExtraParams = (string: string): string => {
+  let finalString = encodeURIComponent(string);
+
+  extraEncodes.forEach((encode) => {
+    finalString = finalString.replace(encode[0], encode[1]);
+  });
+
+  return finalString;
+};
+
+const useDiscover = <
+  T extends BaseMedia,
+  S = Record<string, never>,
+  O = Record<string, unknown>
+>(
   endpoint: string,
-  options?: Record<string, unknown>,
+  options?: O,
   { hideAvailable = true } = {}
 ): DiscoverResult<T, S> => {
   const settings = useSettings();
@@ -47,7 +68,10 @@ const useDiscover = <T extends BaseMedia, S = Record<string, never>>(
       };
 
       const finalQueryString = Object.keys(params)
-        .map((paramKey) => `${paramKey}=${params[paramKey]}`)
+        .map(
+          (paramKey) =>
+            `${paramKey}=${encodeURIExtraParams(params[paramKey] as string)}`
+        )
         .join('&');
 
       return `${endpoint}?${finalQueryString}`;

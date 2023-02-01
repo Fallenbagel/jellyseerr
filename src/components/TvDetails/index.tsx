@@ -11,6 +11,7 @@ import PageTitle from '@app/components/Common/PageTitle';
 import type { PlayButtonLink } from '@app/components/Common/PlayButton';
 import PlayButton from '@app/components/Common/PlayButton';
 import StatusBadgeMini from '@app/components/Common/StatusBadgeMini';
+import Tag from '@app/components/Common/Tag';
 import Tooltip from '@app/components/Common/Tooltip';
 import ExternalLinkBlock from '@app/components/ExternalLinkBlock';
 import IssueModal from '@app/components/IssueModal';
@@ -31,13 +32,13 @@ import Error from '@app/pages/_error';
 import { sortCrewPriority } from '@app/utils/creditHelpers';
 import { Disclosure, Transition } from '@headlessui/react';
 import {
-  ArrowCircleRightIcon,
+  ArrowRightCircleIcon,
   CogIcon,
-  ExclamationIcon,
+  ExclamationTriangleIcon,
   FilmIcon,
   PlayIcon,
-} from '@heroicons/react/outline';
-import { ChevronUpIcon } from '@heroicons/react/solid';
+} from '@heroicons/react/24/outline';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import type { RTRating } from '@server/api/rottentomatoes';
 import { ANIME_KEYWORD_ID } from '@server/api/themoviedb/constants';
 import { IssueStatus } from '@server/constants/issue';
@@ -200,7 +201,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
   }
 
   const seasonCount = data.seasons.filter(
-    (season) => season.seasonNumber !== 0
+    (season) => season.seasonNumber !== 0 && season.episodeCount !== 0
   ).length;
 
   if (seasonCount) {
@@ -213,7 +214,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     seriesAttributes.push(
       data.genres
         .map((g) => (
-          <Link href={`/discover/tv/genre/${g.id}`} key={`genre-${g.id}`}>
+          <Link href={`/discover/tv?genre=${g.id}`} key={`genre-${g.id}`}>
             <a className="hover:underline">{g.name}</a>
           </Link>
         ))
@@ -228,25 +229,37 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     );
   }
 
-  const isComplete =
-    seasonCount <=
-    (
-      data.mediaInfo?.seasons.filter(
-        (season) =>
-          season.status === MediaStatus.AVAILABLE ||
-          season.status === MediaStatus.PARTIALLY_AVAILABLE
-      ) ?? []
-    ).length;
+  const getAllRequestedSeasons = (is4k: boolean): number[] => {
+    const requestedSeasons = (data?.mediaInfo?.requests ?? [])
+      .filter(
+        (request) =>
+          request.is4k === is4k &&
+          request.status !== MediaRequestStatus.DECLINED
+      )
+      .reduce((requestedSeasons, request) => {
+        return [
+          ...requestedSeasons,
+          ...request.seasons.map((sr) => sr.seasonNumber),
+        ];
+      }, [] as number[]);
 
-  const is4kComplete =
-    seasonCount <=
-    (
-      data.mediaInfo?.seasons.filter(
+    const availableSeasons = (data?.mediaInfo?.seasons ?? [])
+      .filter(
         (season) =>
-          season.status4k === MediaStatus.AVAILABLE ||
-          season.status4k === MediaStatus.PARTIALLY_AVAILABLE
-      ) ?? []
-    ).length;
+          (season[is4k ? 'status4k' : 'status'] === MediaStatus.AVAILABLE ||
+            season[is4k ? 'status4k' : 'status'] ===
+              MediaStatus.PARTIALLY_AVAILABLE ||
+            season[is4k ? 'status4k' : 'status'] === MediaStatus.PROCESSING) &&
+          !requestedSeasons.includes(season.seasonNumber)
+      )
+      .map((season) => season.seasonNumber);
+
+    return [...requestedSeasons, ...availableSeasons];
+  };
+
+  const isComplete = seasonCount <= getAllRequestedSeasons(false).length;
+
+  const is4kComplete = seasonCount <= getAllRequestedSeasons(true).length;
 
   const streamingProviders =
     data?.watchProviders?.find((provider) => provider.iso_3166_1 === region)
@@ -436,7 +449,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                   onClick={() => setShowIssueModal(true)}
                   className="ml-2 first:ml-0"
                 >
-                  <ExclamationIcon />
+                  <ExclamationTriangleIcon />
                 </Button>
               </Tooltip>
             )}
@@ -508,11 +521,25 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                 <Link href={`/tv/${data.id}/crew`}>
                   <a className="flex items-center text-gray-400 transition duration-300 hover:text-gray-100">
                     <span>{intl.formatMessage(messages.viewfullcrew)}</span>
-                    <ArrowCircleRightIcon className="ml-1.5 inline-block h-5 w-5" />
+                    <ArrowRightCircleIcon className="ml-1.5 inline-block h-5 w-5" />
                   </a>
                 </Link>
               </div>
             </>
+          )}
+          {data.keywords.length > 0 && (
+            <div className="mt-6">
+              {data.keywords.map((keyword) => (
+                <Link
+                  href={`/discover/tv?keywords=${keyword.id}`}
+                  key={`keyword-id-${keyword.id}`}
+                >
+                  <a className="mb-2 mr-2 inline-flex last:mr-0">
+                    <Tag>{keyword.name}</Tag>
+                  </a>
+                </Link>
+              ))}
+            </div>
           )}
           <h2 className="py-4">{intl.formatMessage(messages.seasonstitle)}</h2>
           <div className="flex w-full flex-col space-y-2">
@@ -555,6 +582,10 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                       (s) => s.seasonNumber === season.seasonNumber
                     ) && r.is4k
                 );
+
+                if (season.episodeCount === 0) {
+                  return null;
+                }
 
                 return (
                   <Disclosure key={`season-discoslure-${season.seasonNumber}`}>
@@ -726,7 +757,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                                 </div>
                               </>
                             )}
-                          <ChevronUpIcon
+                          <ChevronDownIcon
                             className={`${
                               open ? 'rotate-180 transform' : ''
                             } h-6 w-6 text-gray-500`}
@@ -816,12 +847,13 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                 )}
               </div>
             )}
-            {data.originalName && data.originalLanguage !== locale.slice(0, 2) && (
-              <div className="media-fact">
-                <span>{intl.formatMessage(messages.originaltitle)}</span>
-                <span className="media-fact-value">{data.originalName}</span>
-              </div>
-            )}
+            {data.originalName &&
+              data.originalLanguage !== locale.slice(0, 2) && (
+                <div className="media-fact">
+                  <span>{intl.formatMessage(messages.originaltitle)}</span>
+                  <span className="media-fact-value">{data.originalName}</span>
+                </div>
+              )}
             {data.keywords.some(
               (keyword) => keyword.id === ANIME_KEYWORD_ID
             ) && (
@@ -844,6 +876,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
+                    timeZone: 'UTC',
                   })}
                 </span>
               </div>
@@ -858,6 +891,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
+                      timeZone: 'UTC',
                     })}
                   </span>
                 </div>
@@ -982,7 +1016,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
             <Link href="/tv/[tvId]/cast" as={`/tv/${data.id}/cast`}>
               <a className="slider-title">
                 <span>{intl.formatMessage(messages.cast)}</span>
-                <ArrowCircleRightIcon />
+                <ArrowRightCircleIcon />
               </a>
             </Link>
           </div>
@@ -1016,7 +1050,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
         linkUrl={`/tv/${data.id}/similar`}
         hideWhenEmpty
       />
-      <div className="pb-8" />
+      <div className="extra-bottom-space relative" />
     </div>
   );
 };
