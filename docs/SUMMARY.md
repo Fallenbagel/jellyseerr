@@ -6,7 +6,7 @@
 
 - [Installation](getting-started/installation.md)
 
-## Using Overseerr
+## Using Jellyseerr
 
 - [Settings](using-overseerr/settings/README.md)
 - [Users](using-overseerr/users/README.md)
@@ -27,7 +27,7 @@
 - [Frequently Asked Questions (FAQ)](support/faq.md)
 - [Need Help?](support/need-help.md)
 
-## Extending Overseerr
+## Extending Jellyseerr
 
 - [Reverse Proxy](extending-overseerr/reverse-proxy.md)
 - [Fail2ban](extending-overseerr/fail2ban.md)

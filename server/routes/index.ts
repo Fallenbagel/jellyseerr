@@ -362,7 +362,7 @@ router.get('/watchproviders/tv', async (req, res, next) => {
 
 router.get('/', (_req, res) => {
   return res.status(200).json({
-    api: 'Overseerr API',
+    api: 'Jellyseerr API',
     version: '1.0',
   });
 });

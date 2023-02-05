@@ -1,17 +1,17 @@
 # Installation
 
 {% hint style="danger" %}
-**Overseerr is currently in BETA.** If you would like to help test the bleeding edge, please use the image **`fallenbagel/jellyseerr:develop`**!
+**Jellyseerr is currently in BETA.** If you would like to help test the bleeding edge, please use the image **`fallenbagel/jellyseerr:develop`**!
 {% endhint %}
 
 {% hint style="info" %}
-After running Overseerr for the first time, configure it by visiting the web UI at `http://[address]:5055` and completing the setup steps.
+After running Jellyseerr for the first time, configure it by visiting the web UI at `http://[address]:5055` and completing the setup steps.
 {% endhint %}
 
 ## Docker
 
 {% hint style="warning" %}
-Be sure to replace `/path/to/appdata/config` in the below examples with a valid host directory path. If this volume mount is not configured correctly, your Overseerr settings/data will not be persisted when the container is recreated (e.g., when updating the image or rebooting your machine).
+Be sure to replace `/path/to/appdata/config` in the below examples with a valid host directory path. If this volume mount is not configured correctly, your Jellyseerr settings/data will not be persisted when the container is recreated (e.g., when updating the image or rebooting your machine).
 
 The `TZ` environment variable value should also be set to the [TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) of your time zone!
 {% endhint %}
@@ -25,7 +25,7 @@ For details on the Docker CLI, please [review the official `docker run` document
 
 ```bash
 docker run -d \
-  --name overseerr \
+  --name jellyseerr \
   -e LOG_LEVEL=debug \
   -e TZ=Asia/Tokyo \
   -e PORT=5055 `#optional` \
@@ -42,7 +42,7 @@ To run the container as a specific user/group, you may optionally add `--user=[ 
 Stop and remove the existing container:
 
 ```bash
-docker stop overseerr && docker rm overseerr
+docker stop jellyseerr && docker rm jellyseerr
 ```
 
 Pull the latest image:
@@ -58,7 +58,7 @@ docker run -d ...
 ```
 
 {% hint style="info" %}
-You may alternatively use a third-party updating mechanism, such as [Watchtower](https://github.com/containrrr/watchtower) or [Ouroboros](https://github.com/pyouroboros/ouroboros), to keep Overseerr up-to-date automatically.
+You may alternatively use a third-party updating mechanism, such as [Watchtower](https://github.com/containrrr/watchtower) or [Ouroboros](https://github.com/pyouroboros/ouroboros), to keep Jellyseerr up-to-date automatically.
 {% endhint %}
 
 {% endtab %}
@@ -69,16 +69,16 @@ For details on how to use Docker Compose, please [review the official Compose do
 
 **Installation:**
 
-Define the `overseerr` service in your `docker-compose.yml` as follows:
+Define the `jellyseerr` service in your `docker-compose.yml` as follows:
 
 ```yaml
 ---
 version: '3'
 
 services:
-  overseerr:
+  jellyseerr:
     image: fallenbagel/jellyseerr:latest
-    container_name: overseerr
+    container_name: jellyseerr
     environment:
       - LOG_LEVEL=debug
       - TZ=Asia/Tokyo
@@ -101,7 +101,7 @@ docker-compose up -d
 Pull the latest image:
 
 ```bash
-docker-compose pull overseerr
+docker-compose pull jellyseerr
 ```
 
 Then, restart all services defined in the Compose file:
@@ -116,10 +116,10 @@ docker-compose up -d
 ## Unraid
 
 1. Ensure you have the **Community Applications** plugin installed.
-2. Inside the **Community Applications** app store, search for **Overseerr**.
+2. Inside the **Community Applications** app store, search for **Jellyseerr**.
 3. Click the **Install Button**.
 4. On the following **Add Container** screen, make changes to the **Host Port** and **Host Path 1**\(Appdata\) as needed.
-5. Click apply and access "Overseerr" at your `<ServerIP:HostPort>` in a web browser.
+5. Click apply and access "Jellyseerr" at your `<ServerIP:HostPort>` in a web browser.
 
 ## Windows
 
@@ -129,10 +129,10 @@ Please refer to the [Docker Desktop for Windows user manual](https://docs.docker
 **WSL2 will need to be installed to prevent DB corruption!** Please see the [Docker Desktop WSL 2 backend documentation](https://docs.docker.com/docker-for-windows/wsl/) for instructions on how to enable WSL2. The commands below will only work with WSL2 installed!
 {% endhint %}
 
-First, create a volume to store the configuration data for Overseerr using using either the Docker CLI:
+First, create a volume to store the configuration data for Jellyseerr using using either the Docker CLI:
 
 ```bash
-docker volume create overseerr-data
+docker volume create jellyseerr-data
 ```
 
 or the Docker Desktop app:
@@ -140,15 +140,15 @@ or the Docker Desktop app:
 1. Open the Docker Desktop app
 2. Head to the Volumes tab
 3. Click on the "New Volume" button near the top right
-4. Enter a name for the volume (example: `overseerr-data`) and hit "Create"
+4. Enter a name for the volume (example: `jellyseerr-data`) and hit "Create"
 
-Then, create and start the Overseerr container:
+Then, create and start the Jellyseerr container:
 
 ```bash
-docker run -d --name overseerr -e LOG_LEVEL=debug -e TZ=Asia/Tokyo -p 5055:5055 -v "overseerr-data:/app/config" --restart unless-stopped fallenbagel/jellyseerr:latest
+docker run -d --name jellyseerr -e LOG_LEVEL=debug -e TZ=Asia/Tokyo -p 5055:5055 -v "jellyseerr-data:/app/config" --restart unless-stopped fallenbagel/jellyseerr:latest
 ```
 
-To access the files inside the volume created above, navigate to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes\overseerr-data\_data` using File Explorer.
+To access the files inside the volume created above, navigate to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes\jellyseerr-data\_data` using File Explorer.
 
 {% hint style="info" %}
 Docker on Windows works differently than it does on Linux; it runs Docker inside of a stripped-down Linux VM. Volume mounts are exposed to Docker inside this VM via SMB mounts. While this is fine for media, it is unacceptable for the `/app/config` directory because SMB does not support file locking. This will eventually corrupt your database, which can lead to slow behavior and crashes.

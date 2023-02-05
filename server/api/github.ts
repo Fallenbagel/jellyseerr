@@ -94,7 +94,7 @@ class GithubAPI extends ExternalAPI {
       return data;
     } catch (e) {
       logger.warn(
-        "Failed to retrieve GitHub releases. This may be an issue on GitHub's end. Overseerr can't check if it's on the latest version.",
+        "Failed to retrieve GitHub releases. This may be an issue on GitHub's end. Jellyseerr can't check if it's on the latest version.",
         { label: 'GitHub API', errorMessage: e.message }
       );
       return [];
@@ -122,7 +122,7 @@ class GithubAPI extends ExternalAPI {
       return data;
     } catch (e) {
       logger.warn(
-        "Failed to retrieve GitHub commits. This may be an issue on GitHub's end. Overseerr can't check if it's on the latest version.",
+        "Failed to retrieve GitHub commits. This may be an issue on GitHub's end. Jellyseerr can't check if it's on the latest version.",
         { label: 'GitHub API', errorMessage: e.message }
       );
       return [];

@@ -2,8 +2,8 @@
 
 Before seeking assistance, please make sure you have first tried these following:
 
-- **Updating** Overseerr to the latest version.
-- **Stopping and restarting** Overseerr.
+- **Updating** Jellyseerr to the latest version.
+- **Stopping and restarting** Jellyseerr.
 - **Restarting** your machine.
 - **Clearing** your browser cache.
 - **Analyzing** your logs, you just might find the solution yourself!
@@ -19,10 +19,10 @@ Please try to include as much information as possible. A vague statement like "i
 
 Try to answer the following questions:
 
-- What version of Overseerr are you running? (You can find this in Settings → About → Version.)
-- How did you install Overseerr? Are you using the official Docker or snap images, or images published by a third-party?
-- How are you accessing Overseerr?
-  - Are you accessing Overseerr through your reverse proxy or via a local IP address?
+- What version of Jellyseerr are you running? (You can find this in Settings → About → Version.)
+- How did you install Jellyseerr? Are you using the official Docker or snap images, or images published by a third-party?
+- How are you accessing Jellyseerr?
+  - Are you accessing Jellyseerr through your reverse proxy or via a local IP address?
   - What browser are you using? What browser extensions are enabled?
 - What were you trying to do, and how did you attempt it?
   - What command did you enter?
@@ -36,10 +36,10 @@ Try to answer the following questions:
   - Did something not happen?
   - Are there any error messages showing?
   - Provide screenshots to help us see what you are seeing.
-  - Share your Overseerr logs, which show exactly what happened and are often critical for identifying issues (see [How can I share my logs?](#how-can-i-share-my-logs) below).
+  - Share your Jellyseerr logs, which show exactly what happened and are often critical for identifying issues (see [How can I share my logs?](#how-can-i-share-my-logs) below).
 
 ## How can I share my logs?
 
-1. Locate the current log file at `<your Overseerr config directory>/logs/overseerr.log`.
+1. Locate the current log file at `<your Jellyseerr config directory>/logs/overseerr.log`.
 2. Open the log file and **copy its contents** into a [**secret gist** on GitHub](https://gist.github.com/). If you upload your logs elsewhere, we may ask you to share them again via GitHub Gist.
 3. **Share the link/URL to your secret gist** in the [`#support` channel in our Discord server](https://discord.gg/ckbvBtDJgC).
