@@ -7,12 +7,14 @@ import RequestBlock from '@app/components/RequestBlock';
 import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
-import { ServerIcon, ViewListIcon } from '@heroicons/react/outline';
+
+import { Bars4Icon, ServerIcon } from '@heroicons/react/24/outline';
 import {
   CheckCircleIcon,
-  DocumentRemoveIcon,
+  DocumentMinusIcon,
   TrashIcon,
-} from '@heroicons/react/solid';
+} from '@heroicons/react/24/solid';
+
 import { IssueStatus } from '@server/constants/issue';
 import {
   MediaRequestStatus,
@@ -25,6 +27,7 @@ import type { RadarrSettings, SonarrSettings } from '@server/lib/settings';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
 import axios from 'axios';
+import getConfig from 'next/config';
 import Link from 'next/link';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
@@ -39,7 +42,7 @@ const messages = defineMessages({
   manageModalNoRequests: 'No requests.',
   manageModalClearMedia: 'Clear Data',
   manageModalClearMediaWarning:
-    '* This will irreversibly remove all data for this {mediaType}, including any requests. If this item exists in your Plex library, the media information will be recreated during the next scan.',
+    '* This will irreversibly remove all data for this {mediaType}, including any requests. If this item exists in your {mediaServerName} library, the media information will be recreated during the next scan.',
   manageModalRemoveMediaWarning:
     '* This will irreversibly remove this {mediaType} from {arr}, including all files.',
   openarr: 'Open in {arr}',
@@ -92,6 +95,7 @@ const ManageSlideOver = ({
   const { user: currentUser, hasPermission } = useUser();
   const intl = useIntl();
   const settings = useSettings();
+  const { publicRuntimeConfig } = getConfig();
   const { data: watchData } = useSWR<MediaWatchDataResponse>(
     settings.currentSettings.mediaServerType === MediaServerType.PLEX &&
       data.mediaInfo &&
@@ -348,7 +352,7 @@ const ManageSlideOver = ({
                             watchData?.data ? 'rounded-t-none' : ''
                           }`}
                         >
-                          <ViewListIcon />
+                          <Bars4Icon />
                           <span>
                             {intl.formatMessage(messages.opentautulli)}
                           </span>
@@ -503,7 +507,7 @@ const ManageSlideOver = ({
                             watchData?.data4k ? 'rounded-t-none' : ''
                           }`}
                         >
-                          <ViewListIcon />
+                          <Bars4Icon />
                           <span>
                             {intl.formatMessage(messages.opentautulli)}
                           </span>
@@ -610,7 +614,7 @@ const ManageSlideOver = ({
                   confirmText={intl.formatMessage(globalMessages.areyousure)}
                   className="w-full"
                 >
-                  <DocumentRemoveIcon />
+                  <DocumentMinusIcon />
                   <span>
                     {intl.formatMessage(messages.manageModalClearMedia)}
                   </span>
@@ -620,6 +624,13 @@ const ManageSlideOver = ({
                     mediaType: intl.formatMessage(
                       mediaType === 'movie' ? messages.movie : messages.tvshow
                     ),
+                    mediaServerName:
+                      publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                        ? 'Emby'
+                        : settings.currentSettings.mediaServerType ===
+                          MediaServerType.PLEX
+                        ? 'Plex'
+                        : 'Jellyfin',
                   })}
                 </div>
               </div>
