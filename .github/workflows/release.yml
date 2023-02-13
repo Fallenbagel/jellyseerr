@@ -51,8 +51,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Switch to master branch
-        run: git checkout master
+      - name: Switch to main branch
+        run: git checkout main
       - name: Pull latest changes
         run: git pull
       - name: Prepare
@@ -60,9 +60,9 @@ jobs:
         run: |
           git fetch --prune --tags
           if [[ $GITHUB_REF == refs/tags/* || $GITHUB_REF == refs/heads/master ]]; then
-            echo ::set-output name=RELEASE::stable
+            echo "RELEASE=stable" >> $GITHUB_OUTPUT
           else
-            echo ::set-output name=RELEASE::edge
+            echo "RELEASE=edge" >> $GITHUB_OUTPUT
           fi
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v1
@@ -76,7 +76,7 @@ jobs:
       - name: Upload Snap Package
         uses: actions/upload-artifact@v2
         with:
-          name: overseerr-snap-package-${{ matrix.architecture }}
+          name: jellyseerr-snap-package-${{ matrix.architecture }}
           path: ${{ steps.build.outputs.snap }}
       - name: Review Snap Package
         uses: diddlesnaps/snapcraft-review-tools-action@v1
@@ -84,8 +84,9 @@ jobs:
           snap: ${{ steps.build.outputs.snap }}
       - name: Publish Snap Package
         uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAP_LOGIN }}
         with:
-          store_login: ${{ secrets.SNAP_LOGIN }}
           snap: ${{ steps.build.outputs.snap }}
           release: ${{ steps.prepare.outputs.RELEASE }}
 
@@ -93,7 +94,7 @@ jobs:
     name: Send Discord Notification
     needs: semantic-release
     if: always()
-    runs-on: self-hosted
+    runs-on: ubuntu-20.04
     steps:
       - name: Get Build Job Status
         uses: technote-space/workflow-conclusion-action@v3
@@ -102,9 +103,9 @@ jobs:
         run: |
           failures=(neutral, skipped, timed_out, action_required)
           if [[ ${array[@]} =~ $WORKFLOW_CONCLUSION ]]; then
-            echo ::set-output name=status::failure
+            echo "status=failure" >> $GITHUB_OUTPUT
           else
-            echo ::set-output name=status::$WORKFLOW_CONCLUSION
+            echo "status=$WORKFLOW_CONCLUSION" >> $GITHUB_OUTPUT
           fi
       - name: Post Status to Discord
         uses: sarisia/actions-status-discord@v1

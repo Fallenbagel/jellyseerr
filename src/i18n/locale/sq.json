@@ -5,7 +5,7 @@
   "components.IssueModal.CreateIssueModal.submitissue": "Paraqit Problemin",
   "components.IssueModal.CreateIssueModal.toastSuccessCreate": "Raporti i problemit për <strong>{title}</strong> u paraqit me sukses!",
   "components.IssueModal.CreateIssueModal.toastviewissue": "Shiko Problemin",
-  "components.ManageSlideOver.manageModalClearMediaWarning": "* Kjo do të heqë në mënyrë të pakthyeshme të gjitha të dhënat për këtë {mediaType}, duke përfshirë çdo kërkesë. Nëse ky artikull ekziston në bibliotekën tuaj Plex, informacioni i medias do të rikrijohet gjatë skanimit të ardhshëm.",
+  "components.ManageSlideOver.manageModalClearMediaWarning": "* Kjo do të heqë në mënyrë të pakthyeshme të gjitha të dhënat për këtë {mediaType}, duke përfshirë çdo kërkesë. Nëse ky artikull ekziston në bibliotekën tuaj {mediaServerName}, informacioni i medias do të rikrijohet gjatë skanimit të ardhshëm.",
   "components.AppDataWarning.dockerVolumeMissingDescription": "Monitimi i volumit <code>{appDataPath}</code> nuk u konfigurua siç duhet. Gjithë informacioni do të fshihet kur kontenieri do të mbyllet ose të ristartohet.",
   "components.Discover.StudioSlider.studios": "Studiot",
   "components.Layout.UserDropdown.settings": "Cilësimet",

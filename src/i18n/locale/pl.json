@@ -103,7 +103,7 @@
   "components.PermissionEdit.createissues": "Zgłoś problemy",
   "components.PermissionEdit.manageissues": "Zarządzaj problemami",
   "components.PermissionEdit.manageissuesDescription": "Udziel uprawnień do zarządzania problemami z multimediami.",
-  "components.ManageSlideOver.manageModalClearMediaWarning": "* Spowoduje to nieodwracalne usunięcie wszystkich danych dla {mediaType}, w tym wszelkie prośby. Jeśli ten element istnieje w Twojej bibliotece Plex, informacje o multimediach zostaną odtworzone podczas następnego skanowania.",
+  "components.ManageSlideOver.manageModalClearMediaWarning": "* Spowoduje to nieodwracalne usunięcie wszystkich danych dla {mediaType}, w tym wszelkie prośby. Jeśli ten element istnieje w Twojej bibliotece {mediaServerName}, informacje o multimediach zostaną odtworzone podczas następnego skanowania.",
   "components.IssueModal.CreateIssueModal.providedetail": "Podaj szczegółowe wyjaśnienie napotkanego problemu.",
   "components.IssueModal.CreateIssueModal.whatswrong": "Co jest nie tak?",
   "components.Discover.MovieGenreList.moviegenres": "Gatunki filmowe",

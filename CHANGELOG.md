@@ -1,3 +1,22 @@
+# [1.3.0](https://github.com/fallenbagel/jellyseerr/compare/v1.2.1...v1.3.0) (2023-01-02)
+
+### Bug Fixes
+
+- added deep links to issues and status badges ([#3065](https://github.com/fallenbagel/jellyseerr/issues/3065)) ([bfe56c3](https://github.com/fallenbagel/jellyseerr/commit/bfe56c347073001795b1c3e917eb7a5afcc4462c))
+- **api:** handle auth for accounts where the plex id may have been set to null ([#3125](https://github.com/fallenbagel/jellyseerr/issues/3125)) ([15e2469](https://github.com/fallenbagel/jellyseerr/commit/15e246929bdbc2b7b5bdab7a84bd7882b79d5cb1))
+- **api:** ignore Music,Books,Photos,MusicVideo libraries ([d9ca3c6](https://github.com/fallenbagel/jellyseerr/commit/d9ca3c6e52c118698ca71021217f6ca409e71974))
+- count combined episodes ([64339e5](https://github.com/fallenbagel/jellyseerr/commit/64339e5f0374f8490e685e5c086e088bb7fd737e))
+- improved PTR scrolling performance ([#3095](https://github.com/fallenbagel/jellyseerr/issues/3095)) ([07ec3ef](https://github.com/fallenbagel/jellyseerr/commit/07ec3efbcaf669de7ccde4421c1112bfd23675d6))
+- **locale:** fix the duplicated wording in the Clear Media Warning message ([7e20c7c](https://github.com/fallenbagel/jellyseerr/commit/7e20c7cb78a44c32ab8a5f21203e285f23f402ab))
+- **ui:** adds mediaServerName to statusBadge and manageSlideOver ([d0cdce9](https://github.com/fallenbagel/jellyseerr/commit/d0cdce9e90fba642d2bf934a4266e1421424bc73)), closes [#254](https://github.com/fallenbagel/jellyseerr/issues/254)
+- update API docs to allow 'all' seasons value ([#3073](https://github.com/fallenbagel/jellyseerr/issues/3073)) ([1dfa943](https://github.com/fallenbagel/jellyseerr/commit/1dfa9431a95e7e2a1843746c2473d8a06f03e184))
+
+### Features
+
+- **api:** adds support for Mixed Libraries ([ba82ece](https://github.com/fallenbagel/jellyseerr/commit/ba82ecec5c994e79d7c9b658372041522b58a120)), closes [#95](https://github.com/fallenbagel/jellyseerr/issues/95)
+- custom image proxy ([#3056](https://github.com/fallenbagel/jellyseerr/issues/3056)) ([500cd1f](https://github.com/fallenbagel/jellyseerr/commit/500cd1f872942923d2b9c3b835e6329e335d4a3f))
+- **lang:** add Croatian display language ([#3041](https://github.com/fallenbagel/jellyseerr/issues/3041)) ([64aab6d](https://github.com/fallenbagel/jellyseerr/commit/64aab6dd8240e191026512733b34cc046b6e508a))
+
 ## [1.29.1](https://github.com/sct/overseerr/compare/v1.29.0...v1.29.1) (2022-04-06)
 
 ### Bug Fixes

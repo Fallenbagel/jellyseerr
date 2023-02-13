@@ -5,6 +5,12 @@ import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { uniqWith } from 'lodash';
 
+interface EpisodeNumberResult {
+  seasonNumber: number;
+  episodeNumber: number;
+  absoluteEpisodeNumber: number;
+  id: number;
+}
 export interface DownloadingItem {
   mediaType: MediaType;
   externalId: number;
@@ -14,6 +20,7 @@ export interface DownloadingItem {
   timeLeft: string;
   estimatedCompletionTime: Date;
   title: string;
+  episode?: EpisodeNumberResult;
 }
 
 class DownloadTracker {
@@ -164,6 +171,7 @@ class DownloadTracker {
               status: item.status,
               timeLeft: item.timeleft,
               title: item.title,
+              episode: item.episode,
             }));
 
             if (queueItems.length > 0) {

@@ -12,8 +12,8 @@ import { availableLanguages } from '@app/context/LanguageContext';
 import useLocale from '@app/hooks/useLocale';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
-import { SaveIcon } from '@heroicons/react/outline';
-import { RefreshIcon } from '@heroicons/react/solid';
+import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon } from '@heroicons/react/24/solid';
 import type { UserSettingsGeneralResponse } from '@server/interfaces/api/userSettingsInterfaces';
 import type { MainSettings } from '@server/lib/settings';
 import axios from 'axios';
@@ -46,7 +46,7 @@ const messages = defineMessages({
     'Do NOT enable this setting unless you understand what you are doing!',
   cacheImages: 'Enable Image Caching',
   cacheImagesTip:
-    'Cache and serve optimized images (requires a significant amount of disk space)',
+    'Cache externally sourced images (requires a significant amount of disk space)',
   trustProxy: 'Enable Proxy Support',
   trustProxyTip:
     'Allow Overseerr to correctly register client IP addresses behind a proxy',
@@ -185,7 +185,7 @@ const SettingsMain = () => {
             setFieldValue,
           }) => {
             return (
-              <Form className="section">
+              <Form className="section" data-testid="settings-main-form">
                 {userHasPermission(Permission.ADMIN) && (
                   <div className="form-row">
                     <label htmlFor="apiKey" className="text-label">
@@ -211,7 +211,7 @@ const SettingsMain = () => {
                           }}
                           className="input-action"
                         >
-                          <RefreshIcon />
+                          <ArrowPathIcon />
                         </button>
                       </div>
                     </div>
@@ -309,7 +309,7 @@ const SettingsMain = () => {
                   </div>
                 </div>
                 <div className="form-row">
-                  <label htmlFor="csrfProtection" className="checkbox-label">
+                  <label htmlFor="cacheImages" className="checkbox-label">
                     <span className="mr-2">
                       {intl.formatMessage(messages.cacheImages)}
                     </span>
@@ -435,7 +435,7 @@ const SettingsMain = () => {
                         type="submit"
                         disabled={isSubmitting || !isValid}
                       >
-                        <SaveIcon />
+                        <ArrowDownOnSquareIcon />
                         <span>
                           {isSubmitting
                             ? intl.formatMessage(globalMessages.saving)

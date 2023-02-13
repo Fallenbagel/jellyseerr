@@ -1,6 +1,8 @@
-import { ArrowCircleRightIcon } from '@heroicons/react/solid';
+import TitleCard from '@app/components/TitleCard';
+import { ArrowRightCircleIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useInView } from 'react-intersection-observer';
 import { defineMessages, useIntl } from 'react-intl';
 
 const messages = defineMessages({
@@ -15,6 +17,18 @@ interface ShowMoreCardProps {
 const ShowMoreCard = ({ url, posters }: ShowMoreCardProps) => {
   const intl = useIntl();
   const [isHovered, setHovered] = useState(false);
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+  });
+
+  if (!inView) {
+    return (
+      <div ref={ref}>
+        <TitleCard.Placeholder />
+      </div>
+    );
+  }
+
   return (
     <Link href={url}>
       <a
@@ -80,7 +94,7 @@ const ShowMoreCard = ({ url, posters }: ShowMoreCardProps) => {
                 )}
               </div>
               <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-white">
-                <ArrowCircleRightIcon className="w-14" />
+                <ArrowRightCircleIcon className="w-14" />
                 <div className="mt-2 font-extrabold">
                   {intl.formatMessage(messages.seemore)}
                 </div>

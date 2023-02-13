@@ -4,16 +4,17 @@ import CachedImage from '@app/components/Common/CachedImage';
 import Tooltip from '@app/components/Common/Tooltip';
 import RequestModal from '@app/components/RequestModal';
 import StatusBadge from '@app/components/StatusBadge';
+import useDeepLinks from '@app/hooks/useDeepLinks';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import { withProperties } from '@app/utils/typeHelpers';
 import {
+  ArrowPathIcon,
   CheckIcon,
   PencilIcon,
-  RefreshIcon,
   TrashIcon,
-  XIcon,
-} from '@heroicons/react/solid';
+  XMarkIcon,
+} from '@heroicons/react/24/solid';
 import { MediaRequestStatus } from '@server/constants/media';
 import type { MediaRequest } from '@server/entity/MediaRequest';
 import type { MovieDetails } from '@server/models/Movie';
@@ -37,6 +38,7 @@ const messages = defineMessages({
   editrequest: 'Edit Request',
   cancelrequest: 'Cancel Request',
   deleterequest: 'Delete Request',
+  unknowntitle: 'Unknown Title',
 });
 
 const isMovie = (movie: MovieDetails | TvDetails): movie is MovieDetails => {
@@ -60,6 +62,13 @@ interface RequestCardErrorProps {
 const RequestCardError = ({ requestData }: RequestCardErrorProps) => {
   const { hasPermission } = useUser();
   const intl = useIntl();
+
+  const { mediaUrl: plexUrl, mediaUrl4k: plexUrl4k } = useDeepLinks({
+    mediaUrl: requestData?.media?.mediaUrl,
+    mediaUrl4k: requestData?.media?.mediaUrl4k,
+    iOSPlexUrl: requestData?.media?.iOSPlexUrl,
+    iOSPlexUrl4k: requestData?.media?.iOSPlexUrl4k,
+  });
 
   const deleteRequest = async () => {
     await axios.delete(`/api/v1/media/${requestData?.media.id}`);
@@ -128,6 +137,14 @@ const RequestCardError = ({ requestData }: RequestCardErrorProps) => {
                           requestData.is4k ? 'status4k' : 'status'
                         ]
                       }
+                      downloadItem={
+                        requestData.media[
+                          requestData.is4k
+                            ? 'downloadStatus4k'
+                            : 'downloadStatus'
+                        ]
+                      }
+                      title={intl.formatMessage(messages.unknowntitle)}
                       inProgress={
                         (
                           requestData.media[
@@ -138,11 +155,8 @@ const RequestCardError = ({ requestData }: RequestCardErrorProps) => {
                         ).length > 0
                       }
                       is4k={requestData.is4k}
-                      plexUrl={
-                        requestData.is4k
-                          ? requestData.media.mediaUrl4k
-                          : requestData.media.mediaUrl
-                      }
+                      mediaType={requestData.type}
+                      plexUrl={requestData.is4k ? plexUrl4k : plexUrl}
                       serviceUrl={
                         requestData.is4k
                           ? requestData.media.serviceUrl4k
@@ -215,6 +229,13 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
     mutate: revalidate,
   } = useSWR<MediaRequest>(`/api/v1/request/${request.id}`, {
     fallbackData: request,
+  });
+
+  const { mediaUrl: plexUrl, mediaUrl4k: plexUrl4k } = useDeepLinks({
+    mediaUrl: requestData?.media?.mediaUrl,
+    mediaUrl4k: requestData?.media?.mediaUrl4k,
+    iOSPlexUrl: requestData?.media?.iOSPlexUrl,
+    iOSPlexUrl4k: requestData?.media?.iOSPlexUrl4k,
   });
 
   const modifyRequest = async (type: 'approve' | 'decline') => {
@@ -357,20 +378,13 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
                       : request.seasons.length,
                 })}
               </span>
-              {title.seasons.filter((season) => season.seasonNumber !== 0)
-                .length === request.seasons.length ? (
-                <span className="mr-2 uppercase">
-                  <Badge>{intl.formatMessage(globalMessages.all)}</Badge>
-                </span>
-              ) : (
-                <div className="hide-scrollbar overflow-x-scroll">
-                  {request.seasons.map((season) => (
-                    <span key={`season-${season.id}`} className="mr-2">
-                      <Badge>{season.seasonNumber}</Badge>
-                    </span>
-                  ))}
-                </div>
-              )}
+              <div className="hide-scrollbar overflow-x-scroll">
+                {request.seasons.map((season) => (
+                  <span key={`season-${season.id}`} className="mr-2">
+                    <Badge>{season.seasonNumber}</Badge>
+                  </span>
+                ))}
+              </div>
             </div>
           )}
           <div className="mt-2 flex items-center text-sm sm:mt-1">
@@ -393,6 +407,12 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
                 status={
                   requestData.media[requestData.is4k ? 'status4k' : 'status']
                 }
+                downloadItem={
+                  requestData.media[
+                    requestData.is4k ? 'downloadStatus4k' : 'downloadStatus'
+                  ]
+                }
+                title={isMovie(title) ? title.title : title.name}
                 inProgress={
                   (
                     requestData.media[
@@ -403,11 +423,7 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
                 is4k={requestData.is4k}
                 tmdbId={requestData.media.tmdbId}
                 mediaType={requestData.type}
-                plexUrl={
-                  requestData.is4k
-                    ? requestData.media.mediaUrl4k
-                    : requestData.media.mediaUrl
-                }
+                plexUrl={requestData.is4k ? plexUrl4k : plexUrl}
                 serviceUrl={
                   requestData.is4k
                     ? requestData.media.serviceUrl4k
@@ -425,7 +441,7 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
                   disabled={isRetrying}
                   onClick={() => retryRequest()}
                 >
-                  <RefreshIcon
+                  <ArrowPathIcon
                     className={isRetrying ? 'animate-spin' : ''}
                     style={{ marginRight: '0', animationDirection: 'reverse' }}
                   />
@@ -467,7 +483,7 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
                       className="hidden sm:block"
                       onClick={() => modifyRequest('decline')}
                     >
-                      <XIcon />
+                      <XMarkIcon />
                       <span>{intl.formatMessage(globalMessages.decline)}</span>
                     </Button>
                     <Tooltip
@@ -479,7 +495,7 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
                         className="sm:hidden"
                         onClick={() => modifyRequest('decline')}
                       >
-                        <XIcon />
+                        <XMarkIcon />
                       </Button>
                     </Tooltip>
                   </div>
@@ -524,7 +540,7 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
                     className="hidden sm:block"
                     onClick={() => deleteRequest()}
                   >
-                    <XIcon />
+                    <XMarkIcon />
                     <span>{intl.formatMessage(globalMessages.cancel)}</span>
                   </Button>
                   <Tooltip content={intl.formatMessage(messages.cancelrequest)}>
@@ -534,7 +550,7 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
                       className="sm:hidden"
                       onClick={() => deleteRequest()}
                     >
-                      <XIcon />
+                      <XMarkIcon />
                     </Button>
                   </Tooltip>
                 </div>

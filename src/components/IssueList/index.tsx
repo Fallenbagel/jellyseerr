@@ -6,11 +6,11 @@ import IssueItem from '@app/components/IssueList/IssueItem';
 import { useUpdateQueryParams } from '@app/hooks/useUpdateQueryParams';
 import globalMessages from '@app/i18n/globalMessages';
 import {
+  BarsArrowDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  FilterIcon,
-  SortDescendingIcon,
-} from '@heroicons/react/solid';
+  FunnelIcon,
+} from '@heroicons/react/24/solid';
 import type { IssueResultsResponse } from '@server/interfaces/api/issueInterfaces';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -98,7 +98,7 @@ const IssueList = () => {
         <div className="mt-2 flex flex-grow flex-col sm:flex-row lg:flex-grow-0">
           <div className="mb-2 flex flex-grow sm:mb-0 sm:mr-2 lg:flex-grow-0">
             <span className="inline-flex cursor-default items-center rounded-l-md border border-r-0 border-gray-500 bg-gray-800 px-3 text-sm text-gray-100">
-              <FilterIcon className="h-6 w-6" />
+              <FunnelIcon className="h-6 w-6" />
             </span>
             <select
               id="filter"
@@ -128,7 +128,7 @@ const IssueList = () => {
           </div>
           <div className="mb-2 flex flex-grow sm:mb-0 lg:flex-grow-0">
             <span className="inline-flex cursor-default items-center rounded-l-md border border-r-0 border-gray-500 bg-gray-800 px-3 text-gray-100 sm:text-sm">
-              <SortDescendingIcon className="h-6 w-6" />
+              <BarsArrowDownIcon className="h-6 w-6" />
             </span>
             <select
               id="sort"

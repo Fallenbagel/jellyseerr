@@ -7,18 +7,19 @@ import PageTitle from '@app/components/Common/PageTitle';
 import IssueComment from '@app/components/IssueDetails/IssueComment';
 import IssueDescription from '@app/components/IssueDetails/IssueDescription';
 import { issueOptions } from '@app/components/IssueModal/constants';
+import useDeepLinks from '@app/hooks/useDeepLinks';
 import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
 import { Transition } from '@headlessui/react';
 import {
-  ChatIcon,
+  ChatBubbleOvalLeftEllipsisIcon,
   CheckCircleIcon,
   PlayIcon,
   ServerIcon,
-} from '@heroicons/react/outline';
-import { RefreshIcon } from '@heroicons/react/solid';
+} from '@heroicons/react/24/outline';
+import { ArrowPathIcon } from '@heroicons/react/24/solid';
 import { IssueStatus } from '@server/constants/issue';
 import { MediaType } from '@server/constants/media';
 import { MediaServerType } from '@server/constants/server';
@@ -90,6 +91,13 @@ const IssueDetails = () => {
       ? `/api/v1/${issueData.media.mediaType}/${issueData.media.tmdbId}`
       : null
   );
+
+  const { mediaUrl, mediaUrl4k } = useDeepLinks({
+    mediaUrl: data?.mediaInfo?.mediaUrl,
+    mediaUrl4k: data?.mediaInfo?.mediaUrl4k,
+    iOSPlexUrl: data?.mediaInfo?.iOSPlexUrl,
+    iOSPlexUrl4k: data?.mediaInfo?.iOSPlexUrl4k,
+  });
 
   const CommentSchema = Yup.object().shape({
     message: Yup.string().required(),
@@ -359,7 +367,7 @@ const IssueDetails = () => {
               {issueData?.media.mediaUrl && (
                 <Button
                   as="a"
-                  href={issueData?.media.mediaUrl}
+                  href={mediaUrl}
                   target="_blank"
                   rel="noreferrer"
                   className="w-full"
@@ -382,30 +390,31 @@ const IssueDetails = () => {
                   </span>
                 </Button>
               )}
-              {issueData?.media.serviceUrl && hasPermission(Permission.ADMIN) && (
-                <Button
-                  as="a"
-                  href={issueData?.media.serviceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full"
-                  buttonType="ghost"
-                >
-                  <ServerIcon />
-                  <span>
-                    {intl.formatMessage(messages.openinarr, {
-                      arr:
-                        issueData.media.mediaType === MediaType.MOVIE
-                          ? 'Radarr'
-                          : 'Sonarr',
-                    })}
-                  </span>
-                </Button>
-              )}
+              {issueData?.media.serviceUrl &&
+                hasPermission(Permission.ADMIN) && (
+                  <Button
+                    as="a"
+                    href={issueData?.media.serviceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full"
+                    buttonType="ghost"
+                  >
+                    <ServerIcon />
+                    <span>
+                      {intl.formatMessage(messages.openinarr, {
+                        arr:
+                          issueData.media.mediaType === MediaType.MOVIE
+                            ? 'Radarr'
+                            : 'Sonarr',
+                      })}
+                    </span>
+                  </Button>
+                )}
               {issueData?.media.mediaUrl4k && (
                 <Button
                   as="a"
-                  href={issueData?.media.mediaUrl4k}
+                  href={mediaUrl4k}
                   target="_blank"
                   rel="noreferrer"
                   className="w-full"
@@ -497,7 +506,8 @@ const IssueDetails = () => {
                           className="h-20"
                         />
                         <div className="mt-4 flex items-center justify-end space-x-2">
-                          {hasPermission(Permission.MANAGE_ISSUES) && (
+                          {(hasPermission(Permission.MANAGE_ISSUES) ||
+                            belongsToUser) && (
                             <>
                               {issueData.status === IssueStatus.OPEN ? (
                                 <Button
@@ -532,7 +542,7 @@ const IssueDetails = () => {
                                     }
                                   }}
                                 >
-                                  <RefreshIcon />
+                                  <ArrowPathIcon />
                                   <span>
                                     {intl.formatMessage(
                                       values.message
@@ -551,7 +561,7 @@ const IssueDetails = () => {
                               !isValid || isSubmitting || !values.message
                             }
                           >
-                            <ChatIcon />
+                            <ChatBubbleOvalLeftEllipsisIcon />
                             <span>
                               {intl.formatMessage(messages.leavecomment)}
                             </span>
@@ -621,7 +631,7 @@ const IssueDetails = () => {
             {issueData?.media.mediaUrl && (
               <Button
                 as="a"
-                href={issueData?.media.mediaUrl}
+                href={mediaUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full"
@@ -667,7 +677,7 @@ const IssueDetails = () => {
             {issueData?.media.mediaUrl4k && (
               <Button
                 as="a"
-                href={issueData?.media.mediaUrl4k}
+                href={mediaUrl4k}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full"
@@ -690,29 +700,31 @@ const IssueDetails = () => {
                 </span>
               </Button>
             )}
-            {issueData?.media.serviceUrl4k && hasPermission(Permission.ADMIN) && (
-              <Button
-                as="a"
-                href={issueData?.media.serviceUrl4k}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full"
-                buttonType="ghost"
-              >
-                <ServerIcon />
-                <span>
-                  {intl.formatMessage(messages.openin4karr, {
-                    arr:
-                      issueData.media.mediaType === MediaType.MOVIE
-                        ? 'Radarr'
-                        : 'Sonarr',
-                  })}
-                </span>
-              </Button>
-            )}
+            {issueData?.media.serviceUrl4k &&
+              hasPermission(Permission.ADMIN) && (
+                <Button
+                  as="a"
+                  href={issueData?.media.serviceUrl4k}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full"
+                  buttonType="ghost"
+                >
+                  <ServerIcon />
+                  <span>
+                    {intl.formatMessage(messages.openin4karr, {
+                      arr:
+                        issueData.media.mediaType === MediaType.MOVIE
+                          ? 'Radarr'
+                          : 'Sonarr',
+                    })}
+                  </span>
+                </Button>
+              )}
           </div>
         </div>
       </div>
+      <div className="extra-bottom-space" />
     </div>
   );
 };

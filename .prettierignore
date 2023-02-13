@@ -2,6 +2,7 @@
 .next/
 dist/
 config/
+CHANGELOG.md
 
 # assets
 src/assets/

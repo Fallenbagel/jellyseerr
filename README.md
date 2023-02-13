@@ -13,35 +13,103 @@ _The original Overseerr team have been busy and Jellyfin/Emby support aren't on 
 
 ## Current Features
 
-- Jellyfin Support
-- Emby Support
-
-  (Upcoming Features include: Multiple Server Instances, Music Support, Ability to change email address and much more!)
-
-Along with all the existing Overseerr features:
-
-- Full Plex integration. Authenticate and manage user access with Plex!
+- Full Jellyfin/Emby/Plex integration. Authenticate and manage user access with Jellyfin/Emby/Plex!
+- Supports Movies, Shows, Mixed Libraries!
+- Ability to change email addresses for smtp purposes
+- Ability to import all jellyfin/emby users
 - Easy integration with your existing services. Currently, Jellyseerr supports Sonarr and Radarr. More to come!
-- Plex library scan, to keep track of the titles which are already available.
+- Jellyfin/Emby/Plex library scan, to keep track of the titles which are already available.
 - Customizable request system, which allows users to request individual seasons or movies in a friendly, easy-to-use interface.
 - Incredibly simple request management UI. Don't dig through the app to simply approve recent requests!
 - Granular permission system.
 - Support for various notification agents.
 - Mobile-friendly design, for when you need to approve requests on the go!
 
+  (Upcoming Features include: Multiple Server Instances, Music Support, and much more!)
+
 With more features on the way! Check out our [issue tracker](https://github.com/fallenbagel/jellyseerr/issues) to see the features which have already been requested.
 
 ## Getting Started
+
+#### Pre-requisite (Important)
+
+_*On Jellyfin/Emby, ensure the `settings > Home > Automatically group content from the following folders into views such as 'Movies', 'Music' and 'TV'` is turned off*_
+
+### Launching Jellyseerr using Docker
 
 Check out our dockerhub for instructions on how to install and run Jellyseerr:
 https://hub.docker.com/r/fallenbagel/jellyseerr
 
 ### Launching Jellyseerr manually:
 
+#### Windows
+
+Pre-requisites:
+
+- Nodejs (atleast LTS version)
+- Yarn
+- Download the source code from the github (Either develop branch or main for stable)
+
 ```bash
+npm i -g win-node-env
 yarn install
 yarn run build
 yarn start
+```
+
+#### Linux
+
+Pre-requisites:
+
+- Nodejs (atleast LTS version)
+- Yarn
+- Git
+
+```bash
+git clone https://github.com/Fallenbagel/jellyseerr.git && cd jellyseerr
+git checkout main #if you want to run stable instead of develop
+yarn install
+yarn run build
+yarn start
+```
+
+_Systemd-service:_
+
+- assuming jellyseerr was cloned to `/opt/`
+  and the environmentfile is located at `/etc/jellyseerr`
+
+service:
+
+```
+[Unit]
+Description=Jellyseerr Service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+EnvironmentFile=/etc/jellyseerr/jellyseerr.conf
+Environment=NODE_ENV=production
+Type=exec
+Restart=on-failure
+WorkingDirectory=/opt/jellyseerr
+ExecStart=/root/.nvm/versions/node/v18.7.0/bin/node dist/index.js
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Environmentfile:
+
+```
+# Jellyseerr's default port is 5055, if you want to use both, change this.
+# specify on which port to listen
+PORT=5055
+
+# specify on which interface to listen, by default jellyseerr listens on all interfaces
+#HOST=127.0.0.1
+
+# Uncomment if your media server is emby instead of jellyfin.
+# JELLYFIN_TYPE=emby
 ```
 
 ### Packages:

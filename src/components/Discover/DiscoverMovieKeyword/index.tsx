@@ -1,16 +1,20 @@
 import Header from '@app/components/Common/Header';
 import ListView from '@app/components/Common/ListView';
 import PageTitle from '@app/components/Common/PageTitle';
-import useDiscover from '@app/hooks/useDiscover';
+import useDiscover, { encodeURIExtraParams } from '@app/hooks/useDiscover';
+import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
+import type { TmdbKeyword } from '@server/api/themoviedb/interfaces';
 import type { MovieResult } from '@server/models/Search';
+import { useRouter } from 'next/router';
 import { defineMessages, useIntl } from 'react-intl';
 
 const messages = defineMessages({
-  discovermovies: 'Popular Movies',
+  keywordMovies: '{keywordTitle} Movies',
 });
 
-const DiscoverMovies = () => {
+const DiscoverMovieKeyword = () => {
+  const router = useRouter();
   const intl = useIntl();
 
   const {
@@ -21,13 +25,25 @@ const DiscoverMovies = () => {
     titles,
     fetchMore,
     error,
-  } = useDiscover<MovieResult>('/api/v1/discover/movies');
+    firstResultData,
+  } = useDiscover<MovieResult, { keywords: TmdbKeyword[] }>(
+    `/api/v1/discover/movies`,
+    {
+      keywords: encodeURIExtraParams(router.query.keywords as string),
+    }
+  );
 
   if (error) {
     return <Error statusCode={500} />;
   }
 
-  const title = intl.formatMessage(messages.discovermovies);
+  const title = isLoadingInitialData
+    ? intl.formatMessage(globalMessages.loading)
+    : intl.formatMessage(messages.keywordMovies, {
+        keywordTitle: firstResultData?.keywords
+          .map((k) => `${k.name[0].toUpperCase()}${k.name.substring(1)}`)
+          .join(', '),
+      });
 
   return (
     <>
@@ -48,4 +64,4 @@ const DiscoverMovies = () => {
   );
 };
 
-export default DiscoverMovies;
+export default DiscoverMovieKeyword;

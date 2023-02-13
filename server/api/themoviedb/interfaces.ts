@@ -171,6 +171,9 @@ export interface TmdbMovieDetails {
     id: number;
     results?: { [iso_3166_1: string]: TmdbWatchProviders };
   };
+  keywords: {
+    keywords: TmdbKeyword[];
+  };
 }
 
 export interface TmdbVideo {
@@ -191,7 +194,7 @@ export interface TmdbVideo {
 
 export interface TmdbTvEpisodeResult {
   id: number;
-  air_date: string;
+  air_date: string | null;
   episode_number: number;
   name: string;
   overview: string;
@@ -372,7 +375,8 @@ export interface TmdbPersonCombinedCredits {
   crew: TmdbPersonCreditCrew[];
 }
 
-export interface TmdbSeasonWithEpisodes extends TmdbTvSeasonResult {
+export interface TmdbSeasonWithEpisodes
+  extends Omit<TmdbTvSeasonResult, 'episode_count'> {
   episodes: TmdbTvEpisodeResult[];
   external_ids: TmdbExternalIds;
 }
@@ -426,4 +430,25 @@ export interface TmdbWatchProviderDetails {
   logo_path?: string;
   provider_id: number;
   provider_name: string;
+}
+
+export interface TmdbKeywordSearchResponse extends TmdbPaginatedResponse {
+  results: TmdbKeyword[];
+}
+
+// We have production companies, but the company search results return less data
+export interface TmdbCompany {
+  id: number;
+  logo_path?: string;
+  name: string;
+}
+
+export interface TmdbCompanySearchResponse extends TmdbPaginatedResponse {
+  results: TmdbCompany[];
+}
+
+export interface TmdbWatchProviderRegion {
+  iso_3166_1: string;
+  english_name: string;
+  native_name: string;
 }

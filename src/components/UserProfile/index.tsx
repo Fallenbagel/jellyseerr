@@ -8,7 +8,7 @@ import TmdbTitleCard from '@app/components/TitleCard/TmdbTitleCard';
 import ProfileHeader from '@app/components/UserProfile/ProfileHeader';
 import { Permission, UserType, useUser } from '@app/hooks/useUser';
 import Error from '@app/pages/_error';
-import { ArrowCircleRightIcon } from '@heroicons/react/outline';
+import { ArrowRightCircleIcon } from '@heroicons/react/24/outline';
 import type { WatchlistResponse } from '@server/interfaces/api/discoverInterfaces';
 import type {
   QuotaResponse,
@@ -291,7 +291,7 @@ const UserProfile = () => {
               >
                 <a className="slider-title">
                   <span>{intl.formatMessage(messages.recentrequests)}</span>
-                  <ArrowCircleRightIcon />
+                  <ArrowRightCircleIcon />
                 </a>
               </Link>
             </div>
@@ -332,7 +332,7 @@ const UserProfile = () => {
               >
                 <a className="slider-title">
                   <span>{intl.formatMessage(messages.plexwatchlist)}</span>
-                  <ArrowCircleRightIcon />
+                  <ArrowRightCircleIcon />
                 </a>
               </Link>
             </div>

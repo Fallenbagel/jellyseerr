@@ -89,13 +89,28 @@ authRoutes.post('/plex', async (req, res, next) => {
       await userRepository.save(user);
     } else {
       const mainUser = await userRepository.findOneOrFail({
-        select: { id: true, plexToken: true, plexId: true },
+        select: { id: true, plexToken: true, plexId: true, email: true },
         where: { id: 1 },
       });
       const mainPlexTv = new PlexTvAPI(mainUser.plexToken ?? '');
 
+      if (!account.id) {
+        logger.error('Plex ID was missing from Plex.tv response', {
+          label: 'API',
+          ip: req.ip,
+          email: account.email,
+          plexUsername: account.username,
+        });
+
+        return next({
+          status: 500,
+          message: 'Something went wrong. Try again.',
+        });
+      }
+
       if (
         account.id === mainUser.plexId ||
+        (account.email === mainUser.email && !mainUser.plexId) ||
         (await mainPlexTv.checkUserAccess(account.id))
       ) {
         if (user) {
@@ -226,7 +241,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
     const hostname =
       settings.jellyfin.hostname !== ''
         ? settings.jellyfin.hostname
-        : body.hostname;
+        : body.hostname ?? '';
     const { externalHostname } = getSettings().jellyfin;
 
     // Try to find deviceId that corresponds to jellyfin user, else generate a new one
@@ -244,10 +259,14 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
     }
     // First we need to attempt to log the user in to jellyfin
     const jellyfinserver = new JellyfinAPI(hostname ?? '', undefined, deviceId);
-    const jellyfinHost =
+    let jellyfinHost =
       externalHostname && externalHostname.length > 0
         ? externalHostname
         : hostname;
+
+    jellyfinHost = jellyfinHost.endsWith('/')
+      ? jellyfinHost.slice(0, -1)
+      : jellyfinHost;
 
     const account = await jellyfinserver.login(body.username, body.password);
     // Next let's see if the user already exists

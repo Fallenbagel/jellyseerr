@@ -7,14 +7,12 @@ import RequestBlock from '@app/components/RequestBlock';
 import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
-
 import { Bars4Icon, ServerIcon } from '@heroicons/react/24/outline';
 import {
   CheckCircleIcon,
   DocumentMinusIcon,
   TrashIcon,
 } from '@heroicons/react/24/solid';
-
 import { IssueStatus } from '@server/constants/issue';
 import {
   MediaRequestStatus,

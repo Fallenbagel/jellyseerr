@@ -6,18 +6,22 @@ import { Transition } from '@headlessui/react';
 import {
   ClockIcon,
   CogIcon,
-  ExclamationIcon,
+  ExclamationTriangleIcon,
+  FilmIcon,
   SparklesIcon,
+  TvIcon,
   UsersIcon,
-  XIcon,
-} from '@heroicons/react/outline';
+  XMarkIcon,
+} from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Fragment, useRef } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 
-const messages = defineMessages({
+export const menuMessages = defineMessages({
   dashboard: 'Discover',
+  browsemovies: 'Movies',
+  browsetv: 'Series',
   requests: 'Requests',
   issues: 'Issues',
   users: 'Users',
@@ -32,7 +36,7 @@ interface SidebarProps {
 interface SidebarLinkProps {
   href: string;
   svgIcon: React.ReactNode;
-  messagesKey: keyof typeof messages;
+  messagesKey: keyof typeof menuMessages;
   activeRegExp: RegExp;
   as?: string;
   requiredPermission?: Permission | Permission[];
@@ -45,7 +49,19 @@ const SidebarLinks: SidebarLinkProps[] = [
     href: '/',
     messagesKey: 'dashboard',
     svgIcon: <SparklesIcon className="mr-3 h-6 w-6" />,
-    activeRegExp: /^\/(discover\/?(movies|tv)?)?$/,
+    activeRegExp: /^\/(discover\/?)?$/,
+  },
+  {
+    href: '/discover/movies',
+    messagesKey: 'browsemovies',
+    svgIcon: <FilmIcon className="mr-3 h-6 w-6" />,
+    activeRegExp: /^\/discover\/movies$/,
+  },
+  {
+    href: '/discover/tv',
+    messagesKey: 'browsetv',
+    svgIcon: <TvIcon className="mr-3 h-6 w-6" />,
+    activeRegExp: /^\/discover\/tv$/,
   },
   {
     href: '/requests',
@@ -57,7 +73,7 @@ const SidebarLinks: SidebarLinkProps[] = [
     href: '/issues',
     messagesKey: 'issues',
     svgIcon: (
-      <ExclamationIcon className="mr-3 h-6 w-6 text-gray-300 transition duration-150 ease-in-out group-hover:text-gray-100 group-focus:text-gray-300" />
+      <ExclamationTriangleIcon className="mr-3 h-6 w-6 text-gray-300 transition duration-150 ease-in-out group-hover:text-gray-100 group-focus:text-gray-300" />
     ),
     activeRegExp: /^\/issues/,
     requiredPermission: [
@@ -121,13 +137,13 @@ const Sidebar = ({ open, setClosed }: SidebarProps) => {
             >
               <>
                 <div className="sidebar relative flex h-full w-full max-w-xs flex-1 flex-col bg-gray-800">
-                  <div className="sidebar-close-button absolute top-0 right-0 -mr-14 p-1">
+                  <div className="sidebar-close-button absolute right-0 -mr-14 p-1">
                     <button
                       className="flex h-12 w-12 items-center justify-center rounded-full focus:bg-gray-600 focus:outline-none"
                       aria-label="Close sidebar"
                       onClick={() => setClosed()}
                     >
-                      <XIcon className="h-6 w-6 text-white" />
+                      <XMarkIcon className="h-6 w-6 text-white" />
                     </button>
                   </div>
                   <div
@@ -177,7 +193,7 @@ const Sidebar = ({ open, setClosed }: SidebarProps) => {
                             >
                               {sidebarLink.svgIcon}
                               {intl.formatMessage(
-                                messages[sidebarLink.messagesKey]
+                                menuMessages[sidebarLink.messagesKey]
                               )}
                             </a>
                           </Link>
@@ -242,7 +258,9 @@ const Sidebar = ({ open, setClosed }: SidebarProps) => {
                         data-testid={sidebarLink.dataTestId}
                       >
                         {sidebarLink.svgIcon}
-                        {intl.formatMessage(messages[sidebarLink.messagesKey])}
+                        {intl.formatMessage(
+                          menuMessages[sidebarLink.messagesKey]
+                        )}
                       </a>
                     </Link>
                   );

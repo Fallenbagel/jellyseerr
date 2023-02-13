@@ -1,16 +1,20 @@
 import Header from '@app/components/Common/Header';
 import ListView from '@app/components/Common/ListView';
 import PageTitle from '@app/components/Common/PageTitle';
-import useDiscover from '@app/hooks/useDiscover';
+import useDiscover, { encodeURIExtraParams } from '@app/hooks/useDiscover';
+import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
+import type { TmdbKeyword } from '@server/api/themoviedb/interfaces';
 import type { TvResult } from '@server/models/Search';
+import { useRouter } from 'next/router';
 import { defineMessages, useIntl } from 'react-intl';
 
 const messages = defineMessages({
-  discovertv: 'Popular Series',
+  keywordSeries: '{keywordTitle} Series',
 });
 
-const DiscoverTv = () => {
+const DiscoverTvKeyword = () => {
+  const router = useRouter();
   const intl = useIntl();
 
   const {
@@ -21,13 +25,25 @@ const DiscoverTv = () => {
     titles,
     fetchMore,
     error,
-  } = useDiscover<TvResult>('/api/v1/discover/tv');
+    firstResultData,
+  } = useDiscover<TvResult, { keywords: TmdbKeyword[] }>(
+    `/api/v1/discover/tv`,
+    {
+      keywords: encodeURIExtraParams(router.query.keywords as string),
+    }
+  );
 
   if (error) {
     return <Error statusCode={500} />;
   }
 
-  const title = intl.formatMessage(messages.discovertv);
+  const title = isLoadingInitialData
+    ? intl.formatMessage(globalMessages.loading)
+    : intl.formatMessage(messages.keywordSeries, {
+        keywordTitle: firstResultData?.keywords
+          .map((k) => `${k.name[0].toUpperCase()}${k.name.substring(1)}`)
+          .join(', '),
+      });
 
   return (
     <>
@@ -38,14 +54,14 @@ const DiscoverTv = () => {
       <ListView
         items={titles}
         isEmpty={isEmpty}
-        isReachingEnd={isReachingEnd}
         isLoading={
           isLoadingInitialData || (isLoadingMore && (titles?.length ?? 0) > 0)
         }
+        isReachingEnd={isReachingEnd}
         onScrollBottom={fetchMore}
       />
     </>
   );
 };
 
-export default DiscoverTv;
+export default DiscoverTvKeyword;
