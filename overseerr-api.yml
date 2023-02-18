@@ -5876,6 +5876,23 @@ paths:
       responses:
         '204':
           description: Succesfully removed media item
+  /media/{mediaId}/file:
+    delete:
+      summary: Delete media file
+      description: Removes a media file from radarr/sonarr. The `ADMIN` permission is required to perform this action.
+      tags:
+        - media
+      parameters:
+        - in: path
+          name: mediaId
+          description: Media ID
+          required: true
+          example: '1'
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Succesfully removed media item
   /media/{mediaId}/{status}:
     post:
       summary: Update media status
