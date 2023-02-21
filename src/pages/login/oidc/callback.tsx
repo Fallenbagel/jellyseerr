@@ -1,13 +1,18 @@
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import LoginError from '@app/components/Login/ErrorCallout';
 import { processCallback } from '@app/utils/oidc';
-import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 
 const OidcCallback = () => {
+  const router = useRouter();
+
   const login = async () => {
     const params = new URLSearchParams(window.location.search);
     const result = await processCallback(params);
 
-    if (window.opener) {
+    // is popup window
+    if (window.opener && window.opener !== window) {
       // send result to the opening window
       window.opener.postMessage(
         result,
@@ -15,16 +20,30 @@ const OidcCallback = () => {
       );
       // close the popup
       window.close();
+    } else {
+      if (result.type === 'success') {
+        // redirect to homepage
+        router.push('/');
+      } else {
+        // display login error
+        setError(result.message);
+      }
     }
   };
+
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     login();
   }, []);
 
   return (
-    <div>
-      <LoadingSpinner />
+    <div className="container mx-auto flex h-screen items-center justify-center">
+      {error != null ? (
+        <LoginError error={error}></LoginError>
+      ) : (
+        <LoadingSpinner />
+      )}
     </div>
   );
 };
