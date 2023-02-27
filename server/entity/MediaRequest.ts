@@ -1187,3 +1187,5 @@ export class MediaRequest {
     }
   }
 }
+
+export default MediaRequest;

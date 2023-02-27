@@ -78,10 +78,10 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
         appear
         as="div"
         className="fixed top-0 bottom-0 left-0 right-0 z-50 flex h-full w-full items-center justify-center bg-gray-800 bg-opacity-70"
-        enter="transition opacity-0 duration-300"
+        enter="transition-opacity duration-300"
         enterFrom="opacity-0"
         enterTo="opacity-100"
-        leave="transition opacity-100 duration-300"
+        leave="transition-opacity duration-300"
         leaveFrom="opacity-100"
         leaveTo="opacity-0"
         ref={parentRef}
@@ -89,10 +89,10 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
         <Transition
           appear
           as={Fragment}
-          enter="transition opacity-0 duration-300 transform scale-75"
+          enter="transition duration-300"
           enterFrom="opacity-0 scale-75"
           enterTo="opacity-100 scale-100"
-          leave="transition opacity-100 duration-300"
+          leave="transition-opacity duration-300"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
           show={loading}
@@ -102,7 +102,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
           </div>
         </Transition>
         <Transition
-          className="hide-scrollbar relative inline-block w-full transform overflow-auto bg-gray-800 px-4 pt-4 pb-4 text-left align-bottom shadow-xl ring-1 ring-gray-700 transition-all sm:my-8 sm:max-w-3xl sm:rounded-lg sm:align-middle"
+          className="hide-scrollbar relative inline-block w-full overflow-auto bg-gray-800 px-4 pt-4 pb-4 text-left align-bottom shadow-xl ring-1 ring-gray-700 transition-all sm:my-8 sm:max-w-3xl sm:rounded-lg sm:align-middle"
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-headline"
@@ -111,10 +111,10 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
           }}
           appear
           as="div"
-          enter="transition opacity-0 duration-300 transform scale-75"
+          enter="transition duration-300"
           enterFrom="opacity-0 scale-75"
           enterTo="opacity-100 scale-100"
-          leave="transition opacity-100 duration-300"
+          leave="transition-opacity duration-300"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
           show={!loading}

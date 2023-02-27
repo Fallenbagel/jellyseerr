@@ -773,6 +773,42 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "lunks",
+      "name": "Pedro Nascimento",
+      "avatar_url": "https://avatars.githubusercontent.com/u/91118?v=4",
+      "profile": "http://twitter.com/lunks/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "owenvoke",
+      "name": "Owen Voke",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1899334?v=4",
+      "profile": "https://voke.dev",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Nimelrian",
+      "name": "Sebastian K",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8960836?v=4",
+      "profile": "https://github.com/Nimelrian",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "jariz",
+      "name": "jariz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1415847?v=4",
+      "profile": "https://github.com/jariz",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "badgeTemplate": "<a href=\"#contributors-\"><img alt=\"All Contributors\" src=\"https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg\"/></a>",

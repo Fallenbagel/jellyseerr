@@ -3868,7 +3868,7 @@ paths:
                 $ref: '#/components/schemas/User'
   /user/{userId}/requests:
     get:
-      summary: Get user by ID
+      summary: Get requests for a specific user
       description: |
         Retrieves a user's requests in a JSON object.
       tags:
@@ -3964,7 +3964,7 @@ paths:
                         example: false
   /user/{userId}/watchlist:
     get:
-      summary: Get user by ID
+      summary: Get the Plex watchlist for a specific user
       description: |
         Retrieves a user's Plex Watchlist in a JSON object.
       tags:

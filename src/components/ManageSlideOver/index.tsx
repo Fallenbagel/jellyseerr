@@ -1,6 +1,7 @@
 import Button from '@app/components/Common/Button';
 import ConfirmButton from '@app/components/Common/ConfirmButton';
 import SlideOver from '@app/components/Common/SlideOver';
+import Tooltip from '@app/components/Common/Tooltip';
 import DownloadBlock from '@app/components/DownloadBlock';
 import IssueBlock from '@app/components/IssueBlock';
 import RequestBlock from '@app/components/RequestBlock';
@@ -197,20 +198,24 @@ const ManageSlideOver = ({
             <div className="overflow-hidden rounded-md border border-gray-700 shadow">
               <ul>
                 {data.mediaInfo?.downloadStatus?.map((status, index) => (
-                  <li
+                  <Tooltip
                     key={`dl-status-${status.externalId}-${index}`}
-                    className="border-b border-gray-700 last:border-b-0"
+                    content={status.title}
                   >
-                    <DownloadBlock downloadItem={status} />
-                  </li>
+                    <li className="border-b border-gray-700 last:border-b-0">
+                      <DownloadBlock downloadItem={status} />
+                    </li>
+                  </Tooltip>
                 ))}
                 {data.mediaInfo?.downloadStatus4k?.map((status, index) => (
-                  <li
+                  <Tooltip
                     key={`dl-status-${status.externalId}-${index}`}
-                    className="border-b border-gray-700 last:border-b-0"
+                    content={status.title}
                   >
-                    <DownloadBlock downloadItem={status} is4k />
-                  </li>
+                    <li className="border-b border-gray-700 last:border-b-0">
+                      <DownloadBlock downloadItem={status} is4k />
+                    </li>
+                  </Tooltip>
                 ))}
               </ul>
             </div>

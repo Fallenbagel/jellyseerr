@@ -100,10 +100,10 @@ const Login = () => {
             <Transition
               as="div"
               show={!!error}
-              enter="opacity-0 transition duration-300"
+              enter="transition-opacity duration-300"
               enterFrom="opacity-0"
               enterTo="opacity-100"
-              leave="opacity-100 transition duration-300"
+              leave="transition-opacity duration-300"
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >

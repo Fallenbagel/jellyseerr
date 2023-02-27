@@ -1,7 +1,7 @@
 import logger from '@server/logger';
 import ServarrBase from './base';
 
-interface SonarrSeason {
+export interface SonarrSeason {
   seasonNumber: number;
   monitored: boolean;
   statistics?: {
