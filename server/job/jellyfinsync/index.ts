@@ -278,11 +278,14 @@ class JobJellyfinSync {
                   ExtendedEpisodeData.MediaSources?.some((MediaSource) => {
                     return MediaSource.MediaStreams.some((MediaStream) => {
                       if (MediaStream.Type === 'Video') {
-                        if (MediaStream.Width ?? 0 < 2000) {
+                        if (
+                          (MediaStream.Width ?? 0) >= 3840 &&
+                          (MediaStream.Height ?? 0) >= 2160
+                        ) {
+                          total4k += episodeCount;
+                        } else {
                           totalStandard += episodeCount;
                         }
-                      } else {
-                        total4k += episodeCount;
                       }
                     });
                   });
