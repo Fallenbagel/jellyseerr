@@ -141,7 +141,7 @@ const TitleCard = ({
                   : intl.formatMessage(globalMessages.tvshow)}
               </div>
             </div>
-            {currentStatus && (
+            {currentStatus && currentStatus !== MediaStatus.UNKNOWN && (
               <div className="pointer-events-none z-40 flex items-center">
                 <StatusBadgeMini
                   status={currentStatus}
@@ -154,10 +154,10 @@ const TitleCard = ({
           <Transition
             as={Fragment}
             show={isUpdating}
-            enter="transition ease-in-out duration-300 transform opacity-0"
+            enter="transition-opacity ease-in-out duration-300"
             enterFrom="opacity-0"
             enterTo="opacity-100"
-            leave="transition ease-in-out duration-300 transform opacity-100"
+            leave="transition-opacity ease-in-out duration-300"
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
@@ -169,10 +169,10 @@ const TitleCard = ({
           <Transition
             as={Fragment}
             show={!image || showDetail || showRequestModal}
-            enter="transition transform opacity-0"
+            enter="transition-opacity"
             enterFrom="opacity-0"
             enterTo="opacity-100"
-            leave="transition transform opacity-100"
+            leave="transition-opacity"
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >

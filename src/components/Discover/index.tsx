@@ -165,10 +165,10 @@ const Discover = () => {
           </Transition>
           <Transition
             show={isEditing}
-            enter="transition transform duration-300"
+            enter="transition duration-300"
             enterFrom="opacity-0 translate-y-6"
             enterTo="opacity-100 translate-y-0"
-            leave="transition duration-300 transform"
+            leave="transition duration-300"
             leaveFrom="opacity-100 translate-y-0"
             leaveTo="opacity-0 translate-y-6"
             className="safe-shift-edit-menu fixed right-0 left-0 z-50 flex flex-col items-center justify-end space-x-0 space-y-2 border-t border-gray-700 bg-gray-800 bg-opacity-80 p-4 backdrop-blur sm:bottom-0 sm:flex-row sm:space-y-0 sm:space-x-3"

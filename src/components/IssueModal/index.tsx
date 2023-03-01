@@ -12,10 +12,10 @@ interface IssueModalProps {
 const IssueModal = ({ show, mediaType, onCancel, tmdbId }: IssueModalProps) => (
   <Transition
     as="div"
-    enter="transition opacity-0 duration-300"
+    enter="transition-opacity duration-300"
     enterFrom="opacity-0"
     enterTo="opacity-100"
-    leave="transition opacity-100 duration-300"
+    leave="transition-opacity duration-300"
     leaveFrom="opacity-100"
     leaveTo="opacity-0"
     show={show}

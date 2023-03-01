@@ -26,6 +26,7 @@ import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
 import { sortCrewPriority } from '@app/utils/creditHelpers';
+import { refreshIntervalHelper } from '@app/utils/refreshIntervalHelper';
 import {
   ArrowRightCircleIcon,
   CloudIcon,
@@ -116,6 +117,13 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
     mutate: revalidate,
   } = useSWR<MovieDetailsType>(`/api/v1/movie/${router.query.movieId}`, {
     fallbackData: movie,
+    refreshInterval: refreshIntervalHelper(
+      {
+        downloadStatus: movie?.mediaInfo?.downloadStatus,
+        downloadStatus4k: movie?.mediaInfo?.downloadStatus4k,
+      },
+      15000
+    ),
   });
 
   const { data: ratingData } = useSWR<RTRating>(
@@ -651,6 +659,7 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric',
+                          timeZone: 'UTC',
                         })}
                       </span>
                     </span>
@@ -670,6 +679,7 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
+                      timeZone: 'UTC',
                     })}
                   </span>
                 </div>

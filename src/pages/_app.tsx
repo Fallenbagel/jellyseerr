@@ -71,6 +71,8 @@ const loadLocaleData = (locale: AvailableLocale): Promise<any> => {
       return import('../i18n/locale/sr.json');
     case 'sv':
       return import('../i18n/locale/sv.json');
+    case 'ua':
+      return import('../i18n/locale/ua.json');
     case 'zh-CN':
       return import('../i18n/locale/zh_Hans.json');
     case 'zh-TW':

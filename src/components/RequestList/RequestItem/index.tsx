@@ -7,6 +7,7 @@ import StatusBadge from '@app/components/StatusBadge';
 import useDeepLinks from '@app/hooks/useDeepLinks';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import { refreshIntervalHelper } from '@app/utils/refreshIntervalHelper';
 import {
   ArrowPathIcon,
   CheckIcon,
@@ -293,6 +294,13 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
     `/api/v1/request/${request.id}`,
     {
       fallbackData: request,
+      refreshInterval: refreshIntervalHelper(
+        {
+          downloadStatus: request.media.downloadStatus,
+          downloadStatus4k: request.media.downloadStatus4k,
+        },
+        15000
+      ),
     }
   );
 

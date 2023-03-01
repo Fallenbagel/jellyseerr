@@ -582,10 +582,10 @@ const AdvancedRequester = ({
 
                     <Transition
                       show={open}
-                      enter="transition ease-in duration-300"
+                      enter="transition-opacity ease-in duration-300"
                       enterFrom="opacity-0"
                       enterTo="opacity-100"
-                      leave="transition ease-in duration-100"
+                      leave="transition-opacity ease-in duration-100"
                       leaveFrom="opacity-100"
                       leaveTo="opacity-0"
                       className="mt-1 w-full rounded-md border border-gray-700 bg-gray-800 shadow-lg"

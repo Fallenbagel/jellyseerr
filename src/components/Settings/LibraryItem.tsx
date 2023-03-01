@@ -32,7 +32,7 @@ const LibraryItem = ({ isEnabled, name, onToggle }: LibraryItemProps) => {
               aria-hidden="true"
               className={`${
                 isEnabled ? 'translate-x-5' : 'translate-x-0'
-              } relative inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out`}
+              } relative inline-block h-5 w-5 rounded-full bg-white shadow transition duration-200 ease-in-out`}
             >
               <span
                 className={`${

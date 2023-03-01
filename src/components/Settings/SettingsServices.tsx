@@ -247,10 +247,10 @@ const SettingsServices = () => {
       <Transition
         as={Fragment}
         show={deleteServerModal.open}
-        enter="transition ease-in-out duration-300 transform opacity-0"
+        enter="transition-opacity ease-in-out duration-300"
         enterFrom="opacity-0"
-        enterTo="opacuty-100"
-        leave="transition ease-in-out duration-300 transform opacity-100"
+        enterTo="opacity-100"
+        leave="transition-opacity ease-in-out duration-300"
         leaveFrom="opacity-100"
         leaveTo="opacity-0"
       >

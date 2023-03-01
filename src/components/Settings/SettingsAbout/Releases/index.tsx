@@ -63,10 +63,10 @@ const Release = ({ currentVersion, release, isLatest }: ReleaseProps) => {
     <div className="flex w-full flex-col space-y-3 rounded-md bg-gray-800 px-4 py-2 shadow-md ring-1 ring-gray-700 sm:flex-row sm:space-y-0 sm:space-x-3">
       <Transition
         as={Fragment}
-        enter="opacity-0 transition duration-300"
+        enter="transition-opacity duration-300"
         enterFrom="opacity-0"
         enterTo="opacity-100"
-        leave="opacity-100 transition duration-300"
+        leave="transition-opacity duration-300"
         leaveFrom="opacity-100"
         leaveTo="opacity-0"
         show={isModalOpen}

@@ -96,7 +96,8 @@ class PlexScanner
                   // We remove 10 minutes from the last scan as a buffer
                   addedAt: library.lastScan - 1000 * 60 * 10,
                 }
-              : undefined
+              : undefined,
+            library.type
           );
 
           // Bundle items up by rating keys

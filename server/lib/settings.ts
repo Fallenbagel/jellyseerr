@@ -274,7 +274,8 @@ export type JobId =
   | 'download-sync-reset'
   | 'jellyfin-recently-added-sync'
   | 'jellyfin-full-sync'
-  | 'image-cache-cleanup';
+  | 'image-cache-cleanup'
+  | 'availability-sync';
 
 interface AllSettings {
   clientId: string;
@@ -452,6 +453,9 @@ class Settings {
         'sonarr-scan': {
           schedule: '0 30 4 * * *',
         },
+        'availability-sync': {
+          schedule: '0 0 5 * * *',
+        },
         'download-sync': {
           schedule: '0 * * * * *',
         },
@@ -610,7 +614,7 @@ class Settings {
   }
 
   private generateApiKey(): string {
-    return Buffer.from(`${Date.now()}${randomUUID()})`).toString('base64');
+    return Buffer.from(`${Date.now()}${randomUUID()}`).toString('base64');
   }
 
   private generateVapidKeys(force = false): void {
