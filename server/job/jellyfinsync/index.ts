@@ -311,13 +311,13 @@ class JobJellyfinSync {
                 // setting the status to AVAILABLE if all of a type is there, partially if some,
                 // and then not modifying the status if there are 0 items
                 existingSeason.status =
-                  totalStandard === season.episode_count
+                  totalStandard >= season.episode_count
                     ? MediaStatus.AVAILABLE
                     : totalStandard > 0
                     ? MediaStatus.PARTIALLY_AVAILABLE
                     : existingSeason.status;
                 existingSeason.status4k =
-                  this.enable4kShow && total4k === season.episode_count
+                  this.enable4kShow && total4k >= season.episode_count
                     ? MediaStatus.AVAILABLE
                     : this.enable4kShow && total4k > 0
                     ? MediaStatus.PARTIALLY_AVAILABLE
@@ -329,13 +329,13 @@ class JobJellyfinSync {
                     // This ternary is the same as the ones above, but it just falls back to "UNKNOWN"
                     // if we dont have any items for the season
                     status:
-                      totalStandard === season.episode_count
+                      totalStandard >= season.episode_count
                         ? MediaStatus.AVAILABLE
                         : totalStandard > 0
                         ? MediaStatus.PARTIALLY_AVAILABLE
                         : MediaStatus.UNKNOWN,
                     status4k:
-                      this.enable4kShow && total4k === season.episode_count
+                      this.enable4kShow && total4k >= season.episode_count
                         ? MediaStatus.AVAILABLE
                         : this.enable4kShow && total4k > 0
                         ? MediaStatus.PARTIALLY_AVAILABLE
