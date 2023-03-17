@@ -1,5 +1,4 @@
 import { MediaServerType } from '@server/constants/server';
-import availabilitySync from '@server/lib/availabilitySync';
 import downloadTracker from '@server/lib/downloadtracker';
 import ImageProxy from '@server/lib/imageproxy';
 import { plexFullScanner, plexRecentScanner } from '@server/lib/scanners/plex';
@@ -154,7 +153,7 @@ export const startJobs = (): void => {
   });
 
   // Checks if media is still available in plex/sonarr/radarr libs
-  scheduledJobs.push({
+  /*  scheduledJobs.push({
     id: 'availability-sync',
     name: 'Media Availability Sync',
     type: 'process',
@@ -169,6 +168,7 @@ export const startJobs = (): void => {
     running: () => availabilitySync.running,
     cancelFn: () => availabilitySync.cancel(),
   });
+*/
 
   // Run download sync every minute
   scheduledJobs.push({
