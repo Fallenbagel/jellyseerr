@@ -13,6 +13,7 @@ const messages = defineMessages({
   password: 'Password',
   host: '{mediaServerName} URL',
   email: 'Email',
+  emailtooltip: 'This can be any valid email. It doesn\'t need to come from your {mediaServerName} instance.',
   validationhostrequired: '{mediaServerName} URL required',
   validationhostformat: 'Valid URL required',
   validationemailrequired: 'Email required',
@@ -63,6 +64,12 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
       ),
       password: Yup.string(),
     });
+    const mediaServerFormatValues = {
+      mediaServerName:
+        publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+          ? 'Emby'
+          : 'Jellyfin',
+    };
     return (
       <Formik
         initialValues={{
@@ -101,12 +108,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
           <Form>
             <div className="sm:border-t sm:border-gray-800">
               <label htmlFor="host" className="text-label">
-                {intl.formatMessage(messages.host, {
-                  mediaServerName:
-                    publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                      ? 'Emby'
-                      : 'Jellyfin',
-                })}
+                {intl.formatMessage(messages.host, mediaServerFormatValues)}
               </label>
               <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
                 <div className="flex rounded-md shadow-sm">
@@ -114,12 +116,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                     id="host"
                     name="host"
                     type="text"
-                    placeholder={intl.formatMessage(messages.host, {
-                      mediaServerName:
-                        publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                          ? 'Emby'
-                          : 'Jellyfin',
-                    })}
+                    placeholder={intl.formatMessage(messages.host, mediaServerFormatValues)}
                   />
                 </div>
                 {errors.host && touched.host && (
@@ -128,6 +125,9 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
               </div>
               <label htmlFor="email" className="text-label">
                 {intl.formatMessage(messages.email)}
+                <span className="label-tip">
+                  {intl.formatMessage(messages.emailtooltip, mediaServerFormatValues)}
+                </span>
               </label>
               <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
                 <div className="flex rounded-md shadow-sm">
