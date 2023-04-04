@@ -837,7 +837,7 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
         gravatarUrl(fullUserInfo.email, { default: 'mm', size: 200 });
       user = new User({
         avatar: avatar,
-        username: fullUserInfo.name,
+        username: fullUserInfo.preferred_username,
         email: fullUserInfo.email,
         permissions: settings.main.defaultPermissions,
         plexToken: '',
