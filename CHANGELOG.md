@@ -1,3 +1,35 @@
+# [1.5.0](https://github.com/fallenbagel/jellyseerr/compare/v1.4.1...v1.5.0) (2023-04-20)
+
+
+### Bug Fixes
+
+* add better checks on 4k detection of series ([bc9017f](https://github.com/fallenbagel/jellyseerr/commit/bc9017f54d84ec24c4d74d38e1b4e24219425d41))
+* added a refresh interval if download status is in progress ([#3275](https://github.com/fallenbagel/jellyseerr/issues/3275)) ([1e2c6f4](https://github.com/fallenbagel/jellyseerr/commit/1e2c6f46ab66c836f321b5d8e34f1e8124c0b542))
+* **build:** increase threshold for amount of data to be fetched when SSR'ing ([#3320](https://github.com/fallenbagel/jellyseerr/issues/3320)) ([d7b83d2](https://github.com/fallenbagel/jellyseerr/commit/d7b83d22cee3d20db564cc0564d42802b02327e3))
+* disable availability sync temporarily ([2e5cf22](https://github.com/fallenbagel/jellyseerr/commit/2e5cf226265686012329248e7f729fec324c3deb))
+* hide remove button when default service is not configured ([7d4455b](https://github.com/fallenbagel/jellyseerr/commit/7d4455ba6bfd12e2730f7085cbb87df246f01d22))
+* **jellyfin scan:** temporary workaround fix for jellyfin scan when display specials within season ([38fb66d](https://github.com/fallenbagel/jellyseerr/commit/38fb66d31e41232c01898d0d362af8338eb7b960)), closes [#215](https://github.com/fallenbagel/jellyseerr/issues/215) [#176](https://github.com/fallenbagel/jellyseerr/issues/176) [#246](https://github.com/fallenbagel/jellyseerr/issues/246)
+* lint issues ([bcd2bb7](https://github.com/fallenbagel/jellyseerr/commit/bcd2bb7c96810f5a6932f42468a628d2db1bc771))
+* logger was set to info for the wrong logs ([#3354](https://github.com/fallenbagel/jellyseerr/issues/3354)) ([c36a4ba](https://github.com/fallenbagel/jellyseerr/commit/c36a4ba2b8df05873f5dfd0946a9bc3dc4ecfd1d))
+* remove unnecessary parenthesis from api key generation ([#3336](https://github.com/fallenbagel/jellyseerr/issues/3336)) ([6bd3f01](https://github.com/fallenbagel/jellyseerr/commit/6bd3f015d65507efca60279007bd2b86ee860643))
+* **snapcraft:** use the correct config folder for image cache ([#3302](https://github.com/fallenbagel/jellyseerr/issues/3302)) ([c93467b](https://github.com/fallenbagel/jellyseerr/commit/c93467b3acf2c256324297e7e8f21e9944005dd4))
+* **ui:** hide mini status badge if non-4K media status is unknown ([#3346](https://github.com/fallenbagel/jellyseerr/issues/3346)) ([50f06da](https://github.com/fallenbagel/jellyseerr/commit/50f06dabbffc693f0843584a64d1d96e77982820))
+* **ui:** hide search bar behind slideover when opened ([#3348](https://github.com/fallenbagel/jellyseerr/issues/3348)) ([b3882de](https://github.com/fallenbagel/jellyseerr/commit/b3882de8930a70adb2f93a27be6370bfa1826587))
+* **ui:** prevent title cards from flickering when quickly hovering across them ([#3349](https://github.com/fallenbagel/jellyseerr/issues/3349)) ([eb5502a](https://github.com/fallenbagel/jellyseerr/commit/eb5502a16f86e37a933f6beca0678c2d228e77d5))
+* **watchlist:** correctly load more than 20 watchlist items ([#3351](https://github.com/fallenbagel/jellyseerr/issues/3351)) ([af880a6](https://github.com/fallenbagel/jellyseerr/commit/af880a6c839794b34bddcd7e0fe56353aa48ba36))
+
+
+### Features
+
+* add a button in ManageSlideOver to remove the movie and the file from Radarr/Sonarr ([2e74584](https://github.com/fallenbagel/jellyseerr/commit/2e7458457e995dd3ec6dd96035fe997646cdd446))
+* availability sync rework ([#3219](https://github.com/fallenbagel/jellyseerr/issues/3219)) ([ae38183](https://github.com/fallenbagel/jellyseerr/commit/ae3818304b2f75222d1bd223ece94f829a3b42d0)), closes [#377](https://github.com/fallenbagel/jellyseerr/issues/377)
+* full title of download item on hover with tooltip ([#3296](https://github.com/fallenbagel/jellyseerr/issues/3296)) ([33e7691](https://github.com/fallenbagel/jellyseerr/commit/33e7691b94d7d369a0a1410e434850bc51e5572e))
+
+
+### Performance Improvements
+
+* **imageproxy:** do not set cookies to image proxy so CDNs can cache images ([#3332](https://github.com/fallenbagel/jellyseerr/issues/3332)) ([966639d](https://github.com/fallenbagel/jellyseerr/commit/966639df430d32f6bfebdb16314dc4590d21caf8))
+
 ## [1.4.1](https://github.com/fallenbagel/jellyseerr/compare/v1.4.0...v1.4.1) (2023-01-31)
 
 
