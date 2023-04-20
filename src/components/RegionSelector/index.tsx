@@ -122,7 +122,7 @@ const RegionSelector = ({
 
             <Transition
               show={open}
-              leave="transition ease-in duration-100"
+              leave="transition-opacity ease-in duration-100"
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
               className="absolute mt-1 w-full rounded-md bg-gray-800 shadow-lg"

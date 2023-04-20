@@ -96,7 +96,7 @@ describe('Discover Customization', () => {
       .should('be.disabled');
 
     cy.get('#data').clear();
-    cy.get('#data').type('time travel{enter}', { delay: 100 });
+    cy.get('#data').type('christmas{enter}', { delay: 100 });
 
     // Confirming we have some results
     cy.contains('.slider-header', sliderTitle)

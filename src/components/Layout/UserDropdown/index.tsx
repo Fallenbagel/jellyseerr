@@ -63,11 +63,11 @@ const UserDropdown = () => {
       <Transition
         as={Fragment}
         enter="transition ease-out duration-100"
-        enterFrom="transform opacity-0 scale-95"
-        enterTo="transform opacity-100 scale-100"
+        enterFrom="opacity-0 scale-95"
+        enterTo="opacity-100 scale-100"
         leave="transition ease-in duration-75"
-        leaveFrom="transform opacity-100 scale-100"
-        leaveTo="transform opacity-0 scale-95"
+        leaveFrom="opacity-100 scale-100"
+        leaveTo="opacity-0 scale-95"
         appear
       >
         <Menu.Items className="absolute right-0 mt-2 w-72 origin-top-right rounded-md shadow-lg">

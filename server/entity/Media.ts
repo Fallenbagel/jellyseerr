@@ -115,29 +115,29 @@ class Media {
   @Column({ type: 'datetime', nullable: true })
   public mediaAddedAt: Date;
 
-  @Column({ nullable: true })
-  public serviceId?: number;
+  @Column({ nullable: true, type: 'int' })
+  public serviceId?: number | null;
 
-  @Column({ nullable: true })
-  public serviceId4k?: number;
+  @Column({ nullable: true, type: 'int' })
+  public serviceId4k?: number | null;
 
-  @Column({ nullable: true })
-  public externalServiceId?: number;
+  @Column({ nullable: true, type: 'int' })
+  public externalServiceId?: number | null;
 
-  @Column({ nullable: true })
-  public externalServiceId4k?: number;
+  @Column({ nullable: true, type: 'int' })
+  public externalServiceId4k?: number | null;
 
-  @Column({ nullable: true })
-  public externalServiceSlug?: string;
+  @Column({ nullable: true, type: 'varchar' })
+  public externalServiceSlug?: string | null;
 
-  @Column({ nullable: true })
-  public externalServiceSlug4k?: string;
+  @Column({ nullable: true, type: 'varchar' })
+  public externalServiceSlug4k?: string | null;
 
-  @Column({ nullable: true })
-  public ratingKey?: string;
+  @Column({ nullable: true, type: 'varchar' })
+  public ratingKey?: string | null;
 
-  @Column({ nullable: true })
-  public ratingKey4k?: string;
+  @Column({ nullable: true, type: 'varchar' })
+  public ratingKey4k?: string | null;
 
   @Column({ nullable: true })
   public jellyfinMediaId?: string;
@@ -288,7 +288,9 @@ class Media {
     if (this.mediaType === MediaType.MOVIE) {
       if (
         this.externalServiceId !== undefined &&
-        this.serviceId !== undefined
+        this.externalServiceId !== null &&
+        this.serviceId !== undefined &&
+        this.serviceId !== null
       ) {
         this.downloadStatus = downloadTracker.getMovieProgress(
           this.serviceId,
@@ -298,7 +300,9 @@ class Media {
 
       if (
         this.externalServiceId4k !== undefined &&
-        this.serviceId4k !== undefined
+        this.externalServiceId4k !== null &&
+        this.serviceId4k !== undefined &&
+        this.serviceId4k !== null
       ) {
         this.downloadStatus4k = downloadTracker.getMovieProgress(
           this.serviceId4k,
@@ -310,7 +314,9 @@ class Media {
     if (this.mediaType === MediaType.TV) {
       if (
         this.externalServiceId !== undefined &&
-        this.serviceId !== undefined
+        this.externalServiceId !== null &&
+        this.serviceId !== undefined &&
+        this.serviceId !== null
       ) {
         this.downloadStatus = downloadTracker.getSeriesProgress(
           this.serviceId,
@@ -320,7 +326,9 @@ class Media {
 
       if (
         this.externalServiceId4k !== undefined &&
-        this.serviceId4k !== undefined
+        this.externalServiceId4k !== null &&
+        this.serviceId4k !== undefined &&
+        this.serviceId4k !== null
       ) {
         this.downloadStatus4k = downloadTracker.getSeriesProgress(
           this.serviceId4k,

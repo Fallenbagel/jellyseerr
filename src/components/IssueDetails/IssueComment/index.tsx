@@ -65,10 +65,10 @@ const IssueComment = ({
     >
       <Transition
         as={Fragment}
-        enter="transition opacity-0 duration-300"
+        enter="transition-opacity duration-300"
         enterFrom="opacity-0"
         enterTo="opacity-100"
-        leave="transition opacity-100 duration-300"
+        leave="transition-opacity duration-300"
         leaveFrom="opacity-100"
         leaveTo="opacity-0"
         show={showDeleteModal}
@@ -115,11 +115,11 @@ const IssueComment = ({
                     as={Fragment}
                     show={open}
                     enter="transition ease-out duration-100"
-                    enterFrom="transform opacity-0 scale-95"
-                    enterTo="transform opacity-100 scale-100"
+                    enterFrom="opacity-0 scale-95"
+                    enterTo="opacity-100 scale-100"
                     leave="transition ease-in duration-75"
-                    leaveFrom="transform opacity-100 scale-100"
-                    leaveTo="transform opacity-0 scale-95"
+                    leaveFrom="opacity-100 scale-100"
+                    leaveTo="opacity-0 scale-95"
                   >
                     <Menu.Items
                       static
@@ -164,7 +164,7 @@ const IssueComment = ({
             </Menu>
           )}
           <div
-            className={`absolute top-3 z-10 h-3 w-3 rotate-45 transform bg-gray-800 shadow ring-1 ring-gray-500 ${
+            className={`absolute top-3 z-10 h-3 w-3 rotate-45 bg-gray-800 shadow ring-1 ring-gray-500 ${
               isReversed ? '-left-1' : '-right-1'
             }`}
           />

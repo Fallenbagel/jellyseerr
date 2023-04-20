@@ -5,7 +5,6 @@
 <a href="https://discord.gg/ckbvBtDJgC"><img src="https://img.shields.io/badge/Discord-Chat-lightgrey" alt="Discord"></a>
 <a href="https://hub.docker.com/r/fallenbagel/jellyseerr"><img src="https://img.shields.io/docker/pulls/fallenbagel/jellyseerr" alt="Docker pulls"></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
-</p>
 
 **Jellyseerr** is a free and open source software application for managing requests for your media library. It is a a fork of Overseerr built to bring support for Jellyfin & Emby media servers!
 
@@ -141,3 +140,7 @@ Our [Code of Conduct](https://github.com/fallenbagel/jellyseerr/blob/develop/COD
 ## Contributing
 
 You can help improve Jellyseerr too! Check out our [Contribution Guide](https://github.com/fallenbagel/jellyseerr/blob/develop/CONTRIBUTING.md) to get started.
+
+## Contributors ✨
+
+Thanks goes to all wonderful people who contributed directly to Jellyseerr and Overseerr.

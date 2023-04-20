@@ -685,7 +685,7 @@ router.get<{ id: string }, UserWatchDataResponse>(
   }
 );
 
-router.get<{ id: string; page?: number }, WatchlistResponse>(
+router.get<{ id: string }, WatchlistResponse>(
   '/:id/watchlist',
   async (req, res, next) => {
     if (
@@ -705,7 +705,7 @@ router.get<{ id: string; page?: number }, WatchlistResponse>(
     }
 
     const itemsPerPage = 20;
-    const page = req.params.page ?? 1;
+    const page = Number(req.query.page) ?? 1;
     const offset = (page - 1) * itemsPerPage;
 
     const user = await getRepository(User).findOneOrFail({
@@ -729,8 +729,8 @@ router.get<{ id: string; page?: number }, WatchlistResponse>(
 
     return res.json({
       page,
-      totalPages: Math.ceil(watchlist.size / itemsPerPage),
-      totalResults: watchlist.size,
+      totalPages: Math.ceil(watchlist.totalSize / itemsPerPage),
+      totalResults: watchlist.totalSize,
       results: watchlist.items.map((item) => ({
         ratingKey: item.ratingKey,
         title: item.title,

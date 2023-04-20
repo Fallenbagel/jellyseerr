@@ -94,7 +94,7 @@ jobs:
     name: Send Discord Notification
     needs: semantic-release
     if: always()
-    runs-on: self-hosted
+    runs-on: ubuntu-20.04
     steps:
       - name: Get Build Job Status
         uses: technote-space/workflow-conclusion-action@v3
