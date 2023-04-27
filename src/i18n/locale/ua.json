@@ -12,7 +12,7 @@
   "components.Discover.DiscoverStudio.studioMovies": "Фільми {studio}",
   "components.Discover.DiscoverTvGenre.genreSeries": "Серіали в жанрі \"{genre}\"",
   "components.Discover.DiscoverTvLanguage.languageSeries": "Серіали мовою \"{language}\"",
-  "components.Discover.DiscoverWatchlist.discoverwatchlist": "Your Plex Watchlist",
+  "components.Discover.DiscoverWatchlist.discoverwatchlist": "Your Watchlist",
   "components.Discover.DiscoverWatchlist.watchlist": "Список спостереження Plex",
   "components.Discover.MovieGenreList.moviegenres": "Фільми за жанрами",
   "components.Discover.MovieGenreSlider.moviegenres": "Фільми за жанрами",

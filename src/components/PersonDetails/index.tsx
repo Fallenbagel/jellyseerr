@@ -133,6 +133,7 @@ const PersonDetails = () => {
           return (
             <li key={`list-cast-item-${media.id}-${index}`}>
               <TitleCard
+                key={media.id}
                 id={media.id}
                 title={media.mediaType === 'movie' ? media.title : media.name}
                 userScore={media.voteAverage}
@@ -173,6 +174,7 @@ const PersonDetails = () => {
           return (
             <li key={`list-crew-item-${media.id}-${index}`}>
               <TitleCard
+                key={media.id}
                 id={media.id}
                 title={media.mediaType === 'movie' ? media.title : media.name}
                 userScore={media.voteAverage}

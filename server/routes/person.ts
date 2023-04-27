@@ -42,10 +42,12 @@ personRoutes.get('/:id/combined_credits', async (req, res, next) => {
     });
 
     const castMedia = await Media.getRelatedMedia(
+      req.user,
       combinedCredits.cast.map((result) => result.id)
     );
 
     const crewMedia = await Media.getRelatedMedia(
+      req.user,
       combinedCredits.crew.map((result) => result.id)
     );
 

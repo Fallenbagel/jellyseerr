@@ -34,6 +34,7 @@ searchRoutes.get('/', async (req, res, next) => {
     }
 
     const media = await Media.getRelatedMedia(
+      req.user,
       results.results.map((result) => result.id)
     );
 
