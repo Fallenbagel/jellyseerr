@@ -203,7 +203,7 @@ describe('Discover', () => {
       .find('[data-testid=title-card-title]')
       .invoke('text')
       .then((text) => {
-        cy.contains('.slider-header', 'Plex Watchlist')
+        cy.contains('.slider-header', 'Watchlist')
           .next('[data-testid=media-slider]')
           .find('[data-testid=title-card]')
           .first()
