@@ -28,7 +28,8 @@ watchlistRoutes.post<never, Watchlist, Watchlist>(
       switch (error.constructor) {
         case QueryFailedError:
           logger.warn('Something wrong with data watchlist', {
-            ...req.body,
+            tmdbId: req.body.tmdbId,
+            mediaType: req.body.mediaType,
             label: 'Watchlist',
           });
           return next({ status: 409, message: 'Something wrong' });
