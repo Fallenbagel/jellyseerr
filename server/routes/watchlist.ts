@@ -7,6 +7,8 @@ import logger from '@server/logger';
 import { Router } from 'express';
 import { QueryFailedError } from 'typeorm';
 
+import { watchlistCreate } from '@server/interfaces/api/watchlistCreate';
+
 const watchlistRoutes = Router();
 
 watchlistRoutes.post<never, Watchlist, Watchlist>(
@@ -19,7 +21,12 @@ watchlistRoutes.post<never, Watchlist, Watchlist>(
           message: 'You must be logged in to add watchlist.',
         });
       }
-      const request = await Watchlist.createWatchlist(req.body, req.user);
+      const values = watchlistCreate.parse(req.body);
+
+      const request = await Watchlist.createWatchlist({
+        watchlistRequest: values,
+        user: req.user,
+      });
       return res.status(201).json(request);
     } catch (error) {
       if (!(error instanceof Error)) {

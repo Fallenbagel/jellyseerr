@@ -15,6 +15,7 @@ import {
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
+import type { ZodNumber, ZodOptional, ZodString } from 'zod';
 
 export class DuplicateWatchlistRequestError extends Error {}
 export class NotFoundError extends Error {
@@ -65,10 +66,18 @@ export class Watchlist implements WatchlistItem {
     Object.assign(this, init);
   }
 
-  public static async createWatchlist(
-    watchlistRequest: Watchlist,
-    user: User
-  ): Promise<Watchlist> {
+  public static async createWatchlist({
+    watchlistRequest,
+    user,
+  }: {
+    watchlistRequest: {
+      mediaType: MediaType;
+      ratingKey?: ZodOptional<ZodString>['_output'];
+      title?: ZodOptional<ZodString>['_output'];
+      tmdbId: ZodNumber['_output'];
+    };
+    user: User;
+  }): Promise<Watchlist> {
     const watchlistRepository = getRepository(this);
     const mediaRepository = getRepository(Media);
     const tmdb = new TheMovieDb();
