@@ -8,6 +8,7 @@
     "build:next": "next build",
     "build": "yarn build:next && yarn build:server",
     "lint": "eslint \"./server/**/*.{ts,tsx}\" \"./src/**/*.{ts,tsx}\" --cache",
+    "lintfix": "eslint \"./server/**/*.{ts,tsx}\" \"./src/**/*.{ts,tsx}\" --fix",
     "start": "NODE_ENV=production node dist/index.js",
     "i18n:extract": "extract-messages -l=en -o src/i18n/locale -d en --flat true --overwriteDefault true \"./src/**/!(*.test).{ts,tsx}\"",
     "migration:generate": "ts-node -r tsconfig-paths/register --project server/tsconfig.json ./node_modules/typeorm/cli.js migration:generate -d server/datasource.ts",

@@ -10,7 +10,7 @@ import { useRouter } from 'next/router';
 import { defineMessages, useIntl } from 'react-intl';
 
 const messages = defineMessages({
-  discoverwatchlist: 'Your Plex Watchlist',
+  discoverwatchlist: 'Your Watchlist',
   watchlist: 'Plex Watchlist',
 });
 

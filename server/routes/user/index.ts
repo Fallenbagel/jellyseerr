@@ -8,6 +8,7 @@ import Media from '@server/entity/Media';
 import { MediaRequest } from '@server/entity/MediaRequest';
 import { User } from '@server/entity/User';
 import { UserPushSubscription } from '@server/entity/UserPushSubscription';
+import { Watchlist } from '@server/entity/Watchlist';
 import type { WatchlistResponse } from '@server/interfaces/api/discoverInterfaces';
 import type {
   QuotaResponse,
@@ -699,8 +700,7 @@ router.get<{ id: string }, WatchlistResponse>(
     ) {
       return next({
         status: 403,
-        message:
-          "You do not have permission to view this user's Plex Watchlist.",
+        message: "You do not have permission to view this user's Watchlist.",
       });
     }
 
@@ -714,6 +714,24 @@ router.get<{ id: string }, WatchlistResponse>(
     });
 
     if (!user?.plexToken) {
+      if (user) {
+        const [result, total] = await getRepository(Watchlist).findAndCount({
+          where: { requestedBy: { id: user?.id } },
+          relations: { requestedBy: true },
+          // loadRelationIds: true,
+          take: itemsPerPage,
+          skip: offset,
+        });
+        if (total) {
+          return res.json({
+            page: page,
+            totalPages: total / itemsPerPage,
+            totalResults: total,
+            results: result,
+          });
+        }
+      }
+
       // We will just return an empty array if the user has no Plex token
       return res.json({
         page: 1,

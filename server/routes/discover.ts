@@ -6,6 +6,7 @@ import { MediaType } from '@server/constants/media';
 import { getRepository } from '@server/datasource';
 import Media from '@server/entity/Media';
 import { User } from '@server/entity/User';
+import { Watchlist } from '@server/entity/Watchlist';
 import type {
   GenreSliderItem,
   WatchlistResponse,
@@ -100,6 +101,7 @@ discoverRoutes.get('/movies', async (req, res, next) => {
     });
 
     const media = await Media.getRelatedMedia(
+      req.user,
       data.results.map((result) => result.id)
     );
 
@@ -164,6 +166,7 @@ discoverRoutes.get<{ language: string }>(
       });
 
       const media = await Media.getRelatedMedia(
+        req.user,
         data.results.map((result) => result.id)
       );
 
@@ -221,6 +224,7 @@ discoverRoutes.get<{ genreId: string }>(
       });
 
       const media = await Media.getRelatedMedia(
+        req.user,
         data.results.map((result) => result.id)
       );
 
@@ -268,6 +272,7 @@ discoverRoutes.get<{ studioId: string }>(
       });
 
       const media = await Media.getRelatedMedia(
+        req.user,
         data.results.map((result) => result.id)
       );
 
@@ -317,6 +322,7 @@ discoverRoutes.get('/movies/upcoming', async (req, res, next) => {
     });
 
     const media = await Media.getRelatedMedia(
+      req.user,
       data.results.map((result) => result.id)
     );
 
@@ -375,6 +381,7 @@ discoverRoutes.get('/tv', async (req, res, next) => {
     });
 
     const media = await Media.getRelatedMedia(
+      req.user,
       data.results.map((result) => result.id)
     );
 
@@ -438,6 +445,7 @@ discoverRoutes.get<{ language: string }>(
       });
 
       const media = await Media.getRelatedMedia(
+        req.user,
         data.results.map((result) => result.id)
       );
 
@@ -495,6 +503,7 @@ discoverRoutes.get<{ genreId: string }>(
       });
 
       const media = await Media.getRelatedMedia(
+        req.user,
         data.results.map((result) => result.id)
       );
 
@@ -542,6 +551,7 @@ discoverRoutes.get<{ networkId: string }>(
       });
 
       const media = await Media.getRelatedMedia(
+        req.user,
         data.results.map((result) => result.id)
       );
 
@@ -591,6 +601,7 @@ discoverRoutes.get('/tv/upcoming', async (req, res, next) => {
     });
 
     const media = await Media.getRelatedMedia(
+      req.user,
       data.results.map((result) => result.id)
     );
 
@@ -629,6 +640,7 @@ discoverRoutes.get('/trending', async (req, res, next) => {
     });
 
     const media = await Media.getRelatedMedia(
+      req.user,
       data.results.map((result) => result.id)
     );
 
@@ -681,6 +693,7 @@ discoverRoutes.get<{ keywordId: string }>(
       });
 
       const media = await Media.getRelatedMedia(
+        req.user,
         data.results.map((result) => result.id)
       );
 
@@ -813,6 +826,25 @@ discoverRoutes.get<Record<string, unknown>, WatchlistResponse>(
       select: ['id', 'plexToken'],
     });
 
+    if (activeUser) {
+      const [result, total] = await getRepository(Watchlist).findAndCount({
+        where: { requestedBy: { id: activeUser?.id } },
+        relations: {
+          /*requestedBy: true,media:true*/
+        },
+        // loadRelationIds: true,
+        take: itemsPerPage,
+        skip: offset,
+      });
+      if (total) {
+        return res.json({
+          page: page,
+          totalPages: total / itemsPerPage,
+          totalResults: total,
+          results: result,
+        });
+      }
+    }
     if (!activeUser?.plexToken) {
       // We will just return an empty array if the user has no Plex token
       return res.json({
