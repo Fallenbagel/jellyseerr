@@ -10,6 +10,7 @@ import useLocale from '@app/hooks/useLocale';
 import useSettings from '@app/hooks/useSettings';
 import { MediaType } from '@server/constants/media';
 import { MediaServerType } from '@server/constants/server';
+import getConfig from 'next/config';
 
 interface ExternalLinkBlockProps {
   mediaType: 'movie' | 'tv';
@@ -29,6 +30,7 @@ const ExternalLinkBlock = ({
   mediaUrl,
 }: ExternalLinkBlockProps) => {
   const settings = useSettings();
+  const { publicRuntimeConfig } = getConfig();
   const { locale } = useLocale();
 
   return (
@@ -42,11 +44,10 @@ const ExternalLinkBlock = ({
         >
           {settings.currentSettings.mediaServerType === MediaServerType.PLEX ? (
             <PlexLogo />
-          ) : settings.currentSettings.mediaServerType ===
-            MediaServerType.JELLYFIN ? (
-            <JellyfinLogo />
-          ) : (
+          ) : publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? (
             <EmbyLogo />
+          ) : (
+            <JellyfinLogo />
           )}
         </a>
       )}
