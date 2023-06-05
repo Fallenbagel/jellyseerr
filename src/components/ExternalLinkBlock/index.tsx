@@ -1,3 +1,4 @@
+import EmbyLogo from '@app/assets/services/emby.svg';
 import ImdbLogo from '@app/assets/services/imdb.svg';
 import JellyfinLogo from '@app/assets/services/jellyfin.svg';
 import PlexLogo from '@app/assets/services/plex.svg';
@@ -41,8 +42,11 @@ const ExternalLinkBlock = ({
         >
           {settings.currentSettings.mediaServerType === MediaServerType.PLEX ? (
             <PlexLogo />
-          ) : (
+          ) : settings.currentSettings.mediaServerType ===
+            MediaServerType.JELLYFIN ? (
             <JellyfinLogo />
+          ) : (
+            <EmbyLogo />
           )}
         </a>
       )}
