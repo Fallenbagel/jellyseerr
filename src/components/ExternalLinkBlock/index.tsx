@@ -1,3 +1,4 @@
+import EmbyLogo from '@app/assets/services/emby.svg';
 import ImdbLogo from '@app/assets/services/imdb.svg';
 import JellyfinLogo from '@app/assets/services/jellyfin.svg';
 import PlexLogo from '@app/assets/services/plex.svg';
@@ -9,6 +10,7 @@ import useLocale from '@app/hooks/useLocale';
 import useSettings from '@app/hooks/useSettings';
 import { MediaType } from '@server/constants/media';
 import { MediaServerType } from '@server/constants/server';
+import getConfig from 'next/config';
 
 interface ExternalLinkBlockProps {
   mediaType: 'movie' | 'tv';
@@ -28,6 +30,7 @@ const ExternalLinkBlock = ({
   mediaUrl,
 }: ExternalLinkBlockProps) => {
   const settings = useSettings();
+  const { publicRuntimeConfig } = getConfig();
   const { locale } = useLocale();
 
   return (
@@ -41,6 +44,8 @@ const ExternalLinkBlock = ({
         >
           {settings.currentSettings.mediaServerType === MediaServerType.PLEX ? (
             <PlexLogo />
+          ) : publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? (
+            <EmbyLogo />
           ) : (
             <JellyfinLogo />
           )}
