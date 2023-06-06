@@ -1,6 +1,6 @@
+import ExternalAPI from '@server/api/externalapi';
 import cacheManager from '@server/lib/cache';
 import { getSettings } from '@server/lib/settings';
-import ExternalAPI from './externalapi';
 
 interface RTAlgoliaSearchResponse {
   results: {
@@ -140,6 +140,7 @@ class RottenTomatoes extends ExternalAPI {
 
       return {
         title: movie.title,
+
         url: `https://www.rottentomatoes.com/m/${movie.vanity}`,
         criticsRating: movie.rottenTomatoes.certifiedFresh
           ? 'Certified Fresh'

@@ -1,4 +1,6 @@
-import RottenTomatoes from '@server/api/rottentomatoes';
+import IMDBRadarrProxy from '@server/api/rating/imdbRadarrProxy';
+import RottenTomatoes from '@server/api/rating/rottentomatoes';
+import { type RatingResponse } from '@server/api/rating/types';
 import TheMovieDb from '@server/api/themoviedb';
 import { MediaType } from '@server/constants/media';
 import Media from '@server/entity/Media';
@@ -121,6 +123,7 @@ movieRoutes.get('/:id/similar', async (req, res, next) => {
 movieRoutes.get('/:id/ratings', async (req, res, next) => {
   const tmdb = new TheMovieDb();
   const rtapi = new RottenTomatoes();
+  const imdbApi = new IMDBRadarrProxy();
 
   try {
     const movie = await tmdb.getMovie({
@@ -132,14 +135,24 @@ movieRoutes.get('/:id/ratings', async (req, res, next) => {
       Number(movie.release_date.slice(0, 4))
     );
 
-    if (!rtratings) {
+    let imdbRatings;
+    if (movie.imdb_id) {
+      imdbRatings = await imdbApi.getMovieRatings(movie.imdb_id);
+    }
+
+    if (!rtratings && !imdbRatings) {
       return next({
         status: 404,
-        message: 'Rotten Tomatoes ratings not found.',
+        message: 'No ratings found.',
       });
     }
 
-    return res.status(200).json(rtratings);
+    const ratings: RatingResponse = {
+      ...(rtratings ? { rt: rtratings } : {}),
+      ...(imdbRatings ? { imdb: imdbRatings } : {}),
+    };
+
+    return res.status(200).json(ratings);
   } catch (e) {
     logger.debug('Something went wrong retrieving movie ratings', {
       label: 'API',
