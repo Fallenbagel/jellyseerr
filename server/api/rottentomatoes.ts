@@ -147,6 +147,9 @@ class RottenTomatoes extends ExternalAPI {
           ? 'Fresh'
           : 'Rotten',
         criticsScore: movie.rottenTomatoes.criticsScore,
+        audienceRating:
+          movie.rottenTomatoes.audienceScore >= 60 ? 'Upright' : 'Spilled',
+        audienceScore: movie.rottenTomatoes.audienceScore,
         year: Number(movie.releaseYear),
       };
     } catch (e) {
