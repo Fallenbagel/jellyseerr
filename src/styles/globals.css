@@ -17,7 +17,7 @@
 
   body {
     @apply bg-gray-900;
-    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   code {
@@ -71,6 +71,10 @@
 
   ul.cards-horizontal {
     grid-template-columns: repeat(auto-fill, minmax(16.5rem, 1fr));
+  }
+
+  .provider-icons {
+    grid-template-columns: repeat(auto-fill, minmax(3.5rem, 1fr));
   }
 
   .slider-header {

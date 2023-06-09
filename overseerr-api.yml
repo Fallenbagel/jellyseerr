@@ -4506,6 +4506,16 @@ paths:
             type: number
             example: 10
         - in: query
+          name: voteCountGte
+          schema:
+            type: number
+            example: 7
+        - in: query
+          name: voteCountLte
+          schema:
+            type: number
+            example: 10
+        - in: query
           name: watchRegion
           schema:
             type: string
@@ -4781,6 +4791,16 @@ paths:
             example: 7
         - in: query
           name: voteAverageLte
+          schema:
+            type: number
+            example: 10
+        - in: query
+          name: voteCountGte
+          schema:
+            type: number
+            example: 7
+        - in: query
+          name: voteCountLte
           schema:
             type: number
             example: 10

@@ -65,6 +65,8 @@ interface DiscoverMovieOptions {
   withRuntimeLte?: string;
   voteAverageGte?: string;
   voteAverageLte?: string;
+  voteCountGte?: string;
+  voteCountLte?: string;
   originalLanguage?: string;
   genre?: string;
   studio?: string;
@@ -83,6 +85,8 @@ interface DiscoverTvOptions {
   withRuntimeLte?: string;
   voteAverageGte?: string;
   voteAverageLte?: string;
+  voteCountGte?: string;
+  voteCountLte?: string;
   includeEmptyReleaseDate?: boolean;
   originalLanguage?: string;
   genre?: string;
@@ -460,6 +464,8 @@ class TheMovieDb extends ExternalAPI {
     withRuntimeLte,
     voteAverageGte,
     voteAverageLte,
+    voteCountGte,
+    voteCountLte,
     watchProviders,
     watchRegion,
   }: DiscoverMovieOptions = {}): Promise<TmdbSearchMovieResponse> => {
@@ -504,6 +510,8 @@ class TheMovieDb extends ExternalAPI {
           'with_runtime.lte': withRuntimeLte,
           'vote_average.gte': voteAverageGte,
           'vote_average.lte': voteAverageLte,
+          'vote_count.gte': voteCountGte,
+          'vote_count.lte': voteCountLte,
           watch_region: watchRegion,
           with_watch_providers: watchProviders,
         },
@@ -530,6 +538,8 @@ class TheMovieDb extends ExternalAPI {
     withRuntimeLte,
     voteAverageGte,
     voteAverageLte,
+    voteCountGte,
+    voteCountLte,
     watchProviders,
     watchRegion,
   }: DiscoverTvOptions = {}): Promise<TmdbSearchTvResponse> => {
@@ -574,6 +584,8 @@ class TheMovieDb extends ExternalAPI {
           'with_runtime.lte': withRuntimeLte,
           'vote_average.gte': voteAverageGte,
           'vote_average.lte': voteAverageLte,
+          'vote_count.gte': voteCountGte,
+          'vote_count.lte': voteCountLte,
           with_watch_providers: watchProviders,
           watch_region: watchRegion,
         },

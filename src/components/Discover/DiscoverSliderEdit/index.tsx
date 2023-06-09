@@ -164,6 +164,10 @@ const DiscoverSliderEdit = ({
         return intl.formatMessage(sliderTitles.tmdbnetwork);
       case DiscoverSliderType.TMDB_SEARCH:
         return intl.formatMessage(sliderTitles.tmdbsearch);
+      case DiscoverSliderType.TMDB_MOVIE_STREAMING_SERVICES:
+        return intl.formatMessage(sliderTitles.tmdbmoviestreamingservices);
+      case DiscoverSliderType.TMDB_TV_STREAMING_SERVICES:
+        return intl.formatMessage(sliderTitles.tmdbtvstreamingservices);
       default:
         return 'Unknown Slider';
     }
@@ -195,7 +199,9 @@ const DiscoverSliderEdit = ({
           className={`${slider.data ? 'mb-4' : 'mb-0'} flex space-x-2 md:mb-0`}
         >
           <Bars3Icon className="h-6 w-6" />
-          <div>{getSliderTitle(slider)}</div>
+          <div className="w-7/12 truncate md:w-full">
+            {getSliderTitle(slider)}
+          </div>
         </div>
         <div
           className={`pointer-events-none ${

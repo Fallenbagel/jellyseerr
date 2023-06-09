@@ -32,7 +32,7 @@ interface TitleCardProps {
   summary?: string;
   year?: string;
   title: string;
-  userScore: number;
+  userScore?: number;
   mediaType: MediaType;
   status?: MediaStatus;
   canExpand?: boolean;
@@ -157,7 +157,9 @@ const TitleCard = ({
   const showRequestButton = hasPermission(
     [
       Permission.REQUEST,
-      mediaType === 'movie' ? Permission.REQUEST_MOVIE : Permission.REQUEST_TV,
+      mediaType === 'movie' || mediaType === 'collection'
+        ? Permission.REQUEST_MOVIE
+        : Permission.REQUEST_TV,
     ],
     { type: 'or' }
   );
@@ -170,7 +172,13 @@ const TitleCard = ({
       <RequestModal
         tmdbId={id}
         show={showRequestModal}
-        type={mediaType === 'movie' ? 'movie' : 'tv'}
+        type={
+          mediaType === 'movie'
+            ? 'movie'
+            : mediaType === 'collection'
+            ? 'collection'
+            : 'tv'
+        }
         onComplete={requestComplete}
         onUpdating={requestUpdating}
         onCancel={closeModal}
@@ -214,7 +222,7 @@ const TitleCard = ({
           <div className="absolute left-0 right-0 flex items-center justify-between p-2">
             <div
               className={`pointer-events-none z-40 rounded-full border bg-opacity-80 shadow-md ${
-                mediaType === 'movie'
+                mediaType === 'movie' || mediaType === 'collection'
                   ? 'border-blue-500 bg-blue-600'
                   : 'border-purple-600 bg-purple-600'
               }`}
@@ -222,6 +230,8 @@ const TitleCard = ({
               <div className="flex h-4 items-center px-2 py-2 text-center text-xs font-medium uppercase tracking-wider text-white sm:h-5">
                 {mediaType === 'movie'
                   ? intl.formatMessage(globalMessages.movie)
+                  : mediaType === 'collection'
+                  ? intl.formatMessage(globalMessages.collection)
                   : intl.formatMessage(globalMessages.tvshow)}
               </div>
             </div>
@@ -283,7 +293,15 @@ const TitleCard = ({
             leaveTo="opacity-0"
           >
             <div className="absolute inset-0 overflow-hidden rounded-xl">
-              <Link href={mediaType === 'movie' ? `/movie/${id}` : `/tv/${id}`}>
+              <Link
+                href={
+                  mediaType === 'movie'
+                    ? `/movie/${id}`
+                    : mediaType === 'collection'
+                    ? `/collection/${id}`
+                    : `/tv/${id}`
+                }
+              >
                 <a
                   className="absolute inset-0 h-full w-full cursor-pointer overflow-hidden text-left"
                   style={{

@@ -5,6 +5,7 @@ import useVerticalScroll from '@app/hooks/useVerticalScroll';
 import globalMessages from '@app/i18n/globalMessages';
 import type { WatchlistItem } from '@server/interfaces/api/discoverInterfaces';
 import type {
+  CollectionResult,
   MovieResult,
   PersonResult,
   TvResult,
@@ -12,7 +13,7 @@ import type {
 import { useIntl } from 'react-intl';
 
 type ListViewProps = {
-  items?: (TvResult | MovieResult | PersonResult)[];
+  items?: (TvResult | MovieResult | PersonResult | CollectionResult)[];
   plexItems?: WatchlistItem[];
   isEmpty?: boolean;
   isLoading?: boolean;
@@ -90,6 +91,18 @@ const ListView = ({
                   inProgress={
                     (title.mediaInfo?.downloadStatus ?? []).length > 0
                   }
+                  canExpand
+                />
+              );
+              break;
+            case 'collection':
+              titleCard = (
+                <TitleCard
+                  id={title.id}
+                  image={title.posterPath}
+                  summary={title.overview}
+                  title={title.title}
+                  mediaType={title.mediaType}
                   canExpand
                 />
               );
