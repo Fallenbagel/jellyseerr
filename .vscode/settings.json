@@ -19,5 +19,11 @@
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "files.associations": {
     "globals.css": "tailwindcss"
-  }
+  },
+  "i18n-ally.localesPaths": [
+    "src/i18n",
+    "src/i18n/locale",
+    "src/pages/discover/movies/language",
+    "src/pages/discover/tv/language"
+  ]
 }

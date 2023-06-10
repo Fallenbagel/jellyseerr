@@ -200,7 +200,7 @@ class RottenTomatoes extends ExternalAPI {
           tvshow.rottenTomatoes.criticsScore >= 60 ? 'Fresh' : 'Rotten',
         criticsScore: tvshow.rottenTomatoes.criticsScore,
         audienceRating:
-        tvshow.rottenTomatoes.audienceScore >= 60 ? 'Upright' : 'Spilled',
+          tvshow.rottenTomatoes.audienceScore >= 60 ? 'Upright' : 'Spilled',
         audienceScore: tvshow.rottenTomatoes.audienceScore,
         year: Number(tvshow.releaseYear),
       };
