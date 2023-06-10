@@ -41,6 +41,8 @@ jobs:
           fi
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v2
+      - name: Configure Git
+        run: git config --add safe.directory /data/parts/jellyseerr/src
       - name: Build Snap Package
         uses: diddlesnaps/snapcraft-multiarch-action@v1
         id: build
