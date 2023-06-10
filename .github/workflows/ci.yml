@@ -31,7 +31,7 @@ jobs:
   build_and_push:
     name: Build & Publish Docker Images
     if: github.ref == 'refs/heads/develop' && !contains(github.event.head_commit.message, '[skip ci]')
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -39,10 +39,6 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      # temporarily clear out cache
-      - name: Remove cache
-        run: |
-          rm -rf /tmp/.buildx-cache
       - name: Cache Docker layers
         uses: actions/cache@v3
         with:
