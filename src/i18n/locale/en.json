@@ -146,6 +146,8 @@
   "components.Layout.LanguagePicker.displaylanguage": "Display Language",
   "components.Layout.SearchInput.searchPlaceholder": "Search Movies & TV",
   "components.Layout.Sidebar.dashboard": "Discover",
+  "components.Layout.Sidebar.browsemovies": "Movies",
+  "components.Layout.Sidebar.browsetv": "Series",
   "components.Layout.Sidebar.issues": "Issues",
   "components.Layout.Sidebar.requests": "Requests",
   "components.Layout.Sidebar.settings": "Settings",
