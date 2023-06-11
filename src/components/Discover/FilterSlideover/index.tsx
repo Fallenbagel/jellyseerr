@@ -35,8 +35,10 @@ const messages = defineMessages({
   ratingText: 'Ratings between {minValue} and {maxValue}',
   clearfilters: 'Clear Active Filters',
   tmdbuserscore: 'TMDB User Score',
+  tmdbuservotecount: 'TMDB User Vote Count',
   runtime: 'Runtime',
   streamingservices: 'Streaming Services',
+  voteCount: 'Number of votes between {minValue} and {maxValue}',
 });
 
 type FilterSlideoverProps = {
@@ -243,6 +245,45 @@ const FilterSlideover = ({
             subText={intl.formatMessage(messages.ratingText, {
               minValue: currentFilters.voteAverageGte ?? 1,
               maxValue: currentFilters.voteAverageLte ?? 10,
+            })}
+          />
+        </div>
+        <span className="text-lg font-semibold">
+          {intl.formatMessage(messages.tmdbuservotecount)}
+        </span>
+        <div className="relative z-0">
+          <MultiRangeSlider
+            min={0}
+            max={1000}
+            defaultMaxValue={
+              currentFilters.voteCountLte
+                ? Number(currentFilters.voteCountLte)
+                : undefined
+            }
+            defaultMinValue={
+              currentFilters.voteCountGte
+                ? Number(currentFilters.voteCountGte)
+                : undefined
+            }
+            onUpdateMin={(min) => {
+              updateQueryParams(
+                'voteCountGte',
+                min !== 0 && Number(currentFilters.voteCountLte) !== 1000
+                  ? min.toString()
+                  : undefined
+              );
+            }}
+            onUpdateMax={(max) => {
+              updateQueryParams(
+                'voteCountLte',
+                max !== 1000 && Number(currentFilters.voteCountGte) !== 0
+                  ? max.toString()
+                  : undefined
+              );
+            }}
+            subText={intl.formatMessage(messages.voteCount, {
+              minValue: currentFilters.voteCountGte ?? 0,
+              maxValue: currentFilters.voteCountLte ?? 1000,
             })}
           />
         </div>

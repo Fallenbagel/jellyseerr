@@ -65,6 +65,7 @@ class WatchlistSync {
     const response = await plexTvApi.getWatchlist({ size: 200 });
 
     const mediaItems = await Media.getRelatedMedia(
+      user,
       response.items.map((i) => i.tmdbId)
     );
 

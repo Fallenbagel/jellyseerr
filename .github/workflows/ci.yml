@@ -31,7 +31,7 @@ jobs:
   build_and_push:
     name: Build & Publish Docker Images
     if: github.ref == 'refs/heads/develop' && !contains(github.event.head_commit.message, '[skip ci]')
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v3

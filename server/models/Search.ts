@@ -1,4 +1,5 @@
 import type {
+  TmdbCollectionResult,
   TmdbMovieDetails,
   TmdbMovieResult,
   TmdbPersonDetails,
@@ -9,7 +10,7 @@ import type {
 import { MediaType as MainMediaType } from '@server/constants/media';
 import type Media from '@server/entity/Media';
 
-export type MediaType = 'tv' | 'movie' | 'person';
+export type MediaType = 'tv' | 'movie' | 'person' | 'collection';
 
 interface SearchResult {
   id: number;
@@ -43,6 +44,18 @@ export interface TvResult extends SearchResult {
   firstAirDate: string;
 }
 
+export interface CollectionResult {
+  id: number;
+  mediaType: 'collection';
+  title: string;
+  originalTitle: string;
+  adult: boolean;
+  posterPath?: string;
+  backdropPath?: string;
+  overview: string;
+  originalLanguage: string;
+}
+
 export interface PersonResult {
   id: number;
   name: string;
@@ -53,7 +66,7 @@ export interface PersonResult {
   knownFor: (MovieResult | TvResult)[];
 }
 
-export type Results = MovieResult | TvResult | PersonResult;
+export type Results = MovieResult | TvResult | PersonResult | CollectionResult;
 
 export const mapMovieResult = (
   movieResult: TmdbMovieResult,
@@ -99,6 +112,20 @@ export const mapTvResult = (
   mediaInfo: media,
 });
 
+export const mapCollectionResult = (
+  collectionResult: TmdbCollectionResult
+): CollectionResult => ({
+  id: collectionResult.id,
+  mediaType: collectionResult.media_type || 'collection',
+  adult: collectionResult.adult,
+  originalLanguage: collectionResult.original_language,
+  originalTitle: collectionResult.original_title,
+  title: collectionResult.title,
+  overview: collectionResult.overview,
+  backdropPath: collectionResult.backdrop_path,
+  posterPath: collectionResult.poster_path,
+});
+
 export const mapPersonResult = (
   personResult: TmdbPersonResult
 ): PersonResult => ({
@@ -118,7 +145,12 @@ export const mapPersonResult = (
 });
 
 export const mapSearchResults = (
-  results: (TmdbMovieResult | TmdbTvResult | TmdbPersonResult)[],
+  results: (
+    | TmdbMovieResult
+    | TmdbTvResult
+    | TmdbPersonResult
+    | TmdbCollectionResult
+  )[],
   media?: Media[]
 ): Results[] =>
   results.map((result) => {
@@ -139,6 +171,8 @@ export const mapSearchResults = (
               req.tmdbId === result.id && req.mediaType === MainMediaType.TV
           )
         );
+      case 'collection':
+        return mapCollectionResult(result);
       default:
         return mapPersonResult(result);
     }

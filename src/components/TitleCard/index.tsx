@@ -10,12 +10,21 @@ import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import { withProperties } from '@app/utils/typeHelpers';
 import { Transition } from '@headlessui/react';
-import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowDownTrayIcon,
+  MinusCircleIcon,
+  StarIcon,
+} from '@heroicons/react/24/outline';
 import { MediaStatus } from '@server/constants/media';
+import type { Watchlist } from '@server/entity/Watchlist';
 import type { MediaType } from '@server/models/Search';
+import axios from 'axios';
 import Link from 'next/link';
+import type React from 'react';
 import { Fragment, useCallback, useEffect, useState } from 'react';
-import { useIntl } from 'react-intl';
+import { defineMessages, useIntl } from 'react-intl';
+import { useToasts } from 'react-toast-notifications';
+import { mutate } from 'swr';
 
 interface TitleCardProps {
   id: number;
@@ -23,12 +32,23 @@ interface TitleCardProps {
   summary?: string;
   year?: string;
   title: string;
-  userScore: number;
+  userScore?: number;
   mediaType: MediaType;
   status?: MediaStatus;
   canExpand?: boolean;
   inProgress?: boolean;
+  isAddedToWatchlist?: number | boolean;
 }
+
+const messages = defineMessages({
+  addToWatchList: 'Add to watchlist',
+  watchlistSuccess:
+    '<strong>{title}</strong> added to watchlist  successfully!',
+  watchlistDeleted:
+    '<strong>{title}</strong> Removed from watchlist  successfully!',
+  watchlistCancel: 'watchlist for <strong>{title}</strong> canceled.',
+  watchlistError: 'Something went wrong try again.',
+});
 
 const TitleCard = ({
   id,
@@ -38,6 +58,7 @@ const TitleCard = ({
   title,
   status,
   mediaType,
+  isAddedToWatchlist = false,
   inProgress = false,
   canExpand = false,
 }: TitleCardProps) => {
@@ -48,6 +69,10 @@ const TitleCard = ({
   const [currentStatus, setCurrentStatus] = useState(status);
   const [showDetail, setShowDetail] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
+  const { addToast } = useToasts();
+  const [toggleWatchlist, setToggleWatchlist] = useState<boolean>(
+    !isAddedToWatchlist
+  );
 
   // Just to get the year from the date
   if (year) {
@@ -68,12 +93,73 @@ const TitleCard = ({
     []
   );
 
+  const onClickWatchlistBtn = async (): Promise<void> => {
+    setIsUpdating(true);
+    try {
+      const response = await axios.post<Watchlist>('/api/v1/watchlist', {
+        tmdbId: id,
+        mediaType,
+        title,
+      });
+      mutate('/api/v1/discover/watchlist');
+      if (response.data) {
+        addToast(
+          <span>
+            {intl.formatMessage(messages.watchlistSuccess, {
+              title,
+              strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+            })}
+          </span>,
+          { appearance: 'success', autoDismiss: true }
+        );
+      }
+    } catch (e) {
+      addToast(intl.formatMessage(messages.watchlistError), {
+        appearance: 'error',
+        autoDismiss: true,
+      });
+    } finally {
+      setIsUpdating(false);
+      setToggleWatchlist((prevState) => !prevState);
+    }
+  };
+
+  const onClickDeleteWatchlistBtn = async (): Promise<void> => {
+    setIsUpdating(true);
+    try {
+      const response = await axios.delete<Watchlist>('/api/v1/watchlist/' + id);
+
+      if (response.status === 204) {
+        addToast(
+          <span>
+            {intl.formatMessage(messages.watchlistDeleted, {
+              title,
+              strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+            })}
+          </span>,
+          { appearance: 'info', autoDismiss: true }
+        );
+      }
+    } catch (e) {
+      addToast(intl.formatMessage(messages.watchlistError), {
+        appearance: 'error',
+        autoDismiss: true,
+      });
+    } finally {
+      setIsUpdating(false);
+      mutate('/api/v1/discover/watchlist');
+      setToggleWatchlist((prevState) => !prevState);
+    }
+  };
+
   const closeModal = useCallback(() => setShowRequestModal(false), []);
 
   const showRequestButton = hasPermission(
     [
       Permission.REQUEST,
-      mediaType === 'movie' ? Permission.REQUEST_MOVIE : Permission.REQUEST_TV,
+      mediaType === 'movie' || mediaType === 'collection'
+        ? Permission.REQUEST_MOVIE
+        : Permission.REQUEST_TV,
     ],
     { type: 'or' }
   );
@@ -86,7 +172,13 @@ const TitleCard = ({
       <RequestModal
         tmdbId={id}
         show={showRequestModal}
-        type={mediaType === 'movie' ? 'movie' : 'tv'}
+        type={
+          mediaType === 'movie'
+            ? 'movie'
+            : mediaType === 'collection'
+            ? 'collection'
+            : 'tv'
+        }
         onComplete={requestComplete}
         onUpdating={requestUpdating}
         onCancel={closeModal}
@@ -130,7 +222,7 @@ const TitleCard = ({
           <div className="absolute left-0 right-0 flex items-center justify-between p-2">
             <div
               className={`pointer-events-none z-40 rounded-full border bg-opacity-80 shadow-md ${
-                mediaType === 'movie'
+                mediaType === 'movie' || mediaType === 'collection'
                   ? 'border-blue-500 bg-blue-600'
                   : 'border-purple-600 bg-purple-600'
               }`}
@@ -138,9 +230,33 @@ const TitleCard = ({
               <div className="flex h-4 items-center px-2 py-2 text-center text-xs font-medium uppercase tracking-wider text-white sm:h-5">
                 {mediaType === 'movie'
                   ? intl.formatMessage(globalMessages.movie)
+                  : mediaType === 'collection'
+                  ? intl.formatMessage(globalMessages.collection)
                   : intl.formatMessage(globalMessages.tvshow)}
               </div>
             </div>
+            {showDetail && (
+              <>
+                {toggleWatchlist ? (
+                  <Button
+                    buttonType={'ghost'}
+                    className="z-40"
+                    buttonSize={'sm'}
+                    onClick={onClickWatchlistBtn}
+                  >
+                    <StarIcon className={'h-3 text-amber-300'} />
+                  </Button>
+                ) : (
+                  <Button
+                    className="z-40"
+                    buttonSize={'sm'}
+                    onClick={onClickDeleteWatchlistBtn}
+                  >
+                    <MinusCircleIcon className={'h-3'} />
+                  </Button>
+                )}
+              </>
+            )}
             {currentStatus && currentStatus !== MediaStatus.UNKNOWN && (
               <div className="pointer-events-none z-40 flex items-center">
                 <StatusBadgeMini
@@ -177,7 +293,15 @@ const TitleCard = ({
             leaveTo="opacity-0"
           >
             <div className="absolute inset-0 overflow-hidden rounded-xl">
-              <Link href={mediaType === 'movie' ? `/movie/${id}` : `/tv/${id}`}>
+              <Link
+                href={
+                  mediaType === 'movie'
+                    ? `/movie/${id}`
+                    : mediaType === 'collection'
+                    ? `/collection/${id}`
+                    : `/tv/${id}`
+                }
+              >
                 <a
                   className="absolute inset-0 h-full w-full cursor-pointer overflow-hidden text-left"
                   style={{

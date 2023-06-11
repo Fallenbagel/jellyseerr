@@ -13,7 +13,7 @@ describe('Pull To Refresh', () => {
       url: '/api/v1/*',
     }).as('apiCall');
 
-    cy.get('.searchbar').swipe('bottom', [190, 400]);
+    cy.get('.searchbar').swipe('bottom', [190, 500]);
 
     cy.wait('@apiCall').then((interception) => {
       assert.isNotNull(

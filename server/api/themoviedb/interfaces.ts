@@ -28,6 +28,18 @@ export interface TmdbTvResult extends TmdbMediaResult {
   first_air_date: string;
 }
 
+export interface TmdbCollectionResult {
+  id: number;
+  media_type: 'collection';
+  title: string;
+  original_title: string;
+  adult: boolean;
+  poster_path?: string;
+  backdrop_path?: string;
+  overview: string;
+  original_language: string;
+}
+
 export interface TmdbPersonResult {
   id: number;
   name: string;
@@ -45,7 +57,12 @@ interface TmdbPaginatedResponse {
 }
 
 export interface TmdbSearchMultiResponse extends TmdbPaginatedResponse {
-  results: (TmdbMovieResult | TmdbTvResult | TmdbPersonResult)[];
+  results: (
+    | TmdbMovieResult
+    | TmdbTvResult
+    | TmdbPersonResult
+    | TmdbCollectionResult
+  )[];
 }
 
 export interface TmdbSearchMovieResponse extends TmdbPaginatedResponse {

@@ -365,6 +365,36 @@ const Discover = () => {
               />
             );
             break;
+          case DiscoverSliderType.TMDB_MOVIE_STREAMING_SERVICES:
+            sliderComponent = (
+              <MediaSlider
+                sliderKey={`custom-slider-${slider.id}`}
+                title={slider.title ?? ''}
+                url="/api/v1/discover/movies"
+                extraParams={`watchRegion=${
+                  slider.data?.split(',')[0]
+                }&watchProviders=${slider.data?.split(',')[1]}`}
+                linkUrl={`/discover/movies?watchRegion=${
+                  slider.data?.split(',')[0]
+                }&watchProviders=${slider.data?.split(',')[1]}`}
+              />
+            );
+            break;
+          case DiscoverSliderType.TMDB_TV_STREAMING_SERVICES:
+            sliderComponent = (
+              <MediaSlider
+                sliderKey={`custom-slider-${slider.id}`}
+                title={slider.title ?? ''}
+                url="/api/v1/discover/tv"
+                extraParams={`watchRegion=${
+                  slider.data?.split(',')[0]
+                }&watchProviders=${slider.data?.split(',')[1]}`}
+                linkUrl={`/discover/tv?watchRegion=${
+                  slider.data?.split(',')[0]
+                }&watchProviders=${slider.data?.split(',')[1]}`}
+              />
+            );
+            break;
         }
 
         if (isEditing) {

@@ -704,7 +704,7 @@ export class MediaRequest {
 
         let rootFolder = radarrSettings.activeDirectory;
         let qualityProfile = radarrSettings.activeProfileId;
-        let tags = radarrSettings.tags;
+        let tags = radarrSettings.tags ? [...radarrSettings.tags] : [];
 
         if (
           this.rootFolder &&
@@ -762,6 +762,38 @@ export class MediaRequest {
             mediaId: this.media.id,
           });
           return;
+        }
+
+        if (radarrSettings.tagRequests) {
+          let userTag = (await radarr.getTags()).find((v) =>
+            v.label.startsWith(this.requestedBy.id + ' - ')
+          );
+          if (!userTag) {
+            logger.info(`Requester has no active tag. Creating new`, {
+              label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
+              userId: this.requestedBy.id,
+              newTag:
+                this.requestedBy.id + ' - ' + this.requestedBy.displayName,
+            });
+            userTag = await radarr.createTag({
+              label: this.requestedBy.id + ' - ' + this.requestedBy.displayName,
+            });
+          }
+          if (userTag.id) {
+            if (!tags?.find((v) => v === userTag?.id)) {
+              tags?.push(userTag.id);
+            }
+          } else {
+            logger.warn(`Requester has no tag and failed to add one`, {
+              label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
+              userId: this.requestedBy.id,
+              radarrServer: radarrSettings.hostname + ':' + radarrSettings.port,
+            });
+          }
         }
 
         if (
@@ -970,7 +1002,11 @@ export class MediaRequest {
         let tags =
           seriesType === 'anime'
             ? sonarrSettings.animeTags
-            : sonarrSettings.tags;
+              ? [...sonarrSettings.animeTags]
+              : []
+            : sonarrSettings.tags
+            ? [...sonarrSettings.tags]
+            : [];
 
         if (
           this.rootFolder &&
@@ -1020,6 +1056,38 @@ export class MediaRequest {
             mediaId: this.media.id,
             tagIds: tags,
           });
+        }
+
+        if (sonarrSettings.tagRequests) {
+          let userTag = (await sonarr.getTags()).find((v) =>
+            v.label.startsWith(this.requestedBy.id + ' - ')
+          );
+          if (!userTag) {
+            logger.info(`Requester has no active tag. Creating new`, {
+              label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
+              userId: this.requestedBy.id,
+              newTag:
+                this.requestedBy.id + ' - ' + this.requestedBy.displayName,
+            });
+            userTag = await sonarr.createTag({
+              label: this.requestedBy.id + ' - ' + this.requestedBy.displayName,
+            });
+          }
+          if (userTag.id) {
+            if (!tags?.find((v) => v === userTag?.id)) {
+              tags?.push(userTag.id);
+            }
+          } else {
+            logger.warn(`Requester has no tag and failed to add one`, {
+              label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
+              userId: this.requestedBy.id,
+              sonarrServer: sonarrSettings.hostname + ':' + sonarrSettings.port,
+            });
+          }
         }
 
         const sonarrSeriesOptions: AddSeriesOptions = {
