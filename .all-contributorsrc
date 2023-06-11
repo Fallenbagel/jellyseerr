@@ -863,6 +863,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "Fallenbagel",
+      "name": "Fallenbagel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/98979876?v=4",
+      "profile": "https://github.com/Fallenbagel",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "badgeTemplate": "<a href=\"#contributors-\"><img alt=\"All Contributors\" src=\"https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg\"/></a>",
