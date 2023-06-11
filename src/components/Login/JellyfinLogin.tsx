@@ -16,7 +16,7 @@ const messages = defineMessages({
   host: '{mediaServerName} URL',
   email: 'Email',
   emailtooltip:
-    'Any valid address. Unrelated to your {mediaServerName} instance.',
+    'Address does not need to be associated with your {mediaServerName} instance.',
   validationhostrequired: '{mediaServerName} URL required',
   validationhostformat: 'Valid URL required',
   validationemailrequired: 'Email required',
