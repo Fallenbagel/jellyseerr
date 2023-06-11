@@ -1,5 +1,7 @@
 import Button from '@app/components/Common/Button';
+import Tooltip from '@app/components/Common/Tooltip';
 import useSettings from '@app/hooks/useSettings';
+import { InformationCircleIcon } from '@heroicons/react/24/solid';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import getConfig from 'next/config';
@@ -13,7 +15,7 @@ const messages = defineMessages({
   password: 'Password',
   host: '{mediaServerName} URL',
   email: 'Email',
-  emailtooltip: 'This can be any valid email. It doesn\'t need to come from your {mediaServerName} instance.',
+  emailtooltip: 'Any valid email. Unrelated to your {mediaServerName} instance',
   validationhostrequired: '{mediaServerName} URL required',
   validationhostformat: 'Valid URL required',
   validationemailrequired: 'Email required',
@@ -66,9 +68,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
     });
     const mediaServerFormatValues = {
       mediaServerName:
-        publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-          ? 'Emby'
-          : 'Jellyfin',
+        publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
     };
     return (
       <Formik
@@ -116,17 +116,33 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                     id="host"
                     name="host"
                     type="text"
-                    placeholder={intl.formatMessage(messages.host, mediaServerFormatValues)}
+                    placeholder={intl.formatMessage(
+                      messages.host,
+                      mediaServerFormatValues
+                    )}
                   />
                 </div>
                 {errors.host && touched.host && (
                   <div className="error">{errors.host}</div>
                 )}
               </div>
-              <label htmlFor="email" className="text-label">
+              <label
+                htmlFor="email"
+                className="text-label"
+                style={{ display: 'inline-flex' }}
+              >
                 {intl.formatMessage(messages.email)}
                 <span className="label-tip">
-                  {intl.formatMessage(messages.emailtooltip, mediaServerFormatValues)}
+                  <Tooltip
+                    content={intl.formatMessage(
+                      messages.emailtooltip,
+                      mediaServerFormatValues
+                    )}
+                  >
+                    <span className="tooltip-trigger">
+                      <InformationCircleIcon className="h-5 w-5" />
+                    </span>
+                  </Tooltip>
                 </span>
               </label>
               <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
