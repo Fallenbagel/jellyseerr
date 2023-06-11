@@ -183,9 +183,7 @@ serviceRoutes.get<{ tmdbId: string }>(
 
     const sonarr = new SonarrAPI({
       apiKey: sonarrSettings.apiKey,
-      url: `${sonarrSettings.useSsl ? 'https' : 'http'}://${
-        sonarrSettings.hostname
-      }:${sonarrSettings.port}${sonarrSettings.baseUrl ?? ''}/api`,
+      url: SonarrAPI.buildUrl(sonarrSettings, '/api/v3'),
     });
 
     try {

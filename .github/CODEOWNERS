@@ -1,7 +1,2 @@
 # Global code ownership
-
--       @Fallenbagel
-
-# i18n locale files
-
-src/i18n/locale/ @Fallenbagel
+*                               @Fallenbagel

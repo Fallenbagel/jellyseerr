@@ -383,7 +383,14 @@ router.delete<{ id: string }>(
        * we manually remove all requests from the user here so the parent media's
        * properly reflect the change.
        */
-      await requestRepository.remove(user.requests);
+      await requestRepository.remove(user.requests, {
+        /**
+         * Break-up into groups of 1000 requests to be removed at a time.
+         * Necessary for users with >1000 requests, else an SQLite 'Expression tree is too large' error occurs.
+         * https://typeorm.io/repository-api#additional-options
+         */
+        chunk: user.requests.length / 1000,
+      });
 
       await userRepository.delete(user.id);
       return res.status(200).json(user.filter());

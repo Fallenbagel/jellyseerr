@@ -380,7 +380,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
     return res.status(200).json(user?.filter() ?? {});
   } catch (e) {
     if (e.message === 'Unauthorized') {
-      logger.info(
+      logger.warn(
         'Failed login attempt from user with incorrect Jellyfin credentials',
         {
           label: 'Auth',

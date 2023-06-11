@@ -169,15 +169,19 @@ export const GenreSelector = ({
     loadDefaultGenre();
   }, [defaultValue, type]);
 
-  const loadGenreOptions = async () => {
+  const loadGenreOptions = async (inputValue: string) => {
     const results = await axios.get<GenreSliderItem[]>(
       `/api/v1/discover/genreslider/${type}`
     );
 
-    return results.data.map((result) => ({
-      label: result.name,
-      value: result.id,
-    }));
+    return results.data
+      .map((result) => ({
+        label: result.name,
+        value: result.id,
+      }))
+      .filter(({ label }) =>
+        label.toLowerCase().includes(inputValue.toLowerCase())
+      );
   };
 
   return (
@@ -305,7 +309,9 @@ export const WatchProviderSelector = ({
 
   useEffect(() => {
     onChange(watchRegion, activeProvider);
-  }, [activeProvider, watchRegion, onChange]);
+    // removed onChange as a dependency as we only need to call it when the value(s) change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeProvider, watchRegion]);
 
   const orderedData = useMemo(() => {
     if (!data) {
@@ -344,7 +350,7 @@ export const WatchProviderSelector = ({
         <SmallLoadingSpinner />
       ) : (
         <div className="grid">
-          <div className="grid grid-cols-6 gap-2">
+          <div className="provider-icons grid gap-2">
             {initialProviders.map((provider) => {
               const isActive = activeProvider.includes(provider.id);
               return (
@@ -353,7 +359,7 @@ export const WatchProviderSelector = ({
                   key={`prodiver-${provider.id}`}
                 >
                   <div
-                    className={`provider-container relative h-full w-full cursor-pointer rounded-lg p-2 ring-1 ${
+                    className={`provider-container relative w-full cursor-pointer rounded-lg p-2 ring-1 ${
                       isActive
                         ? 'bg-gray-600 ring-indigo-500 hover:bg-gray-500'
                         : 'bg-gray-700 ring-gray-500 hover:bg-gray-600'
@@ -386,7 +392,7 @@ export const WatchProviderSelector = ({
             })}
           </div>
           {showMore && otherProviders.length > 0 && (
-            <div className="relative top-2 grid grid-cols-6 gap-2">
+            <div className="provider-icons relative top-2 grid gap-2">
               {otherProviders.map((provider) => {
                 const isActive = activeProvider.includes(provider.id);
                 return (
@@ -395,7 +401,7 @@ export const WatchProviderSelector = ({
                     key={`prodiver-${provider.id}`}
                   >
                     <div
-                      className={`provider-container relative h-full w-full cursor-pointer rounded-lg p-2 ring-1 transition ${
+                      className={`provider-container relative w-full cursor-pointer rounded-lg p-2 ring-1 transition ${
                         isActive
                           ? 'bg-gray-600 ring-indigo-500 hover:bg-gray-500'
                           : 'bg-gray-700 ring-gray-500 hover:bg-gray-600'
