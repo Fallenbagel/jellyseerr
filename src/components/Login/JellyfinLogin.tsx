@@ -15,7 +15,8 @@ const messages = defineMessages({
   password: 'Password',
   host: '{mediaServerName} URL',
   email: 'Email',
-  emailtooltip: 'Any valid email. Unrelated to your {mediaServerName} instance',
+  emailtooltip:
+    'Any valid address. Unrelated to your {mediaServerName} instance.',
   validationhostrequired: '{mediaServerName} URL required',
   validationhostformat: 'Valid URL required',
   validationemailrequired: 'Email required',
@@ -140,7 +141,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                     )}
                   >
                     <span className="tooltip-trigger">
-                      <InformationCircleIcon className="h-5 w-5" />
+                      <InformationCircleIcon className="h-4 w-4" />
                     </span>
                   </Tooltip>
                 </span>
