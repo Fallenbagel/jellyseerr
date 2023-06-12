@@ -148,14 +148,10 @@ export interface IMDBRating {
 }
 
 /**
- * This is a best-effort API. The Rotten Tomatoes API is technically
+ * This is a best-effort API. The IMDB API is technically
  * private and getting access costs money/requires approval.
  *
- * They do, however, have a "public" api that they use to request the
- * data on their own site. We use this to get ratings for movies/tv shows.
- *
- * Unfortunately, we need to do it by searching for the movie name, so it's
- * not always accurate.
+ * Radarr hosts a public proxy that's in use by all Radarr instances.
  */
 class IMDBRadarrProxy extends ExternalAPI {
   constructor() {
