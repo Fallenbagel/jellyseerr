@@ -1,6 +1,6 @@
 import Slider from '@app/components/Slider';
 import TmdbTitleCard from '@app/components/TitleCard/TmdbTitleCard';
-import { UserType, useUser } from '@app/hooks/useUser';
+import { useUser } from '@app/hooks/useUser';
 import { ArrowRightCircleIcon } from '@heroicons/react/24/outline';
 import type { WatchlistItem } from '@server/interfaces/api/discoverInterfaces';
 import Link from 'next/link';
@@ -8,7 +8,7 @@ import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
 
 const messages = defineMessages({
-  plexwatchlist: 'Your Plex Watchlist',
+  plexwatchlist: 'Your Watchlist',
   emptywatchlist:
     'Media added to your <PlexWatchlistSupportLink>Plex Watchlist</PlexWatchlistSupportLink> will appear here.',
 });
@@ -22,12 +22,11 @@ const PlexWatchlistSlider = () => {
     totalPages: number;
     totalResults: number;
     results: WatchlistItem[];
-  }>(user?.userType === UserType.PLEX ? '/api/v1/discover/watchlist' : null, {
+  }>('/api/v1/discover/watchlist', {
     revalidateOnMount: true,
   });
 
   if (
-    user?.userType !== UserType.PLEX ||
     (watchlistItems &&
       watchlistItems.results.length === 0 &&
       !user?.settings?.watchlistSyncMovies &&
@@ -69,6 +68,7 @@ const PlexWatchlistSlider = () => {
             key={`watchlist-slider-item-${item.ratingKey}`}
             tmdbId={item.tmdbId}
             type={item.mediaType}
+            isAddedToWatchlist={true}
           />
         ))}
       />

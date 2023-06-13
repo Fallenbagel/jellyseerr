@@ -3,6 +3,8 @@ import SonarrAPI from '@server/api/servarr/sonarr';
 import { MediaStatus, MediaType } from '@server/constants/media';
 import { MediaServerType } from '@server/constants/server';
 import { getRepository } from '@server/datasource';
+import type { User } from '@server/entity/User';
+import { Watchlist } from '@server/entity/Watchlist';
 import type { DownloadingItem } from '@server/lib/downloadtracker';
 import downloadTracker from '@server/lib/downloadtracker';
 import { getSettings } from '@server/lib/settings';
@@ -12,7 +14,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  In,
   Index,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -25,6 +26,7 @@ import Season from './Season';
 @Entity()
 class Media {
   public static async getRelatedMedia(
+    user: User | undefined,
     tmdbIds: number | number[]
   ): Promise<Media[]> {
     const mediaRepository = getRepository(Media);
@@ -37,9 +39,16 @@ class Media {
         finalIds = tmdbIds;
       }
 
-      const media = await mediaRepository.find({
-        where: { tmdbId: In(finalIds) },
-      });
+      const media = await mediaRepository
+        .createQueryBuilder('media')
+        .leftJoinAndSelect(
+          'media.watchlists',
+          'watchlist',
+          'media.id= watchlist.media and watchlist.requestedBy = :userId',
+          { userId: user?.id }
+        ) //,
+        .where(' media.tmdbId in (:...finalIds)', { finalIds })
+        .getMany();
 
       return media;
     } catch (e) {
@@ -93,6 +102,9 @@ class Media {
 
   @OneToMany(() => MediaRequest, (request) => request.media, { cascade: true })
   public requests: MediaRequest[];
+
+  @OneToMany(() => Watchlist, (watchlist) => watchlist.media)
+  public watchlists: null | Watchlist[];
 
   @OneToMany(() => Season, (season) => season.media, {
     cascade: true,

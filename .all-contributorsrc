@@ -809,6 +809,69 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "Alexays",
+      "name": "Alex",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13947260?v=4",
+      "profile": "https://arouillard.fr",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Zebebles",
+      "name": "Zeb Muller",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11425451?v=4",
+      "profile": "https://github.com/Zebebles",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "SMores",
+      "name": "Shane Friedman",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5354254?v=4",
+      "profile": "http://smoores.dev",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "IzaacJ",
+      "name": "Izaac Brånn",
+      "avatar_url": "https://avatars.githubusercontent.com/u/711323?v=4",
+      "profile": "https://izaacj.me",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "SalmanTariq",
+      "name": "Salman Tariq",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13284494?v=4",
+      "profile": "https://github.com/SalmanTariq",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "andrew-kennedy",
+      "name": "Andrew Kennedy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2387159?v=4",
+      "profile": "https://github.com/andrew-kennedy",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Fallenbagel",
+      "name": "Fallenbagel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/98979876?v=4",
+      "profile": "https://github.com/Fallenbagel",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "badgeTemplate": "<a href=\"#contributors-\"><img alt=\"All Contributors\" src=\"https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg\"/></a>",
@@ -818,5 +881,6 @@
   "repoType": "github",
   "repoHost": "https://github.com",
   "skipCi": false,
-  "commitConvention": "angular"
+  "commitConvention": "angular",
+  "commitType": "docs"
 }

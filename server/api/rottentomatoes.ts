@@ -17,7 +17,7 @@ interface RTAlgoliaHit {
   title: string;
   titles: string[];
   description: string;
-  releaseYear: string;
+  releaseYear: number;
   rating: string;
   genres: string[];
   updateDate: string;
@@ -111,22 +111,19 @@ class RottenTomatoes extends ExternalAPI {
 
       // First, attempt to match exact name and year
       let movie = contentResults.hits.find(
-        (movie) => movie.releaseYear === year.toString() && movie.title === name
+        (movie) => movie.releaseYear === year && movie.title === name
       );
 
       // If we don't find a movie, try to match partial name and year
       if (!movie) {
         movie = contentResults.hits.find(
-          (movie) =>
-            movie.releaseYear === year.toString() && movie.title.includes(name)
+          (movie) => movie.releaseYear === year && movie.title.includes(name)
         );
       }
 
       // If we still dont find a movie, try to match just on year
       if (!movie) {
-        movie = contentResults.hits.find(
-          (movie) => movie.releaseYear === year.toString()
-        );
+        movie = contentResults.hits.find((movie) => movie.releaseYear === year);
       }
 
       // One last try, try exact name match only
@@ -181,7 +178,7 @@ class RottenTomatoes extends ExternalAPI {
 
       if (year) {
         tvshow = contentResults.hits.find(
-          (series) => series.releaseYear === year.toString()
+          (series) => series.releaseYear === year
         );
       }
 

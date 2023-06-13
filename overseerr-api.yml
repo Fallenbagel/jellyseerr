@@ -36,6 +36,8 @@ tags:
     description: Endpoints related to retrieving collection details.
   - name: service
     description: Endpoints related to getting service (Radarr/Sonarr) details.
+  - name: watchlist
+    description: Collection of media to watch later
 servers:
   - url: '{server}/api/v1'
     variables:
@@ -44,6 +46,34 @@ servers:
 
 components:
   schemas:
+    Watchlist:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+          readOnly: true
+        tmdbId:
+          type: number
+          example: 1
+        ratingKey:
+          type: string
+        type:
+          type: string
+        title:
+          type: string
+        media:
+          $ref: '#/components/schemas/MediaInfo'
+        createdAt:
+          type: string
+          example: '2020-09-12T10:00:27.000Z'
+          readOnly: true
+        updatedAt:
+          type: string
+          example: '2020-09-12T10:00:27.000Z'
+          readOnly: true
+        requestedBy:
+          $ref: '#/components/schemas/User'
     User:
       type: object
       properties:
@@ -3962,6 +3992,41 @@ paths:
                       restricted:
                         type: boolean
                         example: false
+  /watchlist:
+    post:
+      summary: Add media to watchlist
+      tags:
+        - watchlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Watchlist'
+      responses:
+        '200':
+          description: Watchlist data returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Watchlist'
+  /watchlist/{tmdbId}:
+    delete:
+      summary: Delete watchlist item
+      description: Removes a watchlist item.
+      tags:
+        - watchlist
+      parameters:
+        - in: path
+          name: tmdbId
+          description: tmdbId ID
+          required: true
+          example: '1'
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Succesfully removed watchlist item
   /user/{userId}/watchlist:
     get:
       summary: Get the Plex watchlist for a specific user
@@ -3969,6 +4034,7 @@ paths:
         Retrieves a user's Plex Watchlist in a JSON object.
       tags:
         - users
+        - watchlist
       parameters:
         - in: path
           name: userId
@@ -4440,6 +4506,16 @@ paths:
             type: number
             example: 10
         - in: query
+          name: voteCountGte
+          schema:
+            type: number
+            example: 7
+        - in: query
+          name: voteCountLte
+          schema:
+            type: number
+            example: 10
+        - in: query
           name: watchRegion
           schema:
             type: string
@@ -4715,6 +4791,16 @@ paths:
             example: 7
         - in: query
           name: voteAverageLte
+          schema:
+            type: number
+            example: 10
+        - in: query
+          name: voteCountGte
+          schema:
+            type: number
+            example: 7
+        - in: query
+          name: voteCountLte
           schema:
             type: number
             example: 10

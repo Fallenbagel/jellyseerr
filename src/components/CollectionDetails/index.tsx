@@ -338,6 +338,7 @@ const CollectionDetails = ({ collection }: CollectionDetailsProps) => {
           <TitleCard
             key={`collection-movie-${title.id}`}
             id={title.id}
+            isAddedToWatchlist={title.mediaInfo?.watchlists?.length ?? 0}
             image={title.posterPath}
             status={title.mediaInfo?.status}
             summary={title.overview}
@@ -348,7 +349,7 @@ const CollectionDetails = ({ collection }: CollectionDetailsProps) => {
           />
         ))}
       />
-      <div className="pb-8" />
+      <div className="extra-bottom-space relative" />
     </div>
   );
 };

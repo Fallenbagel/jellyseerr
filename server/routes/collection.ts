@@ -16,6 +16,7 @@ collectionRoutes.get<{ id: string }>('/:id', async (req, res, next) => {
     });
 
     const media = await Media.getRelatedMedia(
+      req.user,
       collection.parts.map((part) => part.id)
     );
 

@@ -2,6 +2,7 @@ import Button from '@app/components/Common/Button';
 import Tooltip from '@app/components/Common/Tooltip';
 import { sliderTitles } from '@app/components/Discover/constants';
 import MediaSlider from '@app/components/MediaSlider';
+import { WatchProviderSelector } from '@app/components/Selector';
 import { encodeURIExtraParams } from '@app/hooks/useDiscover';
 import type {
   TmdbCompanySearchResponse,
@@ -55,7 +56,7 @@ type CreateOption = {
   dataUrl: string;
   params?: string;
   titlePlaceholderText: string;
-  dataPlaceholderText: string;
+  dataPlaceholderText?: string;
 };
 
 const CreateSlider = ({ onCreate, slider }: CreateSliderProps) => {
@@ -276,6 +277,20 @@ const CreateSlider = ({ onCreate, slider }: CreateSliderProps) => {
       titlePlaceholderText: intl.formatMessage(messages.slidernameplaceholder),
       dataPlaceholderText: intl.formatMessage(messages.providetmdbsearch),
     },
+    {
+      type: DiscoverSliderType.TMDB_MOVIE_STREAMING_SERVICES,
+      title: intl.formatMessage(sliderTitles.tmdbmoviestreamingservices),
+      dataUrl: '/api/v1/discover/movies',
+      params: 'watchRegion=$regionValue&watchProviders=$providersValue',
+      titlePlaceholderText: intl.formatMessage(messages.slidernameplaceholder),
+    },
+    {
+      type: DiscoverSliderType.TMDB_TV_STREAMING_SERVICES,
+      title: intl.formatMessage(sliderTitles.tmdbtvstreamingservices),
+      dataUrl: '/api/v1/discover/tv',
+      params: 'watchRegion=$regionValue&watchProviders=$providersValue',
+      titlePlaceholderText: intl.formatMessage(messages.slidernameplaceholder),
+    },
   ];
 
   return (
@@ -417,6 +432,40 @@ const CreateSlider = ({ onCreate, slider }: CreateSliderProps) => {
               />
             );
             break;
+          case DiscoverSliderType.TMDB_MOVIE_STREAMING_SERVICES:
+            dataInput = (
+              <WatchProviderSelector
+                type={'movie'}
+                region={slider?.data?.split(',')[0]}
+                activeProviders={
+                  slider?.data
+                    ?.split(',')[1]
+                    .split('|')
+                    .map((v) => Number(v)) ?? []
+                }
+                onChange={(region, providers) => {
+                  setFieldValue('data', `${region},${providers.join('|')}`);
+                }}
+              />
+            );
+            break;
+          case DiscoverSliderType.TMDB_TV_STREAMING_SERVICES:
+            dataInput = (
+              <WatchProviderSelector
+                type={'tv'}
+                region={slider?.data?.split(',')[0]}
+                activeProviders={
+                  slider?.data
+                    ?.split(',')[1]
+                    .split('|')
+                    .map((v) => Number(v)) ?? []
+                }
+                onChange={(region, providers) => {
+                  setFieldValue('data', `${region},${providers.join('|')}`);
+                }}
+              />
+            );
+            break;
           default:
             dataInput = (
               <Field
@@ -488,10 +537,25 @@ const CreateSlider = ({ onCreate, slider }: CreateSliderProps) => {
                     '$value',
                     encodeURIExtraParams(values.data)
                   )}
-                  extraParams={activeOption.params?.replace(
-                    '$value',
-                    encodeURIExtraParams(values.data)
-                  )}
+                  extraParams={
+                    activeOption.type ===
+                      DiscoverSliderType.TMDB_MOVIE_STREAMING_SERVICES ||
+                    activeOption.type ===
+                      DiscoverSliderType.TMDB_TV_STREAMING_SERVICES
+                      ? activeOption.params
+                          ?.replace(
+                            '$regionValue',
+                            encodeURIExtraParams(values?.data.split(',')[0])
+                          )
+                          .replace(
+                            '$providersValue',
+                            encodeURIExtraParams(values?.data.split(',')[1])
+                          )
+                      : activeOption.params?.replace(
+                          '$value',
+                          encodeURIExtraParams(values.data)
+                        )
+                  }
                   onNewTitles={updateResultCount}
                 />
               </div>

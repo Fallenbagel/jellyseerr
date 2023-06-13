@@ -76,6 +76,15 @@ export interface SonarrSeries {
     ignoreEpisodesWithoutFiles?: boolean;
     searchForMissingEpisodes?: boolean;
   };
+  statistics: {
+    seasonCount: number;
+    episodeFileCount: number;
+    episodeCount: number;
+    totalEpisodeCount: number;
+    sizeOnDisk: number;
+    releaseGroups: string[];
+    percentOfEpisodes: number;
+  };
 }
 
 export interface AddSeriesOptions {
@@ -113,6 +122,16 @@ class SonarrAPI extends ServarrBase<{
       return response.data;
     } catch (e) {
       throw new Error(`[Sonarr] Failed to retrieve series: ${e.message}`);
+    }
+  }
+
+  public async getSeriesById(id: number): Promise<SonarrSeries> {
+    try {
+      const response = await this.axios.get<SonarrSeries>(`/series/${id}`);
+
+      return response.data;
+    } catch (e) {
+      throw new Error(`[Sonarr] Failed to retrieve series by ID: ${e.message}`);
     }
   }
 

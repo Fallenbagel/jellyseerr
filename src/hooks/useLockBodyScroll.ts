@@ -15,13 +15,20 @@ export const useLockBodyScroll = (
   disabled?: boolean
 ): void => {
   useEffect(() => {
-    const originalStyle = window.getComputedStyle(document.body).overflow;
+    const originalOverflowStyle = window.getComputedStyle(
+      document.body
+    ).overflow;
+    const originalTouchActionStyle = window.getComputedStyle(
+      document.body
+    ).touchAction;
     if (isLocked && !disabled) {
       document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
     }
     return () => {
       if (!disabled) {
-        document.body.style.overflow = originalStyle;
+        document.body.style.overflow = originalOverflowStyle;
+        document.body.style.touchAction = originalTouchActionStyle;
       }
     };
   }, [isLocked, disabled]);
