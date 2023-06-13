@@ -1103,7 +1103,7 @@
   "components.PermissionEdit.autorequestSeries": "Series automatisch aanvragen",
   "components.PermissionEdit.autorequestMovies": "Films automatisch aanvragen",
   "components.Settings.experimentalTooltip": "Deze instelling inschakelen, kan leiden tot onverwacht gedrag van de toepassing",
-  "components.Settings.restartrequiredTooltip": "Overseerr moet opnieuw worden gestart om wijzigingen in deze instelling door te voeren",
+  "components.Settings.restartrequiredTooltip": "Jellyseerr moet opnieuw worden gestart om wijzigingen in deze instelling door te voeren",
   "components.AirDateBadge.airedrelative": "{relativeTime} uitgezonden",
   "components.AirDateBadge.airsrelative": "Uitzending {relativeTime}",
   "components.Layout.UserDropdown.MiniQuotaDisplay.seriesrequests": "Serieverzoeken",
