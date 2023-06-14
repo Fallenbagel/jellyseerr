@@ -1,5 +1,7 @@
 import Button from '@app/components/Common/Button';
+import Tooltip from '@app/components/Common/Tooltip';
 import useSettings from '@app/hooks/useSettings';
+import { InformationCircleIcon } from '@heroicons/react/24/solid';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import getConfig from 'next/config';
@@ -13,6 +15,8 @@ const messages = defineMessages({
   password: 'Password',
   host: '{mediaServerName} URL',
   email: 'Email',
+  emailtooltip:
+    'Address does not need to be associated with your {mediaServerName} instance.',
   validationhostrequired: '{mediaServerName} URL required',
   validationhostformat: 'Valid URL required',
   validationemailrequired: 'Email required',
@@ -63,6 +67,10 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
       ),
       password: Yup.string(),
     });
+    const mediaServerFormatValues = {
+      mediaServerName:
+        publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+    };
     return (
       <Formik
         initialValues={{
@@ -101,12 +109,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
           <Form>
             <div className="sm:border-t sm:border-gray-800">
               <label htmlFor="host" className="text-label">
-                {intl.formatMessage(messages.host, {
-                  mediaServerName:
-                    publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                      ? 'Emby'
-                      : 'Jellyfin',
-                })}
+                {intl.formatMessage(messages.host, mediaServerFormatValues)}
               </label>
               <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
                 <div className="flex rounded-md shadow-sm">
@@ -114,20 +117,34 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                     id="host"
                     name="host"
                     type="text"
-                    placeholder={intl.formatMessage(messages.host, {
-                      mediaServerName:
-                        publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                          ? 'Emby'
-                          : 'Jellyfin',
-                    })}
+                    placeholder={intl.formatMessage(
+                      messages.host,
+                      mediaServerFormatValues
+                    )}
                   />
                 </div>
                 {errors.host && touched.host && (
                   <div className="error">{errors.host}</div>
                 )}
               </div>
-              <label htmlFor="email" className="text-label">
+              <label
+                htmlFor="email"
+                className="text-label"
+                style={{ display: 'inline-flex' }}
+              >
                 {intl.formatMessage(messages.email)}
+                <span className="label-tip">
+                  <Tooltip
+                    content={intl.formatMessage(
+                      messages.emailtooltip,
+                      mediaServerFormatValues
+                    )}
+                  >
+                    <span className="tooltip-trigger">
+                      <InformationCircleIcon className="h-4 w-4" />
+                    </span>
+                  </Tooltip>
+                </span>
               </label>
               <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
                 <div className="flex rounded-md shadow-sm">
