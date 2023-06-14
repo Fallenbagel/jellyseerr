@@ -457,7 +457,7 @@
   "components.Settings.partialRequestsEnabled": "Permet sol·licituds parcials de Sèries",
   "components.Settings.originallanguageTip": "Filtra el contingut per l'idioma original",
   "components.Settings.originallanguage": "Idioma per a la secció \"Descobriu\"",
-  "components.Settings.manualscanDescription": "Normalment, només s’executarà una vegada cada 24 hores. Overseerr comprovarà de forma més agressiva el contingut afegit recentment del seu servidor Plex. Si és la primera vegada que configureu Plex, es recomana fer una exploració manual completa de la biblioteca!",
+  "components.Settings.manualscanDescription": "Normalment, només s’executarà una vegada cada 24 hores. Jellyseerr comprovarà de forma més agressiva el contingut afegit recentment del seu servidor Plex. Si és la primera vegada que configureu Plex, es recomana fer una exploració manual completa de la biblioteca!",
   "components.Settings.SettingsJobsCache.plex-recently-added-scan": "Exploració d'elements de Plex afegits recentment",
   "components.Settings.notrunning": "No s'està executant",
   "components.Settings.notificationsettings": "Configuració de les notificacions",
@@ -1110,5 +1110,5 @@
   "components.Settings.SettingsJobsCache.imagecache": "Memòria cau d'imatges",
   "components.Settings.SettingsJobsCache.imagecachecount": "Imatges a la memòria cau",
   "components.Settings.SettingsJobsCache.imagecachesize": "Mida total de la memòria cau",
-  "components.Settings.SettingsJobsCache.imagecacheDescription": "Quan està activat a la configuració, Overseerr enviarà les imatges a la memòria cau de fonts externes preconfigurades. Les imatges emmagatzemades a la memòria cau es desen a la vostra carpeta de configuració. Podeu trobar els fitxers a <code>{appDataPath}/cache/images</code>."
+  "components.Settings.SettingsJobsCache.imagecacheDescription": "Quan està activat a la configuració, Jellyseerr enviarà les imatges a la memòria cau de fonts externes preconfigurades. Les imatges emmagatzemades a la memòria cau es desen a la vostra carpeta de configuració. Podeu trobar els fitxers a <code>{appDataPath}/cache/images</code>."
 }

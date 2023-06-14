@@ -1060,7 +1060,7 @@
   "components.RequestCard.tmdbid": "TMDB ID",
   "components.Settings.SettingsLogs.viewdetails": "查看详情",
   "components.Layout.UserDropdown.requests": "请求",
-  "components.Settings.restartrequiredTooltip": "必须重新启动 Overseerr 才能使更改的设置生效",
+  "components.Settings.restartrequiredTooltip": "必须重新启动 Jellyseerr 才能使更改的设置生效",
   "components.TvDetails.manageseries": "管理电视节目",
   "components.UserProfile.UserSettings.UserGeneralSettings.plexwatchlistsyncseriestip": "自动请求您的 <PlexWatchlistSupportLink>Plex 关注列表</PlexWatchlistSupportLink>的媒体",
   "components.AirDateBadge.airedrelative": "播出{relativeTime}",

@@ -187,7 +187,7 @@ describe('Discover', () => {
 
     cy.wait('@getWatchlist');
 
-    const sliderHeader = cy.contains('.slider-header', 'Your Watchlist');
+    const sliderHeader = cy.contains('.slider-header', 'Watchlist');
 
     sliderHeader.scrollIntoView();
 

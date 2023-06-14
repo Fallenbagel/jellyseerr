@@ -39,7 +39,7 @@
   "components.Settings.SettingsAbout.totalrequests": "Celkový počet žádostí",
   "components.Settings.SettingsAbout.totalmedia": "Celkový počet médií",
   "components.Settings.SettingsAbout.timezone": "Časové pásmo",
-  "components.Settings.SettingsAbout.supportoverseerr": "Podpořte Overseerr",
+  "components.Settings.SettingsAbout.supportoverseerr": "Podpořte Jellyseerr",
   "components.Settings.SettingsAbout.overseerrinformation": "O Jellyseerr",
   "components.Settings.SettingsAbout.githubdiscussions": "Diskuze na GitHubu",
   "components.Settings.SettingsAbout.Releases.viewchangelog": "Zobrazit seznam změn",
