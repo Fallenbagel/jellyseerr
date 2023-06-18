@@ -60,11 +60,23 @@ yarn start
 
 Pre-requisites:
 
+Package Manager:
+- Git
+- npm
+
+npm:
 - Nodejs (atleast LTS version)
 - Yarn
-- Git
+  
+```bash
+npm install -g node yarn
+```
+```-g flag required for global install of packages```
+
+Installation:
 
 ```bash
+cd /opt #recommended folder for installation
 git clone https://github.com/Fallenbagel/jellyseerr.git && cd jellyseerr
 git checkout main #if you want to run stable instead of develop
 yarn install
