@@ -84,13 +84,14 @@ yarn run build
 yarn start
 ```
 
-_Systemd-service:_
+Systemd Service:
 
-- assuming jellyseerr was cloned to `/opt/`
-  and the environmentfile is located at `/etc/jellyseerr`
+Assuming:
+- Jellyseerr was cloned to `/opt/`
+- The environmentfile is located at `/etc/jellyseerr/jellyseerr.conf`
+- node was installed with npm using `-g` flag
 
-service:
-
+Create file at: ```/etc/systemd/system/jellyseerr.service```
 ```
 [Unit]
 Description=Jellyseerr Service
@@ -103,7 +104,7 @@ Environment=NODE_ENV=production
 Type=exec
 Restart=on-failure
 WorkingDirectory=/opt/jellyseerr
-ExecStart=/root/.nvm/versions/node/v18.7.0/bin/node dist/index.js
+ExecStart=node dist/index.js
 
 [Install]
 WantedBy=multi-user.target
