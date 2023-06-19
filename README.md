@@ -91,7 +91,10 @@ Assuming:
 - The environmentfile is located at `/etc/jellyseerr/jellyseerr.conf`
 - node was installed with npm using `-g` flag
 
-Create file at: ```/etc/systemd/system/jellyseerr.service```
+Lookup path for the node binary with `which node` it should return something like this: `/usr/bin/node`
+
+Create new file at ```/etc/systemd/system/jellyseerr.service``` with the following text:
+
 ```
 [Unit]
 Description=Jellyseerr Service
@@ -104,11 +107,18 @@ Environment=NODE_ENV=production
 Type=exec
 Restart=on-failure
 WorkingDirectory=/opt/jellyseerr
-ExecStart=node dist/index.js
+ExecStart=/usr/bin/node dist/index.js
 
 [Install]
 WantedBy=multi-user.target
 ```
+
+The node path in `ExecStart` needs to be changed to what you got from `which node`
+
+Example:
+`ExecStart=/usr/bin/node dist/index.js` or `ExecStart=/usr/local/bin/node dist/index.js`
+
+`dist/index.js` is required.
 
 Environmentfile:
 
