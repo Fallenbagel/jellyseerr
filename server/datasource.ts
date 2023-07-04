@@ -30,9 +30,53 @@ const prodConfig: DataSourceOptions = {
   subscribers: ['dist/subscriber/**/*.js'],
 };
 
-const dataSource = new DataSource(
-  process.env.NODE_ENV !== 'production' ? devConfig : prodConfig
-);
+const postgresDevConfig: DataSourceOptions = {
+  type: 'postgres',
+  name: 'pgdb',
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT ?? '5432'),
+  username: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME ?? 'jellyseerr',
+  synchronize: true,
+  migrationsRun: false,
+  logging: false,
+  entities: ['server/entity/**/*.ts'],
+  migrations: ['server/migration/**/*.ts'],
+  subscribers: ['server/subscriber/**/*.ts'],
+};
+
+const postgresProdConfig: DataSourceOptions = {
+  type: 'postgres',
+  name: 'pgdb',
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT ?? '5432'),
+  username: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME ?? 'jellyseerr',
+  synchronize: false,
+  migrationsRun: false,
+  logging: false,
+  entities: ['dist/entity/**/*.js'],
+  migrations: ['dist/migration/**/*.js'],
+  subscribers: ['dist/subscriber/**/*.js'],
+};
+
+export const isPgsql = process.env.DB_TYPE === 'postgres';
+
+function getDataSource(): DataSourceOptions {
+  if (process.env.NODE_ENV === 'production') {
+    if (isPgsql) {
+      return postgresProdConfig;
+    }
+    return prodConfig;
+  } else if (isPgsql) {
+    return postgresDevConfig;
+  }
+  return devConfig;
+}
+
+const dataSource = new DataSource(getDataSource());
 
 export const getRepository = <Entity extends object>(
   target: EntityTarget<Entity>
