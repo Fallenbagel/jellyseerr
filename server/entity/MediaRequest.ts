@@ -12,7 +12,7 @@ import {
   MediaStatus,
   MediaType,
 } from '@server/constants/media';
-import { getRepository } from '@server/datasource';
+import { getRepository, isPgsql } from '@server/datasource';
 import type { MediaRequestBody } from '@server/interfaces/api/requestInterfaces';
 import notificationManager, { Notification } from '@server/lib/notifications';
 import { Permission } from '@server/lib/permissions';
@@ -569,6 +569,13 @@ export class MediaRequest {
       });
       return;
     }
+    // Typeorm pgsql doesn't load this relation even though the query specifically
+    // calls for it. The fk will get blown away from media_request when it is
+    // saved. Adding request back in prior to saving.
+    if (isPgsql) {
+      media.requests.push(this);
+    }
+
     const seasonRequestRepository = getRepository(SeasonRequest);
     if (
       this.status === MediaRequestStatus.APPROVED &&
@@ -626,6 +633,13 @@ export class MediaRequest {
       where: { id: this.media.id },
       relations: { requests: true },
     });
+
+    // Typeorm pgsql doesn't load this relation even though the query specifically
+    // calls for it. The fk will get blown away from media_request when it is
+    // saved. Adding request back in prior to saving.
+    if (isPgsql) {
+      fullMedia.requests.push(this);
+    }
 
     if (
       !fullMedia.requests.some((request) => !request.is4k) &&
