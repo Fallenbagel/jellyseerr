@@ -96,6 +96,7 @@ apps:
       - home
       - network
       - network-bind
+      - personal-files
     environment:
       PATH: '$SNAP/usr/sbin:$SNAP/usr/bin:$SNAP/sbin:$SNAP/bin:$PATH'
       OVERSEERR_SNAP: 'True'
