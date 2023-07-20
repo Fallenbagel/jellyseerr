@@ -111,6 +111,8 @@ class DiscordAgent
   ): DiscordRichEmbed {
     const { applicationUrl } = getSettings().main;
 
+    const appUrl =
+      applicationUrl || `http://localhost:${process.env.port || 5055}`;
     let color = EmbedColors.DARK_PURPLE;
     const fields: Field[] = [];
 
@@ -125,7 +127,7 @@ class DiscordAgent
       switch (type) {
         case Notification.MEDIA_PENDING:
           color = EmbedColors.ORANGE;
-          status = 'Pending Approval';
+          status = `[Pending Approval](${appUrl}/requests)`;
           break;
         case Notification.MEDIA_APPROVED:
         case Notification.MEDIA_AUTO_APPROVED:
