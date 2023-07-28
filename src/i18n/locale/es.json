@@ -560,7 +560,7 @@
   "components.Settings.SettingsJobsCache.editJobScheduleSelectorHours": "Cada {jobScheduleHours, plural, one {hora} other {{jobScheduleHours} horas}}",
   "components.Settings.SettingsJobsCache.editJobScheduleSelectorMinutes": "Cada {jobScheduleMinutes, plural, one {minuto} other {{jobScheduleMinutes} minutos}}",
   "components.Settings.SettingsJobsCache.flushcache": "Vaciar Caché",
-  "components.Settings.SettingsJobsCache.jelly-recently-added-scan": "Escaneo de Recien Añadidos de Jellyfin",
+  "components.Settings.SettingsJobsCache.jellyfin-recently-added-scan": "Escaneo de Recien Añadidos de Jellyfin",
   "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Escaneo Completo de la Biblioteca de Jellyfin",
   "components.Settings.SettingsJobsCache.jobScheduleEditFailed": "Algo fue mal al guardar la tarea programada.",
   "components.Settings.SettingsJobsCache.jobScheduleEditSaved": "¡Tarea programada modificada con éxito!",

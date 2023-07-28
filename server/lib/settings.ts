@@ -263,8 +263,8 @@ export type JobId =
   | 'sonarr-scan'
   | 'download-sync'
   | 'download-sync-reset'
-  | 'jellyfin-recently-added-sync'
-  | 'jellyfin-full-sync'
+  | 'jellyfin-recently-added-scan'
+  | 'jellyfin-full-scan'
   | 'image-cache-cleanup'
   | 'availability-sync';
 
@@ -446,10 +446,10 @@ class Settings {
         'download-sync-reset': {
           schedule: '0 0 1 * * *',
         },
-        'jellyfin-recently-added-sync': {
+        'jellyfin-recently-added-scan': {
           schedule: '0 */5 * * * *',
         },
-        'jellyfin-full-sync': {
+        'jellyfin-full-scan': {
           schedule: '0 0 3 * * *',
         },
         'image-cache-cleanup': {

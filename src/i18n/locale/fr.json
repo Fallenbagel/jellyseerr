@@ -650,7 +650,7 @@
   "components.Settings.SettingsJobsCache.editJobScheduleSelectorHours": "Toutes les {jobScheduleHours, plural, one {heure} other {{jobScheduleHours} heures}}",
   "components.Settings.SettingsJobsCache.editJobScheduleSelectorMinutes": "Toutes les {jobScheduleMinutes, plural, one {minute} other {{jobScheduleMinutes} minutes}}",
   "components.Settings.SettingsJobsCache.flushcache": "Vider le cache",
-  "components.Settings.SettingsJobsCache.jelly-recently-added-scan": "Scanner les récents ajoutés sur Jellyfin",
+  "components.Settings.SettingsJobsCache.jellyfin-recently-added-scan": "Scanner les récents ajoutés sur Jellyfin",
   "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Scanner toute la bibliothèque Jellyfin",
   "components.Settings.SettingsJobsCache.image-cache-cleanup": "Vider le cache des images",
   "components.Settings.SettingsJobsCache.imagecache": "Cache des images",

@@ -655,7 +655,7 @@
   "components.Settings.SettingsJobsCache.imagecacheDescription": "Wenn diese Funktion in den Einstellungen aktiviert ist, wird Jellyseerr Bilder aus vorkonfigurierten externen Quellen cachen und ausliefern. Bilder im Cache werden in deinem Config Ordner abgelegt. Die findest die Dateien unter <code>{appDataPath}/cache/images</code>.",
   "components.Settings.SettingsJobsCache.imagecachecount": "Bilder im Cache",
   "components.Settings.SettingsJobsCache.imagecachesize": "Gesamtgröße des Cache",
-  "components.Settings.SettingsJobsCache.jelly-recently-added-scan": "Scan der zuletzt hinzugefügten Jellyfin Medien",
+  "components.Settings.SettingsJobsCache.jellyfin-recently-added-scan": "Scan der zuletzt hinzugefügten Jellyfin Medien",
   "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Vollständiger Jellyfin Bibliotheken Scan",
   "components.Settings.SettingsJobsCache.jobScheduleEditFailed": "Beim Speichern des Auftrags ging etwas schief.",
   "components.Settings.SettingsJobsCache.jobScheduleEditSaved": "Auftrag erfolgreich bearbeitet!",

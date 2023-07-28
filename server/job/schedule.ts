@@ -71,13 +71,13 @@ export const startJobs = (): void => {
   ) {
     // Run recently added jellyfin sync every 5 minutes
     scheduledJobs.push({
-      id: 'jellyfin-recently-added-sync',
+      id: 'jellyfin-recently-added-scan',
       name: 'Jellyfin Recently Added Sync',
       type: 'process',
       interval: 'minutes',
-      cronSchedule: jobs['jellyfin-recently-added-sync'].schedule,
+      cronSchedule: jobs['jellyfin-recently-added-scan'].schedule,
       job: schedule.scheduleJob(
-        jobs['jellyfin-recently-added-sync'].schedule,
+        jobs['jellyfin-recently-added-scan'].schedule,
         () => {
           logger.info('Starting scheduled job: Jellyfin Recently Added Sync', {
             label: 'Jobs',
@@ -91,12 +91,12 @@ export const startJobs = (): void => {
 
     // Run full jellyfin sync every 24 hours
     scheduledJobs.push({
-      id: 'jellyfin-full-sync',
+      id: 'jellyfin-full-scan',
       name: 'Jellyfin Full Library Sync',
       type: 'process',
       interval: 'hours',
-      cronSchedule: jobs['jellyfin-full-sync'].schedule,
-      job: schedule.scheduleJob(jobs['jellyfin-full-sync'].schedule, () => {
+      cronSchedule: jobs['jellyfin-full-scan'].schedule,
+      job: schedule.scheduleJob(jobs['jellyfin-full-scan'].schedule, () => {
         logger.info('Starting scheduled job: Jellyfin Full Sync', {
           label: 'Jobs',
         });
