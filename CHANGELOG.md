@@ -1,3 +1,42 @@
+# [1.6.0](https://github.com/fallenbagel/jellyseerr/compare/v1.5.0...v1.6.0) (2023-08-04)
+
+
+### Bug Fixes
+
+* availability sync file detection ([#3371](https://github.com/fallenbagel/jellyseerr/issues/3371)) ([7522aa3](https://github.com/fallenbagel/jellyseerr/commit/7522aa31743b169c903ebdf9d4d698645d27514c))
+* corrected initial fallback data load on details page ([#3395](https://github.com/fallenbagel/jellyseerr/issues/3395)) ([4bd8764](https://github.com/fallenbagel/jellyseerr/commit/4bd87647d0551c20e13589a62690a6f3e5ad8ff7))
+* correctly load series fallback modal with sonarr v4 ([#3451](https://github.com/fallenbagel/jellyseerr/issues/3451)) ([e051b1d](https://github.com/fallenbagel/jellyseerr/commit/e051b1dfea9c9320cc9dd420c475ae74cff0d901))
+* **deps:** update all non-major dependencies ([#3223](https://github.com/fallenbagel/jellyseerr/issues/3223)) ([f5191ad](https://github.com/fallenbagel/jellyseerr/commit/f5191aded680357522a65bbdcc40d162b8fbf594))
+* error deleting users with over 1000 requests ([#3376](https://github.com/fallenbagel/jellyseerr/issues/3376)) ([ac77b03](https://github.com/fallenbagel/jellyseerr/commit/ac77b037d5fb0c54f5edf4b29d04adb57aef388f))
+* external url regex is now consistent with internal url ([33ec443](https://github.com/fallenbagel/jellyseerr/commit/33ec4436fb82e1eb1bc97dd650088c27785e9d94))
+* externalLinkBlock ([46cd4d0](https://github.com/fallenbagel/jellyseerr/commit/46cd4d01d9a3cf17d79350c5e678202820272299))
+* fix regex for internal url to use a more effecient one ([e848386](https://github.com/fallenbagel/jellyseerr/commit/e848386d10f05f157e7a6dde8847ecab50c169ac))
+* fixes RT ratings for tv shows ([#3492](https://github.com/fallenbagel/jellyseerr/issues/3492)) ([04fbd00](https://github.com/fallenbagel/jellyseerr/commit/04fbd00d4ac29045592588ef8b664d1916991e37)), closes [#3491](https://github.com/fallenbagel/jellyseerr/issues/3491)
+* **genreselector:** fix searching in Genre filter ([#3468](https://github.com/fallenbagel/jellyseerr/issues/3468)) ([d7fa35e](https://github.com/fallenbagel/jellyseerr/commit/d7fa35e066cf371797aaa46ca464aa531ba8fb35))
+* handle search results with collections ([#3393](https://github.com/fallenbagel/jellyseerr/issues/3393)) ([70b1540](https://github.com/fallenbagel/jellyseerr/commit/70b1540ae23e83e01013856a9e06ad39e600922d))
+* lock body scroll when using webkit ([#3399](https://github.com/fallenbagel/jellyseerr/issues/3399)) ([c27f960](https://github.com/fallenbagel/jellyseerr/commit/c27f96096ac8cc6c387f9d1dde5b263576ac2132))
+* **logs:** jellyfin auth error now has the severity warn consistent with local login ([cc041b5](https://github.com/fallenbagel/jellyseerr/commit/cc041b5e0aa2b67573edba5919772b77a5111162)), closes [#224](https://github.com/fallenbagel/jellyseerr/issues/224)
+* make a (shallow) copy of radarr/sonarr tags into a request before adding user tags ([#3485](https://github.com/fallenbagel/jellyseerr/issues/3485)) ([48f7666](https://github.com/fallenbagel/jellyseerr/commit/48f76662d5c08156f1da3f47e216c5f02668f64b))
+* **ui:** corrected default badge hover opacity ([#3369](https://github.com/fallenbagel/jellyseerr/issues/3369)) ([a4d07f5](https://github.com/fallenbagel/jellyseerr/commit/a4d07f5afab613317d96c9c6e9b47157a5a28986))
+* **ui:** corrected mobile menu spacing in collection details ([#3432](https://github.com/fallenbagel/jellyseerr/issues/3432)) ([77a33cb](https://github.com/fallenbagel/jellyseerr/commit/77a33cb74d744bb747b791785799b632af8c7862))
+* **ui:** Make play symbol white ([1fe4bb8](https://github.com/fallenbagel/jellyseerr/commit/1fe4bb8a0415a72791ced75a2fba1027287398d5))
+* **ui:** Resize Emby icon and add margins ([ad69d67](https://github.com/fallenbagel/jellyseerr/commit/ad69d6715e976630092bfbbb1843886523551014))
+* **watchlist:** add validation for creation request ([03316c6](https://github.com/fallenbagel/jellyseerr/commit/03316c642d1ecf89753789af08caf6e3aac80113))
+* **watchlist:** fix github code scanning ([c08897b](https://github.com/fallenbagel/jellyseerr/commit/c08897bdc1cff65862c62347572bbbd01b6c36ac))
+
+
+### Features
+
+* **add watchlist:** adding midding functionality from overserr ([5f1c10d](https://github.com/fallenbagel/jellyseerr/commit/5f1c10d50aaa430bcda96218ef2cc12a0eb926f3))
+* adds streaming services custom slider ([#3361](https://github.com/fallenbagel/jellyseerr/issues/3361)) ([2520d8f](https://github.com/fallenbagel/jellyseerr/commit/2520d8f739abfde608f3ef66a9fbe6b7b5c6647a))
+* auto tagging requested media with username ([#3338](https://github.com/fallenbagel/jellyseerr/issues/3338)) ([24f268b](https://github.com/fallenbagel/jellyseerr/commit/24f268b6cb67d9a8d8675cd6e09dd83a7f499add))
+* **discover:** support filtering by tmdb user vote count on discover page ([#3407](https://github.com/fallenbagel/jellyseerr/issues/3407)) ([aa84977](https://github.com/fallenbagel/jellyseerr/commit/aa849776809dfe891e67ff4db6861ef44df1a774))
+* **settings:** add internal url to jellyfin settings form ([0a30cd3](https://github.com/fallenbagel/jellyseerr/commit/0a30cd356d217a39546c016cc8bfa6ff6ad75e3e)), closes [#194](https://github.com/fallenbagel/jellyseerr/issues/194)
+* **src/components/externallinkblock/index.tsx:** support Emby icon ([672061c](https://github.com/fallenbagel/jellyseerr/commit/672061cd646c97c9954790c8e50eac88ea2666e9))
+* **tooltip:** email tooltip now appears when hovered over info icon ([cd7930e](https://github.com/fallenbagel/jellyseerr/commit/cd7930eef98451a781e5c9dc5ec223600a379f42))
+* translations update ([47287c3](https://github.com/fallenbagel/jellyseerr/commit/47287c368885d14bd1a56e3e8318ce22dd0f6ddf)), closes [#381](https://github.com/fallenbagel/jellyseerr/issues/381)
+* **watchlist:** add translation for en ([b7e3d28](https://github.com/fallenbagel/jellyseerr/commit/b7e3d285ed35b623062eceb0d99035cafbf075a6))
+
 # [1.5.0](https://github.com/fallenbagel/jellyseerr/compare/v1.4.1...v1.5.0) (2023-04-20)
 
 
