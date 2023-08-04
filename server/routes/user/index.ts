@@ -8,6 +8,7 @@ import Media from '@server/entity/Media';
 import { MediaRequest } from '@server/entity/MediaRequest';
 import { User } from '@server/entity/User';
 import { UserPushSubscription } from '@server/entity/UserPushSubscription';
+import { Watchlist } from '@server/entity/Watchlist';
 import type { WatchlistResponse } from '@server/interfaces/api/discoverInterfaces';
 import type {
   QuotaResponse,
@@ -382,7 +383,14 @@ router.delete<{ id: string }>(
        * we manually remove all requests from the user here so the parent media's
        * properly reflect the change.
        */
-      await requestRepository.remove(user.requests);
+      await requestRepository.remove(user.requests, {
+        /**
+         * Break-up into groups of 1000 requests to be removed at a time.
+         * Necessary for users with >1000 requests, else an SQLite 'Expression tree is too large' error occurs.
+         * https://typeorm.io/repository-api#additional-options
+         */
+        chunk: user.requests.length / 1000,
+      });
 
       await userRepository.delete(user.id);
       return res.status(200).json(user.filter());
@@ -699,8 +707,7 @@ router.get<{ id: string }, WatchlistResponse>(
     ) {
       return next({
         status: 403,
-        message:
-          "You do not have permission to view this user's Plex Watchlist.",
+        message: "You do not have permission to view this user's Watchlist.",
       });
     }
 
@@ -714,6 +721,24 @@ router.get<{ id: string }, WatchlistResponse>(
     });
 
     if (!user?.plexToken) {
+      if (user) {
+        const [result, total] = await getRepository(Watchlist).findAndCount({
+          where: { requestedBy: { id: user?.id } },
+          relations: { requestedBy: true },
+          // loadRelationIds: true,
+          take: itemsPerPage,
+          skip: offset,
+        });
+        if (total) {
+          return res.json({
+            page: page,
+            totalPages: total / itemsPerPage,
+            totalResults: total,
+            results: result,
+          });
+        }
+      }
+
       // We will just return an empty array if the user has no Plex token
       return res.json({
         page: 1,

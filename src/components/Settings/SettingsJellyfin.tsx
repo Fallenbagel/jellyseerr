@@ -30,8 +30,9 @@ const messages = defineMessages({
   jellyfinSettingsSuccess: '{mediaServerName} settings saved successfully!',
   jellyfinSettings: '{mediaServerName} Settings',
   jellyfinSettingsDescription:
-    'Optionally configure an external player endpoint for your {mediaServerName} server that is different to the internal URL used during setup',
+    'Optionally configure the internal and external endpoints for your {mediaServerName} server. In most cases, the external URL is different to the internal URL.',
   externalUrl: 'External URL',
+  internalUrl: 'Internal URL',
   validationUrl: 'You must provide a valid URL',
   syncing: 'Syncing',
   syncJellyfin: 'Sync Libraries',
@@ -86,7 +87,11 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
 
   const JellyfinSettingsSchema = Yup.object().shape({
     jellyfinExternalUrl: Yup.string().matches(
-      /^(?:(?:(?:https?):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*\.?)(?::\d{2,5})?(?:[/?#]\S*)?$/,
+      /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
+      intl.formatMessage(messages.validationUrl)
+    ),
+    jellyfinInternalUrl: Yup.string().matches(
+      /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
       intl.formatMessage(messages.validationUrl)
     ),
   });
@@ -346,12 +351,14 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
           </div>
           <Formik
             initialValues={{
+              jellyfinInternalUrl: data?.hostname || '',
               jellyfinExternalUrl: data?.externalHostname || '',
             }}
             validationSchema={JellyfinSettingsSchema}
             onSubmit={async (values) => {
               try {
                 await axios.post('/api/v1/settings/jellyfin', {
+                  hostname: values.jellyfinInternalUrl,
                   externalHostname: values.jellyfinExternalUrl,
                 } as JellyfinSettings);
 
@@ -388,6 +395,27 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
             {({ errors, touched, handleSubmit, isSubmitting, isValid }) => {
               return (
                 <form className="section" onSubmit={handleSubmit}>
+                  <div className="form-row">
+                    <label htmlFor="jellyfinInternalUrl" className="text-label">
+                      {intl.formatMessage(messages.internalUrl)}
+                    </label>
+                    <div className="form-input-area">
+                      <div className="form-input-field">
+                        <Field
+                          type="text"
+                          inputMode="url"
+                          id="jellyfinInternalUrl"
+                          name="jellyfinInternalUrl"
+                        />
+                      </div>
+                      {errors.jellyfinInternalUrl &&
+                        touched.jellyfinInternalUrl && (
+                          <div className="error">
+                            {errors.jellyfinInternalUrl}
+                          </div>
+                        )}
+                    </div>
+                  </div>
                   <div className="form-row">
                     <label htmlFor="jellyfinExternalUrl" className="text-label">
                       {intl.formatMessage(messages.externalUrl)}

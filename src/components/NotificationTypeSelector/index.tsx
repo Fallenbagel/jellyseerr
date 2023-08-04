@@ -62,7 +62,7 @@ const messages = defineMessages({
     'Get notified when issues are reopened by other users.',
   mediaautorequested: 'Request Automatically Submitted',
   mediaautorequestedDescription:
-    'Get notified when new media requests are automatically submitted for items on your Plex Watchlist.',
+    'Get notified when new media requests are automatically submitted for items on Your Watchlist.',
 });
 
 export const hasNotificationType = (

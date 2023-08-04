@@ -45,6 +45,7 @@ movieRoutes.get('/:id/recommendations', async (req, res, next) => {
     });
 
     const media = await Media.getRelatedMedia(
+      req.user,
       results.results.map((result) => result.id)
     );
 
@@ -86,6 +87,7 @@ movieRoutes.get('/:id/similar', async (req, res, next) => {
     });
 
     const media = await Media.getRelatedMedia(
+      req.user,
       results.results.map((result) => result.id)
     );
 

@@ -71,7 +71,7 @@ const Badge = (
         'bg-indigo-500 bg-opacity-80 border border-indigo-500 !text-indigo-100'
       );
       if (href) {
-        badgeStyle.push('hover:bg-indigo-500 bg-opacity-100');
+        badgeStyle.push('hover:bg-indigo-500 hover:bg-opacity-100');
       }
   }
 

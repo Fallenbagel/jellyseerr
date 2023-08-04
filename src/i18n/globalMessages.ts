@@ -16,6 +16,7 @@ const globalMessages = defineMessages({
   approved: 'Approved',
   movie: 'Movie',
   movies: 'Movies',
+  collection: 'Collection',
   tvshow: 'Series',
   tvshows: 'Series',
   cancel: 'Cancel',
