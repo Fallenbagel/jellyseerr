@@ -88,6 +88,8 @@
     "components.Discover.StudioSlider.studios": "Studios",
     "components.Discover.TvGenreList.seriesgenres": "Genres de séries",
     "components.Discover.TvGenreSlider.tvgenres": "Genres de séries",
+    "components.Discover.createnewslider": "Créer un nouveau curseur",
+    "components.Discover.customizediscover": "Personnalisez votre page Découvrir",
     "components.Discover.discover": "Découvrir",
     "components.Discover.discovermovies": "Films populaires",
     "components.Discover.discovertv": "Séries populaires",
