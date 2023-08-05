@@ -114,8 +114,6 @@
   "components.Layout.SearchInput.searchPlaceholder": "Rechercher des films et des séries",
   "components.Layout.Sidebar.browsemovies": "Films",
   "components.Layout.Sidebar.browsetv": "Séries",
-  "components.Layout.Sidebar.browsemovies": "Films",
-  "components.Layout.Sidebar.browsetv": "Séries",
   "components.Layout.Sidebar.dashboard": "Découvrir",
   "components.Layout.Sidebar.issues": "Problèmes",
   "components.Layout.Sidebar.requests": "Demandes",
