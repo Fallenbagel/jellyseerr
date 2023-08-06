@@ -83,7 +83,7 @@
   "components.Discover.MovieGenreSlider.moviegenres": "Genres de films",
   "components.Discover.NetworkSlider.networks": "Diffuseurs",
   "components.Discover.PlexWatchlistSlider.emptywatchlist": "Les médias ajoutés à votre <PlexWatchlistSupportLink>liste de visionnage Plex</PlexWatchlistSupportLink>apparaîtront ici.",
-  "components.Discover.PlexWatchlistSlider.plexwatchlist": "Ma liste de visionnage Plex",
+  "components.Discover.PlexWatchlistSlider.plexwatchlist": "Ma liste de visionnage Jellyseerr",
   "components.Discover.RecentlyAddedSlider.recentlyAdded": "Récemment ajouté",
   "components.Discover.StudioSlider.studios": "Studios",
   "components.Discover.TvGenreList.seriesgenres": "Genres de séries",
