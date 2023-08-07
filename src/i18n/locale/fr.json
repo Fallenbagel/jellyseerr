@@ -294,7 +294,7 @@
   "components.MovieDetails.physicalrelease": "Sortie physique",
   "components.MovieDetails.play": "Lire sur {mediaServerName}",
   "components.MovieDetails.play4k": "Lire en 4k sur {mediaServerName}",
-  "components.MovieDetails.productioncountries": "{countryCount, plural, one {Pays} other {Pays}}de production",
+  "components.MovieDetails.productioncountries": "{countryCount, plural, one {Pays} other {Pays}} de production",
   "components.MovieDetails.recommendations": "Recommandations",
   "components.MovieDetails.releasedate": "{releaseCount, plural, one {Date de sortie} other {Date de sorties}}",
   "components.MovieDetails.reportissue": "Signaler un problème",
