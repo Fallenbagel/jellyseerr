@@ -949,7 +949,7 @@
   "components.Settings.generalsettingsDescription": "Configurer les paramètres généraux et par défaut pour Jellyseerr.",
   "components.Settings.hideAvailable": "Masquer les médias disponibles",
   "components.Settings.is4k": "4K",
-  "components.Settings.jellyfinSettings": "{mediaServerName} Paramètres",
+  "components.Settings.jellyfinSettings": "Paramètres {mediaServerName}",
   "components.Settings.jellyfinSettingsDescription": "Configurez éventuellement les points de terminaison internes et externes pour votre serveur {mediaServerName}. Dans la plupart des cas, l’URL externe est différente de l’URL interne.",
   "components.Settings.jellyfinSettingsFailure": "Quelque chose, s’est mal passé lors de la sauvegarde des paramètres {mediaServerName}.",
   "components.Settings.jellyfinSettingsSuccess": "{mediaServerName} paramètres enregistrés avec succès !",
