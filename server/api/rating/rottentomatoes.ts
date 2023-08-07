@@ -1,6 +1,6 @@
+import ExternalAPI from '@server/api/externalapi';
 import cacheManager from '@server/lib/cache';
 import { getSettings } from '@server/lib/settings';
-import ExternalAPI from './externalapi';
 
 interface RTAlgoliaSearchResponse {
   results: {
@@ -144,6 +144,9 @@ class RottenTomatoes extends ExternalAPI {
           ? 'Fresh'
           : 'Rotten',
         criticsScore: movie.rottenTomatoes.criticsScore,
+        audienceRating:
+          movie.rottenTomatoes.audienceScore >= 60 ? 'Upright' : 'Spilled',
+        audienceScore: movie.rottenTomatoes.audienceScore,
         year: Number(movie.releaseYear),
       };
     } catch (e) {
@@ -192,6 +195,9 @@ class RottenTomatoes extends ExternalAPI {
         criticsRating:
           tvshow.rottenTomatoes.criticsScore >= 60 ? 'Fresh' : 'Rotten',
         criticsScore: tvshow.rottenTomatoes.criticsScore,
+        audienceRating:
+          tvshow.rottenTomatoes.audienceScore >= 60 ? 'Upright' : 'Spilled',
+        audienceScore: tvshow.rottenTomatoes.audienceScore,
         year: Number(tvshow.releaseYear),
       };
     } catch (e) {

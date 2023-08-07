@@ -1,4 +1,4 @@
-import RottenTomatoes from '@server/api/rottentomatoes';
+import RottenTomatoes from '@server/api/rating/rottentomatoes';
 import TheMovieDb from '@server/api/themoviedb';
 import { MediaType } from '@server/constants/media';
 import Media from '@server/entity/Media';

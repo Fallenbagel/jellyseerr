@@ -5657,6 +5657,63 @@ paths:
                   audienceRating:
                     type: string
                     enum: ['Spilled', 'Upright']
+  /movie/{movieId}/ratingscombined:
+    get:
+      summary: Get RT and IMDB movie ratings combined
+      description: Returns ratings from RottenTomatoes and IMDB based on the provided movieId in a JSON object.
+      tags:
+        - movies
+      parameters:
+        - in: path
+          name: movieId
+          required: true
+          schema:
+            type: number
+            example: 337401
+      responses:
+        '200':
+          description: Ratings returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rt:
+                    type: object
+                    properties:
+                      title:
+                        type: string
+                        example: Mulan
+                      year:
+                        type: number
+                        example: 2020
+                      url:
+                        type: string
+                        example: 'http://www.rottentomatoes.com/m/mulan_2020/'
+                      criticsScore:
+                        type: number
+                        example: 85
+                      criticsRating:
+                        type: string
+                        enum: ['Rotten', 'Fresh', 'Certified Fresh']
+                      audienceScore:
+                        type: number
+                        example: 65
+                      audienceRating:
+                        type: string
+                        enum: ['Spilled', 'Upright']
+                  imdb:
+                    type: object
+                    properties:
+                      title:
+                        type: string
+                        example: I am Legend
+                      url:
+                        type: string
+                        example: 'https://www.imdb.com/title/tt0480249'
+                      criticsScore:
+                        type: number
+                        example: 6.5
   /tv/{tvId}:
     get:
       summary: Get TV details

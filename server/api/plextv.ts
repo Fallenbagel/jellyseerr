@@ -82,21 +82,6 @@ interface ServerResponse {
   };
 }
 
-interface FriendResponse {
-  MediaContainer: {
-    User: {
-      $: {
-        id: string;
-        title: string;
-        username: string;
-        email: string;
-        thumb: string;
-      };
-      Server?: ServerResponse[];
-    }[];
-  };
-}
-
 interface UsersResponse {
   MediaContainer: {
     User: {
@@ -234,19 +219,6 @@ class PlexTvAPI extends ExternalAPI {
     }
   }
 
-  public async getFriends(): Promise<FriendResponse> {
-    const response = await this.axios.get('/pms/friends/all', {
-      transformResponse: [],
-      responseType: 'text',
-    });
-
-    const parsedXml = (await xml2js.parseStringPromise(
-      response.data
-    )) as FriendResponse;
-
-    return parsedXml;
-  }
-
   public async checkUserAccess(userId: number): Promise<boolean> {
     const settings = getSettings();
 
@@ -255,9 +227,9 @@ class PlexTvAPI extends ExternalAPI {
         throw new Error('Plex is not configured!');
       }
 
-      const friends = await this.getFriends();
+      const usersResponse = await this.getUsers();
 
-      const users = friends.MediaContainer.User;
+      const users = usersResponse.MediaContainer.User;
 
       const user = users.find((u) => parseInt(u.$.id) === userId);
 
