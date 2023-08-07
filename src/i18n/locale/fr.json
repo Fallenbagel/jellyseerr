@@ -251,6 +251,7 @@
   "components.Login.validationusernamerequired": "Nom d'utilisateur requis",
   "components.ManageSlideOver.alltime": "Tout le temps",
   "components.ManageSlideOver.downloadstatus": "Téléchargement(s)",
+  "components.MovieDetails.imdbuserscore": "Note des utilisateurs IMDB",
   "components.ManageSlideOver.manageModalAdvanced": "Avancé",
   "components.ManageSlideOver.manageModalClearMedia": "Effacer les données",
   "components.ManageSlideOver.manageModalClearMediaWarning": "* Ceci supprimera de manière irréversible toutes les données de ce(tte) {mediaType}, y compris les demandes éventuelles. Si cet élément existe dans votre bibliothèque {mediaServerName}, les informations sur le média seront recréées lors de la prochaine analyse.",
