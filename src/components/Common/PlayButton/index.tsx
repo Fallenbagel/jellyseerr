@@ -25,7 +25,10 @@ const PlayButton = ({ links }: PlayButtonProps) => {
         </>
       }
       onClick={() => {
-        window.open(links[0].url, '_blank');
+        window.open(
+          links[0].url,
+          links[0].url.startsWith('http') ? '_blank' : '_self'
+        );
       }}
     >
       {links.length > 1 &&
@@ -34,7 +37,10 @@ const PlayButton = ({ links }: PlayButtonProps) => {
             <ButtonWithDropdown.Item
               key={`play-button-dropdown-item-${i}`}
               onClick={() => {
-                window.open(link.url, '_blank');
+                window.open(
+                  link.url,
+                  link.url.startsWith('http') ? '_blank' : '_self'
+                );
               }}
               buttonType="ghost"
             >
