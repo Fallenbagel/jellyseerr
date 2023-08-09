@@ -319,7 +319,7 @@ class JobJellyfinSync {
                     : existingSeason.status;
                 existingSeason.status4k =
                   (this.enable4kShow && total4k >= season.episode_count) ||
-                  existingSeason.status === MediaStatus.AVAILABLE
+                  existingSeason.status4k === MediaStatus.AVAILABLE
                     ? MediaStatus.AVAILABLE
                     : this.enable4kShow && total4k > 0
                     ? MediaStatus.PARTIALLY_AVAILABLE
