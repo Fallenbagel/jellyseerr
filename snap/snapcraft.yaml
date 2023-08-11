@@ -37,7 +37,7 @@ parts:
     override-pull: |
       snapcraftctl pull
       # Get information to determine snap grade and version
-      git config --global --add safe.directory /data/parts/jellyyseerr/src
+      git config --global --add safe.directory /data/parts/jellyseerr/src
       #setup yarn.rc
       echo "--install.frozen-lockfile\n--install.network-timeout 1000000" > .yarnrc
       BRANCH=$(git rev-parse --abbrev-ref HEAD)
