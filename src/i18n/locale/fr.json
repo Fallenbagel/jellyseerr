@@ -1095,7 +1095,7 @@
   "components.TvDetails.overview": "Résumé",
   "components.TvDetails.overviewunavailable": "Résumé indisponible.",
   "components.TvDetails.play": "Lire sur {mediaServerName}",
-  "components.TvDetails.play4k": "Lire en 4k sur {mediaServerName}",
+  "components.TvDetails.play4K": "Lire en 4k sur {mediaServerName}",
   "components.TvDetails.productioncountries": "Pays de production",
   "components.TvDetails.recommendations": "Recommandations",
   "components.TvDetails.reportissue": "Signaler un problème",
