@@ -69,9 +69,7 @@ settingsRoutes.get('/main', (req, res, next) => {
 settingsRoutes.post('/main', (req, res) => {
   const settings = getSettings();
 
-  const newSettings: MainSettings = merge(settings.main, req.body);
-
-  settings.main = newSettings;
+  settings.main = merge(settings.main, req.body);
   settings.save();
 
   return res.status(200).json(settings.main);
