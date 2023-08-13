@@ -11,6 +11,8 @@ import React, { Fragment, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { useIntl } from 'react-intl';
 
+type ButtonAction = 'button' | 'submit' | 'reset';
+
 interface ModalProps {
   title?: string;
   subTitle?: string;
@@ -24,11 +26,15 @@ interface ModalProps {
   tertiaryText?: string;
   okDisabled?: boolean;
   cancelButtonType?: ButtonType;
+  cancelButtonAction?: ButtonAction;
   okButtonType?: ButtonType;
+  okButtonAction?: ButtonAction;
   secondaryButtonType?: ButtonType;
+  secondaryButtonAction?: ButtonAction;
   secondaryDisabled?: boolean;
   tertiaryDisabled?: boolean;
   tertiaryButtonType?: ButtonType;
+  tertiaryButtonAction?: ButtonAction;
   disableScrollLock?: boolean;
   backgroundClickable?: boolean;
   loading?: boolean;
@@ -47,15 +53,19 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
       okText,
       okDisabled = false,
       cancelButtonType = 'default',
+      cancelButtonAction = 'submit',
       okButtonType = 'primary',
+      okButtonAction = 'submit',
       children,
       disableScrollLock,
       backgroundClickable = true,
       secondaryButtonType = 'default',
+      secondaryButtonAction = 'submit',
       secondaryDisabled = false,
       onSecondary,
       secondaryText,
       tertiaryButtonType = 'default',
+      tertiaryButtonAction = 'submit',
       tertiaryDisabled = false,
       tertiaryText,
       loading = false,
@@ -180,6 +190,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
               {typeof onOk === 'function' && (
                 <Button
                   buttonType={okButtonType}
+                  type={okButtonAction}
                   onClick={onOk}
                   className="ml-3"
                   disabled={okDisabled}
@@ -191,6 +202,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
               {typeof onSecondary === 'function' && secondaryText && (
                 <Button
                   buttonType={secondaryButtonType}
+                  type={secondaryButtonAction}
                   onClick={onSecondary}
                   className="ml-3"
                   disabled={secondaryDisabled}
@@ -202,6 +214,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
               {typeof onTertiary === 'function' && tertiaryText && (
                 <Button
                   buttonType={tertiaryButtonType}
+                  type={tertiaryButtonAction}
                   onClick={onTertiary}
                   className="ml-3"
                   disabled={tertiaryDisabled}
@@ -212,6 +225,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
               {typeof onCancel === 'function' && (
                 <Button
                   buttonType={cancelButtonType}
+                  type={cancelButtonAction}
                   onClick={onCancel}
                   className="ml-3 sm:ml-0"
                   data-testid="modal-cancel-button"
