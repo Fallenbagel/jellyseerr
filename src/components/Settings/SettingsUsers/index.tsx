@@ -5,14 +5,17 @@ import FormErrorNotification from '@app/components/FormErrorNotification';
 import LabeledCheckbox from '@app/components/LabeledCheckbox';
 import PermissionEdit from '@app/components/PermissionEdit';
 import QuotaSelector from '@app/components/QuotaSelector';
+import OidcModal from '@app/components/Settings/OidcModal';
 import useSettings from '@app/hooks/useSettings';
 import globalMessages from '@app/i18n/globalMessages';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
+import { CogIcon } from '@heroicons/react/24/solid';
 import { MediaServerType } from '@server/constants/server';
 import type { MainSettings } from '@server/lib/settings';
 import axios from 'axios';
-import { ErrorMessage, Field, Form, Formik } from 'formik';
+import { Field, Form, Formik } from 'formik';
 import getConfig from 'next/config';
+import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR, { mutate } from 'swr';
@@ -37,17 +40,6 @@ const messages = defineMessages({
     'Allow users to sign in using their {mediaServerName} account',
   oidcLogin: 'Enable OIDC Sign-In',
   oidcLoginTip: 'Allow users to sign in using an OIDC identity provider',
-  oidcDomain: 'OIDC Issuer URL',
-  oidcDomainTip: "The base URL of the identity provider's OIDC endpoint",
-  oidcName: 'OIDC Provider Name',
-  oidcNameTip: 'Name of the OIDC Provider which appears on the login screen',
-  oidcClientId: 'OIDC Client ID',
-  oidcClientIdTip: 'The OIDC Client ID assigned to Jellyseerr',
-  oidcClientSecret: 'OIDC Client Secret',
-  oidcClientSecretTip: 'The OIDC Client Secret assigned to Jellyseerr',
-  oidcMatchUsername: 'OIDC Allow {mediaServerName} Usernames',
-  oidcMatchUsernameTip:
-    'Match OIDC users with their {mediaServerName} accounts based on username',
   movieRequestLimitLabel: 'Global Movie Request Limit',
   tvRequestLimitLabel: 'Global Series Request Limit',
   defaultPermissions: 'Default Permissions',
@@ -114,6 +106,11 @@ const SettingsUsers = () => {
   } = useSWR<MainSettings>('/api/v1/settings/main');
   const settings = useSettings();
   const { publicRuntimeConfig } = getConfig();
+  // [showDialog, isFirstOpen]
+  const [showOidcDialog, setShowOidcDialog] = useState<[boolean, boolean]>([
+    false,
+    false,
+  ]);
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -239,6 +236,7 @@ const SettingsUsers = () => {
                         />
                         <LabeledCheckbox
                           id="mediaServerLogin"
+                          className="mt-4"
                           label={intl.formatMessage(messages.mediaServerLogin, {
                             mediaServerName,
                           })}
@@ -255,127 +253,43 @@ const SettingsUsers = () => {
                             )
                           }
                         />
-                        <LabeledCheckbox
-                          id="oidcLogin"
-                          label={intl.formatMessage(messages.oidcLogin)}
-                          description={intl.formatMessage(
-                            messages.oidcLoginTip
-                          )}
-                          onChange={() =>
-                            setFieldValue('oidcLogin', !values.oidcLogin)
-                          }
-                        />
+                        <div className="mt-4 flex">
+                          <div className="grow">
+                            <LabeledCheckbox
+                              id="oidcLogin"
+                              label={intl.formatMessage(messages.oidcLogin)}
+                              description={intl.formatMessage(
+                                messages.oidcLoginTip
+                              )}
+                              onChange={() => {
+                                const newValue = !values.oidcLogin;
+                                setFieldValue('oidcLogin', newValue);
+                                if (newValue) setShowOidcDialog([true, true]);
+                              }}
+                            />
+                          </div>
+                          <CogIcon
+                            className="ml-4 w-8 cursor-pointer text-gray-400"
+                            onClick={() => setShowOidcDialog([true, false])}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                {values.oidcLogin && (
-                  <>
-                    <div className="form-row">
-                      <label htmlFor="oidcDomain" className="text-label">
-                        {intl.formatMessage(messages.oidcDomain)}
-                        <span className="label-required">*</span>
-                        <span className="label-tip">
-                          {intl.formatMessage(messages.oidcDomainTip)}
-                        </span>
-                      </label>
-                      <div className="form-input-area">
-                        <Field id="oidcDomain" name="oidcDomain" type="text" />
-                        <ErrorMessage
-                          className="error"
-                          component="span"
-                          name="oidcDomain"
-                        />
-                      </div>
-                    </div>
-                    <div className="form-row">
-                      <label htmlFor="oidcName" className="text-label">
-                        {intl.formatMessage(messages.oidcName)}
-                        <span className="label-required">*</span>
-                        <span className="label-tip">
-                          {intl.formatMessage(messages.oidcNameTip)}
-                        </span>
-                      </label>
-                      <div className="form-input-area">
-                        <Field id="oidcName" name="oidcName" type="text" />
-                        <ErrorMessage
-                          className="error"
-                          component="span"
-                          name="oidcName"
-                        />
-                      </div>
-                    </div>
-                    <div className="form-row">
-                      <label htmlFor="oidcClientId" className="text-label">
-                        {intl.formatMessage(messages.oidcClientId)}
-                        <span className="label-required">*</span>
-                        <span className="label-tip">
-                          {intl.formatMessage(messages.oidcClientIdTip)}
-                        </span>
-                      </label>
-                      <div className="form-input-area">
-                        <Field
-                          id="oidcClientId"
-                          name="oidcClientId"
-                          type="text"
-                        />
-                        <ErrorMessage
-                          className="error"
-                          component="span"
-                          name="oidcClientId"
-                        />
-                      </div>
-                    </div>
-                    <div className="form-row">
-                      <label htmlFor="oidcClientSecret" className="text-label">
-                        {intl.formatMessage(messages.oidcClientSecret)}
-                        <span className="label-required">*</span>
-                        <span className="label-tip">
-                          {intl.formatMessage(messages.oidcClientSecretTip)}
-                        </span>
-                      </label>
-                      <div className="form-input-area">
-                        <Field
-                          id="oidcClientSecret"
-                          name="oidcClientSecret"
-                          type="text"
-                        />
-                        <ErrorMessage
-                          className="error"
-                          component="span"
-                          name="oidcClientSecret"
-                        />
-                      </div>
-                    </div>
-                    <div className="form-row">
-                      <label
-                        htmlFor="oidcMatchUsername"
-                        className="checkbox-label"
-                      >
-                        {intl.formatMessage(messages.oidcMatchUsername, {
-                          mediaServerName,
-                        })}
-                        <span className="label-tip">
-                          {intl.formatMessage(messages.oidcMatchUsernameTip, {
-                            mediaServerName,
-                          })}
-                        </span>
-                      </label>
-                      <div className="form-input-area">
-                        <Field
-                          type="checkbox"
-                          id="oidcMatchUsername"
-                          name="oidcMatchUsername"
-                          onChange={() => {
-                            setFieldValue(
-                              'oidcMatchUsername',
-                              !values.oidcMatchUsername
-                            );
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </>
+                {values.oidcLogin && showOidcDialog[0] && (
+                  <OidcModal
+                    values={values}
+                    errors={errors}
+                    setFieldValue={setFieldValue}
+                    mediaServerName={mediaServerName}
+                    onOk={() => setShowOidcDialog([false, false])}
+                    onClose={
+                      showOidcDialog[1]
+                        ? () => setFieldValue('oidcLogin', false)
+                        : undefined
+                    }
+                  />
                 )}
                 <div className="form-row">
                   <label htmlFor="newPlexLogin" className="checkbox-label">

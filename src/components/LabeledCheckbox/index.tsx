@@ -2,6 +2,7 @@ import { Field } from 'formik';
 
 interface LabeledCheckboxProps {
   id: string;
+  className?: string;
   label: string;
   description: string;
   onChange: () => void;
@@ -10,6 +11,7 @@ interface LabeledCheckboxProps {
 
 const LabeledCheckbox: React.FC<LabeledCheckboxProps> = ({
   id,
+  className,
   label,
   description,
   onChange,
@@ -17,7 +19,7 @@ const LabeledCheckbox: React.FC<LabeledCheckboxProps> = ({
 }) => {
   return (
     <>
-      <div className={`relative mt-4 flex items-start first:mt-0`}>
+      <div className={`relative flex items-start ${className}`}>
         <div className="flex h-6 items-center">
           <Field type="checkbox" id={id} name={id} onChange={onChange} />
         </div>
