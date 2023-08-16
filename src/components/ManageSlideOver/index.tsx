@@ -382,7 +382,7 @@ const ManageSlideOver = ({
                   </a>
                 )}
 
-                {hasPermission(Permission.ADMIN) &&
+                {hasPermission(Permission.MANAGE_REQUESTS) &&
                   data?.mediaInfo?.serviceUrl &&
                   isDefaultService() && (
                     <div>
