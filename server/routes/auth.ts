@@ -654,6 +654,15 @@ authRoutes.post('/reset-password/:guid', async (req, res, next) => {
 });
 
 authRoutes.get('/oidc-login', async (req, res, next) => {
+  const settings = getSettings();
+
+  if (!settings.main.oidcLogin) {
+    return next({
+      status: 403,
+      message: 'OpenID Connect sign-in is disabled.',
+    });
+  }
+
   const state = randomBytes(32).toString('hex');
   let redirectUrl;
 
@@ -667,7 +676,7 @@ authRoutes.get('/oidc-login', async (req, res, next) => {
     });
     return next({
       status: 500,
-      message: 'Failed to fetch OIDC redirect url.',
+      message: 'Failed to fetch OpenID Connect redirect url.',
     });
   }
 
@@ -681,14 +690,15 @@ authRoutes.get('/oidc-login', async (req, res, next) => {
 
 authRoutes.get('/oidc-callback', async (req, res, next) => {
   const settings = getSettings();
-  const { oidcDomain, oidcClientId } = settings.main;
+  const { oidcLogin, oidcDomain, oidcClientId } = settings.main;
 
-  if (!settings.main.oidcLogin) {
+  if (!oidcLogin) {
     return next({
-      status: 500,
-      message: 'OIDC sign-in is disabled.',
+      status: 403,
+      message: 'OpenID Connect sign-in is disabled.',
     });
   }
+
   const cookieState = req.cookies['oidc-state'];
   const url = new URL(req.url, `${req.protocol}://${req.hostname}`);
   const state = url.searchParams.get('state');
@@ -705,7 +715,7 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
         cookieState: cookieState,
       });
       return next({
-        status: 500,
+        status: 400,
         message: 'Invalid state.',
       });
     }
@@ -719,7 +729,7 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
         code: code,
       });
       return next({
-        status: 500,
+        status: 400,
         message: 'Invalid code.',
       });
     }
@@ -739,7 +749,7 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
         body: body,
       });
       return next({
-        status: 500,
+        status: 403,
         message: 'Invalid token response.',
       });
     }
@@ -768,7 +778,7 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
         idToken: idToken,
       });
       return next({
-        status: 500,
+        status: 403,
         message: 'Invalid jwt.',
       });
     }
@@ -792,7 +802,7 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
         errorMessage: err.message,
       });
       return next({
-        status: 500,
+        status: 403,
         message: `Validation failed: ${err.message}.`,
       });
     }
@@ -805,7 +815,7 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
         email: fullUserInfo.email,
       });
       return next({
-        status: 500,
+        status: 403,
         message: 'Email not verified.',
       });
     }
