@@ -5,6 +5,7 @@ export type AvailableCacheIds =
   | 'radarr'
   | 'sonarr'
   | 'rt'
+  | 'imdb'
   | 'github'
   | 'plexguid'
   | 'plextv';
@@ -48,6 +49,10 @@ class CacheManager {
     radarr: new Cache('radarr', 'Radarr API'),
     sonarr: new Cache('sonarr', 'Sonarr API'),
     rt: new Cache('rt', 'Rotten Tomatoes API', {
+      stdTtl: 43200,
+      checkPeriod: 60 * 30,
+    }),
+    imdb: new Cache('imdb', 'IMDB Radarr Proxy', {
       stdTtl: 43200,
       checkPeriod: 60 * 30,
     }),
