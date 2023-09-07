@@ -105,14 +105,23 @@ class JellyfinAPI {
 
   public async login(
     Username?: string,
-    Password?: string
+    Password?: string,
+    ClientIP?: string
   ): Promise<JellyfinLoginResponse> {
     try {
+      const headers = ClientIP
+        ? {
+            'X-Forwarded-For': ClientIP,
+          }
+        : {};
       const account = await this.axios.post<JellyfinLoginResponse>(
         '/Users/AuthenticateByName',
         {
           Username: Username,
           Pw: Password,
+        },
+        {
+          headers: headers,
         }
       );
       return account.data;
