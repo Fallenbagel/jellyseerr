@@ -437,6 +437,7 @@ export const WatchProviderSelector = ({
           {otherProviders.length > 0 && (
             <button
               className="relative top-4 flex items-center justify-center space-x-2 text-sm text-gray-400 transition hover:text-gray-200"
+              type="button"
               onClick={() => setShowMore(!showMore)}
             >
               <div className="h-0.5 flex-1 bg-gray-600" />

@@ -1,4 +1,6 @@
-import RottenTomatoes from '@server/api/rottentomatoes';
+import IMDBRadarrProxy from '@server/api/rating/imdbRadarrProxy';
+import RottenTomatoes from '@server/api/rating/rottentomatoes';
+import { type RatingResponse } from '@server/api/ratings';
 import TheMovieDb from '@server/api/themoviedb';
 import { MediaType } from '@server/constants/media';
 import Media from '@server/entity/Media';
@@ -118,6 +120,9 @@ movieRoutes.get('/:id/similar', async (req, res, next) => {
   }
 });
 
+/**
+ * Endpoint backed by RottenTomatoes
+ */
 movieRoutes.get('/:id/ratings', async (req, res, next) => {
   const tmdb = new TheMovieDb();
   const rtapi = new RottenTomatoes();
@@ -140,6 +145,55 @@ movieRoutes.get('/:id/ratings', async (req, res, next) => {
     }
 
     return res.status(200).json(rtratings);
+  } catch (e) {
+    logger.debug('Something went wrong retrieving movie ratings', {
+      label: 'API',
+      errorMessage: e.message,
+      movieId: req.params.id,
+    });
+    return next({
+      status: 500,
+      message: 'Unable to retrieve movie ratings.',
+    });
+  }
+});
+
+/**
+ * Endpoint combining RottenTomatoes and IMDB
+ */
+movieRoutes.get('/:id/ratingscombined', async (req, res, next) => {
+  const tmdb = new TheMovieDb();
+  const rtapi = new RottenTomatoes();
+  const imdbApi = new IMDBRadarrProxy();
+
+  try {
+    const movie = await tmdb.getMovie({
+      movieId: Number(req.params.id),
+    });
+
+    const rtratings = await rtapi.getMovieRatings(
+      movie.title,
+      Number(movie.release_date.slice(0, 4))
+    );
+
+    let imdbRatings;
+    if (movie.imdb_id) {
+      imdbRatings = await imdbApi.getMovieRatings(movie.imdb_id);
+    }
+
+    if (!rtratings && !imdbRatings) {
+      return next({
+        status: 404,
+        message: 'No ratings found.',
+      });
+    }
+
+    const ratings: RatingResponse = {
+      ...(rtratings ? { rt: rtratings } : {}),
+      ...(imdbRatings ? { imdb: imdbRatings } : {}),
+    };
+
+    return res.status(200).json(ratings);
   } catch (e) {
     logger.debug('Something went wrong retrieving movie ratings', {
       label: 'API',
