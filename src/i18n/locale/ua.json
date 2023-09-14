@@ -650,7 +650,7 @@
   "components.Settings.SettingsJobsCache.editJobScheduleSelectorHours": "Кожен {jobScheduleHours, plural, one {година} other {{jobScheduleHours} години(ів)}}",
   "components.Settings.SettingsJobsCache.editJobScheduleSelectorMinutes": "Кожну {jobScheduleMinutes, plural, one {хвилину} other {{jobScheduleMinutes} хвилин(и)}}",
   "components.Settings.SettingsJobsCache.flushcache": "Очистити кеш",
-  "components.Settings.SettingsJobsCache.jelly-recently-added-scan": "Нещодавно додане сканування Jellyfin",
+  "components.Settings.SettingsJobsCache.jellyfin-recently-added-scan": "Нещодавно додане сканування Jellyfin",
   "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Сканування повної бібліотеки Jellyfin",
   "components.Settings.SettingsJobsCache.image-cache-cleanup": "Очищення кешу зображень",
   "components.Settings.SettingsJobsCache.imagecache": "Кеш зображень",

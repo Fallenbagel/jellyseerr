@@ -565,7 +565,7 @@
   "components.Settings.SettingsJobsCache.plex-recently-added-scan": "Plex recent toegevoegde scan",
   "components.Settings.SettingsJobsCache.plex-full-scan": "Plex volledige bibliotheekscan",
   "components.Settings.SettingsJobsCache.jellyfin-full-scan": "volledige bibliotheekscan Jellyfin",
-  "components.Settings.SettingsJobsCache.jelly-recently-added-scan": "Jellyfin recent toegevoegde scan",
+  "components.Settings.SettingsJobsCache.jellyfin-recently-added-scan": "Jellyfin recent toegevoegde scan",
   "components.Settings.Notifications.validationUrl": "Je moet een geldige URL opgeven",
   "components.Settings.Notifications.botAvatarUrl": "URL bot-avatar",
   "components.RequestList.RequestItem.requested": "Aangevraagd",
