@@ -1,3 +1,26 @@
+# [1.7.0](https://github.com/fallenbagel/jellyseerr/compare/v1.6.0...v1.7.0) (2023-09-14)
+
+
+### Bug Fixes
+
+* adjust the plex watchlist sync schedule to have fuzziness ([#3502](https://github.com/fallenbagel/jellyseerr/issues/3502)) ([2c3f533](https://github.com/fallenbagel/jellyseerr/commit/2c3f5330764492e1323afd2d1f25e28ad78a2f2f))
+* handle issue causing incorrect media to change to unknown ([#3516](https://github.com/fallenbagel/jellyseerr/issues/3516)) ([83b008c](https://github.com/fallenbagel/jellyseerr/commit/83b008c8391459bd02dc74bcdb0d8caf27207bdf))
+* improved handling of edge case that could cause availability sync to fail ([#3497](https://github.com/fallenbagel/jellyseerr/issues/3497)) ([d0836ce](https://github.com/fallenbagel/jellyseerr/commit/d0836ce0efd55fccf2546087a0c4f94f7cb2e82a))
+* Include all defaults in payload ([#3538](https://github.com/fallenbagel/jellyseerr/issues/3538)) ([cb63bf2](https://github.com/fallenbagel/jellyseerr/commit/cb63bf217b9e8810a5210b4bf475b2a96583cc84))
+* multiple notifications for available media ([048fa96](https://github.com/fallenbagel/jellyseerr/commit/048fa967f2e5b23831ac9917c703934c50ef75f0))
+* repeat notifications for available 4k media ([30361f2](https://github.com/fallenbagel/jellyseerr/commit/30361f2ab751d9a882a9120e0f3df28dc42cc2cd))
+* resolved issue with create slider causing incorrect form submission ([#3514](https://github.com/fallenbagel/jellyseerr/issues/3514)) ([a761b7d](https://github.com/fallenbagel/jellyseerr/commit/a761b7dd35a5bd61bb4eb0275b75d1e0977e6a2d))
+* resolved user access check issue ([#3551](https://github.com/fallenbagel/jellyseerr/issues/3551)) ([2816c66](https://github.com/fallenbagel/jellyseerr/commit/2816c66300bf870d493c0665b0e984d60f707dfd))
+* **server/api/jellyfin.ts:** use /Library/VirtualFolders Jellyfin API call to fetch Jellyfin libs ([8685f57](https://github.com/fallenbagel/jellyseerr/commit/8685f5796a99d9700146bae9892319db10508d68)), closes [#256](https://github.com/fallenbagel/jellyseerr/issues/256)
+* **statusbadge:** handle missing season/episode number ([#3526](https://github.com/fallenbagel/jellyseerr/issues/3526)) ([01de972](https://github.com/fallenbagel/jellyseerr/commit/01de972a8fe2ea3c18d5b2f426d01b5b14d142d4))
+* **tautulli:** only test connection if hostname is defined ([#3573](https://github.com/fallenbagel/jellyseerr/issues/3573)) ([f7b4dfc](https://github.com/fallenbagel/jellyseerr/commit/f7b4dfcac472d08c54779a14fc1ad3c90927df26))
+* **ui:** corrected issues icon color ([#3498](https://github.com/fallenbagel/jellyseerr/issues/3498)) ([c1a47bd](https://github.com/fallenbagel/jellyseerr/commit/c1a47bd9de332cb4925974690f5a33448b5cc2e6))
+
+
+### Features
+
+* **rating:** added IMDB Radarr proxy ([#3496](https://github.com/fallenbagel/jellyseerr/issues/3496)) ([b4191f9](https://github.com/fallenbagel/jellyseerr/commit/b4191f9c65b7ff08764e61d18e7a75bc8d4b3325))
+
 # [1.6.0](https://github.com/fallenbagel/jellyseerr/compare/v1.5.0...v1.6.0) (2023-08-04)
 
 
