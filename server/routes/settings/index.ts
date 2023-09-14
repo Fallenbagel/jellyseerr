@@ -367,25 +367,27 @@ settingsRoutes.post('/tautulli', async (req, res, next) => {
 
   Object.assign(settings.tautulli, req.body);
 
-  try {
-    const tautulliClient = new TautulliAPI(settings.tautulli);
+  if (settings.tautulli.hostname) {
+    try {
+      const tautulliClient = new TautulliAPI(settings.tautulli);
 
-    const result = await tautulliClient.getInfo();
+      const result = await tautulliClient.getInfo();
 
-    if (!semver.gte(semver.coerce(result?.tautulli_version) ?? '', '2.9.0')) {
-      throw new Error('Tautulli version not supported');
+      if (!semver.gte(semver.coerce(result?.tautulli_version) ?? '', '2.9.0')) {
+        throw new Error('Tautulli version not supported');
+      }
+
+      settings.save();
+    } catch (e) {
+      logger.error('Something went wrong testing Tautulli connection', {
+        label: 'API',
+        errorMessage: e.message,
+      });
+      return next({
+        status: 500,
+        message: 'Unable to connect to Tautulli.',
+      });
     }
-
-    settings.save();
-  } catch (e) {
-    logger.error('Something went wrong testing Tautulli connection', {
-      label: 'API',
-      errorMessage: e.message,
-    });
-    return next({
-      status: 500,
-      message: 'Unable to connect to Tautulli.',
-    });
   }
 
   return res.status(200).json(settings.tautulli);

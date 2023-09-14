@@ -156,6 +156,7 @@ const Slider = ({
           }`}
           onClick={() => slide(Direction.LEFT)}
           disabled={scrollPos.isStart}
+          type="button"
         >
           <ChevronLeftIcon className="h-6 w-6" />
         </button>
@@ -165,6 +166,7 @@ const Slider = ({
           }`}
           onClick={() => slide(Direction.RIGHT)}
           disabled={scrollPos.isEnd}
+          type="button"
         >
           <ChevronRightIcon className="h-6 w-6" />
         </button>
