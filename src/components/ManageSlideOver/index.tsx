@@ -103,14 +103,10 @@ const ManageSlideOver = ({
       : null
   );
   const { data: radarrData } = useSWR<RadarrSettings[]>(
-    hasPermission(Permission.ADMIN) ?
-      '/api/v1/settings/radarr'
-      : null
+    hasPermission(Permission.ADMIN) ? '/api/v1/settings/radarr' : null
   );
   const { data: sonarrData } = useSWR<SonarrSettings[]>(
-    hasPermission(Permission.ADMIN) ?
-      '/api/v1/settings/sonarr'
-      : null
+    hasPermission(Permission.ADMIN) ? '/api/v1/settings/sonarr' : null
   );
 
   const deleteMedia = async () => {
