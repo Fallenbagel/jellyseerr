@@ -26,6 +26,7 @@
   "components.Discover.emptywatchlist": "Medien, die zu deiner <PlexWatchlistSupportLink>Plex Watchlist</PlexWatchlistSupportLink> hinzugefügt wurden, werden hier angezeigt.",
   "components.Discover.noRequests": "Keine Anfragen.",
   "components.Discover.plexwatchlist": "Deine Plex Watchlist",
+  "components.Discover.RecentlyAddedSlider.recentlyAdded": "Kürzlich hinzugefügt",
   "components.Discover.popularmovies": "Beliebte Filme",
   "components.Discover.populartv": "Beliebte Serien",
   "components.Discover.recentlyAdded": "Kürzlich hinzugefügt",
