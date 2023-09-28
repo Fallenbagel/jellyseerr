@@ -14,6 +14,7 @@ export type AvailableLocale =
   | 'hu'
   | 'it'
   | 'ja'
+  | 'ko'
   | 'lt'
   | 'nb-NO'
   | 'nl'
@@ -129,6 +130,10 @@ export const availableLanguages: AvailableLanguageObject = {
   ua: {
     code: 'ua',
     display: 'українська',
+  },
+  ko: {
+    code: 'ko',
+    display: '한국어',
   },
   'zh-TW': {
     code: 'zh-TW',

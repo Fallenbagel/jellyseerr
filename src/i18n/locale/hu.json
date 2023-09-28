@@ -695,7 +695,7 @@
   "components.RequestModal.AdvancedRequester.folder": "{path} ({space})",
   "components.RequestList.RequestItem.requesteddate": "Kérve",
   "components.RequestList.RequestItem.requested": "Kérve",
-  "components.RequestList.RequestItem.modifieduserdate": "{date} {user} álltal",
+  "components.RequestList.RequestItem.modifieduserdate": "{date} {user} által",
   "components.RequestList.RequestItem.modified": "Módosított",
   "components.RequestList.RequestItem.mediaerror": "A kéréshez társított címe már nem érhető el.",
   "components.RequestList.RequestItem.editrequest": "Kérés szerkesztése",
