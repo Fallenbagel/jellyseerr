@@ -17,8 +17,8 @@ All help is welcome and greatly appreciated! If you would like to contribute to 
 1. [Fork](https://help.github.com/articles/fork-a-repo/) the repository to your own GitHub account and [clone](https://help.github.com/articles/cloning-a-repository/) it to your local device:
 
    ```bash
-   git clone https://github.com/YOUR_USERNAME/overseerr.git
-   cd overseerr/
+   git clone https://github.com/YOUR_USERNAME/jellyseerr.git
+   cd jellyseerr/
    ```
 
 2. Add the remote `upstream`:

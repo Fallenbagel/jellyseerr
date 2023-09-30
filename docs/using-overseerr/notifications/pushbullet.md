@@ -10,7 +10,7 @@ User notifications are separate from system notifications, and the available not
 
 ### Access Token
 
-[Create an access token](https://www.pushbullet.com/#settings) and set it here to grant Overseerr access to the Pushbullet API.
+[Create an access token](https://www.pushbullet.com/#settings) and set it here to grant Jellyseerr access to the Pushbullet API.
 
 ### Channel Tag (optional)
 

@@ -18,7 +18,7 @@ This value will be sent as an `Authorization` HTTP header.
 
 ### JSON Payload
 
-Customize the JSON payload to suit your needs. Overseerr provides several [template variables](#template-variables) for use in the payload, which will be replaced with the relevant data when the notifications are triggered.
+Customize the JSON payload to suit your needs. Jellyseerr provides several [template variables](#template-variables) for use in the payload, which will be replaced with the relevant data when the notifications are triggered.
 
 ## Template Variables
 

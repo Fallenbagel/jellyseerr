@@ -3,12 +3,12 @@
 ## Configuration
 
 {% hint style="info" %}
-If the [Application URL](../settings/README.md#application-url) setting is configured in **Settings &rarr; General**, Overseerr will explicitly set the origin server hostname when connecting to the SMTP host.
+If the [Application URL](../settings/README.md#application-url) setting is configured in **Settings &rarr; General**, Jellyseerr will explicitly set the origin server hostname when connecting to the SMTP host.
 {% endhint %}
 
 ### Sender Name (optional)
 
-Configure a friendly name for the email sender (e.g., "Overseerr").
+Configure a friendly name for the email sender (e.g., "Jellyseerr").
 
 ### Sender Address
 

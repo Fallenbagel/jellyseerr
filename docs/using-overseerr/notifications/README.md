@@ -2,7 +2,7 @@
 
 ## Supported Notification Agents
 
-Overseerr currently supports the following notification agents:
+Jellyseerr currently supports the following notification agents:
 
 - [Email](./email.md)
 - [Web Push](./webpush.md)
@@ -23,4 +23,4 @@ Users can customize their personal notification preferences in their own user no
 
 ## Requesting New Notification Agents
 
-If we do not currently support your preferred notification agent, feel free to [submit a feature request on GitHub](https://github.com/sct/overseerr/issues). However, please be sure to search first and confirm that there is not already an existing request for the agent!
+If we do not currently support your preferred notification agent, feel free to [submit a feature request on GitHub](https://github.com/Fallenbagel/jellyseerr/issues). However, please be sure to search first and confirm that there is not already an existing request for the agent!
