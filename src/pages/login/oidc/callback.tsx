@@ -35,7 +35,7 @@ const OidcCallback = () => {
 
   useEffect(() => {
     login();
-  }, []);
+  });
 
   return (
     <div className="container mx-auto flex h-screen items-center justify-center">
