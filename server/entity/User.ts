@@ -24,6 +24,7 @@ import {
   PrimaryGeneratedColumn,
   RelationCount,
   UpdateDateColumn,
+  type FindOperator,
 } from 'typeorm';
 import Issue from './Issue';
 import { MediaRequest } from './MediaRequest';
@@ -51,7 +52,12 @@ export class User {
     unique: true,
     transformer: {
       from: (value: string): string => (value ?? '').toLowerCase(),
-      to: (value: string): string => (value ?? '').toLowerCase(),
+      to: (
+        value: string | FindOperator<string>
+      ): string | FindOperator<string> => {
+        if (typeof value === 'string') return (value ?? '').toLowerCase();
+        return value;
+      },
     },
   })
   public email: string;
