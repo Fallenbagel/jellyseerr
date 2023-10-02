@@ -56,6 +56,7 @@ const globalMessages = defineMessages({
   noresults: 'No results.',
   open: 'Open',
   resolved: 'Resolved',
+  fieldRequired: '{fieldName} is required',
 });
 
 export default globalMessages;

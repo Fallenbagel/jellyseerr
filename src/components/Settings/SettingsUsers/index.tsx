@@ -5,7 +5,9 @@ import FormErrorNotification from '@app/components/FormErrorNotification';
 import LabeledCheckbox from '@app/components/LabeledCheckbox';
 import PermissionEdit from '@app/components/PermissionEdit';
 import QuotaSelector from '@app/components/QuotaSelector';
-import OidcModal from '@app/components/Settings/OidcModal';
+import OidcModal, {
+  oidcSettingsSchema,
+} from '@app/components/Settings/OidcModal';
 import useSettings from '@app/hooks/useSettings';
 import globalMessages from '@app/i18n/globalMessages';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
@@ -16,7 +18,7 @@ import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import getConfig from 'next/config';
 import { useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { defineMessages, useIntl, type IntlShape } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR, { mutate } from 'swr';
 import * as yup from 'yup';
@@ -46,55 +48,33 @@ const messages = defineMessages({
   defaultPermissionsTip: 'Initial permissions assigned to new users',
 });
 
-const validationSchema = yup
-  .object()
-  .shape({
-    localLogin: yup.boolean(),
-    mediaServerLogin: yup.boolean(),
-    oidcLogin: yup.boolean(),
-    oidcName: yup.string().when('oidcLogin', {
-      is: true,
-      then: yup.string().required(),
-    }),
-    oidcClientId: yup.string().when('oidcLogin', {
-      is: true,
-      then: yup.string().required(),
-    }),
-    oidcClientSecret: yup.string().when('oidcLogin', {
-      is: true,
-      then: yup.string().required(),
-    }),
-    oidcDomain: yup.string().when('oidcLogin', {
-      is: true,
-      then: yup
-        .string()
-        .required()
-        .test({
-          message: 'Must be a valid domain without query string parameters.',
-          test: (val) => {
-            return (
-              !!val &&
-              // Any HTTP(S) domain without query string
-              /^(https?:\/\/)([A-Za-z0-9-_.!~*'():]*)(((?!\?).)*$)/i.test(val)
-            );
-          },
-        }),
-    }),
-  })
-  .test({
-    name: 'atLeastOneAuth',
-    test: function (values) {
-      const isValid = ['localLogin', 'mediaServerLogin', 'oidcLogin'].some(
-        (field) => !!values[field]
-      );
+const createValidationSchema = (intl: IntlShape) => {
+  return yup
+    .object()
+    .shape({
+      localLogin: yup.boolean(),
+      mediaServerLogin: yup.boolean(),
+      oidcLogin: yup.boolean(),
+      oidc: yup.object().when('oidcLogin', {
+        is: true,
+        then: oidcSettingsSchema(intl),
+      }),
+    })
+    .test({
+      name: 'atLeastOneAuth',
+      test: function (values) {
+        const isValid = ['localLogin', 'mediaServerLogin', 'oidcLogin'].some(
+          (field) => !!values[field]
+        );
 
-      if (isValid) return true;
-      return this.createError({
-        path: 'localLogin | mediaServerLogin | oidcLogin',
-        message: 'At least one authentication method must be selected.',
-      });
-    },
-  });
+        if (isValid) return true;
+        return this.createError({
+          path: 'localLogin | mediaServerLogin | oidcLogin',
+          message: 'At least one authentication method must be selected.',
+        });
+      },
+    });
+};
 
 const SettingsUsers = () => {
   const { addToast } = useToasts();
@@ -144,18 +124,14 @@ const SettingsUsers = () => {
             newPlexLogin: data?.newPlexLogin,
             mediaServerLogin: data?.mediaServerLogin,
             oidcLogin: data?.oidcLogin,
-            oidcName: data?.oidcName,
-            oidcClientId: data?.oidcClientId,
-            oidcClientSecret: data?.oidcClientSecret,
-            oidcDomain: data?.oidcDomain,
-            oidcMatchUsername: data?.oidcMatchUsername,
+            oidc: data?.oidc ?? {},
             movieQuotaLimit: data?.defaultQuotas.movie.quotaLimit ?? 0,
             movieQuotaDays: data?.defaultQuotas.movie.quotaDays ?? 7,
             tvQuotaLimit: data?.defaultQuotas.tv.quotaLimit ?? 0,
             tvQuotaDays: data?.defaultQuotas.tv.quotaDays ?? 7,
             defaultPermissions: data?.defaultPermissions ?? 0,
           }}
-          validationSchema={validationSchema}
+          validationSchema={() => createValidationSchema(intl)}
           enableReinitialize
           onSubmit={async (values) => {
             try {
@@ -164,11 +140,7 @@ const SettingsUsers = () => {
                 newPlexLogin: values.newPlexLogin,
                 mediaServerLogin: values.mediaServerLogin,
                 oidcLogin: values.oidcLogin,
-                oidcName: values.oidcName,
-                oidcClientId: values.oidcClientId,
-                oidcClientSecret: values.oidcClientSecret,
-                oidcDomain: values.oidcDomain,
-                oidcMatchUsername: values.oidcMatchUsername,
+                oidc: values.oidc,
                 defaultQuotas: {
                   movie: {
                     quotaLimit: values.movieQuotaLimit,
@@ -277,10 +249,10 @@ const SettingsUsers = () => {
                     </div>
                   </div>
                 </div>
-                {values.oidcLogin && showOidcDialog[0] && (
+                {values.oidcLogin && values.oidc && showOidcDialog[0] && (
                   <OidcModal
-                    values={values}
-                    errors={errors}
+                    values={values.oidc}
+                    errors={errors.oidc}
                     setFieldValue={setFieldValue}
                     mediaServerName={mediaServerName}
                     onOk={() => setShowOidcDialog([false, false])}

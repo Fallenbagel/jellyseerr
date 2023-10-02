@@ -8,7 +8,12 @@ import {
   type FormikErrors,
   type FormikHelpers,
 } from 'formik';
-import { defineMessages, useIntl } from 'react-intl';
+import {
+  defineMessages,
+  useIntl,
+  type IntlShape,
+  type MessageDescriptor,
+} from 'react-intl';
 import * as yup from 'yup';
 
 const messages = defineMessages({
@@ -26,43 +31,28 @@ const messages = defineMessages({
     'Match OIDC users with their {mediaServerName} accounts by username',
 });
 
-const OIDC_SETTINGS_OPTIONS = [
-  'oidcName',
-  'oidcClientId',
-  'oidcClientSecret',
-  'oidcDomain',
-  'oidcMatchUsername',
-] as const;
-
-type OidcSettings = Pick<MainSettings, typeof OIDC_SETTINGS_OPTIONS[number]>;
+type OidcSettings = MainSettings['oidc'];
 
 interface OidcModalProps {
   values: Partial<OidcSettings>;
-  errors: FormikErrors<OidcSettings>;
+  errors?: FormikErrors<OidcSettings>;
   setFieldValue: FormikHelpers<OidcSettings>['setFieldValue'];
   mediaServerName: string;
   onClose?: () => void;
   onOk?: () => void;
 }
 
-export const OidcSettingsSchema = yup.object().shape({
-  oidcName: yup.string().when('oidcLogin', {
-    is: true,
-    then: yup.string().required(),
-  }),
-  oidcClientId: yup.string().when('oidcLogin', {
-    is: true,
-    then: yup.string().required(),
-  }),
-  oidcClientSecret: yup.string().when('oidcLogin', {
-    is: true,
-    then: yup.string().required(),
-  }),
-  oidcDomain: yup.string().when('oidcLogin', {
-    is: true,
-    then: yup
+export const oidcSettingsSchema = (intl: IntlShape) => {
+  const requiredMessage = (message: MessageDescriptor) =>
+    intl.formatMessage(globalMessages.fieldRequired, {
+      fieldName: intl.formatMessage(message),
+    });
+
+  return yup.object().shape({
+    providerName: yup.string().required(requiredMessage(messages.oidcName)),
+    providerUrl: yup
       .string()
-      .required()
+      .required(requiredMessage(messages.oidcDomain))
       .test({
         message: 'Must be a valid domain without query string parameters.',
         test: (val) => {
@@ -73,8 +63,12 @@ export const OidcSettingsSchema = yup.object().shape({
           );
         },
       }),
-  }),
-});
+    clientId: yup.string().required(requiredMessage(messages.oidcClientId)),
+    clientSecret: yup
+      .string()
+      .required(requiredMessage(messages.oidcClientSecret)),
+  });
+};
 
 const OidcModal = ({
   onClose,
@@ -87,9 +81,8 @@ const OidcModal = ({
   const intl = useIntl();
 
   const canClose = (errors: OidcModalProps['errors']) => {
-    return Object.keys(errors).some((err) =>
-      (OIDC_SETTINGS_OPTIONS as readonly string[]).includes(err)
-    );
+    if (errors == null) return true;
+    return Object.keys(errors).length === 0;
   };
 
   return (
@@ -109,7 +102,7 @@ const OidcModal = ({
         cancelButtonAction="button"
         okButtonType="primary"
         okButtonAction="button"
-        okDisabled={canClose(errors)}
+        okDisabled={!canClose(errors)}
         okText={intl.formatMessage(globalMessages.done)}
         onOk={onOk}
         title={intl.formatMessage(messages.configureoidc)}
@@ -124,11 +117,11 @@ const OidcModal = ({
               </span>
             </label>
             <div className="form-input-area">
-              <Field id="oidcDomain" name="oidcDomain" type="text" />
+              <Field id="oidcDomain" name="oidc.providerUrl" type="text" />
               <ErrorMessage
                 className="error"
                 component="span"
-                name="oidcDomain"
+                name="oidc.providerUrl"
               />
             </div>
           </div>
@@ -141,11 +134,11 @@ const OidcModal = ({
               </span>
             </label>
             <div className="form-input-area">
-              <Field id="oidcName" name="oidcName" type="text" />
+              <Field id="oidcName" name="oidc.providerName" type="text" />
               <ErrorMessage
                 className="error"
                 component="span"
-                name="oidcName"
+                name="oidc.providerName"
               />
             </div>
           </div>
@@ -158,11 +151,11 @@ const OidcModal = ({
               </span>
             </label>
             <div className="form-input-area">
-              <Field id="oidcClientId" name="oidcClientId" type="text" />
+              <Field id="oidcClientId" name="oidc.clientId" type="text" />
               <ErrorMessage
                 className="error"
                 component="span"
-                name="oidcClientId"
+                name="oidc.clientId"
               />
             </div>
           </div>
@@ -177,13 +170,13 @@ const OidcModal = ({
             <div className="form-input-area">
               <Field
                 id="oidcClientSecret"
-                name="oidcClientSecret"
+                name="oidc.clientSecret"
                 type="text"
               />
               <ErrorMessage
                 className="error"
                 component="span"
-                name="oidcClientSecret"
+                name="oidc.clientSecret"
               />
             </div>
           </div>
@@ -202,9 +195,12 @@ const OidcModal = ({
               <Field
                 type="checkbox"
                 id="oidcMatchUsername"
-                name="oidcMatchUsername"
+                name="oidc.matchJellyfinUsername"
                 onChange={() => {
-                  setFieldValue('oidcMatchUsername', !values.oidcMatchUsername);
+                  setFieldValue(
+                    'oidc.matchJellyfinUsername',
+                    !values.matchJellyfinUsername
+                  );
                 }}
               />
             </div>
