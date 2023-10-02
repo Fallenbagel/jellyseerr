@@ -107,13 +107,18 @@ export interface MainSettings {
   hideAvailable: boolean;
   localLogin: boolean;
   mediaServerLogin: boolean;
-  newPlexLogin: boolean;
   oidcLogin: boolean;
-  oidcName: string;
-  oidcClientId: string;
-  oidcClientSecret: string;
-  oidcDomain: string;
-  oidcMatchUsername: boolean;
+  newPlexLogin: boolean;
+  oidc: {
+    providerName: string;
+    providerUrl: string;
+    clientId: string;
+    clientSecret: string;
+    userIdentifier: string;
+    requiredClaims: string;
+    scopes: string;
+    matchJellyfinUsername: boolean;
+  };
   region: string;
   originalLanguage: string;
   trustProxy: boolean;
@@ -133,7 +138,7 @@ interface FullPublicSettings extends PublicSettings {
   localLogin: boolean;
   mediaServerLogin: boolean;
   oidcLogin: boolean;
-  oidcName: string;
+  oidcProviderName: string;
   movie4kEnabled: boolean;
   series4kEnabled: boolean;
   region: string;
@@ -325,11 +330,16 @@ class Settings {
         mediaServerLogin: true,
         newPlexLogin: true,
         oidcLogin: false,
-        oidcName: 'OpenID Connect',
-        oidcClientId: '',
-        oidcClientSecret: '',
-        oidcDomain: '',
-        oidcMatchUsername: false,
+        oidc: {
+          providerName: 'OpenID Connect',
+          providerUrl: '',
+          clientId: '',
+          clientSecret: '',
+          userIdentifier: 'email',
+          requiredClaims: 'email_verified',
+          scopes: 'email openid profile',
+          matchJellyfinUsername: false,
+        },
         region: '',
         originalLanguage: '',
         trustProxy: false,
@@ -553,7 +563,7 @@ class Settings {
       localLogin: this.data.main.localLogin,
       mediaServerLogin: this.data.main.mediaServerLogin,
       oidcLogin: this.data.main.oidcLogin,
-      oidcName: this.data.main.oidcName,
+      oidcProviderName: this.data.main.oidc.providerName,
       movie4kEnabled: this.data.radarr.some(
         (radarr) => radarr.is4k && radarr.isDefault
       ),

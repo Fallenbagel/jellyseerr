@@ -30,8 +30,10 @@ export interface PublicSettingsResponse {
   hideAvailable: boolean;
   localLogin: boolean;
   mediaServerLogin: boolean;
-  oidcLogin: boolean;
-  oidcName: string;
+  oidc: {
+    enabled: boolean;
+    providerName: string;
+  };
   movie4kEnabled: boolean;
   series4kEnabled: boolean;
   region: string;

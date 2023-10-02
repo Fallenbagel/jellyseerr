@@ -29,12 +29,12 @@ export async function getOIDCWellknownConfiguration(domain: string) {
 /** Generate authentication request url */
 export async function getOIDCRedirectUrl(req: Request, state: string) {
   const settings = getSettings();
-  const { oidcDomain, oidcClientId } = settings.main;
+  const { oidc } = settings.main;
 
-  const wellKnownInfo = await getOIDCWellknownConfiguration(oidcDomain);
+  const wellKnownInfo = await getOIDCWellknownConfiguration(oidc.providerUrl);
   const url = new URL(wellKnownInfo.authorization_endpoint);
   url.searchParams.set('response_type', 'code');
-  url.searchParams.set('client_id', oidcClientId);
+  url.searchParams.set('client_id', oidc.clientId);
 
   const callbackUrl = new URL(
     '/login/oidc/callback',
@@ -53,7 +53,7 @@ export async function fetchOIDCTokenData(
   code: string
 ) {
   const settings = getSettings();
-  const { oidcClientId, oidcClientSecret } = settings.main;
+  const { oidc } = settings.main;
 
   const callbackUrl = new URL(
     '/login/oidc/callback',
@@ -61,10 +61,10 @@ export async function fetchOIDCTokenData(
   );
 
   const formData = new URLSearchParams();
-  formData.append('client_secret', oidcClientSecret);
+  formData.append('client_secret', oidc.clientSecret);
   formData.append('grant_type', 'authorization_code');
   formData.append('redirect_uri', callbackUrl.toString());
-  formData.append('client_id', oidcClientId);
+  formData.append('client_id', oidc.clientId);
   formData.append('code', code);
 
   return await axios
@@ -86,6 +86,61 @@ export async function getOIDCUserInfo(
     .then((r) => r.data);
 
   return userInfo;
+}
+
+class OidcAuthorizationError extends Error {}
+
+class OidcMissingKeyError extends OidcAuthorizationError {
+  constructor(public userInfo: FullUserInfo, public key: string) {
+    super(`Key ${key} was missing on OIDC userinfo but was expected.`);
+  }
+}
+
+export function tryGetUserIdentifiers(
+  userInfo: FullUserInfo,
+  identifierKeys: string[]
+): string[] {
+  return identifierKeys.map((userIdentifier) => {
+    if (
+      !Object.hasOwn(userInfo, userIdentifier) ||
+      typeof userInfo[userIdentifier] !== 'string'
+    ) {
+      throw new OidcMissingKeyError(userInfo, userIdentifier);
+    }
+
+    return userInfo[userIdentifier] as string;
+  });
+}
+
+type PrimitiveString = 'string' | 'boolean';
+type TypeFromName<T extends PrimitiveString> = T extends 'string'
+  ? string
+  : T extends 'boolean'
+  ? boolean
+  : unknown;
+
+export function tryGetUserInfoKey<T extends PrimitiveString>(
+  userInfo: FullUserInfo,
+  key: string,
+  expectedType: T
+): TypeFromName<T> {
+  if (!Object.hasOwn(userInfo, key) || typeof userInfo[key] !== expectedType) {
+    throw new OidcMissingKeyError(userInfo, key);
+  }
+
+  return userInfo[key] as TypeFromName<T>;
+}
+
+export function validateUserClaims(userInfo: FullUserInfo) {
+  const settings = getSettings();
+  const { requiredClaims: requiredClaimsString } = settings.main.oidc;
+  const requiredClaims = requiredClaimsString.split(' ');
+
+  requiredClaims.some((claim) => {
+    const value = tryGetUserInfoKey(userInfo, claim, 'boolean');
+    if (!value)
+      throw new OidcAuthorizationError('User was missing a required claim.');
+  });
 }
 
 /** Generates a schema to validate ID token JWT and userinfo claims */

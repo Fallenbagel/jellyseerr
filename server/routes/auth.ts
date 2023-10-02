@@ -16,6 +16,8 @@ import {
   getOIDCRedirectUrl,
   getOIDCUserInfo,
   getOIDCWellknownConfiguration,
+  tryGetUserIdentifiers,
+  validateUserClaims,
   type FullUserInfo,
 } from '@server/utils/oidc';
 import { randomBytes } from 'crypto';
@@ -23,6 +25,7 @@ import * as EmailValidator from 'email-validator';
 import { Router } from 'express';
 import gravatarUrl from 'gravatar-url';
 import decodeJwt from 'jwt-decode';
+import { In } from 'typeorm';
 
 const authRoutes = Router();
 
@@ -690,7 +693,7 @@ authRoutes.get('/oidc-login', async (req, res, next) => {
 
 authRoutes.get('/oidc-callback', async (req, res, next) => {
   const settings = getSettings();
-  const { oidcLogin, oidcDomain, oidcClientId } = settings.main;
+  const { oidcLogin, oidc } = settings.main;
 
   if (!oidcLogin) {
     return next({
@@ -716,7 +719,7 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
       });
       return next({
         status: 400,
-        message: 'Invalid state.',
+        message: 'Authorization failed.',
       });
     }
 
@@ -730,11 +733,11 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
       });
       return next({
         status: 400,
-        message: 'Invalid code.',
+        message: 'Authorization failed.',
       });
     }
 
-    const wellKnownInfo = await getOIDCWellknownConfiguration(oidcDomain);
+    const wellKnownInfo = await getOIDCWellknownConfiguration(oidc.providerUrl);
 
     // Fetch the token data
     const body = (await fetchOIDCTokenData(req, wellKnownInfo, code)) as
@@ -749,8 +752,8 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
         body: body,
       });
       return next({
-        status: 403,
-        message: 'Invalid token response.',
+        status: 400,
+        message: 'Authorization failed.',
       });
     }
 
@@ -778,8 +781,8 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
         idToken: idToken,
       });
       return next({
-        status: 403,
-        message: 'Invalid jwt.',
+        status: 400,
+        message: 'Authorization failed.',
       });
     }
 
@@ -790,8 +793,8 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
     // Validate ID token jwt and user info
     try {
       const idTokenSchema = createIdTokenSchema({
-        oidcClientId: oidcClientId,
-        oidcDomain: oidcDomain,
+        oidcClientId: oidc.clientId,
+        oidcDomain: oidc.providerUrl,
       });
       await idTokenSchema.validate(fullUserInfo);
     } catch (err) {
@@ -803,35 +806,58 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
       });
       return next({
         status: 403,
-        message: `Validation failed: ${err.message}.`,
+        message: 'Authorization failed.',
+      });
+    }
+
+    // Validate user identifier
+    let identifiers: string[];
+    try {
+      const identificationKeys = oidc.userIdentifier.split(' ');
+      identifiers = tryGetUserIdentifiers(fullUserInfo, identificationKeys);
+    } catch {
+      logger.info('Failed OIDC login attempt', {
+        cause: 'User identifier not found in userinfo payload.',
+        user: fullUserInfo,
+        identifier: oidc.userIdentifier,
+      });
+      return next({
+        status: 500,
+        message: 'Configuration error.',
       });
     }
 
     // Check that email is verified
-    if (!fullUserInfo.email_verified) {
+    try {
+      validateUserClaims(fullUserInfo);
+    } catch (error) {
       logger.info('Failed OIDC login attempt', {
-        cause: 'Email not verified',
+        cause: 'Failed to validate required claims',
+        error,
         ip: req.ip,
-        email: fullUserInfo.email,
+        identifiers,
+        requiredClaims: oidc.requiredClaims,
       });
       return next({
         status: 403,
-        message: 'Email not verified.',
+        message: 'Insufficient permissions.',
       });
     }
 
-    // Map email to user
+    // Map oidc identifier to user email
     const userRepository = getRepository(User);
     let user = await userRepository.findOne({
-      where: { email: fullUserInfo.email },
+      where: {
+        email: In(identifiers),
+      },
     });
 
-    // Map username to media server username
-    if (settings.main.oidcMatchUsername && !user) {
+    // Map user identification claim to media server username
+    if (!user && oidc.matchJellyfinUsername) {
       user = await userRepository.findOne({
         where: [
-          { plexUsername: fullUserInfo.preferred_username },
-          { jellyfinUsername: fullUserInfo.preferred_username },
+          { plexUsername: In(identifiers) },
+          { jellyfinUsername: In(identifiers) },
         ],
       });
     }
