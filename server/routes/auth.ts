@@ -679,7 +679,7 @@ authRoutes.get('/oidc-login', async (req, res, next) => {
     });
     return next({
       status: 500,
-      message: 'Failed to fetch OpenID Connect redirect url.',
+      message: 'Configuration error.',
     });
   }
 
