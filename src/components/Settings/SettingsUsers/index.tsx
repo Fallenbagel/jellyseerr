@@ -87,10 +87,7 @@ const SettingsUsers = () => {
   const settings = useSettings();
   const { publicRuntimeConfig } = getConfig();
   // [showDialog, isFirstOpen]
-  const [showOidcDialog, setShowOidcDialog] = useState<[boolean, boolean]>([
-    false,
-    false,
-  ]);
+  const [showOidcDialog, setShowOidcDialog] = useState<boolean>(false);
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -236,31 +233,27 @@ const SettingsUsers = () => {
                               onChange={() => {
                                 const newValue = !values.oidcLogin;
                                 setFieldValue('oidcLogin', newValue);
-                                if (newValue) setShowOidcDialog([true, true]);
+                                if (newValue) setShowOidcDialog(true);
                               }}
                             />
                           </div>
                           <CogIcon
                             className="ml-4 w-8 cursor-pointer text-gray-400"
-                            onClick={() => setShowOidcDialog([true, false])}
+                            onClick={() => setShowOidcDialog(true)}
                           />
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                {values.oidcLogin && values.oidc && showOidcDialog[0] && (
+                {values.oidcLogin && values.oidc && showOidcDialog && (
                   <OidcModal
                     values={values.oidc}
                     errors={errors.oidc}
                     setFieldValue={setFieldValue}
                     mediaServerName={mediaServerName}
-                    onOk={() => setShowOidcDialog([false, false])}
-                    onClose={
-                      showOidcDialog[1]
-                        ? () => setFieldValue('oidcLogin', false)
-                        : undefined
-                    }
+                    onOk={() => setShowOidcDialog(false)}
+                    onClose={() => setFieldValue('oidcLogin', false)}
                   />
                 )}
                 <div className="form-row">
