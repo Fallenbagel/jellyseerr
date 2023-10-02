@@ -59,7 +59,7 @@ const OidcLogin: React.FC<OidcLoginProps> = ({
           {isProcessing
             ? intl.formatMessage(globalMessages.loading)
             : intl.formatMessage(messages.signinwithoidc, {
-                OIDCProvider: settings.currentSettings.oidcName,
+                OIDCProvider: settings.currentSettings.oidcProviderName,
               })}
         </span>
       </Button>

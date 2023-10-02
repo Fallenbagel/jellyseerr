@@ -182,7 +182,7 @@ CoreApp.getInitialProps = async (initialProps) => {
     localLogin: true,
     mediaServerLogin: true,
     oidcLogin: false,
-    oidcName: 'OpenID Connect',
+    oidcProviderName: 'OpenID Connect',
     region: '',
     originalLanguage: '',
     mediaServerType: MediaServerType.NOT_CONFIGURED,

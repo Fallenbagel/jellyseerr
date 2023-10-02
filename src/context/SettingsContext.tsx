@@ -8,7 +8,7 @@ export interface SettingsContextProps {
   children?: React.ReactNode;
 }
 
-const defaultSettings = {
+const defaultSettings: PublicSettingsResponse = {
   initialized: false,
   applicationTitle: 'Overseerr',
   applicationUrl: '',
@@ -16,7 +16,7 @@ const defaultSettings = {
   localLogin: true,
   mediaServerLogin: true,
   oidcLogin: false,
-  oidcName: 'OpenID Connect',
+  oidcProviderName: 'OpenID Connect',
   movie4kEnabled: false,
   series4kEnabled: false,
   region: '',
