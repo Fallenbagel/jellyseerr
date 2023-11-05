@@ -1,4 +1,4 @@
-FROM node:16.17-alpine AS BUILD_IMAGE
+FROM node:20.9-alpine AS BUILD_IMAGE
 
 WORKDIR /app
 
@@ -7,10 +7,9 @@ ENV TARGETPLATFORM=${TARGETPLATFORM:-linux/amd64}
 
 RUN \
   case "${TARGETPLATFORM}" in \
-    'linux/arm64' | 'linux/arm/v7') \
-      apk add --no-cache python3 make g++ && \
-      ln -s /usr/bin/python3 /usr/bin/python \
-      ;; \
+  'linux/arm64' | 'linux/arm/v7') \
+  apk add --no-cache python3 make g++ \
+  ;; \
   esac
 
 COPY package.json yarn.lock ./
@@ -33,7 +32,7 @@ RUN touch config/DOCKER
 RUN echo "{\"commitTag\": \"${COMMIT_TAG}\"}" > committag.json
 
 
-FROM node:16.17-alpine
+FROM node:20.9-alpine
 
 WORKDIR /app
 

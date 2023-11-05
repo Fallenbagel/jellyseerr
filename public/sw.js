@@ -4,30 +4,30 @@
 // This variable is intentionally declared and unused.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const OFFLINE_VERSION = 3;
-const CACHE_NAME = "offline";
+const CACHE_NAME = 'offline';
 // Customize this with a different URL if needed.
-const OFFLINE_URL = "/offline.html";
+const OFFLINE_URL = '/offline.html';
 
-self.addEventListener("install", (event) => {
+self.addEventListener('install', (event) => {
   event.waitUntil(
     (async () => {
       const cache = await caches.open(CACHE_NAME);
       // Setting {cache: 'reload'} in the new request will ensure that the
       // response isn't fulfilled from the HTTP cache; i.e., it will be from
       // the network.
-      await cache.add(new Request(OFFLINE_URL, { cache: "reload" }));
+      await cache.add(new Request(OFFLINE_URL, { cache: 'reload' }));
     })()
   );
   // Force the waiting service worker to become the active service worker.
   self.skipWaiting();
 });
 
-self.addEventListener("activate", (event) => {
+self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
       // Enable navigation preload if it's supported.
       // See https://developers.google.com/web/updates/2017/02/navigation-preload
-      if ("navigationPreload" in self.registration) {
+      if ('navigationPreload' in self.registration) {
         await self.registration.navigationPreload.enable();
       }
     })()
@@ -37,10 +37,10 @@ self.addEventListener("activate", (event) => {
   clients.claim();
 });
 
-self.addEventListener("fetch", (event) => {
+self.addEventListener('fetch', (event) => {
   // We only want to call event.respondWith() if this is a navigation request
   // for an HTML page.
-  if (event.request.mode === "navigate") {
+  if (event.request.mode === 'navigate') {
     event.respondWith(
       (async () => {
         try {
@@ -59,7 +59,7 @@ self.addEventListener("fetch", (event) => {
           // If fetch() returns a valid HTTP response with a response code in
           // the 4xx or 5xx range, the catch() will NOT be called.
           // eslint-disable-next-line no-console
-          console.log("Fetch failed; returning offline page instead.", error);
+          console.log('Fetch failed; returning offline page instead.', error);
 
           const cache = await caches.open(CACHE_NAME);
           const cachedResponse = await cache.match(OFFLINE_URL);
@@ -85,15 +85,13 @@ self.addEventListener('push', (event) => {
       requestId: payload.requestId,
     },
     actions: [],
-  }
+  };
 
-  if (payload.actionUrl){
-    options.actions.push(
-      {
-        action: 'view',
-        title: payload.actionUrlTitle ?? 'View',
-      }
-    );
+  if (payload.actionUrl) {
+    options.actions.push({
+      action: 'view',
+      title: payload.actionUrlTitle ?? 'View',
+    });
   }
 
   if (payload.notificationType === 'MEDIA_PENDING') {
@@ -109,27 +107,29 @@ self.addEventListener('push', (event) => {
     );
   }
 
-  event.waitUntil(
-    self.registration.showNotification(payload.subject, options)
-  );
+  event.waitUntil(self.registration.showNotification(payload.subject, options));
 });
 
-self.addEventListener('notificationclick', (event) => {
-  const notificationData = event.notification.data;
+self.addEventListener(
+  'notificationclick',
+  (event) => {
+    const notificationData = event.notification.data;
 
-  event.notification.close();
+    event.notification.close();
 
-  if (event.action === 'approve') {
-    fetch(`/api/v1/request/${notificationData.requestId}/approve`, {
-      method: 'POST',
-    });
-  } else if (event.action === 'decline') {
-    fetch(`/api/v1/request/${notificationData.requestId}/decline`, {
-      method: 'POST',
-    });
-  }
-  
-  if (notificationData.actionUrl) {
-    clients.openWindow(notificationData.actionUrl);
-  }
-}, false);
+    if (event.action === 'approve') {
+      fetch(`/api/v1/request/${notificationData.requestId}/approve`, {
+        method: 'POST',
+      });
+    } else if (event.action === 'decline') {
+      fetch(`/api/v1/request/${notificationData.requestId}/decline`, {
+        method: 'POST',
+      });
+    }
+
+    if (notificationData.actionUrl) {
+      clients.openWindow(notificationData.actionUrl);
+    }
+  },
+  false
+);
