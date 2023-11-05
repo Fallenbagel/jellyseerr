@@ -62,7 +62,7 @@ class JobJellyfinSync {
       const metadata = await this.jfClient.getItemData(jellyfinitem.Id);
       const newMedia = new Media();
 
-      if (!metadata.Id) {
+      if (!metadata?.Id) {
         logger.debug('No Id metadata for this title. Skipping', {
           label: 'Plex Sync',
           ratingKey: jellyfinitem.Id,
@@ -197,6 +197,14 @@ class JobJellyfinSync {
         jellyfinitem.SeriesId ?? jellyfinitem.SeasonId ?? jellyfinitem.Id;
       const metadata = await this.jfClient.getItemData(Id);
 
+      if (!metadata?.Id) {
+        logger.debug('No Id metadata for this title. Skipping', {
+          label: 'Plex Sync',
+          ratingKey: jellyfinitem.Id,
+        });
+        return;
+      }
+
       if (metadata.ProviderIds.Tvdb) {
         tvShow = await this.tmdb.getShowByTvdbId({
           tvdbId: Number(metadata.ProviderIds.Tvdb),
@@ -275,7 +283,7 @@ class JobJellyfinSync {
                     episode.Id
                   );
 
-                  ExtendedEpisodeData.MediaSources?.some((MediaSource) => {
+                  ExtendedEpisodeData?.MediaSources?.some((MediaSource) => {
                     return MediaSource.MediaStreams.some((MediaStream) => {
                       if (MediaStream.Type === 'Video') {
                         if ((MediaStream.Width ?? 0) >= 2000) {
