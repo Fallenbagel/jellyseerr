@@ -25,7 +25,7 @@ export type AvailableLocale =
   | 'sq'
   | 'sr'
   | 'sv'
-  | 'ua'
+  | 'uk'
   | 'zh-CN'
   | 'zh-TW';
 
@@ -127,8 +127,8 @@ export const availableLanguages: AvailableLanguageObject = {
     code: 'ja',
     display: '日本語',
   },
-  ua: {
-    code: 'ua',
+  uk: {
+    code: 'uk',
     display: 'українська',
   },
   ko: {
