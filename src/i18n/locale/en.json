@@ -83,7 +83,7 @@
   "components.Discover.MovieGenreSlider.moviegenres": "Movie Genres",
   "components.Discover.NetworkSlider.networks": "Networks",
   "components.Discover.PlexWatchlistSlider.emptywatchlist": "Media added to your <PlexWatchlistSupportLink>Plex Watchlist</PlexWatchlistSupportLink> will appear here.",
-  "components.Discover.PlexWatchlistSlider.plexwatchlist": "Your Plex Watchlist",
+  "components.Discover.PlexWatchlistSlider.plexwatchlist": "Your Watchlist",
   "components.Discover.RecentlyAddedSlider.recentlyAdded": "Recently Added",
   "components.Discover.StudioSlider.studios": "Studios",
   "components.Discover.TvGenreList.seriesgenres": "Series Genres",
