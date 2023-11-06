@@ -17,9 +17,9 @@ architectures:
 parts:
   jellyseerr:
     plugin: nodejs
-    nodejs-version: '20.9.0'
+    nodejs-version: '18.18.2'
     nodejs-package-manager: 'yarn'
-    nodejs-yarn-version: v1.22.17
+    nodejs-yarn-version: v1.22.19
     build-packages:
       - git
       - on arm64:
