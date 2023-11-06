@@ -16,10 +16,8 @@ architectures:
 
 parts:
   jellyseerr:
-    plugin: nodejs
-    nodejs-version: '18.18.2'
-    nodejs-package-manager: 'yarn'
-    nodejs-yarn-version: v1.22.19
+    plugin: npm
+    npm-node-version: '18.18.2'
     build-packages:
       - git
       - on arm64:
@@ -69,6 +67,8 @@ parts:
       - CYPRESS_INSTALL_BINARY: '0'
     override-build: |
       set -e
+      # Install Yarn
+      npm install -g yarn
       # Set COMMIT_TAG before the build begins
       export COMMIT_TAG=$(cat $SNAPCRAFT_PART_BUILD/commit.txt)
       snapcraftctl build
