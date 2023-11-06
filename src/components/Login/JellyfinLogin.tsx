@@ -67,6 +67,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
       ),
       password: Yup.string(),
     });
+
     const mediaServerFormatValues = {
       mediaServerName:
         publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
@@ -218,6 +219,9 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
       ),
       password: Yup.string(),
     });
+    const baseUrl = settings.currentSettings.jellyfinExternalHost
+      ? settings.currentSettings.jellyfinExternalHost
+      : settings.currentSettings.jellyfinHost;
     return (
       <div>
         <Formik
@@ -294,13 +298,11 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                         <Button
                           as="a"
                           buttonType="ghost"
-                          href={
-                            process.env.JELLYFIN_TYPE == 'emby'
-                              ? settings.currentSettings.jellyfinHost +
-                                '/web/index.html#!/startup/forgotpassword.html'
-                              : settings.currentSettings.jellyfinHost +
-                                '/web/index.html#!/forgotpassword.html'
-                          }
+                          href={`${baseUrl}/web/index.html#!/${
+                            process.env.JELLYFIN_TYPE === 'emby'
+                              ? 'startup/'
+                              : ''
+                          }forgotpassword.html`}
                         >
                           {intl.formatMessage(messages.forgotpassword)}
                         </Button>
