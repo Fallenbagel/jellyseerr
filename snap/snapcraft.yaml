@@ -88,6 +88,7 @@ parts:
       # Set COMMIT_TAG before the build begins
       export COMMIT_TAG=$(cat $SNAPCRAFT_PART_BUILD/commit.txt)
       snapcraftctl build
+      yarn install
       yarn build
       # Copy files needed for staging
       cp $SNAPCRAFT_PART_BUILD/committag.json $SNAPCRAFT_PART_INSTALL/
