@@ -232,6 +232,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "EthanArmbrust",
+      "name": "EthanArmbrust",
+      "avatar_url": "https://avatars.githubusercontent.com/u/22754714?v=4",
+      "profile": "https://github.com/EthanArmbrust",
+      "contributions": [
+        "code"
+      ]
     }
   ]
 }
