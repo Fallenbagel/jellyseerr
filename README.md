@@ -6,7 +6,7 @@
 <a href="https://hub.docker.com/r/fallenbagel/jellyseerr"><img src="https://img.shields.io/docker/pulls/fallenbagel/jellyseerr" alt="Docker pulls"></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-15-orange.svg"/></a>
+<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-16-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 **Jellyseerr** is a free and open source software application for managing requests for your media library. It is a a fork of Overseerr built to bring support for Jellyfin & Emby media servers!
@@ -175,6 +175,7 @@ Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcon
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/CheChu10"><img src="https://avatars.githubusercontent.com/u/32913133?v=4?s=100" width="100px;" alt="Chechu García"/><br /><sub><b>Chechu García</b></sub></a><br /><a href="#translation-CheChu10" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/DimitriDR"><img src="https://avatars.githubusercontent.com/u/56969769?v=4?s=100" width="100px;" alt="Dimitri"/><br /><sub><b>Dimitri</b></sub></a><br /><a href="#translation-DimitriDR" title="Translation">🌍</a></td>
     </tr>
   </tbody>
 </table>
