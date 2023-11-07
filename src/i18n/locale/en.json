@@ -752,6 +752,7 @@
   "components.Settings.SettingsAbout.preferredmethod": "Preferred",
   "components.Settings.SettingsAbout.runningDevelop": "You are running the <code>develop</code> branch of Overseerr, which is only recommended for those contributing to development or assisting with bleeding-edge testing.",
   "components.Settings.SettingsAbout.supportoverseerr": "Support Overseerr",
+  "components.Settings.SettingsAbout.supportjellyseerr": "Support Jellyseerr",
   "components.Settings.SettingsAbout.timezone": "Time Zone",
   "components.Settings.SettingsAbout.totalmedia": "Total Media",
   "components.Settings.SettingsAbout.totalrequests": "Total Requests",

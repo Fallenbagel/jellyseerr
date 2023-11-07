@@ -69,7 +69,7 @@ const DiscoverWatchlist = () => {
         </Header>
       </div>
       <ListView
-        plexItems={titles.filter((title) => title != null)}
+        plexItems={titles}
         isEmpty={isEmpty}
         isLoading={
           isLoadingInitialData || (isLoadingMore && (titles?.length ?? 0) > 0)

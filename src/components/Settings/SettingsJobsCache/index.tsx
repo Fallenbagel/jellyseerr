@@ -30,7 +30,7 @@ const messages: { [messageName: string]: MessageDescriptor } = defineMessages({
   jobsandcache: 'Jobs & Cache',
   jobs: 'Jobs',
   jobsDescription:
-    'Overseerr performs certain maintenance tasks as regularly-scheduled jobs, but they can also be manually triggered below. Manually running a job will not alter its schedule.',
+    'Jellyseerr performs certain maintenance tasks as regularly-scheduled jobs, but they can also be manually triggered below. Manually running a job will not alter its schedule.',
   jobname: 'Job Name',
   jobtype: 'Type',
   nextexecution: 'Next Execution',
@@ -42,7 +42,7 @@ const messages: { [messageName: string]: MessageDescriptor } = defineMessages({
   command: 'Command',
   cache: 'Cache',
   cacheDescription:
-    'Overseerr caches requests to external API endpoints to optimize performance and avoid making unnecessary API calls.',
+    'Jellyseerr caches requests to external API endpoints to optimize performance and avoid making unnecessary API calls.',
   cacheflushed: '{cachename} cache flushed.',
   cachename: 'Cache Name',
   cachehits: 'Hits',
@@ -76,7 +76,7 @@ const messages: { [messageName: string]: MessageDescriptor } = defineMessages({
     'Every {jobScheduleSeconds, plural, one {second} other {{jobScheduleSeconds} seconds}}',
   imagecache: 'Image Cache',
   imagecacheDescription:
-    'When enabled in settings, Overseerr will proxy and cache images from pre-configured external sources. Cached images are saved into your config folder. You can find the files in <code>{appDataPath}/cache/images</code>.',
+    'When enabled in settings, Jellyseerr will proxy and cache images from pre-configured external sources. Cached images are saved into your config folder. You can find the files in <code>{appDataPath}/cache/images</code>.',
   imagecachecount: 'Images Cached',
   imagecachesize: 'Total Cache Size',
 });
