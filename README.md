@@ -37,12 +37,12 @@ With more features on the way! Check out our [issue tracker](https://github.com/
 
 _*On Jellyfin/Emby, ensure the `settings > Home > Automatically group content from the following folders into views such as 'Movies', 'Music' and 'TV'` is turned off*_
 
-### Launching Jellyseerr using Docker
+### Launching Jellyseerr using Docker (Recommended)
 
 Check out our dockerhub for instructions on how to install and run Jellyseerr:
 https://hub.docker.com/r/fallenbagel/jellyseerr
 
-### Launching Jellyseerr manually:
+### Building from source (ADVANCED):
 
 #### Windows
 
@@ -52,12 +52,16 @@ Pre-requisites:
 - [Yarn](https://classic.yarnpkg.com/lang/en/docs/install) 
 - Download/git clone the source code from the github (Either develop branch or main for stable)
 
-```bash
+```cmd
 npm i -g win-node-env
-yarn install
+set CYPRESS_INSTALL_BINARY=0
+yarn install --frozen-lockfile --network-timeout 1000000
 yarn run build
 yarn start
 ```
+(you can use task scheduler to run a bat script with `@echo off` and `yarn start` to run jellyseerr in the background)
+
+_to set env variables such as `JELLYFIN_TYPE=emby` create a file called `.env` in the root directory of jellyseerr_
 
 #### Linux
 
@@ -85,7 +89,7 @@ git checkout main
 3. Then install the dependencies and build the dist
 
 ```bash
-yarn install
+CYPRESS_INSTALL_BINARY=0 yarn install --frozen-lockfile --network-timeout 1000000
 yarn run build
 ```
 
