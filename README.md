@@ -6,7 +6,7 @@
 <a href="https://hub.docker.com/r/fallenbagel/jellyseerr"><img src="https://img.shields.io/docker/pulls/fallenbagel/jellyseerr" alt="Docker pulls"></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-21-orange.svg"/></a>
+<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-22-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 **Jellyseerr** is a free and open source software application for managing requests for your media library. It is a a fork of Overseerr built to bring support for Jellyfin & Emby media servers!
@@ -181,6 +181,9 @@ Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcon
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Pikachu920"><img src="https://avatars.githubusercontent.com/u/28607612?v=4?s=100" width="100px;" alt="Pikachu920"/><br /><sub><b>Pikachu920</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=Pikachu920" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/yalagin"><img src="https://avatars.githubusercontent.com/u/12879142?v=4?s=100" width="100px;" alt="Maxim Yalagin"/><br /><sub><b>Maxim Yalagin</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=yalagin" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/jeaboswell"><img src="https://avatars.githubusercontent.com/u/11653068?v=4?s=100" width="100px;" alt="Jesse Boswell"/><br /><sub><b>Jesse Boswell</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=jeaboswell" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/d-fendrich"><img src="https://avatars.githubusercontent.com/u/27904138?v=4?s=100" width="100px;" alt="d-fendrich"/><br /><sub><b>d-fendrich</b></sub></a><br /><a href="#translation-d-fendrich" title="Translation">🌍</a></td>
     </tr>
   </tbody>
 </table>
