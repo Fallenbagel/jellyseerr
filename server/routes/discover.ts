@@ -848,7 +848,7 @@ discoverRoutes.get<Record<string, unknown>, WatchlistResponse>(
       if (total) {
         return res.json({
           page: page,
-          totalPages: total / itemsPerPage,
+          totalPages: Math.ceil(total / itemsPerPage),
           totalResults: total,
           results: result,
         });
@@ -865,7 +865,6 @@ discoverRoutes.get<Record<string, unknown>, WatchlistResponse>(
     }
 
     const plexTV = new PlexTvAPI(activeUser.plexToken);
-
     const watchlist = await plexTV.getWatchlist({ offset });
 
     return res.json({

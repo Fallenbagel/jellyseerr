@@ -717,29 +717,31 @@ router.get<{ id: string }, WatchlistResponse>(
 
     const user = await getRepository(User).findOneOrFail({
       where: { id: Number(req.params.id) },
-      select: { id: true, plexToken: true },
+      select: ['id', 'plexToken'],
     });
 
-    if (!user?.plexToken) {
-      if (user) {
-        const [result, total] = await getRepository(Watchlist).findAndCount({
-          where: { requestedBy: { id: user?.id } },
-          relations: { requestedBy: true },
-          // loadRelationIds: true,
-          take: itemsPerPage,
-          skip: offset,
+    if (user) {
+      const [result, total] = await getRepository(Watchlist).findAndCount({
+        where: { requestedBy: { id: user?.id } },
+        relations: {
+          /*requestedBy: true,media:true*/
+        },
+        // loadRelationIds: true,
+        take: itemsPerPage,
+        skip: offset,
+      });
+      if (total) {
+        return res.json({
+          page: page,
+          totalPages: Math.ceil(total / itemsPerPage),
+          totalResults: total,
+          results: result,
         });
-        if (total) {
-          return res.json({
-            page: page,
-            totalPages: total / itemsPerPage,
-            totalResults: total,
-            results: result,
-          });
-        }
       }
+    }
 
-      // We will just return an empty array if the user has no Plex token
+    // We will just return an empty array if the user has no Plex token
+    if (!user.plexToken) {
       return res.json({
         page: 1,
         totalPages: 1,
