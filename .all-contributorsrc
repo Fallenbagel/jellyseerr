@@ -12,5 +12,17 @@
   "repoHost": "https://github.com",
   "skipCi": false,
   "commitConvention": "angular",
-  "commitType": "docs"
+  "commitType": "docs",
+  "contributors": [
+    {
+      "login": "Fallenbagel",
+      "name": "Fallenbagel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/98979876?v=4",
+      "profile": "https://github.com/Fallenbagel",
+      "contributions": [
+        "code",
+        "maintenance"
+      ]
+    }
+  ]
 }
