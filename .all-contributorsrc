@@ -214,6 +214,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "davidfdezalcoba",
+      "name": "David Fernández Alcoba",
+      "avatar_url": "https://avatars.githubusercontent.com/u/15996018?v=4",
+      "profile": "https://github.com/davidfdezalcoba",
+      "contributions": [
+        "code"
+      ]
     }
   ]
 }
