@@ -171,25 +171,31 @@ class JellyfinAPI {
 
   public async getLibraries(): Promise<JellyfinLibrary[]> {
     try {
-      const libraries = await this.axios.get<any>('/Library/VirtualFolders');
+      // TODO: Try to fix automatic grouping without fucking up LDAP users
+      // const libraries = await this.axios.get<any>('/Library/VirtualFolders');
 
-      const response: JellyfinLibrary[] = libraries.data
-        .filter((Item: any) => {
+      const account = await this.axios.get<any>(
+        `/Users/${this.userId ?? 'Me'}/Views`
+      );
+
+      const response: JellyfinLibrary[] = account.data.Items.filter(
+        (Item: any) => {
           return (
+            Item.Type === 'CollectionFolder' &&
             Item.CollectionType !== 'music' &&
             Item.CollectionType !== 'books' &&
             Item.CollectionType !== 'musicvideos' &&
             Item.CollectionType !== 'homevideos'
           );
-        })
-        .map((Item: any) => {
-          return <JellyfinLibrary>{
-            key: Item.ItemId,
-            title: Item.Name,
-            type: Item.CollectionType === 'movies' ? 'movie' : 'show',
-            agent: 'jellyfin',
-          };
-        });
+        }
+      ).map((Item: any) => {
+        return <JellyfinLibrary>{
+          key: Item.Id,
+          title: Item.Name,
+          type: Item.CollectionType === 'movies' ? 'movie' : 'show',
+          agent: 'jellyfin',
+        };
+      });
 
       return response;
     } catch (e) {

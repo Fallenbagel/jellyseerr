@@ -43,6 +43,8 @@ const messages = defineMessages({
   qualityprofile: 'Quality Profile',
   languageprofile: 'Language Profile',
   rootfolder: 'Root Folder',
+  seriesType: 'Series Type',
+  animeSeriesType: 'Anime Series Type',
   animequalityprofile: 'Anime Quality Profile',
   animelanguageprofile: 'Anime Language Profile',
   animerootfolder: 'Anime Root Folder',
@@ -244,6 +246,8 @@ const SonarrModal = ({ onClose, sonarr, onSave }: SonarrModalProps) => {
           activeProfileId: sonarr?.activeProfileId,
           activeLanguageProfileId: sonarr?.activeLanguageProfileId,
           rootFolder: sonarr?.activeDirectory,
+          seriesType: sonarr?.seriesType,
+          animeSeriesType: sonarr?.animeSeriesType,
           activeAnimeProfileId: sonarr?.activeAnimeProfileId,
           activeAnimeLanguageProfileId: sonarr?.activeAnimeLanguageProfileId,
           activeAnimeRootFolder: sonarr?.activeAnimeDirectory,
@@ -280,6 +284,8 @@ const SonarrModal = ({ onClose, sonarr, onSave }: SonarrModalProps) => {
                 : undefined,
               activeProfileName: profileName,
               activeDirectory: values.rootFolder,
+              seriesType: values.seriesType,
+              animeSeriesType: values.animeSeriesType,
               activeAnimeProfileId: values.activeAnimeProfileId
                 ? Number(values.activeAnimeProfileId)
                 : undefined,
@@ -538,6 +544,27 @@ const SonarrModal = ({ onClose, sonarr, onSave }: SonarrModalProps) => {
                   </div>
                 </div>
                 <div className="form-row">
+                  <label htmlFor="seriesType" className="text-label">
+                    {intl.formatMessage(messages.seriesType)}
+                  </label>
+                  <div className="form-input-area">
+                    <div className="form-input-field">
+                      <Field
+                        as="select"
+                        id="seriesType"
+                        name="seriesType"
+                        disabled={!isValidated || isTesting}
+                      >
+                        <option value="standard">Standard</option>
+                        <option value="daily">Daily</option>
+                      </Field>
+                    </div>
+                  </div>
+                  {errors.seriesType && touched.seriesType && (
+                    <div className="error">{errors.seriesType}</div>
+                  )}
+                </div>
+                <div className="form-row">
                   <label htmlFor="activeProfileId" className="text-label">
                     {intl.formatMessage(messages.qualityprofile)}
                     <span className="label-required">*</span>
@@ -722,6 +749,27 @@ const SonarrModal = ({ onClose, sonarr, onSave }: SonarrModalProps) => {
                       }
                     />
                   </div>
+                </div>
+                <div className="form-row">
+                  <label htmlFor="animeSeriesType" className="text-label">
+                    {intl.formatMessage(messages.animeSeriesType)}
+                  </label>
+                  <div className="form-input-area">
+                    <div className="form-input-field">
+                      <Field
+                        as="select"
+                        id="animeSeriesType"
+                        name="animeSeriesType"
+                        disabled={!isValidated || isTesting}
+                      >
+                        <option value="standard">Standard</option>
+                        <option value="anime">Anime</option>
+                      </Field>
+                    </div>
+                  </div>
+                  {errors.animeSeriesType && touched.animeSeriesType && (
+                    <div className="error">{errors.animeSeriesType}</div>
+                  )}
                 </div>
                 <div className="form-row">
                   <label htmlFor="activeAnimeProfileId" className="text-label">

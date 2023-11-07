@@ -80,82 +80,80 @@ class WatchlistSync {
         )
     );
 
-    await Promise.all(
-      unavailableItems.map(async (mediaItem) => {
-        try {
-          logger.info("Creating media request from user's Plex Watchlist", {
-            label: 'Watchlist Sync',
-            userId: user.id,
-            mediaTitle: mediaItem.title,
-          });
+    for (const mediaItem of unavailableItems) {
+      try {
+        logger.info("Creating media request from user's Plex Watchlist", {
+          label: 'Watchlist Sync',
+          userId: user.id,
+          mediaTitle: mediaItem.title,
+        });
 
-          if (mediaItem.type === 'show' && !mediaItem.tvdbId) {
-            throw new Error('Missing TVDB ID from Plex Metadata');
-          }
-
-          // Check if they have auto-request permissons and watchlist sync
-          // enabled for the media type
-          if (
-            ((!user.hasPermission(
-              [Permission.AUTO_REQUEST, Permission.AUTO_REQUEST_MOVIE],
-              { type: 'or' }
-            ) ||
-              !user.settings?.watchlistSyncMovies) &&
-              mediaItem.type === 'movie') ||
-            ((!user.hasPermission(
-              [Permission.AUTO_REQUEST, Permission.AUTO_REQUEST_TV],
-              { type: 'or' }
-            ) ||
-              !user.settings?.watchlistSyncTv) &&
-              mediaItem.type === 'show')
-          ) {
-            return;
-          }
-
-          await MediaRequest.request(
-            {
-              mediaId: mediaItem.tmdbId,
-              mediaType:
-                mediaItem.type === 'show' ? MediaType.TV : MediaType.MOVIE,
-              seasons: mediaItem.type === 'show' ? 'all' : undefined,
-              tvdbId: mediaItem.tvdbId,
-              is4k: false,
-            },
-            user,
-            { isAutoRequest: true }
-          );
-        } catch (e) {
-          if (!(e instanceof Error)) {
-            return;
-          }
-
-          switch (e.constructor) {
-            // During watchlist sync, these errors aren't necessarily
-            // a problem with Overseerr. Since we are auto syncing these constantly, it's
-            // possible they are unexpectedly at their quota limit, for example. So we'll
-            // instead log these as debug messages.
-            case RequestPermissionError:
-            case DuplicateMediaRequestError:
-            case QuotaRestrictedError:
-            case NoSeasonsAvailableError:
-              logger.debug('Failed to create media request from watchlist', {
-                label: 'Watchlist Sync',
-                userId: user.id,
-                mediaTitle: mediaItem.title,
-                errorMessage: e.message,
-              });
-              break;
-            default:
-              logger.error('Failed to create media request from watchlist', {
-                label: 'Watchlist Sync',
-                userId: user.id,
-                mediaTitle: mediaItem.title,
-                errorMessage: e.message,
-              });
-          }
+        if (mediaItem.type === 'show' && !mediaItem.tvdbId) {
+          throw new Error('Missing TVDB ID from Plex Metadata');
         }
-      })
-    );
+
+        // Check if they have auto-request permissons and watchlist sync
+        // enabled for the media type
+        if (
+          ((!user.hasPermission(
+            [Permission.AUTO_REQUEST, Permission.AUTO_REQUEST_MOVIE],
+            { type: 'or' }
+          ) ||
+            !user.settings?.watchlistSyncMovies) &&
+            mediaItem.type === 'movie') ||
+          ((!user.hasPermission(
+            [Permission.AUTO_REQUEST, Permission.AUTO_REQUEST_TV],
+            { type: 'or' }
+          ) ||
+            !user.settings?.watchlistSyncTv) &&
+            mediaItem.type === 'show')
+        ) {
+          continue;
+        }
+
+        await MediaRequest.request(
+          {
+            mediaId: mediaItem.tmdbId,
+            mediaType:
+              mediaItem.type === 'show' ? MediaType.TV : MediaType.MOVIE,
+            seasons: mediaItem.type === 'show' ? 'all' : undefined,
+            tvdbId: mediaItem.tvdbId,
+            is4k: false,
+          },
+          user,
+          { isAutoRequest: true }
+        );
+      } catch (e) {
+        if (!(e instanceof Error)) {
+          continue;
+        }
+
+        switch (e.constructor) {
+          // During watchlist sync, these errors aren't necessarily
+          // a problem with Overseerr. Since we are auto syncing these constantly, it's
+          // possible they are unexpectedly at their quota limit, for example. So we'll
+          // instead log these as debug messages.
+          case RequestPermissionError:
+          case DuplicateMediaRequestError:
+          case QuotaRestrictedError:
+          case NoSeasonsAvailableError:
+            logger.debug('Failed to create media request from watchlist', {
+              label: 'Watchlist Sync',
+              userId: user.id,
+              mediaTitle: mediaItem.title,
+              errorMessage: e.message,
+            });
+            break;
+          default:
+            logger.error('Failed to create media request from watchlist', {
+              label: 'Watchlist Sync',
+              userId: user.id,
+              mediaTitle: mediaItem.title,
+              errorMessage: e.message,
+            });
+        }
+      }
+    }
   }
 }
 

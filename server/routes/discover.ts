@@ -848,7 +848,7 @@ discoverRoutes.get<Record<string, unknown>, WatchlistResponse>(
       if (total) {
         return res.json({
           page: page,
-          totalPages: total / itemsPerPage,
+          totalPages: Math.ceil(total / itemsPerPage),
           totalResults: total,
           results: result,
         });

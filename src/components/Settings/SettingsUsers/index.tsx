@@ -28,7 +28,7 @@ const messages = defineMessages({
   loginMethodsTip: 'Configure login methods for users.',
   localLogin: 'Enable Local Sign-In',
   localLoginTip:
-    'Allow users to sign in using their email address and password, instead of Plex OAuth',
+    'Allow users to sign in using their email address and password, instead of {mediaServerName} OAuth',
   newPlexLogin: 'Enable New {mediaServerName} Sign-In',
   newPlexLoginTip:
     'Allow {mediaServerName} users to sign in without first being imported',

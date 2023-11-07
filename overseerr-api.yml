@@ -1372,6 +1372,8 @@ components:
               type: string
             userToken:
               type: string
+            sound:
+              type: string
     GotifySettings:
       type: object
       properties:
@@ -1805,6 +1807,9 @@ components:
           type: string
           nullable: true
         pushoverUserKey:
+          type: string
+          nullable: true
+        pushoverSound:
           type: string
           nullable: true
         telegramEnabled:
@@ -3104,6 +3109,33 @@ paths:
       responses:
         '204':
           description: Test notification attempted
+  /settings/notifications/pushover/sounds:
+    get:
+      summary: Get Pushover sounds
+      description: Returns valid Pushover sound options in a JSON array.
+      tags:
+        - settings
+      parameters:
+        - in: query
+          name: token
+          required: true
+          schema:
+            type: string
+            nullable: false
+      responses:
+        '200':
+          description: Returned Pushover settings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    description:
+                      type: string
   /settings/notifications/gotify:
     get:
       summary: Get Gotify notification settings
