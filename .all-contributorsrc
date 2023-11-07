@@ -114,6 +114,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "dd060606",
+      "name": "dd060606",
+      "avatar_url": "https://avatars.githubusercontent.com/u/58089504?v=4",
+      "profile": "https://dd06-dev.fr",
+      "contributions": [
+        "code"
+      ]
     }
   ]
 }
