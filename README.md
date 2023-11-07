@@ -6,7 +6,7 @@
 <a href="https://hub.docker.com/r/fallenbagel/jellyseerr"><img src="https://img.shields.io/docker/pulls/fallenbagel/jellyseerr" alt="Docker pulls"></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-18-orange.svg"/></a>
+<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-19-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 **Jellyseerr** is a free and open source software application for managing requests for your media library. It is a a fork of Overseerr built to bring support for Jellyfin & Emby media servers!
@@ -178,6 +178,7 @@ Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcon
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/DimitriDR"><img src="https://avatars.githubusercontent.com/u/56969769?v=4?s=100" width="100px;" alt="Dimitri"/><br /><sub><b>Dimitri</b></sub></a><br /><a href="#translation-DimitriDR" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/andrey4korop"><img src="https://avatars.githubusercontent.com/u/24610708?v=4?s=100" width="100px;" alt="andrey4korop"/><br /><sub><b>andrey4korop</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=andrey4korop" title="Code">💻</a> <a href="#translation-andrey4korop" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://geoffrey-coulaud.fr"><img src="https://avatars.githubusercontent.com/u/20744730?v=4?s=100" width="100px;" alt="Geoffrey Coulaud"/><br /><sub><b>Geoffrey Coulaud</b></sub></a><br /><a href="#translation-GeoffreyCoulaud" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Pikachu920"><img src="https://avatars.githubusercontent.com/u/28607612?v=4?s=100" width="100px;" alt="Pikachu920"/><br /><sub><b>Pikachu920</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=Pikachu920" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
