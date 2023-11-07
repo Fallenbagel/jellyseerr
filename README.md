@@ -6,7 +6,7 @@
 <a href="https://hub.docker.com/r/fallenbagel/jellyseerr"><img src="https://img.shields.io/docker/pulls/fallenbagel/jellyseerr" alt="Docker pulls"></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-2-orange.svg"/></a>
+<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-3-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 **Jellyseerr** is a free and open source software application for managing requests for your media library. It is a a fork of Overseerr built to bring support for Jellyfin & Emby media servers!
@@ -158,6 +158,7 @@ Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcon
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Fallenbagel"><img src="https://avatars.githubusercontent.com/u/98979876?v=4?s=100" width="100px;" alt="Fallenbagel"/><br /><sub><b>Fallenbagel</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=Fallenbagel" title="Code">💻</a> <a href="#maintenance-Fallenbagel" title="Maintenance">🚧</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/seanzhang98"><img src="https://avatars.githubusercontent.com/u/34902361?v=4?s=100" width="100px;" alt="Sean"/><br /><sub><b>Sean</b></sub></a><br /><a href="#translation-seanzhang98" title="Translation">🌍</a> <a href="https://github.com/Fallenbagel/jellyseerr/commits?author=seanzhang98" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/notfakie"><img src="https://avatars.githubusercontent.com/u/103784113?v=4?s=100" width="100px;" alt="notfakie"/><br /><sub><b>notfakie</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=notfakie" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
