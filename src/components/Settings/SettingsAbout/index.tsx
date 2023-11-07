@@ -16,7 +16,7 @@ import useSWR from 'swr';
 
 const messages = defineMessages({
   about: 'About',
-  overseerrinformation: 'About Overseerr',
+  overseerrinformation: 'About Jellyseerr',
   version: 'Version',
   totalmedia: 'Total Media',
   totalrequests: 'Total Requests',
@@ -25,6 +25,7 @@ const messages = defineMessages({
   timezone: 'Time Zone',
   appDataPath: 'Data Directory',
   supportoverseerr: 'Support Overseerr',
+  supportjellyseerr: 'Support Jellyseerr',
   helppaycoffee: 'Help Pay for Coffee',
   documentation: 'Documentation',
   preferredmethod: 'Preferred',
@@ -33,7 +34,7 @@ const messages = defineMessages({
   betawarning:
     'This is BETA software. Features may be broken and/or unstable. Please report any issues on GitHub!',
   runningDevelop:
-    'You are running the <code>develop</code> branch of Overseerr, which is only recommended for those contributing to development or assisting with bleeding-edge testing.',
+    'You are running the <code>develop</code> branch of Jellyseerr, which is only recommended for those contributing to development or assisting with bleeding-edge testing.',
 });
 
 const SettingsAbout = () => {
@@ -184,6 +185,54 @@ const SettingsAbout = () => {
             >
               https://discord.gg/ckbvBtDJgC
             </a>
+          </List.Item>
+        </List>
+      </div>
+      <div className="section">
+        <List title={intl.formatMessage(messages.supportoverseerr)}>
+          <List.Item
+            title={`${intl.formatMessage(messages.helppaycoffee)} ☕️`}
+          >
+            <a
+              href="https://github.com/sponsors/sct"
+              target="_blank"
+              rel="noreferrer"
+              className="text-indigo-500 transition duration-300 hover:underline"
+            >
+              https://github.com/sponsors/sct
+            </a>
+            <Badge className="ml-2">
+              {intl.formatMessage(messages.preferredmethod)}
+            </Badge>
+          </List.Item>
+          <List.Item title="">
+            <a
+              href="https://patreon.com/overseerr"
+              target="_blank"
+              rel="noreferrer"
+              className="text-indigo-500 transition duration-300 hover:underline"
+            >
+              https://patreon.com/overseerr
+            </a>
+          </List.Item>
+        </List>
+      </div>
+      <div className="section">
+        <List title={intl.formatMessage(messages.supportjellyseerr)}>
+          <List.Item
+            title={`${intl.formatMessage(messages.helppaycoffee)} ☕️`}
+          >
+            <a
+              href="https://www.buymeacoffee.com/fallen.bagel"
+              target="_blank"
+              rel="noreferrer"
+              className="text-indigo-500 transition duration-300 hover:underline"
+            >
+              https://www.buymeacoffee.com/fallen.bagel
+            </a>
+            <Badge className="ml-2">
+              {intl.formatMessage(messages.preferredmethod)}
+            </Badge>
           </List.Item>
         </List>
       </div>
