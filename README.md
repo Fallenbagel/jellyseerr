@@ -148,9 +148,19 @@ You can help improve Jellyseerr too! Check out our [Contribution Guide](https://
 
 Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcontributors.org/docs/en/emoji-key)) and all those that contributed directly to Jellyseerr:
 
+### Jellyseerr Contributors ✨
+
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+### Overseerr Contributors ✨
+
 <table>
   <tbody>
     <tr>
@@ -284,8 +294,3 @@ Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcon
     </tr>
   </tbody>
 </table>
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
