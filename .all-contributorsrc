@@ -10,7 +10,7 @@
   "projectOwner": "Fallenbagel",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "skipCi": false,
+  "skipCi": true,
   "commitConvention": "angular",
   "commitType": "docs",
   "contributors": [
