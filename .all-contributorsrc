@@ -96,6 +96,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "NicolaiVdS",
+      "name": "Nicolai Van der Storm",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5257222?v=4",
+      "profile": "https://nvds.be",
+      "contributions": [
+        "code"
+      ]
     }
   ]
 }

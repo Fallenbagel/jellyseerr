@@ -6,7 +6,7 @@
 <a href="https://hub.docker.com/r/fallenbagel/jellyseerr"><img src="https://img.shields.io/docker/pulls/fallenbagel/jellyseerr" alt="Docker pulls"></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-9-orange.svg"/></a>
+<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-10-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 **Jellyseerr** is a free and open source software application for managing requests for your media library. It is a a fork of Overseerr built to bring support for Jellyfin & Emby media servers!
@@ -167,6 +167,7 @@ Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcon
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/CyferShepard"><img src="https://avatars.githubusercontent.com/u/24864904?v=4?s=100" width="100px;" alt="Thegan Govender"/><br /><sub><b>Thegan Govender</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=CyferShepard" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/jab416171"><img src="https://avatars.githubusercontent.com/u/345752?v=4?s=100" width="100px;" alt="jab416171"/><br /><sub><b>jab416171</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=jab416171" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://nvds.be"><img src="https://avatars.githubusercontent.com/u/5257222?v=4?s=100" width="100px;" alt="Nicolai Van der Storm"/><br /><sub><b>Nicolai Van der Storm</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=NicolaiVdS" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
