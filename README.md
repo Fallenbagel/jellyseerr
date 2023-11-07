@@ -6,7 +6,7 @@
 <a href="https://hub.docker.com/r/fallenbagel/jellyseerr"><img src="https://img.shields.io/docker/pulls/fallenbagel/jellyseerr" alt="Docker pulls"></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-26-orange.svg"/></a>
+<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-27-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 **Jellyseerr** is a free and open source software application for managing requests for your media library. It is a a fork of Overseerr built to bring support for Jellyfin & Emby media servers!
@@ -188,6 +188,7 @@ Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcon
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Gauvino"><img src="https://avatars.githubusercontent.com/u/68083474?v=4?s=100" width="100px;" alt="Gauvino"/><br /><sub><b>Gauvino</b></sub></a><br /><a href="#translation-Gauvino" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/EthanArmbrust"><img src="https://avatars.githubusercontent.com/u/22754714?v=4?s=100" width="100px;" alt="EthanArmbrust"/><br /><sub><b>EthanArmbrust</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=EthanArmbrust" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://www.piribisoft.com"><img src="https://avatars.githubusercontent.com/u/854646?v=4?s=100" width="100px;" alt="Eduardo"/><br /><sub><b>Eduardo</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=SirMartin" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/RickLuiken"><img src="https://avatars.githubusercontent.com/u/34110371?v=4?s=100" width="100px;" alt="RickLuiken"/><br /><sub><b>RickLuiken</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=RickLuiken" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
