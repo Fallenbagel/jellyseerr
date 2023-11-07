@@ -6,7 +6,7 @@
 <a href="https://hub.docker.com/r/fallenbagel/jellyseerr"><img src="https://img.shields.io/docker/pulls/fallenbagel/jellyseerr" alt="Docker pulls"></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-13-orange.svg"/></a>
+<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-14-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 **Jellyseerr** is a free and open source software application for managing requests for your media library. It is a a fork of Overseerr built to bring support for Jellyfin & Emby media servers!
@@ -171,6 +171,7 @@ Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcon
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Smexhy"><img src="https://avatars.githubusercontent.com/u/4880625?v=4?s=100" width="100px;" alt="Smexhy"/><br /><sub><b>Smexhy</b></sub></a><br /><a href="#translation-Smexhy" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://dd06-dev.fr"><img src="https://avatars.githubusercontent.com/u/58089504?v=4?s=100" width="100px;" alt="dd060606"/><br /><sub><b>dd060606</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=dd060606" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://qwer.tz"><img src="https://avatars.githubusercontent.com/u/71837281?v=4?s=100" width="100px;" alt="Daniel"/><br /><sub><b>Daniel</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=darmiel" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/undone37"><img src="https://avatars.githubusercontent.com/u/10513808?v=4?s=100" width="100px;" alt="undone37"/><br /><sub><b>undone37</b></sub></a><br /><a href="#translation-undone37" title="Translation">🌍</a></td>
     </tr>
   </tbody>
 </table>
