@@ -48,9 +48,9 @@ https://hub.docker.com/r/fallenbagel/jellyseerr
 
 Pre-requisites:
 
-- Nodejs (atleast LTS version)
-- Yarn
-- Download the source code from the github (Either develop branch or main for stable)
+- Nodejs [v18](https://nodejs.org/download/release/v18.18.2)
+- [Yarn](https://classic.yarnpkg.com/lang/en/docs/install) 
+- Download/git clone the source code from the github (Either develop branch or main for stable)
 
 ```bash
 npm i -g win-node-env
@@ -61,44 +61,40 @@ yarn start
 
 #### Linux
 
-Pre-requisites:
+**Pre-requisites:**
 
-- Nodejs (atleast LTS version)
-- Yarn
+- Nodejs [v18](https://nodejs.org/en/download/package-manager)
+- [Yarn](https://classic.yarnpkg.com/lang/en/docs/install) (on debian based distros, the package manager provided `yarn` is different and is a package called cmdlet. You can remove that using `apt-remove cmdlet` then install yarn using `npm install -g yarn`)
 - Git
+
+**Steps:**
+
+1. Assuming you want the root folder for the jellyseerr source code to be cloned to `/opt`
+
+```bash
+cd /opt
+```
+
+2. Then clone the follow commands to clone and checkout to the stable version
 
 ```bash
 git clone https://github.com/Fallenbagel/jellyseerr.git && cd jellyseerr
-git checkout main #if you want to run stable instead of develop
+git checkout main
+```
+
+3. Then install the dependencies and build the dist
+
+```bash
 yarn install
 yarn run build
-yarn start
 ```
 
-_Systemd-service:_
+4. Now you can start jellyseerr using `yarn start` and opening http://localhost:5055 in your browser.
+
+5. If you want to run jellyseerr as a _Systemd-service:_
 
 - assuming jellyseerr was cloned to `/opt/`
-  and the environmentfile is located at `/etc/jellyseerr`
-
-service:
-
-```
-[Unit]
-Description=Jellyseerr Service
-Wants=network-online.target
-After=network-online.target
-
-[Service]
-EnvironmentFile=/etc/jellyseerr/jellyseerr.conf
-Environment=NODE_ENV=production
-Type=exec
-Restart=on-failure
-WorkingDirectory=/opt/jellyseerr
-ExecStart=/root/.nvm/versions/node/v18.7.0/bin/node dist/index.js
-
-[Install]
-WantedBy=multi-user.target
-```
+- first create the environmentfile at `/etc/jellyseerr/jellyseerr.conf`
 
 Environmentfile:
 
@@ -114,9 +110,33 @@ PORT=5055
 # JELLYFIN_TYPE=emby
 ```
 
+- Then run the command `which node` to find your node path (assuming it's at `/usr/bin/node`)
+- Then create the service file using `sudo systemctl edit jellyseerr.service` or creating and editing a file at `/etc/systemd/system/jellyseerr.service`
+
+Service file contents:
+
+```
+[Unit]
+Description=Jellyseerr Service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+EnvironmentFile=/etc/jellyseerr/jellyseerr.conf
+Environment=NODE_ENV=production
+Type=exec
+Restart=on-failure
+WorkingDirectory=/opt/jellyseerr
+ExecStart=/usr/bin/node dist/index.js
+
+[Install]
+WantedBy=multi-user.target
+```
 ### Packages:
 
 Archlinux: [AUR](https://aur.archlinux.org/packages/jellyseerr)
+Nixpkg: [Nixpkg](https://search.nixos.org/packages?channel=unstable&show=jellyseerr)
+Snap: [Snap](https://snapcraft.io/jellyseerr)
 
 ## Preview
 
