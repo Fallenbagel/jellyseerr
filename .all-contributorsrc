@@ -4,56 +4,6 @@
   ],
   "imageSize": 100,
   "commit": false,
-  "contributors": [
-    {
-      "login": "Fallenbagel",
-      "name": "Fallenbagel",
-      "avatar_url": "https://avatars.githubusercontent.com/u/98979876?v=4",
-      "profile": "https://github.com/Fallenbagel",
-      "contributions": [
-        "code",
-        "Maintenance",
-        "Reviewed Pull Requests"
-      ]
-    },
-    {
-      "login": "notfakie",
-      "name": "notfakie",
-      "avatar_url": "https://avatars.githubusercontent.com/u/103784113?v=4",
-      "profile": "https://github.com/notfakie",
-      "contributions": [
-        "code"
-      ]
-    },
-    {
-      "login": "Jumail",
-      "name": "Mohamed Jumail",
-      "avatar_url": "https://avatars.githubusercontent.com/u/7672055?v=4",
-      "profile": "https://github.com/Jumail",
-      "contributions": [
-        "Reviewed Pull Requests"
-      ]
-    },
-    {
-      "login": "seanzhang98",
-      "name": "Sean",
-      "avatar_url": "https://avatars.githubusercontent.com/u/34902361?v=4",
-      "profile": "https://github.com/seanzhang98",
-      "contributions": [
-        "translation",
-        "code"
-      ]
-    },
-    {
-      "login": "jsl9208",
-      "name": "Shilong Jiang",
-      "avatar_url": "https://avatars.githubusercontent.com/u/4048787?v=4",
-      "profile": "https://www.heywhale.com",
-      "contributions": [
-        "code"
-      ]
-    }
-  ],
   "badgeTemplate": "<a href=\"#contributors-\"><img alt=\"All Contributors\" src=\"https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg\"/></a>",
   "contributorsPerLine": 7,
   "projectName": "jellyseerr",
