@@ -169,6 +169,15 @@
         "code",
         "translation"
       ]
+    },
+    {
+      "login": "GeoffreyCoulaud",
+      "name": "Geoffrey Coulaud",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20744730?v=4",
+      "profile": "https://geoffrey-coulaud.fr",
+      "contributions": [
+        "translation"
+      ]
     }
   ]
 }
