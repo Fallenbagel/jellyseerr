@@ -63,8 +63,8 @@ jobs:
             fallenbagel/jellyseerr:develop
       - name: Tag and push to GitHub Container Registry
         run: |
-          docker tag fallenbagel/jellyseerr:develop ghcr.io/fallenbagel/jellyseerr:develop
-          docker push ghcr.io/fallenbagel/jellyseerr:develop
+          docker tag fallenbagel/jellyseerr:develop ghcr.io/${{ github.repository_owner }}/jellyseerr:develop
+          docker push ghcr.io/${{ github.repository_owner }}/jellyseerr:develop
 
   discord:
     name: Send Discord Notification
