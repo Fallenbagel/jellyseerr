@@ -38,6 +38,12 @@ const postgresDevConfig: DataSourceOptions = {
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME ?? 'jellyseerr',
+  ssl: {
+    rejectUnauthorized: false, // Disable root certificate verification
+    //ca: fs.readFileSync('/path/to/server-certificates/root.crt').toString(),
+    //key: fs.readFileSync('/path/to/client-key/postgresql.key').toString(),
+    //cert: fs.readFileSync('/path/to/client-certificates/postgresql.crt').toString(),
+  },
   synchronize: true,
   migrationsRun: false,
   logging: false,
@@ -54,6 +60,12 @@ const postgresProdConfig: DataSourceOptions = {
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME ?? 'jellyseerr',
+  ssl: {
+    rejectUnauthorized: false, // Disable root certificate verification
+    //ca: fs.readFileSync('/path/to/server-certificates/root.crt').toString(),
+    //key: fs.readFileSync('/path/to/client-key/postgresql.key').toString(),
+    //cert: fs.readFileSync('/path/to/client-certificates/postgresql.crt').toString(),
+  },
   synchronize: false,
   migrationsRun: false,
   logging: false,
