@@ -30,9 +30,10 @@ const messages = defineMessages({
   jellyfinSettingsSuccess: '{mediaServerName} settings saved successfully!',
   jellyfinSettings: '{mediaServerName} Settings',
   jellyfinSettingsDescription:
-    'Optionally configure the internal and external endpoints for your {mediaServerName} server. In most cases, the external URL is different to the internal URL.',
+    'Optionally configure the internal and external endpoints for your {mediaServerName} server. In most cases, the external URL is different to the internal URL. A custom password reset URL can also be set for {mediaServerName} login, in case you would like to redirect to a different password reset page.',
   externalUrl: 'External URL',
   internalUrl: 'Internal URL',
+  jellyfinForgotPasswordUrl: 'Forgot Password URL',
   validationUrl: 'You must provide a valid URL',
   syncing: 'Syncing',
   syncJellyfin: 'Sync Libraries',
@@ -91,6 +92,10 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
       intl.formatMessage(messages.validationUrl)
     ),
     jellyfinInternalUrl: Yup.string().matches(
+      /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
+      intl.formatMessage(messages.validationUrl)
+    ),
+    jellyfinForgotPasswordUrl: Yup.string().matches(
       /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
       intl.formatMessage(messages.validationUrl)
     ),
@@ -171,20 +176,20 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
         <h3 className="heading">
           {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
             ? intl.formatMessage(messages.jellyfinlibraries, {
-                mediaServerName: 'Emby',
-              })
+              mediaServerName: 'Emby',
+            })
             : intl.formatMessage(messages.jellyfinlibraries, {
-                mediaServerName: 'Jellyfin',
-              })}
+              mediaServerName: 'Jellyfin',
+            })}
         </h3>
         <p className="description">
           {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
             ? intl.formatMessage(messages.jellyfinlibrariesDescription, {
-                mediaServerName: 'Emby',
-              })
+              mediaServerName: 'Emby',
+            })
             : intl.formatMessage(messages.jellyfinlibrariesDescription, {
-                mediaServerName: 'Jellyfin',
-              })}
+              mediaServerName: 'Jellyfin',
+            })}
         </p>
       </div>
       <div className="section">
@@ -223,11 +228,11 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
         <p className="description">
           {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
             ? intl.formatMessage(messages.manualscanDescriptionJellyfin, {
-                mediaServerName: 'Emby',
-              })
+              mediaServerName: 'Emby',
+            })
             : intl.formatMessage(messages.manualscanDescriptionJellyfin, {
-                mediaServerName: 'Jellyfin',
-              })}
+              mediaServerName: 'Jellyfin',
+            })}
         </p>
       </div>
       <div className="section">
@@ -271,11 +276,11 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                       values={{
                         count: dataSync.currentLibrary
                           ? dataSync.libraries.slice(
-                              dataSync.libraries.findIndex(
-                                (library) =>
-                                  library.id === dataSync.currentLibrary?.id
-                              ) + 1
-                            ).length
+                            dataSync.libraries.findIndex(
+                              (library) =>
+                                library.id === dataSync.currentLibrary?.id
+                            ) + 1
+                          ).length
                           : 0,
                       }}
                     />
@@ -333,26 +338,27 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
             <h3 className="heading">
               {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
                 ? intl.formatMessage(messages.jellyfinSettings, {
-                    mediaServerName: 'Emby',
-                  })
+                  mediaServerName: 'Emby',
+                })
                 : intl.formatMessage(messages.jellyfinSettings, {
-                    mediaServerName: 'Jellyfin',
-                  })}
+                  mediaServerName: 'Jellyfin',
+                })}
             </h3>
             <p className="description">
               {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
                 ? intl.formatMessage(messages.jellyfinSettingsDescription, {
-                    mediaServerName: 'Emby',
-                  })
+                  mediaServerName: 'Emby',
+                })
                 : intl.formatMessage(messages.jellyfinSettingsDescription, {
-                    mediaServerName: 'Jellyfin',
-                  })}
+                  mediaServerName: 'Jellyfin',
+                })}
             </p>
           </div>
           <Formik
             initialValues={{
               jellyfinInternalUrl: data?.hostname || '',
               jellyfinExternalUrl: data?.externalHostname || '',
+              jellyfinForgotPasswordUrl: data?.jellyfinForgotPasswordUrl || '',
             }}
             validationSchema={JellyfinSettingsSchema}
             onSubmit={async (values) => {
@@ -360,6 +366,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                 await axios.post('/api/v1/settings/jellyfin', {
                   hostname: values.jellyfinInternalUrl,
                   externalHostname: values.jellyfinExternalUrl,
+                  jellyfinForgotPasswordUrl: values.jellyfinForgotPasswordUrl,
                 } as JellyfinSettings);
 
                 addToast(
@@ -433,6 +440,27 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                         touched.jellyfinExternalUrl && (
                           <div className="error">
                             {errors.jellyfinExternalUrl}
+                          </div>
+                        )}
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <label htmlFor="jellyfinForgotPasswordUrl" className="text-label">
+                      {intl.formatMessage(messages.jellyfinForgotPasswordUrl)}
+                    </label>
+                    <div className="form-input-area">
+                      <div className="form-input-field">
+                        <Field
+                          type="text"
+                          inputMode="url"
+                          id="jellyfinForgotPasswordUrl"
+                          name="jellyfinForgotPasswordUrl"
+                        />
+                      </div>
+                      {errors.jellyfinForgotPasswordUrl &&
+                        touched.jellyfinForgotPasswordUrl && (
+                          <div className="error">
+                            {errors.jellyfinForgotPasswordUrl}
                           </div>
                         )}
                     </div>

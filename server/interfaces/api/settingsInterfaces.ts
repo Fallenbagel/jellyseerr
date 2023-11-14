@@ -41,6 +41,7 @@ export interface PublicSettingsResponse {
   locale: string;
   emailEnabled: boolean;
   newPlexLogin: boolean;
+  jellyfinForgotPasswordUrl: string;
 }
 
 export interface CacheItem {

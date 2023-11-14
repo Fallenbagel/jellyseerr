@@ -222,6 +222,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
     const baseUrl = settings.currentSettings.jellyfinExternalHost
       ? settings.currentSettings.jellyfinExternalHost
       : settings.currentSettings.jellyfinHost;
+    const jellyfinForgotPasswordUrl = settings.currentSettings.jellyfinForgotPasswordUrl;
     return (
       <div>
         <Formik
@@ -298,11 +299,11 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                         <Button
                           as="a"
                           buttonType="ghost"
-                          href={`${baseUrl}/web/index.html#!/${
-                            process.env.JELLYFIN_TYPE === 'emby'
+                          href={jellyfinForgotPasswordUrl ? `${jellyfinForgotPasswordUrl}` :
+                            `${baseUrl}/web/index.html#!/${process.env.JELLYFIN_TYPE === 'emby'
                               ? 'startup/'
                               : ''
-                          }forgotpassword.html`}
+                            }forgotpassword.html`}
                         >
                           {intl.formatMessage(messages.forgotpassword)}
                         </Button>
