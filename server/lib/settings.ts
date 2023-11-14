@@ -40,9 +40,9 @@ export interface JellyfinSettings {
   name: string;
   hostname: string;
   externalHostname?: string;
+  jellyfinForgotPasswordUrl?: string;
   libraries: Library[];
   serverId: string;
-  jellyfinForgotPasswordUrl: string;
 }
 export interface TautulliSettings {
   hostname?: string;
@@ -125,7 +125,6 @@ interface FullPublicSettings extends PublicSettings {
   applicationUrl: string;
   hideAvailable: boolean;
   localLogin: boolean;
-  jellyfinForgotPasswordUrl: string;
   movie4kEnabled: boolean;
   series4kEnabled: boolean;
   region: string;
@@ -133,6 +132,7 @@ interface FullPublicSettings extends PublicSettings {
   mediaServerType: number;
   jellyfinHost?: string;
   jellyfinExternalHost?: string;
+  jellyfinForgotPasswordUrl?: string;
   jellyfinServerName?: string;
   partialRequestsEnabled: boolean;
   cacheImages: boolean;
