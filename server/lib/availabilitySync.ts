@@ -1074,7 +1074,7 @@ class AvailabilitySync {
     is4k: boolean
   ): Promise<boolean> {
     const ratingKey = media.jellyfinMediaId;
-    const ratingKey4k = media.jellyfinMediaId;
+    const ratingKey4k = media.jellyfinMediaId4k;
     let seasonExistsInJellyfin = false;
 
     // Check each jellyfin instance to see if the season exists
