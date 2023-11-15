@@ -176,20 +176,20 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
         <h3 className="heading">
           {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
             ? intl.formatMessage(messages.jellyfinlibraries, {
-              mediaServerName: 'Emby',
-            })
+                mediaServerName: 'Emby',
+              })
             : intl.formatMessage(messages.jellyfinlibraries, {
-              mediaServerName: 'Jellyfin',
-            })}
+                mediaServerName: 'Jellyfin',
+              })}
         </h3>
         <p className="description">
           {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
             ? intl.formatMessage(messages.jellyfinlibrariesDescription, {
-              mediaServerName: 'Emby',
-            })
+                mediaServerName: 'Emby',
+              })
             : intl.formatMessage(messages.jellyfinlibrariesDescription, {
-              mediaServerName: 'Jellyfin',
-            })}
+                mediaServerName: 'Jellyfin',
+              })}
         </p>
       </div>
       <div className="section">
@@ -228,11 +228,11 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
         <p className="description">
           {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
             ? intl.formatMessage(messages.manualscanDescriptionJellyfin, {
-              mediaServerName: 'Emby',
-            })
+                mediaServerName: 'Emby',
+              })
             : intl.formatMessage(messages.manualscanDescriptionJellyfin, {
-              mediaServerName: 'Jellyfin',
-            })}
+                mediaServerName: 'Jellyfin',
+              })}
         </p>
       </div>
       <div className="section">
@@ -276,11 +276,11 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                       values={{
                         count: dataSync.currentLibrary
                           ? dataSync.libraries.slice(
-                            dataSync.libraries.findIndex(
-                              (library) =>
-                                library.id === dataSync.currentLibrary?.id
-                            ) + 1
-                          ).length
+                              dataSync.libraries.findIndex(
+                                (library) =>
+                                  library.id === dataSync.currentLibrary?.id
+                              ) + 1
+                            ).length
                           : 0,
                       }}
                     />
@@ -338,20 +338,20 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
             <h3 className="heading">
               {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
                 ? intl.formatMessage(messages.jellyfinSettings, {
-                  mediaServerName: 'Emby',
-                })
+                    mediaServerName: 'Emby',
+                  })
                 : intl.formatMessage(messages.jellyfinSettings, {
-                  mediaServerName: 'Jellyfin',
-                })}
+                    mediaServerName: 'Jellyfin',
+                  })}
             </h3>
             <p className="description">
               {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
                 ? intl.formatMessage(messages.jellyfinSettingsDescription, {
-                  mediaServerName: 'Emby',
-                })
+                    mediaServerName: 'Emby',
+                  })
                 : intl.formatMessage(messages.jellyfinSettingsDescription, {
-                  mediaServerName: 'Jellyfin',
-                })}
+                    mediaServerName: 'Jellyfin',
+                  })}
             </p>
           </div>
           <Formik
@@ -445,7 +445,10 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                     </div>
                   </div>
                   <div className="form-row">
-                    <label htmlFor="jellyfinForgotPasswordUrl" className="text-label">
+                    <label
+                      htmlFor="jellyfinForgotPasswordUrl"
+                      className="text-label"
+                    >
                       {intl.formatMessage(messages.jellyfinForgotPasswordUrl)}
                     </label>
                     <div className="form-input-area">

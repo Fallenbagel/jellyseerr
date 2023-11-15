@@ -49,7 +49,7 @@ https://hub.docker.com/r/fallenbagel/jellyseerr
 Pre-requisites:
 
 - Nodejs [v18](https://nodejs.org/download/release/v18.18.2)
-- [Yarn](https://classic.yarnpkg.com/lang/en/docs/install) 
+- [Yarn](https://classic.yarnpkg.com/lang/en/docs/install)
 - Download/git clone the source code from the github (Either develop branch or main for stable)
 
 ```cmd
@@ -59,6 +59,7 @@ yarn install --frozen-lockfile --network-timeout 1000000
 yarn run build
 yarn start
 ```
+
 (you can use task scheduler to run a bat script with `@echo off` and `yarn start` to run jellyseerr in the background)
 
 _to set env variables such as `JELLYFIN_TYPE=emby` create a file called `.env` in the root directory of jellyseerr_
@@ -136,6 +137,7 @@ ExecStart=/usr/bin/node dist/index.js
 [Install]
 WantedBy=multi-user.target
 ```
+
 ### Packages:
 
 Archlinux: [AUR](https://aur.archlinux.org/packages/jellyseerr)
