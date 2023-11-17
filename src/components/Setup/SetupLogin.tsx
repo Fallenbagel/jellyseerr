@@ -4,7 +4,6 @@ import PlexLoginButton from '@app/components/PlexLoginButton';
 import { useUser } from '@app/hooks/useUser';
 import { MediaServerType } from '@server/constants/server';
 import axios from 'axios';
-import getConfig from 'next/config';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
@@ -27,7 +26,16 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
   );
   const { user, revalidate } = useUser();
   const intl = useIntl();
-  const { publicRuntimeConfig } = getConfig();
+  const [selectedService, setSelectedService] = useState<string | undefined>(
+    undefined
+  );
+
+  // Function to handle toggle changes
+  const handleToggle = (option: string) => {
+    // Toggle between 'emby' and 'jellyfin'
+    setSelectedService(option);
+  };
+
   // Effect that is triggered when the `authToken` comes back from the Plex OAuth
   // We take the token and attempt to login. If we get a success message, we will
   // ask swr to revalidate the user which _shouid_ come back with a valid user.
@@ -94,20 +102,21 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
                 }`}
                 onClick={() => handleClick(1)}
               >
-                {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                  ? intl.formatMessage(messages.signinWithJellyfin, {
-                      mediaServerName: 'Emby',
-                    })
-                  : intl.formatMessage(messages.signinWithJellyfin, {
-                      mediaServerName: 'Jellyfin',
-                    })}
+                {intl.formatMessage(messages.signinWithJellyfin, {
+                  mediaServerName: selectedService ?? 'Jellyfin / Emby',
+                })}
               </button>
               <AccordionContent isOpen={openIndexes.includes(1)}>
                 <div
                   className="rounded-b-lg px-10 py-8"
                   style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
                 >
-                  <JellyfinLogin initial={true} revalidate={revalidate} />
+                  <JellyfinLogin
+                    initial={true}
+                    revalidate={revalidate}
+                    selectedService={selectedService}
+                    onToggle={handleToggle}
+                  />
                 </div>
               </AccordionContent>
             </div>

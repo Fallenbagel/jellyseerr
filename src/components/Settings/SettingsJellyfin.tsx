@@ -2,12 +2,13 @@ import Badge from '@app/components/Common/Badge';
 import Button from '@app/components/Common/Button';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import LibraryItem from '@app/components/Settings/LibraryItem';
+import useSettings from '@app/hooks/useSettings';
 import globalMessages from '@app/i18n/globalMessages';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
+import { MediaServerType } from '@server/constants/server';
 import type { JellyfinSettings } from '@server/lib/settings';
 import axios from 'axios';
 import { Field, Formik } from 'formik';
-import getConfig from 'next/config';
 import type React from 'react';
 import { useState } from 'react';
 import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
@@ -83,7 +84,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
   );
   const intl = useIntl();
   const { addToast } = useToasts();
-  const { publicRuntimeConfig } = getConfig();
+  const settings = useSettings();
 
   const JellyfinSettingsSchema = Yup.object().shape({
     jellyfinExternalUrl: Yup.string().matches(
@@ -165,26 +166,29 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
     return <LoadingSpinner />;
   }
 
+  const mediaServerFormatValues = {
+    mediaServerName:
+      settings.currentSettings.mediaServerType === MediaServerType.JELLYFIN
+        ? 'Jellyfin'
+        : settings.currentSettings.mediaServerType === MediaServerType.EMBY
+        ? 'Emby'
+        : undefined,
+  };
+
   return (
     <>
       <div className="mb-6">
         <h3 className="heading">
-          {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-            ? intl.formatMessage(messages.jellyfinlibraries, {
-                mediaServerName: 'Emby',
-              })
-            : intl.formatMessage(messages.jellyfinlibraries, {
-                mediaServerName: 'Jellyfin',
-              })}
+          {intl.formatMessage(
+            messages.jellyfinlibraries,
+            mediaServerFormatValues
+          )}
         </h3>
         <p className="description">
-          {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-            ? intl.formatMessage(messages.jellyfinlibrariesDescription, {
-                mediaServerName: 'Emby',
-              })
-            : intl.formatMessage(messages.jellyfinlibrariesDescription, {
-                mediaServerName: 'Jellyfin',
-              })}
+          {intl.formatMessage(
+            messages.jellyfinlibrariesDescription,
+            mediaServerFormatValues
+          )}
         </p>
       </div>
       <div className="section">
@@ -221,13 +225,10 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
           <FormattedMessage {...messages.manualscanJellyfin} />
         </h3>
         <p className="description">
-          {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-            ? intl.formatMessage(messages.manualscanDescriptionJellyfin, {
-                mediaServerName: 'Emby',
-              })
-            : intl.formatMessage(messages.manualscanDescriptionJellyfin, {
-                mediaServerName: 'Jellyfin',
-              })}
+          {intl.formatMessage(
+            messages.manualscanDescriptionJellyfin,
+            mediaServerFormatValues
+          )}
         </p>
       </div>
       <div className="section">
@@ -331,22 +332,16 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
         <>
           <div className="mt-10 mb-6">
             <h3 className="heading">
-              {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                ? intl.formatMessage(messages.jellyfinSettings, {
-                    mediaServerName: 'Emby',
-                  })
-                : intl.formatMessage(messages.jellyfinSettings, {
-                    mediaServerName: 'Jellyfin',
-                  })}
+              {intl.formatMessage(
+                messages.jellyfinSettings,
+                mediaServerFormatValues
+              )}
             </h3>
             <p className="description">
-              {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                ? intl.formatMessage(messages.jellyfinSettingsDescription, {
-                    mediaServerName: 'Emby',
-                  })
-                : intl.formatMessage(messages.jellyfinSettingsDescription, {
-                    mediaServerName: 'Jellyfin',
-                  })}
+              {intl.formatMessage(
+                messages.jellyfinSettingsDescription,
+                mediaServerFormatValues
+              )}
             </p>
           </div>
           <Formik
@@ -365,7 +360,8 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                 addToast(
                   intl.formatMessage(messages.jellyfinSettingsSuccess, {
                     mediaServerName:
-                      publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                      settings.currentSettings.mediaServerType ===
+                      MediaServerType.EMBY
                         ? 'Emby'
                         : 'Jellyfin',
                   }),
@@ -376,12 +372,10 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                 );
               } catch (e) {
                 addToast(
-                  intl.formatMessage(messages.jellyfinSettingsFailure, {
-                    mediaServerName:
-                      publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                        ? 'Emby'
-                        : 'Jellyfin',
-                  }),
+                  intl.formatMessage(
+                    messages.jellyfinSettingsFailure,
+                    mediaServerFormatValues
+                  ),
                   {
                     autoDismiss: true,
                     appearance: 'error',

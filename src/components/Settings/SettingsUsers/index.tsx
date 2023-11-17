@@ -10,7 +10,6 @@ import { MediaServerType } from '@server/constants/server';
 import type { MainSettings } from '@server/lib/settings';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
-import getConfig from 'next/config';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR, { mutate } from 'swr';
@@ -42,11 +41,19 @@ const SettingsUsers = () => {
     mutate: revalidate,
   } = useSWR<MainSettings>('/api/v1/settings/main');
   const settings = useSettings();
-  const { publicRuntimeConfig } = getConfig();
 
   if (!data && !error) {
     return <LoadingSpinner />;
   }
+
+  const mediaServerFormatValues = {
+    mediaServerName:
+      settings.currentSettings.mediaServerType === MediaServerType.JELLYFIN
+        ? 'Jellyfin'
+        : settings.currentSettings.mediaServerType === MediaServerType.EMBY
+        ? 'Emby'
+        : undefined,
+  };
 
   return (
     <>
@@ -114,16 +121,10 @@ const SettingsUsers = () => {
                   <label htmlFor="localLogin" className="checkbox-label">
                     {intl.formatMessage(messages.localLogin)}
                     <span className="label-tip">
-                      {intl.formatMessage(messages.localLoginTip, {
-                        mediaServerName:
-                          settings.currentSettings.mediaServerType ===
-                          MediaServerType.PLEX
-                            ? 'Plex'
-                            : settings.currentSettings.mediaServerType ===
-                              MediaServerType.JELLYFIN
-                            ? 'Jellyfin'
-                            : 'Emby',
-                      })}
+                      {intl.formatMessage(
+                        messages.localLoginTip,
+                        mediaServerFormatValues
+                      )}
                     </span>
                   </label>
                   <div className="form-input-area">
@@ -139,25 +140,15 @@ const SettingsUsers = () => {
                 </div>
                 <div className="form-row">
                   <label htmlFor="newPlexLogin" className="checkbox-label">
-                    {intl.formatMessage(messages.newPlexLogin, {
-                      mediaServerName:
-                        publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                          ? 'Emby'
-                          : settings.currentSettings.mediaServerType ===
-                            MediaServerType.PLEX
-                          ? 'Plex'
-                          : 'Jellyfin',
-                    })}
+                    {intl.formatMessage(
+                      messages.newPlexLogin,
+                      mediaServerFormatValues
+                    )}
                     <span className="label-tip">
-                      {intl.formatMessage(messages.newPlexLoginTip, {
-                        mediaServerName:
-                          publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                            ? 'Emby'
-                            : settings.currentSettings.mediaServerType ===
-                              MediaServerType.PLEX
-                            ? 'Plex'
-                            : 'Jellyfin',
-                      })}
+                      {intl.formatMessage(
+                        messages.newPlexLoginTip,
+                        mediaServerFormatValues
+                      )}
                     </span>
                   </label>
                   <div className="form-input-area">

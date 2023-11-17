@@ -138,19 +138,13 @@ export const PermissionEdit = ({
             mediaServerName:
               settings.currentSettings.mediaServerType === MediaServerType.PLEX
                 ? 'Plex'
-                : settings.currentSettings.mediaServerType ===
-                  MediaServerType.JELLYFIN
-                ? 'Jellyfin'
-                : 'Emby',
+                : 'Local',
           }),
           description: intl.formatMessage(messages.viewwatchlistsDescription, {
             mediaServerName:
               settings.currentSettings.mediaServerType === MediaServerType.PLEX
                 ? 'Plex'
-                : settings.currentSettings.mediaServerType ===
-                  MediaServerType.JELLYFIN
-                ? 'Jellyfin'
-                : 'Emby',
+                : 'Local',
           }),
           permission: Permission.WATCHLIST_VIEW,
         },
@@ -213,43 +207,47 @@ export const PermissionEdit = ({
         },
       ],
     },
-    {
-      id: 'autorequest',
-      name: intl.formatMessage(messages.autorequest),
-      description: intl.formatMessage(messages.autorequestDescription),
-      permission: Permission.AUTO_REQUEST,
-      requires: [{ permissions: [Permission.REQUEST] }],
-      children: [
-        {
-          id: 'autorequestmovies',
-          name: intl.formatMessage(messages.autorequestMovies),
-          description: intl.formatMessage(
-            messages.autorequestMoviesDescription
-          ),
-          permission: Permission.AUTO_REQUEST_MOVIE,
-          requires: [
-            {
-              permissions: [Permission.REQUEST, Permission.REQUEST_MOVIE],
-              type: 'or',
-            },
-          ],
-        },
-        {
-          id: 'autorequesttv',
-          name: intl.formatMessage(messages.autorequestSeries),
-          description: intl.formatMessage(
-            messages.autorequestSeriesDescription
-          ),
-          permission: Permission.AUTO_REQUEST_TV,
-          requires: [
-            {
-              permissions: [Permission.REQUEST, Permission.REQUEST_TV],
-              type: 'or',
-            },
-          ],
-        },
-      ],
-    },
+    ...(settings.currentSettings.mediaServerType === MediaServerType.PLEX
+      ? [
+          {
+            id: 'autorequest',
+            name: intl.formatMessage(messages.autorequest),
+            description: intl.formatMessage(messages.autorequestDescription),
+            permission: Permission.AUTO_REQUEST,
+            requires: [{ permissions: [Permission.REQUEST] }],
+            children: [
+              {
+                id: 'autorequestmovies',
+                name: intl.formatMessage(messages.autorequestMovies),
+                description: intl.formatMessage(
+                  messages.autorequestMoviesDescription
+                ),
+                permission: Permission.AUTO_REQUEST_MOVIE,
+                requires: [
+                  {
+                    permissions: [Permission.REQUEST, Permission.REQUEST_MOVIE],
+                    type: 'or',
+                  },
+                ],
+              },
+              {
+                id: 'autorequesttv',
+                name: intl.formatMessage(messages.autorequestSeries),
+                description: intl.formatMessage(
+                  messages.autorequestSeriesDescription
+                ),
+                permission: Permission.AUTO_REQUEST_TV,
+                requires: [
+                  {
+                    permissions: [Permission.REQUEST, Permission.REQUEST_TV],
+                    type: 'or',
+                  },
+                ],
+              },
+            ],
+          } as PermissionItem,
+        ]
+      : []),
     {
       id: 'request4k',
       name: intl.formatMessage(messages.request4k),

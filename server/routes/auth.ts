@@ -219,14 +219,18 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
     password?: string;
     hostname?: string;
     email?: string;
+    selectedservice?: string;
   };
 
-  //Make sure jellyfin login is enabled, but only if jellyfin is not already configured
+  //Make sure jellyfin login is enabled, but only if jellyfin && Emby is not already configured
   if (
     settings.main.mediaServerType !== MediaServerType.JELLYFIN &&
+    settings.main.mediaServerType !== MediaServerType.EMBY &&
     settings.jellyfin.hostname !== ''
   ) {
     return res.status(500).json({ error: 'Jellyfin login is disabled' });
+  } else if (!body.selectedservice) {
+    return res.status(500).json({ error: 'No server type provided.' });
   } else if (!body.username) {
     return res.status(500).json({ error: 'You must provide an username' });
   } else if (settings.jellyfin.hostname !== '' && body.hostname) {
@@ -292,6 +296,13 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
       if (user.username === account.User.Name) {
         user.username = '';
       }
+
+      // If JELLYFIN_TYPE is set to 'emby' then set mediaServerType to EMBY
+      if (process.env.JELLYFIN_TYPE === 'emby') {
+        settings.main.mediaServerType = MediaServerType.EMBY;
+        settings.save();
+      }
+
       await userRepository.save(user);
     } else if (!settings.main.newPlexLogin) {
       logger.warn(
@@ -320,6 +331,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
             jellyfinUsername: account.User.Name,
           }
         );
+
         user = new User({
           email: body.email,
           jellyfinUsername: account.User.Name,
@@ -337,7 +349,16 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         //Update hostname in settings if it doesn't exist (initial configuration)
         //Also set mediaservertype to JELLYFIN
         if (settings.jellyfin.hostname === '') {
-          settings.main.mediaServerType = MediaServerType.JELLYFIN;
+          // If JELLYFIN_TYPE is set to 'emby' then set mediaServerType to EMBY
+          if (
+            process.env.JELLYFIN_TYPE === 'emby' ||
+            body.selectedservice === 'Emby'
+          ) {
+            settings.main.mediaServerType = MediaServerType.EMBY;
+          } else if (body.selectedservice === 'Jellyfin') {
+            settings.main.mediaServerType = MediaServerType.JELLYFIN;
+          }
+
           settings.jellyfin.hostname = body.hostname ?? '';
           settings.jellyfin.serverId = account.User.ServerId;
           settings.save();
@@ -348,6 +369,13 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
       if (!user) {
         if (!body.email) {
           throw new Error('add_email');
+        }
+
+        if (
+          !body.selectedservice &&
+          (body.selectedservice !== 'Emby' || 'Jellyfin')
+        ) {
+          throw new Error('select_server_type');
         }
 
         user = new User({
@@ -399,6 +427,11 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
       return next({
         status: 406,
         message: 'CREDENTIAL_ERROR_ADD_EMAIL',
+      });
+    } else if (e.message === 'select_server_type') {
+      return next({
+        status: 406,
+        message: 'CREDENTIAL_ERROR_NO_SERVER_TYPE',
       });
     } else {
       logger.error(e.message, { label: 'Auth' });

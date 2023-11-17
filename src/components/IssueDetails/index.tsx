@@ -28,7 +28,6 @@ import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
-import getConfig from 'next/config';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
@@ -107,7 +106,6 @@ const IssueDetails = () => {
     (opt) => opt.issueType === issueData?.issueType
   );
   const settings = useSettings();
-  const { publicRuntimeConfig } = getConfig();
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -375,7 +373,8 @@ const IssueDetails = () => {
                 >
                   <PlayIcon />
                   <span>
-                    {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                    {settings.currentSettings.mediaServerType ===
+                    MediaServerType.EMBY
                       ? intl.formatMessage(messages.playonplex, {
                           mediaServerName: 'Emby',
                         })
@@ -422,16 +421,17 @@ const IssueDetails = () => {
                 >
                   <PlayIcon />
                   <span>
-                    {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                      ? intl.formatMessage(messages.play4konplex, {
+                    {settings.currentSettings.mediaServerType ===
+                    MediaServerType.EMBY
+                      ? intl.formatMessage(messages.playonplex, {
                           mediaServerName: 'Emby',
                         })
                       : settings.currentSettings.mediaServerType ===
                         MediaServerType.PLEX
-                      ? intl.formatMessage(messages.play4konplex, {
+                      ? intl.formatMessage(messages.playonplex, {
                           mediaServerName: 'Plex',
                         })
-                      : intl.formatMessage(messages.play4konplex, {
+                      : intl.formatMessage(messages.playonplex, {
                           mediaServerName: 'Jellyfin',
                         })}
                   </span>
@@ -639,7 +639,8 @@ const IssueDetails = () => {
               >
                 <PlayIcon />
                 <span>
-                  {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                  {settings.currentSettings.mediaServerType ===
+                  MediaServerType.EMBY
                     ? intl.formatMessage(messages.playonplex, {
                         mediaServerName: 'Emby',
                       })
@@ -685,16 +686,17 @@ const IssueDetails = () => {
               >
                 <PlayIcon />
                 <span>
-                  {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                    ? intl.formatMessage(messages.play4konplex, {
+                  {settings.currentSettings.mediaServerType ===
+                  MediaServerType.EMBY
+                    ? intl.formatMessage(messages.playonplex, {
                         mediaServerName: 'Emby',
                       })
                     : settings.currentSettings.mediaServerType ===
                       MediaServerType.PLEX
-                    ? intl.formatMessage(messages.play4konplex, {
+                    ? intl.formatMessage(messages.playonplex, {
                         mediaServerName: 'Plex',
                       })
-                    : intl.formatMessage(messages.play4konplex, {
+                    : intl.formatMessage(messages.playonplex, {
                         mediaServerName: 'Jellyfin',
                       })}
                 </span>
