@@ -46,6 +46,7 @@ const ListView = ({
                 id={title.tmdbId}
                 tmdbId={title.tmdbId}
                 type={title.mediaType}
+                isAddedToWatchlist={true}
                 canExpand
               />
             </li>
