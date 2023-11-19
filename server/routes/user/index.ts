@@ -197,7 +197,6 @@ router.get<{ id: string }>(
         .status(200)
         .json(user.filter(req.user?.hasPermission(Permission.MANAGE_USERS)));
     } catch (e) {
-      console.log(e);
       next({ status: 404, message: 'User not found.' });
     }
   }
