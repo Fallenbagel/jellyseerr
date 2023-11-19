@@ -182,21 +182,26 @@ router.post<
   }
 });
 
-router.get<{ id: string }>('/:id', async (req, res, next) => {
-  try {
-    const userRepository = getRepository(User);
+router.get<{ id: string }>(
+  '/:id',
+  isAuthenticated([Permission.MANAGE_USERS, Permission.WATCHLIST_VIEW]),
+  async (req, res, next) => {
+    try {
+      const userRepository = getRepository(User);
 
-    const user = await userRepository.findOneOrFail({
-      where: { id: Number(req.params.id) },
-    });
+      const user = await userRepository.findOneOrFail({
+        where: { id: Number(req.params.id) },
+      });
 
-    return res
-      .status(200)
-      .json(user.filter(req.user?.hasPermission(Permission.MANAGE_USERS)));
-  } catch (e) {
-    next({ status: 404, message: 'User not found.' });
+      return res
+        .status(200)
+        .json(user.filter(req.user?.hasPermission(Permission.MANAGE_USERS)));
+    } catch (e) {
+      console.log(e);
+      next({ status: 404, message: 'User not found.' });
+    }
   }
-});
+);
 
 router.use('/:id/settings', userSettingsRoutes);
 
