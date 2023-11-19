@@ -30,6 +30,7 @@ const DiscoverWatchlist = () => {
     titles,
     fetchMore,
     error,
+    mutate,
   } = useDiscover<WatchlistItem>(
     `/api/v1/${
       router.pathname.startsWith('/profile')
@@ -76,6 +77,7 @@ const DiscoverWatchlist = () => {
         }
         isReachingEnd={isReachingEnd}
         onScrollBottom={fetchMore}
+        mutateParent={mutate}
       />
     </>
   );
