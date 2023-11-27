@@ -980,7 +980,6 @@ const SonarrModal = ({ onClose, sonarr, onSave }: SonarrModalProps) => {
                       type="checkbox"
                       id="enableSeasonFolders"
                       name="enableSeasonFolders"
-                      // checked={true}
                       disabled={
                         settings.currentSettings.mediaServerType !==
                         MediaServerType.PLEX
