@@ -26,7 +26,7 @@ interface SyncStatus {
   libraries: Library[];
 }
 
-class JobJellyfinSync {
+class JellyfinScanner {
   private sessionId: string;
   private tmdb: TheMovieDb;
   private jfClient: JellyfinAPI;
@@ -675,7 +675,7 @@ class JobJellyfinSync {
   }
 }
 
-export const jobJellyfinFullSync = new JobJellyfinSync();
-export const jobJellyfinRecentSync = new JobJellyfinSync({
+export const jellyfinFullScanner = new JellyfinScanner();
+export const jellyfinRecentScanner = new JellyfinScanner({
   isRecentOnly: true,
 });
