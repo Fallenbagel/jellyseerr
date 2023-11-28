@@ -12,6 +12,7 @@ import { SettingsProvider } from '@app/context/SettingsContext';
 import { UserContext } from '@app/context/UserContext';
 import type { User } from '@app/hooks/useUser';
 import '@app/styles/globals.css';
+import { getRequestHeaders } from '@app/utils/localRequestHelper';
 import '@app/utils/fetchOverride';
 import { polyfillIntl } from '@app/utils/polyfillIntl';
 import { MediaServerType } from '@server/constants/server';
@@ -227,10 +228,7 @@ CoreApp.getInitialProps = async (initialProps) => {
         const res = await fetch(
           `http://localhost:${process.env.PORT || 5055}/api/v1/auth/me`,
           {
-            headers:
-              ctx.req && ctx.req.headers.cookie
-                ? { cookie: ctx.req.headers.cookie }
-                : undefined,
+            headers: getRequestHeaders(ctx),
           }
         );
         if (!res.ok) throw new Error();
