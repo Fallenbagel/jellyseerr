@@ -12,6 +12,7 @@ import { SettingsProvider } from '@app/context/SettingsContext';
 import { UserContext } from '@app/context/UserContext';
 import type { User } from '@app/hooks/useUser';
 import '@app/styles/globals.css';
+import { getRequestHeaders } from '@app/utils/localRequestHelper';
 import { polyfillIntl } from '@app/utils/polyfillIntl';
 import { MediaServerType } from '@server/constants/server';
 import type { PublicSettingsResponse } from '@server/interfaces/api/settingsInterfaces';
@@ -215,10 +216,7 @@ CoreApp.getInitialProps = async (initialProps) => {
         const response = await axios.get<User>(
           `http://localhost:${process.env.PORT || 5055}/api/v1/auth/me`,
           {
-            headers:
-              ctx.req && ctx.req.headers.cookie
-                ? { cookie: ctx.req.headers.cookie }
-                : undefined,
+            headers: getRequestHeaders(ctx),
           }
         );
         user = response.data;
