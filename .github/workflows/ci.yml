@@ -12,8 +12,8 @@ jobs:
   test:
     name: Lint & Test Build
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-20.04
-    container: node:16.17-alpine
+    runs-on: ubuntu-22.04
+    container: node:18.18-alpine
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -31,7 +31,7 @@ jobs:
   build_and_push:
     name: Build & Publish Docker Images
     if: github.ref == 'refs/heads/develop' && !contains(github.event.head_commit.message, '[skip ci]')
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -50,6 +50,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set lower case owner name
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+        env:
+          OWNER: ${{ github.repository_owner }}
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
@@ -61,12 +66,13 @@ jobs:
             COMMIT_TAG=${{ github.sha }}
           tags: |
             fallenbagel/jellyseerr:develop
+            ghcr.io/${{ env.OWNER_LC }}/jellyseerr:develop
 
   discord:
     name: Send Discord Notification
     needs: build_and_push
     if: always() && github.event_name != 'pull_request' && !contains(github.event.head_commit.message, '[skip ci]')
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Get Build Job Status
         uses: technote-space/workflow-conclusion-action@v3

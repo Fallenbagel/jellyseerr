@@ -23,7 +23,7 @@ const messages = defineMessages({
   toastSettingsFailure: 'Something went wrong while saving settings.',
   localLogin: 'Enable Local Sign-In',
   localLoginTip:
-    'Allow users to sign in using their email address and password, instead of Plex OAuth',
+    'Allow users to sign in using their email address and password, instead of {mediaServerName} OAuth',
   newPlexLogin: 'Enable New {mediaServerName} Sign-In',
   newPlexLoginTip:
     'Allow {mediaServerName} users to sign in without first being imported',
@@ -114,7 +114,16 @@ const SettingsUsers = () => {
                   <label htmlFor="localLogin" className="checkbox-label">
                     {intl.formatMessage(messages.localLogin)}
                     <span className="label-tip">
-                      {intl.formatMessage(messages.localLoginTip)}
+                      {intl.formatMessage(messages.localLoginTip, {
+                        mediaServerName:
+                          settings.currentSettings.mediaServerType ===
+                          MediaServerType.PLEX
+                            ? 'Plex'
+                            : settings.currentSettings.mediaServerType ===
+                              MediaServerType.JELLYFIN
+                            ? 'Jellyfin'
+                            : 'Emby',
+                      })}
                     </span>
                   </label>
                   <div className="form-input-area">

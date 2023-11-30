@@ -139,6 +139,12 @@ const networks: Network[] = [
       'https://image.tmdb.org/t/p/w780_filter(duotone,ffffff,bababa)/ikZXxg6GnwpzqiZbRPhJGaZapqB.png',
     url: '/discover/tv/network/13',
   },
+  {
+    name: 'Peacock',
+    image:
+      'https://image.tmdb.org/t/p/w780_filter(duotone,ffffff,bababa)/gIAcGTjKKr0KOHL5s4O36roJ8p7.png',
+    url: '/discover/tv/network/3353',
+  },
 ];
 
 const NetworkSlider = () => {
