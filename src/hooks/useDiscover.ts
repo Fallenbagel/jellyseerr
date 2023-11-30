@@ -25,6 +25,7 @@ interface DiscoverResult<T, S> {
   error: unknown;
   titles: T[];
   firstResultData?: BaseSearchResult<T> & S;
+  mutate?: () => void;
 }
 
 const extraEncodes: [RegExp, string][] = [
@@ -54,7 +55,7 @@ const useDiscover = <
   { hideAvailable = true } = {}
 ): DiscoverResult<T, S> => {
   const settings = useSettings();
-  const { data, error, size, setSize, isValidating } = useSWRInfinite<
+  const { data, error, size, setSize, isValidating, mutate } = useSWRInfinite<
     BaseSearchResult<T> & S
   >(
     (pageIndex: number, previousPageData) => {
@@ -119,6 +120,7 @@ const useDiscover = <
     error,
     titles,
     firstResultData: data?.[0],
+    mutate,
   };
 };
 
