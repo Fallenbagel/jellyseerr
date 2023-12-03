@@ -277,6 +277,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "mdll23",
+      "name": "Michael Dallinger",
+      "avatar_url": "https://avatars.githubusercontent.com/u/142844478?v=4",
+      "profile": "https://github.com/mdll23",
+      "contributions": [
+        "translation"
+      ]
     }
   ]
 }
