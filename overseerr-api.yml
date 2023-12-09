@@ -132,6 +132,36 @@ components:
           type: string
         originalLanguage:
           type: string
+    OidcSettings:
+      type: object
+      properties:
+        providerName:
+          type: string
+          example: Keycloak
+        providerUrl:
+          type: string
+          example: https://auth.example.com
+        clientId:
+          type: string
+          example: your-client-id
+        clientSecret:
+          type: string
+          example: your-client-secret
+        userIdentifier:
+          type: string
+          example: email
+        requiredClaims:
+          type: string
+          example: email_verified
+        scopes:
+          type: string
+          example: id email
+        matchJellyfinUsername:
+          type: boolean
+          example: false
+        automaticLogin:
+          type: boolean
+          example: false
     MainSettings:
       type: object
       properties:
@@ -168,21 +198,8 @@ components:
         oidcLogin:
           type: boolean
           example: true
-        oidcName:
-          type: string
-          example: Keycloak
-        oidcClientId:
-          type: string
-          example: your-client-id
-        oidcClientSecret:
-          type: string
-          example: your-client-secret
-        oidcDomain:
-          type: string
-          example: https://auth.example.com
-        oidcMatchUsername:
-          type: boolean
-          example: true
+        oidc:
+          $ref: '#/components/schemas/OidcSettings'
         mediaServerType:
           type: number
           example: 1
@@ -389,9 +406,6 @@ components:
         externalHostname:
           type: string
           example: 'http://my.jellyfin.host'
-        jellyfinForgotPasswordUrl:
-          type: string
-          example: 'http://my.jellyfin.host/web/index.html#!/forgotpassword.html'
         adminUser:
           type: string
           example: 'admin'
@@ -3780,7 +3794,7 @@ paths:
               schema:
                 type: string
                 example: https://example.com/auth/oidc/invalidate_session
-  /user:
+  /ucser:
     get:
       summary: Get all users
       description: Returns all users in a JSON object.
