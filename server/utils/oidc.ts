@@ -225,22 +225,63 @@ export type FullUserInfo = IdTokenClaims &
   Mandatory<OidcStandardClaims, 'name' | 'email' | 'email_verified'>;
 
 export interface WellKnownConfiguration {
-  issuer: string;
-  authorization_endpoint: string;
-  token_endpoint: string;
-  device_authorization_endpoint: string;
-  userinfo_endpoint: string;
-  mfa_challenge_endpoint: string;
-  jwks_uri: string;
-  registration_endpoint: string;
-  revocation_endpoint: string;
-  scopes_supported: string[];
-  response_types_supported: string[];
-  code_challenge_methods_supported: string[];
-  response_modes_supported: string[];
-  subject_types_supported: string[];
-  id_token_signing_alg_values_supported: string[];
-  token_endpoint_auth_methods_supported: string[];
-  claims_supported: string[];
-  request_uri_parameter_supported: boolean;
+  issuer: string; // REQUIRED
+
+  authorization_endpoint: string; // REQUIRED
+
+  token_endpoint: string; // REQUIRED
+
+  token_endpoint_auth_methods_supported?: string[]; // OPTIONAL
+
+  token_endpoint_auth_signing_alg_values_supported?: string[]; // OPTIONAL
+
+  userinfo_endpoint: string; // RECOMMENDED
+
+  check_session_iframe: string; // REQUIRED
+
+  end_session_endpoint: string; // REQUIRED
+
+  jwks_uri: string; // REQUIRED
+
+  registration_endpoint: string; // RECOMMENDED
+
+  scopes_supported: string[]; // RECOMMENDED
+
+  response_types_supported: string[]; // REQUIRED
+
+  acr_values_supported?: string[]; // OPTIONAL
+
+  subject_types_supported: string[]; // REQUIRED
+
+  request_object_signing_alg_values_supported?: string[]; // OPTIONAL
+
+  display_values_supported?: string[]; // OPTIONAL
+
+  claim_types_supported?: string[]; // OPTIONAL
+
+  claims_supported: string[]; // RECOMMENDED
+
+  claims_parameter_supported?: boolean; // OPTIONAL
+
+  service_documentation?: string; // OPTIONAL
+
+  ui_locales_supported?: string[]; // OPTIONAL
+
+  revocation_endpoint: string; // REQUIRED
+
+  introspection_endpoint: string; // REQUIRED
+
+  frontchannel_logout_supported?: boolean; // OPTIONAL
+
+  frontchannel_logout_session_supported?: boolean; // OPTIONAL
+
+  backchannel_logout_supported?: boolean; // OPTIONAL
+
+  backchannel_logout_session_supported?: boolean; // OPTIONAL
+
+  grant_types_supported?: string[]; // OPTIONAL
+
+  response_modes_supported?: string[]; // OPTIONAL
+
+  code_challenge_methods_supported?: string[]; // OPTIONAL
 }

@@ -32,6 +32,7 @@ export interface PublicSettingsResponse {
   mediaServerLogin: boolean;
   oidcLogin: boolean;
   oidcProviderName: string;
+  oidcAutomaticLogin: boolean;
   movie4kEnabled: boolean;
   series4kEnabled: boolean;
   region: string;

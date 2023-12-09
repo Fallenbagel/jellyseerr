@@ -39,6 +39,10 @@ const messages = defineMessages({
   oidcMatchUsername: 'Allow {mediaServerName} Usernames',
   oidcMatchUsernameTip:
     'Match OIDC users with their {mediaServerName} accounts by username',
+  oidcAutomaticLogin: 'Automatic Login',
+  oidcAutomaticLoginTip:
+    'Automatically navigate to the OIDC login and logout pages. This functionality ' +
+    'only supported when OIDC is the exclusive login method.',
 });
 
 type OidcSettings = MainSettings['oidc'];
@@ -83,6 +87,7 @@ export const oidcSettingsSchema = (intl: IntlShape) => {
       .required(requiredMessage(messages.oidcIdentificationClaims)),
     requiredClaims: yup.string(),
     matchJellyfinUsername: yup.boolean(),
+    automaticLogin: yup.boolean(),
   });
 };
 
@@ -305,6 +310,30 @@ const OidcModal = ({
                             setFieldValue(
                               'oidc.matchJellyfinUsername',
                               !values.matchJellyfinUsername
+                            );
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="form-row">
+                      <label
+                        htmlFor="oidcAutomaticLogin"
+                        className="checkbox-label"
+                      >
+                        {intl.formatMessage(messages.oidcAutomaticLogin)}
+                        <span className="label-tip">
+                          {intl.formatMessage(messages.oidcAutomaticLoginTip)}
+                        </span>
+                      </label>
+                      <div className="form-input-area">
+                        <Field
+                          type="checkbox"
+                          id="oidcAutomaticLogin"
+                          name="oidc.automaticLogin"
+                          onChange={() => {
+                            setFieldValue(
+                              'oidc.automaticLogin',
+                              !values.automaticLogin
                             );
                           }}
                         />

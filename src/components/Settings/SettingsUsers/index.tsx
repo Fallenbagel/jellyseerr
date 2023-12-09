@@ -73,6 +73,22 @@ const createValidationSchema = (intl: IntlShape) => {
           message: 'At least one authentication method must be selected.',
         });
       },
+    })
+    .test({
+      name: 'automaticLoginExclusive',
+      test: function (values) {
+        const isValid =
+          !values.oidcLogin ||
+          !values.oidc.automaticLogin ||
+          !['localLogin', 'mediaServerLogin'].some((field) => !!values[field]);
+
+        if (isValid) return true;
+        return this.createError({
+          path: 'localLogin | mediaServerLogin | oidcLogin',
+          message:
+            'Only OIDC login may be enabled when automatic login is enabled.',
+        });
+      },
     });
 };
 
@@ -197,7 +213,8 @@ const SettingsUsers = () => {
                           id="localLogin"
                           label={intl.formatMessage(messages.localLogin)}
                           description={intl.formatMessage(
-                            messages.localLoginTip
+                            messages.localLoginTip,
+                            { mediaServerName }
                           )}
                           onChange={() =>
                             setFieldValue('localLogin', !values.localLogin)

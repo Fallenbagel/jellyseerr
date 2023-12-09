@@ -118,6 +118,7 @@ export interface MainSettings {
     requiredClaims: string;
     scopes: string;
     matchJellyfinUsername: boolean;
+    automaticLogin: boolean;
   };
   region: string;
   originalLanguage: string;
@@ -139,6 +140,7 @@ interface FullPublicSettings extends PublicSettings {
   mediaServerLogin: boolean;
   oidcLogin: boolean;
   oidcProviderName: string;
+  oidcAutomaticLogin: boolean;
   movie4kEnabled: boolean;
   series4kEnabled: boolean;
   region: string;
@@ -339,6 +341,7 @@ class Settings {
           requiredClaims: 'email_verified',
           scopes: 'email openid profile',
           matchJellyfinUsername: false,
+          automaticLogin: false,
         },
         region: '',
         originalLanguage: '',
@@ -564,6 +567,7 @@ class Settings {
       mediaServerLogin: this.data.main.mediaServerLogin,
       oidcLogin: this.data.main.oidcLogin,
       oidcProviderName: this.data.main.oidc.providerName,
+      oidcAutomaticLogin: this.data.main.oidc.automaticLogin,
       movie4kEnabled: this.data.radarr.some(
         (radarr) => radarr.is4k && radarr.isDefault
       ),

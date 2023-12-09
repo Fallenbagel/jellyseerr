@@ -3762,6 +3762,21 @@ paths:
               schema:
                 type: string
                 example: 'oidc-state=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+  /auth/oidc-logout:
+    get:
+      security: []
+      summary: Redirect to the OpenID Connect provider logout page
+      description: Determines the logout redirect URL for to the OpenID Connect provider, and redirects the user to it.
+      tags:
+        - auth
+      responses:
+        '302':
+          description: Redirect to the logout url for the OpenID Connect provider
+          headers:
+            Location:
+              schema:
+                type: string
+                example: https://example.com/auth/oidc/invalidate_session
   /user:
     get:
       summary: Get all users

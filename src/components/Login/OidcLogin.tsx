@@ -4,6 +4,7 @@ import globalMessages from '@app/i18n/globalMessages';
 import OIDCAuth from '@app/utils/oidc';
 import { ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline';
 import type React from 'react';
+import { useEffect } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 
 const messages = defineMessages({
@@ -31,6 +32,13 @@ const OidcLogin: React.FC<OidcLoginProps> = ({
 }) => {
   const intl = useIntl();
   const settings = useSettings();
+
+  useEffect(() => {
+    const { oidcLogin, oidcAutomaticLogin } = settings.currentSettings;
+    if (oidcLogin && oidcAutomaticLogin)
+      // redirect to login page
+      window.location.href = '/api/v1/auth/oidc-login';
+  }, [settings.currentSettings]);
 
   const handleClick = async () => {
     setProcessing(true);

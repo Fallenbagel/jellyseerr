@@ -891,4 +891,21 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
   }
 });
 
+authRoutes.get('/oidc-logout', async (req, res, next) => {
+  const settings = getSettings();
+
+  if (!settings.main.oidcLogin || !settings.main.oidc.automaticLogin) {
+    return next({
+      status: 403,
+      message: 'OpenID Connect sign-in is disabled.',
+    });
+  }
+
+  const oidcEndpoints = await getOIDCWellknownConfiguration(
+    settings.main.oidc.providerUrl
+  );
+
+  return res.redirect(oidcEndpoints.end_session_endpoint);
+});
+
 export default authRoutes;
