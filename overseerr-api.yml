@@ -389,6 +389,9 @@ components:
         externalHostname:
           type: string
           example: 'http://my.jellyfin.host'
+        jellyfinForgotPasswordUrl:
+          type: string
+          example: 'http://my.jellyfin.host/web/index.html#!/forgotpassword.html'
         adminUser:
           type: string
           example: 'admin'

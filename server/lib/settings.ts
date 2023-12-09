@@ -40,6 +40,7 @@ export interface JellyfinSettings {
   name: string;
   hostname: string;
   externalHostname?: string;
+  jellyfinForgotPasswordUrl?: string;
   libraries: Library[];
   serverId: string;
 }
@@ -148,6 +149,7 @@ interface FullPublicSettings extends PublicSettings {
   mediaServerType: number;
   jellyfinHost?: string;
   jellyfinExternalHost?: string;
+  jellyfinForgotPasswordUrl?: string;
   jellyfinServerName?: string;
   partialRequestsEnabled: boolean;
   cacheImages: boolean;
@@ -361,6 +363,7 @@ class Settings {
         name: '',
         hostname: '',
         externalHostname: '',
+        jellyfinForgotPasswordUrl: '',
         libraries: [],
         serverId: '',
       },
@@ -579,6 +582,7 @@ class Settings {
       mediaServerType: this.main.mediaServerType,
       jellyfinHost: this.jellyfin.hostname,
       jellyfinExternalHost: this.jellyfin.externalHostname,
+      jellyfinForgotPasswordUrl: this.data.jellyfin.jellyfinForgotPasswordUrl,
       partialRequestsEnabled: this.data.main.partialRequestsEnabled,
       cacheImages: this.data.main.cacheImages,
       vapidPublic: this.vapidPublic,

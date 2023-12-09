@@ -50,6 +50,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set lower case owner name
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+        env:
+          OWNER: ${{ github.repository_owner }}
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
@@ -61,6 +66,7 @@ jobs:
             COMMIT_TAG=${{ github.sha }}
           tags: |
             fallenbagel/jellyseerr:develop
+            ghcr.io/${{ env.OWNER_LC }}/jellyseerr:develop
 
   discord:
     name: Send Discord Notification

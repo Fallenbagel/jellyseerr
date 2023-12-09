@@ -36,6 +36,9 @@ RUN echo "{\"commitTag\": \"${COMMIT_TAG}\"}" > committag.json
 
 FROM node:18.18-alpine
 
+# Metadata for Github Package Registry
+LABEL org.opencontainers.image.source="https://github.com/Fallenbagel/jellyseerr"
+
 WORKDIR /app
 
 RUN apk add --no-cache tzdata tini && rm -rf /tmp/*

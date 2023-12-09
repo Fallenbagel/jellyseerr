@@ -30,9 +30,10 @@ const messages = defineMessages({
   jellyfinSettingsSuccess: '{mediaServerName} settings saved successfully!',
   jellyfinSettings: '{mediaServerName} Settings',
   jellyfinSettingsDescription:
-    'Optionally configure the internal and external endpoints for your {mediaServerName} server. In most cases, the external URL is different to the internal URL.',
+    'Optionally configure the internal and external endpoints for your {mediaServerName} server. In most cases, the external URL is different to the internal URL. A custom password reset URL can also be set for {mediaServerName} login, in case you would like to redirect to a different password reset page.',
   externalUrl: 'External URL',
   internalUrl: 'Internal URL',
+  jellyfinForgotPasswordUrl: 'Forgot Password URL',
   validationUrl: 'You must provide a valid URL',
   syncing: 'Syncing',
   syncJellyfin: 'Sync Libraries',
@@ -91,6 +92,10 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
       intl.formatMessage(messages.validationUrl)
     ),
     jellyfinInternalUrl: Yup.string().matches(
+      /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
+      intl.formatMessage(messages.validationUrl)
+    ),
+    jellyfinForgotPasswordUrl: Yup.string().matches(
       /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
       intl.formatMessage(messages.validationUrl)
     ),
@@ -353,6 +358,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
             initialValues={{
               jellyfinInternalUrl: data?.hostname || '',
               jellyfinExternalUrl: data?.externalHostname || '',
+              jellyfinForgotPasswordUrl: data?.jellyfinForgotPasswordUrl || '',
             }}
             validationSchema={JellyfinSettingsSchema}
             onSubmit={async (values) => {
@@ -360,6 +366,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                 await axios.post('/api/v1/settings/jellyfin', {
                   hostname: values.jellyfinInternalUrl,
                   externalHostname: values.jellyfinExternalUrl,
+                  jellyfinForgotPasswordUrl: values.jellyfinForgotPasswordUrl,
                 } as JellyfinSettings);
 
                 addToast(
@@ -433,6 +440,30 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                         touched.jellyfinExternalUrl && (
                           <div className="error">
                             {errors.jellyfinExternalUrl}
+                          </div>
+                        )}
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <label
+                      htmlFor="jellyfinForgotPasswordUrl"
+                      className="text-label"
+                    >
+                      {intl.formatMessage(messages.jellyfinForgotPasswordUrl)}
+                    </label>
+                    <div className="form-input-area">
+                      <div className="form-input-field">
+                        <Field
+                          type="text"
+                          inputMode="url"
+                          id="jellyfinForgotPasswordUrl"
+                          name="jellyfinForgotPasswordUrl"
+                        />
+                      </div>
+                      {errors.jellyfinForgotPasswordUrl &&
+                        touched.jellyfinForgotPasswordUrl && (
+                          <div className="error">
+                            {errors.jellyfinForgotPasswordUrl}
                           </div>
                         )}
                     </div>

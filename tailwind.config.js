@@ -3,7 +3,6 @@ const defaultTheme = require('tailwindcss/defaultTheme');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  important: true,
   mode: 'jit',
   content: [
     './node_modules/react-tailwindcss-datepicker-sct/dist/index.esm.js',

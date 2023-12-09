@@ -6,7 +6,7 @@
 <a href="https://hub.docker.com/r/fallenbagel/jellyseerr"><img src="https://img.shields.io/docker/pulls/fallenbagel/jellyseerr" alt="Docker pulls"></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-99-orange.svg"/></a>
+<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-30-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 **Jellyseerr** is a free and open source software application for managing requests for your media library. It is a a fork of Overseerr built to bring support for Jellyfin & Emby media servers!
@@ -37,68 +37,69 @@ With more features on the way! Check out our [issue tracker](https://github.com/
 
 _*On Jellyfin/Emby, ensure the `settings > Home > Automatically group content from the following folders into views such as 'Movies', 'Music' and 'TV'` is turned off*_
 
-### Launching Jellyseerr using Docker
+### Launching Jellyseerr using Docker (Recommended)
 
 Check out our dockerhub for instructions on how to install and run Jellyseerr:
 https://hub.docker.com/r/fallenbagel/jellyseerr
 
-### Launching Jellyseerr manually:
+### Building from source (ADVANCED):
 
 #### Windows
 
 Pre-requisites:
 
-- Nodejs (atleast LTS version)
-- Yarn
-- Download the source code from the github (Either develop branch or main for stable)
+- Nodejs [v18](https://nodejs.org/download/release/v18.18.2)
+- [Yarn](https://classic.yarnpkg.com/lang/en/docs/install)
+- Download/git clone the source code from the github (Either develop branch or main for stable)
 
-```bash
+```cmd
 npm i -g win-node-env
-yarn install
+set CYPRESS_INSTALL_BINARY=0
+yarn install --frozen-lockfile --network-timeout 1000000
 yarn run build
 yarn start
 ```
+
+(you can use task scheduler to run a bat script with `@echo off` and `yarn start` to run jellyseerr in the background)
+
+_to set env variables such as `JELLYFIN_TYPE=emby` create a file called `.env` in the root directory of jellyseerr_
 
 #### Linux
 
-Pre-requisites:
+**Pre-requisites:**
 
-- Nodejs (atleast LTS version)
-- Yarn
+- Nodejs [v18](https://nodejs.org/en/download/package-manager)
+- [Yarn](https://classic.yarnpkg.com/lang/en/docs/install) (on debian based distros, the package manager provided `yarn` is different and is a package called cmdlet. You can remove that using `apt-remove cmdlet` then install yarn using `npm install -g yarn`)
 - Git
+
+**Steps:**
+
+1. Assuming you want the root folder for the jellyseerr source code to be cloned to `/opt`
+
+```bash
+cd /opt
+```
+
+2. Then clone the follow commands to clone and checkout to the stable version
 
 ```bash
 git clone https://github.com/Fallenbagel/jellyseerr.git && cd jellyseerr
-git checkout main #if you want to run stable instead of develop
-yarn install
-yarn run build
-yarn start
+git checkout main
 ```
 
-_Systemd-service:_
+3. Then install the dependencies and build the dist
+
+```bash
+CYPRESS_INSTALL_BINARY=0 yarn install --frozen-lockfile --network-timeout 1000000
+yarn run build
+```
+
+4. Now you can start jellyseerr using `yarn start` and opening http://localhost:5055 in your browser.
+
+5. If you want to run jellyseerr as a _Systemd-service:_
 
 - assuming jellyseerr was cloned to `/opt/`
-  and the environmentfile is located at `/etc/jellyseerr`
-
-service:
-
-```
-[Unit]
-Description=Jellyseerr Service
-Wants=network-online.target
-After=network-online.target
-
-[Service]
-EnvironmentFile=/etc/jellyseerr/jellyseerr.conf
-Environment=NODE_ENV=production
-Type=exec
-Restart=on-failure
-WorkingDirectory=/opt/jellyseerr
-ExecStart=/root/.nvm/versions/node/v18.7.0/bin/node dist/index.js
-
-[Install]
-WantedBy=multi-user.target
-```
+- first create the environmentfile at `/etc/jellyseerr/jellyseerr.conf`
 
 Environmentfile:
 
@@ -114,9 +115,34 @@ PORT=5055
 # JELLYFIN_TYPE=emby
 ```
 
+- Then run the command `which node` to find your node path (assuming it's at `/usr/bin/node`)
+- Then create the service file using `sudo systemctl edit jellyseerr.service` or creating and editing a file at `/etc/systemd/system/jellyseerr.service`
+
+Service file contents:
+
+```
+[Unit]
+Description=Jellyseerr Service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+EnvironmentFile=/etc/jellyseerr/jellyseerr.conf
+Environment=NODE_ENV=production
+Type=exec
+Restart=on-failure
+WorkingDirectory=/opt/jellyseerr
+ExecStart=/usr/bin/node dist/index.js
+
+[Install]
+WantedBy=multi-user.target
+```
+
 ### Packages:
 
 Archlinux: [AUR](https://aur.archlinux.org/packages/jellyseerr)
+Nixpkg: [Nixpkg](https://search.nixos.org/packages?channel=unstable&show=jellyseerr)
+Snap: [Snap](https://snapcraft.io/jellyseerr)
 
 ## Preview
 
@@ -148,9 +174,63 @@ You can help improve Jellyseerr too! Check out our [Contribution Guide](https://
 
 Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcontributors.org/docs/en/emoji-key)) and all those that contributed directly to Jellyseerr:
 
+### Jellyseerr Contributors ✨
+
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Fallenbagel"><img src="https://avatars.githubusercontent.com/u/98979876?v=4?s=100" width="100px;" alt="Fallenbagel"/><br /><sub><b>Fallenbagel</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=Fallenbagel" title="Code">💻</a> <a href="#maintenance-Fallenbagel" title="Maintenance">🚧</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/seanzhang98"><img src="https://avatars.githubusercontent.com/u/34902361?v=4?s=100" width="100px;" alt="Sean"/><br /><sub><b>Sean</b></sub></a><br /><a href="#translation-seanzhang98" title="Translation">🌍</a> <a href="https://github.com/Fallenbagel/jellyseerr/commits?author=seanzhang98" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/notfakie"><img src="https://avatars.githubusercontent.com/u/103784113?v=4?s=100" width="100px;" alt="notfakie"/><br /><sub><b>notfakie</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=notfakie" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Jumail"><img src="https://avatars.githubusercontent.com/u/7672055?v=4?s=100" width="100px;" alt="Mohamed Jumail"/><br /><sub><b>Mohamed Jumail</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/pulls?q=is%3Apr+reviewed-by%3AJumail" title="Reviewed Pull Requests">👀</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://www.heywhale.com"><img src="https://avatars.githubusercontent.com/u/4048787?v=4?s=100" width="100px;" alt="Shilong Jiang"/><br /><sub><b>Shilong Jiang</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=jsl9208" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://jinas.me"><img src="https://avatars.githubusercontent.com/u/28459081?v=4?s=100" width="100px;" alt="Boring Dragon"/><br /><sub><b>Boring Dragon</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=boring-dragon" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/sambartik"><img src="https://avatars.githubusercontent.com/u/63553146?v=4?s=100" width="100px;" alt="Samuel Bartík"/><br /><sub><b>Samuel Bartík</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=sambartik" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/CyferShepard"><img src="https://avatars.githubusercontent.com/u/24864904?v=4?s=100" width="100px;" alt="Thegan Govender"/><br /><sub><b>Thegan Govender</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=CyferShepard" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jab416171"><img src="https://avatars.githubusercontent.com/u/345752?v=4?s=100" width="100px;" alt="jab416171"/><br /><sub><b>jab416171</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=jab416171" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://nvds.be"><img src="https://avatars.githubusercontent.com/u/5257222?v=4?s=100" width="100px;" alt="Nicolai Van der Storm"/><br /><sub><b>Nicolai Van der Storm</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=NicolaiVdS" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Smexhy"><img src="https://avatars.githubusercontent.com/u/4880625?v=4?s=100" width="100px;" alt="Smexhy"/><br /><sub><b>Smexhy</b></sub></a><br /><a href="#translation-Smexhy" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://dd06-dev.fr"><img src="https://avatars.githubusercontent.com/u/58089504?v=4?s=100" width="100px;" alt="dd060606"/><br /><sub><b>dd060606</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=dd060606" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://qwer.tz"><img src="https://avatars.githubusercontent.com/u/71837281?v=4?s=100" width="100px;" alt="Daniel"/><br /><sub><b>Daniel</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=darmiel" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/undone37"><img src="https://avatars.githubusercontent.com/u/10513808?v=4?s=100" width="100px;" alt="undone37"/><br /><sub><b>undone37</b></sub></a><br /><a href="#translation-undone37" title="Translation">🌍</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/CheChu10"><img src="https://avatars.githubusercontent.com/u/32913133?v=4?s=100" width="100px;" alt="Chechu García"/><br /><sub><b>Chechu García</b></sub></a><br /><a href="#translation-CheChu10" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/DimitriDR"><img src="https://avatars.githubusercontent.com/u/56969769?v=4?s=100" width="100px;" alt="Dimitri"/><br /><sub><b>Dimitri</b></sub></a><br /><a href="#translation-DimitriDR" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/andrey4korop"><img src="https://avatars.githubusercontent.com/u/24610708?v=4?s=100" width="100px;" alt="andrey4korop"/><br /><sub><b>andrey4korop</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=andrey4korop" title="Code">💻</a> <a href="#translation-andrey4korop" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://geoffrey-coulaud.fr"><img src="https://avatars.githubusercontent.com/u/20744730?v=4?s=100" width="100px;" alt="Geoffrey Coulaud"/><br /><sub><b>Geoffrey Coulaud</b></sub></a><br /><a href="#translation-GeoffreyCoulaud" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Pikachu920"><img src="https://avatars.githubusercontent.com/u/28607612?v=4?s=100" width="100px;" alt="Pikachu920"/><br /><sub><b>Pikachu920</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=Pikachu920" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/yalagin"><img src="https://avatars.githubusercontent.com/u/12879142?v=4?s=100" width="100px;" alt="Maxim Yalagin"/><br /><sub><b>Maxim Yalagin</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=yalagin" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jeaboswell"><img src="https://avatars.githubusercontent.com/u/11653068?v=4?s=100" width="100px;" alt="Jesse Boswell"/><br /><sub><b>Jesse Boswell</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=jeaboswell" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/d-fendrich"><img src="https://avatars.githubusercontent.com/u/27904138?v=4?s=100" width="100px;" alt="d-fendrich"/><br /><sub><b>d-fendrich</b></sub></a><br /><a href="#translation-d-fendrich" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/davidfdezalcoba"><img src="https://avatars.githubusercontent.com/u/15996018?v=4?s=100" width="100px;" alt="David Fernández Alcoba"/><br /><sub><b>David Fernández Alcoba</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=davidfdezalcoba" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Gauvino"><img src="https://avatars.githubusercontent.com/u/68083474?v=4?s=100" width="100px;" alt="Gauvino"/><br /><sub><b>Gauvino</b></sub></a><br /><a href="#translation-Gauvino" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/EthanArmbrust"><img src="https://avatars.githubusercontent.com/u/22754714?v=4?s=100" width="100px;" alt="EthanArmbrust"/><br /><sub><b>EthanArmbrust</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=EthanArmbrust" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://www.piribisoft.com"><img src="https://avatars.githubusercontent.com/u/854646?v=4?s=100" width="100px;" alt="Eduardo"/><br /><sub><b>Eduardo</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=SirMartin" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/RickLuiken"><img src="https://avatars.githubusercontent.com/u/34110371?v=4?s=100" width="100px;" alt="RickLuiken"/><br /><sub><b>RickLuiken</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=RickLuiken" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Br33ce"><img src="https://avatars.githubusercontent.com/u/124933490?v=4?s=100" width="100px;" alt="Br33ce"/><br /><sub><b>Br33ce</b></sub></a><br /><a href="#translation-Br33ce" title="Translation">🌍</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://athfan.com"><img src="https://avatars.githubusercontent.com/u/13810742?v=4?s=100" width="100px;" alt="Athfan Khaleel"/><br /><sub><b>Athfan Khaleel</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=athphane" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mdll23"><img src="https://avatars.githubusercontent.com/u/142844478?v=4?s=100" width="100px;" alt="Michael Dallinger"/><br /><sub><b>Michael Dallinger</b></sub></a><br /><a href="#translation-mdll23" title="Translation">🌍</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+### Overseerr Contributors ✨
+
 <table>
   <tbody>
     <tr>
@@ -284,8 +364,3 @@ Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcon
     </tr>
   </tbody>
 </table>
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
