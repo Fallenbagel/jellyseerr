@@ -208,8 +208,8 @@ const OidcModal = ({
                   <span className="text-md font-semibold">Advanced</span>
                   <ChevronDownIcon
                     width={20}
-                    className={`rotate-90 transition-transform ${
-                      openIndexes.includes(0) && 'rotate-0'
+                    className={` transition-transform duration-200 ${
+                      openIndexes.includes(0) ? 'rotate-0' : 'rotate-90'
                     }`}
                   />
                 </button>
