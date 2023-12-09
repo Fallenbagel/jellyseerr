@@ -17,6 +17,7 @@ const defaultSettings: PublicSettingsResponse = {
   mediaServerLogin: true,
   oidcLogin: false,
   oidcProviderName: 'OpenID Connect',
+  oidcAutomaticLogin: false,
   movie4kEnabled: false,
   series4kEnabled: false,
   region: '',
