@@ -1,7 +1,9 @@
 import type {
   IdTokenClaims,
   Mandatory,
+  OidcProviderMetadata,
   OidcStandardClaims,
+  OidcTokenResponse,
 } from '@server/interfaces/api/oidcInterfaces';
 import { getSettings } from '@server/lib/settings';
 import axios from 'axios';
@@ -15,7 +17,7 @@ export async function getOIDCWellknownConfiguration(domain: string) {
     domain.replace(/\/$/, '') + '/.well-known/openid-configuration'
   ).toString();
 
-  const wellKnownInfo: WellKnownConfiguration = await axios
+  const wellKnownInfo: OidcProviderMetadata = await axios
     .get(wellKnownUrl, {
       headers: {
         'Content-Type': 'application/json',
@@ -46,16 +48,12 @@ export async function getOIDCRedirectUrl(req: Request, state: string) {
   return url.toString();
 }
 
-type OIDCTokenResponse =
-  | { id_token: string; access_token: string }
-  | { error: string };
-
 /** Exchange authorization code for token data */
 export async function fetchOIDCTokenData(
   req: Request,
-  wellKnownInfo: WellKnownConfiguration,
+  wellKnownInfo: OidcProviderMetadata,
   code: string
-): Promise<OIDCTokenResponse> {
+): Promise<OidcTokenResponse> {
   const settings = getSettings();
   const { oidc } = settings.main;
 
@@ -72,12 +70,12 @@ export async function fetchOIDCTokenData(
   formData.append('code', code);
 
   return await axios
-    .post<OIDCTokenResponse>(wellKnownInfo.token_endpoint, formData)
+    .post<OidcTokenResponse>(wellKnownInfo.token_endpoint, formData)
     .then((r) => r.data);
 }
 
 export async function getOIDCUserInfo(
-  wellKnownInfo: WellKnownConfiguration,
+  wellKnownInfo: OidcProviderMetadata,
   authToken: string
 ) {
   const userInfo = await axios
@@ -223,65 +221,3 @@ export const createIdTokenSchema = ({
 
 export type FullUserInfo = IdTokenClaims &
   Mandatory<OidcStandardClaims, 'name' | 'email' | 'email_verified'>;
-
-export interface WellKnownConfiguration {
-  issuer: string; // REQUIRED
-
-  authorization_endpoint: string; // REQUIRED
-
-  token_endpoint: string; // REQUIRED
-
-  token_endpoint_auth_methods_supported?: string[]; // OPTIONAL
-
-  token_endpoint_auth_signing_alg_values_supported?: string[]; // OPTIONAL
-
-  userinfo_endpoint: string; // RECOMMENDED
-
-  check_session_iframe: string; // REQUIRED
-
-  end_session_endpoint: string; // REQUIRED
-
-  jwks_uri: string; // REQUIRED
-
-  registration_endpoint: string; // RECOMMENDED
-
-  scopes_supported: string[]; // RECOMMENDED
-
-  response_types_supported: string[]; // REQUIRED
-
-  acr_values_supported?: string[]; // OPTIONAL
-
-  subject_types_supported: string[]; // REQUIRED
-
-  request_object_signing_alg_values_supported?: string[]; // OPTIONAL
-
-  display_values_supported?: string[]; // OPTIONAL
-
-  claim_types_supported?: string[]; // OPTIONAL
-
-  claims_supported: string[]; // RECOMMENDED
-
-  claims_parameter_supported?: boolean; // OPTIONAL
-
-  service_documentation?: string; // OPTIONAL
-
-  ui_locales_supported?: string[]; // OPTIONAL
-
-  revocation_endpoint: string; // REQUIRED
-
-  introspection_endpoint: string; // REQUIRED
-
-  frontchannel_logout_supported?: boolean; // OPTIONAL
-
-  frontchannel_logout_session_supported?: boolean; // OPTIONAL
-
-  backchannel_logout_supported?: boolean; // OPTIONAL
-
-  backchannel_logout_session_supported?: boolean; // OPTIONAL
-
-  grant_types_supported?: string[]; // OPTIONAL
-
-  response_modes_supported?: string[]; // OPTIONAL
-
-  code_challenge_methods_supported?: string[]; // OPTIONAL
-}

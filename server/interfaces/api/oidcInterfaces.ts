@@ -4,6 +4,74 @@
 export type Mandatory<T, K extends keyof T> = Required<Pick<T, K>> & Omit<T, K>;
 
 /**
+ * Standard OpenID Connect discovery document.
+ *
+ * @public
+ * @see https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
+ */
+export interface OidcProviderMetadata {
+  issuer: string; // REQUIRED
+
+  authorization_endpoint: string; // REQUIRED
+
+  token_endpoint: string; // REQUIRED
+
+  token_endpoint_auth_methods_supported?: string[]; // OPTIONAL
+
+  token_endpoint_auth_signing_alg_values_supported?: string[]; // OPTIONAL
+
+  userinfo_endpoint: string; // RECOMMENDED
+
+  check_session_iframe: string; // REQUIRED
+
+  end_session_endpoint: string; // REQUIRED
+
+  jwks_uri: string; // REQUIRED
+
+  registration_endpoint: string; // RECOMMENDED
+
+  scopes_supported: string[]; // RECOMMENDED
+
+  response_types_supported: string[]; // REQUIRED
+
+  acr_values_supported?: string[]; // OPTIONAL
+
+  subject_types_supported: string[]; // REQUIRED
+
+  request_object_signing_alg_values_supported?: string[]; // OPTIONAL
+
+  display_values_supported?: string[]; // OPTIONAL
+
+  claim_types_supported?: string[]; // OPTIONAL
+
+  claims_supported: string[]; // RECOMMENDED
+
+  claims_parameter_supported?: boolean; // OPTIONAL
+
+  service_documentation?: string; // OPTIONAL
+
+  ui_locales_supported?: string[]; // OPTIONAL
+
+  revocation_endpoint: string; // REQUIRED
+
+  introspection_endpoint: string; // REQUIRED
+
+  frontchannel_logout_supported?: boolean; // OPTIONAL
+
+  frontchannel_logout_session_supported?: boolean; // OPTIONAL
+
+  backchannel_logout_supported?: boolean; // OPTIONAL
+
+  backchannel_logout_session_supported?: boolean; // OPTIONAL
+
+  grant_types_supported?: string[]; // OPTIONAL
+
+  response_modes_supported?: string[]; // OPTIONAL
+
+  code_challenge_methods_supported?: string[]; // OPTIONAL
+}
+
+/**
  * Standard OpenID Connect address claim.
  * The Address Claim represents a physical mailing address.
  *
@@ -127,3 +195,45 @@ export interface IdTokenClaims
    * */
   sid?: string;
 }
+
+type OidcTokenSuccessResponse = {
+  /**
+   * REQUIRED. ID Token value associated with the authenticated session.
+   *
+   * @see https://openid.net/specs/openid-connect-core-1_0.html#IDToken
+   */
+  id_token: string;
+  /**
+   * REQUIRED. The access token issued by the authorization server.
+   */
+  access_token: string;
+  /**
+   * REQUIRED.  The type of the token issued as described in
+   * Section 7.1.  Value is case insensitive.
+   *
+   * @see https://datatracker.ietf.org/doc/html/rfc6749#section-7.1
+   */
+  token_type: string;
+  /**
+   * RECOMMENDED.  The lifetime in seconds of the access token.  For
+   * example, the value "3600" denotes that the access token will
+   * expire in one hour from the time the response was generated.
+   * If omitted, the authorization server SHOULD provide the
+   * expiration time via other means or document the default value.
+   */
+  expires_in?: number;
+};
+
+type OidcTokenErrorResponse = {
+  error: string;
+};
+
+/**
+ * Standard response from the OpenID Connect token request endpoint.
+ *
+ * @public
+ * @see https://openid.net/specs/openid-connect-core-1_0.html#TokenResponse
+ */
+export type OidcTokenResponse =
+  | OidcTokenSuccessResponse
+  | OidcTokenErrorResponse;
