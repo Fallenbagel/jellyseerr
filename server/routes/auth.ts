@@ -740,12 +740,10 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
     const wellKnownInfo = await getOIDCWellknownConfiguration(oidc.providerUrl);
 
     // Fetch the token data
-    const body = (await fetchOIDCTokenData(req, wellKnownInfo, code)) as
-      | { id_token: string; access_token: string; error: never }
-      | { error: string };
+    const body = await fetchOIDCTokenData(req, wellKnownInfo, code);
 
     // Validate that the token response is valid and not manipulated
-    if (body.error) {
+    if ('error' in body) {
       logger.info('Failed OIDC login attempt', {
         cause: 'Invalid token response',
         ip: req.ip,
@@ -758,27 +756,18 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
     }
 
     // Extract the ID token and access token
-    const { id_token: idToken, access_token: accessToken } = body as Extract<
-      typeof body,
-      { id_token: string; access_token: string }
-    >;
+    const { id_token: idToken, access_token: accessToken } = body;
 
-    // Attempt to decode ID token jwt, catch and return any errors
-    const tryDecodeJwt = (): [IdTokenClaims | null, unknown] => {
-      try {
-        const decoded: IdTokenClaims = decodeJwt(idToken);
-        return [decoded, null];
-      } catch (error) {
-        return [null, error];
-      }
-    };
-    const [decoded, err] = tryDecodeJwt();
-
-    if (err != null) {
+    // Attempt to decode ID token jwt
+    let decoded: IdTokenClaims;
+    try {
+      decoded = decodeJwt(idToken);
+    } catch (err) {
       logger.info('Failed OIDC login attempt', {
         cause: 'Invalid jwt',
         ip: req.ip,
         idToken: idToken,
+        err,
       });
       return next({
         status: 400,

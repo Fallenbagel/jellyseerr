@@ -46,12 +46,16 @@ export async function getOIDCRedirectUrl(req: Request, state: string) {
   return url.toString();
 }
 
+type OIDCTokenResponse =
+  | { id_token: string; access_token: string }
+  | { error: string };
+
 /** Exchange authorization code for token data */
 export async function fetchOIDCTokenData(
   req: Request,
   wellKnownInfo: WellKnownConfiguration,
   code: string
-) {
+): Promise<OIDCTokenResponse> {
   const settings = getSettings();
   const { oidc } = settings.main;
 
@@ -68,7 +72,7 @@ export async function fetchOIDCTokenData(
   formData.append('code', code);
 
   return await axios
-    .post(wellKnownInfo.token_endpoint, formData)
+    .post<OIDCTokenResponse>(wellKnownInfo.token_endpoint, formData)
     .then((r) => r.data);
 }
 
