@@ -406,6 +406,9 @@ components:
         externalHostname:
           type: string
           example: 'http://my.jellyfin.host'
+        jellyfinForgotPasswordUrl:
+          type: string
+          example: 'http://my.jellyfin.host/web/index.html#!/forgotpassword.html'
         adminUser:
           type: string
           example: 'admin'
@@ -3794,7 +3797,7 @@ paths:
               schema:
                 type: string
                 example: https://example.com/auth/oidc/invalidate_session
-  /ucser:
+  /user:
     get:
       summary: Get all users
       description: Returns all users in a JSON object.
