@@ -35,7 +35,8 @@ const OidcCallback = () => {
 
   useEffect(() => {
     login();
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="container mx-auto flex h-screen items-center justify-center">
