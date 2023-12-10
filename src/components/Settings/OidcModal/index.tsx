@@ -207,7 +207,9 @@ const OidcModal = ({
             {({ openIndexes, handleClick, AccordionContent }) => (
               <>
                 <button
-                  className="mt-4 flex w-full cursor-pointer justify-between rounded-md bg-gray-800 bg-opacity-70 p-3 text-gray-400 hover:bg-gray-700"
+                  className={`mt-4 flex w-full cursor-pointer justify-between rounded-md bg-opacity-70 p-3 text-gray-400 hover:bg-gray-700 ${
+                    openIndexes.includes(0) ? 'bg-gray-700' : ''
+                  }`}
                   onClick={() => handleClick(0)}
                 >
                   <span className="text-md font-semibold">Advanced</span>
