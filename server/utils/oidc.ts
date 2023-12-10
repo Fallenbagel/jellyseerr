@@ -133,11 +133,10 @@ export function tryGetUserInfoKey<T extends PrimitiveString>(
   return userInfo[key] as TypeFromName<T>;
 }
 
-export function validateUserClaims(userInfo: FullUserInfo) {
-  const settings = getSettings();
-  const { requiredClaims: requiredClaimsString } = settings.main.oidc;
-  const requiredClaims = requiredClaimsString.split(' ');
-
+export function validateUserClaims(
+  userInfo: FullUserInfo,
+  requiredClaims: string[]
+) {
   requiredClaims.some((claim) => {
     const value = tryGetUserInfoKey(userInfo, claim, 'boolean');
     if (!value)
@@ -149,9 +148,13 @@ export function validateUserClaims(userInfo: FullUserInfo) {
 export const createIdTokenSchema = ({
   oidcDomain,
   oidcClientId,
+  identifierClaims,
+  requiredClaims,
 }: {
   oidcDomain: string;
   oidcClientId: string;
+  identifierClaims: string[];
+  requiredClaims: string[];
 }) => {
   return yup.object().shape({
     iss: yup
@@ -212,10 +215,16 @@ export const createIdTokenSchema = ({
           return true;
         }
       ),
-    // these should exist because we set the scope to `openid profile email`
-    name: yup.string().required(),
-    email: yup.string().email().required(),
-    email_verified: yup.boolean().required(),
+    // ensure all identifier claims are present and are strings
+    ...identifierClaims.reduce(
+      (a, v) => ({ ...a, [v]: yup.string().required() }),
+      {}
+    ),
+    // ensure all required claims are present and are booleans
+    ...requiredClaims.reduce(
+      (a, v) => ({ ...a, [v]: yup.boolean().required() }),
+      {}
+    ),
   });
 };
 

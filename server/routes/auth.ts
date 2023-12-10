@@ -702,6 +702,9 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
     });
   }
 
+  const identifierClaims = oidc.userIdentifier.split(' ').filter((s) => !!s);
+  const requiredClaims = oidc.requiredClaims.split(' ').filter((s) => !!s);
+
   const cookieState = req.cookies['oidc-state'];
   const url = new URL(req.url, `${req.protocol}://${req.hostname}`);
   const state = url.searchParams.get('state');
@@ -784,6 +787,8 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
       const idTokenSchema = createIdTokenSchema({
         oidcClientId: oidc.clientId,
         oidcDomain: oidc.providerUrl,
+        identifierClaims,
+        requiredClaims,
       });
       await idTokenSchema.validate(fullUserInfo);
     } catch (err) {
@@ -802,8 +807,7 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
     // Validate user identifier
     let identifiers: string[];
     try {
-      const identificationKeys = oidc.userIdentifier.split(' ');
-      identifiers = tryGetUserIdentifiers(fullUserInfo, identificationKeys);
+      identifiers = tryGetUserIdentifiers(fullUserInfo, identifierClaims);
     } catch {
       logger.info('Failed OIDC login attempt', {
         cause: 'User identifier not found in userinfo payload.',
@@ -818,7 +822,7 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
 
     // Check that email is verified
     try {
-      validateUserClaims(fullUserInfo);
+      validateUserClaims(fullUserInfo, requiredClaims);
     } catch (error) {
       logger.info('Failed OIDC login attempt', {
         cause: 'Failed to validate required claims',
