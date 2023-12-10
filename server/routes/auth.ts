@@ -856,7 +856,7 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
     }
 
     // Create user if one doesn't already exist
-    if (!user) {
+    if (!user && fullUserInfo.email != null) {
       logger.info(`Creating user for ${fullUserInfo.email}`, {
         ip: req.ip,
         email: fullUserInfo.email,
@@ -873,6 +873,15 @@ authRoutes.get('/oidc-callback', async (req, res, next) => {
         userType: UserType.LOCAL,
       });
       await userRepository.save(user);
+    } else if (!user) {
+      logger.debug('Failed OIDC sign-up attempt', {
+        cause:
+          'User did not have an account, and was missing an associated email address.',
+      });
+      return next({
+        status: 400,
+        message: 'Unable to create new user account. Missing email address.',
+      });
     }
 
     // Set logged in session and return

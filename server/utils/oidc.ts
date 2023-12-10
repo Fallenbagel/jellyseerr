@@ -1,6 +1,5 @@
 import type {
   IdTokenClaims,
-  Mandatory,
   OidcProviderMetadata,
   OidcStandardClaims,
   OidcTokenResponse,
@@ -228,5 +227,4 @@ export const createIdTokenSchema = ({
   });
 };
 
-export type FullUserInfo = IdTokenClaims &
-  Mandatory<OidcStandardClaims, 'name' | 'email' | 'email_verified'>;
+export type FullUserInfo = IdTokenClaims & OidcStandardClaims;

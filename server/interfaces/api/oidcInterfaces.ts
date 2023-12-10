@@ -1,7 +1,7 @@
 /**
  * @internal
  */
-export type Mandatory<T, K extends keyof T> = Required<Pick<T, K>> & Omit<T, K>;
+type Mandatory<T, K extends keyof T> = Required<Pick<T, K>> & Omit<T, K>;
 
 /**
  * Standard OpenID Connect discovery document.
