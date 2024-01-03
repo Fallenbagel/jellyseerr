@@ -2,6 +2,10 @@
 <img src="./public/logo_full.svg" alt="Jellyseerr" style="margin: 20px 0;">
 </p>
 <p align="center">
+<img src="https://github.com/Fallenbagel/jellyseerr/actions/workflows/release.yml/badge.svg" alt="Jellyseerr Release" />
+<img src="https://github.com/Fallenbagel/jellyseerr/actions/workflows/ci.yml/badge.svg" alt="Jellyseerr CI">
+</p>
+<p align="center">
 <a href="https://discord.gg/ckbvBtDJgC"><img src="https://img.shields.io/badge/Discord-Chat-lightgrey" alt="Discord"></a>
 <a href="https://hub.docker.com/r/fallenbagel/jellyseerr"><img src="https://img.shields.io/docker/pulls/fallenbagel/jellyseerr" alt="Docker pulls"></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
@@ -169,6 +173,12 @@ Our [Code of Conduct](https://github.com/fallenbagel/jellyseerr/blob/develop/COD
 ## Contributing
 
 You can help improve Jellyseerr too! Check out our [Contribution Guide](https://github.com/fallenbagel/jellyseerr/blob/develop/CONTRIBUTING.md) to get started.
+
+Check out our Weblate instance to help translate Jellyseerr.
+
+<a href="http://jellyseerr.borgcube.de/engage/jellyseerr/">
+<img src="http://jellyseerr.borgcube.de/widget/jellyseerr/horizontal-auto.svg" alt="Translation status" />
+</a>
 
 ## Contributors ✨
 
