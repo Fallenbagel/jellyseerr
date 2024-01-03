@@ -9,16 +9,16 @@
 <a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-30-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-**Jellyseerr** is a free and open source software application for managing requests for your media library. It is a a fork of Overseerr built to bring support for Jellyfin & Emby media servers!
+**Jellyseerr** is a free and open source software application for managing requests for your media library.
+It is a a fork of [Overseerr](https://github.com/sct/overseerr) built to bring support for [Jellyfin](https://github.com/jellyfin/jellyfin) & [Emby](https://github.com/MediaBrowser/Emby) media servers!
 
 _The original Overseerr team have been busy and Jellyfin/Emby support aren't on their roadmap, so we started this project as we wanted to bring the Overseerr experience to the Jellyfin/Emby Community!_
 
 ## Current Features
 
-- Full Jellyfin/Emby/Plex integration. Authenticate and manage user access with Jellyfin/Emby/Plex!
-- Supports Movies, Shows, Mixed Libraries!
+- Full Jellyfin/Emby/Plex integration including authentication with user import & management
+- Supports Movies, Shows and Mixed Libraries
 - Ability to change email addresses for smtp purposes
-- Ability to import all jellyfin/emby users
 - Easy integration with your existing services. Currently, Jellyseerr supports Sonarr and Radarr. More to come!
 - Jellyfin/Emby/Plex library scan, to keep track of the titles which are already available.
 - Customizable request system, which allows users to request individual seasons or movies in a friendly, easy-to-use interface.
