@@ -174,12 +174,6 @@ Our [Code of Conduct](https://github.com/fallenbagel/jellyseerr/blob/develop/COD
 
 You can help improve Jellyseerr too! Check out our [Contribution Guide](https://github.com/fallenbagel/jellyseerr/blob/develop/CONTRIBUTING.md) to get started.
 
-Check out our Weblate instance to help translate Jellyseerr.
-
-<a href="http://jellyseerr.borgcube.de/engage/jellyseerr/">
-<img src="http://jellyseerr.borgcube.de/widget/jellyseerr/horizontal-auto.svg" alt="Translation status" />
-</a>
-
 ## Contributors ✨
 
 Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcontributors.org/docs/en/emoji-key)) and all those that contributed directly to Jellyseerr:
