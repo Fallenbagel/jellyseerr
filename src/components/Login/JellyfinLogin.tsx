@@ -84,10 +84,10 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
         onSubmit={async (values) => {
           try {
             await axios.post('/api/v1/auth/jellyfin', {
-              username: values.username,
-              password: values.password,
-              hostname: values.host,
-              email: values.email,
+              username: values.username.trim(),
+              password: values.password.trim(),
+              hostname: values.host.trim(),
+              email: values.email.trim(),
             });
           } catch (e) {
             toasts.addToast(
@@ -235,9 +235,9 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
           onSubmit={async (values) => {
             try {
               await axios.post('/api/v1/auth/jellyfin', {
-                username: values.username,
-                password: values.password,
-                email: values.username,
+                username: values.username.trim(),
+                password: values.password.trim(),
+                email: values.username.trim(),
               });
             } catch (e) {
               toasts.addToast(
