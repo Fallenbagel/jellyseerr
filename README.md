@@ -2,23 +2,28 @@
 <img src="./public/logo_full.svg" alt="Jellyseerr" style="margin: 20px 0;">
 </p>
 <p align="center">
-<a href="https://discord.gg/ckbvBtDJgC"><img src="https://img.shields.io/badge/Discord-Chat-lightgrey" alt="Discord"></a>
+<img src="https://github.com/Fallenbagel/jellyseerr/actions/workflows/release.yml/badge.svg" alt="Jellyseerr Release" />
+<img src="https://github.com/Fallenbagel/jellyseerr/actions/workflows/ci.yml/badge.svg" alt="Jellyseerr CI">
+</p>
+<p align="center">
+<a href="https://discord.gg/ckbvBtDJgC"><img src="https://img.shields.io/discord/952656177924300932" alt="Discord"></a>
 <a href="https://hub.docker.com/r/fallenbagel/jellyseerr"><img src="https://img.shields.io/docker/pulls/fallenbagel/jellyseerr" alt="Docker pulls"></a>
+<a href="http://jellyseerr.borgcube.de/engage/jellyseerr/"><img src="http://jellyseerr.borgcube.de/widget/jellyseerr/jellyseerr-frontend/svg-badge.svg" alt="Translation status" /></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-30-orange.svg"/></a>
+<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-31-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-**Jellyseerr** is a free and open source software application for managing requests for your media library. It is a a fork of Overseerr built to bring support for Jellyfin & Emby media servers!
+**Jellyseerr** is a free and open source software application for managing requests for your media library.
+It is a a fork of [Overseerr](https://github.com/sct/overseerr) built to bring support for [Jellyfin](https://github.com/jellyfin/jellyfin) & [Emby](https://github.com/MediaBrowser/Emby) media servers!
 
 _The original Overseerr team have been busy and Jellyfin/Emby support aren't on their roadmap, so we started this project as we wanted to bring the Overseerr experience to the Jellyfin/Emby Community!_
 
 ## Current Features
 
-- Full Jellyfin/Emby/Plex integration. Authenticate and manage user access with Jellyfin/Emby/Plex!
-- Supports Movies, Shows, Mixed Libraries!
+- Full Jellyfin/Emby/Plex integration including authentication with user import & management
+- Supports Movies, Shows and Mixed Libraries
 - Ability to change email addresses for smtp purposes
-- Ability to import all jellyfin/emby users
 - Easy integration with your existing services. Currently, Jellyseerr supports Sonarr and Radarr. More to come!
 - Jellyfin/Emby/Plex library scan, to keep track of the titles which are already available.
 - Customizable request system, which allows users to request individual seasons or movies in a friendly, easy-to-use interface.
@@ -220,6 +225,7 @@ Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcon
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://athfan.com"><img src="https://avatars.githubusercontent.com/u/13810742?v=4?s=100" width="100px;" alt="Athfan Khaleel"/><br /><sub><b>Athfan Khaleel</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=athphane" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/mdll23"><img src="https://avatars.githubusercontent.com/u/142844478?v=4?s=100" width="100px;" alt="Michael Dallinger"/><br /><sub><b>Michael Dallinger</b></sub></a><br /><a href="#translation-mdll23" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/xeruf"><img src="https://avatars.githubusercontent.com/u/13354331?v=4?s=100" width="100px;" alt="Janek"/><br /><sub><b>Janek</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=xeruf" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
