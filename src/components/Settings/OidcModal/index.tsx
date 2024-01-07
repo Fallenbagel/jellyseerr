@@ -67,13 +67,20 @@ export const oidcSettingsSchema = (intl: IntlShape) => {
     providerUrl: yup
       .string()
       .required(requiredMessage(messages.oidcDomain))
+      .url('Issuer URL must be a valid URL.')
       .test({
-        message: 'Must be a valid domain without query string parameters.',
+        message: 'Issuer URL may not have search parameters.',
+        test: (val) => {
+          return !!val && URL.canParse(val) && new URL(val).search === '';
+        },
+      })
+      .test({
+        message: 'Issuer URL protocol must be http / https.',
         test: (val) => {
           return (
             !!val &&
-            // Any HTTP(S) domain without query string
-            /^(https?:\/\/)([A-Za-z0-9-_.!~*'():]*)(((?!\?).)*$)/i.test(val)
+            URL.canParse(val) &&
+            ['http:', 'https:'].includes(new URL(val).protocol)
           );
         },
       }),
