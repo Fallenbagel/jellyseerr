@@ -1300,5 +1300,16 @@
     "components.MovieDetails.downloadstatus": "Статус загрузки",
     "components.MovieDetails.openradarr4k": "Открыть фильм в 4К Radarr",
     "components.Settings.Notifications.NotificationsPushover.deviceDefault": "Устройство по умолчанию",
-    "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Сканировать всю библиотеку Jellyfin"
+    "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Сканировать всю библиотеку Jellyfin",
+    "components.Settings.SettingsJobsCache.availability-sync": "Синхронизировать доступность медиа",
+    "components.Settings.jellyfinSettingsFailure": "Что-то пошло не так во время сохранения настроек {mediaServerName}.",
+    "components.Settings.jellyfinSettingsSuccess": "Настройки {mediaServerName} успешно сохранены!",
+    "components.Settings.jellyfinlibraries": "Библиотеки {mediaServerName}",
+    "components.Settings.jellyfinlibrariesDescription": "Библиотеки {mediaServerName} проверяются на наличие заголовков. Нажмите кнопку ниже, если в списке не хватает библиотек.",
+    "components.Settings.jellyfinsettings": "Настройки {mediaServerName}",
+    "components.Settings.internalUrl": "Внутренний URL-адрес",
+    "components.Settings.SonarrModal.tagRequestsInfo": "Автодобавление тега с именем и ID пользователя, отправившего запрос",
+    "components.Settings.jellyfinSettings": "Настройки {mediaServerName}",
+    "components.Settings.jellyfinSettingsDescription": "Необязательно настраивать внутреннюю и внешнюю конечные точки для вашего сервера {mediaServerName}. В большинстве случаев внешний URL-адрес отличается от внутреннего. Пользовательский URL-адрес для сброса пароля также может быть задан для входа в систему {mediaServerName}, на случай, если вы хотите перенаправить на другую страницу для сброса пароля.",
+    "components.Settings.jellyfinsettingsDescription": "Настройте свой {mediaServerName} сервер. {mediaServerName} отсканирует ваши библиотеки, чтобы увидеть, какие библиотеки доступны."
 }
