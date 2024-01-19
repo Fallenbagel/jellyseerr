@@ -1,4 +1,6 @@
-import 'reflect-metadata';
+import fs from 'fs';
+import * as process from 'process';
+import type { TlsOptions } from 'tls';
 import type { DataSourceOptions, EntityTarget, Repository } from 'typeorm';
 import { DataSource } from 'typeorm';
 
@@ -12,7 +14,7 @@ const devConfig: DataSourceOptions = {
   logging: false,
   enableWAL: true,
   entities: ['server/entity/**/*.ts'],
-  migrations: ['server/migration/**/*.ts'],
+  migrations: ['server/migration/sqlite/**/*.ts'],
   subscribers: ['server/subscriber/**/*.ts'],
 };
 
@@ -26,7 +28,7 @@ const prodConfig: DataSourceOptions = {
   logging: false,
   enableWAL: true,
   entities: ['dist/entity/**/*.js'],
-  migrations: ['dist/migration/**/*.js'],
+  migrations: ['dist/migration/sqlite/**/*.js'],
   subscribers: ['dist/subscriber/**/*.js'],
 };
 
@@ -42,29 +44,7 @@ const postgresDevConfig: DataSourceOptions = {
   migrationsRun: false,
   logging: false,
   entities: ['server/entity/**/*.ts'],
-  migrations: ['server/migration/**/*.ts'],
-  subscribers: ['server/subscriber/**/*.ts'],
-};
-
-const postgresDevConfigSSL: DataSourceOptions = {
-  type: 'postgres',
-  name: 'pgdb',
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT ?? '5432'),
-  username: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME ?? 'jellyseerr',
-  ssl: {
-    rejectUnauthorized: false, // Disable root certificate verification
-    //ca: fs.readFileSync('/path/to/server-certificates/root.crt').toString(),
-    //key: fs.readFileSync('/path/to/client-key/postgresql.key').toString(),
-    //cert: fs.readFileSync('/path/to/client-certificates/postgresql.crt').toString(),
-  },
-  synchronize: true,
-  migrationsRun: false,
-  logging: false,
-  entities: ['server/entity/**/*.ts'],
-  migrations: ['server/migration/**/*.ts'],
+  migrations: ['server/migration/postgres/**/*.ts'],
   subscribers: ['server/subscriber/**/*.ts'],
 };
 
@@ -76,55 +56,53 @@ const postgresProdConfig: DataSourceOptions = {
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME ?? 'jellyseerr',
+  ssl: buildSslConfig(),
   synchronize: false,
   migrationsRun: false,
   logging: false,
   entities: ['dist/entity/**/*.js'],
-  migrations: ['dist/migration/**/*.js'],
-  subscribers: ['dist/subscriber/**/*.js'],
-};
-
-const postgresProdConfigSSL: DataSourceOptions = {
-  type: 'postgres',
-  name: 'pgdb',
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT ?? '5432'),
-  username: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME ?? 'jellyseerr',
-  ssl: {
-    rejectUnauthorized: false, // Disable root certificate verification
-    //ca: fs.readFileSync('/path/to/server-certificates/root.crt').toString(),
-    //key: fs.readFileSync('/path/to/client-key/postgresql.key').toString(),
-    //cert: fs.readFileSync('/path/to/client-certificates/postgresql.crt').toString(),
-  },
-  synchronize: false,
-  migrationsRun: false,
-  logging: false,
-  entities: ['dist/entity/**/*.js'],
-  migrations: ['dist/migration/**/*.js'],
+  migrations: ['dist/migration/postgres/**/*.js'],
   subscribers: ['dist/subscriber/**/*.js'],
 };
 
 export const isPgsql = process.env.DB_TYPE === 'postgres';
-export const pgsqlUseSSL = process.env.DB_USE_SSL === 'true';
+const DB_SSL_PREFIX = 'DB_SSL_CONF_';
+
+function boolFromEnv(envVar: string) {
+  return process.env[envVar]?.toLowerCase() === 'true';
+}
+
+function stringOrReadFileFromEnv(envVar: string): Buffer | string | undefined {
+  if (process.env[envVar]) {
+    return process.env[envVar];
+  }
+  const filePath = process.env[`${envVar}_FILE`];
+  if (filePath) {
+    return fs.readFileSync(filePath);
+  }
+  return undefined;
+}
+
+function buildSslConfig(): TlsOptions | undefined {
+  if (process.env.DB_USE_SSL?.toLowerCase() !== 'true') {
+    return undefined;
+  }
+  return {
+    rejectUnauthorized: boolFromEnv(`${DB_SSL_PREFIX}REJECT_UNAUTHORIZED`),
+    ca: stringOrReadFileFromEnv(`${DB_SSL_PREFIX}CA`),
+    key: stringOrReadFileFromEnv(`${DB_SSL_PREFIX}KEY`),
+    cert: stringOrReadFileFromEnv(`${DB_SSL_PREFIX}CERT`),
+  };
+}
 
 function getDataSource(): DataSourceOptions {
   if (process.env.NODE_ENV === 'production') {
     if (isPgsql) {
-      if (pgsqlUseSSL) {
-        return postgresProdConfigSSL;
-      } else {
-        return postgresProdConfig;
-      }
+      return postgresProdConfig;
     }
     return prodConfig;
   } else if (isPgsql) {
-    if (pgsqlUseSSL) {
-      return postgresDevConfigSSL;
-    } else {
-      return postgresDevConfig;
-    }
+    return postgresDevConfig;
   }
   return devConfig;
 }
