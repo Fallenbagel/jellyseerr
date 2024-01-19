@@ -76,8 +76,12 @@ const RegionSelector = ({
   }, [value, regions, allRegion]);
 
   useEffect(() => {
-    if (onChange && regions && selectedRegion) {
-      onChange(name, selectedRegion.iso_3166_1);
+    if (onChange && regions) {
+      if (selectedRegion) {
+        onChange(name, selectedRegion.iso_3166_1);
+      } else {
+        onChange(name, '');
+      }
     }
   }, [onChange, selectedRegion, name, regions]);
 

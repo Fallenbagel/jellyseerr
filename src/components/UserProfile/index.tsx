@@ -34,6 +34,7 @@ const messages = defineMessages({
   seriesrequest: 'Series Requests',
   recentlywatched: 'Recently Watched',
   plexwatchlist: 'Plex Watchlist',
+  localWatchlist: "{username}'s Watchlist",
   emptywatchlist:
     'Media added to your <PlexWatchlistSupportLink>Plex Watchlist</PlexWatchlistSupportLink> will appear here.',
 });
@@ -78,17 +79,17 @@ const UserProfile = () => {
         ? `/api/v1/user/${user.id}/watch_data`
         : null
     );
+
   const { data: watchlistItems, error: watchlistError } =
     useSWR<WatchlistResponse>(
-      user?.userType === UserType.PLEX &&
-        (user.id === currentUser?.id ||
-          currentHasPermission(
-            [Permission.MANAGE_REQUESTS, Permission.WATCHLIST_VIEW],
-            {
-              type: 'or',
-            }
-          ))
-        ? `/api/v1/user/${user.id}/watchlist`
+      user?.id === currentUser?.id ||
+        currentHasPermission(
+          [Permission.MANAGE_REQUESTS, Permission.WATCHLIST_VIEW],
+          {
+            type: 'or',
+          }
+        )
+        ? `/api/v1/user/${user?.id}/watchlist`
         : null,
       {
         revalidateOnMount: true,
@@ -116,6 +117,13 @@ const UserProfile = () => {
   if (!user) {
     return <Error statusCode={404} />;
   }
+
+  const watchlistSliderTitle = intl.formatMessage(
+    user.userType === UserType.PLEX
+      ? messages.plexwatchlist
+      : messages.localWatchlist,
+    { username: user.displayName }
+  );
 
   return (
     <>
@@ -309,12 +317,11 @@ const UserProfile = () => {
             />
           </>
         )}
-      {user.userType === UserType.PLEX &&
-        (user.id === currentUser?.id ||
-          currentHasPermission(
-            [Permission.MANAGE_REQUESTS, Permission.WATCHLIST_VIEW],
-            { type: 'or' }
-          )) &&
+      {(user.id === currentUser?.id ||
+        currentHasPermission(
+          [Permission.MANAGE_REQUESTS, Permission.WATCHLIST_VIEW],
+          { type: 'or' }
+        )) &&
         (!watchlistItems ||
           !!watchlistItems.results.length ||
           (user.id === currentUser?.id &&
@@ -327,11 +334,11 @@ const UserProfile = () => {
                 href={
                   user.id === currentUser?.id
                     ? '/profile/watchlist'
-                    : `/users/${user?.id}/watchlist`
+                    : `/users/${user.id}/watchlist`
                 }
               >
                 <a className="slider-title">
-                  <span>{intl.formatMessage(messages.plexwatchlist)}</span>
+                  <span>{watchlistSliderTitle}</span>
                   <ArrowRightCircleIcon />
                 </a>
               </Link>

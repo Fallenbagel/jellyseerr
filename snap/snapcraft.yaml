@@ -6,7 +6,7 @@ description: >
   Jellyseerr is a free and open source software application for managing requests for your media library.
   It is a a fork of Overseerr built to bring support for & focusing mainly on Jellyfin & Emby media servers!
   It integrates with your existing services such as Sonarr, Radarr, and Jellyfin/Emby/Plex.
-base: core18
+base: core20
 confinement: strict
 
 architectures:
@@ -16,12 +16,12 @@ architectures:
 
 parts:
   jellyseerr:
-    plugin: nodejs
-    nodejs-version: '16.17.0'
-    nodejs-package-manager: 'yarn'
-    nodejs-yarn-version: v1.22.17
+    plugin: nil
     build-packages:
       - git
+      - ca-certificates
+      - curl
+      - gnupg
       - on arm64:
           - build-essential
           - automake
@@ -65,13 +65,30 @@ parts:
       snapcraftctl set-version "$SNAP_VERSION"
       snapcraftctl set-grade "$GRADE"
     build-environment:
-      - PATH: '$SNAPCRAFT_PART_BUILD/node_modules/.bin:$SNAPCRAFT_PART_BUILD/../npm/bin:$PATH'
+      - PATH: '$SNAPCRAFT_PART_BUILD/node_modules/.bin:$PATH'
       - CYPRESS_INSTALL_BINARY: '0'
     override-build: |
       set -e
+      # Install necessary packages
+      mkdir -p /etc/apt/keyrings
+      # Add Node.js repository key
+      curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+
+      # Set Node.js version
+      NODE_MAJOR=18
+      # Add Node.js repository to sources list
+      echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+
+      # Update package sources and install Node.js
+      apt-get update
+      apt-get install nodejs -y
+
+      # Install Yarn
+      npm install -g yarn
       # Set COMMIT_TAG before the build begins
       export COMMIT_TAG=$(cat $SNAPCRAFT_PART_BUILD/commit.txt)
       snapcraftctl build
+      yarn install --frozen-lockfile --network-timeout 1000000
       yarn build
       # Copy files needed for staging
       cp $SNAPCRAFT_PART_BUILD/committag.json $SNAPCRAFT_PART_INSTALL/
@@ -79,7 +96,7 @@ parts:
       cp -R $SNAPCRAFT_PART_BUILD/dist $SNAPCRAFT_PART_INSTALL/
       cp -R $SNAPCRAFT_PART_BUILD/node_modules $SNAPCRAFT_PART_INSTALL/
       # Remove .github and gitbook as it will fail snap lint
-      rm -rf $SNAPCRAFT_PART_INSTALL/.github && rm $SNAPCRAFT_PART_INSTALL/.gitbook.yaml
+      rm -rf $SNAPCRAFT_PART_INSTALL/.github
     stage-packages:
       - on armhf:
           - libatomic1
