@@ -4,6 +4,35 @@ import type { TlsOptions } from 'tls';
 import type { DataSourceOptions, EntityTarget, Repository } from 'typeorm';
 import { DataSource } from 'typeorm';
 
+const DB_SSL_PREFIX = 'DB_SSL_CONF_';
+
+function boolFromEnv(envVar: string) {
+  return process.env[envVar]?.toLowerCase() === 'true';
+}
+
+function stringOrReadFileFromEnv(envVar: string): Buffer | string | undefined {
+  if (process.env[envVar]) {
+    return process.env[envVar];
+  }
+  const filePath = process.env[`${envVar}_FILE`];
+  if (filePath) {
+    return fs.readFileSync(filePath);
+  }
+  return undefined;
+}
+
+function buildSslConfig(): TlsOptions | undefined {
+  if (process.env.DB_USE_SSL?.toLowerCase() !== 'true') {
+    return undefined;
+  }
+  return {
+    rejectUnauthorized: boolFromEnv(`${DB_SSL_PREFIX}REJECT_UNAUTHORIZED`),
+    ca: stringOrReadFileFromEnv(`${DB_SSL_PREFIX}CA`),
+    key: stringOrReadFileFromEnv(`${DB_SSL_PREFIX}KEY`),
+    cert: stringOrReadFileFromEnv(`${DB_SSL_PREFIX}CERT`),
+  };
+}
+
 const devConfig: DataSourceOptions = {
   type: 'sqlite',
   database: process.env.CONFIG_DIRECTORY
@@ -66,34 +95,6 @@ const postgresProdConfig: DataSourceOptions = {
 };
 
 export const isPgsql = process.env.DB_TYPE === 'postgres';
-const DB_SSL_PREFIX = 'DB_SSL_CONF_';
-
-function boolFromEnv(envVar: string) {
-  return process.env[envVar]?.toLowerCase() === 'true';
-}
-
-function stringOrReadFileFromEnv(envVar: string): Buffer | string | undefined {
-  if (process.env[envVar]) {
-    return process.env[envVar];
-  }
-  const filePath = process.env[`${envVar}_FILE`];
-  if (filePath) {
-    return fs.readFileSync(filePath);
-  }
-  return undefined;
-}
-
-function buildSslConfig(): TlsOptions | undefined {
-  if (process.env.DB_USE_SSL?.toLowerCase() !== 'true') {
-    return undefined;
-  }
-  return {
-    rejectUnauthorized: boolFromEnv(`${DB_SSL_PREFIX}REJECT_UNAUTHORIZED`),
-    ca: stringOrReadFileFromEnv(`${DB_SSL_PREFIX}CA`),
-    key: stringOrReadFileFromEnv(`${DB_SSL_PREFIX}KEY`),
-    cert: stringOrReadFileFromEnv(`${DB_SSL_PREFIX}CERT`),
-  };
-}
 
 function getDataSource(): DataSourceOptions {
   if (process.env.NODE_ENV === 'production') {
