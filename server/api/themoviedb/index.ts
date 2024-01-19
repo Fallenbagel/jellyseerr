@@ -99,7 +99,7 @@ interface DiscoverTvOptions {
 }
 
 class TheMovieDb extends ExternalAPI {
-  private locale?: string;
+  private locale: string;
   private region?: string;
   private originalLanguage?: string;
   constructor({
@@ -119,7 +119,7 @@ class TheMovieDb extends ExternalAPI {
         },
       }
     );
-    this.locale = getSettings().main.locale;
+    this.locale = getSettings().main?.locale || 'en';
     this.region = region;
     this.originalLanguage = originalLanguage;
   }
