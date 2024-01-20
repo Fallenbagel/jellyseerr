@@ -88,7 +88,7 @@ const postgresProdConfig: DataSourceOptions = {
   ssl: buildSslConfig(),
   synchronize: false,
   migrationsRun: false,
-  logging: false,
+  logging: boolFromEnv('DB_LOG_QUERIES'),
   entities: ['dist/entity/**/*.js'],
   migrations: ['dist/migration/postgres/**/*.js'],
   subscribers: ['dist/subscriber/**/*.js'],
