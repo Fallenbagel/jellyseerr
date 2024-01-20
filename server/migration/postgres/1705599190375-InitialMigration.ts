@@ -174,25 +174,26 @@ export class InitialMigration1705599190375 implements MigrationInterface {
     await queryRunner.query(
       `create table if not exists user_settings
        (
-         id                         serial,
-         "notificationTypes"        text,
-         "discordId"                text,
-         "userId"                   int,
-         region                     text,
-         "originalLanguage"         text,
-         "telegramChatId"           text,
-         "telegramSendSilently"     boolean,
-         "pgpKey"                   text,
-         locale                     text default ''::text,
-         "pushbulletAccessToken"    text,
-         "pushoverApplicationToken" text,
-         "pushoverUserKey"          text,
-         "watchlistSyncMovies"      boolean,
-         "watchlistSyncTv"          boolean,
-         constraint idx_194762_user_settings_pkey
-           primary key (id),
-         foreign key ("userId") references "user"
-           on delete cascade
+           id                         serial,
+           "notificationTypes"        text,
+           "discordId"                text,
+           "userId"                   int,
+           region                     text,
+           "originalLanguage"         text,
+           "telegramChatId"           text,
+           "telegramSendSilently"     boolean,
+           "pgpKey"                   text,
+           locale                     text default ''::text,
+           "pushbulletAccessToken"    text,
+           "pushoverApplicationToken" text,
+           "pushoverUserKey"          text,
+           "watchlistSyncMovies"      boolean,
+           "watchlistSyncTv"          boolean,
+           "pushoverSound"            varchar,
+           constraint idx_194762_user_settings_pkey
+               primary key (id),
+           foreign key ("userId") references "user"
+               on delete cascade
        );`
     );
     await queryRunner.query(
