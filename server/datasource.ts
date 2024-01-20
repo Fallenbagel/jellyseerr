@@ -4,13 +4,19 @@ import type { TlsOptions } from 'tls';
 import type { DataSourceOptions, EntityTarget, Repository } from 'typeorm';
 import { DataSource } from 'typeorm';
 
-const DB_SSL_PREFIX = 'DB_SSL_CONF_';
+const DB_SSL_PREFIX = 'DB_SSL_';
 
-function boolFromEnv(envVar: string) {
-  return process.env[envVar]?.toLowerCase() === 'true';
+function boolFromEnv(envVar: string, defaultVal = false) {
+  console.log(envVar);
+  console.log(process.env[envVar]);
+  if (process.env[envVar]) {
+    return process.env[envVar]?.toLowerCase() === 'true';
+  }
+  return defaultVal;
 }
 
 function stringOrReadFileFromEnv(envVar: string): Buffer | string | undefined {
+  console.log(envVar);
   if (process.env[envVar]) {
     return process.env[envVar];
   }
@@ -22,11 +28,15 @@ function stringOrReadFileFromEnv(envVar: string): Buffer | string | undefined {
 }
 
 function buildSslConfig(): TlsOptions | undefined {
+  console.log(process.env.DB_USE_SSL);
   if (process.env.DB_USE_SSL?.toLowerCase() !== 'true') {
     return undefined;
   }
   return {
-    rejectUnauthorized: boolFromEnv(`${DB_SSL_PREFIX}REJECT_UNAUTHORIZED`),
+    rejectUnauthorized: boolFromEnv(
+      `${DB_SSL_PREFIX}REJECT_UNAUTHORIZED`,
+      true
+    ),
     ca: stringOrReadFileFromEnv(`${DB_SSL_PREFIX}CA`),
     key: stringOrReadFileFromEnv(`${DB_SSL_PREFIX}KEY`),
     cert: stringOrReadFileFromEnv(`${DB_SSL_PREFIX}CERT`),
@@ -68,6 +78,7 @@ const postgresDevConfig: DataSourceOptions = {
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME ?? 'jellyseerr',
+  ssl: buildSslConfig(),
   synchronize: true,
   migrationsRun: false,
   logging: boolFromEnv('DB_LOG_QUERIES'),

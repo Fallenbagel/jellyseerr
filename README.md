@@ -47,6 +47,40 @@ _*On Jellyfin/Emby, ensure the `settings > Home > Automatically group content fr
 Check out our dockerhub for instructions on how to install and run Jellyseerr:
 https://hub.docker.com/r/fallenbagel/jellyseerr
 
+### Database configuration
+
+Jellyseerr supports sqlite and postgres. The database connection can be configured using the following options:
+
+#### SQLite Options
+
+```dotenv
+DB_TYPE="sqlite" # Which DB engine to use. The default is "sqlite"
+CONFIG_DIRECTORY="config" # The path to the config directory where the db file is stored
+DB_LOG_QUERIES="false" # Whether to log the DB queries for debugging
+```
+
+#### PostgreSQL Options
+
+```dotenv
+DB_TYPE="postgres" # Which DB engine to use. The default is "sqlite". To use postgres, this needs to be set to "postgres"
+DB_HOST= # The host (url) of the database
+DB_PORT="5432" # The port to connect to
+DB_USER= # Username used to connect to the database
+DB_PASS= # Password of the user used to connect to the database
+DB_NAME="jellyseerr" # The name of the database to connect to
+DB_LOG_QUERIES="false" # Whether to log the DB queries for debugging
+DB_USE_SSL="false" # Whether to enable ssl for database connection
+
+# The following options can be used to further configure ssl:
+DB_SSL_REJECT_UNAUTHORIZED="true" # Whether to reject ssl connections with unverifiable certificates i.e. self-signed certificates without providing the below settings
+DB_SSL_CA= # The CA certificate to verify the connection, provided as a string
+DB_SSL_CA_FILE= # The path to a CA certificate to verify the connection
+DB_SSL_KEY= # The private key for the connection in PEM format, provided as a string
+DB_SSL_KEY_FILE= # Path to the private key for the connection in PEM format
+DB_SSL_CERT= # Certificate chain in pem format for the private key, provided as a string
+DB_SSL_CERT_FILE= # Path to certificate chain in pem format for the private key
+```
+
 ### Building from source (ADVANCED):
 
 #### Windows
