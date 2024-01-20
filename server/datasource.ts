@@ -40,7 +40,7 @@ const devConfig: DataSourceOptions = {
     : 'config/db/db.sqlite3',
   synchronize: true,
   migrationsRun: false,
-  logging: false,
+  logging: boolFromEnv('DB_LOG_QUERIES'),
   enableWAL: true,
   entities: ['server/entity/**/*.ts'],
   migrations: ['server/migration/sqlite/**/*.ts'],
@@ -54,7 +54,7 @@ const prodConfig: DataSourceOptions = {
     : 'config/db/db.sqlite3',
   synchronize: false,
   migrationsRun: false,
-  logging: false,
+  logging: boolFromEnv('DB_LOG_QUERIES'),
   enableWAL: true,
   entities: ['dist/entity/**/*.js'],
   migrations: ['dist/migration/sqlite/**/*.js'],
@@ -63,7 +63,6 @@ const prodConfig: DataSourceOptions = {
 
 const postgresDevConfig: DataSourceOptions = {
   type: 'postgres',
-  name: 'pgdb',
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT ?? '5432'),
   username: process.env.DB_USER,
@@ -71,7 +70,7 @@ const postgresDevConfig: DataSourceOptions = {
   database: process.env.DB_NAME ?? 'jellyseerr',
   synchronize: true,
   migrationsRun: false,
-  logging: false,
+  logging: boolFromEnv('DB_LOG_QUERIES'),
   entities: ['server/entity/**/*.ts'],
   migrations: ['server/migration/postgres/**/*.ts'],
   subscribers: ['server/subscriber/**/*.ts'],
@@ -79,7 +78,6 @@ const postgresDevConfig: DataSourceOptions = {
 
 const postgresProdConfig: DataSourceOptions = {
   type: 'postgres',
-  name: 'pgdb',
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT ?? '5432'),
   username: process.env.DB_USER,
