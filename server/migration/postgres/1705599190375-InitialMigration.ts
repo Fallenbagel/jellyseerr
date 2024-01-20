@@ -7,7 +7,7 @@ export class InitialMigration1705599190375 implements MigrationInterface {
     await queryRunner.query(
       `create table if not exists session
        (
-         "expiredAt" int,
+         "expiredAt" bigint,
          id          text,
          json        text
        );`
