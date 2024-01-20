@@ -7,8 +7,6 @@ import { DataSource } from 'typeorm';
 const DB_SSL_PREFIX = 'DB_SSL_';
 
 function boolFromEnv(envVar: string, defaultVal = false) {
-  console.log(envVar);
-  console.log(process.env[envVar]);
   if (process.env[envVar]) {
     return process.env[envVar]?.toLowerCase() === 'true';
   }
@@ -16,7 +14,6 @@ function boolFromEnv(envVar: string, defaultVal = false) {
 }
 
 function stringOrReadFileFromEnv(envVar: string): Buffer | string | undefined {
-  console.log(envVar);
   if (process.env[envVar]) {
     return process.env[envVar];
   }
@@ -28,7 +25,6 @@ function stringOrReadFileFromEnv(envVar: string): Buffer | string | undefined {
 }
 
 function buildSslConfig(): TlsOptions | undefined {
-  console.log(process.env.DB_USE_SSL);
   if (process.env.DB_USE_SSL?.toLowerCase() !== 'true') {
     return undefined;
   }
