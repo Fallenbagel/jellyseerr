@@ -1,4 +1,5 @@
 import Spinner from '@app/assets/spinner.svg';
+import BlacklistModal from '@app/components/BlacklistModal';
 import Button from '@app/components/Common/Button';
 import CachedImage from '@app/components/Common/CachedImage';
 import StatusBadgeMini from '@app/components/Common/StatusBadgeMini';
@@ -13,14 +14,16 @@ import { withProperties } from '@app/utils/typeHelpers';
 import { Transition } from '@headlessui/react';
 import {
   ArrowDownTrayIcon,
+  EyeSlashIcon,
   MinusCircleIcon,
   StarIcon,
 } from '@heroicons/react/24/outline';
 import { MediaStatus } from '@server/constants/media';
+import type { Blacklist } from '@server/entity/Blacklist';
 import type { Watchlist } from '@server/entity/Watchlist';
 import type { MediaType } from '@server/models/Search';
 import Link from 'next/link';
-import { Fragment, useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import { mutate } from 'swr';
@@ -48,6 +51,10 @@ const messages = defineMessages('components.TitleCard', {
     '<strong>{title}</strong> Removed from watchlist  successfully!',
   watchlistCancel: 'watchlist for <strong>{title}</strong> canceled.',
   watchlistError: 'Something went wrong try again.',
+  blacklistSuccess: '<strong>{title}</strong> was successfully blacklisted.',
+  blacklistError: 'Something went wrong try again.',
+  blacklistDuplicateError:
+    '<strong>{title}</strong> has already been blacklisted.',
 });
 
 const TitleCard = ({
@@ -74,6 +81,8 @@ const TitleCard = ({
   const [toggleWatchlist, setToggleWatchlist] = useState<boolean>(
     !isAddedToWatchlist
   );
+  const [showBlacklistModal, setShowBlacklistModal] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   // Just to get the year from the date
   if (year) {
@@ -166,7 +175,63 @@ const TitleCard = ({
     }
   };
 
+  const onClickHideItemBtn = async (): Promise<void> => {
+    const topNode = cardRef.current;
+
+    if (topNode) {
+      try {
+        const response = await axios.post<Blacklist>('/api/v1/blacklist', {
+          tmdbId: id,
+          mediaType,
+          title,
+        });
+        if (response.status === 201) {
+          topNode.parentElement?.classList.add('hidden');
+          addToast(
+            <span>
+              {intl.formatMessage(messages.blacklistSuccess, {
+                title,
+                strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+              })}
+            </span>,
+            { appearance: 'success', autoDismiss: true }
+          );
+        }
+        closeBlacklistModal();
+      } catch (e) {
+        if (e.response.status === 412) {
+          topNode.parentElement?.classList.add('hidden');
+          addToast(
+            <span>
+              {intl.formatMessage(messages.blacklistDuplicateError, {
+                title,
+                strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+              })}
+            </span>,
+            { appearance: 'info', autoDismiss: true }
+          );
+        } else {
+          addToast(intl.formatMessage(messages.blacklistError), {
+            appearance: 'error',
+            autoDismiss: true,
+          });
+        }
+      } finally {
+        closeBlacklistModal();
+      }
+    } else {
+      addToast(intl.formatMessage(messages.blacklistError), {
+        appearance: 'error',
+        autoDismiss: true,
+      });
+    }
+  };
+
   const closeModal = useCallback(() => setShowRequestModal(false), []);
+  const closeBlacklistModal = useCallback(
+    () => setShowBlacklistModal(false),
+    []
+  );
 
   const showRequestButton = hasPermission(
     [
@@ -178,10 +243,13 @@ const TitleCard = ({
     { type: 'or' }
   );
 
+  const showHideButton = hasPermission([Permission.ADMIN]);
+
   return (
     <div
       className={canExpand ? 'w-full' : 'w-36 sm:w-36 md:w-44'}
       data-testid="title-card"
+      ref={cardRef}
     >
       <RequestModal
         tmdbId={id}
@@ -190,19 +258,25 @@ const TitleCard = ({
           mediaType === 'movie'
             ? 'movie'
             : mediaType === 'collection'
-            ? 'collection'
-            : 'tv'
+              ? 'collection'
+              : 'tv'
         }
         onComplete={requestComplete}
         onUpdating={requestUpdating}
         onCancel={closeModal}
       />
+      {showBlacklistModal && (
+        <BlacklistModal
+          title={title}
+          onCancel={closeBlacklistModal}
+          onComplete={onClickHideItemBtn}
+        />
+      )}
       <div
-        className={`relative transform-gpu cursor-default overflow-hidden rounded-xl bg-gray-800 bg-cover outline-none ring-1 transition duration-300 ${
-          showDetail
+        className={`relative transform-gpu cursor-default overflow-hidden rounded-xl bg-gray-800 bg-cover outline-none ring-1 transition duration-300 ${showDetail
             ? 'scale-105 shadow-lg ring-gray-500'
             : 'scale-100 shadow ring-gray-700'
-        }`}
+          }`}
         style={{
           paddingBottom: '150%',
         }}
@@ -235,22 +309,21 @@ const TitleCard = ({
           />
           <div className="absolute left-0 right-0 flex items-center justify-between p-2">
             <div
-              className={`pointer-events-none z-40 rounded-full border bg-opacity-80 shadow-md ${
-                mediaType === 'movie' || mediaType === 'collection'
+              className={`pointer-events-none z-40 self-start rounded-full border bg-opacity-80 shadow-md ${mediaType === 'movie' || mediaType === 'collection'
                   ? 'border-blue-500 bg-blue-600'
                   : 'border-purple-600 bg-purple-600'
-              }`}
+                }`}
             >
               <div className="flex h-4 items-center px-2 py-2 text-center text-xs font-medium uppercase tracking-wider text-white sm:h-5">
                 {mediaType === 'movie'
                   ? intl.formatMessage(globalMessages.movie)
                   : mediaType === 'collection'
-                  ? intl.formatMessage(globalMessages.collection)
-                  : intl.formatMessage(globalMessages.tvshow)}
+                    ? intl.formatMessage(globalMessages.collection)
+                    : intl.formatMessage(globalMessages.tvshow)}
               </div>
             </div>
             {showDetail && (
-              <>
+              <div className="flex flex-col gap-1">
                 {toggleWatchlist ? (
                   <Button
                     buttonType={'ghost'}
@@ -269,7 +342,21 @@ const TitleCard = ({
                     <MinusCircleIcon className={'h-3'} />
                   </Button>
                 )}
-              </>
+                {showHideButton &&
+                  currentStatus !== MediaStatus.PROCESSING &&
+                  currentStatus !== MediaStatus.AVAILABLE &&
+                  currentStatus !== MediaStatus.PARTIALLY_AVAILABLE &&
+                  currentStatus !== MediaStatus.PENDING && (
+                    <Button
+                      buttonType={'ghost'}
+                      className="z-40"
+                      buttonSize={'sm'}
+                      onClick={() => setShowBlacklistModal(true)}
+                    >
+                      <EyeSlashIcon className={'h-3'} />
+                    </Button>
+                  )}
+              </div>
             )}
             {currentStatus && currentStatus !== MediaStatus.UNKNOWN && (
               <div className="pointer-events-none z-40 flex items-center">
@@ -312,8 +399,8 @@ const TitleCard = ({
                   mediaType === 'movie'
                     ? `/movie/${id}`
                     : mediaType === 'collection'
-                    ? `/collection/${id}`
-                    : `/tv/${id}`
+                      ? `/collection/${id}`
+                      : `/tv/${id}`
                 }
                 className="absolute inset-0 h-full w-full cursor-pointer overflow-hidden text-left"
                 style={{
@@ -323,12 +410,11 @@ const TitleCard = ({
               >
                 <div className="flex h-full w-full items-end">
                   <div
-                    className={`px-2 text-white ${
-                      !showRequestButton ||
-                      (currentStatus && currentStatus !== MediaStatus.UNKNOWN)
+                    className={`px-2 text-white ${!showRequestButton ||
+                        (currentStatus && currentStatus !== MediaStatus.UNKNOWN)
                         ? 'pb-2'
                         : 'pb-11'
-                    }`}
+                      }`}
                   >
                     {year && <div className="text-sm font-medium">{year}</div>}
 
@@ -350,8 +436,8 @@ const TitleCard = ({
                       style={{
                         WebkitLineClamp:
                           !showRequestButton ||
-                          (currentStatus &&
-                            currentStatus !== MediaStatus.UNKNOWN)
+                            (currentStatus &&
+                              currentStatus !== MediaStatus.UNKNOWN)
                             ? 5
                             : 3,
                         display: '-webkit-box',
