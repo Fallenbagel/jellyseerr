@@ -17,3 +17,9 @@ export interface WatchlistResponse {
   totalResults: number;
   results: WatchlistItem[];
 }
+
+export interface BlacklistItem {
+  tmdbId: number;
+  mediaType: 'movie' | 'tv';
+  title?: string;
+}
