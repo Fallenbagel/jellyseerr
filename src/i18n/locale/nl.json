@@ -1337,5 +1337,12 @@
     "components.UserProfile.UserSettings.UserGeneralSettings.saving": "Opslaan…",
     "i18n.collection": "Collectie",
     "components.UserProfile.localWatchlist": "Kijklijst van {username}",
-    "components.Setup.signinWithPlex": "Plex-account gebruiken"
+    "components.Setup.signinWithPlex": "Plex-account gebruiken",
+    "components.Settings.jellyfinSettingsDescription": "Optioneel, configureer de interne en externe eindpunten voor uw {mediaServerName} server. In de meeste gevallen verschilt de externe URL met de interne URL. Een aangepaste wachtwoord reset URL kan ook gebruikt worden voor de {mediaServerName} login, voor het geval dat u doorverwezen wilt worden naar een andere wachtwoord reset pagina.",
+    "components.Settings.jellyfinsettingsDescription": "Configureer de instellingen voor uw {mediaServerName} server. {mediaServerName} scanned uw {mediaServerName} bibliotheken om te zien welke content beschikbaar is.",
+    "components.TitleCard.watchlistDeleted": "<strong>{title}</strong> Is succesvol verwijderd van de kijklijst!",
+    "components.TitleCard.watchlistSuccess": "<strong>{title}</strong> succesvol toegevoegd aan de kijklijst!",
+    "components.TitleCard.watchlistCancel": "kijklijst voor <strong>{title}</strong> is geannuleerd.",
+    "components.UserList.importedfromJellyfin": "<strong>{userCount}</strong> {mediaServerName} {userCount, plural, one {user} other {users}} succesvol geimporteerd!",
+    "components.UserList.newJellyfinsigninenabled": "De <strong>Gebruik Nieuwe {mediaServerName} Login</strong> instelling staat momenteel aan. {mediaServerName} gebruikers met toegang tot de bibliotheek, hoeven niet geïmporteerd te worden om in te kunnen loggen."
 }
