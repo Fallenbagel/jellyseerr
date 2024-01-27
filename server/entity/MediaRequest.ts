@@ -1144,6 +1144,14 @@ export class MediaRequest {
               sonarrSeries.titleSlug;
             media[this.is4k ? 'serviceId4k' : 'serviceId'] = sonarrSettings?.id;
             await mediaRepository.save(media);
+            const reqCheck3 = await getRepository(MediaRequest).find({
+              where: { media: { id: this.media.id } },
+            });
+            logger.debug(
+              `After save, the DB claims we have ${
+                reqCheck3?.length ?? 0
+              } relations`
+            );
           })
           .catch(async () => {
             const requestRepository = getRepository(MediaRequest);
