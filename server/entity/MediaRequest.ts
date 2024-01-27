@@ -1114,6 +1114,18 @@ export class MediaRequest {
               relations: { requests: true },
             });
 
+            logger.debug(
+              `Typeorm claims ${
+                media?.requests?.length ?? 0
+              } relations are loaded`
+            );
+            const reqCheck = await getRepository(MediaRequest).find({
+              where: { media: { id: this.media.id } },
+            });
+            logger.debug(
+              `The DB claims we have ${reqCheck?.length ?? 0} relations`
+            );
+
             if (!media) {
               throw new Error('Media data not found');
             }
