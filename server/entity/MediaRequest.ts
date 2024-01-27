@@ -12,7 +12,7 @@ import {
   MediaStatus,
   MediaType,
 } from '@server/constants/media';
-import { getRepository } from '@server/datasource';
+import { getRepository, isPgsql } from '@server/datasource';
 import type { MediaRequestBody } from '@server/interfaces/api/requestInterfaces';
 import notificationManager, { Notification } from '@server/lib/notifications';
 import { Permission } from '@server/lib/permissions';
@@ -1108,34 +1108,40 @@ export class MediaRequest {
         sonarr
           .addSeries(sonarrSeriesOptions)
           .then(async (sonarrSeries) => {
-            const reqCheck1 = await getRepository(MediaRequest).find({
-              where: { media: { id: this.media.id } },
-            });
-            logger.debug(
-              `Before running the find the DB claims we have ${
-                reqCheck1?.length ?? 0
-              } relations`
-            );
+            // const reqCheck1 = await getRepository(MediaRequest).find({
+            //   where: { media: { id: this.media.id } },
+            // });
+            // logger.debug(
+            //   `Before running the find the DB claims we have ${
+            //     reqCheck1?.length ?? 0
+            //   } relations`
+            // );
             // We grab media again here to make sure we have the latest version of it
             const media = await mediaRepository.findOne({
               where: { id: this.media.id },
               relations: { requests: true },
             });
 
-            logger.debug(
-              `Typeorm claims ${
-                media?.requests?.length ?? 0
-              } relations are loaded`
-            );
-            const reqCheck = await getRepository(MediaRequest).find({
-              where: { media: { id: this.media.id } },
-            });
-            logger.debug(
-              `The DB claims we have ${reqCheck?.length ?? 0} relations`
-            );
+            // logger.debug(
+            //   `Typeorm claims ${
+            //     media?.requests?.length ?? 0
+            //   } relations are loaded`
+            // );
+            // const reqCheck = await getRepository(MediaRequest).find({
+            //   where: { media: { id: this.media.id } },
+            // });
+            // logger.debug(
+            //   `The DB claims we have ${reqCheck?.length ?? 0} relations`
+            // );
 
             if (!media) {
               throw new Error('Media data not found');
+            }
+
+            if (isPgsql) {
+              // Force lazy loading of requests
+              logger.debug('Forcing lazy loading of requests');
+              media.requests;
             }
 
             media[this.is4k ? 'externalServiceId4k' : 'externalServiceId'] =
@@ -1143,6 +1149,8 @@ export class MediaRequest {
             media[this.is4k ? 'externalServiceSlug4k' : 'externalServiceSlug'] =
               sonarrSeries.titleSlug;
             media[this.is4k ? 'serviceId4k' : 'serviceId'] = sonarrSettings?.id;
+            logger.debug('Dumping media before save:');
+            logger.debug(JSON.stringify(media));
             await mediaRepository.save(media);
             const reqCheck3 = await getRepository(MediaRequest).find({
               where: { media: { id: this.media.id } },
@@ -1152,6 +1160,8 @@ export class MediaRequest {
                 reqCheck3?.length ?? 0
               } relations`
             );
+            logger.debug('Dumping media after save:');
+            logger.debug(JSON.stringify(media));
           })
           .catch(async () => {
             const requestRepository = getRepository(MediaRequest);
