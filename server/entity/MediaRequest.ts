@@ -1108,6 +1108,14 @@ export class MediaRequest {
         sonarr
           .addSeries(sonarrSeriesOptions)
           .then(async (sonarrSeries) => {
+            const reqCheck1 = await getRepository(MediaRequest).find({
+              where: { media: { id: this.media.id } },
+            });
+            logger.debug(
+              `Before running the find the DB claims we have ${
+                reqCheck1?.length ?? 0
+              } relations`
+            );
             // We grab media again here to make sure we have the latest version of it
             const media = await mediaRepository.findOne({
               where: { id: this.media.id },
