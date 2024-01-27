@@ -1120,6 +1120,7 @@ export class MediaRequest {
             const media = await mediaRepository.findOne({
               where: { id: this.media.id },
               relations: { requests: true },
+              loadEagerRelations: true,
             });
 
             // logger.debug(
@@ -1149,8 +1150,7 @@ export class MediaRequest {
             media[this.is4k ? 'externalServiceSlug4k' : 'externalServiceSlug'] =
               sonarrSeries.titleSlug;
             media[this.is4k ? 'serviceId4k' : 'serviceId'] = sonarrSettings?.id;
-            logger.debug('Dumping media before save:');
-            logger.debug(JSON.stringify(media));
+
             await mediaRepository.save(media);
             const reqCheck3 = await getRepository(MediaRequest).find({
               where: { media: { id: this.media.id } },
