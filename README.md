@@ -11,7 +11,7 @@
 <a href="http://jellyseerr.borgcube.de/engage/jellyseerr/"><img src="http://jellyseerr.borgcube.de/widget/jellyseerr/jellyseerr-frontend/svg-badge.svg" alt="Translation status" /></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-31-orange.svg"/></a>
+<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-32-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 **Jellyseerr** is a free and open source software application for managing requests for your media library.
@@ -226,6 +226,7 @@ Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcon
       <td align="center" valign="top" width="14.28%"><a href="https://athfan.com"><img src="https://avatars.githubusercontent.com/u/13810742?v=4?s=100" width="100px;" alt="Athfan Khaleel"/><br /><sub><b>Athfan Khaleel</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=athphane" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/mdll23"><img src="https://avatars.githubusercontent.com/u/142844478?v=4?s=100" width="100px;" alt="Michael Dallinger"/><br /><sub><b>Michael Dallinger</b></sub></a><br /><a href="#translation-mdll23" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/xeruf"><img src="https://avatars.githubusercontent.com/u/13354331?v=4?s=100" width="100px;" alt="Janek"/><br /><sub><b>Janek</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=xeruf" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://aleksasiriski.dev"><img src="https://avatars.githubusercontent.com/u/31509435?v=4?s=100" width="100px;" alt="Aleksa Siriški"/><br /><sub><b>Aleksa Siriški</b></sub></a><br /><a href="#infra-aleksasiriski" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
     </tr>
   </tbody>
 </table>
