@@ -295,6 +295,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "aleksasiriski",
+      "name": "Aleksa Siriški",
+      "avatar_url": "https://avatars.githubusercontent.com/u/31509435?v=4",
+      "profile": "https://aleksasiriski.dev",
+      "contributions": [
+        "infra"
+      ]
     }
   ]
 }
