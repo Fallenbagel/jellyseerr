@@ -1134,8 +1134,6 @@ export class MediaRequest {
             media[this.is4k ? 'serviceId4k' : 'serviceId'] = sonarrSettings?.id;
 
             await mediaRepository.save(media);
-            logger.debug('Dumping media after save:');
-            logger.debug(JSON.stringify(media));
           })
           .catch(async () => {
             const requestRepository = getRepository(MediaRequest);
