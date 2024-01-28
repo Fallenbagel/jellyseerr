@@ -1112,7 +1112,6 @@ export class MediaRequest {
             const media = await mediaRepository.findOne({
               where: { id: this.media.id },
               relations: { requests: true },
-              loadEagerRelations: true,
             });
 
             if (!media) {
