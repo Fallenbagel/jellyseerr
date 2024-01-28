@@ -12,7 +12,7 @@ import {
   MediaStatus,
   MediaType,
 } from '@server/constants/media';
-import { getRepository, isPgsql } from '@server/datasource';
+import { getRepository } from '@server/datasource';
 import type { MediaRequestBody } from '@server/interfaces/api/requestInterfaces';
 import notificationManager, { Notification } from '@server/lib/notifications';
 import { Permission } from '@server/lib/permissions';
@@ -1117,14 +1117,6 @@ export class MediaRequest {
 
             if (!media) {
               throw new Error('Media data not found');
-            }
-
-            if (isPgsql) {
-              // Force lazy loading of requests
-              logger.debug('Forcing lazy loading of requests');
-              media.requests.forEach((r) =>
-                logger.debug(`loaded request ${r.id} with status ${r.status}`)
-              );
             }
 
             media[this.is4k ? 'externalServiceId4k' : 'externalServiceId'] =
