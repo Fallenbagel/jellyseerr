@@ -304,6 +304,15 @@
       "contributions": [
         "infra"
       ]
+    },
+    {
+      "login": "Danish-H",
+      "name": "Danish Humair",
+      "avatar_url": "https://avatars.githubusercontent.com/u/121830048?v=4",
+      "profile": "http://danishhumair.com",
+      "contributions": [
+        "code"
+      ]
     }
   ]
 }
