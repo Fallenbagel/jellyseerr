@@ -56,7 +56,7 @@ export class InitialMigration1705599190375 implements MigrationInterface {
          status         int default '1'::int,
          "createdAt"    timestamp with time zone  default CURRENT_TIMESTAMP,
          "updatedAt"    timestamp with time zone  default CURRENT_TIMESTAMP,
-         "mediaId"      int,
+         "mediaId"      int not null,
          status4k       int default '1'::int,
          constraint idx_194715_season_pkey
            primary key (id),
@@ -141,7 +141,7 @@ export class InitialMigration1705599190375 implements MigrationInterface {
          "problemEpisode" int default '0'::int,
          "createdAt"      timestamp with time zone  default CURRENT_TIMESTAMP,
          "updatedAt"      timestamp with time zone  default CURRENT_TIMESTAMP,
-         "mediaId"        int,
+         "mediaId"        int not null,
          "createdById"    int,
          "modifiedById"   int,
          constraint idx_194747_issue_pkey
@@ -208,7 +208,7 @@ export class InitialMigration1705599190375 implements MigrationInterface {
          "createdAt"         timestamp with time zone  default CURRENT_TIMESTAMP,
          "updatedAt"         timestamp with time zone  default CURRENT_TIMESTAMP,
          type                text,
-         "mediaId"           int,
+         "mediaId"           int not null,
          "requestedById"     int,
          "modifiedById"      int,
          is4k                boolean default false,
@@ -231,7 +231,7 @@ export class InitialMigration1705599190375 implements MigrationInterface {
     await queryRunner.query(
       `create table if not exists season_request
        (
-         id             serial,
+         id             serial NOT NULL,
          "seasonNumber" int,
          status         int                      default '1'::int,
          "createdAt"    timestamp with time zone default now(),
@@ -270,7 +270,7 @@ export class InitialMigration1705599190375 implements MigrationInterface {
          "createdAt"     timestamp with time zone default CURRENT_TIMESTAMP,
          "updatedAt"     timestamp with time zone default CURRENT_TIMESTAMP,
          "requestedById" int,
-         "mediaId"       int,
+         "mediaId"       int not null,
          constraint idx_194788_watchlist_pkey
            primary key (id)
        );`

@@ -1108,31 +1108,11 @@ export class MediaRequest {
         sonarr
           .addSeries(sonarrSeriesOptions)
           .then(async (sonarrSeries) => {
-            const reqCheck1 = await getRepository(MediaRequest).find({
-              where: { media: { id: this.media.id } },
-            });
-            logger.debug(
-              `Before running the find the DB claims we have ${
-                reqCheck1?.length ?? 0
-              } relations`
-            );
             // We grab media again here to make sure we have the latest version of it
             const media = await mediaRepository.findOne({
               where: { id: this.media.id },
               relations: { requests: true },
             });
-
-            logger.debug(
-              `Typeorm claims ${
-                media?.requests?.length ?? 0
-              } relations are loaded`
-            );
-            const reqCheck = await getRepository(MediaRequest).find({
-              where: { media: { id: this.media.id } },
-            });
-            logger.debug(
-              `The DB claims we have ${reqCheck?.length ?? 0} relations`
-            );
 
             if (!media) {
               throw new Error('Media data not found');
@@ -1143,15 +1123,8 @@ export class MediaRequest {
             media[this.is4k ? 'externalServiceSlug4k' : 'externalServiceSlug'] =
               sonarrSeries.titleSlug;
             media[this.is4k ? 'serviceId4k' : 'serviceId'] = sonarrSettings?.id;
+
             await mediaRepository.save(media);
-            const reqCheck3 = await getRepository(MediaRequest).find({
-              where: { media: { id: this.media.id } },
-            });
-            logger.debug(
-              `After save, the DB claims we have ${
-                reqCheck3?.length ?? 0
-              } relations`
-            );
           })
           .catch(async () => {
             const requestRepository = getRepository(MediaRequest);
