@@ -190,6 +190,7 @@ CoreApp.getInitialProps = async (initialProps) => {
     locale: 'en',
     emailEnabled: false,
     newPlexLogin: true,
+    youtubeUrl: '',
   };
 
   if (ctx.res) {
