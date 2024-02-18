@@ -85,7 +85,7 @@ _To set env variables such as `JELLYFIN_TYPE=emby` create a file called `.env` i
 cd /opt
 ```
 
-2. Then execute the followed commands to clone and checkout to the stable version
+2. Then execute the following commands to clone and checkout to the stable version
 
 ```bash
 git clone https://github.com/Fallenbagel/jellyseerr.git && cd jellyseerr
