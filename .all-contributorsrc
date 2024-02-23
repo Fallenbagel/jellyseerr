@@ -295,6 +295,33 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "aleksasiriski",
+      "name": "Aleksa Siriški",
+      "avatar_url": "https://avatars.githubusercontent.com/u/31509435?v=4",
+      "profile": "https://aleksasiriski.dev",
+      "contributions": [
+        "infra"
+      ]
+    },
+    {
+      "login": "Danish-H",
+      "name": "Danish Humair",
+      "avatar_url": "https://avatars.githubusercontent.com/u/121830048?v=4",
+      "profile": "http://danishhumair.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "trackmastersteve",
+      "name": "Stephen Harris",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16858514?v=4",
+      "profile": "https://arm0.red",
+      "contributions": [
+        "doc"
+      ]
     }
   ]
 }
