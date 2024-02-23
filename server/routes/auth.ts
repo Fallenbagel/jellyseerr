@@ -11,6 +11,7 @@ import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
 import * as EmailValidator from 'email-validator';
 import { Router } from 'express';
+import gravatarUrl from 'gravatar-url';
 
 const authRoutes = Router();
 
@@ -296,7 +297,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         permissions: Permission.ADMIN,
         avatar: account.User.PrimaryImageTag
           ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
-          : '/os_logo_square.png',
+          : gravatarUrl(body.email ?? '', { default: 'mm', size: 200 }),
         userType: UserType.JELLYFIN,
       });
 
@@ -333,7 +334,10 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
       if (account.User.PrimaryImageTag) {
         user.avatar = `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`;
       } else {
-        user.avatar = '/os_logo_square.png';
+        user.avatar = gravatarUrl(user.email, {
+          default: 'mm',
+          size: 200,
+        });
       }
       user.jellyfinUsername = account.User.Name;
 
@@ -385,7 +389,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         permissions: settings.main.defaultPermissions,
         avatar: account.User.PrimaryImageTag
           ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
-          : '/os_logo_square.png',
+          : gravatarUrl(body.email, { default: 'mm', size: 200 }),
         userType: UserType.JELLYFIN,
       });
       //initialize Jellyfin/Emby users with local login
