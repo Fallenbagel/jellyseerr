@@ -299,44 +299,41 @@ class AvailabilitySync {
           const finalSeasons: Map<number, boolean> = new Map();
 
           if (mediaServerType === MediaServerType.PLEX) {
-            const plexMap = new Map([
-              ...plexSeasonsMap,
-              ...filteredSeasonsMap,
-              ...sonarrSeasonsMap,
-            ]);
-            plexMap.forEach((value, key) => {
+            plexSeasonsMap.forEach((value, key) => {
               finalSeasons.set(key, value);
+            });
+
+            filteredSeasonsMap.forEach((value, key) => {
+              if (!finalSeasons.has(key)) {
+                finalSeasons.set(key, value);
+              }
+            });
+
+            sonarrSeasonsMap.forEach((value, key) => {
+              if (!finalSeasons.has(key)) {
+                finalSeasons.set(key, value);
+              }
             });
           } else if (
             mediaServerType === MediaServerType.JELLYFIN ||
             mediaServerType === MediaServerType.EMBY
           ) {
-            // Adding values from jellyfinSeasonsMap
             jellyfinSeasonsMap.forEach((value, key) => {
               finalSeasons.set(key, value);
             });
 
-            // Adding values from filteredSeasonsMap and handling missing keys
             filteredSeasonsMap.forEach((value, key) => {
-              // Check if the key is missing in jellyfinSeasonsMap
               if (!finalSeasons.has(key)) {
                 finalSeasons.set(key, value);
               }
             });
 
-            // Adding values from sonarrSeasonsMap and handling missing keys
             sonarrSeasonsMap.forEach((value, key) => {
-              // Check if the key is missing in jellyfinSeasonsMap and filteredSeasonsMap
               if (!finalSeasons.has(key)) {
                 finalSeasons.set(key, value);
               }
             });
           }
-
-          // ...(mediaServerType === MediaServerType.PLEX ? plexSeasonsMap : []),
-          // ...(mediaServerType === MediaServerType.JELLYFIN ||
-          // mediaServerType === MediaServerType.EMBY  ? jellyfinSeasonsMap
-          //   : []),
 
           const filteredSeasonsMap4k: Map<number, boolean> = new Map();
 
@@ -350,50 +347,40 @@ class AvailabilitySync {
               filteredSeasonsMap4k.set(season.seasonNumber, false)
             );
 
-          // const finalSeasons4k: Map<any, any> = new Map<any, any>([
-          //   ...(mediaServerType === MediaServerType.PLEX
-          //     ? plexSeasonsMap4k
-          //     : []),
-          //   ...(mediaServerType === MediaServerType.JELLYFIN ||
-          //   mediaServerType === MediaServerType.EMBY
-          //     ? jellyfinSeasonsMap4k
-          //     : []),
-          //   ...filteredSeasonsMap4k,
-          //   ...sonarrSeasonsMap4k,
-          // ]);
-
           // 4k
           const finalSeasons4k: Map<number, boolean> = new Map();
 
           if (mediaServerType === MediaServerType.PLEX) {
-            const plexMap4k = new Map([
-              ...plexSeasonsMap4k,
-              ...filteredSeasonsMap4k,
-              ...sonarrSeasonsMap4k,
-            ]);
-            plexMap4k.forEach((value, key) => {
-              finalSeasons4k.set(key, value);
-            });
-          } else if (
-            mediaServerType === MediaServerType.JELLYFIN ||
-            mediaServerType === MediaServerType.EMBY
-          ) {
-            // Adding values from jellyfinSeasonsMap
-            jellyfinSeasonsMap4k.forEach((value, key) => {
+            plexSeasonsMap4k.forEach((value, key) => {
               finalSeasons4k.set(key, value);
             });
 
-            // Adding values from filteredSeasonsMap and handling missing keys
             filteredSeasonsMap4k.forEach((value, key) => {
-              // Check if the key is missing in jellyfinSeasonsMap
               if (!finalSeasons4k.has(key)) {
                 finalSeasons4k.set(key, value);
               }
             });
 
-            // Adding values from sonarrSeasonsMap and handling missing keys
             sonarrSeasonsMap4k.forEach((value, key) => {
-              // Check if the key is missing in jellyfinSeasonsMap and filteredSeasonsMap
+              if (!finalSeasons4k.has(key)) {
+                finalSeasons4k.set(key, value);
+              }
+            });
+          } else if (
+            mediaServerType === MediaServerType.JELLYFIN ||
+            mediaServerType === MediaServerType.EMBY
+          ) {
+            jellyfinSeasonsMap4k.forEach((value, key) => {
+              finalSeasons4k.set(key, value);
+            });
+
+            filteredSeasonsMap4k.forEach((value, key) => {
+              if (!finalSeasons4k.has(key)) {
+                finalSeasons4k.set(key, value);
+              }
+            });
+
+            sonarrSeasonsMap4k.forEach((value, key) => {
               if (!finalSeasons4k.has(key)) {
                 finalSeasons4k.set(key, value);
               }
