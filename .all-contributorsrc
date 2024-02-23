@@ -313,6 +313,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "trackmastersteve",
+      "name": "Stephen Harris",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16858514?v=4",
+      "profile": "https://arm0.red",
+      "contributions": [
+        "doc"
+      ]
     }
   ]
 }
