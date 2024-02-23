@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import availabilitySync from '@server/lib/availabilitySync';
 import logger from '@server/logger';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
@@ -241,7 +242,9 @@ class JellyfinAPI {
     }
   }
 
-  public async getItemData(id: string): Promise<JellyfinLibraryItemExtended> {
+  public async getItemData(
+    id: string
+  ): Promise<JellyfinLibraryItemExtended | undefined> {
     try {
       const contents = await this.axios.get<any>(
         `/Users/${this.userId}/Items/${id}`
@@ -249,6 +252,11 @@ class JellyfinAPI {
 
       return contents.data;
     } catch (e) {
+      if (availabilitySync.running) {
+        if (e.response && e.response.status === 500) {
+          return undefined;
+        }
+      }
       logger.error(
         `Something went wrong while getting library content from the Jellyfin server: ${e.message}`,
         { label: 'Jellyfin API' }
