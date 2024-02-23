@@ -53,7 +53,7 @@ https://hub.docker.com/r/fallenbagel/jellyseerr
 
 Pre-requisites:
 
-- Nodejs [v18](https://nodejs.org/download/release/v18.19.1)
+- Nodejs [v18](https://nodejs.org/download/release/v18.18.2)
 - [Yarn](https://classic.yarnpkg.com/lang/en/docs/install)
 - Download/git clone the source code from the github (Either develop branch or main for stable)
 
