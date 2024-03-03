@@ -81,6 +81,20 @@ DB_SSL_CERT= # Certificate chain in pem format for the private key, provided as 
 DB_SSL_CERT_FILE= # Path to certificate chain in pem format for the private key
 ```
 
+#### Migrating from SQLite to PostgreSQL
+
+1. Set up your PostgreSQL database and configure Jellyseerr to use it
+2. Run Jellyseerr to create the tables in the PostgreSQL database
+3. Stop Jellyseerr
+4. Run the following command to export the data from the SQLite database and import it into the PostgreSQL database:
+   - Edit the postgres connection string to match your setup
+   - WARNING: The most recent release of pgloader has an issue quoting the table columns. Use the version in the docker container to avoid this issue.
+   - "I don't have or don't want to use docker" - You can build the working pgloader version [in this PR](https://github.com/dimitri/pgloader/pull/1531) from source and use the same options as below.
+   ```bash
+   docker run --rm -v config/db.sqlite3:/db.sqlite3:ro -v pgloader/pgloader.load:/pgloader.load ghcr.io/ralgar/pgloader:pr-1531 pgloader --with "quote identifiers" --with "data only" /db.sqlite3 postgresql://{{DB_USER}}:{{DB_PASS}}@{{DB_HOST}}:{{DB_PORT}}/{{DB_NAME}}
+   ```
+5. Start Jellyseerr
+
 ### Building from source (ADVANCED):
 
 #### Windows
