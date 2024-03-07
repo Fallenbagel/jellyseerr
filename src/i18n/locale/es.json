@@ -848,7 +848,7 @@
     "components.IssueDetails.nocomments": "Sin comentarios.",
     "components.IssueDetails.openedby": "#{issueId} abierta {relativeTime} por {username}",
     "components.IssueDetails.openin4karr": "Abrir en {arr} 4K",
-    "components.IssueDetails.openinarr": "Abierta en {arr}",
+    "components.IssueDetails.openinarr": "Abrir en {arr}",
     "components.IssueDetails.play4konplex": "Ver en 4K en {mediaServerName}",
     "components.IssueDetails.playonplex": "Ver en {mediaServerName}",
     "components.IssueDetails.problemepisode": "Episodio Afectado",
