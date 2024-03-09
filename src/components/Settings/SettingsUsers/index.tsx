@@ -53,9 +53,6 @@ const SettingsUsers = () => {
     return <LoadingSpinner />;
   }
 
-  console.log(data);
-  // TODO: repopulate dropdown
-
   return (
     <>
       <PageTitle

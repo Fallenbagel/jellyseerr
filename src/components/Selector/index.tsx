@@ -501,7 +501,7 @@ export const UserSelector = ({
     };
 
     loadUsers();
-  });
+  }, [defaultValue]);
 
   return (
     <AsyncSelect
