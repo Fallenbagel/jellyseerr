@@ -3505,6 +3505,19 @@ paths:
                   appDataPath:
                     type: string
                     example: /app/config
+  /auth/easy:
+    post:
+      summary: Get logged-in user
+      description: Returns the currently logged-in user.
+      tags:
+        - auth
+      responses:
+        '200':
+          description: Object containing the logged-in user in JSON
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
   /auth/me:
     get:
       summary: Get logged-in user
