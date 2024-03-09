@@ -12,6 +12,7 @@ import type {
   TmdbKeywordSearchResponse,
 } from '@server/api/themoviedb/interfaces';
 import type { GenreSliderItem } from '@server/interfaces/api/discoverInterfaces';
+import type { UserResultsResponse } from '@server/interfaces/api/userInterfaces';
 import type {
   Keyword,
   ProductionCompany,
@@ -29,6 +30,7 @@ const messages = defineMessages({
   searchKeywords: 'Search keywords…',
   searchGenres: 'Select genres…',
   searchStudios: 'Search studios…',
+  searchUser: 'Search users…',
   starttyping: 'Starting typing to search.',
   nooptions: 'No results.',
   showmore: 'Show More',
@@ -460,5 +462,62 @@ export const WatchProviderSelector = ({
         </div>
       )}
     </>
+  );
+};
+
+type UserSelectorProps = BaseSelectorMultiProps | BaseSelectorSingleProps;
+
+export const UserSelector = ({
+  isMulti,
+  defaultValue,
+  onChange,
+}: UserSelectorProps) => {
+  const intl = useIntl();
+  const [defaultDataValue, setDefaultDataValue] = useState<
+    | {
+        label: string;
+        value: number;
+      }[]
+    | null
+  >(null);
+
+  const loadUserOptions = async () => {
+    const results = await axios.get<UserResultsResponse>(`/api/v1/user`);
+    return results.data.results.map((result) => ({
+      label: result.displayName,
+      value: result.id,
+    }));
+  };
+
+  useEffect(() => {
+    const loadUsers = async (): Promise<void> => {
+      if (!defaultValue) {
+        return;
+      }
+      const options = await loadUserOptions();
+      setDefaultDataValue(
+        options.filter((x) => x.value == parseInt(defaultValue))
+      );
+    };
+
+    loadUsers();
+  });
+
+  return (
+    <AsyncSelect
+      key={`genre-select-${defaultDataValue}`}
+      className="react-select-container"
+      classNamePrefix="react-select"
+      defaultValue={isMulti ? defaultDataValue : defaultDataValue?.[0]}
+      defaultOptions
+      cacheOptions
+      isMulti={isMulti}
+      loadOptions={loadUserOptions}
+      placeholder={intl.formatMessage(messages.searchUser)}
+      onChange={(value) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onChange(value as any);
+      }}
+    />
   );
 };

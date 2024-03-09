@@ -106,6 +106,8 @@ export interface MainSettings {
     tv: Quota;
   };
   hideAvailable: boolean;
+  easyLogin: boolean;
+  easyLoginUserId: number;
   localLogin: boolean;
   newPlexLogin: boolean;
   region: string;
@@ -125,6 +127,8 @@ interface FullPublicSettings extends PublicSettings {
   applicationUrl: string;
   hideAvailable: boolean;
   localLogin: boolean;
+  easyLogin: boolean;
+  easyLoginUserId: number;
   movie4kEnabled: boolean;
   series4kEnabled: boolean;
   region: string;
@@ -313,6 +317,8 @@ class Settings {
           tv: {},
         },
         hideAvailable: false,
+        easyLogin: false,
+        easyLoginUserId: 0,
         localLogin: true,
         newPlexLogin: true,
         region: '',
@@ -537,6 +543,8 @@ class Settings {
       applicationUrl: this.data.main.applicationUrl,
       hideAvailable: this.data.main.hideAvailable,
       localLogin: this.data.main.localLogin,
+      easyLogin: this.data.main.easyLogin,
+      easyLoginUserId: this.data.main.easyLoginUserId,
       jellyfinForgotPasswordUrl: this.data.jellyfin.jellyfinForgotPasswordUrl,
       movie4kEnabled: this.data.radarr.some(
         (radarr) => radarr.is4k && radarr.isDefault

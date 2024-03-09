@@ -3,6 +3,7 @@ import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import PageTitle from '@app/components/Common/PageTitle';
 import PermissionEdit from '@app/components/PermissionEdit';
 import QuotaSelector from '@app/components/QuotaSelector';
+import { UserSelector } from '@app/components/Selector';
 import useSettings from '@app/hooks/useSettings';
 import globalMessages from '@app/i18n/globalMessages';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
@@ -22,6 +23,10 @@ const messages = defineMessages({
   toastSettingsSuccess: 'User settings saved successfully!',
   toastSettingsFailure: 'Something went wrong while saving settings.',
   localLogin: 'Enable Local Sign-In',
+  easyLoginUserId: 'Easy Login User',
+  easyLogin: 'Enable Easy Login',
+  easyLoginTip:
+    'Adds a generic login button that auto logs in to the selected easy login user selected',
   localLoginTip:
     'Allow users to sign in using their email address and password, instead of {mediaServerName} OAuth',
   newPlexLogin: 'Enable New {mediaServerName} Sign-In',
@@ -48,6 +53,9 @@ const SettingsUsers = () => {
     return <LoadingSpinner />;
   }
 
+  console.log(data);
+  // TODO: repopulate dropdown
+
   return (
     <>
       <PageTitle
@@ -66,6 +74,8 @@ const SettingsUsers = () => {
         <Formik
           initialValues={{
             localLogin: data?.localLogin,
+            easyLogin: data?.easyLogin,
+            easyLoginUserId: data?.easyLoginUserId,
             newPlexLogin: data?.newPlexLogin,
             movieQuotaLimit: data?.defaultQuotas.movie.quotaLimit ?? 0,
             movieQuotaDays: data?.defaultQuotas.movie.quotaDays ?? 7,
@@ -78,6 +88,8 @@ const SettingsUsers = () => {
             try {
               await axios.post('/api/v1/settings/main', {
                 localLogin: values.localLogin,
+                easyLogin: values.easyLogin,
+                easyLoginUserId: values.easyLoginUserId,
                 newPlexLogin: values.newPlexLogin,
                 defaultQuotas: {
                   movie: {
@@ -110,6 +122,44 @@ const SettingsUsers = () => {
           {({ isSubmitting, values, setFieldValue }) => {
             return (
               <Form className="section">
+                <div className="form-row">
+                  <label htmlFor="easyLogin" className="checkbox-label">
+                    {intl.formatMessage(messages.easyLogin)}
+                    <span className="label-tip">
+                      {intl.formatMessage(messages.easyLoginTip)}
+                    </span>
+                  </label>
+                  <div className="form-input-area">
+                    <Field
+                      type="checkbox"
+                      id="easyLogin"
+                      name="easyLogin"
+                      onChange={() => {
+                        if (!values.easyLogin)
+                          setFieldValue('easyLoginUserId', 0);
+                        setFieldValue('easyLogin', !values.easyLogin);
+                      }}
+                    />
+                  </div>
+                </div>
+                {values.easyLogin ? (
+                  <div className="form-row">
+                    <label htmlFor="applicationTitle" className="text-label">
+                      {intl.formatMessage(messages.easyLoginUserId)}
+                    </label>
+                    <div className="form-input-area">
+                      <UserSelector
+                        defaultValue={data?.easyLoginUserId.toString()}
+                        onChange={(x) => {
+                          setFieldValue('easyLoginUserId', x ? x.value : null);
+                        }}
+                        isMulti={false}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <> </>
+                )}
                 <div className="form-row">
                   <label htmlFor="localLogin" className="checkbox-label">
                     {intl.formatMessage(messages.localLogin)}
