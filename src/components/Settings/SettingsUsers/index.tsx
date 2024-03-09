@@ -132,9 +132,10 @@ const SettingsUsers = () => {
                       id="easyLogin"
                       name="easyLogin"
                       onChange={() => {
-                        if (!values.easyLogin)
+                        const newEasyLogin = !values.easyLogin;
+                        setFieldValue('easyLogin', newEasyLogin);
+                        if (newEasyLogin == false)
                           setFieldValue('easyLoginUserId', 0);
-                        setFieldValue('easyLogin', !values.easyLogin);
                       }}
                     />
                   </div>
