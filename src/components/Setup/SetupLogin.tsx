@@ -2,7 +2,7 @@ import Accordion from '@app/components/Common/Accordion';
 import JellyfinLogin from '@app/components/Login/JellyfinLogin';
 import PlexLoginButton from '@app/components/PlexLoginButton';
 import { useUser } from '@app/hooks/useUser';
-import { MediaServerType } from '@server/constants/server';
+import { MediaServerType, ServerType } from '@server/constants/server';
 import axios from 'axios';
 import type React from 'react';
 import { useEffect, useState } from 'react';
@@ -26,14 +26,12 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
   );
   const { user, revalidate } = useUser();
   const intl = useIntl();
-  const [selectedService, setSelectedService] = useState<string | undefined>(
-    undefined
-  );
+  const [serverType, setserverType] = useState<string | undefined>(undefined);
 
   // Function to handle toggle changes
   const handleToggle = (option: string) => {
     // Toggle between 'emby' and 'jellyfin'
-    setSelectedService(option);
+    setserverType(option);
   };
 
   // Effect that is triggered when the `authToken` comes back from the Plex OAuth
@@ -103,7 +101,9 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
                 onClick={() => handleClick(1)}
               >
                 {intl.formatMessage(messages.signinWithJellyfin, {
-                  mediaServerName: selectedService ?? 'Jellyfin / Emby',
+                  mediaServerName:
+                    serverType ??
+                    `${ServerType.JELLYFIN} or ${ServerType.EMBY}`,
                 })}
               </button>
               <AccordionContent isOpen={openIndexes.includes(1)}>
@@ -114,7 +114,7 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
                   <JellyfinLogin
                     initial={true}
                     revalidate={revalidate}
-                    selectedService={selectedService}
+                    serverType={serverType}
                     onToggle={handleToggle}
                   />
                 </div>
