@@ -423,15 +423,15 @@ const IssueDetails = () => {
                   <span>
                     {settings.currentSettings.mediaServerType ===
                     MediaServerType.EMBY
-                      ? intl.formatMessage(messages.playonplex, {
+                      ? intl.formatMessage(messages.play4konplex, {
                           mediaServerName: 'Emby',
                         })
                       : settings.currentSettings.mediaServerType ===
                         MediaServerType.PLEX
-                      ? intl.formatMessage(messages.playonplex, {
+                      ? intl.formatMessage(messages.play4konplex, {
                           mediaServerName: 'Plex',
                         })
-                      : intl.formatMessage(messages.playonplex, {
+                      : intl.formatMessage(messages.play4konplex, {
                           mediaServerName: 'Jellyfin',
                         })}
                   </span>
@@ -688,15 +688,15 @@ const IssueDetails = () => {
                 <span>
                   {settings.currentSettings.mediaServerType ===
                   MediaServerType.EMBY
-                    ? intl.formatMessage(messages.playonplex, {
+                    ? intl.formatMessage(messages.play4konplex, {
                         mediaServerName: 'Emby',
                       })
                     : settings.currentSettings.mediaServerType ===
                       MediaServerType.PLEX
-                    ? intl.formatMessage(messages.playonplex, {
+                    ? intl.formatMessage(messages.play4konplex, {
                         mediaServerName: 'Plex',
                       })
-                    : intl.formatMessage(messages.playonplex, {
+                    : intl.formatMessage(messages.play4konplex, {
                         mediaServerName: 'Jellyfin',
                       })}
                 </span>
