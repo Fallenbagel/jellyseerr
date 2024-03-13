@@ -1,6 +1,6 @@
 import JellyfinAPI from '@server/api/jellyfin';
 import PlexTvAPI from '@server/api/plextv';
-import { MediaServerType } from '@server/constants/server';
+import { MediaServerType, ServerType } from '@server/constants/server';
 import { UserType } from '@server/constants/user';
 import { getRepository } from '@server/datasource';
 import { User } from '@server/entity/User';
@@ -220,7 +220,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
     password?: string;
     hostname?: string;
     email?: string;
-    serverType?: string;
+    serverType?: number;
   };
 
   //Make sure jellyfin login is enabled, but only if jellyfin && Emby is not already configured
@@ -296,7 +296,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
       // User doesn't exist, and there are no users in the database, we'll create the user
       // with admin permissions
       switch (body.serverType) {
-        case 'Emby':
+        case MediaServerType.EMBY:
           settings.main.mediaServerType = MediaServerType.EMBY;
           user = new User({
             email: body.email,
@@ -311,7 +311,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
             userType: UserType.EMBY,
           });
           break;
-        case 'Jellyfin':
+        case MediaServerType.JELLYFIN:
           settings.main.mediaServerType = MediaServerType.JELLYFIN;
           user = new User({
             email: body.email,
@@ -342,12 +342,12 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
       logger.info(
         `Found matching ${
           settings.main.mediaServerType === MediaServerType.JELLYFIN
-            ? 'Jellyfin'
-            : 'Emby'
+            ? ServerType.JELLYFIN
+            : ServerType.EMBY
         } user; updating user with ${
           settings.main.mediaServerType === MediaServerType.JELLYFIN
-            ? 'Jellyfin'
-            : 'Emby'
+            ? ServerType.JELLYFIN
+            : ServerType.EMBY
         }`,
         {
           label: 'API',

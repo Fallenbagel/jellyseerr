@@ -41,15 +41,15 @@ const messages = defineMessages({
 interface JellyfinLoginProps {
   revalidate: () => void;
   initial?: boolean;
-  onToggle?: (option: string) => void;
-  serverType?: string;
+  serverType?: MediaServerType;
+  onServerTypeChange?: (type: MediaServerType) => void;
 }
 
 const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
   revalidate,
   initial,
-  onToggle,
   serverType,
+  onServerTypeChange,
 }) => {
   const toasts = useToasts();
   const intl = useIntl();
@@ -81,12 +81,13 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
 
     const mediaServerFormatValues = {
       mediaServerName:
-        serverType === ServerType.JELLYFIN
+        serverType === MediaServerType.JELLYFIN
           ? ServerType.JELLYFIN
-          : serverType === ServerType.EMBY
+          : serverType === MediaServerType.EMBY
           ? ServerType.EMBY
           : 'Media Server',
     };
+
     return (
       <Formik
         initialValues={{
@@ -148,18 +149,17 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                   <button
                     type="button"
                     className={`server-type-button jellyfin-server ${
-                      serverType === ServerType.JELLYFIN
+                      serverType === MediaServerType.JELLYFIN
                         ? 'bg-gradient-to-r from-[#AA5CC3] to-[#00A4DC]'
                         : ''
                     }`}
                     onClick={() => {
-                      if (onToggle) {
-                        onToggle(ServerType.JELLYFIN);
-                      }
+                      onServerTypeChange &&
+                        onServerTypeChange(MediaServerType.JELLYFIN);
                       setFieldValue('serverType', ServerType.JELLYFIN);
                     }}
                   >
-                    {serverType === ServerType.JELLYFIN ? (
+                    {serverType === MediaServerType.JELLYFIN ? (
                       <JellyfinLogoInverted />
                     ) : (
                       <JellyfinLogo />
@@ -168,16 +168,15 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                   <button
                     type="button"
                     className={`server-type-button emby-server ${
-                      serverType === ServerType.EMBY ? 'bg-[#51B44A]' : ''
+                      serverType === MediaServerType.EMBY ? 'bg-[#51B44A]' : ''
                     }`}
                     onClick={() => {
-                      if (onToggle) {
-                        onToggle(ServerType.EMBY);
-                      }
+                      onServerTypeChange &&
+                        onServerTypeChange(MediaServerType.EMBY);
                       setFieldValue('serverType', ServerType.EMBY);
                     }}
                   >
-                    {serverType === ServerType.EMBY ? (
+                    {serverType === MediaServerType.EMBY ? (
                       <EmbyLogoInverted />
                     ) : (
                       <EmbyLogo />

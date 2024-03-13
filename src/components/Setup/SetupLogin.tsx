@@ -26,12 +26,14 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
   );
   const { user, revalidate } = useUser();
   const intl = useIntl();
-  const [serverType, setserverType] = useState<string | undefined>(undefined);
+  const [serverType, setserverType] = useState<MediaServerType | undefined>(
+    undefined
+  );
 
   // Function to handle toggle changes
-  const handleToggle = (option: string) => {
+  const handleServerTypeChange = (type: MediaServerType) => {
     // Toggle between 'emby' and 'jellyfin'
-    setserverType(option);
+    setserverType(type);
   };
 
   // Effect that is triggered when the `authToken` comes back from the Plex OAuth
@@ -102,8 +104,11 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
               >
                 {intl.formatMessage(messages.signinWithJellyfin, {
                   mediaServerName:
-                    serverType ??
-                    `${ServerType.JELLYFIN} or ${ServerType.EMBY}`,
+                    serverType === MediaServerType.JELLYFIN
+                      ? ServerType.JELLYFIN
+                      : serverType === MediaServerType.EMBY
+                      ? ServerType.EMBY
+                      : `${ServerType.JELLYFIN} or ${ServerType.EMBY}`,
                 })}
               </button>
               <AccordionContent isOpen={openIndexes.includes(1)}>
@@ -115,7 +120,7 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
                     initial={true}
                     revalidate={revalidate}
                     serverType={serverType}
-                    onToggle={handleToggle}
+                    onServerTypeChange={handleServerTypeChange}
                   />
                 </div>
               </AccordionContent>
