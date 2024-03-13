@@ -41,6 +41,7 @@ const messages = defineMessages({
   tmdbid: 'TMDB ID',
   tvdbid: 'TheTVDB ID',
   unknowntitle: 'Unknown Title',
+  removearr: 'Remove from {arr}',
 });
 
 const isMovie = (movie: MovieDetails | TvDetails): movie is MovieDetails => {
@@ -318,6 +319,14 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
     await axios.delete(`/api/v1/request/${request.id}`);
 
     revalidateList();
+  };
+
+  const deleteMediaFile = async () => {
+    if (request.media) {
+      await axios.delete(`/api/v1/media/${request.media.id}/file`);
+      await axios.delete(`/api/v1/media/${request.media.id}`);
+      revalidateList();
+    }
   };
 
   const retryRequest = async () => {
@@ -622,14 +631,28 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
             )}
           {requestData.status !== MediaRequestStatus.PENDING &&
             hasPermission(Permission.MANAGE_REQUESTS) && (
-              <ConfirmButton
-                onClick={() => deleteRequest()}
-                confirmText={intl.formatMessage(globalMessages.areyousure)}
-                className="w-full"
-              >
-                <TrashIcon />
-                <span>{intl.formatMessage(messages.deleterequest)}</span>
-              </ConfirmButton>
+              <>
+                <ConfirmButton
+                  onClick={() => deleteRequest()}
+                  confirmText={intl.formatMessage(globalMessages.areyousure)}
+                  className="w-full"
+                >
+                  <TrashIcon />
+                  <span>{intl.formatMessage(messages.deleterequest)}</span>
+                </ConfirmButton>
+                <ConfirmButton
+                  onClick={() => deleteMediaFile()}
+                  confirmText={intl.formatMessage(globalMessages.areyousure)}
+                  className="w-full"
+                >
+                  <TrashIcon />
+                  <span>
+                    {intl.formatMessage(messages.removearr, {
+                      arr: request.type === 'movie' ? 'Radarr' : 'Sonarr',
+                    })}
+                  </span>
+                </ConfirmButton>
+              </>
             )}
           {requestData.status === MediaRequestStatus.PENDING &&
             hasPermission(Permission.MANAGE_REQUESTS) && (
