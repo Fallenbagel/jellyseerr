@@ -12,12 +12,12 @@ import type {
   LogsResultsResponse,
   SettingsAboutResponse,
 } from '@server/interfaces/api/settingsInterfaces';
-import { jobJellyfinFullSync } from '@server/job/jellyfinsync';
 import { scheduledJobs } from '@server/job/schedule';
 import type { AvailableCacheIds } from '@server/lib/cache';
 import cacheManager from '@server/lib/cache';
 import ImageProxy from '@server/lib/imageproxy';
 import { Permission } from '@server/lib/permissions';
+import { jellyfinFullScanner } from '@server/lib/scanners/jellyfin';
 import { plexFullScanner } from '@server/lib/scanners/plex';
 import type { JobId, Library, MainSettings } from '@server/lib/settings';
 import { getSettings } from '@server/lib/settings';
@@ -29,6 +29,7 @@ import { getAppVersion } from '@server/utils/appVersion';
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import fs from 'fs';
+import gravatarUrl from 'gravatar-url';
 import { escapeRegExp, merge, omit, set, sortBy } from 'lodash';
 import { rescheduleJob } from 'node-schedule';
 import path from 'path';
@@ -337,7 +338,7 @@ settingsRoutes.get('/jellyfin/users', async (req, res) => {
     id: user.Id,
     thumb: user.PrimaryImageTag
       ? `${jellyfinHost}/Users/${user.Id}/Images/Primary/?tag=${user.PrimaryImageTag}&quality=90`
-      : '/os_logo_square.png',
+      : gravatarUrl(user.Name, { default: 'mm', size: 200 }),
     email: user.Name,
   }));
 
@@ -345,16 +346,16 @@ settingsRoutes.get('/jellyfin/users', async (req, res) => {
 });
 
 settingsRoutes.get('/jellyfin/sync', (_req, res) => {
-  return res.status(200).json(jobJellyfinFullSync.status());
+  return res.status(200).json(jellyfinFullScanner.status());
 });
 
 settingsRoutes.post('/jellyfin/sync', (req, res) => {
   if (req.body.cancel) {
-    jobJellyfinFullSync.cancel();
+    jellyfinFullScanner.cancel();
   } else if (req.body.start) {
-    jobJellyfinFullSync.run();
+    jellyfinFullScanner.run();
   }
-  return res.status(200).json(jobJellyfinFullSync.status());
+  return res.status(200).json(jellyfinFullScanner.status());
 });
 settingsRoutes.get('/tautulli', (_req, res) => {
   const settings = getSettings();

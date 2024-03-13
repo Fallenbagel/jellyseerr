@@ -1235,7 +1235,7 @@
   "components.Discover.tmdbmoviestreamingservices": "TMDB Film-Streaming-Dienste",
   "components.Discover.tmdbtvstreamingservices": "TMDB TV-Streaming-Dienste",
   "i18n.collection": "Sammlung",
-  "components.Discover.FilterSlideover.tmdbuservotecount": "TMDB Kullanıcı Oy Sayısı",
+  "components.Discover.FilterSlideover.tmdbuservotecount": "Anzahl an TMDB Benutzerbewertungen",
   "components.Settings.RadarrModal.tagRequestsInfo": "Füge automatisch ein Tag hinzu mit der ID und dem Namen des anfordernden Nutzers",
   "components.MovieDetails.imdbuserscore": "IMDB Nutzer Bewertung",
   "components.Settings.SonarrModal.tagRequests": "Tag Anforderungen",

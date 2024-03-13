@@ -6,7 +6,6 @@ import Button from '@app/components/Common/Button';
 import Tooltip from '@app/components/Common/Tooltip';
 import useSettings from '@app/hooks/useSettings';
 import { InformationCircleIcon } from '@heroicons/react/24/solid';
-import { MediaServerType } from '@server/constants/server';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import type React from 'react';
@@ -303,6 +302,8 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
     const baseUrl = settings.currentSettings.jellyfinExternalHost
       ? settings.currentSettings.jellyfinExternalHost
       : settings.currentSettings.jellyfinHost;
+    const jellyfinForgotPasswordUrl =
+      settings.currentSettings.jellyfinForgotPasswordUrl;
     return (
       <div>
         <Formik
@@ -379,12 +380,15 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                         <Button
                           as="a"
                           buttonType="ghost"
-                          href={`${baseUrl}/web/index.html#!/${
-                            settings.currentSettings.mediaServerType ===
-                            MediaServerType.EMBY
-                              ? 'startup/'
-                              : ''
-                          }forgotpassword.html`}
+                          href={
+                            jellyfinForgotPasswordUrl
+                              ? `${jellyfinForgotPasswordUrl}`
+                              : `${baseUrl}/web/index.html#!/${
+                                  process.env.JELLYFIN_TYPE === 'emby'
+                                    ? 'startup/'
+                                    : ''
+                                }forgotpassword.html`
+                          }
                         >
                           {intl.formatMessage(messages.forgotpassword)}
                         </Button>

@@ -11,6 +11,7 @@ import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
 import * as EmailValidator from 'email-validator';
 import { Router } from 'express';
+import gravatarUrl from 'gravatar-url';
 
 const authRoutes = Router();
 
@@ -278,19 +279,70 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
       where: { jellyfinUserId: account.User.Id },
     });
 
-    if (user) {
+    if (!user && !(await userRepository.count())) {
+      logger.info(
+        'Sign-in attempt from Jellyfin user with access to the media server; creating initial admin user for Overseerr',
+        {
+          label: 'API',
+          ip: req.ip,
+          jellyfinUsername: account.User.Name,
+        }
+      );
+
+      // User doesn't exist, and there are no users in the database, we'll create the user
+      // with admin permission
+      settings.main.mediaServerType = MediaServerType.JELLYFIN;
+      user = new User({
+        email: body.email,
+        jellyfinUsername: account.User.Name,
+        jellyfinUserId: account.User.Id,
+        jellyfinDeviceId: deviceId,
+        jellyfinAuthToken: account.AccessToken,
+        permissions: Permission.ADMIN,
+        avatar: account.User.PrimaryImageTag
+          ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
+          : gravatarUrl(body.email ?? '', { default: 'mm', size: 200 }),
+        userType: UserType.JELLYFIN,
+      });
+
+      settings.jellyfin.hostname = body.hostname ?? '';
+      settings.jellyfin.serverId = account.User.ServerId;
+      settings.save();
+      startJobs();
+
+      await userRepository.save(user);
+    }
+    // User already exists, let's update their information
+    else if (body.username === user?.jellyfinUsername) {
+      logger.info(
+        `Found matching ${
+          settings.main.mediaServerType === MediaServerType.JELLYFIN
+            ? 'Jellyfin'
+            : 'Emby'
+        } user; updating user with ${
+          settings.main.mediaServerType === MediaServerType.JELLYFIN
+            ? 'Jellyfin'
+            : 'Emby'
+        }`,
+        {
+          label: 'API',
+          ip: req.ip,
+          jellyfinUsername: account.User.Name,
+        }
+      );
       // Let's check if their authtoken is up to date
       if (user.jellyfinAuthToken !== account.AccessToken) {
         user.jellyfinAuthToken = account.AccessToken;
       }
-
       // Update the users avatar with their jellyfin profile pic (incase it changed)
       if (account.User.PrimaryImageTag) {
         user.avatar = `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`;
       } else {
-        user.avatar = '/os_logo_square.png';
+        user.avatar = gravatarUrl(user.email, {
+          default: 'mm',
+          size: 200,
+        });
       }
-
       user.jellyfinUsername = account.User.Name;
 
       if (user.username === account.User.Name) {
@@ -318,86 +370,38 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         status: 403,
         message: 'Access denied.',
       });
-    } else {
-      // Here we check if it's the first user. If it is, we create the user with no check
-      // and give them admin permissions
-      const totalUsers = await userRepository.count();
-      if (totalUsers === 0) {
-        logger.info(
-          'Sign-in attempt from Jellyfin user with access to the media server; creating initial admin user for Overseerr',
-          {
-            label: 'API',
-            ip: req.ip,
-            jellyfinUsername: account.User.Name,
-          }
-        );
-
-        user = new User({
-          email: body.email,
+    } else if (!user) {
+      logger.info(
+        'Sign-in attempt from Jellyfin user with access to the media server; creating new Overseerr user',
+        {
+          label: 'API',
+          ip: req.ip,
           jellyfinUsername: account.User.Name,
-          jellyfinUserId: account.User.Id,
-          jellyfinDeviceId: deviceId,
-          jellyfinAuthToken: account.AccessToken,
-          permissions: Permission.ADMIN,
-          avatar: account.User.PrimaryImageTag
-            ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
-            : '/os_logo_square.png',
-          userType: UserType.JELLYFIN,
-        });
-        await userRepository.save(user);
-
-        //Update hostname in settings if it doesn't exist (initial configuration)
-        //Also set mediaservertype to JELLYFIN
-        if (settings.jellyfin.hostname === '') {
-          // If JELLYFIN_TYPE is set to 'emby' then set mediaServerType to EMBY
-          if (
-            process.env.JELLYFIN_TYPE === 'emby' ||
-            body.selectedservice === 'Emby'
-          ) {
-            settings.main.mediaServerType = MediaServerType.EMBY;
-          } else if (body.selectedservice === 'Jellyfin') {
-            settings.main.mediaServerType = MediaServerType.JELLYFIN;
-          }
-
-          settings.jellyfin.hostname = body.hostname ?? '';
-          settings.jellyfin.serverId = account.User.ServerId;
-          settings.save();
-          startJobs();
         }
+      );
+
+      if (!body.email) {
+        throw new Error('add_email');
       }
 
-      if (!user) {
-        if (!body.email) {
-          throw new Error('add_email');
-        }
-
-        if (
-          !body.selectedservice &&
-          (body.selectedservice !== 'Emby' || 'Jellyfin')
-        ) {
-          throw new Error('select_server_type');
-        }
-
-        user = new User({
-          email: body.email,
-          jellyfinUsername: account.User.Name,
-          jellyfinUserId: account.User.Id,
-          jellyfinDeviceId: deviceId,
-          jellyfinAuthToken: account.AccessToken,
-          permissions: settings.main.defaultPermissions,
-          avatar: account.User.PrimaryImageTag
-            ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
-            : '/os_logo_square.png',
-          userType: UserType.JELLYFIN,
-        });
-        //initialize Jellyfin/Emby users with local login
-        const passedExplicitPassword =
-          body.password && body.password.length > 0;
-        if (passedExplicitPassword) {
-          await user.setPassword(body.password ?? '');
-        }
-        await userRepository.save(user);
+      user = new User({
+        email: body.email,
+        jellyfinUsername: account.User.Name,
+        jellyfinUserId: account.User.Id,
+        jellyfinDeviceId: deviceId,
+        jellyfinAuthToken: account.AccessToken,
+        permissions: settings.main.defaultPermissions,
+        avatar: account.User.PrimaryImageTag
+          ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
+          : gravatarUrl(body.email, { default: 'mm', size: 200 }),
+        userType: UserType.JELLYFIN,
+      });
+      //initialize Jellyfin/Emby users with local login
+      const passedExplicitPassword = body.password && body.password.length > 0;
+      if (passedExplicitPassword) {
+        await user.setPassword(body.password ?? '');
       }
+      await userRepository.save(user);
     }
 
     // Set logged in session

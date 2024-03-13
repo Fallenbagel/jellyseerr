@@ -2,23 +2,28 @@
 <img src="./public/logo_full.svg" alt="Jellyseerr" style="margin: 20px 0;">
 </p>
 <p align="center">
-<a href="https://discord.gg/ckbvBtDJgC"><img src="https://img.shields.io/badge/Discord-Chat-lightgrey" alt="Discord"></a>
+<img src="https://github.com/Fallenbagel/jellyseerr/actions/workflows/release.yml/badge.svg" alt="Jellyseerr Release" />
+<img src="https://github.com/Fallenbagel/jellyseerr/actions/workflows/ci.yml/badge.svg" alt="Jellyseerr CI">
+</p>
+<p align="center">
+<a href="https://discord.gg/ckbvBtDJgC"><img src="https://img.shields.io/discord/952656177924300932" alt="Discord"></a>
 <a href="https://hub.docker.com/r/fallenbagel/jellyseerr"><img src="https://img.shields.io/docker/pulls/fallenbagel/jellyseerr" alt="Docker pulls"></a>
+<a href="http://jellyseerr.borgcube.de/engage/jellyseerr/"><img src="http://jellyseerr.borgcube.de/widget/jellyseerr/jellyseerr-frontend/svg-badge.svg" alt="Translation status" /></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-29-orange.svg"/></a>
+<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-34-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-**Jellyseerr** is a free and open source software application for managing requests for your media library. It is a a fork of Overseerr built to bring support for Jellyfin & Emby media servers!
+**Jellyseerr** is a free and open source software application for managing requests for your media library.
+It is a fork of [Overseerr](https://github.com/sct/overseerr) built to bring support for [Jellyfin](https://github.com/jellyfin/jellyfin) & [Emby](https://github.com/MediaBrowser/Emby) media servers!
 
 _The original Overseerr team have been busy and Jellyfin/Emby support aren't on their roadmap, so we started this project as we wanted to bring the Overseerr experience to the Jellyfin/Emby Community!_
 
 ## Current Features
 
-- Full Jellyfin/Emby/Plex integration. Authenticate and manage user access with Jellyfin/Emby/Plex!
-- Supports Movies, Shows, Mixed Libraries!
+- Full Jellyfin/Emby/Plex integration including authentication with user import & management
+- Supports Movies, Shows and Mixed Libraries
 - Ability to change email addresses for smtp purposes
-- Ability to import all jellyfin/emby users
 - Easy integration with your existing services. Currently, Jellyseerr supports Sonarr and Radarr. More to come!
 - Jellyfin/Emby/Plex library scan, to keep track of the titles which are already available.
 - Customizable request system, which allows users to request individual seasons or movies in a friendly, easy-to-use interface.
@@ -35,11 +40,11 @@ With more features on the way! Check out our [issue tracker](https://github.com/
 
 #### Pre-requisite (Important)
 
-_*On Jellyfin/Emby, ensure the `settings > Home > Automatically group content from the following folders into views such as 'Movies', 'Music' and 'TV'` is turned off*_
+_*On Jellyfin/Emby, ensure the `Settings > Home > Automatically group content from the following folders into views such as 'Movies', 'Music' and 'TV'` is turned off*_
 
 ### Launching Jellyseerr using Docker (Recommended)
 
-Check out our dockerhub for instructions on how to install and run Jellyseerr:
+Check out our docker hub for instructions on how to install and run Jellyseerr:
 https://hub.docker.com/r/fallenbagel/jellyseerr
 
 ### Building from source (ADVANCED):
@@ -49,7 +54,7 @@ https://hub.docker.com/r/fallenbagel/jellyseerr
 Pre-requisites:
 
 - Nodejs [v18](https://nodejs.org/download/release/v18.18.2)
-- [Yarn](https://classic.yarnpkg.com/lang/en/docs/install) 
+- [Yarn](https://classic.yarnpkg.com/lang/en/docs/install)
 - Download/git clone the source code from the github (Either develop branch or main for stable)
 
 ```cmd
@@ -59,16 +64,17 @@ yarn install --frozen-lockfile --network-timeout 1000000
 yarn run build
 yarn start
 ```
-(you can use task scheduler to run a bat script with `@echo off` and `yarn start` to run jellyseerr in the background)
 
-_to set env variables such as `JELLYFIN_TYPE=emby` create a file called `.env` in the root directory of jellyseerr_
+(You can use task scheduler to run a bat script with `@echo off` and `yarn start` to run jellyseerr in the background)
+
+_To set env variables such as `JELLYFIN_TYPE=emby` create a file called `.env` in the root directory of jellyseerr_
 
 #### Linux
 
 **Pre-requisites:**
 
 - Nodejs [v18](https://nodejs.org/en/download/package-manager)
-- [Yarn](https://classic.yarnpkg.com/lang/en/docs/install) (on debian based distros, the package manager provided `yarn` is different and is a package called cmdlet. You can remove that using `apt-remove cmdlet` then install yarn using `npm install -g yarn`)
+- [Yarn](https://classic.yarnpkg.com/lang/en/docs/install) (on Debian based distros, the package manager provided `yarn` is different and is a package called cmdlet. You can remove that using `apt-remove cmdlet` then install yarn using `npm install -g yarn`)
 - Git
 
 **Steps:**
@@ -79,7 +85,7 @@ _to set env variables such as `JELLYFIN_TYPE=emby` create a file called `.env` i
 cd /opt
 ```
 
-2. Then clone the follow commands to clone and checkout to the stable version
+2. Then execute the following commands to clone and checkout to the stable version
 
 ```bash
 git clone https://github.com/Fallenbagel/jellyseerr.git && cd jellyseerr
@@ -98,9 +104,9 @@ yarn run build
 5. If you want to run jellyseerr as a _Systemd-service:_
 
 - assuming jellyseerr was cloned to `/opt/`
-- first create the environmentfile at `/etc/jellyseerr/jellyseerr.conf`
+- first create the environment file at `/etc/jellyseerr/jellyseerr.conf`
 
-Environmentfile:
+Environment file:
 
 ```
 # Jellyseerr's default port is 5055, if you want to use both, change this.
@@ -136,6 +142,7 @@ ExecStart=/usr/bin/node dist/index.js
 [Install]
 WantedBy=multi-user.target
 ```
+
 ### Packages:
 
 Archlinux: [AUR](https://aur.archlinux.org/packages/jellyseerr)
@@ -217,6 +224,11 @@ Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcon
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://athfan.com"><img src="https://avatars.githubusercontent.com/u/13810742?v=4?s=100" width="100px;" alt="Athfan Khaleel"/><br /><sub><b>Athfan Khaleel</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=athphane" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mdll23"><img src="https://avatars.githubusercontent.com/u/142844478?v=4?s=100" width="100px;" alt="Michael Dallinger"/><br /><sub><b>Michael Dallinger</b></sub></a><br /><a href="#translation-mdll23" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/xeruf"><img src="https://avatars.githubusercontent.com/u/13354331?v=4?s=100" width="100px;" alt="Janek"/><br /><sub><b>Janek</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=xeruf" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://aleksasiriski.dev"><img src="https://avatars.githubusercontent.com/u/31509435?v=4?s=100" width="100px;" alt="Aleksa Siriški"/><br /><sub><b>Aleksa Siriški</b></sub></a><br /><a href="#infra-aleksasiriski" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://danishhumair.com"><img src="https://avatars.githubusercontent.com/u/121830048?v=4?s=100" width="100px;" alt="Danish Humair"/><br /><sub><b>Danish Humair</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=Danish-H" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://arm0.red"><img src="https://avatars.githubusercontent.com/u/16858514?v=4?s=100" width="100px;" alt="Stephen Harris"/><br /><sub><b>Stephen Harris</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=trackmastersteve" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
