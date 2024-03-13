@@ -28,7 +28,6 @@ import type { UserResultsResponse } from '@server/interfaces/api/userInterfaces'
 import { hasPermission } from '@server/lib/permissions';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
-import getConfig from 'next/config';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -88,7 +87,6 @@ const UserList = () => {
   const intl = useIntl();
   const router = useRouter();
   const settings = useSettings();
-  const { publicRuntimeConfig } = getConfig();
   const { addToast } = useToasts();
   const { user: currentUser, hasPermission: currentHasPermission } = useUser();
   const [currentSort, setCurrentSort] = useState<Sort>('displayname');
@@ -514,7 +512,8 @@ const UserList = () => {
             >
               <InboxArrowDownIcon />
               <span>
-                {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                {settings.currentSettings.mediaServerType ===
+                MediaServerType.EMBY
                   ? intl.formatMessage(messages.importfrommediaserver, {
                       mediaServerName: 'Emby',
                     })
@@ -659,7 +658,7 @@ const UserList = () => {
                   <Badge badgeType="default">
                     {intl.formatMessage(messages.localuser)}
                   </Badge>
-                ) : publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? (
+                ) : user.userType === UserType.EMBY ? (
                   <Badge badgeType="success">
                     {intl.formatMessage(messages.mediaServerUser, {
                       mediaServerName: 'Emby',
