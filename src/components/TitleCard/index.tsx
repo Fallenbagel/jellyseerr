@@ -1,4 +1,5 @@
 import Spinner from '@app/assets/spinner.svg';
+import BlacklistModal from '@app/components/BlacklistModal';
 import Button from '@app/components/Common/Button';
 import CachedImage from '@app/components/Common/CachedImage';
 import StatusBadgeMini from '@app/components/Common/StatusBadgeMini';
@@ -12,16 +13,18 @@ import { withProperties } from '@app/utils/typeHelpers';
 import { Transition } from '@headlessui/react';
 import {
   ArrowDownTrayIcon,
+  EyeSlashIcon,
   MinusCircleIcon,
   StarIcon,
 } from '@heroicons/react/24/outline';
 import { MediaStatus } from '@server/constants/media';
+import type { Blacklist } from '@server/entity/Blacklist';
 import type { Watchlist } from '@server/entity/Watchlist';
 import type { MediaType } from '@server/models/Search';
 import axios from 'axios';
 import Link from 'next/link';
 import type React from 'react';
-import { Fragment, useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import { mutate } from 'swr';
@@ -49,6 +52,10 @@ const messages = defineMessages({
     '<strong>{title}</strong> Removed from watchlist  successfully!',
   watchlistCancel: 'watchlist for <strong>{title}</strong> canceled.',
   watchlistError: 'Something went wrong try again.',
+  blacklistSuccess: '<strong>{title}</strong> was successfully blacklisted.',
+  blacklistError: 'Something went wrong try again.',
+  blacklistDuplicateError:
+    '<strong>{title}</strong> has already been blacklisted.',
 });
 
 const TitleCard = ({
@@ -75,6 +82,8 @@ const TitleCard = ({
   const [toggleWatchlist, setToggleWatchlist] = useState<boolean>(
     !isAddedToWatchlist
   );
+  const [showBlacklistModal, setShowBlacklistModal] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   // Just to get the year from the date
   if (year) {
@@ -157,7 +166,63 @@ const TitleCard = ({
     }
   };
 
+  const onClickHideItemBtn = async (): Promise<void> => {
+    const topNode = cardRef.current;
+
+    if (topNode) {
+      try {
+        const response = await axios.post<Blacklist>('/api/v1/blacklist', {
+          tmdbId: id,
+          mediaType,
+          title,
+        });
+        if (response.status === 201) {
+          topNode.parentElement?.classList.add('hidden');
+          addToast(
+            <span>
+              {intl.formatMessage(messages.blacklistSuccess, {
+                title,
+                strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+              })}
+            </span>,
+            { appearance: 'success', autoDismiss: true }
+          );
+        }
+        closeBlacklistModal();
+      } catch (e) {
+        if (e.response.status === 412) {
+          topNode.parentElement?.classList.add('hidden');
+          addToast(
+            <span>
+              {intl.formatMessage(messages.blacklistDuplicateError, {
+                title,
+                strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+              })}
+            </span>,
+            { appearance: 'info', autoDismiss: true }
+          );
+        } else {
+          addToast(intl.formatMessage(messages.blacklistError), {
+            appearance: 'error',
+            autoDismiss: true,
+          });
+        }
+      } finally {
+        closeBlacklistModal();
+      }
+    } else {
+      addToast(intl.formatMessage(messages.blacklistError), {
+        appearance: 'error',
+        autoDismiss: true,
+      });
+    }
+  };
+
   const closeModal = useCallback(() => setShowRequestModal(false), []);
+  const closeBlacklistModal = useCallback(
+    () => setShowBlacklistModal(false),
+    []
+  );
 
   const showRequestButton = hasPermission(
     [
@@ -169,10 +234,13 @@ const TitleCard = ({
     { type: 'or' }
   );
 
+  const showHideButton = hasPermission([Permission.ADMIN]);
+
   return (
     <div
       className={canExpand ? 'w-full' : 'w-36 sm:w-36 md:w-44'}
       data-testid="title-card"
+      ref={cardRef}
     >
       <RequestModal
         tmdbId={id}
@@ -188,6 +256,13 @@ const TitleCard = ({
         onUpdating={requestUpdating}
         onCancel={closeModal}
       />
+      {showBlacklistModal && (
+        <BlacklistModal
+          title={title}
+          onCancel={closeBlacklistModal}
+          onComplete={onClickHideItemBtn}
+        />
+      )}
       <div
         className={`relative transform-gpu cursor-default overflow-hidden rounded-xl bg-gray-800 bg-cover outline-none ring-1 transition duration-300 ${
           showDetail
@@ -226,7 +301,7 @@ const TitleCard = ({
           />
           <div className="absolute left-0 right-0 flex items-center justify-between p-2">
             <div
-              className={`pointer-events-none z-40 rounded-full border bg-opacity-80 shadow-md ${
+              className={`pointer-events-none z-40 self-start rounded-full border bg-opacity-80 shadow-md ${
                 mediaType === 'movie' || mediaType === 'collection'
                   ? 'border-blue-500 bg-blue-600'
                   : 'border-purple-600 bg-purple-600'
@@ -241,7 +316,7 @@ const TitleCard = ({
               </div>
             </div>
             {showDetail && (
-              <>
+              <div className="flex flex-col gap-1">
                 {toggleWatchlist ? (
                   <Button
                     buttonType={'ghost'}
@@ -260,7 +335,21 @@ const TitleCard = ({
                     <MinusCircleIcon className={'h-3'} />
                   </Button>
                 )}
-              </>
+                {showHideButton &&
+                  currentStatus !== MediaStatus.PROCESSING &&
+                  currentStatus !== MediaStatus.AVAILABLE &&
+                  currentStatus !== MediaStatus.PARTIALLY_AVAILABLE &&
+                  currentStatus !== MediaStatus.PENDING && (
+                    <Button
+                      buttonType={'ghost'}
+                      className="z-40"
+                      buttonSize={'sm'}
+                      onClick={() => setShowBlacklistModal(true)}
+                    >
+                      <EyeSlashIcon className={'h-3'} />
+                    </Button>
+                  )}
+              </div>
             )}
             {currentStatus && currentStatus !== MediaStatus.UNKNOWN && (
               <div className="pointer-events-none z-40 flex items-center">
