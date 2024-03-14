@@ -848,7 +848,7 @@ export class MediaRequest {
             const requestRepository = getRepository(MediaRequest);
 
             this.status = MediaRequestStatus.FAILED;
-            requestRepository.save(this);
+            await requestRepository.save(this);
 
             logger.warn(
               'Something went wrong sending movie request to Radarr, marking status as FAILED',
@@ -1123,13 +1123,14 @@ export class MediaRequest {
             media[this.is4k ? 'externalServiceSlug4k' : 'externalServiceSlug'] =
               sonarrSeries.titleSlug;
             media[this.is4k ? 'serviceId4k' : 'serviceId'] = sonarrSettings?.id;
+
             await mediaRepository.save(media);
           })
           .catch(async () => {
             const requestRepository = getRepository(MediaRequest);
 
             this.status = MediaRequestStatus.FAILED;
-            requestRepository.save(this);
+            await requestRepository.save(this);
 
             logger.warn(
               'Something went wrong sending series request to Sonarr, marking status as FAILED',

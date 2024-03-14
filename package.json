@@ -1,6 +1,6 @@
 {
   "name": "jellyseerr",
-  "version": "0.1.0",
+  "version": "1.7.0",
   "private": true,
   "scripts": {
     "dev": "nodemon -e ts --watch server --watch overseerr-api.yml -e .json,.ts,.yml -x ts-node -r tsconfig-paths/register --files --project server/tsconfig.json server/index.ts",
@@ -68,6 +68,7 @@
     "node-schedule": "2.1.1",
     "nodemailer": "6.9.1",
     "openpgp": "5.7.0",
+    "pg": "8.11.0",
     "plex-api": "5.3.2",
     "pug": "3.0.2",
     "react": "18.2.0",
