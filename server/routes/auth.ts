@@ -674,4 +674,25 @@ authRoutes.post('/reset-password/:guid', async (req, res, next) => {
   return res.status(200).json({ status: 'ok' });
 });
 
+authRoutes.post('/easy', async (req, res) => {
+  const settings = getSettings();
+  if (!settings.main.easyLogin)
+    return res.status(500).json({ error: 'Easy Login disabled' });
+  const userRepository = getRepository(User);
+
+  // Try to find deviceId that corresponds to jellyfin user, else generate a new one
+  const user = await userRepository.findOne({
+    where: { id: settings.main.easyLoginUserId },
+  });
+
+  if (!user) return res.status(500).json({ error: 'User Not Found' });
+
+  // Set logged in session
+  if (req.session) {
+    req.session.userId = user?.id;
+  }
+
+  return res.status(200).json(user?.filter() ?? {});
+});
+
 export default authRoutes;

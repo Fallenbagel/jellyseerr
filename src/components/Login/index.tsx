@@ -2,6 +2,7 @@ import Accordion from '@app/components/Common/Accordion';
 import ImageFader from '@app/components/Common/ImageFader';
 import PageTitle from '@app/components/Common/PageTitle';
 import LanguagePicker from '@app/components/Layout/LanguagePicker';
+import EasyLogin from '@app/components/Login/EasyLogin';
 import LocalLogin from '@app/components/Login/LocalLogin';
 import PlexLoginButton from '@app/components/PlexLoginButton';
 import useSettings from '@app/hooks/useSettings';
@@ -23,6 +24,7 @@ const messages = defineMessages({
   signinwithplex: 'Use your Plex account',
   signinwithjellyfin: 'Use your {mediaServerName} account',
   signinwithoverseerr: 'Use your {applicationTitle} account',
+  signinwitheasylogin: 'Sign in with default user',
 });
 
 const Login = () => {
@@ -120,9 +122,34 @@ const Login = () => {
                 </div>
               </div>
             </Transition>
-            <Accordion single atLeastOne>
+            <Accordion
+              initialOpenIndexes={
+                settings.currentSettings.easyLogin ? [3] : [0]
+              }
+              single
+              atLeastOne
+            >
               {({ openIndexes, handleClick, AccordionContent }) => (
                 <>
+                  {settings.currentSettings.easyLogin && (
+                    <div>
+                      <button
+                        className={`w-full cursor-default bg-gray-800 bg-opacity-70 py-2 text-center text-sm font-bold text-gray-400 transition-colors duration-200 hover:cursor-pointer hover:bg-gray-700 focus:outline-none ${
+                          openIndexes.includes(3)
+                            ? 'text-indigo-500'
+                            : 'sm:rounded-b-lg'
+                        }`}
+                        onClick={() => handleClick(3)}
+                      >
+                        {intl.formatMessage(messages.signinwitheasylogin)}
+                      </button>
+                      <AccordionContent isOpen={openIndexes.includes(3)}>
+                        <div className="px-10 py-8">
+                          <EasyLogin revalidate={revalidate} />
+                        </div>
+                      </AccordionContent>
+                    </div>
+                  )}
                   <button
                     className={`w-full cursor-default bg-gray-800 bg-opacity-70 py-2 text-center text-sm font-bold text-gray-400 transition-colors duration-200 focus:outline-none sm:rounded-t-lg ${
                       openIndexes.includes(0) && 'text-indigo-500'

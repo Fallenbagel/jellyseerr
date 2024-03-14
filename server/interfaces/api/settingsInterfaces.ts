@@ -30,6 +30,8 @@ export interface PublicSettingsResponse {
   applicationUrl: string;
   hideAvailable: boolean;
   localLogin: boolean;
+  easyLogin: boolean;
+  easyLoginUserId: number;
   movie4kEnabled: boolean;
   series4kEnabled: boolean;
   region: string;
