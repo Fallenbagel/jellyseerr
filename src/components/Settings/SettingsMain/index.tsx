@@ -82,6 +82,13 @@ const SettingsMain = () => {
         intl.formatMessage(messages.validationApplicationUrlTrailingSlash),
         (value) => !value || !value.endsWith('/')
       ),
+    youtubeUrl: Yup.string()
+      .url('Must be a valid URL')
+      .test(
+        'no-trailing-slash',
+        'URL must not end in a trailing slash',
+        (value) => !value || !value.endsWith('/')
+      ),
   });
 
   const regenerate = async () => {
@@ -134,6 +141,7 @@ const SettingsMain = () => {
             partialRequestsEnabled: data?.partialRequestsEnabled,
             trustProxy: data?.trustProxy,
             cacheImages: data?.cacheImages,
+            youtubeUrl: data?.youtubeUrl,
           }}
           enableReinitialize
           validationSchema={MainSettingsSchema}
@@ -150,6 +158,7 @@ const SettingsMain = () => {
                 partialRequestsEnabled: values.partialRequestsEnabled,
                 trustProxy: values.trustProxy,
                 cacheImages: values.cacheImages,
+                youtubeUrl: values.youtubeUrl,
               });
               mutate('/api/v1/settings/public');
               mutate('/api/v1/status');
@@ -425,6 +434,26 @@ const SettingsMain = () => {
                         );
                       }}
                     />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label htmlFor="youtubeUrl" className="text-label">
+                    {'YouTube URL'}
+                  </label>
+                  <div className="form-input-area">
+                    <div className="form-input-field">
+                      <Field
+                        id="youtubeUrl"
+                        name="youtubeUrl"
+                        type="text"
+                        inputMode="url"
+                      />
+                    </div>
+                    {errors.youtubeUrl &&
+                      touched.youtubeUrl &&
+                      typeof errors.youtubeUrl === 'string' && (
+                        <div className="error">{errors.youtubeUrl}</div>
+                      )}
                   </div>
                 </div>
                 <div className="actions">
