@@ -1,6 +1,6 @@
 # Introduction
 
-Welcome to the Overseerr Documentation.
+Welcome to the Jellyseerr Documentation.
 
 ## Features
 
@@ -15,10 +15,10 @@ Welcome to the Overseerr Documentation.
 
 ## Motivation
 
-The primary motivation for starting this project was to have an incredibly performant and easy to use application. There is a heavy focus on the user experience for both the server owner and the users. We feel requesting should be **effortless for the user**. Find the media you want, click request, and branch off efficiently into other titles that interest you, all in one seamless flow. For the server owner, Overseerr takes all the hassle out of approving your users' requests.
+The primary motivation for starting this project was to have an incredibly performant and easy to use application. There is a heavy focus on the user experience for both the server owner and the users. We feel requesting should be **effortless for the user**. Find the media you want, click request, and branch off efficiently into other titles that interest you, all in one seamless flow. For the server owner, Jellyseerr takes all the hassle out of approving your users' requests.
 
 ## We need your help!
 
-Overseerr is an ambitious project. We have already poured a lot of work into this, and have a lot more to do. We need your valuable feedback and help to find and fix bugs. Also, with Overseerr being an open-source project, anyone is welcome to contribute. Contribution includes building new features, patching bugs, translating the application, or even just writing documentation.
+Jellyseerr is an ambitious project. We have already poured a lot of work into this, and have a lot more to do. We need your valuable feedback and help to find and fix bugs. Also, with Jellyseerr being an open-source project, anyone is welcome to contribute. Contribution includes building new features, patching bugs, translating the application, or even just writing documentation.
 
 If you would like to contribute, please be sure to review our [contribution guidelines](https://github.com/fallenbagel/jellyseerr/blob/develop/CONTRIBUTING.md).
