@@ -71,17 +71,25 @@ export const oidcSettingsSchema = (intl: IntlShape) => {
       .test({
         message: 'Issuer URL may not have search parameters.',
         test: (val) => {
-          return !!val && URL.canParse(val) && new URL(val).search === '';
+          if (!val) return false;
+          try {
+            const url = new URL(val);
+            return url.search === '';
+          } catch {
+            return false;
+          }
         },
       })
       .test({
         message: 'Issuer URL protocol must be http / https.',
         test: (val) => {
-          return (
-            !!val &&
-            URL.canParse(val) &&
-            ['http:', 'https:'].includes(new URL(val).protocol)
-          );
+          if (!val) return false;
+          try {
+            const url = new URL(val);
+            return ['http:', 'https:'].includes(url.protocol);
+          } catch {
+            return false;
+          }
         },
       }),
     clientId: yup.string().required(requiredMessage(messages.oidcClientId)),
