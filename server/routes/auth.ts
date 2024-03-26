@@ -4,14 +4,28 @@ import { MediaServerType } from '@server/constants/server';
 import { UserType } from '@server/constants/user';
 import { getRepository } from '@server/datasource';
 import { User } from '@server/entity/User';
+import type { IdTokenClaims } from '@server/interfaces/api/oidcInterfaces';
 import { startJobs } from '@server/job/schedule';
 import { Permission } from '@server/lib/permissions';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
+import {
+  createIdTokenSchema,
+  fetchOIDCTokenData,
+  getOIDCRedirectUrl,
+  getOIDCUserInfo,
+  getOIDCWellknownConfiguration,
+  tryGetUserIdentifiers,
+  validateUserClaims,
+  type FullUserInfo,
+} from '@server/utils/oidc';
+import { randomBytes } from 'crypto';
 import * as EmailValidator from 'email-validator';
 import { Router } from 'express';
 import gravatarUrl from 'gravatar-url';
+import decodeJwt from 'jwt-decode';
+import { In } from 'typeorm';
 
 const authRoutes = Router();
 
@@ -672,6 +686,271 @@ authRoutes.post('/reset-password/:guid', async (req, res, next) => {
   });
 
   return res.status(200).json({ status: 'ok' });
+});
+
+authRoutes.get('/oidc-login', async (req, res, next) => {
+  const settings = getSettings();
+
+  if (!settings.main.oidcLogin) {
+    return next({
+      status: 403,
+      message: 'OpenID Connect sign-in is disabled.',
+    });
+  }
+
+  const state = randomBytes(32).toString('hex');
+  let redirectUrl;
+
+  try {
+    redirectUrl = await getOIDCRedirectUrl(req, state);
+  } catch (err) {
+    logger.info('Failed OIDC login attempt', {
+      cause: 'Failed to fetch OIDC redirect url',
+      ip: req.ip,
+      errorMessage: err.message,
+    });
+    return next({
+      status: 500,
+      message: 'Configuration error.',
+    });
+  }
+
+  res.cookie('oidc-state', state, {
+    maxAge: 60000,
+    httpOnly: true,
+    secure: req.protocol === 'https',
+  });
+  return res.redirect(redirectUrl);
+});
+
+authRoutes.get('/oidc-callback', async (req, res, next) => {
+  const settings = getSettings();
+  const { oidcLogin, oidc } = settings.main;
+
+  if (!oidcLogin) {
+    return next({
+      status: 403,
+      message: 'OpenID Connect sign-in is disabled.',
+    });
+  }
+
+  const identifierClaims = oidc.userIdentifier.split(' ').filter((s) => !!s);
+  const requiredClaims = oidc.requiredClaims.split(' ').filter((s) => !!s);
+
+  const cookieState = req.cookies['oidc-state'];
+  const url = new URL(req.url, `${req.protocol}://${req.hostname}`);
+  const state = url.searchParams.get('state');
+
+  try {
+    // Check that the request belongs to the correct state
+    if (state && cookieState === state) {
+      res.clearCookie('oidc-state');
+    } else {
+      logger.info('Failed OIDC login attempt', {
+        cause: 'Invalid state',
+        ip: req.ip,
+        state: state,
+        cookieState: cookieState,
+      });
+      return next({
+        status: 400,
+        message: 'Authorization failed.',
+      });
+    }
+
+    // Check that a code has been issued
+    const code = url.searchParams.get('code');
+    if (!code) {
+      logger.info('Failed OIDC login attempt', {
+        cause: 'Invalid code',
+        ip: req.ip,
+        code: code,
+      });
+      return next({
+        status: 400,
+        message: 'Authorization failed.',
+      });
+    }
+
+    const wellKnownInfo = await getOIDCWellknownConfiguration(oidc.providerUrl);
+
+    // Fetch the token data
+    const body = await fetchOIDCTokenData(req, wellKnownInfo, code);
+
+    // Validate that the token response is valid and not manipulated
+    if ('error' in body) {
+      logger.info('Failed OIDC login attempt', {
+        cause: 'Invalid token response',
+        ip: req.ip,
+        body: body,
+      });
+      return next({
+        status: 400,
+        message: 'Authorization failed.',
+      });
+    }
+
+    // Extract the ID token and access token
+    const { id_token: idToken, access_token: accessToken } = body;
+
+    // Attempt to decode ID token jwt
+    let decoded: IdTokenClaims;
+    try {
+      decoded = decodeJwt(idToken);
+    } catch (err) {
+      logger.info('Failed OIDC login attempt', {
+        cause: 'Invalid jwt',
+        ip: req.ip,
+        idToken: idToken,
+        err,
+      });
+      return next({
+        status: 400,
+        message: 'Authorization failed.',
+      });
+    }
+
+    // Merge claims from JWT with data from userinfo endpoint
+    const userInfo = await getOIDCUserInfo(wellKnownInfo, accessToken);
+    const fullUserInfo: FullUserInfo = { ...decoded, ...userInfo };
+
+    // Validate ID token jwt and user info
+    try {
+      const idTokenSchema = createIdTokenSchema({
+        oidcClientId: oidc.clientId,
+        oidcDomain: oidc.providerUrl,
+        identifierClaims,
+        requiredClaims,
+      });
+      await idTokenSchema.validate(fullUserInfo);
+    } catch (err) {
+      logger.info('Failed OIDC login attempt', {
+        cause: 'Invalid jwt or missing claims',
+        ip: req.ip,
+        idToken: idToken,
+        errorMessage: err.message,
+      });
+      return next({
+        status: 403,
+        message: 'Authorization failed.',
+      });
+    }
+
+    // Validate user identifier
+    let identifiers: string[];
+    try {
+      identifiers = tryGetUserIdentifiers(fullUserInfo, identifierClaims);
+    } catch {
+      logger.info('Failed OIDC login attempt', {
+        cause: 'User identifier not found in userinfo payload.',
+        user: fullUserInfo,
+        identifier: oidc.userIdentifier,
+      });
+      return next({
+        status: 500,
+        message: 'Configuration error.',
+      });
+    }
+
+    // Check that email is verified
+    try {
+      validateUserClaims(fullUserInfo, requiredClaims);
+    } catch (error) {
+      logger.info('Failed OIDC login attempt', {
+        cause: 'Failed to validate required claims',
+        error,
+        ip: req.ip,
+        identifiers,
+        requiredClaims: oidc.requiredClaims,
+      });
+      return next({
+        status: 403,
+        message: 'Insufficient permissions.',
+      });
+    }
+
+    // Map oidc identifier to user email
+    const userRepository = getRepository(User);
+    let user = await userRepository.findOne({
+      where: {
+        email: In(identifiers),
+      },
+    });
+
+    // Map user identification claim to media server username
+    if (!user && oidc.matchJellyfinUsername) {
+      user = await userRepository.findOne({
+        where: [
+          { plexUsername: In(identifiers) },
+          { jellyfinUsername: In(identifiers) },
+        ],
+      });
+    }
+
+    // Create user if one doesn't already exist
+    if (!user && fullUserInfo.email != null) {
+      logger.info(`Creating user for ${fullUserInfo.email}`, {
+        ip: req.ip,
+        email: fullUserInfo.email,
+      });
+      const avatar =
+        fullUserInfo.picture ??
+        gravatarUrl(fullUserInfo.email, { default: 'mm', size: 200 });
+      user = new User({
+        avatar: avatar,
+        username: fullUserInfo.preferred_username,
+        email: fullUserInfo.email,
+        permissions: settings.main.defaultPermissions,
+        plexToken: '',
+        userType: UserType.LOCAL,
+      });
+      await userRepository.save(user);
+    } else if (!user) {
+      logger.debug('Failed OIDC sign-up attempt', {
+        cause:
+          'User did not have an account, and was missing an associated email address.',
+      });
+      return next({
+        status: 400,
+        message: 'Unable to create new user account. Missing email address.',
+      });
+    }
+
+    // Set logged in session and return
+    if (req.session) {
+      req.session.userId = user.id;
+    }
+
+    // Success!
+    return res.status(200).json({ status: 'ok' });
+  } catch (error) {
+    logger.error('Failed OIDC login attempt', {
+      cause: 'Unknown error',
+      ip: req.ip,
+      errorMessage: error.message,
+    });
+    return next({
+      status: 500,
+      message: 'An unknown error occurred.',
+    });
+  }
+});
+
+authRoutes.get('/oidc-logout', async (req, res, next) => {
+  const settings = getSettings();
+
+  if (!settings.main.oidcLogin || !settings.main.oidc.automaticLogin) {
+    return next({
+      status: 403,
+      message: 'OpenID Connect sign-in is disabled.',
+    });
+  }
+
+  const oidcEndpoints = await getOIDCWellknownConfiguration(
+    settings.main.oidc.providerUrl
+  );
+
+  return res.redirect(oidcEndpoints.end_session_endpoint);
 });
 
 export default authRoutes;

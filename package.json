@@ -61,6 +61,7 @@
     "formik": "2.2.9",
     "gravatar-url": "3.1.0",
     "intl": "1.2.5",
+    "jwt-decode": "^3.1.2",
     "lodash": "4.17.21",
     "next": "12.3.4",
     "node-cache": "5.1.2",

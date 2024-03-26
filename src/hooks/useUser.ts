@@ -17,7 +17,7 @@ export interface User {
   email: string;
   avatar: string;
   permissions: number;
-  userType: number;
+  userType: UserType;
   createdAt: Date;
   updatedAt: Date;
   requestCount: number;

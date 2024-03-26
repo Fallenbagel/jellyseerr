@@ -35,6 +35,7 @@ const globalMessages = defineMessages({
   import: 'Import',
   importing: 'Importing…',
   close: 'Close',
+  done: 'Done',
   edit: 'Edit',
   areyousure: 'Are you sure?',
   back: 'Back',
@@ -55,6 +56,7 @@ const globalMessages = defineMessages({
   noresults: 'No results.',
   open: 'Open',
   resolved: 'Resolved',
+  fieldRequired: '{fieldName} is required',
 });
 
 export default globalMessages;

@@ -80,6 +80,68 @@ When disabled, Plex OAuth becomes the only sign-in option, and any "local users"
 
 This setting is **enabled** by default.
 
+### Enable Media Server Sign-In
+
+When enabled, users will be able to sign in on the login screen using their Plex / Jellyfin accounts.
+
+When disabled, local sign-in will be the only option.
+
+This setting is **enabled** by default.
+
+### Enable OIDC Sign-In
+
+When enabled, allows users to sign in to local accounts using an OIDC identity provider, which requires additional configuration.
+
+For this setting to function properly, the OIDC Issuer URL, Provider Name, Client ID, and Client Secret must all be properly set.
+
+This setting is **disabled** by default.
+
+### OIDC Settings
+
+#### Issuer URL
+
+Sets the base URL of the identity provider's OpenID Connect endpoint. A valid URL for this setting should have a discovery endpoint at `/.well-known/openid-configuration` as outlined in the [OpenID Connect Discovery specification](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig).
+
+#### Provider Name
+
+Sets the name that should be shown for the OIDC login option on the login screen.
+
+For example, setting the Provider Name option to "My Incredible Login Page" would make a button with the text "Sign in with My Incredible Login Page" appear on the login page.
+
+#### Client ID
+
+Sets the client ID Jellyseerr should use when communicating with the configured identity provider.
+
+#### Client Secret
+
+Sets the client secret Jellyseerr should use when communicating with the configured identity provider.
+
+#### Scopes
+
+Sets the scopes that should be requested from the identity provider when logging in, as described in the [OpenID Connect specification](https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims). This is an advanced setting, and the default value (`email openid profile`) should be sufficient for most configurations.
+
+#### Identification Claims
+
+Sets the string-typed claims that should be used to identify a user. These claims are matched to the user's unique identifier (email). This is an advanced setting, and the default value (`email`) should be sufficient for most configurations.
+
+#### Required Claims
+
+Sets the boolean-typed claims that should be required for a user to successfully log in. This is an advanced setting, and the default value (`email_verified`) should be sufficient for most configurations. If requiring a verified email address is not desired, it is possible to leave this field blank.
+
+#### Allow Plex / Jellyfin Usernames
+
+When enabled, a user's identification claims are matched not only against their email, but against their Plex / Jellyfin username. This is an advanced setting, and enabling it will likely result in reduced security due to the ease of changing / spoofing usernames.
+
+This setting may be helpful, however, for scenarios when the OpenID connect provider and Plex / Jellyfin's usernames are equivalent for all users. It may be helpful to add `preferred_username` or another of the [standard OpenID Connect claims](https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims) to the [Identification Claims](#identification-claims) setting to enable matching Plex / Jellyfin usernames to the usernames obtained from the identity provider.
+
+This setting is **disabled** by default.
+
+#### Automatic Login
+
+When enabled, OpenID Connect authentication will replace the built-in authentication mechanism. The login page will automatically redirect to the OpenID Connect identity provider, and logging out will trigger an OpenID Connect logout flow. This setting may only be enabled if OIDC Sign-In is the only enabled authentication mechanism.
+
+This setting is **disabled** by default.
+
 ### Enable New Plex Sign-In
 
 When enabled, users with access to your Plex server will be able to sign in to Overseerr even if they have not yet been imported. Users will be automatically assigned the permissions configured in the [Default Permissions](#default-permissions) setting upon first sign-in.

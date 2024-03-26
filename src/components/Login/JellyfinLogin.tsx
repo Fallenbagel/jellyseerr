@@ -26,19 +26,19 @@ const messages = defineMessages({
   loginerror: 'Something went wrong while trying to sign in.',
   credentialerror: 'The username or password is incorrect.',
   signingin: 'Signing in…',
-  signin: 'Sign In',
+  signin: 'Sign in',
   initialsigningin: 'Connecting…',
   initialsignin: 'Connect',
   forgotpassword: 'Forgot Password?',
 });
 
 interface JellyfinLoginProps {
-  revalidate: () => void;
+  onAuthenticated: () => void;
   initial?: boolean;
 }
 
 const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
-  revalidate,
+  onAuthenticated,
   initial,
 }) => {
   const toasts = useToasts();
@@ -102,7 +102,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
               }
             );
           } finally {
-            revalidate();
+            onAuthenticated();
           }
         }}
       >
@@ -252,7 +252,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                 }
               );
             } finally {
-              revalidate();
+              onAuthenticated();
             }
           }}
         >
@@ -260,7 +260,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
             return (
               <>
                 <Form>
-                  <div className="sm:border-t sm:border-gray-800">
+                  <div>
                     <label htmlFor="username" className="text-label">
                       {intl.formatMessage(messages.username)}
                     </label>

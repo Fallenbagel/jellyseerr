@@ -1,9 +1,9 @@
 import Accordion from '@app/components/Common/Accordion';
+import ErrorCallout from '@app/components/Login/ErrorCallout';
 import JellyfinLogin from '@app/components/Login/JellyfinLogin';
-import PlexLoginButton from '@app/components/PlexLoginButton';
-import { useUser } from '@app/hooks/useUser';
+import PlexLogin from '@app/components/Login/PlexLogin';
+import { UserType, useUser } from '@app/hooks/useUser';
 import { MediaServerType } from '@server/constants/server';
-import axios from 'axios';
 import getConfig from 'next/config';
 import type React from 'react';
 import { useEffect, useState } from 'react';
@@ -21,35 +21,30 @@ interface LoginWithMediaServerProps {
 }
 
 const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
-  const [authToken, setAuthToken] = useState<string | undefined>(undefined);
+  const [error, setError] = useState('');
   const [mediaServerType, setMediaServerType] = useState<MediaServerType>(
     MediaServerType.NOT_CONFIGURED
   );
   const { user, revalidate } = useUser();
   const intl = useIntl();
   const { publicRuntimeConfig } = getConfig();
-  // Effect that is triggered when the `authToken` comes back from the Plex OAuth
-  // We take the token and attempt to login. If we get a success message, we will
-  // ask swr to revalidate the user which _shouid_ come back with a valid user.
-
-  useEffect(() => {
-    const login = async () => {
-      const response = await axios.post('/api/v1/auth/plex', {
-        authToken: authToken,
-      });
-
-      if (response.data?.email) {
-        revalidate();
-      }
-    };
-    if (authToken && mediaServerType == MediaServerType.PLEX) {
-      login();
-    }
-  }, [authToken, mediaServerType, revalidate]);
 
   useEffect(() => {
     if (user) {
-      onComplete(mediaServerType);
+      if (mediaServerType === MediaServerType.NOT_CONFIGURED) {
+        switch (user.userType) {
+          case UserType.PLEX:
+            setMediaServerType(MediaServerType.PLEX);
+            onComplete(MediaServerType.PLEX);
+            break;
+          case UserType.JELLYFIN:
+            setMediaServerType(MediaServerType.JELLYFIN);
+            onComplete(MediaServerType.JELLYFIN);
+            break;
+        }
+      } else {
+        onComplete(mediaServerType);
+      }
     }
   }, [user, mediaServerType, onComplete]);
 
@@ -61,6 +56,7 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
       <div className="mb-2 flex justify-center pb-6 text-sm">
         <FormattedMessage {...messages.signinMessage} />
       </div>
+      <ErrorCallout error={error} />
       <Accordion single atLeastOne>
         {({ openIndexes, handleClick, AccordionContent }) => (
           <>
@@ -77,11 +73,12 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
                 className="px-10 py-8"
                 style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
               >
-                <PlexLoginButton
-                  onAuthToken={(authToken) => {
+                <PlexLogin
+                  onAuthenticated={() => {
                     setMediaServerType(MediaServerType.PLEX);
-                    setAuthToken(authToken);
+                    revalidate();
                   }}
+                  onError={(err) => setError(err)}
                 />
               </div>
             </AccordionContent>
@@ -107,7 +104,13 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
                   className="rounded-b-lg px-10 py-8"
                   style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
                 >
-                  <JellyfinLogin initial={true} revalidate={revalidate} />
+                  <JellyfinLogin
+                    initial={true}
+                    onAuthenticated={() => {
+                      setMediaServerType(MediaServerType.JELLYFIN);
+                      revalidate();
+                    }}
+                  />
                 </div>
               </AccordionContent>
             </div>
