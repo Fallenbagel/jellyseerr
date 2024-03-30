@@ -45,6 +45,10 @@ const messages = defineMessages({
   librariesRemaining: 'Libraries Remaining: {count}',
   startscan: 'Start Scan',
   cancelscan: 'Cancel Scan',
+  syncFailedNoLibrariesFound: 'No libraries were found',
+  syncFailedAutomaticGroupedFolders:
+    'Custom authentication with Automatic Library Grouping not supported',
+  syncFailedGenericError: 'Something went wrong while syncing libraries',
 });
 
 interface Library {
@@ -70,6 +74,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
   showAdvancedSettings,
 }) => {
   const [isSyncing, setIsSyncing] = useState(false);
+  const toasts = useToasts();
 
   const {
     data,
@@ -117,11 +122,38 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
       params.enable = activeLibraries.join(',');
     }
 
-    await axios.get('/api/v1/settings/jellyfin/library', {
-      params,
-    });
-    setIsSyncing(false);
-    revalidate();
+    try {
+      await axios.get('/api/v1/settings/jellyfin/library', {
+        params,
+      });
+      setIsSyncing(false);
+      revalidate();
+    } catch (e) {
+      if (e.response.data.message === 'SYNC_ERROR_GROUPED_FOLDERS') {
+        toasts.addToast(
+          intl.formatMessage(messages.syncFailedAutomaticGroupedFolders),
+          {
+            autoDismiss: true,
+            appearance: 'warning',
+          }
+        );
+      } else if (e.response.data.message === 'SYNC_ERROR_NO_LIBRARIES') {
+        toasts.addToast(
+          intl.formatMessage(messages.syncFailedNoLibrariesFound),
+          {
+            autoDismiss: true,
+            appearance: 'error',
+          }
+        );
+      } else {
+        toasts.addToast(intl.formatMessage(messages.syncFailedGenericError), {
+          autoDismiss: true,
+          appearance: 'error',
+        });
+      }
+      setIsSyncing(false);
+      revalidate();
+    }
   };
 
   const startScan = async () => {
