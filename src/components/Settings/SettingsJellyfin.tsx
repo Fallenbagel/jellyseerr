@@ -34,6 +34,11 @@ const messages = defineMessages({
   externalUrl: 'External URL',
   internalUrl: 'Internal URL',
   jellyfinForgotPasswordUrl: 'Forgot Password URL',
+  jellyfinSyncFailedNoLibrariesFound: 'No libraries were found',
+  jellyfinSyncFailedAutomaticGroupedFolders:
+    'Custom authentication with Automatic Library Grouping not supported',
+  jellyfinSyncFailedGenericError:
+    'Something went wrong while syncing libraries',
   validationUrl: 'You must provide a valid URL',
   syncing: 'Syncing',
   syncJellyfin: 'Sync Libraries',
@@ -45,10 +50,6 @@ const messages = defineMessages({
   librariesRemaining: 'Libraries Remaining: {count}',
   startscan: 'Start Scan',
   cancelscan: 'Cancel Scan',
-  syncFailedNoLibrariesFound: 'No libraries were found',
-  syncFailedAutomaticGroupedFolders:
-    'Custom authentication with Automatic Library Grouping not supported',
-  syncFailedGenericError: 'Something went wrong while syncing libraries',
 });
 
 interface Library {
@@ -131,7 +132,9 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
     } catch (e) {
       if (e.response.data.message === 'SYNC_ERROR_GROUPED_FOLDERS') {
         toasts.addToast(
-          intl.formatMessage(messages.syncFailedAutomaticGroupedFolders),
+          intl.formatMessage(
+            messages.jellyfinSyncFailedAutomaticGroupedFolders
+          ),
           {
             autoDismiss: true,
             appearance: 'warning',
@@ -139,17 +142,20 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
         );
       } else if (e.response.data.message === 'SYNC_ERROR_NO_LIBRARIES') {
         toasts.addToast(
-          intl.formatMessage(messages.syncFailedNoLibrariesFound),
+          intl.formatMessage(messages.jellyfinSyncFailedNoLibrariesFound),
           {
             autoDismiss: true,
             appearance: 'error',
           }
         );
       } else {
-        toasts.addToast(intl.formatMessage(messages.syncFailedGenericError), {
-          autoDismiss: true,
-          appearance: 'error',
-        });
+        toasts.addToast(
+          intl.formatMessage(messages.jellyfinSyncFailedGenericError),
+          {
+            autoDismiss: true,
+            appearance: 'error',
+          }
+        );
       }
       setIsSyncing(false);
       revalidate();
