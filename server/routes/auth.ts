@@ -276,6 +276,11 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
     });
 
     if (!user && !(await userRepository.count())) {
+      // Check if user is admin on jellyfin
+      if (account.User.Policy.IsAdministrator === false) {
+        throw new Error('not_admin');
+      }
+
       logger.info(
         'Sign-in attempt from Jellyfin user with access to the media server; creating initial admin user for Overseerr',
         {
@@ -345,11 +350,11 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         user.username = '';
       }
 
-      // If JELLYFIN_TYPE is set to 'emby' then set mediaServerType to EMBY
-      if (process.env.JELLYFIN_TYPE === 'emby') {
-        settings.main.mediaServerType = MediaServerType.EMBY;
-        settings.save();
-      }
+      // TODO: If JELLYFIN_TYPE is set to 'emby' then set mediaServerType to EMBY
+      // if (process.env.JELLYFIN_TYPE === 'emby') {
+      //   settings.main.mediaServerType = MediaServerType.EMBY;
+      //   settings.save();
+      // }
 
       await userRepository.save(user);
     } else if (!settings.main.newPlexLogin) {
@@ -422,6 +427,11 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
       return next({
         status: 401,
         message: 'Unauthorized',
+      });
+    } else if (e.message === 'not_admin') {
+      return next({
+        status: 403,
+        message: 'CREDENTIAL_ERROR_NOT_ADMIN',
       });
     } else if (e.message === 'add_email') {
       return next({
