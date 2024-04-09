@@ -609,7 +609,7 @@
     "components.Settings.RadarrModal.validationRootFolderRequired": "Ви повинні вибрати кореневий каталог",
     "components.Settings.SettingsAbout.Releases.currentversion": "Поточна",
     "components.Settings.SettingsAbout.Releases.latestversion": "Остання",
-    "components.Settings.SettingsAbout.Releases.releasedataMissing": "Дані про дозвіл в даний час недоступні.",
+    "components.Settings.SettingsAbout.Releases.releasedataMissing": "Дані про реліз наразі недоступні.",
     "components.Settings.SettingsAbout.Releases.releases": "Релізи",
     "components.Settings.SettingsAbout.Releases.versionChangelog": "Зміни у версії {version}",
     "components.Settings.SettingsAbout.Releases.viewchangelog": "Переглянути список змін",
