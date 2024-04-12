@@ -186,7 +186,6 @@ class JellyfinAPI {
   public async getLibraries(): Promise<JellyfinLibrary[]> {
     try {
       const mediaFolders = await this.axios.get<any>(`/Library/MediaFolders`);
-      console.log(mediaFolders.data.Items);
 
       return this.mapLibraries(mediaFolders.data.Items);
     } catch (mediaFoldersError) {
