@@ -19,6 +19,7 @@ type ListViewProps = {
   isLoading?: boolean;
   isReachingEnd?: boolean;
   onScrollBottom: () => void;
+  mutateParent?: () => void;
 };
 
 const ListView = ({
@@ -28,6 +29,7 @@ const ListView = ({
   onScrollBottom,
   isReachingEnd,
   plexItems,
+  mutateParent,
 }: ListViewProps) => {
   const intl = useIntl();
   useVerticalScroll(onScrollBottom, !isLoading && !isEmpty && !isReachingEnd);
@@ -46,7 +48,9 @@ const ListView = ({
                 id={title.tmdbId}
                 tmdbId={title.tmdbId}
                 type={title.mediaType}
+                isAddedToWatchlist={true}
                 canExpand
+                mutateParent={mutateParent}
               />
             </li>
           );

@@ -40,6 +40,7 @@ export interface JellyfinSettings {
   name: string;
   hostname: string;
   externalHostname?: string;
+  jellyfinForgotPasswordUrl?: string;
   libraries: Library[];
   serverId: string;
 }
@@ -77,6 +78,8 @@ export interface RadarrSettings extends DVRSettings {
 }
 
 export interface SonarrSettings extends DVRSettings {
+  seriesType: 'standard' | 'daily' | 'anime';
+  animeSeriesType: 'standard' | 'daily' | 'anime';
   activeAnimeProfileId?: number;
   activeAnimeProfileName?: string;
   activeAnimeDirectory?: string;
@@ -128,6 +131,8 @@ interface FullPublicSettings extends PublicSettings {
   originalLanguage: string;
   mediaServerType: number;
   jellyfinHost?: string;
+  jellyfinExternalHost?: string;
+  jellyfinForgotPasswordUrl?: string;
   jellyfinServerName?: string;
   partialRequestsEnabled: boolean;
   cacheImages: boolean;
@@ -204,6 +209,7 @@ export interface NotificationAgentPushover extends NotificationAgentConfig {
   options: {
     accessToken: string;
     userToken: string;
+    sound: string;
   };
 }
 
@@ -263,8 +269,8 @@ export type JobId =
   | 'sonarr-scan'
   | 'download-sync'
   | 'download-sync-reset'
-  | 'jellyfin-recently-added-sync'
-  | 'jellyfin-full-sync'
+  | 'jellyfin-recently-added-scan'
+  | 'jellyfin-full-scan'
   | 'image-cache-cleanup'
   | 'availability-sync';
 
@@ -327,6 +333,7 @@ class Settings {
         name: '',
         hostname: '',
         externalHostname: '',
+        jellyfinForgotPasswordUrl: '',
         libraries: [],
         serverId: '',
       },
@@ -396,6 +403,7 @@ class Settings {
             options: {
               accessToken: '',
               userToken: '',
+              sound: '',
             },
           },
           webhook: {
@@ -446,10 +454,10 @@ class Settings {
         'download-sync-reset': {
           schedule: '0 0 1 * * *',
         },
-        'jellyfin-recently-added-sync': {
+        'jellyfin-recently-added-scan': {
           schedule: '0 */5 * * * *',
         },
-        'jellyfin-full-sync': {
+        'jellyfin-full-scan': {
           schedule: '0 0 3 * * *',
         },
         'image-cache-cleanup': {
@@ -529,6 +537,7 @@ class Settings {
       applicationUrl: this.data.main.applicationUrl,
       hideAvailable: this.data.main.hideAvailable,
       localLogin: this.data.main.localLogin,
+      jellyfinForgotPasswordUrl: this.data.jellyfin.jellyfinForgotPasswordUrl,
       movie4kEnabled: this.data.radarr.some(
         (radarr) => radarr.is4k && radarr.isDefault
       ),
@@ -539,6 +548,7 @@ class Settings {
       originalLanguage: this.data.main.originalLanguage,
       mediaServerType: this.main.mediaServerType,
       jellyfinHost: this.jellyfin.hostname,
+      jellyfinExternalHost: this.jellyfin.externalHostname,
       partialRequestsEnabled: this.data.main.partialRequestsEnabled,
       cacheImages: this.data.main.cacheImages,
       vapidPublic: this.vapidPublic,

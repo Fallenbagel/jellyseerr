@@ -30,9 +30,15 @@ const messages = defineMessages({
   jellyfinSettingsSuccess: '{mediaServerName} settings saved successfully!',
   jellyfinSettings: '{mediaServerName} Settings',
   jellyfinSettingsDescription:
-    'Optionally configure the internal and external endpoints for your {mediaServerName} server. In most cases, the external URL is different to the internal URL.',
+    'Optionally configure the internal and external endpoints for your {mediaServerName} server. In most cases, the external URL is different to the internal URL. A custom password reset URL can also be set for {mediaServerName} login, in case you would like to redirect to a different password reset page.',
   externalUrl: 'External URL',
   internalUrl: 'Internal URL',
+  jellyfinForgotPasswordUrl: 'Forgot Password URL',
+  jellyfinSyncFailedNoLibrariesFound: 'No libraries were found',
+  jellyfinSyncFailedAutomaticGroupedFolders:
+    'Custom authentication with Automatic Library Grouping not supported',
+  jellyfinSyncFailedGenericError:
+    'Something went wrong while syncing libraries',
   validationUrl: 'You must provide a valid URL',
   syncing: 'Syncing',
   syncJellyfin: 'Sync Libraries',
@@ -69,6 +75,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
   showAdvancedSettings,
 }) => {
   const [isSyncing, setIsSyncing] = useState(false);
+  const toasts = useToasts();
 
   const {
     data,
@@ -94,6 +101,10 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
       /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
       intl.formatMessage(messages.validationUrl)
     ),
+    jellyfinForgotPasswordUrl: Yup.string().matches(
+      /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
+      intl.formatMessage(messages.validationUrl)
+    ),
   });
 
   const activeLibraries =
@@ -112,11 +123,43 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
       params.enable = activeLibraries.join(',');
     }
 
-    await axios.get('/api/v1/settings/jellyfin/library', {
-      params,
-    });
-    setIsSyncing(false);
-    revalidate();
+    try {
+      await axios.get('/api/v1/settings/jellyfin/library', {
+        params,
+      });
+      setIsSyncing(false);
+      revalidate();
+    } catch (e) {
+      if (e.response.data.message === 'SYNC_ERROR_GROUPED_FOLDERS') {
+        toasts.addToast(
+          intl.formatMessage(
+            messages.jellyfinSyncFailedAutomaticGroupedFolders
+          ),
+          {
+            autoDismiss: true,
+            appearance: 'warning',
+          }
+        );
+      } else if (e.response.data.message === 'SYNC_ERROR_NO_LIBRARIES') {
+        toasts.addToast(
+          intl.formatMessage(messages.jellyfinSyncFailedNoLibrariesFound),
+          {
+            autoDismiss: true,
+            appearance: 'error',
+          }
+        );
+      } else {
+        toasts.addToast(
+          intl.formatMessage(messages.jellyfinSyncFailedGenericError),
+          {
+            autoDismiss: true,
+            appearance: 'error',
+          }
+        );
+      }
+      setIsSyncing(false);
+      revalidate();
+    }
   };
 
   const startScan = async () => {
@@ -353,6 +396,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
             initialValues={{
               jellyfinInternalUrl: data?.hostname || '',
               jellyfinExternalUrl: data?.externalHostname || '',
+              jellyfinForgotPasswordUrl: data?.jellyfinForgotPasswordUrl || '',
             }}
             validationSchema={JellyfinSettingsSchema}
             onSubmit={async (values) => {
@@ -360,6 +404,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                 await axios.post('/api/v1/settings/jellyfin', {
                   hostname: values.jellyfinInternalUrl,
                   externalHostname: values.jellyfinExternalUrl,
+                  jellyfinForgotPasswordUrl: values.jellyfinForgotPasswordUrl,
                 } as JellyfinSettings);
 
                 addToast(
@@ -433,6 +478,30 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                         touched.jellyfinExternalUrl && (
                           <div className="error">
                             {errors.jellyfinExternalUrl}
+                          </div>
+                        )}
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <label
+                      htmlFor="jellyfinForgotPasswordUrl"
+                      className="text-label"
+                    >
+                      {intl.formatMessage(messages.jellyfinForgotPasswordUrl)}
+                    </label>
+                    <div className="form-input-area">
+                      <div className="form-input-field">
+                        <Field
+                          type="text"
+                          inputMode="url"
+                          id="jellyfinForgotPasswordUrl"
+                          name="jellyfinForgotPasswordUrl"
+                        />
+                      </div>
+                      {errors.jellyfinForgotPasswordUrl &&
+                        touched.jellyfinForgotPasswordUrl && (
+                          <div className="error">
+                            {errors.jellyfinForgotPasswordUrl}
                           </div>
                         )}
                     </div>

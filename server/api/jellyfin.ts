@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import availabilitySync from '@server/lib/availabilitySync';
 import logger from '@server/logger';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
@@ -8,6 +9,12 @@ export interface JellyfinUserResponse {
   ServerId: string;
   ServerName: string;
   Id: string;
+  Configuration: {
+    GroupedFolders: string[];
+  };
+  Policy: {
+    IsAdministrator: boolean;
+  };
   PrimaryImageTag?: string;
 }
 
@@ -18,6 +25,13 @@ export interface JellyfinLoginResponse {
 
 export interface JellyfinUserListResponse {
   users: JellyfinUserResponse[];
+}
+
+interface JellyfinMediaFolder {
+  Name: string;
+  Id: string;
+  Type: string;
+  CollectionType: string;
 }
 
 export interface JellyfinLibrary {
@@ -171,40 +185,58 @@ class JellyfinAPI {
 
   public async getLibraries(): Promise<JellyfinLibrary[]> {
     try {
-      const libraries = await this.axios.get<any>('/Library/VirtualFolders');
+      const mediaFolders = await this.axios.get<any>(`/Library/MediaFolders`);
 
-      const response: JellyfinLibrary[] = libraries.data
-        .filter((Item: any) => {
-          return (
-            Item.CollectionType !== 'music' &&
-            Item.CollectionType !== 'books' &&
-            Item.CollectionType !== 'musicvideos' &&
-            Item.CollectionType !== 'homevideos'
-          );
-        })
-        .map((Item: any) => {
-          return <JellyfinLibrary>{
-            key: Item.ItemId,
-            title: Item.Name,
-            type: Item.CollectionType === 'movies' ? 'movie' : 'show',
-            agent: 'jellyfin',
-          };
-        });
+      return this.mapLibraries(mediaFolders.data.Items);
+    } catch (mediaFoldersError) {
+      // fallback to user views to get libraries
+      // this only affects LDAP users
+      try {
+        const mediaFolders = await this.axios.get<any>(
+          `/Users/${this.userId ?? 'Me'}/Views`
+        );
 
-      return response;
-    } catch (e) {
-      logger.error(
-        `Something went wrong while getting libraries from the Jellyfin server: ${e.message}`,
-        { label: 'Jellyfin API' }
-      );
-      return [];
+        return this.mapLibraries(mediaFolders.data.Items);
+      } catch (e) {
+        logger.error(
+          `Something went wrong while getting libraries from the Jellyfin server: ${e.message}`,
+          { label: 'Jellyfin API' }
+        );
+        return [];
+      }
     }
+  }
+
+  private mapLibraries(mediaFolders: JellyfinMediaFolder[]): JellyfinLibrary[] {
+    const excludedTypes = [
+      'music',
+      'books',
+      'musicvideos',
+      'homevideos',
+      'boxsets',
+    ];
+
+    return mediaFolders
+      .filter((Item: JellyfinMediaFolder) => {
+        return (
+          Item.Type === 'CollectionFolder' &&
+          !excludedTypes.includes(Item.CollectionType)
+        );
+      })
+      .map((Item: JellyfinMediaFolder) => {
+        return <JellyfinLibrary>{
+          key: Item.Id,
+          title: Item.Name,
+          type: Item.CollectionType === 'movies' ? 'movie' : 'show',
+          agent: 'jellyfin',
+        };
+      });
   }
 
   public async getLibraryContents(id: string): Promise<JellyfinLibraryItem[]> {
     try {
       const contents = await this.axios.get<any>(
-        `/Users/${this.userId}/Items?SortBy=SortName&SortOrder=Ascending&IncludeItemTypes=Series,Movie,Others&Recursive=true&StartIndex=0&ParentId=${id}`
+        `/Users/${this.userId}/Items?SortBy=SortName&SortOrder=Ascending&IncludeItemTypes=Series,Movie,Others&Recursive=true&StartIndex=0&ParentId=${id}&collapseBoxSetItems=false`
       );
 
       return contents.data.Items.filter(
@@ -235,7 +267,9 @@ class JellyfinAPI {
     }
   }
 
-  public async getItemData(id: string): Promise<JellyfinLibraryItemExtended> {
+  public async getItemData(
+    id: string
+  ): Promise<JellyfinLibraryItemExtended | undefined> {
     try {
       const contents = await this.axios.get<any>(
         `/Users/${this.userId}/Items/${id}`
@@ -243,6 +277,11 @@ class JellyfinAPI {
 
       return contents.data;
     } catch (e) {
+      if (availabilitySync.running) {
+        if (e.response && e.response.status === 500) {
+          return undefined;
+        }
+      }
       logger.error(
         `Something went wrong while getting library content from the Jellyfin server: ${e.message}`,
         { label: 'Jellyfin API' }
@@ -255,9 +294,7 @@ class JellyfinAPI {
     try {
       const contents = await this.axios.get<any>(`/Shows/${seriesID}/Seasons`);
 
-      return contents.data.Items.filter(
-        (item: JellyfinLibraryItem) => item.LocationType !== 'Virtual'
-      );
+      return contents.data.Items;
     } catch (e) {
       logger.error(
         `Something went wrong while getting the list of seasons from the Jellyfin server: ${e.message}`,

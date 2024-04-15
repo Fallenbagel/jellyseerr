@@ -27,7 +27,7 @@ const messages = defineMessages({
   general: 'General',
   generalsettings: 'General Settings',
   generalsettingsDescription:
-    'Configure global and default settings for Overseerr.',
+    'Configure global and default settings for Jellyseerr.',
   apikey: 'API Key',
   applicationTitle: 'Application Title',
   applicationurl: 'Application URL',
@@ -49,7 +49,7 @@ const messages = defineMessages({
     'Cache externally sourced images (requires a significant amount of disk space)',
   trustProxy: 'Enable Proxy Support',
   trustProxyTip:
-    'Allow Overseerr to correctly register client IP addresses behind a proxy',
+    'Allow Jellyseerr to correctly register client IP addresses behind a proxy',
   validationApplicationTitle: 'You must provide an application title',
   validationApplicationUrl: 'You must provide a valid URL',
   validationApplicationUrlTrailingSlash: 'URL must not end in a trailing slash',

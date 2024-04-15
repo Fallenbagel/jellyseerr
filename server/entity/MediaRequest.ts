@@ -984,7 +984,7 @@ export class MediaRequest {
             (keyword) => keyword.id === ANIME_KEYWORD_ID
           )
         ) {
-          seriesType = 'anime';
+          seriesType = sonarrSettings.animeSeriesType ?? 'anime';
         }
 
         let rootFolder =

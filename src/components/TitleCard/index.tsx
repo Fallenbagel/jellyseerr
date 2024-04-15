@@ -38,6 +38,7 @@ interface TitleCardProps {
   canExpand?: boolean;
   inProgress?: boolean;
   isAddedToWatchlist?: number | boolean;
+  mutateParent?: () => void;
 }
 
 const messages = defineMessages({
@@ -61,6 +62,7 @@ const TitleCard = ({
   isAddedToWatchlist = false,
   inProgress = false,
   canExpand = false,
+  mutateParent,
 }: TitleCardProps) => {
   const isTouch = useIsTouch();
   const intl = useIntl();
@@ -148,6 +150,9 @@ const TitleCard = ({
     } finally {
       setIsUpdating(false);
       mutate('/api/v1/discover/watchlist');
+      if (mutateParent) {
+        mutateParent();
+      }
       setToggleWatchlist((prevState) => !prevState);
     }
   };

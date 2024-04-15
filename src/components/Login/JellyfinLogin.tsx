@@ -24,6 +24,7 @@ const messages = defineMessages({
   validationusernamerequired: 'Username required',
   validationpasswordrequired: 'Password required',
   loginerror: 'Something went wrong while trying to sign in.',
+  adminerror: 'You must use an admin account to sign in.',
   credentialerror: 'The username or password is incorrect.',
   signingin: 'Signing in…',
   signin: 'Sign In',
@@ -67,6 +68,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
       ),
       password: Yup.string(),
     });
+
     const mediaServerFormatValues = {
       mediaServerName:
         publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
@@ -93,6 +95,8 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
               intl.formatMessage(
                 e.message == 'Request failed with status code 401'
                   ? messages.credentialerror
+                  : e.message == 'Request failed with status code 403'
+                  ? messages.adminerror
                   : messages.loginerror
               ),
               {
@@ -218,6 +222,11 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
       ),
       password: Yup.string(),
     });
+    const baseUrl = settings.currentSettings.jellyfinExternalHost
+      ? settings.currentSettings.jellyfinExternalHost
+      : settings.currentSettings.jellyfinHost;
+    const jellyfinForgotPasswordUrl =
+      settings.currentSettings.jellyfinForgotPasswordUrl;
     return (
       <div>
         <Formik
@@ -295,11 +304,13 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                           as="a"
                           buttonType="ghost"
                           href={
-                            process.env.JELLYFIN_TYPE == 'emby'
-                              ? settings.currentSettings.jellyfinHost +
-                                '/web/index.html#!/startup/forgotpassword.html'
-                              : settings.currentSettings.jellyfinHost +
-                                '/web/index.html#!/forgotpassword.html'
+                            jellyfinForgotPasswordUrl
+                              ? `${jellyfinForgotPasswordUrl}`
+                              : `${baseUrl}/web/index.html#!/${
+                                  process.env.JELLYFIN_TYPE === 'emby'
+                                    ? 'startup/'
+                                    : ''
+                                }forgotpassword.html`
                           }
                         >
                           {intl.formatMessage(messages.forgotpassword)}

@@ -1,7 +1,9 @@
 import type { PermissionItem } from '@app/components/PermissionOption';
 import PermissionOption from '@app/components/PermissionOption';
+import useSettings from '@app/hooks/useSettings';
 import type { User } from '@app/hooks/useUser';
 import { Permission } from '@app/hooks/useUser';
+import { MediaServerType } from '@server/constants/server';
 import { defineMessages, useIntl } from 'react-intl';
 
 export const messages = defineMessages({
@@ -72,9 +74,9 @@ export const messages = defineMessages({
   viewrecent: 'View Recently Added',
   viewrecentDescription:
     'Grant permission to view the list of recently added media.',
-  viewwatchlists: 'View Plex Watchlists',
+  viewwatchlists: 'View {mediaServerName} Watchlists',
   viewwatchlistsDescription:
-    "Grant permission to view other users' Plex Watchlists.",
+    "Grant permission to view other users' {mediaServerName} Watchlists.",
 });
 
 interface PermissionEditProps {
@@ -91,6 +93,7 @@ export const PermissionEdit = ({
   onUpdate,
 }: PermissionEditProps) => {
   const intl = useIntl();
+  const settings = useSettings();
 
   const permissionList: PermissionItem[] = [
     {
@@ -131,8 +134,24 @@ export const PermissionEdit = ({
         },
         {
           id: 'viewwatchlists',
-          name: intl.formatMessage(messages.viewwatchlists),
-          description: intl.formatMessage(messages.viewwatchlistsDescription),
+          name: intl.formatMessage(messages.viewwatchlists, {
+            mediaServerName:
+              settings.currentSettings.mediaServerType === MediaServerType.PLEX
+                ? 'Plex'
+                : settings.currentSettings.mediaServerType ===
+                  MediaServerType.JELLYFIN
+                ? 'Jellyfin'
+                : 'Emby',
+          }),
+          description: intl.formatMessage(messages.viewwatchlistsDescription, {
+            mediaServerName:
+              settings.currentSettings.mediaServerType === MediaServerType.PLEX
+                ? 'Plex'
+                : settings.currentSettings.mediaServerType ===
+                  MediaServerType.JELLYFIN
+                ? 'Jellyfin'
+                : 'Emby',
+          }),
           permission: Permission.WATCHLIST_VIEW,
         },
       ],

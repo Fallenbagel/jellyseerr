@@ -24,3 +24,24 @@
 *.woff binary
 *.pyc binary
 *.pdf binary
+
+#
+## Theses files/directories should be excluded from git archives
+#
+
+.husky export-ignore
+.vscode export-ignore
+docs export-ignore
+
+.git* export-ignore
+*ignore export-ignore
+*.md export-ignore
+
+.all-contributorsrc export-ignore
+.editorconfig export-ignore
+Dockerfile.local export-ignore
+docker-compose.yml export-ignore
+stylelint.config.js export-ignore
+
+public/os_logo_filled.png export-ignore
+public/preview.jpg export-ignore

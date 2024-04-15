@@ -159,6 +159,7 @@ class PushoverAgent
           ...notificationPayload,
           token: settings.options.accessToken,
           user: settings.options.userToken,
+          sound: settings.options.sound,
         } as PushoverPayload);
       } catch (e) {
         logger.error('Error sending Pushover notification', {
@@ -198,6 +199,7 @@ class PushoverAgent
             ...notificationPayload,
             token: payload.notifyUser.settings.pushoverApplicationToken,
             user: payload.notifyUser.settings.pushoverUserKey,
+            sound: payload.notifyUser.settings.pushoverSound,
           } as PushoverPayload);
         } catch (e) {
           logger.error('Error sending Pushover notification', {
