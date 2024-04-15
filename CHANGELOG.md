@@ -1,3 +1,48 @@
+# [1.8.0](https://github.com/fallenbagel/jellyseerr/compare/v1.7.0...v1.8.0) (2024-04-15)
+
+
+### Bug Fixes
+
+* correct width issue in datepicker of filterSliderOver ([f564cdd](https://github.com/fallenbagel/jellyseerr/commit/f564cddff4525ccebffbf304672d49c57aefe635)), closes [#415](https://github.com/fallenbagel/jellyseerr/issues/415)
+* disable seasonfolder option in sonarr for jellyfin/Emby users ([8ec8f2a](https://github.com/fallenbagel/jellyseerr/commit/8ec8f2ac5730aad3b12dcd8ed95bb553b46b399c)), closes [#126](https://github.com/fallenbagel/jellyseerr/issues/126) [#575](https://github.com/fallenbagel/jellyseerr/issues/575)
+* **embyauth:** remove the accidentally added mediaServerType change code from another PR ([#684](https://github.com/fallenbagel/jellyseerr/issues/684)) ([c2e8771](https://github.com/fallenbagel/jellyseerr/commit/c2e87714b4c4aa11bf68dcd82b76979f82990f3c))
+* ensure watchlist updates are immediately reflected ([b85d7f3](https://github.com/fallenbagel/jellyseerr/commit/b85d7f37b931735ca2ad955dccb6599bf445fc73))
+* fix german translation for "components.Discover.FilterSlideover.tmdbuservotecount" ([e032c02](https://github.com/fallenbagel/jellyseerr/commit/e032c02f5f84dc4b6b470eecb18ba2c376c55f37))
+* fix the translations for watchlist permissions and userSettings page ([8c82a61](https://github.com/fallenbagel/jellyseerr/commit/8c82a61450a7525c0e2f1b64e6939da47a7c715d))
+* **i18n:** fixed jellyfin jobs ([7eed236](https://github.com/fallenbagel/jellyseerr/commit/7eed23637ddfb10bdcb19698e7ae171f07299502))
+* **jellyfin.ts:** process virtual seasons if they have non virtual episodes ([#639](https://github.com/fallenbagel/jellyseerr/issues/639)) ([db84f65](https://github.com/fallenbagel/jellyseerr/commit/db84f6529ab285be26c96daaab065dfabf347417))
+* **jellyfinapi:** refactors jellyfin library sync to support automatic grouping and collections ([#700](https://github.com/fallenbagel/jellyseerr/issues/700)) ([3856061](https://github.com/fallenbagel/jellyseerr/commit/3856061fe1ee4d3457996586b4979ad9dd60765a)), closes [#450](https://github.com/fallenbagel/jellyseerr/issues/450) [#524](https://github.com/fallenbagel/jellyseerr/issues/524) [#256](https://github.com/fallenbagel/jellyseerr/issues/256) [#489](https://github.com/fallenbagel/jellyseerr/issues/489) [#450](https://github.com/fallenbagel/jellyseerr/issues/450) [#524](https://github.com/fallenbagel/jellyseerr/issues/524) [#515](https://github.com/fallenbagel/jellyseerr/issues/515) [#474](https://github.com/fallenbagel/jellyseerr/issues/474) [#473](https://github.com/fallenbagel/jellyseerr/issues/473)
+* **jellyfinlogin:** use externalHostname if set for forgetpassword link ([405f6bb](https://github.com/fallenbagel/jellyseerr/commit/405f6bbb7ffc390327c99dcef2cbbf9b3bc75f01)), closes [#199](https://github.com/fallenbagel/jellyseerr/issues/199) [#424](https://github.com/fallenbagel/jellyseerr/issues/424) [#212](https://github.com/fallenbagel/jellyseerr/issues/212)
+* **jellyfinscanner:** conditionally assign the jellyfinMediaId and jellyfinMediaId4k ([#686](https://github.com/fallenbagel/jellyseerr/issues/686)) ([530be42](https://github.com/fallenbagel/jellyseerr/commit/530be4272cce1b0d74d7f4156b8d794cda6ea03f)), closes [#681](https://github.com/fallenbagel/jellyseerr/issues/681)
+* **langcode:** fixes the ukranian language code ([dc67aaa](https://github.com/fallenbagel/jellyseerr/commit/dc67aaaf53eae86ba20c6c2798c92ec40962d85f)), closes [#504](https://github.com/fallenbagel/jellyseerr/issues/504)
+* nullable type for jellyfinMediaId(4k) ([#702](https://github.com/fallenbagel/jellyseerr/issues/702)) ([0900a95](https://github.com/fallenbagel/jellyseerr/commit/0900a95532501b6f4d9698de7530a771512924fc)), closes [#668](https://github.com/fallenbagel/jellyseerr/issues/668)
+* request watchlist items sequentially to prevent bypassing quota ([#3667](https://github.com/fallenbagel/jellyseerr/issues/3667)) ([b40ba07](https://github.com/fallenbagel/jellyseerr/commit/b40ba07a4de5857b8392f667038eeb0b22aa5d9a))
+* resolved issue with region selector and all regions value ([#3652](https://github.com/fallenbagel/jellyseerr/issues/3652)) ([28a2c50](https://github.com/fallenbagel/jellyseerr/commit/28a2c50495d0ce531da7f8c442bd488a54b1e84c))
+* typos on readme ([#655](https://github.com/fallenbagel/jellyseerr/issues/655)) ([eee9a02](https://github.com/fallenbagel/jellyseerr/commit/eee9a025d246c72bcd3aca753d9e49c1f8f064ea))
+* **watchlist:** added missing prop for watchlist item removal button in watchlist page ([a0ec992](https://github.com/fallenbagel/jellyseerr/commit/a0ec992028093257e9fa043622e236014f02dea3))
+* **watchlist:** discover local watchlist item display and profile local watchlist slider visibility ([3cb9494](https://github.com/fallenbagel/jellyseerr/commit/3cb9494e6210151716587d8c4b22e0a21692cf88))
+
+
+### Features
+
+* add ko language ([#3619](https://github.com/fallenbagel/jellyseerr/issues/3619)) ([9250735](https://github.com/fallenbagel/jellyseerr/commit/92507359b48db08b0066047d6505660b8c8b0b12))
+* add Peacock to Network Slider ([#3545](https://github.com/fallenbagel/jellyseerr/issues/3545)) ([0c39057](https://github.com/fallenbagel/jellyseerr/commit/0c39057ca58743697e9dcc3b678440ac3688c65a))
+* add tooltips to tautulli avatars ([#3601](https://github.com/fallenbagel/jellyseerr/issues/3601)) ([c484810](https://github.com/fallenbagel/jellyseerr/commit/c484810f965f8d04643c25c6d283dd83f4bd4a23))
+* added Letterboxd links for the external link blocks for movies ([981f5e6](https://github.com/fallenbagel/jellyseerr/commit/981f5e679c4c707e119741240a58de8bb07f9d6c))
+* check if first jellyfin user is admin ([#635](https://github.com/fallenbagel/jellyseerr/issues/635)) ([010df62](https://github.com/fallenbagel/jellyseerr/commit/010df62776191fe4c195e590df338f8d8523f55b)), closes [#610](https://github.com/fallenbagel/jellyseerr/issues/610)
+* jellyseerr makeover ([#715](https://github.com/fallenbagel/jellyseerr/issues/715)) ([0c27132](https://github.com/fallenbagel/jellyseerr/commit/0c2713213c56de342f76300d12ce01fd543d2ce3))
+* **job:** media availability support for jellyfin/emby ([#522](https://github.com/fallenbagel/jellyseerr/issues/522)) ([3eb1bb3](https://github.com/fallenbagel/jellyseerr/commit/3eb1bb3d8ff22391acb2e629bbec7b6e4b65ca95)), closes [#406](https://github.com/fallenbagel/jellyseerr/issues/406) [#193](https://github.com/fallenbagel/jellyseerr/issues/193) [#516](https://github.com/fallenbagel/jellyseerr/issues/516) [#362](https://github.com/fallenbagel/jellyseerr/issues/362) [#84](https://github.com/fallenbagel/jellyseerr/issues/84)
+* **notif:** add Pushover sound options ([#2403](https://github.com/fallenbagel/jellyseerr/issues/2403)) ([3ea5076](https://github.com/fallenbagel/jellyseerr/commit/3ea5076053359b518b1b4d537e7b61580d9275a3))
+* select default seriesType for anime ([#3627](https://github.com/fallenbagel/jellyseerr/issues/3627)) ([f628635](https://github.com/fallenbagel/jellyseerr/commit/f6286359cfd2ed93fc692aa2efda37310e02c11c)), closes [#3626](https://github.com/fallenbagel/jellyseerr/issues/3626)
+* standard series type selector ([#3628](https://github.com/fallenbagel/jellyseerr/issues/3628)) ([7bdd25e](https://github.com/fallenbagel/jellyseerr/commit/7bdd25e5a45843a3e530d3fa2b0887664b53eec8))
+* translations update from Hosted Weblate ([#3258](https://github.com/fallenbagel/jellyseerr/issues/3258)) ([e62a078](https://github.com/fallenbagel/jellyseerr/commit/e62a078298ced7dec627fb3ff9fc8f99a39d5e1b))
+* update SameSite policy of session cookie to Lax ([#3650](https://github.com/fallenbagel/jellyseerr/issues/3650)) ([c84ca43](https://github.com/fallenbagel/jellyseerr/commit/c84ca4307465af4278f3dad5cf9c2b8cbae3fada))
+
+
+### Reverts
+
+* **jellyfinapi:** reverts [#450](https://github.com/fallenbagel/jellyseerr/issues/450) as it broke library sync support for local accounts using LDAP ([b5acc09](https://github.com/fallenbagel/jellyseerr/commit/b5acc09ba98e2dd9b61e6b78721e4dd9f42a996c)), closes [#489](https://github.com/fallenbagel/jellyseerr/issues/489)
+
 # [1.7.0](https://github.com/fallenbagel/jellyseerr/compare/v1.6.0...v1.7.0) (2023-09-14)
 
 
