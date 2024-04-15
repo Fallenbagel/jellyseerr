@@ -193,7 +193,7 @@ class JellyfinAPI {
       // this only affects LDAP users
       try {
         const mediaFolders = await this.axios.get<any>(
-          `/Users/${this.userId}/Views`
+          `/Users/${this.userId ?? 'Me'}/Views`
         );
 
         return this.mapLibraries(mediaFolders.data.Items);
