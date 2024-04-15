@@ -286,8 +286,6 @@ settingsRoutes.get('/jellyfin/library', async (req, res, next) => {
       // This only affects LDAP users
       const account = await jellyfinClient.getUser();
 
-      console.log(account.Configuration.GroupedFolders.length);
-
       // Automatic Library grouping is not supported when user views are used to get library
       if (account.Configuration.GroupedFolders.length > 0) {
         return next({ status: 501, message: 'SYNC_ERROR_GROUPED_FOLDERS' });
