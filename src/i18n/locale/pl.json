@@ -1130,5 +1130,8 @@
     "components.Discover.tmdbstudio": "Studio TMDB",
     "components.Discover.tmdbtvkeyword": "Słowo kluczowe serialu TMDB",
     "components.Discover.tmdbtvgenre": "Gatunek serialu TMDB",
-    "components.Discover.tmdbsearch": "Wyszukiwanie TMDB"
+    "components.Discover.tmdbsearch": "Wyszukiwanie TMDB",
+    "components.Discover.FilterSlideover.tmdbuserscore": "Ocena użytkownika TMDB",
+    "components.Discover.moviegenres": "Gatunki filmu",
+    "components.Discover.networks": "Kanały"
 }
