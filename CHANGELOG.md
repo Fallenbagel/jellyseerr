@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/fallenbagel/jellyseerr/compare/v1.8.0...v1.8.1) (2024-04-17)
+
+
+### Reverts
+
+* Revert "fix: disable seasonfolder option in sonarr for jellyfin/Emby users" (#718) ([cd0fa3e](https://github.com/fallenbagel/jellyseerr/commit/cd0fa3e2232dcb522673143f113fc382fb2ff0a3)), closes [#718](https://github.com/fallenbagel/jellyseerr/issues/718)
+
 # [1.8.0](https://github.com/fallenbagel/jellyseerr/compare/v1.7.0...v1.8.0) (2024-04-15)
 
 
