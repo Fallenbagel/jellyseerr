@@ -441,6 +441,9 @@ components:
         is4k:
           type: boolean
           example: false
+        isAnime:
+          type: boolean
+          example: false
         minimumAvailability:
           type: string
           example: 'In Cinema'
@@ -466,6 +469,7 @@ components:
         - activeProfileName
         - activeDirectory
         - is4k
+        - isAnime
         - minimumAvailability
         - isDefault
     SonarrSettings:
@@ -520,6 +524,9 @@ components:
         is4k:
           type: boolean
           example: false
+        isAnime:
+          type: boolean
+          example: false
         enableSeasonFolders:
           type: boolean
           example: false
@@ -545,6 +552,7 @@ components:
         - activeProfileName
         - activeDirectory
         - is4k
+        - isAnime
         - enableSeasonFolders
         - isDefault
     ServarrTag:
@@ -1107,6 +1115,9 @@ components:
             - type: string
               nullable: true
         is4k:
+          type: boolean
+          example: false
+        isAnime:
           type: boolean
           example: false
         serverId:
@@ -5340,6 +5351,9 @@ paths:
                 is4k:
                   type: boolean
                   example: false
+                isAnime:
+                  type: boolean
+                  example: false
                 serverId:
                   type: number
                 profileId:
@@ -5442,6 +5456,9 @@ paths:
                     type: number
                     minimum: 1
                 is4k:
+                  type: boolean
+                  example: false
+                isAnime:
                   type: boolean
                   example: false
                 serverId:
@@ -6100,6 +6117,9 @@ paths:
               type: object
               properties:
                 is4k:
+                  type: boolean
+                  example: false
+                isAnime:
                   type: boolean
                   example: false
       responses:

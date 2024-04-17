@@ -5,6 +5,7 @@ import AdvancedRequester from '@app/components/RequestModal/AdvancedRequester';
 import QuotaDisplay from '@app/components/RequestModal/QuotaDisplay';
 import { useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import { ANIME_KEYWORD_ID } from '@server/api/themoviedb/constants';
 import { MediaStatus } from '@server/constants/media';
 import type { MediaRequest } from '@server/entity/MediaRequest';
 import type { QuotaResponse } from '@server/interfaces/api/userInterfaces';
@@ -68,6 +69,10 @@ const MovieRequestModal = ({
       : null
   );
 
+  const isAnime = data?.keywords.some(
+    (keyword) => keyword.id === ANIME_KEYWORD_ID
+  );
+
   useEffect(() => {
     if (onUpdating) {
       onUpdating(isUpdating);
@@ -92,6 +97,7 @@ const MovieRequestModal = ({
         mediaId: data?.id,
         mediaType: 'movie',
         is4k,
+        isAnime,
         ...overrideParams,
       });
       mutate('/api/v1/request?filter=all&take=10&sort=modified&skip=0');
@@ -129,7 +135,16 @@ const MovieRequestModal = ({
     } finally {
       setIsUpdating(false);
     }
-  }, [data, onComplete, addToast, requestOverrides, hasPermission, intl, is4k]);
+  }, [
+    data,
+    onComplete,
+    addToast,
+    requestOverrides,
+    hasPermission,
+    intl,
+    is4k,
+    isAnime,
+  ]);
 
   const cancelRequest = async () => {
     setIsUpdating(true);
@@ -345,6 +360,7 @@ const MovieRequestModal = ({
         <AdvancedRequester
           type="movie"
           is4k={is4k}
+          isAnime={isAnime}
           onChange={(overrides) => {
             setRequestOverrides(overrides);
           }}

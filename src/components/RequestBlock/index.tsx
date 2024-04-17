@@ -78,6 +78,7 @@ const RequestBlock = ({ request, onUpdate }: RequestBlockProps) => {
         tmdbId={request.media.tmdbId}
         type={request.type}
         is4k={request.is4k}
+        isAnime={request.isAnime}
         editRequest={request}
         onCancel={() => setShowEditModal(false)}
         onComplete={() => {
@@ -210,13 +211,24 @@ const RequestBlock = ({ request, onUpdate }: RequestBlockProps) => {
             <Tooltip content={intl.formatMessage(messages.requestdate)}>
               <CalendarIcon className="mr-1.5 h-5 w-5 flex-shrink-0" />
             </Tooltip>
-            <span>
-              {intl.formatDate(request.createdAt, {
+            <Tooltip
+              content={intl.formatDate(request.createdAt, {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric',
               })}
-            </span>
+            >
+              <span>
+                {intl.formatDate(request.createdAt, {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </span>
+            </Tooltip>
           </div>
         </div>
         {(request.seasons ?? []).length > 0 && (
