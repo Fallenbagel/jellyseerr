@@ -1158,7 +1158,6 @@
   "components.MovieDetails.imdbuserscore": "Note Utilisateurs",
   "components.ManageSlideOver.manageModalRemoveMediaWarning": "* Cela supprimera irréversiblement ce(tte) {mediaType} de {arr}, y compris tous les fichiers.",
   "components.ManageSlideOver.removearr": "Supprimer de {arr}",
-  "components.RequestList.RequestItem.removearr": "Supprimer de {arr}",
   "components.ManageSlideOver.removearr4k": "Supprimer de {arr} 4K",
   "components.MovieDetails.downloadstatus": "Statut du téléchargement",
   "components.MovieDetails.managemovie": "Gérer le film",
