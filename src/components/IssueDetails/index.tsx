@@ -28,7 +28,6 @@ import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
-import getConfig from 'next/config';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
@@ -107,7 +106,6 @@ const IssueDetails = () => {
     (opt) => opt.issueType === issueData?.issueType
   );
   const settings = useSettings();
-  const { publicRuntimeConfig } = getConfig();
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -375,7 +373,8 @@ const IssueDetails = () => {
                 >
                   <PlayIcon />
                   <span>
-                    {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                    {settings.currentSettings.mediaServerType ===
+                    MediaServerType.EMBY
                       ? intl.formatMessage(messages.playonplex, {
                           mediaServerName: 'Emby',
                         })
@@ -422,7 +421,8 @@ const IssueDetails = () => {
                 >
                   <PlayIcon />
                   <span>
-                    {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                    {settings.currentSettings.mediaServerType ===
+                    MediaServerType.EMBY
                       ? intl.formatMessage(messages.play4konplex, {
                           mediaServerName: 'Emby',
                         })
@@ -639,7 +639,8 @@ const IssueDetails = () => {
               >
                 <PlayIcon />
                 <span>
-                  {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                  {settings.currentSettings.mediaServerType ===
+                  MediaServerType.EMBY
                     ? intl.formatMessage(messages.playonplex, {
                         mediaServerName: 'Emby',
                       })
@@ -685,7 +686,8 @@ const IssueDetails = () => {
               >
                 <PlayIcon />
                 <span>
-                  {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                  {settings.currentSettings.mediaServerType ===
+                  MediaServerType.EMBY
                     ? intl.formatMessage(messages.play4konplex, {
                         mediaServerName: 'Emby',
                       })

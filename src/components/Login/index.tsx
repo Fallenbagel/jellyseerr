@@ -10,7 +10,6 @@ import { Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { MediaServerType } from '@server/constants/server';
 import axios from 'axios';
-import getConfig from 'next/config';
 import { useRouter } from 'next/dist/client/router';
 import { useEffect, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
@@ -33,7 +32,6 @@ const Login = () => {
   const { user, revalidate } = useUser();
   const router = useRouter();
   const settings = useSettings();
-  const { publicRuntimeConfig } = getConfig();
 
   // Effect that is triggered when the `authToken` comes back from the Plex OAuth
   // We take the token and attempt to sign in. If we get a success message, we will
@@ -71,6 +69,15 @@ const Login = () => {
     refreshWhenHidden: false,
     revalidateOnFocus: false,
   });
+
+  const mediaServerFormatValues = {
+    mediaServerName:
+      settings.currentSettings.mediaServerType === MediaServerType.JELLYFIN
+        ? 'Jellyfin'
+        : settings.currentSettings.mediaServerType === MediaServerType.EMBY
+        ? 'Emby'
+        : undefined,
+  };
 
   return (
     <div className="relative flex min-h-screen flex-col bg-gray-900 py-14">
@@ -136,12 +143,10 @@ const Login = () => {
                     {settings.currentSettings.mediaServerType ==
                     MediaServerType.PLEX
                       ? intl.formatMessage(messages.signinwithplex)
-                      : intl.formatMessage(messages.signinwithjellyfin, {
-                          mediaServerName:
-                            publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                              ? 'Emby'
-                              : 'Jellyfin',
-                        })}
+                      : intl.formatMessage(
+                          messages.signinwithjellyfin,
+                          mediaServerFormatValues
+                        )}
                   </button>
                   <AccordionContent isOpen={openIndexes.includes(0)}>
                     <div className="px-10 py-8">

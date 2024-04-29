@@ -210,7 +210,9 @@ class Media {
       }
     } else {
       const pageName =
-        process.env.JELLYFIN_TYPE === 'emby' ? 'item' : 'details';
+        getSettings().main.mediaServerType == MediaServerType.EMBY
+          ? 'item'
+          : 'details';
       const { serverId, hostname, externalHostname } = getSettings().jellyfin;
       let jellyfinHost =
         externalHostname && externalHostname.length > 0

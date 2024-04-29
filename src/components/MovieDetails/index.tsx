@@ -49,7 +49,6 @@ import type { MovieDetails as MovieDetailsType } from '@server/models/Movie';
 import { hasFlag } from 'country-flag-icons';
 import 'country-flag-icons/3x2/flags.css';
 import { uniqBy } from 'lodash';
-import getConfig from 'next/config';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
@@ -111,7 +110,6 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
   const minStudios = 3;
   const [showMoreStudios, setShowMoreStudios] = useState(false);
   const [showIssueModal, setShowIssueModal] = useState(false);
-  const { publicRuntimeConfig } = getConfig();
 
   const {
     data,
@@ -259,7 +257,7 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
       ?.flatrate ?? [];
 
   function getAvalaibleMediaServerName() {
-    if (publicRuntimeConfig.JELLYFIN_TYPE === 'emby') {
+    if (settings.currentSettings.mediaServerType === MediaServerType.EMBY) {
       return intl.formatMessage(messages.play, { mediaServerName: 'Emby' });
     }
 
@@ -271,8 +269,8 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
   }
 
   function getAvalaible4kMediaServerName() {
-    if (publicRuntimeConfig.JELLYFIN_TYPE === 'emby') {
-      return intl.formatMessage(messages.play4k, { mediaServerName: 'Emby' });
+    if (settings.currentSettings.mediaServerType === MediaServerType.EMBY) {
+      return intl.formatMessage(messages.play, { mediaServerName: 'Emby' });
     }
 
     if (settings.currentSettings.mediaServerType === MediaServerType.PLEX) {

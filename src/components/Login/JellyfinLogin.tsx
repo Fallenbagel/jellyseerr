@@ -1,10 +1,14 @@
+import EmbyLogoInverted from '@app/assets/services/emby-inverted.svg';
+import EmbyLogo from '@app/assets/services/emby.svg';
+import JellyfinLogoInverted from '@app/assets/services/jellyfin-icon-only-inverted.svg';
+import JellyfinLogo from '@app/assets/services/jellyfin-icon-only.svg';
 import Button from '@app/components/Common/Button';
 import Tooltip from '@app/components/Common/Tooltip';
 import useSettings from '@app/hooks/useSettings';
 import { InformationCircleIcon } from '@heroicons/react/24/solid';
+import { MediaServerType, ServerType } from '@server/constants/server';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
-import getConfig from 'next/config';
 import type React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
@@ -23,6 +27,7 @@ const messages = defineMessages({
   validationemailformat: 'Valid email required',
   validationusernamerequired: 'Username required',
   validationpasswordrequired: 'Password required',
+  validationservertyperequired: 'Please select a server type',
   loginerror: 'Something went wrong while trying to sign in.',
   adminerror: 'You must use an admin account to sign in.',
   credentialerror: 'The username or password is incorrect.',
@@ -31,21 +36,25 @@ const messages = defineMessages({
   initialsigningin: 'Connecting…',
   initialsignin: 'Connect',
   forgotpassword: 'Forgot Password?',
+  servertype: 'Server Type',
 });
 
 interface JellyfinLoginProps {
   revalidate: () => void;
   initial?: boolean;
+  serverType?: MediaServerType;
+  onServerTypeChange?: (type: MediaServerType) => void;
 }
 
 const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
   revalidate,
   initial,
+  serverType,
+  onServerTypeChange,
 }) => {
   const toasts = useToasts();
   const intl = useIntl();
   const settings = useSettings();
-  const { publicRuntimeConfig } = getConfig();
 
   if (initial) {
     const LoginSchema = Yup.object().shape({
@@ -56,8 +65,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
         )
         .required(
           intl.formatMessage(messages.validationhostrequired, {
-            mediaServerName:
-              publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+            mediaServerName: serverType,
           })
         ),
       email: Yup.string()
@@ -67,12 +75,20 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
         intl.formatMessage(messages.validationusernamerequired)
       ),
       password: Yup.string(),
+      serverType: Yup.string().required(
+        intl.formatMessage(messages.validationservertyperequired)
+      ),
     });
 
     const mediaServerFormatValues = {
       mediaServerName:
-        publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+        serverType === MediaServerType.JELLYFIN
+          ? ServerType.JELLYFIN
+          : serverType === MediaServerType.EMBY
+          ? ServerType.EMBY
+          : 'Media Server',
     };
+
     return (
       <Formik
         initialValues={{
@@ -80,15 +96,24 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
           password: '',
           host: '',
           email: '',
+          serverType: '',
         }}
+        initialErrors={{ serverType: 'Please select a server type' }} // Initialize errors with an empty object
+        initialTouched={{ serverType: true }}
         validationSchema={LoginSchema}
         onSubmit={async (values) => {
           try {
+            // Check if serverType is either 'Jellyfin' or 'Emby'
+            // if (serverType !== 'Jellyfin' && serverType !== 'Emby') {
+            //   throw new Error('Invalid serverType'); // You can customize the error message
+            // }
+
             await axios.post('/api/v1/auth/jellyfin', {
               username: values.username,
               password: values.password,
               hostname: values.host,
               email: values.email,
+              serverType: serverType,
             });
           } catch (e) {
             toasts.addToast(
@@ -109,9 +134,64 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
           }
         }}
       >
-        {({ errors, touched, isSubmitting, isValid }) => (
+        {({
+          errors,
+          touched,
+          isSubmitting,
+          isValid,
+          values,
+          setFieldValue,
+        }) => (
           <Form>
             <div className="sm:border-t sm:border-gray-800">
+              <label htmlFor="servertype" className="text-label">
+                {intl.formatMessage(messages.servertype)}
+              </label>
+              <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
+                <div className="flex space-x-4 rounded-md shadow-sm">
+                  <button
+                    type="button"
+                    className={`server-type-button jellyfin-server ${
+                      serverType === MediaServerType.JELLYFIN
+                        ? 'bg-gradient-to-r from-[#AA5CC3] to-[#00A4DC]'
+                        : ''
+                    }`}
+                    onClick={() => {
+                      onServerTypeChange &&
+                        onServerTypeChange(MediaServerType.JELLYFIN);
+                      setFieldValue('serverType', ServerType.JELLYFIN);
+                    }}
+                  >
+                    {serverType === MediaServerType.JELLYFIN ? (
+                      <JellyfinLogoInverted />
+                    ) : (
+                      <JellyfinLogo />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    className={`server-type-button emby-server ${
+                      serverType === MediaServerType.EMBY ? 'bg-[#51B44A]' : ''
+                    }`}
+                    onClick={() => {
+                      onServerTypeChange &&
+                        onServerTypeChange(MediaServerType.EMBY);
+                      setFieldValue('serverType', ServerType.EMBY);
+                    }}
+                  >
+                    {serverType === MediaServerType.EMBY ? (
+                      <EmbyLogoInverted />
+                    ) : (
+                      <EmbyLogo />
+                    )}
+                  </button>
+                </div>
+                {/* Hidden field */}
+                <Field type="hidden" name="serverType" />
+                {!values.serverType && errors.serverType && (
+                  <div className="error">{errors.serverType}</div>
+                )}
+              </div>
               <label htmlFor="host" className="text-label">
                 {intl.formatMessage(messages.host, mediaServerFormatValues)}
               </label>
@@ -307,7 +387,8 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                             jellyfinForgotPasswordUrl
                               ? `${jellyfinForgotPasswordUrl}`
                               : `${baseUrl}/web/index.html#!/${
-                                  process.env.JELLYFIN_TYPE === 'emby'
+                                  settings.currentSettings.mediaServerType ===
+                                  MediaServerType.EMBY
                                     ? 'startup/'
                                     : ''
                                 }forgotpassword.html`

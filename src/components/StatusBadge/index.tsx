@@ -8,7 +8,6 @@ import globalMessages from '@app/i18n/globalMessages';
 import { MediaStatus } from '@server/constants/media';
 import { MediaServerType } from '@server/constants/server';
 import type { DownloadingItem } from '@server/lib/downloadtracker';
-import getConfig from 'next/config';
 import { defineMessages, useIntl } from 'react-intl';
 
 const messages = defineMessages({
@@ -46,7 +45,6 @@ const StatusBadge = ({
   const intl = useIntl();
   const { hasPermission } = useUser();
   const settings = useSettings();
-  const { publicRuntimeConfig } = getConfig();
 
   let mediaLink: string | undefined;
   let mediaLinkDescription: string | undefined;
@@ -84,7 +82,7 @@ const StatusBadge = ({
     mediaLink = plexUrl;
     mediaLinkDescription = intl.formatMessage(messages.playonplex, {
       mediaServerName:
-        publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+        settings.currentSettings.mediaServerType === MediaServerType.EMBY
           ? 'Emby'
           : settings.currentSettings.mediaServerType === MediaServerType.PLEX
           ? 'Plex'
