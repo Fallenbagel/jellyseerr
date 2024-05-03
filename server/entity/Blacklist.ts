@@ -1,10 +1,16 @@
-import type { MediaType } from '@server/constants/media';
+import { MediaStatus, type MediaType } from '@server/constants/media';
 import { getRepository } from '@server/datasource';
+import Media from '@server/entity/Media';
+import { User } from '@server/entity/User';
 import type { BlacklistItem } from '@server/interfaces/api/discoverInterfaces';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
@@ -23,7 +29,19 @@ export class Blacklist implements BlacklistItem {
   title?: string;
 
   @Column()
+  @Index()
   public tmdbId: number;
+
+  @ManyToOne(() => User, (user) => user.id, {
+    eager: true,
+  })
+  user: User;
+
+  @OneToOne(() => Media, (media) => media.blacklist, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  public media: Media;
 
   @CreateDateColumn()
   public createdAt: Date;
@@ -41,13 +59,33 @@ export class Blacklist implements BlacklistItem {
       tmdbId: ZodNumber['_output'];
     };
   }): Promise<void> {
-    const blacklistRepository = getRepository(this);
-
-    const blacklistItem = new this({
+    const blacklist = new this({
       ...blacklistRequest,
     });
 
-    await blacklistRepository.save(blacklistItem);
-    return;
+    const mediaRepository = getRepository(Media);
+    let media = await mediaRepository.findOne({
+      where: {
+        tmdbId: blacklistRequest.tmdbId,
+      },
+    });
+
+    if (!media) {
+      media = new Media({
+        tmdbId: blacklistRequest.tmdbId,
+        status: MediaStatus.BLACKLISTED,
+        status4k: MediaStatus.BLACKLISTED,
+        mediaType: blacklistRequest.mediaType,
+        blacklist: blacklist,
+      });
+
+      const blacklistRepository = getRepository(this);
+
+      await blacklistRepository.save(blacklist);
+
+      await mediaRepository.save(media);
+
+      return;
+    }
   }
 }

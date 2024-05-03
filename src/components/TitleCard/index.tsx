@@ -3,6 +3,7 @@ import BlacklistModal from '@app/components/BlacklistModal';
 import Button from '@app/components/Common/Button';
 import CachedImage from '@app/components/Common/CachedImage';
 import StatusBadgeMini from '@app/components/Common/StatusBadgeMini';
+import Tooltip from '@app/components/Common/Tooltip';
 import RequestModal from '@app/components/RequestModal';
 import ErrorCard from '@app/components/TitleCard/ErrorCard';
 import Placeholder from '@app/components/TitleCard/Placeholder';
@@ -14,6 +15,7 @@ import { withProperties } from '@app/utils/typeHelpers';
 import { Transition } from '@headlessui/react';
 import {
   ArrowDownTrayIcon,
+  EyeIcon,
   EyeSlashIcon,
   MinusCircleIcon,
   StarIcon,
@@ -55,6 +57,9 @@ const messages = defineMessages('components.TitleCard', {
   blacklistError: 'Something went wrong try again.',
   blacklistDuplicateError:
     '<strong>{title}</strong> has already been blacklisted.',
+  removeFromBlacklistSuccess:
+    '<strong>{title}</strong> was successfully removed from the Blacklist.',
+  removefromBlacklist: 'Remove from Blacklist',
 });
 
 const TitleCard = ({
@@ -72,7 +77,7 @@ const TitleCard = ({
 }: TitleCardProps) => {
   const isTouch = useIsTouch();
   const intl = useIntl();
-  const { hasPermission } = useUser();
+  const { user, hasPermission } = useUser();
   const [isUpdating, setIsUpdating] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(status);
   const [showDetail, setShowDetail] = useState(false);
@@ -176,6 +181,7 @@ const TitleCard = ({
   };
 
   const onClickHideItemBtn = async (): Promise<void> => {
+    setIsUpdating(true);
     const topNode = cardRef.current;
 
     if (topNode) {
@@ -184,9 +190,9 @@ const TitleCard = ({
           tmdbId: id,
           mediaType,
           title,
+          user: user?.id,
         });
         if (response.status === 201) {
-          topNode.parentElement?.classList.add('hidden');
           addToast(
             <span>
               {intl.formatMessage(messages.blacklistSuccess, {
@@ -196,11 +202,11 @@ const TitleCard = ({
             </span>,
             { appearance: 'success', autoDismiss: true }
           );
+          setCurrentStatus(MediaStatus.BLACKLISTED);
+          closeBlacklistModal();
         }
-        closeBlacklistModal();
       } catch (e) {
         if (e.response.status === 412) {
-          topNode.parentElement?.classList.add('hidden');
           addToast(
             <span>
               {intl.formatMessage(messages.blacklistDuplicateError, {
@@ -217,7 +223,45 @@ const TitleCard = ({
           });
         }
       } finally {
+        setIsUpdating(false);
         closeBlacklistModal();
+      }
+    } else {
+      addToast(intl.formatMessage(messages.blacklistError), {
+        appearance: 'error',
+        autoDismiss: true,
+      });
+    }
+  };
+
+  const onClickShowBlacklistBtn = async (): Promise<void> => {
+    setIsUpdating(true);
+    const topNode = cardRef.current;
+
+    if (topNode) {
+      try {
+        const response = await axios.delete<Blacklist>(
+          `/api/v1/blacklist/${id}`
+        );
+        if (response.status === 204) {
+          addToast(
+            <span>
+              {intl.formatMessage(messages.removeFromBlacklistSuccess, {
+                title,
+                strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+              })}
+            </span>,
+            { appearance: 'success', autoDismiss: true }
+          );
+          setCurrentStatus(MediaStatus.UNKNOWN);
+        }
+      } catch (e) {
+        addToast(intl.formatMessage(messages.blacklistError), {
+          appearance: 'error',
+          autoDismiss: true,
+        });
+      } finally {
+        setIsUpdating(false);
       }
     } else {
       addToast(intl.formatMessage(messages.blacklistError), {
@@ -243,7 +287,10 @@ const TitleCard = ({
     { type: 'or' }
   );
 
-  const showHideButton = hasPermission([Permission.ADMIN]);
+  const showHideButton = hasPermission(
+    [Permission.MANAGE_BLACKLIST, Permission.MEDIA_BLACKLIST],
+    { type: 'or' }
+  );
 
   return (
     <div
@@ -267,9 +314,17 @@ const TitleCard = ({
       />
       {showBlacklistModal && (
         <BlacklistModal
-          title={title}
+          tmdbId={id}
+          type={
+            mediaType === 'movie'
+              ? 'movie'
+              : mediaType === 'collection'
+              ? 'collection'
+              : 'tv'
+          }
           onCancel={closeBlacklistModal}
           onComplete={onClickHideItemBtn}
+          isUpdating={isUpdating}
         />
       )}
       <div
@@ -322,7 +377,7 @@ const TitleCard = ({
                     : intl.formatMessage(globalMessages.tvshow)}
               </div>
             </div>
-            {showDetail && (
+            {showDetail && currentStatus !== MediaStatus.BLACKLISTED && (
               <div className="flex flex-col gap-1">
                 {toggleWatchlist ? (
                   <Button
@@ -358,13 +413,31 @@ const TitleCard = ({
                   )}
               </div>
             )}
+            {showDetail &&
+              showHideButton &&
+              currentStatus == MediaStatus.BLACKLISTED && (
+                <Tooltip
+                  content={intl.formatMessage(messages.removefromBlacklist)}
+                >
+                  <Button
+                    buttonType={'ghost'}
+                    className="z-40"
+                    buttonSize={'sm'}
+                    onClick={() => onClickShowBlacklistBtn()}
+                  >
+                    <EyeIcon className={'h-3'} />
+                  </Button>
+                </Tooltip>
+              )}
             {currentStatus && currentStatus !== MediaStatus.UNKNOWN && (
-              <div className="pointer-events-none z-40 flex items-center">
-                <StatusBadgeMini
-                  status={currentStatus}
-                  inProgress={inProgress}
-                  shrink
-                />
+              <div className="flex flex-col items-center gap-1">
+                <div className="pointer-events-none z-40 flex">
+                  <StatusBadgeMini
+                    status={currentStatus}
+                    inProgress={inProgress}
+                    shrink
+                  />
+                </div>
               </div>
             )}
           </div>

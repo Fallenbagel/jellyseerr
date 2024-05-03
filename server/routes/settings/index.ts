@@ -4,11 +4,13 @@ import PlexTvAPI from '@server/api/plextv';
 import TautulliAPI from '@server/api/tautulli';
 import { ApiErrorCode } from '@server/constants/error';
 import { getRepository } from '@server/datasource';
+import { Blacklist } from '@server/entity/Blacklist';
 import Media from '@server/entity/Media';
 import { MediaRequest } from '@server/entity/MediaRequest';
 import { User } from '@server/entity/User';
 import type { PlexConnection } from '@server/interfaces/api/plexInterfaces';
 import type {
+  BlacklistResultsResponse,
   LogMessage,
   LogsResultsResponse,
   SettingsAboutResponse,
@@ -516,6 +518,69 @@ settingsRoutes.get(
       next({
         status: 500,
         message: 'Unable to retrieve unimported Plex users.',
+      });
+    }
+  }
+);
+
+settingsRoutes.get(
+  '/blacklist',
+  rateLimit({ windowMs: 60 * 1000, max: 50 }),
+  async (req, res, next) => {
+    if (
+      !req.user?.hasPermission(
+        [Permission.MANAGE_BLACKLIST, Permission.VIEW_BLACKLIST],
+        { type: 'or' }
+      )
+    ) {
+      return next({
+        status: 403,
+        message: 'You do not have permission to access blacklisted items.',
+      });
+    }
+    const pageSize = req.query.take ? Number(req.query.take) : 25;
+    const skip = req.query.skip ? Number(req.query.skip) : 0;
+    const search = (req.query.search as string) ?? '';
+
+    let blacklistedItems;
+
+    try {
+      if (search.length > 0) {
+        blacklistedItems = await getRepository(Blacklist)
+          .createQueryBuilder('blacklist')
+          .where('blacklist.title like :title', { title: `%${search}%` })
+          .leftJoinAndSelect('blacklist.user', 'user')
+          .orderBy('blacklist.createdAt', 'DESC')
+          .take(pageSize)
+          .skip(skip)
+          .getMany();
+      } else {
+        blacklistedItems = await getRepository(Blacklist)
+          .createQueryBuilder('blacklist')
+          .leftJoinAndSelect('blacklist.user', 'user')
+          .orderBy('blacklist.createdAt', 'DESC')
+          .take(pageSize)
+          .skip(skip)
+          .getMany();
+      }
+
+      return res.status(200).json({
+        pageInfo: {
+          pages: Math.ceil(blacklistedItems.length / pageSize),
+          pageSize,
+          results: blacklistedItems.length,
+          page: Math.ceil(skip / pageSize) + 1,
+        },
+        results: blacklistedItems,
+      } as BlacklistResultsResponse);
+    } catch (error) {
+      logger.error('Something went wrong while retrieving blacklisted items', {
+        label: 'Blacklist',
+        errorMessage: error.message,
+      });
+      return next({
+        status: 500,
+        message: 'Unable to retrieve blacklisted items.',
       });
     }
   }
