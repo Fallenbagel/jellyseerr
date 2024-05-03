@@ -291,7 +291,7 @@
     "components.PlexLoginButton.signingin": "Виконується вхід...",
     "components.PlexLoginButton.signinwithplex": "Увійти",
     "components.QuotaSelector.days": "{count, plural, one {день} other {днів}}",
-    "components.QuotaSelector.movieRequests": "{quotaLimit} <quotaUnits>{фільмів} на {quotaDays} {днів}</quotaUnits>",
+    "components.QuotaSelector.movieRequests": "{quotaLimit} <quotaUnits>{movies} на {quotaDays} {days}</quotaUnits>",
     "components.QuotaSelector.movies": "{count, plural, one {фільм} other {фільми}}",
     "components.QuotaSelector.seasons": "{count, plural, one {сезон} other {сезони}}",
     "components.QuotaSelector.tvRequests": "{quotaLimit} <quotaUnits>{seasons} на {quotaDays} {days}</quotaUnits>",
