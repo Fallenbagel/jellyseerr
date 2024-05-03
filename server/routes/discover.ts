@@ -4,7 +4,6 @@ import TheMovieDb from '@server/api/themoviedb';
 import type { TmdbKeyword } from '@server/api/themoviedb/interfaces';
 import { MediaType } from '@server/constants/media';
 import { getRepository } from '@server/datasource';
-import { Blacklist } from '@server/entity/Blacklist';
 import Media from '@server/entity/Media';
 import { User } from '@server/entity/User';
 import { Watchlist } from '@server/entity/Watchlist';
@@ -79,14 +78,6 @@ export type FilterOptions = z.infer<typeof QueryFilterOptions>;
 discoverRoutes.get('/movies', async (req, res, next) => {
   const tmdb = createTmdbWithRegionLanguage(req.user);
 
-  const blacklistedItems = await getRepository(Blacklist).find({
-    select: {
-      tmdbId: true,
-    },
-  });
-
-  const toRemove = new Set(blacklistedItems.map((i) => i.tmdbId));
-
   try {
     const query = QueryFilterOptions.parse(req.query);
     const keywords = query.keywords;
@@ -135,17 +126,15 @@ discoverRoutes.get('/movies', async (req, res, next) => {
       totalPages: data.total_pages,
       totalResults: data.total_results,
       keywords: keywordData,
-      results: data.results
-        .filter((item) => !toRemove.has(item.id))
-        .map((result) =>
-          mapMovieResult(
-            result,
-            media.find(
-              (req) =>
-                req.tmdbId === result.id && req.mediaType === MediaType.MOVIE
-            )
+      results: data.results.map((result) =>
+        mapMovieResult(
+          result,
+          media.find(
+            (req) =>
+              req.tmdbId === result.id && req.mediaType === MediaType.MOVIE
           )
-        ),
+        )
+      ),
     });
   } catch (e) {
     logger.debug('Something went wrong retrieving popular movies', {
@@ -337,14 +326,6 @@ discoverRoutes.get('/movies/upcoming', async (req, res, next) => {
       primaryReleaseDateGte: date,
     });
 
-    const blacklistedItems = await getRepository(Blacklist).find({
-      select: {
-        tmdbId: true,
-      },
-    });
-
-    const toRemove = new Set(blacklistedItems.map((i) => i.tmdbId));
-
     const media = await Media.getRelatedMedia(
       req.user,
       data.results.map((result) => result.id)
@@ -354,17 +335,15 @@ discoverRoutes.get('/movies/upcoming', async (req, res, next) => {
       page: data.page,
       totalPages: data.total_pages,
       totalResults: data.total_results,
-      results: data.results
-        .filter((item) => !toRemove.has(item.id))
-        .map((result) =>
-          mapMovieResult(
-            result,
-            media.find(
-              (med) =>
-                med.tmdbId === result.id && med.mediaType === MediaType.MOVIE
-            )
+      results: data.results.map((result) =>
+        mapMovieResult(
+          result,
+          media.find(
+            (med) =>
+              med.tmdbId === result.id && med.mediaType === MediaType.MOVIE
           )
-        ),
+        )
+      ),
     });
   } catch (e) {
     logger.debug('Something went wrong retrieving upcoming movies', {
@@ -408,14 +387,6 @@ discoverRoutes.get('/tv', async (req, res, next) => {
       watchRegion: query.watchRegion,
     });
 
-    const blacklistedItems = await getRepository(Blacklist).find({
-      select: {
-        tmdbId: true,
-      },
-    });
-
-    const toRemove = new Set(blacklistedItems.map((i) => i.tmdbId));
-
     const media = await Media.getRelatedMedia(
       req.user,
       data.results.map((result) => result.id)
@@ -437,17 +408,14 @@ discoverRoutes.get('/tv', async (req, res, next) => {
       totalPages: data.total_pages,
       totalResults: data.total_results,
       keywords: keywordData,
-      results: data.results
-        .filter((item) => !toRemove.has(item.id))
-        .map((result) =>
-          mapTvResult(
-            result,
-            media.find(
-              (med) =>
-                med.tmdbId === result.id && med.mediaType === MediaType.TV
-            )
+      results: data.results.map((result) =>
+        mapTvResult(
+          result,
+          media.find(
+            (med) => med.tmdbId === result.id && med.mediaType === MediaType.TV
           )
-        ),
+        )
+      ),
     });
   } catch (e) {
     logger.debug('Something went wrong retrieving popular series', {
@@ -639,14 +607,6 @@ discoverRoutes.get('/tv/upcoming', async (req, res, next) => {
       firstAirDateGte: date,
     });
 
-    const blacklistedItems = await getRepository(Blacklist).find({
-      select: {
-        tmdbId: true,
-      },
-    });
-
-    const toRemove = new Set(blacklistedItems.map((i) => i.tmdbId));
-
     const media = await Media.getRelatedMedia(
       req.user,
       data.results.map((result) => result.id)
@@ -656,17 +616,14 @@ discoverRoutes.get('/tv/upcoming', async (req, res, next) => {
       page: data.page,
       totalPages: data.total_pages,
       totalResults: data.total_results,
-      results: data.results
-        .filter((item) => !toRemove.has(item.id))
-        .map((result) =>
-          mapTvResult(
-            result,
-            media.find(
-              (med) =>
-                med.tmdbId === result.id && med.mediaType === MediaType.TV
-            )
+      results: data.results.map((result) =>
+        mapTvResult(
+          result,
+          media.find(
+            (med) => med.tmdbId === result.id && med.mediaType === MediaType.TV
           )
-        ),
+        )
+      ),
     });
   } catch (e) {
     logger.debug('Something went wrong retrieving upcoming series', {
@@ -689,14 +646,6 @@ discoverRoutes.get('/trending', async (req, res, next) => {
       language: req.locale ?? (req.query.language as string),
     });
 
-    const blacklistedItems = await getRepository(Blacklist).find({
-      select: {
-        tmdbId: true,
-      },
-    });
-
-    const toRemove = new Set(blacklistedItems.map((i) => i.tmdbId));
-
     const media = await Media.getRelatedMedia(
       req.user,
       data.results.map((result) => result.id)
@@ -706,30 +655,27 @@ discoverRoutes.get('/trending', async (req, res, next) => {
       page: data.page,
       totalPages: data.total_pages,
       totalResults: data.total_results,
-      results: data.results
-        .filter((item) => !toRemove.has(item.id))
-        .map((result) =>
-          isMovie(result)
-            ? mapMovieResult(
-                result,
-                media.find(
-                  (med) =>
-                    med.tmdbId === result.id &&
-                    med.mediaType === MediaType.MOVIE
-                )
+      results: data.results.map((result) =>
+        isMovie(result)
+          ? mapMovieResult(
+              result,
+              media.find(
+                (med) =>
+                  med.tmdbId === result.id && med.mediaType === MediaType.MOVIE
               )
-            : isPerson(result)
-            ? mapPersonResult(result)
-            : isCollection(result)
-            ? mapCollectionResult(result)
-            : mapTvResult(
-                result,
-                media.find(
-                  (med) =>
-                    med.tmdbId === result.id && med.mediaType === MediaType.TV
-                )
+            )
+          : isPerson(result)
+          ? mapPersonResult(result)
+          : isCollection(result)
+          ? mapCollectionResult(result)
+          : mapTvResult(
+              result,
+              media.find(
+                (med) =>
+                  med.tmdbId === result.id && med.mediaType === MediaType.TV
               )
-        ),
+            )
+      ),
     });
   } catch (e) {
     logger.debug('Something went wrong retrieving trending items', {

@@ -55,6 +55,8 @@ const globalMessages = defineMessages({
   noresults: 'No results.',
   open: 'Open',
   resolved: 'Resolved',
+  blacklist: 'Blacklist',
+  blacklisted: 'Blacklisted',
 });
 
 export default globalMessages;
