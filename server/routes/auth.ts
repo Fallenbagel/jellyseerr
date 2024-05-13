@@ -443,6 +443,14 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         status: 406,
         message: 'CREDENTIAL_ERROR_NO_SERVER_TYPE',
       });
+    } else if (e.message === 'Connection_refused') {
+      logger.error(`Unable to connect to Jellyfin server at ${body.hostname}`, {
+        label: 'Auth',
+      });
+      return next({
+        status: 503,
+        message: 'CONNECTION_REFUSED',
+      });
     } else {
       logger.error(e.message, { label: 'Auth' });
       return next({

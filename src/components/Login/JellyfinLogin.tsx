@@ -26,6 +26,7 @@ const messages = defineMessages({
   loginerror: 'Something went wrong while trying to sign in.',
   adminerror: 'You must use an admin account to sign in.',
   credentialerror: 'The username or password is incorrect.',
+  connectionrefusederror: 'Unable to connect to {mediaServerName} server.',
   signingin: 'Signing in…',
   signin: 'Sign In',
   initialsigningin: 'Connecting…',
@@ -97,7 +98,10 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                   ? messages.credentialerror
                   : e.message == 'Request failed with status code 403'
                   ? messages.adminerror
-                  : messages.loginerror
+                  : e.message == 'Request failed with status code 503'
+                  ? messages.connectionrefusederror
+                  : messages.loginerror,
+                mediaServerFormatValues
               ),
               {
                 autoDismiss: true,

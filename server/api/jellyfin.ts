@@ -131,7 +131,11 @@ class JellyfinAPI {
       );
       return account.data;
     } catch (e) {
-      throw new Error('Unauthorized');
+      if (e.code === 'ECONNREFUSED') {
+        throw new Error('Connection_refused');
+      } else {
+        throw new Error('Unauthorized');
+      }
     }
   }
 
