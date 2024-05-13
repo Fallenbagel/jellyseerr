@@ -444,9 +444,15 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         message: 'CREDENTIAL_ERROR_NO_SERVER_TYPE',
       });
     } else if (e.message === 'Connection_refused') {
-      logger.error(`Unable to connect to Jellyfin server at ${body.hostname}`, {
-        label: 'Auth',
-      });
+      logger.error(
+        `Unable to connect to ${
+          process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin'
+        } server`,
+        {
+          label: 'Auth',
+          hostname: body.hostname,
+        }
+      );
       return next({
         status: 503,
         message: 'CONNECTION_REFUSED',
