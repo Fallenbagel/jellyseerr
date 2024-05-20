@@ -7,6 +7,7 @@ import QuotaSelector from '@app/components/QuotaSelector';
 import RegionSelector from '@app/components/RegionSelector';
 import type { AvailableLocale } from '@app/context/LanguageContext';
 import { availableLanguages } from '@app/context/LanguageContext';
+import useDefaultQualityProfiles from '@app/hooks/useDefaultQualityProfiles';
 import useLocale from '@app/hooks/useLocale';
 import useSettings from '@app/hooks/useSettings';
 import { Permission, UserType, useUser } from '@app/hooks/useUser';
@@ -45,6 +46,15 @@ const messages = defineMessages({
   regionTip: 'Filter content by regional availability',
   originallanguage: 'Discover Language',
   originallanguageTip: 'Filter content by original language',
+  activeRadarrProfile: 'Default Movie Profile',
+  activeRadarrProfileTip: "Change the user's active profile for non-4k movies",
+  activeRadarrProfile4k: 'Default Movie Profile for 4k',
+  activeRadarrProfileTip4k: "Change the user's active profile for 4k movies",
+  activeSonarrProfile: 'Default Series Profile',
+  activeSonarrProfileTip: "Change the user's active profile for non-4k series",
+  activeSonarrProfile4k: 'Default Series Profile for 4k',
+  activeSonarrProfileTip4k: "Change the user's active profile for 4k series",
+  activeProfileDefault: 'Default ({profile})',
   movierequestlimit: 'Movie Request Limit',
   seriesrequestlimit: 'Series Request Limit',
   enableOverride: 'Override Global Limit',
@@ -86,6 +96,8 @@ const UserGeneralSettings = () => {
   } = useSWR<UserSettingsGeneralResponse>(
     user ? `/api/v1/user/${user?.id}/settings/main` : null
   );
+  const radarrQualityProfiles = useDefaultQualityProfiles('movie');
+  const sonarrQualityProfiles = useDefaultQualityProfiles('tv');
 
   const UserGeneralSettingsSchema = Yup.object().shape({
     discordId: Yup.string()
@@ -137,6 +149,10 @@ const UserGeneralSettings = () => {
           tvQuotaDays: data?.tvQuotaDays,
           watchlistSyncMovies: data?.watchlistSyncMovies,
           watchlistSyncTv: data?.watchlistSyncTv,
+          radarrProfileId: data?.radarrProfileId,
+          radarr4kProfileId: data?.radarr4kProfileId,
+          sonarrProfileId: data?.sonarrProfileId,
+          sonarr4kProfileId: data?.sonarr4kProfileId,
         }}
         validationSchema={UserGeneralSettingsSchema}
         enableReinitialize
@@ -157,6 +173,10 @@ const UserGeneralSettings = () => {
               tvQuotaDays: tvQuotaEnabled ? values.tvQuotaDays : null,
               watchlistSyncMovies: values.watchlistSyncMovies,
               watchlistSyncTv: values.watchlistSyncTv,
+              radarrProfileId: Number(values?.radarrProfileId),
+              radarr4kProfileId: Number(values?.radarr4kProfileId),
+              sonarrProfileId: Number(values?.sonarrProfileId),
+              sonarr4kProfileId: Number(values?.sonarr4kProfileId),
             });
 
             if (currentUser?.id === user?.id && setLocale) {
@@ -557,6 +577,217 @@ const UserGeneralSettings = () => {
                       />
                     </div>
                   </div>
+                )}
+              {currentHasPermission(Permission.MANAGE_USERS) &&
+                !hasPermission(Permission.MANAGE_USERS) && (
+                  <>
+                    {radarrQualityProfiles.details && (
+                      <div className="form-row">
+                        <label htmlFor="radarrProfileId" className="text-label">
+                          <span>
+                            {intl.formatMessage(messages.activeRadarrProfile)}
+                          </span>
+                          <span className="label-tip">
+                            {intl.formatMessage(
+                              messages.activeRadarrProfileTip
+                            )}
+                          </span>
+                        </label>
+                        <div className="form-input-area">
+                          <div className="form-input-field">
+                            <Field
+                              as="select"
+                              id="radarrProfileId"
+                              name="radarrProfileId"
+                            >
+                              <option value="">
+                                {intl.formatMessage(
+                                  messages.activeProfileDefault,
+                                  {
+                                    profile:
+                                      radarrQualityProfiles.details.profiles.find(
+                                        (profile) =>
+                                          profile.id ===
+                                          (radarrQualityProfiles.server
+                                            ?.activeProfileId ?? '')
+                                      )?.name,
+                                  }
+                                )}
+                              </option>
+                              {radarrQualityProfiles.details.profiles.length >
+                                0 &&
+                                radarrQualityProfiles.details.profiles.map(
+                                  (profile) => (
+                                    <option
+                                      key={`loaded-profile-${profile.id}`}
+                                      value={profile.id}
+                                    >
+                                      {profile.name}
+                                    </option>
+                                  )
+                                )}
+                            </Field>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {radarrQualityProfiles.details4k && (
+                      <div className="form-row">
+                        <label
+                          htmlFor="radarr4kProfileId"
+                          className="text-label"
+                        >
+                          <span>
+                            {intl.formatMessage(messages.activeRadarrProfile4k)}
+                          </span>
+                          <span className="label-tip">
+                            {intl.formatMessage(
+                              messages.activeRadarrProfileTip4k
+                            )}
+                          </span>
+                        </label>
+                        <div className="form-input-area">
+                          <div className="form-input-field">
+                            <Field
+                              as="select"
+                              id="radarr4kProfileId"
+                              name="radarr4kProfileId"
+                            >
+                              <option value="">
+                                {intl.formatMessage(
+                                  messages.activeProfileDefault,
+                                  {
+                                    profile:
+                                      radarrQualityProfiles.details4k.profiles.find(
+                                        (profile) =>
+                                          profile.id ===
+                                          (radarrQualityProfiles.server4k
+                                            ?.activeProfileId ?? '')
+                                      )?.name,
+                                  }
+                                )}
+                              </option>
+                              {radarrQualityProfiles.details4k.profiles.length >
+                                0 &&
+                                radarrQualityProfiles.details4k.profiles.map(
+                                  (profile) => (
+                                    <option
+                                      key={`loaded-profile-${profile.id}`}
+                                      value={profile.id}
+                                    >
+                                      {profile.name}
+                                    </option>
+                                  )
+                                )}
+                            </Field>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {sonarrQualityProfiles.details && (
+                      <div className="form-row">
+                        <label htmlFor="sonarrProfileId" className="text-label">
+                          <span>
+                            {intl.formatMessage(messages.activeSonarrProfile)}
+                          </span>
+                          <span className="label-tip">
+                            {intl.formatMessage(
+                              messages.activeSonarrProfileTip
+                            )}
+                          </span>
+                        </label>
+                        <div className="form-input-area">
+                          <div className="form-input-field">
+                            <Field
+                              as="select"
+                              id="sonarrProfileId"
+                              name="sonarrProfileId"
+                            >
+                              <option value="">
+                                {intl.formatMessage(
+                                  messages.activeProfileDefault,
+                                  {
+                                    profile:
+                                      sonarrQualityProfiles.details.profiles.find(
+                                        (profile) =>
+                                          profile.id ===
+                                          (sonarrQualityProfiles.server
+                                            ?.activeProfileId ?? '')
+                                      )?.name,
+                                  }
+                                )}
+                              </option>
+                              {sonarrQualityProfiles.details.profiles.length >
+                                0 &&
+                                sonarrQualityProfiles.details.profiles.map(
+                                  (profile) => (
+                                    <option
+                                      key={`loaded-profile-${profile.id}`}
+                                      value={profile.id}
+                                    >
+                                      {profile.name}
+                                    </option>
+                                  )
+                                )}
+                            </Field>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {sonarrQualityProfiles.details4k && (
+                      <div className="form-row">
+                        <label
+                          htmlFor="sonarr4kProfileId"
+                          className="text-label"
+                        >
+                          <span>
+                            {intl.formatMessage(messages.activeSonarrProfile4k)}
+                          </span>
+                          <span className="label-tip">
+                            {intl.formatMessage(
+                              messages.activeSonarrProfileTip4k
+                            )}
+                          </span>
+                        </label>
+                        <div className="form-input-area">
+                          <div className="form-input-field">
+                            <Field
+                              as="select"
+                              id="sonarr4kProfileId"
+                              name="sonarr4kProfileId"
+                            >
+                              <option value="">
+                                {intl.formatMessage(
+                                  messages.activeProfileDefault,
+                                  {
+                                    profile:
+                                      sonarrQualityProfiles.details4k.profiles.find(
+                                        (profile) =>
+                                          profile.id ===
+                                          (sonarrQualityProfiles.server4k
+                                            ?.activeProfileId ?? '')
+                                      )?.name,
+                                  }
+                                )}
+                              </option>
+                              {sonarrQualityProfiles.details4k.profiles.length >
+                                0 &&
+                                sonarrQualityProfiles.details4k.profiles.map(
+                                  (profile) => (
+                                    <option
+                                      key={`loaded-profile-${profile.id}`}
+                                      value={profile.id}
+                                    >
+                                      {profile.name}
+                                    </option>
+                                  )
+                                )}
+                            </Field>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               <div className="actions">
                 <div className="flex justify-end">

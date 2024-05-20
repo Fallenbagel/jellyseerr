@@ -66,6 +66,10 @@ userSettingsRoutes.get<{ id: string }, UserSettingsGeneralResponse>(
         globalTvQuotaLimit: defaultQuotas.tv.quotaLimit,
         watchlistSyncMovies: user.settings?.watchlistSyncMovies,
         watchlistSyncTv: user.settings?.watchlistSyncTv,
+        radarrProfileId: user.radarrProfileId,
+        radarr4kProfileId: user.radarr4kProfileId,
+        sonarrProfileId: user.sonarrProfileId,
+        sonarr4kProfileId: user.sonarr4kProfileId,
       });
     } catch (e) {
       next({ status: 500, message: e.message });
@@ -108,6 +112,10 @@ userSettingsRoutes.post<
       user.movieQuotaLimit = req.body.movieQuotaLimit;
       user.tvQuotaDays = req.body.tvQuotaDays;
       user.tvQuotaLimit = req.body.tvQuotaLimit;
+      user.radarrProfileId = req.body.radarrProfileId;
+      user.radarr4kProfileId = req.body.radarr4kProfileId;
+      user.sonarrProfileId = req.body.sonarrProfileId;
+      user.sonarr4kProfileId = req.body.sonarr4kProfileId;
     }
 
     if (!user.settings) {

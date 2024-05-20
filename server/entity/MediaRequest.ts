@@ -703,7 +703,11 @@ export class MediaRequest {
         }
 
         let rootFolder = radarrSettings.activeDirectory;
-        let qualityProfile = radarrSettings.activeProfileId;
+        let qualityProfile =
+          (this.is4k
+            ? this.requestedBy.radarr4kProfileId
+            : this.requestedBy.radarrProfileId) ||
+          radarrSettings.activeProfileId;
         let tags = radarrSettings.tags ? [...radarrSettings.tags] : [];
 
         if (
@@ -994,7 +998,10 @@ export class MediaRequest {
         let qualityProfile =
           seriesType === 'anime' && sonarrSettings.activeAnimeProfileId
             ? sonarrSettings.activeAnimeProfileId
-            : sonarrSettings.activeProfileId;
+            : (this.is4k
+                ? this.requestedBy.sonarr4kProfileId
+                : this.requestedBy.sonarrProfileId) ||
+              sonarrSettings.activeProfileId;
         let languageProfile =
           seriesType === 'anime' && sonarrSettings.activeAnimeLanguageProfileId
             ? sonarrSettings.activeAnimeLanguageProfileId

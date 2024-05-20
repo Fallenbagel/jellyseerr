@@ -17,6 +17,10 @@ export interface UserSettingsGeneralResponse {
   globalTvQuotaDays?: number;
   watchlistSyncMovies?: boolean;
   watchlistSyncTv?: boolean;
+  radarrProfileId?: number;
+  radarr4kProfileId?: number;
+  sonarrProfileId?: number;
+  sonarr4kProfileId?: number;
 }
 
 export type NotificationAgentTypes = Record<NotificationAgentKey, number>;
