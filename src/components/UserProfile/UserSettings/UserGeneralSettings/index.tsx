@@ -173,10 +173,18 @@ const UserGeneralSettings = () => {
               tvQuotaDays: tvQuotaEnabled ? values.tvQuotaDays : null,
               watchlistSyncMovies: values.watchlistSyncMovies,
               watchlistSyncTv: values.watchlistSyncTv,
-              radarrProfileId: Number(values?.radarrProfileId),
-              radarr4kProfileId: Number(values?.radarr4kProfileId),
-              sonarrProfileId: Number(values?.sonarrProfileId),
-              sonarr4kProfileId: Number(values?.sonarr4kProfileId),
+              radarrProfileId: values?.radarrProfileId
+                ? Number(values?.radarrProfileId)
+                : null,
+              radarr4kProfileId: values?.radarrProfileId
+                ? Number(values?.radarr4kProfileId)
+                : null,
+              sonarrProfileId: values?.sonarrProfileId
+                ? Number(values?.sonarrProfileId)
+                : null,
+              sonarr4kProfileId: values?.sonarr4kProfileId
+                ? Number(values?.sonarr4kProfileId)
+                : null,
             });
 
             if (currentUser?.id === user?.id && setLocale) {
