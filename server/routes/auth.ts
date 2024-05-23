@@ -1,6 +1,6 @@
 import JellyfinAPI from '@server/api/jellyfin';
 import PlexTvAPI from '@server/api/plextv';
-import { NetworkErrorCode } from '@server/constants/error';
+import { ApiErrorCode } from '@server/constants/error';
 import { MediaServerType } from '@server/constants/server';
 import { UserType } from '@server/constants/user';
 import { getRepository } from '@server/datasource';
@@ -10,7 +10,7 @@ import { Permission } from '@server/lib/permissions';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
-import { NetworkError } from '@server/types/error';
+import { ApiError } from '@server/types/error';
 import * as EmailValidator from 'email-validator';
 import { Router } from 'express';
 import gravatarUrl from 'gravatar-url';
@@ -280,7 +280,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
     if (!user && !(await userRepository.count())) {
       // Check if user is admin on jellyfin
       if (account.User.Policy.IsAdministrator === false) {
-        throw new NetworkError(403, NetworkErrorCode.NotAdmin);
+        throw new ApiError(403, ApiErrorCode.NotAdmin);
       }
 
       logger.info(
@@ -415,7 +415,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
     return res.status(200).json(user?.filter() ?? {});
   } catch (e) {
     switch (e.errorCode) {
-      case NetworkErrorCode.InvalidUrl:
+      case ApiErrorCode.InvalidUrl:
         logger.error(
           `The provided ${
             process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin'
@@ -432,7 +432,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
           message: e.errorCode,
         });
 
-      case NetworkErrorCode.InvalidCredentials:
+      case ApiErrorCode.InvalidCredentials:
         logger.warn(
           'Failed login attempt from user with incorrect Jellyfin credentials',
           {
@@ -449,7 +449,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
           message: e.errorCode,
         });
 
-      case NetworkErrorCode.NotAdmin:
+      case ApiErrorCode.NotAdmin:
         logger.warn(
           'Failed login attempt from user without admin permissions',
           {

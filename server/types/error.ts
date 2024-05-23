@@ -1,7 +1,7 @@
-import type { NetworkErrorCode } from '@server/constants/error';
+import type { ApiErrorCode } from '@server/constants/error';
 
-export class NetworkError extends Error {
-  constructor(public statusCode: number, public errorCode: NetworkErrorCode) {
+export class ApiError extends Error {
+  constructor(public statusCode: number, public errorCode: ApiErrorCode) {
     super();
 
     this.name = 'apiError';

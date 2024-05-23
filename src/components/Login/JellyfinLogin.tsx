@@ -2,7 +2,7 @@ import Button from '@app/components/Common/Button';
 import Tooltip from '@app/components/Common/Tooltip';
 import useSettings from '@app/hooks/useSettings';
 import { InformationCircleIcon } from '@heroicons/react/24/solid';
-import { NetworkErrorCode } from '@server/constants/error';
+import { ApiErrorCode } from '@server/constants/error';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import getConfig from 'next/config';
@@ -95,13 +95,13 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
           } catch (e) {
             let errorMessage = null;
             switch (e.response?.data?.message) {
-              case NetworkErrorCode.InvalidUrl:
+              case ApiErrorCode.InvalidUrl:
                 errorMessage = messages.invalidurlerror;
                 break;
-              case NetworkErrorCode.InvalidCredentials:
+              case ApiErrorCode.InvalidCredentials:
                 errorMessage = messages.credentialerror;
                 break;
-              case NetworkErrorCode.NotAdmin:
+              case ApiErrorCode.NotAdmin:
                 errorMessage = messages.adminerror;
                 break;
               default:
