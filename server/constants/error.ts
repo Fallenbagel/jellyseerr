@@ -1,8 +1,5 @@
-export enum ApiErrorCode {
+export enum NetworkErrorCode {
   InvalidUrl = 'INVALID_URL',
   InvalidCredentials = 'INVALID_CREDENTIALS',
-}
-
-export enum AuthErrorCode {
   NotAdmin = 'NOT_ADMIN',
 }

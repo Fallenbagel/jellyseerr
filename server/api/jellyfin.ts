@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ApiErrorCode } from '@server/constants/error';
+import { NetworkErrorCode } from '@server/constants/error';
 import availabilitySync from '@server/lib/availabilitySync';
 import logger from '@server/logger';
-import { ApiError } from '@server/types/error';
+import { NetworkError } from '@server/types/error';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 
@@ -137,10 +137,10 @@ class JellyfinAPI {
       const status = e.response?.status;
 
       if (e.code === 'ECONNREFUSED' || status === 404) {
-        throw new ApiError(status, ApiErrorCode.InvalidUrl);
+        throw new NetworkError(status, NetworkErrorCode.InvalidUrl);
       }
 
-      throw new ApiError(status, ApiErrorCode.InvalidCredentials);
+      throw new NetworkError(status, NetworkErrorCode.InvalidCredentials);
     }
   }
 
