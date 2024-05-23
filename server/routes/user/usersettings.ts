@@ -132,8 +132,6 @@ userSettingsRoutes.post<
 
     const savedUser = await userRepository.save(user);
 
-    // TODO: check if the email of the user has been modified after save (if the email already exists in the db)
-
     return res.status(200).json({
       username: savedUser.username,
       discordId: savedUser.settings?.discordId,
