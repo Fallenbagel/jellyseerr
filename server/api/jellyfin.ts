@@ -132,7 +132,7 @@ class JellyfinAPI extends ExternalAPI {
             'X-Forwarded-For': ClientIP,
           }
         : {};
-      
+
       const authResponse = await this.post<JellyfinLoginResponse>(
         '/Users/AuthenticateByName',
         {
