@@ -123,14 +123,24 @@ class JellyfinAPI extends ExternalAPI {
 
   public async login(
     Username?: string,
-    Password?: string
+    Password?: string,
+    ClientIP?: string
   ): Promise<JellyfinLoginResponse> {
     try {
+      const headers = ClientIP
+        ? {
+            'X-Forwarded-For': ClientIP,
+          }
+        : {};
+      
       const authResponse = await this.post<JellyfinLoginResponse>(
         '/Users/AuthenticateByName',
         {
           Username: Username,
           Pw: Password,
+        },
+        {
+          headers: headers,
         }
       );
 
