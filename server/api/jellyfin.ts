@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ApiErrorCode } from '@server/constants/error';
 import availabilitySync from '@server/lib/availabilitySync';
 import logger from '@server/logger';
+import { ApiError } from '@server/types/error';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 
@@ -102,9 +104,9 @@ class JellyfinAPI {
 
     let authHeaderVal = '';
     if (this.authToken) {
-      authHeaderVal = `MediaBrowser Client="Overseerr", Device="Axios", DeviceId="${deviceId}", Version="10.8.0", Token="${authToken}"`;
+      authHeaderVal = `MediaBrowser Client="Jellyseerr", Device="Jellyseerr", DeviceId="${deviceId}", Version="10.8.0", Token="${authToken}"`;
     } else {
-      authHeaderVal = `MediaBrowser Client="Overseerr", Device="Axios", DeviceId="${deviceId}", Version="10.8.0"`;
+      authHeaderVal = `MediaBrowser Client="Jellyseerr", Device="Jellyseerr", DeviceId="${deviceId}", Version="10.8.0"`;
     }
 
     this.axios = axios.create({
@@ -119,19 +121,52 @@ class JellyfinAPI {
 
   public async login(
     Username?: string,
-    Password?: string
+    Password?: string,
+    ClientIP?: string
   ): Promise<JellyfinLoginResponse> {
     try {
+      const headers = ClientIP
+        ? {
+            'X-Forwarded-For': ClientIP,
+          }
+        : {};
       const account = await this.axios.post<JellyfinLoginResponse>(
         '/Users/AuthenticateByName',
         {
           Username: Username,
           Pw: Password,
+        },
+        {
+          headers: headers,
         }
       );
+
       return account.data;
     } catch (e) {
-      throw new Error('Unauthorized');
+      const status = e.response?.status;
+
+      const networkErrorCodes = new Set([
+        'ECONNREFUSED',
+        'EHOSTUNREACH',
+        'ENOTFOUND',
+        'ETIMEDOUT',
+        'ECONNRESET',
+        'EADDRINUSE',
+        'ENETDOWN',
+        'ENETUNREACH',
+        'EPIPE',
+        'ECONNABORTED',
+        'EPROTO',
+        'EHOSTDOWN',
+        'EAI_AGAIN',
+        'ERR_INVALID_URL',
+      ]);
+
+      if (networkErrorCodes.has(e.code) || status === 404) {
+        throw new ApiError(status, ApiErrorCode.InvalidUrl);
+      }
+
+      throw new ApiError(status, ApiErrorCode.InvalidCredentials);
     }
   }
 
