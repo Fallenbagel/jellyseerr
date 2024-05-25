@@ -3,5 +3,5 @@ export enum ApiErrorCode {
   InvalidCredentials = 'INVALID_CREDENTIALS',
   InvalidAuthToken = 'INVALID_AUTH_TOKEN',
   NotAdmin = 'NOT_ADMIN',
-  UNKNOWN = 'UNKNOWN',
+  Unknown = 'UNKNOWN',
 }
