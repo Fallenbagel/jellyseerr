@@ -38,7 +38,10 @@ export interface PlexSettings {
 
 export interface JellyfinSettings {
   name: string;
-  hostname: string;
+  ip: string;
+  port: number;
+  useSsl?: boolean;
+  urlBase?: string;
   externalHostname?: string;
   jellyfinForgotPasswordUrl?: string;
   libraries: Library[];
@@ -331,7 +334,9 @@ class Settings {
       },
       jellyfin: {
         name: '',
-        hostname: '',
+        ip: '',
+        port: 8096,
+        useSsl: false,
         externalHostname: '',
         jellyfinForgotPasswordUrl: '',
         libraries: [],
@@ -547,8 +552,8 @@ class Settings {
       region: this.data.main.region,
       originalLanguage: this.data.main.originalLanguage,
       mediaServerType: this.main.mediaServerType,
-      jellyfinHost: this.jellyfin.hostname,
-      jellyfinExternalHost: this.jellyfin.externalHostname,
+      // jellyfinHost: this.jellyfin.hostname,
+      // jellyfinExternalHost: this.jellyfin.externalHostname,
       partialRequestsEnabled: this.data.main.partialRequestsEnabled,
       cacheImages: this.data.main.cacheImages,
       vapidPublic: this.vapidPublic,
@@ -637,8 +642,60 @@ class Settings {
     const data = fs.readFileSync(SETTINGS_PATH, 'utf-8');
 
     if (data) {
-      this.data = merge(this.data, JSON.parse(data));
-      this.save();
+      const oldJellyfinSettings = JSON.parse(data).jellyfin;
+
+      // Migrate old settings
+      // TODO: Test this migration and the regex
+      console.log(oldJellyfinSettings);
+
+      if (oldJellyfinSettings && oldJellyfinSettings.hostname) {
+        // migrate old jellyfin hostname to ip and port and useSsl
+        const hostname = oldJellyfinSettings.hostname;
+
+        const protocolMatch = hostname.match(/^(https?):\/\//i);
+
+        if (protocolMatch) {
+          this.data.jellyfin.useSsl = true;
+        }
+
+        const remainingUrl = hostname.replace(/^(https?):\/\//i, '');
+
+        const urlMatch = remainingUrl.match(/^([^:]+)(:([0-9]+))?(\/.*)?$/);
+        if (urlMatch) {
+          this.data.jellyfin.ip = urlMatch[1];
+          this.data.jellyfin.port = urlMatch[3] || '';
+          this.data.jellyfin.urlBase = urlMatch[4] || '';
+
+          if (!this.data.jellyfin.port && this.data.jellyfin.useSsl) {
+            this.data.jellyfin.port = 443;
+          }
+
+          if (
+            this.data.jellyfin.urlBase &&
+            this.data.jellyfin.urlBase.endsWith('/')
+          ) {
+            this.data.jellyfin.urlBase = this.data.jellyfin.urlBase.slice(
+              0,
+              -1
+            );
+          }
+        }
+
+        delete oldJellyfinSettings.hostname;
+
+        console.log(this.data.jellyfin, oldJellyfinSettings.hostname);
+
+        this.data.jellyfin = Object.assign(
+          {},
+          this.data.jellyfin,
+          oldJellyfinSettings
+        );
+
+        this.save();
+      } else {
+        this.data = merge(this.data, JSON.parse(data));
+        this.save();
+      }
     }
     return this;
   }

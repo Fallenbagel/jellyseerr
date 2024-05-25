@@ -32,14 +32,18 @@ const messages = defineMessages({
   jellyfinSettingsDescription:
     'Optionally configure the internal and external endpoints for your {mediaServerName} server. In most cases, the external URL is different to the internal URL. A custom password reset URL can also be set for {mediaServerName} login, in case you would like to redirect to a different password reset page.',
   externalUrl: 'External URL',
-  internalUrl: 'Internal URL',
+  // internalUrl: 'Internal URL',
+  hostname: 'Hostname or IP Address',
+  port: 'Port',
+  enablessl: 'Use SSL',
+  urlBase: 'URL Base',
   jellyfinForgotPasswordUrl: 'Forgot Password URL',
   jellyfinSyncFailedNoLibrariesFound: 'No libraries were found',
   jellyfinSyncFailedAutomaticGroupedFolders:
     'Custom authentication with Automatic Library Grouping not supported',
   jellyfinSyncFailedGenericError:
     'Something went wrong while syncing libraries',
-  validationUrl: 'You must provide a valid URL',
+
   syncing: 'Syncing',
   syncJellyfin: 'Sync Libraries',
   manualscanJellyfin: 'Manual Library Scan',
@@ -50,6 +54,12 @@ const messages = defineMessages({
   librariesRemaining: 'Libraries Remaining: {count}',
   startscan: 'Start Scan',
   cancelscan: 'Cancel Scan',
+  validationUrl: 'You must provide a valid URL',
+  validationHostnameRequired: 'You must provide a valid hostname or IP address',
+  validationPortRequired: 'You must provide a valid port number',
+  validationUrlTrailingSlash: 'URL must not end in a trailing slash',
+  validationUrlBaseLeadingSlash: 'URL base must have a leading slash',
+  validationUrlBaseTrailingSlash: 'URL base must not end in a trailing slash',
 });
 
 interface Library {
@@ -65,6 +75,7 @@ interface SyncStatus {
   currentLibrary?: Library;
   libraries: Library[];
 }
+
 interface SettingsJellyfinProps {
   showAdvancedSettings?: boolean;
   onComplete?: () => void;
@@ -93,18 +104,59 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
   const { publicRuntimeConfig } = getConfig();
 
   const JellyfinSettingsSchema = Yup.object().shape({
-    jellyfinExternalUrl: Yup.string().matches(
-      /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
-      intl.formatMessage(messages.validationUrl)
-    ),
-    jellyfinInternalUrl: Yup.string().matches(
-      /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
-      intl.formatMessage(messages.validationUrl)
-    ),
-    jellyfinForgotPasswordUrl: Yup.string().matches(
-      /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
-      intl.formatMessage(messages.validationUrl)
-    ),
+    hostname: Yup.string()
+      .nullable()
+      .required(intl.formatMessage(messages.validationHostnameRequired))
+      .matches(
+        /^(((([a-z]|\d|_|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*)?([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])):((([a-z]|\d|_|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*)?([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))@)?(([a-z]|\d|_|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*)?([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])$/i,
+        intl.formatMessage(messages.validationHostnameRequired)
+      ),
+    port: Yup.number().when(['hostname'], {
+      is: (value: unknown) => !!value,
+      then: Yup.number()
+        .typeError(intl.formatMessage(messages.validationPortRequired))
+        .nullable()
+        .required(intl.formatMessage(messages.validationPortRequired)),
+      otherwise: Yup.number()
+        .typeError(intl.formatMessage(messages.validationPortRequired))
+        .nullable(),
+    }),
+    urlBase: Yup.string()
+      .test(
+        'leading-slash',
+        intl.formatMessage(messages.validationUrlBaseLeadingSlash),
+        (value) => !value || value.startsWith('/')
+      )
+      .test(
+        'trailing-slash',
+        intl.formatMessage(messages.validationUrlBaseTrailingSlash),
+        (value) => !value || !value.endsWith('/')
+      ),
+    jellyfinExternalUrl: Yup.string()
+      .nullable()
+      .url(intl.formatMessage(messages.validationUrl))
+      .test(
+        'no-trailing-slash',
+        intl.formatMessage(messages.validationUrlTrailingSlash),
+        (value) => !value || !value.endsWith('/')
+      ),
+    jellyfinForgotPasswordUrl: Yup.string()
+      .nullable()
+      .url(intl.formatMessage(messages.validationUrl))
+      .test(
+        'no-trailing-slash',
+        intl.formatMessage(messages.validationUrlTrailingSlash),
+        (value) => !value || !value.endsWith('/')
+      ),
+
+    // jellyfinInternalUrl: Yup.string().matches(
+    //   /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
+    //   intl.formatMessage(messages.validationUrl)
+    // ),
+    // jellyfinForgotPasswordUrl: Yup.string().matches(
+    //   /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
+    //   intl.formatMessage(messages.validationUrl)
+    // ),
   });
 
   const activeLibraries =
@@ -394,7 +446,11 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
           </div>
           <Formik
             initialValues={{
-              jellyfinInternalUrl: data?.hostname || '',
+              // jellyfinInternalUrl: data?.hostname || '',
+              hostname: data?.ip,
+              port: data?.port ?? 8096,
+              useSsl: data?.useSsl,
+              urlBase: data?.urlBase || '',
               jellyfinExternalUrl: data?.externalHostname || '',
               jellyfinForgotPasswordUrl: data?.jellyfinForgotPasswordUrl || '',
             }}
@@ -402,7 +458,10 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
             onSubmit={async (values) => {
               try {
                 await axios.post('/api/v1/settings/jellyfin', {
-                  hostname: values.jellyfinInternalUrl,
+                  ip: values.hostname,
+                  port: Number(values.port),
+                  useSsl: values.useSsl,
+                  urlBase: values.urlBase,
                   externalHostname: values.jellyfinExternalUrl,
                   jellyfinForgotPasswordUrl: values.jellyfinForgotPasswordUrl,
                 } as JellyfinSettings);
@@ -437,10 +496,18 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
               }
             }}
           >
-            {({ errors, touched, handleSubmit, isSubmitting, isValid }) => {
+            {({
+              errors,
+              touched,
+              values,
+              setFieldValue,
+              handleSubmit,
+              isSubmitting,
+              isValid,
+            }) => {
               return (
                 <form className="section" onSubmit={handleSubmit}>
-                  <div className="form-row">
+                  {/* <div className="form-row">
                     <label htmlFor="jellyfinInternalUrl" className="text-label">
                       {intl.formatMessage(messages.internalUrl)}
                     </label>
@@ -458,6 +525,87 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                           <div className="error">
                             {errors.jellyfinInternalUrl}
                           </div>
+                        )}
+                    </div>
+                        </div> */}
+                  <div className="form-row">
+                    <label htmlFor="hostname" className="text-label">
+                      {intl.formatMessage(messages.hostname)}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <div className="form-input-area">
+                      <div className="form-input-field">
+                        <span className="inline-flex cursor-default items-center rounded-l-md border border-r-0 border-gray-500 bg-gray-800 px-3 text-gray-100 sm:text-sm">
+                          {values.useSsl ? 'https://' : 'http://'}
+                        </span>
+                        <Field
+                          type="text"
+                          inputMode="url"
+                          id="hostname"
+                          name="hostname"
+                          className="rounded-r-only"
+                        />
+                      </div>
+                      {errors.hostname &&
+                        touched.hostname &&
+                        typeof errors.hostname === 'string' && (
+                          <div className="error">{errors.hostname}</div>
+                        )}
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <label htmlFor="port" className="text-label">
+                      {intl.formatMessage(messages.port)}
+                      <span className="label-required">*</span>
+                    </label>
+                    <div className="form-input-area">
+                      <Field
+                        type="text"
+                        inputMode="numeric"
+                        id="port"
+                        name="port"
+                        className="short"
+                      />
+                      {errors.port &&
+                        touched.port &&
+                        typeof errors.port === 'string' && (
+                          <div className="error">{errors.port}</div>
+                        )}
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <label htmlFor="useSsl" className="checkbox-label">
+                      {intl.formatMessage(messages.enablessl)}
+                    </label>
+                    <div className="form-input-area">
+                      <Field
+                        type="checkbox"
+                        id="useSsl"
+                        name="useSsl"
+                        onChange={() => {
+                          setFieldValue('useSsl', !values.useSsl);
+                          setFieldValue('port', values.useSsl ? 8096 : 443);
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <label htmlFor="urlBase" className="text-label">
+                      {intl.formatMessage(messages.urlBase)}
+                    </label>
+                    <div className="form-input-area">
+                      <div className="form-input-field">
+                        <Field
+                          type="text"
+                          inputMode="url"
+                          id="urlBase"
+                          name="urlBase"
+                        />
+                      </div>
+                      {errors.urlBase &&
+                        touched.urlBase &&
+                        typeof errors.urlBase === 'string' && (
+                          <div className="error">{errors.urlBase}</div>
                         )}
                     </div>
                   </div>

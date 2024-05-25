@@ -496,7 +496,6 @@ router.post(
         order: { id: 'ASC' },
       });
       const jellyfinClient = new JellyfinAPI(
-        settings.jellyfin.hostname ?? '',
         admin.jellyfinAuthToken ?? '',
         admin.jellyfinDeviceId ?? ''
       );
@@ -504,15 +503,15 @@ router.post(
 
       //const jellyfinUsersResponse = await jellyfinClient.getUsers();
       const createdUsers: User[] = [];
-      const { hostname, externalHostname } = getSettings().jellyfin;
-      let jellyfinHost =
+      const { ip, port, urlBase, useSsl, externalHostname } =
+        getSettings().jellyfin;
+      const hostname = `${useSsl ? 'https' : 'http'}://${ip}:${port}${urlBase}`;
+
+      const jellyfinHost =
         externalHostname && externalHostname.length > 0
           ? externalHostname
           : hostname;
 
-      jellyfinHost = jellyfinHost.endsWith('/')
-        ? jellyfinHost.slice(0, -1)
-        : jellyfinHost;
       jellyfinClient.setUserId(admin.jellyfinUserId ?? '');
       const jellyfinUsers = await jellyfinClient.getUsers();
 

@@ -98,8 +98,9 @@ class JellyfinAPI {
   private jellyfinHost: string;
   private axios: AxiosInstance;
 
-  constructor(jellyfinHost: string, authToken?: string, deviceId?: string) {
-    this.jellyfinHost = jellyfinHost;
+  constructor(hostname: string, authToken?: string, deviceId?: string) {
+    this.jellyfinHost = hostname;
+
     this.authToken = authToken;
 
     let authHeaderVal = '';
@@ -175,6 +176,18 @@ class JellyfinAPI {
     return;
   }
 
+  public async getSystemInfo(): Promise<any> {
+    try {
+      // TODO: remove axios from here
+      const systemInfoResponse = await this.axios.get<any>('/System/Info');
+
+      return systemInfoResponse;
+    } catch (e) {
+      //TODO: Use the api error codes
+      throw new Error('Invalid auth token');
+    }
+  }
+
   public async getServerName(): Promise<string> {
     try {
       const account = await this.axios.get<JellyfinUserResponse>(
@@ -220,6 +233,7 @@ class JellyfinAPI {
 
   public async getLibraries(): Promise<JellyfinLibrary[]> {
     try {
+      console.log('getting libraries with url', this.jellyfinHost);
       const mediaFolders = await this.axios.get<any>(`/Library/MediaFolders`);
 
       return this.mapLibraries(mediaFolders.data.Items);
