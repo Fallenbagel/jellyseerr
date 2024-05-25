@@ -191,7 +191,7 @@ class JellyfinAPI extends ExternalAPI {
         { label: 'Jellyfin API' }
       );
 
-      throw new ApiError(e.response?.status, ApiErrorCode.Generic);
+      throw new ApiError(e.response?.status, ApiErrorCode.UNKNOWN);
     }
   }
 
