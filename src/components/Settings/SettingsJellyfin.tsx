@@ -33,7 +33,6 @@ const messages = defineMessages({
   jellyfinSettingsDescription:
     'Optionally configure the internal and external endpoints for your {mediaServerName} server. In most cases, the external URL is different to the internal URL. A custom password reset URL can also be set for {mediaServerName} login, in case you would like to redirect to a different password reset page.',
   externalUrl: 'External URL',
-  // internalUrl: 'Internal URL',
   hostname: 'Hostname or IP Address',
   port: 'Port',
   enablessl: 'Use SSL',
@@ -438,7 +437,6 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
           </div>
           <Formik
             initialValues={{
-              // jellyfinInternalUrl: data?.hostname || '',
               hostname: data?.ip,
               port: data?.port ?? 8096,
               useSsl: data?.useSsl,
@@ -514,27 +512,6 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
             }) => {
               return (
                 <form className="section" onSubmit={handleSubmit}>
-                  {/* <div className="form-row">
-                    <label htmlFor="jellyfinInternalUrl" className="text-label">
-                      {intl.formatMessage(messages.internalUrl)}
-                    </label>
-                    <div className="form-input-area">
-                      <div className="form-input-field">
-                        <Field
-                          type="text"
-                          inputMode="url"
-                          id="jellyfinInternalUrl"
-                          name="jellyfinInternalUrl"
-                        />
-                      </div>
-                      {errors.jellyfinInternalUrl &&
-                        touched.jellyfinInternalUrl && (
-                          <div className="error">
-                            {errors.jellyfinInternalUrl}
-                          </div>
-                        )}
-                    </div>
-                        </div> */}
                   <div className="form-row">
                     <label htmlFor="hostname" className="text-label">
                       {intl.formatMessage(messages.hostname)}

@@ -59,17 +59,6 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
 
   if (initial) {
     const LoginSchema = Yup.object().shape({
-      // host: Yup.string()
-      //   .matches(
-      //     /^(?:(?:(?:https?):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*\.?)(?::\d{2,5})?(?:[/?#]\S*)?$/,
-      //     intl.formatMessage(messages.validationhostformat)
-      //   )
-      //   .required(
-      //     intl.formatMessage(messages.validationhostrequired, {
-      //       mediaServerName:
-      //         publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
-      //     })
-      //   ),
       hostname: Yup.string().required(
         intl.formatMessage(messages.validationhostrequired, {
           mediaServerName:
@@ -164,25 +153,6 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
         }) => (
           <Form>
             <div className="sm:border-t sm:border-gray-800">
-              {/* <label htmlFor="host" className="text-label">
-                {intl.formatMessage(messages.host, mediaServerFormatValues)}
-              </label> */}
-              {/* <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
-                <div className="flex rounded-md shadow-sm">
-                  <Field
-                    id="host"
-                    name="host"
-                    type="text"
-                    placeholder={intl.formatMessage(
-                      messages.host,
-                      mediaServerFormatValues
-                    )}
-                  />
-                </div>
-                {errors.host && touched.host && (
-                  <div className="error">{errors.host}</div>
-                )}
-              </div> */}
               <div className="flex flex-col sm:flex-row sm:gap-4">
                 <div className="w-full">
                   <label htmlFor="hostname" className="text-label">

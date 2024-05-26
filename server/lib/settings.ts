@@ -133,7 +133,6 @@ interface FullPublicSettings extends PublicSettings {
   region: string;
   originalLanguage: string;
   mediaServerType: number;
-  jellyfinHost?: string;
   jellyfinExternalHost?: string;
   jellyfinForgotPasswordUrl?: string;
   jellyfinServerName?: string;
@@ -552,8 +551,6 @@ class Settings {
       region: this.data.main.region,
       originalLanguage: this.data.main.originalLanguage,
       mediaServerType: this.main.mediaServerType,
-      // jellyfinHost: this.jellyfin.hostname,
-      // jellyfinExternalHost: this.jellyfin.externalHostname,
       partialRequestsEnabled: this.data.main.partialRequestsEnabled,
       cacheImages: this.data.main.cacheImages,
       vapidPublic: this.vapidPublic,
