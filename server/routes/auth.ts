@@ -443,9 +443,12 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
             label: 'Auth',
             error: e.errorCode,
             status: e.statusCode,
-            hostname: `${body.useSsl ? 'https' : 'http'}://${body.hostname}:${
-              body.port
-            }${body.urlBase}`,
+            hostname: getHostname({
+              useSsl: body.useSsl,
+              ip: body.hostname,
+              port: body.port,
+              urlBase: body.urlBase,
+            }),
           }
         );
         return next({

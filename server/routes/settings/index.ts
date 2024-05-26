@@ -25,6 +25,7 @@ import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
 import discoverSettingRoutes from '@server/routes/settings/discover';
+import { ApiError } from '@server/types/error';
 import { appDataPath } from '@server/utils/appDataVolume';
 import { getAppVersion } from '@server/utils/appVersion';
 import { getHostname } from '@server/utils/getHostname';
@@ -275,11 +276,8 @@ settingsRoutes.post('/jellyfin', async (req, res, next) => {
 
     const result = await jellyfinClient.getSystemInfo();
 
-    console.log(result);
-
-    // TODO: use the apiErrorCodes
     if (!result?.data?.Id) {
-      throw new Error('Server not found');
+      throw new ApiError(result?.status, ApiErrorCode.InvalidUrl);
     }
 
     settings.jellyfin.serverId = result.Id;
@@ -364,12 +362,11 @@ settingsRoutes.get('/jellyfin/library', async (req, res, next) => {
 });
 
 settingsRoutes.get('/jellyfin/users', async (req, res) => {
-  const { ip, port, useSsl, urlBase, externalHostname } =
-    getSettings().jellyfin;
+  const { externalHostname } = getSettings().jellyfin;
   const jellyfinHost =
     externalHostname && externalHostname.length > 0
       ? externalHostname
-      : `${useSsl ? 'https' : 'http'}://${ip}:${port}${urlBase}`;
+      : getHostname();
 
   const userRepository = getRepository(User);
   const admin = await userRepository.findOneOrFail({

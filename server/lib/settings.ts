@@ -645,8 +645,6 @@ class Settings {
       const oldJellyfinSettings = JSON.parse(data).jellyfin;
 
       // Migrate old settings
-      // TODO: Test this migration and the regex
-      console.log(oldJellyfinSettings);
 
       if (oldJellyfinSettings && oldJellyfinSettings.hostname) {
         // migrate old jellyfin hostname to ip and port and useSsl
@@ -682,8 +680,6 @@ class Settings {
         }
 
         delete oldJellyfinSettings.hostname;
-
-        console.log(this.data.jellyfin, oldJellyfinSettings.hostname);
 
         this.data.jellyfin = Object.assign(
           {},

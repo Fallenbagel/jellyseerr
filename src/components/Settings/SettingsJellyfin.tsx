@@ -4,6 +4,7 @@ import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import LibraryItem from '@app/components/Settings/LibraryItem';
 import globalMessages from '@app/i18n/globalMessages';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
+import { ApiErrorCode } from '@server/constants/error';
 import type { JellyfinSettings } from '@server/lib/settings';
 import axios from 'axios';
 import { Field, Formik } from 'formik';
@@ -43,7 +44,7 @@ const messages = defineMessages({
     'Custom authentication with Automatic Library Grouping not supported',
   jellyfinSyncFailedGenericError:
     'Something went wrong while syncing libraries',
-
+  invalidurlerror: 'Unable to connect to {mediaServerName} server.',
   syncing: 'Syncing',
   syncJellyfin: 'Sync Libraries',
   manualscanJellyfin: 'Manual Library Scan',
@@ -148,15 +149,6 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
         intl.formatMessage(messages.validationUrlTrailingSlash),
         (value) => !value || !value.endsWith('/')
       ),
-
-    // jellyfinInternalUrl: Yup.string().matches(
-    //   /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
-    //   intl.formatMessage(messages.validationUrl)
-    // ),
-    // jellyfinForgotPasswordUrl: Yup.string().matches(
-    //   /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
-    //   intl.formatMessage(messages.validationUrl)
-    // ),
   });
 
   const activeLibraries =
@@ -479,18 +471,33 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                   }
                 );
               } catch (e) {
-                addToast(
-                  intl.formatMessage(messages.jellyfinSettingsFailure, {
-                    mediaServerName:
-                      publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                        ? 'Emby'
-                        : 'Jellyfin',
-                  }),
-                  {
-                    autoDismiss: true,
-                    appearance: 'error',
-                  }
-                );
+                if (e.response?.data?.message === ApiErrorCode.InvalidUrl) {
+                  addToast(
+                    intl.formatMessage(messages.invalidurlerror, {
+                      mediaServerName:
+                        publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                          ? 'Emby'
+                          : 'Jellyfin',
+                    }),
+                    {
+                      autoDismiss: true,
+                      appearance: 'error',
+                    }
+                  );
+                } else {
+                  addToast(
+                    intl.formatMessage(messages.jellyfinSettingsFailure, {
+                      mediaServerName:
+                        publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                          ? 'Emby'
+                          : 'Jellyfin',
+                    }),
+                    {
+                      autoDismiss: true,
+                      appearance: 'error',
+                    }
+                  );
+                }
               } finally {
                 revalidate();
               }

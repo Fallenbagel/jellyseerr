@@ -20,6 +20,7 @@ import { hasPermission, Permission } from '@server/lib/permissions';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
+import { getHostname } from '@server/utils/getHostname';
 import { Router } from 'express';
 import gravatarUrl from 'gravatar-url';
 import { findIndex, sortBy } from 'lodash';
@@ -503,9 +504,8 @@ router.post(
 
       //const jellyfinUsersResponse = await jellyfinClient.getUsers();
       const createdUsers: User[] = [];
-      const { ip, port, urlBase, useSsl, externalHostname } =
-        getSettings().jellyfin;
-      const hostname = `${useSsl ? 'https' : 'http'}://${ip}:${port}${urlBase}`;
+      const { externalHostname } = getSettings().jellyfin;
+      const hostname = getHostname();
 
       const jellyfinHost =
         externalHostname && externalHostname.length > 0
