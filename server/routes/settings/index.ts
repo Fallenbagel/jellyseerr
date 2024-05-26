@@ -266,33 +266,47 @@ settingsRoutes.post('/jellyfin', async (req, res, next) => {
       order: { id: 'ASC' },
     });
 
-    Object.assign(settings.jellyfin, req.body);
+    const tempJellyfinSettings = { ...settings.jellyfin, ...req.body };
 
     const jellyfinClient = new JellyfinAPI(
-      getHostname(),
+      getHostname(tempJellyfinSettings),
       admin.jellyfinAuthToken ?? '',
       admin.jellyfinDeviceId ?? ''
     );
 
     const result = await jellyfinClient.getSystemInfo();
 
-    if (!result?.data?.Id) {
+    if (!result?.Id) {
       throw new ApiError(result?.status, ApiErrorCode.InvalidUrl);
     }
 
+    Object.assign(settings.jellyfin, req.body);
     settings.jellyfin.serverId = result.Id;
     settings.jellyfin.name = result.ServerName;
-
     settings.save();
   } catch (e) {
-    logger.error('Something went wrong testing Jellyfin connection', {
-      label: 'API',
-      errorMessage: e.message,
-    });
-    return next({
-      status: 500,
-      message: 'Unable to connect to Jellyfin.',
-    });
+    if (e instanceof ApiError) {
+      logger.error('Something went wrong testing Jellyfin connection', {
+        label: 'API',
+        status: e.statusCode,
+        errorMessage: ApiErrorCode.InvalidUrl,
+      });
+
+      return next({
+        status: e.statusCode,
+        message: ApiErrorCode.InvalidUrl,
+      });
+    } else {
+      logger.error('Something went wrong', {
+        label: 'API',
+        errorMessage: e.message,
+      });
+
+      return next({
+        status: 500,
+        message: 'Something went wrong',
+      });
+    }
   }
 
   return res.status(200).json(settings.jellyfin);
