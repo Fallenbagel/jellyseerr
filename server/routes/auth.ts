@@ -231,7 +231,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
   //Make sure jellyfin login is enabled, but only if jellyfin is not already configured
   if (
     settings.main.mediaServerType !== MediaServerType.JELLYFIN &&
-    settings.jellyfin.ip !== ''
+    settings.main.mediaServerType != MediaServerType.NOT_CONFIGURED
   ) {
     return res.status(500).json({ error: 'Jellyfin login is disabled' });
   } else if (!body.username) {
