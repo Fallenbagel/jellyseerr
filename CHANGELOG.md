@@ -1,3 +1,23 @@
+# [1.9.0](https://github.com/fallenbagel/jellyseerr/compare/v1.8.1...v1.9.0) (2024-05-29)
+
+
+### Bug Fixes
+
+* **api:** save user email on the first try ([#760](https://github.com/fallenbagel/jellyseerr/issues/760)) ([0bbcfdc](https://github.com/fallenbagel/jellyseerr/commit/0bbcfdc4f9ff9735f45232a2412ac8444f525de9)), closes [#227](https://github.com/fallenbagel/jellyseerr/issues/227) [#748](https://github.com/fallenbagel/jellyseerr/issues/748)
+* **api:** small errors on overseerr-api.yaml ([#721](https://github.com/fallenbagel/jellyseerr/issues/721)) ([0eea109](https://github.com/fallenbagel/jellyseerr/commit/0eea1090dfdba4333646280c84b09b0197fefa74))
+* **auth:** case-sensitive logins not updating authtokens ([#778](https://github.com/fallenbagel/jellyseerr/issues/778)) ([2bd125d](https://github.com/fallenbagel/jellyseerr/commit/2bd125d9a55d15a398ceb5f2996105a5e861b6e0))
+* **jellyfinapi:** use external api class for jellyfin api requests ([#762](https://github.com/fallenbagel/jellyseerr/issues/762)) ([650c339](https://github.com/fallenbagel/jellyseerr/commit/650c339d74d4fe85ef7f76184901e86f4eeada85)), closes [#728](https://github.com/fallenbagel/jellyseerr/issues/728) [#387](https://github.com/fallenbagel/jellyseerr/issues/387)
+* **logging:** handle media server connection refused error/toast ([#748](https://github.com/fallenbagel/jellyseerr/issues/748)) ([f486fb5](https://github.com/fallenbagel/jellyseerr/commit/f486fb5e75f9ea21456952b6a52cb841e30f3556))
+* use UTF8 encoding for webhook JSON ([#714](https://github.com/fallenbagel/jellyseerr/issues/714)) ([c0a0b9c](https://github.com/fallenbagel/jellyseerr/commit/c0a0b9c8a8b0c2eeaf3fa9159f10742baa9f6c1f))
+
+
+### Features
+
+* add Latin American Spanish translation ([#725](https://github.com/fallenbagel/jellyseerr/issues/725)) ([783fda9](https://github.com/fallenbagel/jellyseerr/commit/783fda9621aef8ffd46e5f036136de82ed502ccc)), closes [#677](https://github.com/fallenbagel/jellyseerr/issues/677)
+* add merge conflict labeler workflow ([#719](https://github.com/fallenbagel/jellyseerr/issues/719)) ([d9d07c7](https://github.com/fallenbagel/jellyseerr/commit/d9d07c705a24d5c49905066aac45a3c6a2e36a53))
+* **auth:** send real information on login ([#470](https://github.com/fallenbagel/jellyseerr/issues/470)) ([d765055](https://github.com/fallenbagel/jellyseerr/commit/d765055da83ee94546399f6348aee14d8427d462))
+* **settings:** stores jellyfin/emby server name in the settings ([#763](https://github.com/fallenbagel/jellyseerr/issues/763)) ([7a5e8d6](https://github.com/fallenbagel/jellyseerr/commit/7a5e8d69bf620c8e7bf5f284840b1a5fe757ae5f))
+
 ## [1.8.1](https://github.com/fallenbagel/jellyseerr/compare/v1.8.0...v1.8.1) (2024-04-17)
 
 
