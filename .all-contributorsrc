@@ -322,6 +322,60 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "joshuaboniface",
+      "name": "Joshua M. Boniface",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4031396?v=4",
+      "profile": "https://www.boniface.me",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "gauthier-th",
+      "name": "Gauthier",
+      "avatar_url": "https://avatars.githubusercontent.com/u/37781713?v=4",
+      "profile": "https://gauthierth.fr/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Kara-Zor-El",
+      "name": "Kara",
+      "avatar_url": "https://avatars.githubusercontent.com/u/69772087?v=4",
+      "profile": "https://github.com/Kara-Zor-El",
+      "contributions": [
+        "infra"
+      ]
+    },
+    {
+      "login": "JoaquinOlivero",
+      "name": "Joaquin Olivero",
+      "avatar_url": "https://avatars.githubusercontent.com/u/66050823?v=4",
+      "profile": "https://joaquinolivero.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Bretterteig",
+      "name": "Julian Behr",
+      "avatar_url": "https://avatars.githubusercontent.com/u/47298401?v=4",
+      "profile": "https://github.com/Bretterteig",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "ThowZzy",
+      "name": "ThowZzy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/61882536?v=4",
+      "profile": "https://github.com/ThowZzy",
+      "contributions": [
+        "code"
+      ]
     }
   ]
 }
