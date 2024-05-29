@@ -11,7 +11,7 @@
 <a href="http://jellyseerr.borgcube.de/engage/jellyseerr/"><img src="http://jellyseerr.borgcube.de/widget/jellyseerr/jellyseerr-frontend/svg-badge.svg" alt="Translation status" /></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-34-orange.svg"/></a>
+<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-40-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 **Jellyseerr** is a free and open source software application for managing requests for your media library.
@@ -40,11 +40,11 @@ With more features on the way! Check out our [issue tracker](https://github.com/
 
 #### Pre-requisite (Important)
 
-_*On Jellyfin/Emby, ensure the `settings > Home > Automatically group content from the following folders into views such as 'Movies', 'Music' and 'TV'` is turned off*_
+_*On Jellyfin/Emby, ensure the `Settings > Home > Automatically group content from the following folders into views such as 'Movies', 'Music' and 'TV'` is turned off*_
 
 ### Launching Jellyseerr using Docker (Recommended)
 
-Check out our dockerhub for instructions on how to install and run Jellyseerr:
+Check out our docker hub for instructions on how to install and run Jellyseerr:
 https://hub.docker.com/r/fallenbagel/jellyseerr
 
 ### Building from source (ADVANCED):
@@ -65,16 +65,16 @@ yarn run build
 yarn start
 ```
 
-(you can use task scheduler to run a bat script with `@echo off` and `yarn start` to run jellyseerr in the background)
+(You can use task scheduler to run a bat script with `@echo off` and `yarn start` to run jellyseerr in the background)
 
-_to set env variables such as `JELLYFIN_TYPE=emby` create a file called `.env` in the root directory of jellyseerr_
+_To set env variables such as `JELLYFIN_TYPE=emby` create a file called `.env` in the root directory of jellyseerr_
 
 #### Linux
 
 **Pre-requisites:**
 
 - Nodejs [v18](https://nodejs.org/en/download/package-manager)
-- [Yarn](https://classic.yarnpkg.com/lang/en/docs/install) (on debian based distros, the package manager provided `yarn` is different and is a package called cmdlet. You can remove that using `apt-remove cmdlet` then install yarn using `npm install -g yarn`)
+- [Yarn](https://classic.yarnpkg.com/lang/en/docs/install) (on Debian based distros, the package manager provided `yarn` is different and is a package called cmdlet. You can remove that using `apt-remove cmdlet` then install yarn using `npm install -g yarn`)
 - Git
 
 **Steps:**
@@ -85,7 +85,7 @@ _to set env variables such as `JELLYFIN_TYPE=emby` create a file called `.env` i
 cd /opt
 ```
 
-2. Then clone the follow commands to clone and checkout to the stable version
+2. Then execute the following commands to clone and checkout to the stable version
 
 ```bash
 git clone https://github.com/Fallenbagel/jellyseerr.git && cd jellyseerr
@@ -104,9 +104,9 @@ yarn run build
 5. If you want to run jellyseerr as a _Systemd-service:_
 
 - assuming jellyseerr was cloned to `/opt/`
-- first create the environmentfile at `/etc/jellyseerr/jellyseerr.conf`
+- first create the environment file at `/etc/jellyseerr/jellyseerr.conf`
 
-Environmentfile:
+Environment file:
 
 ```
 # Jellyseerr's default port is 5055, if you want to use both, change this.
@@ -229,6 +229,14 @@ Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcon
       <td align="center" valign="top" width="14.28%"><a href="https://aleksasiriski.dev"><img src="https://avatars.githubusercontent.com/u/31509435?v=4?s=100" width="100px;" alt="Aleksa Siriški"/><br /><sub><b>Aleksa Siriški</b></sub></a><br /><a href="#infra-aleksasiriski" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://danishhumair.com"><img src="https://avatars.githubusercontent.com/u/121830048?v=4?s=100" width="100px;" alt="Danish Humair"/><br /><sub><b>Danish Humair</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=Danish-H" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://arm0.red"><img src="https://avatars.githubusercontent.com/u/16858514?v=4?s=100" width="100px;" alt="Stephen Harris"/><br /><sub><b>Stephen Harris</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=trackmastersteve" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://www.boniface.me"><img src="https://avatars.githubusercontent.com/u/4031396?v=4?s=100" width="100px;" alt="Joshua M. Boniface"/><br /><sub><b>Joshua M. Boniface</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=joshuaboniface" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://gauthierth.fr/"><img src="https://avatars.githubusercontent.com/u/37781713?v=4?s=100" width="100px;" alt="Gauthier"/><br /><sub><b>Gauthier</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=gauthier-th" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Kara-Zor-El"><img src="https://avatars.githubusercontent.com/u/69772087?v=4?s=100" width="100px;" alt="Kara"/><br /><sub><b>Kara</b></sub></a><br /><a href="#infra-Kara-Zor-El" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://joaquinolivero.com"><img src="https://avatars.githubusercontent.com/u/66050823?v=4?s=100" width="100px;" alt="Joaquin Olivero"/><br /><sub><b>Joaquin Olivero</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=JoaquinOlivero" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Bretterteig"><img src="https://avatars.githubusercontent.com/u/47298401?v=4?s=100" width="100px;" alt="Julian Behr"/><br /><sub><b>Julian Behr</b></sub></a><br /><a href="#translation-Bretterteig" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ThowZzy"><img src="https://avatars.githubusercontent.com/u/61882536?v=4?s=100" width="100px;" alt="ThowZzy"/><br /><sub><b>ThowZzy</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=ThowZzy" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
