@@ -1,9 +1,8 @@
 import { isPgsql } from '@server/datasource';
 import type { ColumnOptions, ColumnType } from 'typeorm';
 import { Column } from 'typeorm';
-// TODO cleanup this file
 const pgTypeMapping: { [key: string]: ColumnType } = {
-  datetime: 'timestamp without time zone',
+  datetime: 'timestamp with time zone',
 };
 
 export function resolveDbType(pgType: ColumnType): ColumnType {
