@@ -100,10 +100,9 @@ const messages = defineMessages('components.MovieDetails', {
   rtaudiencescore: 'Rotten Tomatoes Audience Score',
   tmdbuserscore: 'TMDB User Score',
   imdbuserscore: 'IMDB User Score',
-  watchlistSuccess:
-    '<strong>{title}</strong> added to watchlist  successfully!',
+  watchlistSuccess: '<strong>{title}</strong> added to watchlist successfully!',
   watchlistDeleted:
-    '<strong>{title}</strong> Removed from watchlist  successfully!',
+    '<strong>{title}</strong> Removed from watchlist successfully!',
   watchlistError: 'Something went wrong try again.',
   removefromwatchlist: 'Remove From Watchlist',
   addtowatchlist: 'Add To Watchlist',
