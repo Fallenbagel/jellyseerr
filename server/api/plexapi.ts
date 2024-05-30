@@ -227,7 +227,7 @@ class PlexAPI {
     options: { addedAt: number } = {
       addedAt: Date.now() - 1000 * 60 * 60,
     },
-    mediaType: 'movie' | 'show'
+    mediaType: 'movie' | 'show' | 'music'
   ): Promise<PlexLibraryItem[]> {
     const response = await this.plexClient.query<PlexLibraryResponse>({
       uri: `/library/sections/${id}/all?type=${

@@ -66,6 +66,7 @@
     "node-cache": "5.1.2",
     "node-gyp": "9.3.1",
     "node-schedule": "2.1.1",
+    "nodebrainz": "^2.1.1",
     "nodemailer": "6.9.1",
     "openpgp": "5.7.0",
     "plex-api": "5.3.2",

@@ -27,6 +27,7 @@ export interface MediaIds {
   tmdbId: number;
   imdbId?: string;
   tvdbId?: number;
+  mbId?: string;
   isHama?: boolean;
 }
 
@@ -79,12 +80,20 @@ class BaseScanner<T> {
     this.updateRate = updateRate ?? UPDATE_RATE;
   }
 
-  private async getExisting(tmdbId: number, mediaType: MediaType) {
+  private async getExisting(id: number | string, mediaType: MediaType) {
     const mediaRepository = getRepository(Media);
 
-    const existing = await mediaRepository.findOne({
-      where: { tmdbId: tmdbId, mediaType },
-    });
+    let existing: Media | null;
+
+    if (mediaType === MediaType.MOVIE || mediaType === MediaType.TV) {
+      existing = await mediaRepository.findOne({
+        where: { tmdbId: id as number, mediaType },
+      });
+    } else {
+      existing = await mediaRepository.findOne({
+        where: { mbId: id as string, mediaType },
+      });
+    }
 
     return existing;
   }

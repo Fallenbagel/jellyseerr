@@ -37,7 +37,7 @@ interface JellyfinMediaFolder {
 }
 
 export interface JellyfinLibrary {
-  type: 'show' | 'movie';
+  type: 'show' | 'movie' | 'music';
   key: string;
   title: string;
   agent: string;
@@ -47,7 +47,15 @@ export interface JellyfinLibraryItem {
   Name: string;
   Id: string;
   HasSubtitles: boolean;
-  Type: 'Movie' | 'Episode' | 'Season' | 'Series';
+  HasLyrics: boolean;
+  Type:
+    | 'Movie'
+    | 'Episode'
+    | 'Season'
+    | 'Series'
+    | 'Audio'
+    | 'MusicAlbum'
+    | 'MusicArtist';
   LocationType: 'FileSystem' | 'Offline' | 'Remote' | 'Virtual';
   SeriesName?: string;
   SeriesId?: string;
@@ -84,6 +92,11 @@ export interface JellyfinLibraryItemExtended extends JellyfinLibraryItem {
     Tmdb?: string;
     Imdb?: string;
     Tvdb?: string;
+    MusicBrainzAlbumArtist?: string;
+    MusicBrainzArtist?: string;
+    MusicBrainzAlbum?: string;
+    MusicBrainzReleaseGroup?: string;
+    MusicBrainzTrack?: string;
   };
   MediaSources?: JellyfinMediaSource[];
   Width?: number;
@@ -252,13 +265,7 @@ class JellyfinAPI extends ExternalAPI {
   }
 
   private mapLibraries(mediaFolders: JellyfinMediaFolder[]): JellyfinLibrary[] {
-    const excludedTypes = [
-      'music',
-      'books',
-      'musicvideos',
-      'homevideos',
-      'boxsets',
-    ];
+    const excludedTypes = ['books', 'musicvideos', 'homevideos', 'boxsets'];
 
     return mediaFolders
       .filter((Item: JellyfinMediaFolder) => {
@@ -271,7 +278,14 @@ class JellyfinAPI extends ExternalAPI {
         return <JellyfinLibrary>{
           key: Item.Id,
           title: Item.Name,
-          type: Item.CollectionType === 'movies' ? 'movie' : 'show',
+          type:
+            Item.CollectionType === 'movies'
+              ? 'movie'
+              : Item.CollectionType === 'tvshows'
+              ? 'show'
+              : Item.CollectionType === 'music'
+              ? 'music'
+              : 'show',
           agent: 'jellyfin',
         };
       });
