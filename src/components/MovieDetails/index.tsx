@@ -3,6 +3,7 @@ import RTAudRotten from '@app/assets/rt_aud_rotten.svg';
 import RTFresh from '@app/assets/rt_fresh.svg';
 import RTRotten from '@app/assets/rt_rotten.svg';
 import ImdbLogo from '@app/assets/services/imdb.svg';
+import Spinner from '@app/assets/spinner.svg';
 import TmdbLogo from '@app/assets/tmdb_logo.svg';
 import Button from '@app/components/Common/Button';
 import CachedImage from '@app/components/Common/CachedImage';
@@ -41,11 +42,14 @@ import {
 import {
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
+  MinusCircleIcon,
+  StarIcon,
 } from '@heroicons/react/24/solid';
 import { type RatingResponse } from '@server/api/ratings';
 import { IssueStatus } from '@server/constants/issue';
-import { MediaStatus } from '@server/constants/media';
+import { MediaStatus, MediaType } from '@server/constants/media';
 import { MediaServerType } from '@server/constants/server';
+import type { Watchlist } from '@server/entity/Watchlist';
 import type { MovieDetails as MovieDetailsType } from '@server/models/Movie';
 import { countries } from 'country-flag-icons';
 import 'country-flag-icons/3x2/flags.css';
@@ -56,6 +60,8 @@ import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import useSWR from 'swr';
+import axios from 'axios';
+import { useToasts } from 'react-toast-notifications';
 
 const messages = defineMessages('components.MovieDetails', {
   originaltitle: 'Original Title',
@@ -94,6 +100,13 @@ const messages = defineMessages('components.MovieDetails', {
   rtaudiencescore: 'Rotten Tomatoes Audience Score',
   tmdbuserscore: 'TMDB User Score',
   imdbuserscore: 'IMDB User Score',
+  watchlistSuccess:
+    '<strong>{title}</strong> added to watchlist  successfully!',
+  watchlistDeleted:
+    '<strong>{title}</strong> Removed from watchlist  successfully!',
+  watchlistError: 'Something went wrong try again.',
+  removefromwatchlist: 'Remove From Watchlist',
+  addtowatchlist: 'Add To Watchlist',
 });
 
 interface MovieDetailsProps {
@@ -112,7 +125,12 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
   const minStudios = 3;
   const [showMoreStudios, setShowMoreStudios] = useState(false);
   const [showIssueModal, setShowIssueModal] = useState(false);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [toggleWatchlist, setToggleWatchlist] = useState<boolean>(
+    !movie?.onUserWatchlist
+  );
   const { publicRuntimeConfig } = getConfig();
+  const { addToast } = useToasts();
 
   const {
     data,
@@ -202,8 +220,8 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
   const region = user?.settings?.region
     ? user.settings.region
     : settings.currentSettings.region
-    ? settings.currentSettings.region
-    : 'US';
+      ? settings.currentSettings.region
+      : 'US';
 
   const releases = data.releases.results.find(
     (r) => r.iso_3166_1 === region
@@ -286,6 +304,65 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
 
     return intl.formatMessage(messages.play4k, { mediaServerName: 'Jellyfin' });
   }
+
+  const onClickWatchlistBtn = async (): Promise<void> => {
+    setIsUpdating(true);
+    try {
+      const response = await axios.post<Watchlist>('/api/v1/watchlist', {
+        tmdbId: movie?.id,
+        mediaType: MediaType.MOVIE,
+        title: movie?.title,
+      });
+      if (response.data) {
+        addToast(
+          <span>
+            {intl.formatMessage(messages.watchlistSuccess, {
+              title: movie?.title,
+              strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+            })}
+          </span>,
+          { appearance: 'success', autoDismiss: true }
+        );
+      }
+    } catch (e) {
+      addToast(intl.formatMessage(messages.watchlistError), {
+        appearance: 'error',
+        autoDismiss: true,
+      });
+    } finally {
+      setIsUpdating(false);
+      setToggleWatchlist((prevState) => !prevState);
+    }
+  };
+
+  const onClickDeleteWatchlistBtn = async (): Promise<void> => {
+    setIsUpdating(true);
+    try {
+      const response = await axios.delete<Watchlist>(
+        '/api/v1/watchlist/' + movie?.id
+      );
+
+      if (response.status === 204) {
+        addToast(
+          <span>
+            {intl.formatMessage(messages.watchlistDeleted, {
+              title: movie?.title,
+              strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+            })}
+          </span>,
+          { appearance: 'info', autoDismiss: true }
+        );
+      }
+    } catch (e) {
+      addToast(intl.formatMessage(messages.watchlistError), {
+        appearance: 'error',
+        autoDismiss: true,
+      });
+    } finally {
+      setIsUpdating(false);
+      setToggleWatchlist((prevState) => !prevState);
+    }
+  };
 
   return (
     <div
@@ -408,6 +485,40 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
           </span>
         </div>
         <div className="media-actions">
+          <>
+            {toggleWatchlist ? (
+              <Tooltip content={intl.formatMessage(messages.addtowatchlist)}>
+                <Button
+                  buttonType={'ghost'}
+                  className="z-40 mr-2"
+                  buttonSize={'md'}
+                  onClick={onClickWatchlistBtn}
+                >
+                  {isUpdating ? (
+                    <Spinner className="h-3" />
+                  ) : (
+                    <StarIcon className={'h-3 text-amber-300'} />
+                  )}
+                </Button>
+              </Tooltip>
+            ) : (
+              <Tooltip
+                content={intl.formatMessage(messages.removefromwatchlist)}
+              >
+                <Button
+                  className="z-40 mr-2"
+                  buttonSize={'md'}
+                  onClick={onClickDeleteWatchlistBtn}
+                >
+                  {isUpdating ? (
+                    <Spinner className="h-3" />
+                  ) : (
+                    <MinusCircleIcon className={'h-3'} />
+                  )}
+                </Button>
+              </Tooltip>
+            )}
+          </>
           <PlayButton links={mediaLinks} />
           <RequestButton
             mediaType="movie"
@@ -561,75 +672,75 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
               (ratingData?.rt?.audienceRating &&
                 !!ratingData?.rt?.audienceScore) ||
               ratingData?.imdb?.criticsScore) && (
-              <div className="media-ratings">
-                {ratingData?.rt?.criticsRating &&
-                  !!ratingData?.rt?.criticsScore && (
-                    <Tooltip
-                      content={intl.formatMessage(messages.rtcriticsscore)}
-                    >
+                <div className="media-ratings">
+                  {ratingData?.rt?.criticsRating &&
+                    !!ratingData?.rt?.criticsScore && (
+                      <Tooltip
+                        content={intl.formatMessage(messages.rtcriticsscore)}
+                      >
+                        <a
+                          href={ratingData.rt.url}
+                          className="media-rating"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {ratingData.rt.criticsRating === 'Rotten' ? (
+                            <RTRotten className="w-6" />
+                          ) : (
+                            <RTFresh className="w-6" />
+                          )}
+                          <span>{ratingData.rt.criticsScore}%</span>
+                        </a>
+                      </Tooltip>
+                    )}
+                  {ratingData?.rt?.audienceRating &&
+                    !!ratingData?.rt?.audienceScore && (
+                      <Tooltip
+                        content={intl.formatMessage(messages.rtaudiencescore)}
+                      >
+                        <a
+                          href={ratingData.rt.url}
+                          className="media-rating"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {ratingData.rt.audienceRating === 'Spilled' ? (
+                            <RTAudRotten className="w-6" />
+                          ) : (
+                            <RTAudFresh className="w-6" />
+                          )}
+                          <span>{ratingData.rt.audienceScore}%</span>
+                        </a>
+                      </Tooltip>
+                    )}
+                  {ratingData?.imdb?.criticsScore && (
+                    <Tooltip content={intl.formatMessage(messages.imdbuserscore)}>
                       <a
-                        href={ratingData.rt.url}
+                        href={ratingData.imdb.url}
                         className="media-rating"
                         target="_blank"
                         rel="noreferrer"
                       >
-                        {ratingData.rt.criticsRating === 'Rotten' ? (
-                          <RTRotten className="w-6" />
-                        ) : (
-                          <RTFresh className="w-6" />
-                        )}
-                        <span>{ratingData.rt.criticsScore}%</span>
+                        <ImdbLogo className="mr-1 w-6" />
+                        <span>{ratingData.imdb.criticsScore}</span>
                       </a>
                     </Tooltip>
                   )}
-                {ratingData?.rt?.audienceRating &&
-                  !!ratingData?.rt?.audienceScore && (
-                    <Tooltip
-                      content={intl.formatMessage(messages.rtaudiencescore)}
-                    >
+                  {!!data.voteCount && (
+                    <Tooltip content={intl.formatMessage(messages.tmdbuserscore)}>
                       <a
-                        href={ratingData.rt.url}
+                        href={`https://www.themoviedb.org/movie/${data.id}?language=${locale}`}
                         className="media-rating"
                         target="_blank"
                         rel="noreferrer"
                       >
-                        {ratingData.rt.audienceRating === 'Spilled' ? (
-                          <RTAudRotten className="w-6" />
-                        ) : (
-                          <RTAudFresh className="w-6" />
-                        )}
-                        <span>{ratingData.rt.audienceScore}%</span>
+                        <TmdbLogo className="mr-1 w-6" />
+                        <span>{Math.round(data.voteAverage * 10)}%</span>
                       </a>
                     </Tooltip>
                   )}
-                {ratingData?.imdb?.criticsScore && (
-                  <Tooltip content={intl.formatMessage(messages.imdbuserscore)}>
-                    <a
-                      href={ratingData.imdb.url}
-                      className="media-rating"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <ImdbLogo className="mr-1 w-6" />
-                      <span>{ratingData.imdb.criticsScore}</span>
-                    </a>
-                  </Tooltip>
-                )}
-                {!!data.voteCount && (
-                  <Tooltip content={intl.formatMessage(messages.tmdbuserscore)}>
-                    <a
-                      href={`https://www.themoviedb.org/movie/${data.id}?language=${locale}`}
-                      className="media-rating"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <TmdbLogo className="mr-1 w-6" />
-                      <span>{Math.round(data.voteAverage * 10)}%</span>
-                    </a>
-                  </Tooltip>
-                )}
-              </div>
-            )}
+                </div>
+              )}
             {data.originalTitle &&
               data.originalLanguage !== locale.slice(0, 2) && (
                 <div className="media-fact">
