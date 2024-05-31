@@ -1,10 +1,12 @@
 import { MediaServerType } from '@server/constants/server';
+import { Permission } from '@server/lib/permissions';
+import { SettingsMigrator } from '@server/lib/settings/settingsMigrator';
+import logger from '@server/logger';
 import { randomUUID } from 'crypto';
 import fs from 'fs';
 import { merge } from 'lodash';
 import path from 'path';
 import webpush from 'web-push';
-import { Permission } from './permissions';
 
 export interface Library {
   id: string;
@@ -276,7 +278,7 @@ export type JobId =
   | 'image-cache-cleanup'
   | 'availability-sync';
 
-interface AllSettings {
+export interface AllSettings {
   clientId: string;
   vapidPublic: string;
   vapidPrivate: string;
@@ -641,38 +643,20 @@ class Settings {
 
     if (data) {
       const parsedJson = JSON.parse(data);
-      const oldJellyfinSettings = parsedJson.jellyfin;
 
-      if (oldJellyfinSettings && oldJellyfinSettings.hostname) {
-        const { hostname } = oldJellyfinSettings;
-        const protocolMatch = hostname.match(/^(https?):\/\//i);
-        const useSsl =
-          protocolMatch && protocolMatch[1].toLowerCase() === 'https';
+      SettingsMigrator.migrateSettings(parsedJson)
+        .then((migrated) => {
+          this.data = Object.assign(this.data, migrated);
+          this.data = merge(this.data, migrated);
 
-        const remainingUrl = hostname.replace(/^(https?):\/\//i, '');
-        const urlMatch = remainingUrl.match(/^([^:]+)(:([0-9]+))?(\/.*)?$/);
-
-        delete oldJellyfinSettings.hostname;
-
-        if (urlMatch) {
-          const [, ip, , port, urlBase] = urlMatch;
-          this.data.jellyfin = {
-            ...this.data.jellyfin,
-            ip,
-            port: port || (useSsl ? 443 : 80),
-            useSsl,
-            urlBase: urlBase ? urlBase.replace(/\/$/, '') : '',
-          };
-        }
-      }
-
-      if (parsedJson.jellyfin && parsedJson.jellyfin.hostname) {
-        delete parsedJson.jellyfin.hostname;
-      }
-
-      this.data = merge(this.data, parsedJson);
-
-      this.save();
+          this.save();
+        })
+        .catch((error) => {
+          logger.error('Error migrating settings', {
+            label: 'Settings',
+            error: error,
+          });
+        });
     }
     return this;
   }
