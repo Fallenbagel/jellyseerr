@@ -670,7 +670,7 @@ class Settings {
         delete parsedJson.jellyfin.hostname;
       }
 
-      this.data = merge(this.data, settings);
+      this.data = merge(this.data, parsedJson);
 
       this.save();
     }
