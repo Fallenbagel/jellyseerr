@@ -666,7 +666,9 @@ class Settings {
         }
       }
 
-      delete parsedJson.jellyfin.hostname;
+      if (parsedJson.jellyfin && parsedJson.jellyfin.hostname) {
+        delete parsedJson.jellyfin.hostname;
+      }
 
       this.data = merge(this.data, settings);
 
