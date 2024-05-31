@@ -1,7 +1,6 @@
 import { MediaServerType } from '@server/constants/server';
 import { Permission } from '@server/lib/permissions';
-import { SettingsMigrator } from '@server/lib/settings/settingsMigrator';
-import logger from '@server/logger';
+import { runMigrations } from '@server/lib/settings/migrator';
 import { randomUUID } from 'crypto';
 import fs from 'fs';
 import { merge } from 'lodash';
@@ -295,7 +294,7 @@ export interface AllSettings {
 
 const SETTINGS_PATH = process.env.CONFIG_DIRECTORY
   ? `${process.env.CONFIG_DIRECTORY}/settings.json`
-  : path.join(__dirname, '../../config/settings.json');
+  : path.join(__dirname, '../../../config/settings.json');
 
 class Settings {
   private data: AllSettings;
@@ -643,20 +642,11 @@ class Settings {
 
     if (data) {
       const parsedJson = JSON.parse(data);
+      this.data = runMigrations(parsedJson);
 
-      SettingsMigrator.migrateSettings(parsedJson)
-        .then((migrated) => {
-          this.data = Object.assign(this.data, migrated);
-          this.data = merge(this.data, migrated);
+      this.data = merge(this.data, parsedJson);
 
-          this.save();
-        })
-        .catch((error) => {
-          logger.error('Error migrating settings', {
-            label: 'Settings',
-            error: error,
-          });
-        });
+      this.save();
     }
     return this;
   }
