@@ -336,6 +336,7 @@ class Settings {
         ip: '',
         port: 8096,
         useSsl: false,
+        urlBase: '',
         externalHostname: '',
         jellyfinForgotPasswordUrl: '',
         libraries: [],
@@ -639,56 +640,37 @@ class Settings {
     const data = fs.readFileSync(SETTINGS_PATH, 'utf-8');
 
     if (data) {
-      const oldJellyfinSettings = JSON.parse(data).jellyfin;
-
-      // Migrate old settings
+      const parsedJson = JSON.parse(data);
+      const oldJellyfinSettings = parsedJson.jellyfin;
 
       if (oldJellyfinSettings && oldJellyfinSettings.hostname) {
-        // migrate old jellyfin hostname to ip and port and useSsl
-        const hostname = oldJellyfinSettings.hostname;
-
+        const { hostname } = oldJellyfinSettings;
         const protocolMatch = hostname.match(/^(https?):\/\//i);
-
-        if (protocolMatch) {
-          this.data.jellyfin.useSsl = true;
-        }
+        const useSsl =
+          protocolMatch && protocolMatch[1].toLowerCase() === 'https';
 
         const remainingUrl = hostname.replace(/^(https?):\/\//i, '');
-
         const urlMatch = remainingUrl.match(/^([^:]+)(:([0-9]+))?(\/.*)?$/);
-        if (urlMatch) {
-          this.data.jellyfin.ip = urlMatch[1];
-          this.data.jellyfin.port = urlMatch[3] || '';
-          this.data.jellyfin.urlBase = urlMatch[4] || '';
-
-          if (!this.data.jellyfin.port && this.data.jellyfin.useSsl) {
-            this.data.jellyfin.port = 443;
-          }
-
-          if (
-            this.data.jellyfin.urlBase &&
-            this.data.jellyfin.urlBase.endsWith('/')
-          ) {
-            this.data.jellyfin.urlBase = this.data.jellyfin.urlBase.slice(
-              0,
-              -1
-            );
-          }
-        }
 
         delete oldJellyfinSettings.hostname;
 
-        this.data.jellyfin = Object.assign(
-          {},
-          this.data.jellyfin,
-          oldJellyfinSettings
-        );
-
-        this.save();
-      } else {
-        this.data = merge(this.data, JSON.parse(data));
-        this.save();
+        if (urlMatch) {
+          const [, ip, , port, urlBase] = urlMatch;
+          this.data.jellyfin = {
+            ...this.data.jellyfin,
+            ip,
+            port: port || (useSsl ? 443 : 80),
+            useSsl,
+            urlBase: urlBase ? urlBase.replace(/\/$/, '') : '',
+          };
+        }
       }
+
+      delete parsedJson.jellyfin.hostname;
+
+      this.data = merge(this.data, settings);
+
+      this.save();
     }
     return this;
   }
