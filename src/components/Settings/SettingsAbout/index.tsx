@@ -158,12 +158,12 @@ const SettingsAbout = () => {
         <List title={intl.formatMessage(messages.gettingsupport)}>
           <List.Item title={intl.formatMessage(messages.documentation)}>
             <a
-              href="https://docs.overseerr.dev"
+              href="https://github.com/Fallenbagel/jellyseerr/blob/develop/README.md"
               target="_blank"
               rel="noreferrer"
               className="text-indigo-500 transition duration-300 hover:underline"
             >
-              https://docs.overseerr.dev
+              https://github.com/Fallenbagel/jellyseerr/blob/develop/README.md
             </a>
           </List.Item>
           <List.Item title={intl.formatMessage(messages.githubdiscussions)}>
