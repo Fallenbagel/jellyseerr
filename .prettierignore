@@ -2,7 +2,6 @@
 .next/
 dist/
 config/
-cypress/config/
 CHANGELOG.md
 
 # assets
