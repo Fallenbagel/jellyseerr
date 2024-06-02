@@ -271,13 +271,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
       ? jellyfinHost.slice(0, -1)
       : jellyfinHost;
 
-    const ip = req.ip ? req.ip.split(':').reverse()[0] : undefined;
-    const account = await jellyfinserver.login(
-      body.username,
-      body.password,
-      ip
-    );
-
+    const account = await jellyfinserver.login(body.username, body.password);
     // Next let's see if the user already exists
     user = await userRepository.findOne({
       where: { jellyfinUserId: account.User.Id },
