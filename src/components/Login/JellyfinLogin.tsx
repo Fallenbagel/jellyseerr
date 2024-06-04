@@ -1,7 +1,3 @@
-import EmbyLogoInverted from '@app/assets/services/emby-inverted.svg';
-import EmbyLogo from '@app/assets/services/emby.svg';
-import JellyfinLogoInverted from '@app/assets/services/jellyfin-icon-only-inverted.svg';
-import JellyfinLogo from '@app/assets/services/jellyfin-icon-only.svg';
 import Button from '@app/components/Common/Button';
 import Tooltip from '@app/components/Common/Tooltip';
 import useSettings from '@app/hooks/useSettings';
@@ -10,7 +6,7 @@ import { MediaServerType, ServerType } from '@server/constants/server';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import type React from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import * as Yup from 'yup';
 
@@ -36,24 +32,34 @@ const messages = defineMessages({
   initialsignin: 'Connect',
   forgotpassword: 'Forgot Password?',
   servertype: 'Server Type',
+  back: 'Go back',
 });
 
 interface JellyfinLoginProps {
   revalidate: () => void;
   initial?: boolean;
   serverType?: MediaServerType;
-  onServerTypeChange?: (type: MediaServerType) => void;
+  onCancel: () => void;
 }
 
 const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
   revalidate,
   initial,
   serverType,
-  onServerTypeChange,
+  onCancel,
 }) => {
   const toasts = useToasts();
   const intl = useIntl();
   const settings = useSettings();
+
+  const mediaServerFormatValues = {
+    mediaServerName:
+      serverType === MediaServerType.JELLYFIN
+        ? ServerType.JELLYFIN
+        : serverType === MediaServerType.EMBY
+        ? ServerType.EMBY
+        : 'Media Server',
+  };
 
   if (initial) {
     const LoginSchema = Yup.object().shape({
@@ -63,9 +69,10 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
           intl.formatMessage(messages.validationhostformat)
         )
         .required(
-          intl.formatMessage(messages.validationhostrequired, {
-            mediaServerName: serverType,
-          })
+          intl.formatMessage(
+            messages.validationhostrequired,
+            mediaServerFormatValues
+          )
         ),
       email: Yup.string()
         .email(intl.formatMessage(messages.validationemailformat))
@@ -74,19 +81,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
         intl.formatMessage(messages.validationusernamerequired)
       ),
       password: Yup.string(),
-      serverType: Yup.string().required(
-        intl.formatMessage(messages.validationservertyperequired)
-      ),
     });
-
-    const mediaServerFormatValues = {
-      mediaServerName:
-        serverType === MediaServerType.JELLYFIN
-          ? ServerType.JELLYFIN
-          : serverType === MediaServerType.EMBY
-          ? ServerType.EMBY
-          : 'Media Server',
-    };
 
     return (
       <Formik
@@ -95,10 +90,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
           password: '',
           host: '',
           email: '',
-          serverType: '',
         }}
-        initialErrors={{ serverType: 'Please select a server type' }} // Initialize errors with an empty object
-        initialTouched={{ serverType: true }}
         validationSchema={LoginSchema}
         onSubmit={async (values) => {
           try {
@@ -131,64 +123,9 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
           }
         }}
       >
-        {({
-          errors,
-          touched,
-          isSubmitting,
-          isValid,
-          values,
-          setFieldValue,
-        }) => (
+        {({ errors, touched, isSubmitting, isValid }) => (
           <Form>
             <div className="sm:border-t sm:border-gray-800">
-              <label htmlFor="servertype" className="text-label">
-                {intl.formatMessage(messages.servertype)}
-              </label>
-              <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
-                <div className="flex space-x-4 rounded-md shadow-sm">
-                  <button
-                    type="button"
-                    className={`server-type-button jellyfin-server ${
-                      serverType === MediaServerType.JELLYFIN
-                        ? 'bg-gradient-to-r from-[#AA5CC3] to-[#00A4DC]'
-                        : ''
-                    }`}
-                    onClick={() => {
-                      onServerTypeChange &&
-                        onServerTypeChange(MediaServerType.JELLYFIN);
-                      setFieldValue('serverType', ServerType.JELLYFIN);
-                    }}
-                  >
-                    {serverType === MediaServerType.JELLYFIN ? (
-                      <JellyfinLogoInverted />
-                    ) : (
-                      <JellyfinLogo />
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    className={`server-type-button emby-server ${
-                      serverType === MediaServerType.EMBY ? 'bg-[#51B44A]' : ''
-                    }`}
-                    onClick={() => {
-                      onServerTypeChange &&
-                        onServerTypeChange(MediaServerType.EMBY);
-                      setFieldValue('serverType', ServerType.EMBY);
-                    }}
-                  >
-                    {serverType === MediaServerType.EMBY ? (
-                      <EmbyLogoInverted />
-                    ) : (
-                      <EmbyLogo />
-                    )}
-                  </button>
-                </div>
-                {/* Hidden field */}
-                <Field type="hidden" name="serverType" />
-                {!values.serverType && errors.serverType && (
-                  <div className="error">{errors.serverType}</div>
-                )}
-              </div>
               <label htmlFor="host" className="text-label">
                 {intl.formatMessage(messages.host, mediaServerFormatValues)}
               </label>
@@ -274,7 +211,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
               </div>
             </div>
             <div className="mt-8 border-t border-gray-700 pt-5">
-              <div className="flex justify-end">
+              <div className="flex flex-row-reverse justify-between">
                 <span className="inline-flex rounded-md shadow-sm">
                   <Button
                     buttonType="primary"
@@ -284,6 +221,11 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                     {isSubmitting
                       ? intl.formatMessage(messages.signingin)
                       : intl.formatMessage(messages.signin)}
+                  </Button>
+                </span>
+                <span className="inline-flex rounded-md shadow-sm">
+                  <Button buttonType="default" onClick={() => onCancel()}>
+                    <FormattedMessage {...messages.back} />
                   </Button>
                 </span>
               </div>
