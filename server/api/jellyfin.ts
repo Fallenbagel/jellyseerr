@@ -126,6 +126,7 @@ class JellyfinAPI extends ExternalAPI {
     Password?: string,
     ClientIP?: string
   ): Promise<JellyfinLoginResponse> {
+    logger.debug('Client IP: ', ClientIP);
     try {
       const headers = ClientIP
         ? {
@@ -146,6 +147,7 @@ class JellyfinAPI extends ExternalAPI {
 
       return authResponse;
     } catch (e) {
+      logger.debug(e);
       const status = e.response?.status;
 
       const networkErrorCodes = new Set([
