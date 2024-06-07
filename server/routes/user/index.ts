@@ -537,7 +537,10 @@ router.post(
             permissions: settings.main.defaultPermissions,
             avatar: jellyfinUser?.PrimaryImageTag
               ? `${jellyfinHost}/Users/${jellyfinUser.Id}/Images/Primary/?tag=${jellyfinUser.PrimaryImageTag}&quality=90`
-              : '/os_logo_square.png',
+              : gravatarUrl(jellyfinUser?.Name ?? '', {
+                  default: 'mm',
+                  size: 200,
+                }),
             userType: UserType.JELLYFIN,
           });
 

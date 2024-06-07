@@ -29,6 +29,7 @@ import { getAppVersion } from '@server/utils/appVersion';
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import fs from 'fs';
+import gravatarUrl from 'gravatar-url';
 import { escapeRegExp, merge, omit, set, sortBy } from 'lodash';
 import { rescheduleJob } from 'node-schedule';
 import path from 'path';
@@ -260,7 +261,7 @@ settingsRoutes.post('/jellyfin', (req, res) => {
   return res.status(200).json(settings.jellyfin);
 });
 
-settingsRoutes.get('/jellyfin/library', async (req, res) => {
+settingsRoutes.get('/jellyfin/library', async (req, res, next) => {
   const settings = getSettings();
 
   if (req.query.sync) {
@@ -279,6 +280,19 @@ settingsRoutes.get('/jellyfin/library', async (req, res) => {
     jellyfinClient.setUserId(admin.jellyfinUserId ?? '');
 
     const libraries = await jellyfinClient.getLibraries();
+
+    if (libraries.length === 0) {
+      // Check if no libraries are found due to the fallback to user views
+      // This only affects LDAP users
+      const account = await jellyfinClient.getUser();
+
+      // Automatic Library grouping is not supported when user views are used to get library
+      if (account.Configuration.GroupedFolders.length > 0) {
+        return next({ status: 501, message: 'SYNC_ERROR_GROUPED_FOLDERS' });
+      }
+
+      return next({ status: 404, message: 'SYNC_ERROR_NO_LIBRARIES' });
+    }
 
     const newLibraries: Library[] = libraries.map((library) => {
       const existing = settings.jellyfin.libraries.find(
@@ -337,7 +351,7 @@ settingsRoutes.get('/jellyfin/users', async (req, res) => {
     id: user.Id,
     thumb: user.PrimaryImageTag
       ? `${jellyfinHost}/Users/${user.Id}/Images/Primary/?tag=${user.PrimaryImageTag}&quality=90`
-      : '/os_logo_square.png',
+      : gravatarUrl(user.Name, { default: 'mm', size: 200 }),
     email: user.Name,
   }));
 
