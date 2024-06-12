@@ -1,3 +1,18 @@
+## [1.9.1](https://github.com/fallenbagel/jellyseerr/compare/v1.9.0...v1.9.1) (2024-06-12)
+
+
+### Bug Fixes
+
+* **api:** add DNS caching ([#810](https://github.com/fallenbagel/jellyseerr/issues/810)) ([46ee8a4](https://github.com/fallenbagel/jellyseerr/commit/46ee8a4ca13b026bd929b4027eb001cc74064bb8)), closes [#387](https://github.com/fallenbagel/jellyseerr/issues/387) [#657](https://github.com/fallenbagel/jellyseerr/issues/657) [#728](https://github.com/fallenbagel/jellyseerr/issues/728)
+* empty email in user settings ([#807](https://github.com/fallenbagel/jellyseerr/issues/807)) ([20863d4](https://github.com/fallenbagel/jellyseerr/commit/20863d4a8dabe78fb5c52995b5bcb2da557a804e)), closes [#803](https://github.com/fallenbagel/jellyseerr/issues/803)
+* **jellyfinscanner:** assign only 4k available badge for a 4k request instead of both badges ([#805](https://github.com/fallenbagel/jellyseerr/issues/805)) ([d31a2c3](https://github.com/fallenbagel/jellyseerr/commit/d31a2c37e639c1126b446277fa5d666d8102fef5))
+* remove the settings button of media when useless ([#809](https://github.com/fallenbagel/jellyseerr/issues/809)) ([f52939e](https://github.com/fallenbagel/jellyseerr/commit/f52939e4cdcbee94fc35165f613f6b3e21599e3c))
+
+
+### Reverts
+
+* Revert "ci: update format check command to ignore .prettierignore files (#787)" (#788) ([4757f1c](https://github.com/fallenbagel/jellyseerr/commit/4757f1c3e599304410a737c11f97db92a2bfcefd)), closes [#787](https://github.com/fallenbagel/jellyseerr/issues/787) [#788](https://github.com/fallenbagel/jellyseerr/issues/788)
+
 # [1.9.0](https://github.com/fallenbagel/jellyseerr/compare/v1.8.1...v1.9.0) (2024-05-29)
 
 
