@@ -133,6 +133,11 @@ class JellyfinAPI extends ExternalAPI {
           }
         : {};
 
+      logger.debug(`Logging in to Jellyfin server: ${this.jellyfinHost}`, {
+        label: 'Jellyfin API',
+        ip: ClientIP,
+      });
+
       const authResponse = await this.post<JellyfinLoginResponse>(
         '/Users/AuthenticateByName',
         {
@@ -143,9 +148,17 @@ class JellyfinAPI extends ExternalAPI {
           headers: headers,
         }
       );
+      logger.debug(`Logged in to Jellyfin server: ${this.jellyfinHost}`, {
+        label: 'Jellyfin API',
+        response: authResponse,
+      });
 
       return authResponse;
     } catch (e) {
+      logger.debug(e, {
+        label: 'Jellyfin API',
+      });
+
       const status = e.response?.status;
 
       const networkErrorCodes = new Set([
