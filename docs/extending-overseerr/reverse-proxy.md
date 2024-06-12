@@ -141,7 +141,7 @@ location ^~ /overseerr {
     sub_filter '\/_next' '\/$app\/_next';
     sub_filter '/_next' '/$app/_next';
     sub_filter '/api/v1' '/$app/api/v1';
-    sub_filter '/login/plex/loading' '/$app/login/plex/loading';
+    sub_filter '/login/popup/loading' '/$app/login/popup/loading';
     sub_filter '/images/' '/$app/images/';
     sub_filter '/android-' '/$app/android-';
     sub_filter '/apple-' '/$app/apple-';

@@ -1,4 +1,5 @@
 import MiniQuotaDisplay from '@app/components/Layout/UserDropdown/MiniQuotaDisplay';
+import useSettings from '@app/hooks/useSettings';
 import { useUser } from '@app/hooks/useUser';
 import { Menu, Transition } from '@headlessui/react';
 import {
@@ -36,10 +37,20 @@ ForwardedLink.displayName = 'ForwardedLink';
 
 const UserDropdown = () => {
   const intl = useIntl();
+  const settings = useSettings();
   const { user, revalidate } = useUser();
 
   const logout = async () => {
     const response = await axios.post('/api/v1/auth/logout');
+
+    // redirect to OIDC provider logout page if automatic login is enabled
+    if (
+      settings.currentSettings.oidcLogin &&
+      settings.currentSettings.oidcAutomaticLogin
+    ) {
+      window.location.href = '/api/v1/auth/oidc-logout';
+      return;
+    }
 
     if (response.data?.status === 'ok') {
       revalidate();

@@ -107,7 +107,20 @@ export interface MainSettings {
   };
   hideAvailable: boolean;
   localLogin: boolean;
+  mediaServerLogin: boolean;
+  oidcLogin: boolean;
   newPlexLogin: boolean;
+  oidc: {
+    providerName: string;
+    providerUrl: string;
+    clientId: string;
+    clientSecret: string;
+    userIdentifier: string;
+    requiredClaims: string;
+    scopes: string;
+    matchJellyfinUsername: boolean;
+    automaticLogin: boolean;
+  };
   region: string;
   originalLanguage: string;
   trustProxy: boolean;
@@ -125,6 +138,10 @@ interface FullPublicSettings extends PublicSettings {
   applicationUrl: string;
   hideAvailable: boolean;
   localLogin: boolean;
+  mediaServerLogin: boolean;
+  oidcLogin: boolean;
+  oidcProviderName: string;
+  oidcAutomaticLogin: boolean;
   movie4kEnabled: boolean;
   series4kEnabled: boolean;
   region: string;
@@ -314,7 +331,20 @@ class Settings {
         },
         hideAvailable: false,
         localLogin: true,
+        mediaServerLogin: true,
         newPlexLogin: true,
+        oidcLogin: false,
+        oidc: {
+          providerName: 'OpenID Connect',
+          providerUrl: '',
+          clientId: '',
+          clientSecret: '',
+          userIdentifier: 'email',
+          requiredClaims: 'email_verified',
+          scopes: 'email openid profile',
+          matchJellyfinUsername: false,
+          automaticLogin: false,
+        },
         region: '',
         originalLanguage: '',
         trustProxy: false,
@@ -537,7 +567,10 @@ class Settings {
       applicationUrl: this.data.main.applicationUrl,
       hideAvailable: this.data.main.hideAvailable,
       localLogin: this.data.main.localLogin,
-      jellyfinForgotPasswordUrl: this.data.jellyfin.jellyfinForgotPasswordUrl,
+      mediaServerLogin: this.data.main.mediaServerLogin,
+      oidcLogin: this.data.main.oidcLogin,
+      oidcProviderName: this.data.main.oidc.providerName,
+      oidcAutomaticLogin: this.data.main.oidc.automaticLogin,
       movie4kEnabled: this.data.radarr.some(
         (radarr) => radarr.is4k && radarr.isDefault
       ),
@@ -549,6 +582,7 @@ class Settings {
       mediaServerType: this.main.mediaServerType,
       jellyfinHost: this.jellyfin.hostname,
       jellyfinExternalHost: this.jellyfin.externalHostname,
+      jellyfinForgotPasswordUrl: this.data.jellyfin.jellyfinForgotPasswordUrl,
       partialRequestsEnabled: this.data.main.partialRequestsEnabled,
       cacheImages: this.data.main.cacheImages,
       vapidPublic: this.vapidPublic,

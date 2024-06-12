@@ -119,11 +119,12 @@ const Setup = () => {
           )}
           {currentStep === 2 && (
             <div>
-              {mediaServerType === MediaServerType.PLEX ? (
+              {mediaServerType === MediaServerType.PLEX && (
                 <SettingsPlex
                   onComplete={() => setMediaServerSettingsComplete(true)}
                 />
-              ) : (
+              )}
+              {mediaServerType === MediaServerType.JELLYFIN && (
                 <SettingsJellyfin
                   showAdvancedSettings={false}
                   onComplete={() => setMediaServerSettingsComplete(true)}
