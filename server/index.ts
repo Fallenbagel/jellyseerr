@@ -27,6 +27,7 @@ import type CacheableLookupType from 'cacheable-lookup';
 import { TypeormStore } from 'connect-typeorm/out';
 import cookieParser from 'cookie-parser';
 import csurf from 'csurf';
+import { lookup } from 'dns';
 import type { NextFunction, Request, Response } from 'express';
 import express from 'express';
 import * as OpenApiValidator from 'express-openapi-validator';
@@ -54,6 +55,22 @@ app
     const CacheableLookup = (await _importDynamic('cacheable-lookup'))
       .default as typeof CacheableLookupType;
     const cacheable = new CacheableLookup();
+
+    const originalLookup = cacheable.lookup;
+
+    // if hostname is localhost use dns.lookup instead of cacheable-lookup
+    cacheable.lookup = (
+      hostname: string,
+      options: any,
+      callback?: any
+    ): void => {
+      if (hostname === 'localhost') {
+        return lookup(hostname, options);
+      } else {
+        return originalLookup(hostname, options, callback);
+      }
+    };
+
     cacheable.install(http.globalAgent);
     cacheable.install(https.globalAgent);
 
