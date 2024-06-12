@@ -59,15 +59,12 @@ app
     const originalLookup = cacheable.lookup;
 
     // if hostname is localhost use dns.lookup instead of cacheable-lookup
-    cacheable.lookup = (
-      hostname: string,
-      options: any,
-      callback?: any
-    ): void => {
+    cacheable.lookup = (...args: any) => {
+      const [hostname] = args;
       if (hostname === 'localhost') {
-        return lookup(hostname, options);
+        lookup(...(args as Parameters<typeof lookup>));
       } else {
-        return originalLookup(hostname, options, callback);
+        originalLookup(...(args as Parameters<typeof originalLookup>));
       }
     };
 
