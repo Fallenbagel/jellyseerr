@@ -26,6 +26,7 @@ const defaultSettings = {
   locale: 'en',
   emailEnabled: false,
   newPlexLogin: true,
+  youtubeUrl: '',
 };
 
 export const SettingsContext = React.createContext<SettingsContextProps>({
