@@ -192,6 +192,8 @@ CoreApp.getInitialProps = async (initialProps) => {
     locale: 'en',
     emailEnabled: false,
     newPlexLogin: true,
+    easyLogin: false,
+    easyLoginUserId: 0,
   };
 
   if (ctx.res) {
