@@ -303,8 +303,8 @@ settingsRoutes.post('/jellyfin', async (req, res, next) => {
       });
 
       return next({
-        status: 500,
-        message: 'Something went wrong',
+        status: e.statusCode ?? 500,
+        message: ApiErrorCode.Unknown,
       });
     }
   }
