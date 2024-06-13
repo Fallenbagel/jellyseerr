@@ -1,7 +1,7 @@
 import ExternalAPI from '@server/api/externalapi';
 import type { AvailableCacheIds } from '@server/lib/cache';
 import cacheManager from '@server/lib/cache';
-import type { DVRSettings } from '@server/lib/settings';
+import type { ArrSettings } from '@server/lib/settings';
 
 export interface SystemStatus {
   version: string;
@@ -79,7 +79,7 @@ interface QueueResponse<QueueItemAppendT> {
 }
 
 class ServarrBase<QueueItemAppendT> extends ExternalAPI {
-  static buildUrl(settings: DVRSettings, path?: string): string {
+  static buildUrl(settings: ArrSettings, path?: string): string {
     return `${settings.useSsl ? 'https' : 'http'}://${settings.hostname}:${
       settings.port
     }${settings.baseUrl ?? ''}${path}`;

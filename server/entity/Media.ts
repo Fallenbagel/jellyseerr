@@ -94,6 +94,10 @@ class Media {
   @Index()
   public imdbId?: string;
 
+  @Column({ nullable: true })
+  @Index()
+  public mbId?: string;
+
   @Column({ type: 'int', default: MediaStatus.UNKNOWN })
   public status: MediaStatus;
 

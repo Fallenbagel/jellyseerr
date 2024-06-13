@@ -1,5 +1,6 @@
 import type { JellyfinLibraryItem } from '@server/api/jellyfin';
 import JellyfinAPI from '@server/api/jellyfin';
+import MusicBrainz from '@server/api/musicbrainz';
 import TheMovieDb from '@server/api/themoviedb';
 import type { TmdbTvDetails } from '@server/api/themoviedb/interfaces';
 import { MediaStatus, MediaType } from '@server/constants/media';
@@ -29,6 +30,7 @@ interface SyncStatus {
 class JellyfinScanner {
   private sessionId: string;
   private tmdb: TheMovieDb;
+  private musicbrainz: MusicBrainz;
   private jfClient: JellyfinAPI;
   private items: JellyfinLibraryItem[] = [];
   private progress = 0;
@@ -42,6 +44,7 @@ class JellyfinScanner {
 
   constructor({ isRecentOnly }: { isRecentOnly?: boolean } = {}) {
     this.tmdb = new TheMovieDb();
+    this.musicbrainz = new MusicBrainz();
     this.isRecentOnly = isRecentOnly ?? false;
   }
 
