@@ -1,3 +1,12 @@
+## [1.9.2](https://github.com/fallenbagel/jellyseerr/compare/v1.9.1...v1.9.2) (2024-06-13)
+
+
+### Bug Fixes
+
+* **auth:** improve login resilience with headerless fallback authentication ([#814](https://github.com/fallenbagel/jellyseerr/issues/814)) ([a9741fa](https://github.com/fallenbagel/jellyseerr/commit/a9741fa36d06710aa00d28db3dd2c29f2b0973d3))
+* **auth:** validation of ipv6/ipv4 ([#812](https://github.com/fallenbagel/jellyseerr/issues/812)) ([9aeb360](https://github.com/fallenbagel/jellyseerr/commit/9aeb3604e6498c388df1d30dd0b613ba84160fc0)), closes [#795](https://github.com/fallenbagel/jellyseerr/issues/795)
+* bypass cache-able lookups when resolving localhost ([#813](https://github.com/fallenbagel/jellyseerr/issues/813)) ([b5a0699](https://github.com/fallenbagel/jellyseerr/commit/b5a069901a9545772deaa9c491f2075261da0189))
+
 ## [1.9.1](https://github.com/fallenbagel/jellyseerr/compare/v1.9.0...v1.9.1) (2024-06-12)
 
 
