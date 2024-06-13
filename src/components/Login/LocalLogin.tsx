@@ -137,7 +137,7 @@ const LocalLogin = ({ revalidate }: LocalLoginProps) => {
                   </span>
                   {passwordResetEnabled && (
                     <span className="inline-flex rounded-md shadow-sm">
-                      <Link href="/resetpassword" passHref>
+                      <Link href="/resetpassword" passHref legacyBehavior>
                         <Button as="a" buttonType="ghost">
                           <LifebuoyIcon />
                           <span>

@@ -1,6 +1,6 @@
 import useSettings from '@app/hooks/useSettings';
-import type { ImageLoader, ImageProps } from 'next/image';
-import Image from 'next/image';
+import type { ImageLoader, ImageProps } from 'next/legacy/image';
+import Image from 'next/legacy/image';
 
 const imageLoader: ImageLoader = ({ src }) => src;
 

@@ -131,10 +131,9 @@ const QuotaDisplay = ({
                 ProfileLink: (msg: React.ReactNode) => (
                   <Link
                     href={userOverride ? `/users/${userOverride}` : '/profile'}
+                    className="text-white transition duration-300 hover:underline"
                   >
-                    <a className="text-white transition duration-300 hover:underline">
-                      {msg}
-                    </a>
+                    {msg}
                   </Link>
                 ),
               }

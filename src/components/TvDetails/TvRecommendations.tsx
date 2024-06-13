@@ -40,8 +40,8 @@ const TvRecommendations = () => {
       <div className="mt-1 mb-5">
         <Header
           subtext={
-            <Link href={`/tv/${tvData?.id}`}>
-              <a className="hover:underline">{tvData?.name}</a>
+            <Link href={`/tv/${tvData?.id}`} className="hover:underline">
+              {tvData?.name}
             </Link>
           }
         >

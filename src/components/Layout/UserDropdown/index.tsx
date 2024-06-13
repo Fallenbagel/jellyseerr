@@ -24,10 +24,8 @@ const ForwardedLink = forwardRef<
   LinkProps & React.ComponentPropsWithoutRef<'a'>
 >(({ href, children, ...rest }, ref) => {
   return (
-    <Link href={href}>
-      <a ref={ref} {...rest}>
-        {children}
-      </a>
+    <Link href={href} ref={ref} {...rest}>
+      {children}
     </Link>
   );
 });

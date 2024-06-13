@@ -58,8 +58,8 @@ const DiscoverWatchlist = () => {
         <Header
           subtext={
             router.query.userId ? (
-              <Link href={`/users/${user?.id}`}>
-                <a className="hover:underline">{user?.displayName}</a>
+              <Link href={`/users/${user?.id}`} className="hover:underline">
+                {user?.displayName}
               </Link>
             ) : (
               ''

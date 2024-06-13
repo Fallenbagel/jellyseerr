@@ -306,60 +306,55 @@ const TitleCard = ({
                     ? `/collection/${id}`
                     : `/tv/${id}`
                 }
+                className="absolute inset-0 h-full w-full cursor-pointer overflow-hidden text-left"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(45, 55, 72, 0.4) 0%, rgba(45, 55, 72, 0.9) 100%)',
+                }}
               >
-                <a
-                  className="absolute inset-0 h-full w-full cursor-pointer overflow-hidden text-left"
-                  style={{
-                    background:
-                      'linear-gradient(180deg, rgba(45, 55, 72, 0.4) 0%, rgba(45, 55, 72, 0.9) 100%)',
-                  }}
-                >
-                  <div className="flex h-full w-full items-end">
-                    <div
-                      className={`px-2 text-white ${
-                        !showRequestButton ||
-                        (currentStatus && currentStatus !== MediaStatus.UNKNOWN)
-                          ? 'pb-2'
-                          : 'pb-11'
-                      }`}
-                    >
-                      {year && (
-                        <div className="text-sm font-medium">{year}</div>
-                      )}
+                <div className="flex h-full w-full items-end">
+                  <div
+                    className={`px-2 text-white ${
+                      !showRequestButton ||
+                      (currentStatus && currentStatus !== MediaStatus.UNKNOWN)
+                        ? 'pb-2'
+                        : 'pb-11'
+                    }`}
+                  >
+                    {year && <div className="text-sm font-medium">{year}</div>}
 
-                      <h1
-                        className="whitespace-normal text-xl font-bold leading-tight"
-                        style={{
-                          WebkitLineClamp: 3,
-                          display: '-webkit-box',
-                          overflow: 'hidden',
-                          WebkitBoxOrient: 'vertical',
-                          wordBreak: 'break-word',
-                        }}
-                        data-testid="title-card-title"
-                      >
-                        {title}
-                      </h1>
-                      <div
-                        className="whitespace-normal text-xs"
-                        style={{
-                          WebkitLineClamp:
-                            !showRequestButton ||
-                            (currentStatus &&
-                              currentStatus !== MediaStatus.UNKNOWN)
-                              ? 5
-                              : 3,
-                          display: '-webkit-box',
-                          overflow: 'hidden',
-                          WebkitBoxOrient: 'vertical',
-                          wordBreak: 'break-word',
-                        }}
-                      >
-                        {summary}
-                      </div>
+                    <h1
+                      className="whitespace-normal text-xl font-bold leading-tight"
+                      style={{
+                        WebkitLineClamp: 3,
+                        display: '-webkit-box',
+                        overflow: 'hidden',
+                        WebkitBoxOrient: 'vertical',
+                        wordBreak: 'break-word',
+                      }}
+                      data-testid="title-card-title"
+                    >
+                      {title}
+                    </h1>
+                    <div
+                      className="whitespace-normal text-xs"
+                      style={{
+                        WebkitLineClamp:
+                          !showRequestButton ||
+                          (currentStatus &&
+                            currentStatus !== MediaStatus.UNKNOWN)
+                            ? 5
+                            : 3,
+                        display: '-webkit-box',
+                        overflow: 'hidden',
+                        WebkitBoxOrient: 'vertical',
+                        wordBreak: 'break-word',
+                      }}
+                    >
+                      {summary}
                     </div>
                   </div>
-                </a>
+                </div>
               </Link>
 
               <div className="absolute bottom-0 left-0 right-0 flex justify-between px-2 py-2">

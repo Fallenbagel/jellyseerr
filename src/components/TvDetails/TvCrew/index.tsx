@@ -34,8 +34,8 @@ const TvCrew = () => {
       <div className="mt-1 mb-5">
         <Header
           subtext={
-            <Link href={`/tv/${data.id}`}>
-              <a className="hover:underline">{data.name}</a>
+            <Link href={`/tv/${data.id}`} className="hover:underline">
+              {data.name}
             </Link>
           }
         >

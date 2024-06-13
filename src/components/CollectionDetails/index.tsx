@@ -166,10 +166,9 @@ const CollectionDetails = ({ collection }: CollectionDetailsProps) => {
           <Link
             href={`/discover/movies/genre/${genreId}`}
             key={`genre-${genreId}`}
+            className="hover:underline"
           >
-            <a className="hover:underline">
-              {genres.find((g) => g.id === genreId)?.name}
-            </a>
+            {genres.find((g) => g.id === genreId)?.name}
           </Link>
         ))
         .reduce((prev, curr) => (

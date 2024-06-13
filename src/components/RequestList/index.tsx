@@ -122,12 +122,12 @@ const RequestList = () => {
         <Header
           subtext={
             router.pathname.startsWith('/profile') ? (
-              <Link href={`/profile`}>
-                <a className="hover:underline">{currentUser?.displayName}</a>
+              <Link href={`/profile`} className="hover:underline">
+                {currentUser?.displayName}
               </Link>
             ) : router.query.userId ? (
-              <Link href={`/users/${user?.id}`}>
-                <a className="hover:underline">{user?.displayName}</a>
+              <Link href={`/users/${user?.id}`} className="hover:underline">
+                {user?.displayName}
               </Link>
             ) : (
               ''

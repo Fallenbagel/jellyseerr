@@ -84,13 +84,11 @@ const IssueComment = ({
         </Modal>
       </Transition>
       <Link href={isActiveUser ? '/profile' : `/users/${comment.user.id}`}>
-        <a>
-          <img
-            src={comment.user.avatar}
-            alt=""
-            className="h-10 w-10 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
-          />
-        </a>
+        <img
+          src={comment.user.avatar}
+          alt=""
+          className="h-10 w-10 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
+        />
       </Link>
       <div className="relative flex-1">
         <div className="w-full rounded-md shadow ring-1 ring-gray-500">
@@ -242,10 +240,9 @@ const IssueComment = ({
                     href={
                       isActiveUser ? '/profile' : `/users/${comment.user.id}`
                     }
+                    className="font-semibold text-gray-100 transition duration-300 hover:text-white hover:underline"
                   >
-                    <a className="font-semibold text-gray-100 transition duration-300 hover:text-white hover:underline">
-                      {comment.user.displayName}
-                    </a>
+                    {comment.user.displayName}
                   </Link>
                 ),
                 relativeTime: (

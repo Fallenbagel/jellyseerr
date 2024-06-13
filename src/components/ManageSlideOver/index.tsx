@@ -328,19 +328,18 @@ const ManageSlideOver = ({
                                       : `/users/${user.id}`
                                   }
                                   key={`watch-user-${user.id}`}
+                                  className="z-0 mb-1 -mr-2 shrink-0 hover:z-50"
                                 >
-                                  <a className="z-0 mb-1 -mr-2 shrink-0 hover:z-50">
-                                    <Tooltip
-                                      key={`watch-user-${user.id}`}
-                                      content={user.displayName}
-                                    >
-                                      <img
-                                        src={user.avatar}
-                                        alt={user.displayName}
-                                        className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
-                                      />
-                                    </Tooltip>
-                                  </a>
+                                  <Tooltip
+                                    key={`watch-user-${user.id}`}
+                                    content={user.displayName}
+                                  >
+                                    <img
+                                      src={user.avatar}
+                                      alt={user.displayName}
+                                      className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
+                                    />
+                                  </Tooltip>
                                 </Link>
                               ))}
                             </span>
@@ -488,19 +487,18 @@ const ManageSlideOver = ({
                                       : `/users/${user.id}`
                                   }
                                   key={`watch-user-${user.id}`}
+                                  className="z-0 mb-1 -mr-2 shrink-0 hover:z-50"
                                 >
-                                  <a className="z-0 mb-1 -mr-2 shrink-0 hover:z-50">
-                                    <Tooltip
-                                      key={`watch-user-${user.id}`}
-                                      content={user.displayName}
-                                    >
-                                      <img
-                                        src={user.avatar}
-                                        alt={user.displayName}
-                                        className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
-                                      />
-                                    </Tooltip>
-                                  </a>
+                                  <Tooltip
+                                    key={`watch-user-${user.id}`}
+                                    content={user.displayName}
+                                  >
+                                    <img
+                                      src={user.avatar}
+                                      alt={user.displayName}
+                                      className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
+                                    />
+                                  </Tooltip>
                                 </Link>
                               ))}
                             </span>

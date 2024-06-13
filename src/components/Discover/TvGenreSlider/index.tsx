@@ -25,11 +25,9 @@ const TvGenreSlider = () => {
   return (
     <>
       <div className="slider-header">
-        <Link href="/discover/tv/genres">
-          <a className="slider-title">
-            <span>{intl.formatMessage(messages.tvgenres)}</span>
-            <ArrowRightCircleIcon />
-          </a>
+        <Link href="/discover/tv/genres" className="slider-title">
+          <span>{intl.formatMessage(messages.tvgenres)}</span>
+          <ArrowRightCircleIcon />
         </Link>
       </div>
       <Slider

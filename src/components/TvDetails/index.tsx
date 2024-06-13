@@ -222,8 +222,12 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     seriesAttributes.push(
       data.genres
         .map((g) => (
-          <Link href={`/discover/tv?genre=${g.id}`} key={`genre-${g.id}`}>
-            <a className="hover:underline">{g.name}</a>
+          <Link
+            href={`/discover/tv?genre=${g.id}`}
+            key={`genre-${g.id}`}
+            className="hover:underline"
+          >
+            {g.name}
           </Link>
         ))
         .reduce((prev, curr) => (
@@ -519,18 +523,19 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                   .map((person) => (
                     <li key={`crew-${person.job}-${person.id}`}>
                       <span>{person.job}</span>
-                      <Link href={`/person/${person.id}`}>
-                        <a className="crew-name">{person.name}</a>
+                      <Link href={`/person/${person.id}`} className="crew-name">
+                        {person.name}
                       </Link>
                     </li>
                   ))}
               </ul>
               <div className="mt-4 flex justify-end">
-                <Link href={`/tv/${data.id}/crew`}>
-                  <a className="flex items-center text-gray-400 transition duration-300 hover:text-gray-100">
-                    <span>{intl.formatMessage(messages.viewfullcrew)}</span>
-                    <ArrowRightCircleIcon className="ml-1.5 inline-block h-5 w-5" />
-                  </a>
+                <Link
+                  href={`/tv/${data.id}/crew`}
+                  className="flex items-center text-gray-400 transition duration-300 hover:text-gray-100"
+                >
+                  <span>{intl.formatMessage(messages.viewfullcrew)}</span>
+                  <ArrowRightCircleIcon className="ml-1.5 inline-block h-5 w-5" />
                 </Link>
               </div>
             </>
@@ -541,10 +546,9 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                 <Link
                   href={`/discover/tv?keywords=${keyword.id}`}
                   key={`keyword-id-${keyword.id}`}
+                  className="mb-2 mr-2 inline-flex last:mr-0"
                 >
-                  <a className="mb-2 mr-2 inline-flex last:mr-0">
-                    <Tag>{keyword.name}</Tag>
-                  </a>
+                  <Tag>{keyword.name}</Tag>
                 </Link>
               ))}
             </div>
@@ -919,15 +923,13 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                 <span>{intl.formatMessage(messages.originallanguage)}</span>
                 <span className="media-fact-value">
                   <Link href={`/discover/tv/language/${data.originalLanguage}`}>
-                    <a>
-                      {intl.formatDisplayName(data.originalLanguage, {
-                        type: 'language',
-                        fallback: 'none',
-                      }) ??
-                        data.spokenLanguages.find(
-                          (lng) => lng.iso_639_1 === data.originalLanguage
-                        )?.name}
-                    </a>
+                    {intl.formatDisplayName(data.originalLanguage, {
+                      type: 'language',
+                      fallback: 'none',
+                    }) ??
+                      data.spokenLanguages.find(
+                        (lng) => lng.iso_639_1 === data.originalLanguage
+                      )?.name}
                   </Link>
                 </span>
               </div>
@@ -977,7 +979,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                         href={`/discover/tv/network/${n.id}`}
                         key={`network-${n.id}`}
                       >
-                        <a>{n.name}</a>
+                        {n.name}
                       </Link>
                     ))
                     .reduce((prev, curr) => (
@@ -1021,11 +1023,13 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
       {data.credits.cast.length > 0 && (
         <>
           <div className="slider-header">
-            <Link href="/tv/[tvId]/cast" as={`/tv/${data.id}/cast`}>
-              <a className="slider-title">
-                <span>{intl.formatMessage(messages.cast)}</span>
-                <ArrowRightCircleIcon />
-              </a>
+            <Link
+              href="/tv/[tvId]/cast"
+              as={`/tv/${data.id}/cast`}
+              className="slider-title"
+            >
+              <span>{intl.formatMessage(messages.cast)}</span>
+              <ArrowRightCircleIcon />
             </Link>
           </div>
           <Slider

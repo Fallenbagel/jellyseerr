@@ -133,21 +133,20 @@ const IssueItem = ({ issue }: IssueItemProps) => {
                 ? `/movie/${issue.media.tmdbId}`
                 : `/tv/${issue.media.tmdbId}`
             }
+            className="relative h-auto w-12 flex-shrink-0 scale-100 transform-gpu overflow-hidden rounded-md transition duration-300 hover:scale-105"
           >
-            <a className="relative h-auto w-12 flex-shrink-0 scale-100 transform-gpu overflow-hidden rounded-md transition duration-300 hover:scale-105">
-              <CachedImage
-                src={
-                  title.posterPath
-                    ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${title.posterPath}`
-                    : '/images/overseerr_poster_not_found.png'
-                }
-                alt=""
-                layout="responsive"
-                width={600}
-                height={900}
-                objectFit="cover"
-              />
-            </a>
+            <CachedImage
+              src={
+                title.posterPath
+                  ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${title.posterPath}`
+                  : '/images/overseerr_poster_not_found.png'
+              }
+              alt=""
+              layout="responsive"
+              width={600}
+              height={900}
+              objectFit="cover"
+            />
           </Link>
           <div className="flex flex-col justify-center overflow-hidden pl-2 xl:pl-4">
             <div className="pt-0.5 text-xs text-white sm:pt-1">
@@ -162,10 +161,9 @@ const IssueItem = ({ issue }: IssueItemProps) => {
                   ? `/movie/${issue.media.tmdbId}`
                   : `/tv/${issue.media.tmdbId}`
               }
+              className="mr-2 min-w-0 truncate text-lg font-bold text-white hover:underline xl:text-xl"
             >
-              <a className="mr-2 min-w-0 truncate text-lg font-bold text-white hover:underline xl:text-xl">
-                {isMovie(title) ? title.title : title.name}
-              </a>
+              {isMovie(title) ? title.title : title.name}
             </Link>
             {problemSeasonEpisodeLine.length > 0 && (
               <div className="card-field">
@@ -222,17 +220,18 @@ const IssueItem = ({ issue }: IssueItemProps) => {
                       />
                     ),
                     user: (
-                      <Link href={`/users/${issue.createdBy.id}`}>
-                        <a className="group flex items-center truncate">
-                          <img
-                            src={issue.createdBy.avatar}
-                            alt=""
-                            className="avatar-sm ml-1.5 object-cover"
-                          />
-                          <span className="truncate text-sm font-semibold group-hover:text-white group-hover:underline">
-                            {issue.createdBy.displayName}
-                          </span>
-                        </a>
+                      <Link
+                        href={`/users/${issue.createdBy.id}`}
+                        className="group flex items-center truncate"
+                      >
+                        <img
+                          src={issue.createdBy.avatar}
+                          alt=""
+                          className="avatar-sm ml-1.5 object-cover"
+                        />
+                        <span className="truncate text-sm font-semibold group-hover:text-white group-hover:underline">
+                          {issue.createdBy.displayName}
+                        </span>
                       </Link>
                     ),
                   })}
@@ -259,7 +258,7 @@ const IssueItem = ({ issue }: IssueItemProps) => {
       </div>
       <div className="z-10 mt-4 flex w-full flex-col justify-center pl-4 pr-4 xl:mt-0 xl:w-96 xl:items-end xl:pl-0">
         <span className="w-full">
-          <Link href={`/issues/${issue.id}`} passHref>
+          <Link href={`/issues/${issue.id}`} passHref legacyBehavior>
             <Button as="a" className="w-full" buttonType="primary">
               <EyeIcon />
               <span>{intl.formatMessage(messages.viewissue)}</span>

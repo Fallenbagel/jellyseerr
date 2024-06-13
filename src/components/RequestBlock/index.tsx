@@ -101,10 +101,9 @@ const RequestBlock = ({ request, onUpdate }: RequestBlockProps) => {
                       ? '/profile'
                       : `/users/${request.requestedBy.id}`
                   }
+                  className="font-semibold text-gray-100 transition duration-300 hover:text-white hover:underline"
                 >
-                  <a className="font-semibold text-gray-100 transition duration-300 hover:text-white hover:underline">
-                    {request.requestedBy.displayName}
-                  </a>
+                  {request.requestedBy.displayName}
                 </Link>
               </span>
             </div>
@@ -120,10 +119,9 @@ const RequestBlock = ({ request, onUpdate }: RequestBlockProps) => {
                         ? '/profile'
                         : `/users/${request.modifiedBy.id}`
                     }
+                    className="font-semibold text-gray-100 transition duration-300 hover:text-white hover:underline"
                   >
-                    <a className="font-semibold text-gray-100 transition duration-300 hover:text-white hover:underline">
-                      {request.modifiedBy.displayName}
-                    </a>
+                    {request.modifiedBy.displayName}
                   </Link>
                 </span>
               </div>

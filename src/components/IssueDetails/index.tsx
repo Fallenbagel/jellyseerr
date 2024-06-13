@@ -256,8 +256,9 @@ const IssueDetails = () => {
               href={`/${
                 issueData.media.mediaType === MediaType.MOVIE ? 'movie' : 'tv'
               }/${data.id}`}
+              className="hover:underline"
             >
-              <a className="hover:underline">{title}</a>
+              {title}
             </Link>{' '}
             {releaseYear && (
               <span className="media-year">({releaseYear.slice(0, 4)})</span>
@@ -273,17 +274,16 @@ const IssueDetails = () => {
                       ? '/profile'
                       : `/users/${issueData.createdBy.id}`
                   }
+                  className="group ml-1 inline-flex h-full items-center xl:ml-1.5"
                 >
-                  <a className="group ml-1 inline-flex h-full items-center xl:ml-1.5">
-                    <img
-                      className="mr-0.5 h-5 w-5 scale-100 transform-gpu rounded-full object-cover transition duration-300 group-hover:scale-105 xl:mr-1 xl:h-6 xl:w-6"
-                      src={issueData.createdBy.avatar}
-                      alt=""
-                    />
-                    <span className="font-semibold text-gray-100 transition duration-300 group-hover:text-white group-hover:underline">
-                      {issueData.createdBy.displayName}
-                    </span>
-                  </a>
+                  <img
+                    className="mr-0.5 h-5 w-5 scale-100 transform-gpu rounded-full object-cover transition duration-300 group-hover:scale-105 xl:mr-1 xl:h-6 xl:w-6"
+                    src={issueData.createdBy.avatar}
+                    alt=""
+                  />
+                  <span className="font-semibold text-gray-100 transition duration-300 group-hover:text-white group-hover:underline">
+                    {issueData.createdBy.displayName}
+                  </span>
                 </Link>
               ),
               relativeTime: (

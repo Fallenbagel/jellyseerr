@@ -609,23 +609,23 @@ const UserList = () => {
               </Table.TD>
               <Table.TD>
                 <div className="flex items-center">
-                  <Link href={`/users/${user.id}`}>
-                    <a className="h-10 w-10 flex-shrink-0">
-                      <img
-                        className="h-10 w-10 rounded-full object-cover"
-                        src={user.avatar}
-                        alt=""
-                      />
-                    </a>
+                  <Link
+                    href={`/users/${user.id}`}
+                    className="h-10 w-10 flex-shrink-0"
+                  >
+                    <img
+                      className="h-10 w-10 rounded-full object-cover"
+                      src={user.avatar}
+                      alt=""
+                    />
                   </Link>
                   <div className="ml-4">
-                    <Link href={`/users/${user.id}`}>
-                      <a
-                        className="text-base font-bold leading-5 transition duration-300 hover:underline"
-                        data-testid="user-list-username-link"
-                      >
-                        {user.displayName}
-                      </a>
+                    <Link
+                      href={`/users/${user.id}`}
+                      className="text-base font-bold leading-5 transition duration-300 hover:underline"
+                      data-testid="user-list-username-link"
+                    >
+                      {user.displayName}
                     </Link>
                     {user.displayName.toLowerCase() !== user.email && (
                       <div className="text-sm leading-5 text-gray-300">
@@ -641,10 +641,11 @@ const UserList = () => {
                   [Permission.MANAGE_REQUESTS, Permission.REQUEST_VIEW],
                   { type: 'or' }
                 ) ? (
-                  <Link href={`/users/${user.id}/requests`}>
-                    <a className="text-sm leading-5 transition duration-300 hover:underline">
-                      {user.requestCount}
-                    </a>
+                  <Link
+                    href={`/users/${user.id}/requests`}
+                    className="text-sm leading-5 transition duration-300 hover:underline"
+                  >
+                    {user.requestCount}
                   </Link>
                 ) : (
                   user.requestCount

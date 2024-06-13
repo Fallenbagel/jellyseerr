@@ -39,11 +39,9 @@ const PlexWatchlistSlider = () => {
   return (
     <>
       <div className="slider-header">
-        <Link href="/discover/watchlist">
-          <a className="slider-title">
-            <span>{intl.formatMessage(messages.plexwatchlist)}</span>
-            <ArrowRightCircleIcon />
-          </a>
+        <Link href="/discover/watchlist" className="slider-title">
+          <span>{intl.formatMessage(messages.plexwatchlist)}</span>
+          <ArrowRightCircleIcon />
         </Link>
       </div>
       <Slider

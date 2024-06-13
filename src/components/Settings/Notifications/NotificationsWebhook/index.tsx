@@ -309,6 +309,7 @@ const NotificationsWebhook = () => {
                   <Link
                     href="https://docs.overseerr.dev/using-overseerr/notifications/webhooks#template-variables"
                     passHref
+                    legacyBehavior
                   >
                     <Button
                       as="a"

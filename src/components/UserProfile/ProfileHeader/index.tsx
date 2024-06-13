@@ -57,10 +57,9 @@ const ProfileHeader = ({ user, isSettingsPage }: ProfileHeaderProps) => {
               href={
                 user.id === loggedInUser?.id ? '/profile' : `/users/${user.id}`
               }
+              className="text-overseerr text-lg font-bold hover:to-purple-200 sm:text-2xl"
             >
-              <a className="text-overseerr text-lg font-bold hover:to-purple-200 sm:text-2xl">
-                {user.displayName}
-              </a>
+              {user.displayName}
             </Link>
             {user.email && user.displayName.toLowerCase() !== user.email && (
               <span className="text-sm text-gray-400 sm:ml-2 sm:text-lg">
@@ -88,6 +87,7 @@ const ProfileHeader = ({ user, isSettingsPage }: ProfileHeaderProps) => {
                 : `/users/${user.id}/settings`
             }
             passHref
+            legacyBehavior
           >
             <Button as="a">
               <CogIcon />
@@ -101,6 +101,7 @@ const ProfileHeader = ({ user, isSettingsPage }: ProfileHeaderProps) => {
                 loggedInUser?.id === user.id ? `/profile` : `/users/${user.id}`
               }
               passHref
+              legacyBehavior
             >
               <Button as="a">
                 <UserIcon />
