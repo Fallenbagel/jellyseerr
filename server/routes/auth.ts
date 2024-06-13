@@ -15,6 +15,7 @@ import { getHostname } from '@server/utils/getHostname';
 import * as EmailValidator from 'email-validator';
 import { Router } from 'express';
 import gravatarUrl from 'gravatar-url';
+import net from 'net';
 
 const authRoutes = Router();
 
@@ -278,11 +279,21 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         ? externalHostname
         : hostname;
 
-    const ip = req.ip ? req.ip.split(':').reverse()[0] : undefined;
+    const ip = req.ip;
+    let clientIp;
+
+    if (ip) {
+      if (net.isIPv4(ip)) {
+        clientIp = ip;
+      } else if (net.isIPv6(ip)) {
+        clientIp = ip.startsWith('::ffff:') ? ip.substring(7) : ip;
+      }
+    }
+
     const account = await jellyfinserver.login(
       body.username,
       body.password,
-      ip
+      clientIp
     );
 
     // Next let's see if the user already exists
