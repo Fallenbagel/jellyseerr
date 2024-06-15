@@ -618,6 +618,8 @@ const UserList = () => {
                       className="h-10 w-10 rounded-full object-cover"
                       src={user.avatar}
                       alt=""
+                      width={40}
+                      height={40}
                     />
                   </Link>
                   <div className="ml-4">

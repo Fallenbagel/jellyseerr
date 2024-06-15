@@ -56,6 +56,8 @@ const UserDropdown = () => {
             className="h-8 w-8 rounded-full object-cover sm:h-10 sm:w-10"
             src={user?.avatar || ''}
             alt=""
+            width={40}
+            height={40}
           />
         </Menu.Button>
       </div>
@@ -77,6 +79,8 @@ const UserDropdown = () => {
                   className="h-8 w-8 rounded-full object-cover sm:h-10 sm:w-10"
                   src={user?.avatar || ''}
                   alt=""
+                  width={40}
+                  height={40}
                 />
                 <div className="flex min-w-0 flex-col">
                   <span className="truncate text-xl font-semibold text-gray-200">

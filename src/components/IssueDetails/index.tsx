@@ -282,6 +282,8 @@ const IssueDetails = () => {
                     className="mr-0.5 h-5 w-5 scale-100 transform-gpu rounded-full object-cover transition duration-300 group-hover:scale-105 xl:mr-1 xl:h-6 xl:w-6"
                     src={issueData.createdBy.avatar}
                     alt=""
+                    width={20}
+                    height={20}
                   />
                   <span className="font-semibold text-gray-100 transition duration-300 group-hover:text-white group-hover:underline">
                     {issueData.createdBy.displayName}

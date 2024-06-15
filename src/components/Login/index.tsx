@@ -91,6 +91,7 @@ const Login = () => {
           src="/logo_stacked.svg"
           className="mb-10 max-w-full"
           alt="Logo"
+          fill
         />
         <h2 className="mt-2 text-center text-3xl font-extrabold leading-9 text-gray-100">
           {intl.formatMessage(messages.signinheader)}

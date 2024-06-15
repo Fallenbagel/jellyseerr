@@ -63,6 +63,7 @@ const ShowMoreCard = ({ url, posters }: ShowMoreCardProps) => {
                     src={`//image.tmdb.org/t/p/w300_and_h450_face${posters[0]}`}
                     alt=""
                     className="w-full rounded-md"
+                    fill
                   />
                 </div>
               )}
@@ -72,6 +73,7 @@ const ShowMoreCard = ({ url, posters }: ShowMoreCardProps) => {
                     src={`//image.tmdb.org/t/p/w300_and_h450_face${posters[1]}`}
                     alt=""
                     className="w-full rounded-md"
+                    fill
                   />
                 </div>
               )}
@@ -81,6 +83,7 @@ const ShowMoreCard = ({ url, posters }: ShowMoreCardProps) => {
                     src={`//image.tmdb.org/t/p/w300_and_h450_face${posters[2]}`}
                     alt=""
                     className="w-full rounded-md"
+                    fill
                   />
                 </div>
               )}
@@ -90,6 +93,7 @@ const ShowMoreCard = ({ url, posters }: ShowMoreCardProps) => {
                     src={`//image.tmdb.org/t/p/w300_and_h450_face${posters[3]}`}
                     alt=""
                     className="w-full rounded-md"
+                    fill
                   />
                 </div>
               )}

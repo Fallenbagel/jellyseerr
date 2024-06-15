@@ -52,6 +52,7 @@ const DiscoverMovieStudio = () => {
                 src={`//image.tmdb.org/t/p/w780_filter(duotone,ffffff,bababa)${firstResultData.studio.logoPath}`}
                 alt={firstResultData.studio.name}
                 className="max-h-24 sm:max-h-32"
+                fill
               />
             </div>
           ) : (

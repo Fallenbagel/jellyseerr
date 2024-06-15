@@ -58,6 +58,7 @@ const PersonCard = ({
                       height: '100%',
                       objectFit: 'cover',
                     }}
+                    fill
                   />
                 </div>
               ) : (

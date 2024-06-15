@@ -533,6 +533,7 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                         height: '100%',
                         objectFit: 'cover',
                       }}
+                      fill
                     />
                     <div
                       className="absolute inset-0"

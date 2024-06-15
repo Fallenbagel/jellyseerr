@@ -59,6 +59,7 @@ const Season = ({ seasonNumber, tvId }: SeasonProps) => {
                     className="h-auto w-full rounded-lg xl:h-32 xl:w-auto"
                     src={`https://image.tmdb.org/t/p/original/${episode.stillPath}`}
                     alt=""
+                    fill
                   />
                 )}
               </div>

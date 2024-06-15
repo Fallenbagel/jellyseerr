@@ -95,6 +95,7 @@ const SearchByNameModal = ({
                   }
                   alt={item.title}
                   className="h-100 w-auto rounded-md"
+                  fill
                 />
               </div>
               <div className="flex-grow self-start p-3 text-left">

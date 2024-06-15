@@ -205,6 +205,8 @@ const PlexImportModal = ({ onCancel, onComplete }: PlexImportProps) => {
                                 className="h-10 w-10 flex-shrink-0 rounded-full"
                                 src={user.thumb}
                                 alt=""
+                                width={40}
+                                height={40}
                               />
                               <div className="ml-4">
                                 <div className="text-base font-bold leading-5">

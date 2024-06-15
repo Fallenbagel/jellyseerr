@@ -10,7 +10,10 @@ module.exports = {
     JELLYFIN_TYPE: process.env.JELLYFIN_TYPE,
   },
   images: {
-    domains: ['image.tmdb.org'],
+    remotePatterns: [
+      { hostname: 'gravatar.com' },
+      { hostname: 'image.tmdb.org' },
+    ],
   },
   webpack(config) {
     config.module.rules.push({

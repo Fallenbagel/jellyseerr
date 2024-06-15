@@ -82,6 +82,7 @@ const Setup = () => {
           src="/logo_stacked.svg"
           className="mb-10 max-w-full sm:mx-auto sm:max-w-md"
           alt="Logo"
+          fill
         />
         <AppDataWarning />
         <nav className="relative z-50">

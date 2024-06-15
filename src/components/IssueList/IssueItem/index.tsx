@@ -229,6 +229,7 @@ const IssueItem = ({ issue }: IssueItemProps) => {
                           src={issue.createdBy.avatar}
                           alt=""
                           className="avatar-sm ml-1.5 object-cover"
+                          fill
                         />
                         <span className="truncate text-sm font-semibold group-hover:text-white group-hover:underline">
                           {issue.createdBy.displayName}

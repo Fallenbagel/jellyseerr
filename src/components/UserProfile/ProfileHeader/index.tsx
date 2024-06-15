@@ -45,6 +45,8 @@ const ProfileHeader = ({ user, isSettingsPage }: ProfileHeaderProps) => {
               className="h-24 w-24 rounded-full bg-gray-600 object-cover ring-1 ring-gray-700"
               src={user.avatar}
               alt=""
+              width={96}
+              height={96}
             />
             <span
               className="absolute inset-0 rounded-full shadow-inner"

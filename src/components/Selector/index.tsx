@@ -381,6 +381,7 @@ export const WatchProviderSelector = ({
                         height: '100%',
                         objectFit: 'contain',
                       }}
+                      fill
                       className="rounded-lg"
                     />
                     {isActive && (
@@ -425,6 +426,7 @@ export const WatchProviderSelector = ({
                           height: '100%',
                           objectFit: 'cover',
                         }}
+                        fill
                         className="rounded-lg"
                       />
                       {isActive && (

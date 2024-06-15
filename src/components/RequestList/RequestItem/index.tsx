@@ -188,6 +188,7 @@ const RequestItemError = ({
                               src={requestData.requestedBy.avatar}
                               alt=""
                               className="avatar-sm ml-1.5"
+                              fill
                             />
                             <span className="truncate text-sm group-hover:underline">
                               {requestData.requestedBy.displayName}
@@ -243,6 +244,7 @@ const RequestItemError = ({
                             src={requestData.modifiedBy.avatar}
                             alt=""
                             className="avatar-sm ml-1.5"
+                            fill
                           />
                           <span className="truncate text-sm group-hover:underline">
                             {requestData.modifiedBy.displayName}
@@ -536,6 +538,7 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                             src={requestData.requestedBy.avatar}
                             alt=""
                             className="avatar-sm ml-1.5 object-cover"
+                            fill
                           />
                           <span className="truncate text-sm font-semibold group-hover:text-white group-hover:underline">
                             {requestData.requestedBy.displayName}
@@ -591,6 +594,7 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                           src={requestData.modifiedBy.avatar}
                           alt=""
                           className="avatar-sm ml-1.5 object-cover"
+                          fill
                         />
                         <span className="truncate text-sm font-semibold group-hover:text-white group-hover:underline">
                           {requestData.modifiedBy.displayName}

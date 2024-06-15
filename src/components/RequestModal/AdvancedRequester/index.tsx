@@ -564,6 +564,8 @@ const AdvancedRequester = ({
                             src={selectedUser.avatar}
                             alt=""
                             className="h-6 w-6 flex-shrink-0 rounded-full object-cover"
+                            width={24}
+                            height={24}
                           />
                           <span className="ml-3 block">
                             {selectedUser.displayName}
@@ -614,6 +616,8 @@ const AdvancedRequester = ({
                                     src={user.avatar}
                                     alt=""
                                     className="h-6 w-6 flex-shrink-0 rounded-full object-cover"
+                                    width={24}
+                                    height={24}
                                   />
                                   <span className="ml-3 block flex-shrink-0">
                                     {user.displayName}
