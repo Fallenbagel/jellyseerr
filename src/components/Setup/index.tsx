@@ -11,6 +11,7 @@ import SetupSteps from '@app/components/Setup/SetupSteps';
 import useLocale from '@app/hooks/useLocale';
 import { MediaServerType } from '@server/constants/server';
 import axios from 'axios';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
@@ -77,7 +78,7 @@ const Setup = () => {
         <LanguagePicker />
       </div>
       <div className="relative z-40 px-4 sm:mx-auto sm:w-full sm:max-w-4xl">
-        <img
+        <Image
           src="/logo_stacked.svg"
           className="mb-10 max-w-full sm:mx-auto sm:max-w-md"
           alt="Logo"

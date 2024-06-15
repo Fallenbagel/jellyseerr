@@ -5,7 +5,7 @@ import globalMessages from '@app/i18n/globalMessages';
 import type { UserResultsResponse } from '@server/interfaces/api/userInterfaces';
 import axios from 'axios';
 import getConfig from 'next/config';
-import type React from 'react';
+import Image from 'next/image';
 import { useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
@@ -237,7 +237,7 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
                           </td>
                           <td className="whitespace-nowrap px-1 py-4 text-sm font-medium leading-5 text-gray-100 md:px-6">
                             <div className="flex items-center">
-                              <img
+                              <Image
                                 className="h-10 w-10 flex-shrink-0 rounded-full"
                                 src={user.thumb}
                                 alt=""

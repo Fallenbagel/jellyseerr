@@ -2,6 +2,7 @@ import Alert from '@app/components/Common/Alert';
 import Modal from '@app/components/Common/Modal';
 import globalMessages from '@app/i18n/globalMessages';
 import type { SonarrSeries } from '@server/api/servarr/sonarr';
+import Image from 'next/image';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
 
@@ -87,7 +88,7 @@ const SearchByNameModal = ({
               } `}
             >
               <div className="flex w-24 flex-none items-center space-x-4">
-                <img
+                <Image
                   src={
                     item.remotePoster ??
                     '/images/overseerr_poster_not_found.png'

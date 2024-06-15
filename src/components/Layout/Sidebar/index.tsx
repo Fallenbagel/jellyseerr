@@ -13,6 +13,7 @@ import {
   UsersIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Fragment, useRef } from 'react';
@@ -150,9 +151,9 @@ const Sidebar = ({ open, setClosed }: SidebarProps) => {
                   >
                     <div className="flex flex-shrink-0 items-center px-2">
                       <span className="px-4 text-xl text-gray-50">
-                        <a href="/">
-                          <img src="/logo_full.svg" alt="Logo" />
-                        </a>
+                        <Link href="/">
+                          <Image src="/logo_full.svg" alt="Logo" />
+                        </Link>
                       </span>
                     </div>
                     <nav className="mt-16 flex-1 space-y-4 px-4">
@@ -219,9 +220,9 @@ const Sidebar = ({ open, setClosed }: SidebarProps) => {
             <div className="flex flex-1 flex-col overflow-y-auto pt-8 pb-4">
               <div className="flex flex-shrink-0 items-center">
                 <span className="px-4 text-2xl text-gray-50">
-                  <a href="/">
-                    <img src="/logo_full.svg" alt="Logo" />
-                  </a>
+                  <Link href="/">
+                    <Image src="/logo_full.svg" alt="Logo" />
+                  </Link>
                 </span>
               </div>
               <nav className="mt-16 flex-1 space-y-4 px-4">

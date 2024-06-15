@@ -1,6 +1,7 @@
 import AirDateBadge from '@app/components/AirDateBadge';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import type { SeasonWithEpisodes } from '@server/models/Tv';
+import Image from 'next/image';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
 
@@ -54,7 +55,7 @@ const Season = ({ seasonNumber, tvId }: SeasonProps) => {
                   {episode.overview && <p>{episode.overview}</p>}
                 </div>
                 {episode.stillPath && (
-                  <img
+                  <Image
                     className="h-auto w-full rounded-lg xl:h-32 xl:w-auto"
                     src={`https://image.tmdb.org/t/p/original/${episode.stillPath}`}
                     alt=""

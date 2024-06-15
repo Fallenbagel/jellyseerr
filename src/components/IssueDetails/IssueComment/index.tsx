@@ -6,6 +6,7 @@ import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 import type { default as IssueCommentType } from '@server/entity/IssueComment';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Fragment, useState } from 'react';
 import { defineMessages, FormattedRelativeTime, useIntl } from 'react-intl';
@@ -84,7 +85,7 @@ const IssueComment = ({
         </Modal>
       </Transition>
       <Link href={isActiveUser ? '/profile' : `/users/${comment.user.id}`}>
-        <img
+        <Image
           src={comment.user.avatar}
           alt=""
           className="h-10 w-10 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"

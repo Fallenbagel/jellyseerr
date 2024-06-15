@@ -21,6 +21,7 @@ import type { MediaRequest } from '@server/entity/MediaRequest';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
 import axios from 'axios';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
@@ -110,7 +111,7 @@ const RequestCardError = ({ requestData }: RequestCardErrorProps) => {
                       href={`/users/${requestData.requestedBy.id}`}
                       className="group flex items-center"
                     >
-                      <img
+                      <Image
                         src={requestData.requestedBy.avatar}
                         alt=""
                         className="avatar-sm"
@@ -366,7 +367,7 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
                 href={`/users/${requestData.requestedBy.id}`}
                 className="group flex items-center"
               >
-                <img
+                <Image
                   src={requestData.requestedBy.avatar}
                   alt=""
                   className="avatar-sm object-cover"

@@ -20,6 +20,7 @@ import type { MediaRequest } from '@server/entity/MediaRequest';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
 import axios from 'axios';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useInView } from 'react-intersection-observer';
@@ -183,7 +184,7 @@ const RequestItemError = ({
                             href={`/users/${requestData.requestedBy.id}`}
                             className="group flex items-center truncate"
                           >
-                            <img
+                            <Image
                               src={requestData.requestedBy.avatar}
                               alt=""
                               className="avatar-sm ml-1.5"
@@ -238,7 +239,7 @@ const RequestItemError = ({
                           href={`/users/${requestData.modifiedBy.id}`}
                           className="group flex items-center truncate"
                         >
-                          <img
+                          <Image
                             src={requestData.modifiedBy.avatar}
                             alt=""
                             className="avatar-sm ml-1.5"
@@ -531,7 +532,7 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                           href={`/users/${requestData.requestedBy.id}`}
                           className="group flex items-center truncate"
                         >
-                          <img
+                          <Image
                             src={requestData.requestedBy.avatar}
                             alt=""
                             className="avatar-sm ml-1.5 object-cover"
@@ -586,7 +587,7 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                         href={`/users/${requestData.modifiedBy.id}`}
                         className="group flex items-center truncate"
                       >
-                        <img
+                        <Image
                           src={requestData.modifiedBy.avatar}
                           alt=""
                           className="avatar-sm ml-1.5 object-cover"

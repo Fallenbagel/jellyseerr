@@ -3,7 +3,6 @@ import useSettings from '@app/hooks/useSettings';
 import { Transition } from '@headlessui/react';
 import axios from 'axios';
 import { Field, Formik } from 'formik';
-import type React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import * as Yup from 'yup';
 

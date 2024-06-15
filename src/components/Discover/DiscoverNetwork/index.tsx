@@ -6,6 +6,7 @@ import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
 import type { TvNetwork } from '@server/models/common';
 import type { TvResult } from '@server/models/Search';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { defineMessages, useIntl } from 'react-intl';
 
@@ -47,7 +48,7 @@ const DiscoverTvNetwork = () => {
         <Header>
           {firstResultData?.network.logoPath ? (
             <div className="mb-6 flex justify-center">
-              <img
+              <Image
                 src={`//image.tmdb.org/t/p/w780_filter(duotone,ffffff,bababa)${firstResultData.network.logoPath}`}
                 alt={firstResultData.network.name}
                 className="max-h-24 sm:max-h-32"

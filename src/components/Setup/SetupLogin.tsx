@@ -5,7 +5,6 @@ import { useUser } from '@app/hooks/useUser';
 import { MediaServerType } from '@server/constants/server';
 import axios from 'axios';
 import getConfig from 'next/config';
-import type React from 'react';
 import { useEffect, useState } from 'react';
 import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 

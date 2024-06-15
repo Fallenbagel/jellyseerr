@@ -1,5 +1,6 @@
 import TitleCard from '@app/components/TitleCard';
 import { ArrowRightCircleIcon } from '@heroicons/react/24/solid';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useInView } from 'react-intersection-observer';
@@ -58,7 +59,7 @@ const ShowMoreCard = ({ url, posters }: ShowMoreCardProps) => {
             <div className="relative z-10 flex h-full flex-wrap items-center justify-center opacity-30">
               {posters[0] && (
                 <div className="w-1/2 p-1">
-                  <img
+                  <Image
                     src={`//image.tmdb.org/t/p/w300_and_h450_face${posters[0]}`}
                     alt=""
                     className="w-full rounded-md"
@@ -67,7 +68,7 @@ const ShowMoreCard = ({ url, posters }: ShowMoreCardProps) => {
               )}
               {posters[1] && (
                 <div className="w-1/2 p-1">
-                  <img
+                  <Image
                     src={`//image.tmdb.org/t/p/w300_and_h450_face${posters[1]}`}
                     alt=""
                     className="w-full rounded-md"
@@ -76,7 +77,7 @@ const ShowMoreCard = ({ url, posters }: ShowMoreCardProps) => {
               )}
               {posters[2] && (
                 <div className="w-1/2 p-1">
-                  <img
+                  <Image
                     src={`//image.tmdb.org/t/p/w300_and_h450_face${posters[2]}`}
                     alt=""
                     className="w-full rounded-md"
@@ -85,7 +86,7 @@ const ShowMoreCard = ({ url, posters }: ShowMoreCardProps) => {
               )}
               {posters[3] && (
                 <div className="w-1/2 p-1">
-                  <img
+                  <Image
                     src={`//image.tmdb.org/t/p/w300_and_h450_face${posters[3]}`}
                     alt=""
                     className="w-full rounded-md"

@@ -29,6 +29,7 @@ import { hasPermission } from '@server/lib/permissions';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import getConfig from 'next/config';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -613,7 +614,7 @@ const UserList = () => {
                     href={`/users/${user.id}`}
                     className="h-10 w-10 flex-shrink-0"
                   >
-                    <img
+                    <Image
                       className="h-10 w-10 rounded-full object-cover"
                       src={user.avatar}
                       alt=""

@@ -10,6 +10,7 @@ import { MediaType } from '@server/constants/media';
 import type Issue from '@server/entity/Issue';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useInView } from 'react-intersection-observer';
 import { defineMessages, FormattedRelativeTime, useIntl } from 'react-intl';
@@ -224,7 +225,7 @@ const IssueItem = ({ issue }: IssueItemProps) => {
                         href={`/users/${issue.createdBy.id}`}
                         className="group flex items-center truncate"
                       >
-                        <img
+                        <Image
                           src={issue.createdBy.avatar}
                           alt=""
                           className="avatar-sm ml-1.5 object-cover"

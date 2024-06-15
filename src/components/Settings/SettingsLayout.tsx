@@ -5,7 +5,6 @@ import useSettings from '@app/hooks/useSettings';
 import globalMessages from '@app/i18n/globalMessages';
 import { MediaServerType } from '@server/constants/server';
 import getConfig from 'next/config';
-import type React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 
 const messages = defineMessages({
