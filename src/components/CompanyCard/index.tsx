@@ -36,8 +36,8 @@ const CompanyCard = ({ image, url, name }: CompanyCardProps) => {
           src={image}
           alt={name}
           className="relative z-40 h-full w-full"
-          layout="fill"
-          objectFit="contain"
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          fill
         />
       </div>
       <div

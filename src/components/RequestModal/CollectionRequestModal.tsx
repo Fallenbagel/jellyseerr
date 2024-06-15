@@ -402,10 +402,14 @@ const CollectionRequestModal = ({
                                   : '/images/overseerr_poster_not_found.png'
                               }
                               alt=""
-                              layout="responsive"
+                              sizes="100vw"
+                              style={{
+                                width: '100%',
+                                height: 'auto',
+                                objectFit: 'cover',
+                              }}
                               width={600}
                               height={900}
-                              objectFit="cover"
                             />
                           </div>
                           <div className="flex flex-col justify-center pl-2">

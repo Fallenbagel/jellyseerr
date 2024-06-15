@@ -383,8 +383,8 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
             <CachedImage
               src={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${title.backdropPath}`}
               alt=""
-              layout="fill"
-              objectFit="cover"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              fill
             />
             <div
               className="absolute inset-0"
@@ -412,10 +412,10 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                     : '/images/overseerr_poster_not_found.png'
                 }
                 alt=""
-                layout="responsive"
+                sizes="100vw"
+                style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
                 width={600}
                 height={900}
-                objectFit="cover"
               />
             </Link>
             <div className="flex flex-col justify-center overflow-hidden pl-2 xl:pl-4">
