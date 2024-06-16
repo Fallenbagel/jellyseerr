@@ -610,10 +610,8 @@ class Settings {
 
   private generateApiKey(): string {
     if (process.env.API_KEY) {
-      console.log(process.env.API_KEY)
-      return process.env.API_KEY
-    }
-    else {
+      return process.env.API_KEY;
+    } else {
       return Buffer.from(`${Date.now()}${randomUUID()}`).toString('base64');
     }
   }
