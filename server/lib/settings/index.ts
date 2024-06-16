@@ -610,11 +610,10 @@ class Settings {
 
   private generateApiKey(): string {
     if (process.env.API_KEY) {
-      console.log("This is weird")
+      console.log(process.env.API_KEY)
       return process.env.API_KEY
     }
     else {
-      console.log("But this is weirder")
       return Buffer.from(`${Date.now()}${randomUUID()}`).toString('base64');
     }
   }
