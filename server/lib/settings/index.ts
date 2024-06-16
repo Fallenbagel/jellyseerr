@@ -609,7 +609,12 @@ class Settings {
   }
 
   private generateApiKey(): string {
-    return Buffer.from(`${Date.now()}${randomUUID()}`).toString('base64');
+    if (process.env.API_KEY) {
+      return process.env.API_KEY
+    }
+    else {
+      return Buffer.from(`${Date.now()}${randomUUID()}`).toString('base64');
+    }
   }
 
   private generateVapidKeys(force = false): void {
