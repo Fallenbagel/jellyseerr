@@ -78,12 +78,9 @@ const Setup = () => {
         <LanguagePicker />
       </div>
       <div className="relative z-40 px-4 sm:mx-auto sm:w-full sm:max-w-4xl">
-        <Image
-          src="/logo_stacked.svg"
-          className="mb-10 max-w-full sm:mx-auto sm:max-w-md"
-          alt="Logo"
-          fill
-        />
+        <div className="relative mb-10 h-48 max-w-full sm:mx-auto sm:h-64 sm:max-w-md">
+          <Image src="/logo_stacked.svg" alt="Logo" fill />
+        </div>
         <AppDataWarning />
         <nav className="relative z-50">
           <ul

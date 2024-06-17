@@ -147,16 +147,16 @@ const Sidebar = ({ open, setClosed }: SidebarProps) => {
                   </div>
                   <div
                     ref={navRef}
-                    className="flex flex-1 flex-col overflow-y-auto pt-8 pb-8 sm:pb-4"
+                    className="flex flex-1 flex-col overflow-y-auto pb-8 sm:pb-4"
                   >
                     <div className="flex flex-shrink-0 items-center px-2">
-                      <span className="px-4 text-xl text-gray-50">
-                        <Link href="/">
+                      <span className="w-full px-2 text-xl text-gray-50">
+                        <Link href="/" className="relative block h-24">
                           <Image src="/logo_full.svg" alt="Logo" fill />
                         </Link>
                       </span>
                     </div>
-                    <nav className="mt-16 flex-1 space-y-4 px-4">
+                    <nav className="mt-4 flex-1 space-y-4 px-4">
                       {SidebarLinks.filter((link) =>
                         link.requiredPermission
                           ? hasPermission(link.requiredPermission, {
@@ -217,15 +217,15 @@ const Sidebar = ({ open, setClosed }: SidebarProps) => {
       <div className="fixed top-0 bottom-0 left-0 z-30 hidden lg:flex lg:flex-shrink-0">
         <div className="sidebar flex w-64 flex-col">
           <div className="flex h-0 flex-1 flex-col">
-            <div className="flex flex-1 flex-col overflow-y-auto pt-8 pb-4">
+            <div className="flex flex-1 flex-col overflow-y-auto pb-4">
               <div className="flex flex-shrink-0 items-center">
-                <span className="px-4 text-2xl text-gray-50">
-                  <Link href="/">
+                <span className="w-full px-4 text-2xl text-gray-50">
+                  <Link href="/" className="relative block h-24">
                     <Image src="/logo_full.svg" alt="Logo" fill />
                   </Link>
                 </span>
               </div>
-              <nav className="mt-16 flex-1 space-y-4 px-4">
+              <nav className="mt-8 flex-1 space-y-4 px-4">
                 {SidebarLinks.filter((link) =>
                   link.requiredPermission
                     ? hasPermission(link.requiredPermission, {
