@@ -55,6 +55,9 @@ const messages = defineMessages({
   validationApplicationUrlTrailingSlash: 'URL must not end in a trailing slash',
   partialRequestsEnabled: 'Allow Partial Series Requests',
   locale: 'Display Language',
+  overwriteDnsServers: 'Overwrite Default DNS Servers',
+  overwriteDnsServersTip:
+    'A comma-separated list of DNS server to use instead of the default ones',
 });
 
 const SettingsMain = () => {
@@ -134,6 +137,7 @@ const SettingsMain = () => {
             partialRequestsEnabled: data?.partialRequestsEnabled,
             trustProxy: data?.trustProxy,
             cacheImages: data?.cacheImages,
+            overwriteDnsServers: data?.overwriteDnsServers,
           }}
           enableReinitialize
           validationSchema={MainSettingsSchema}
@@ -150,6 +154,7 @@ const SettingsMain = () => {
                 partialRequestsEnabled: values.partialRequestsEnabled,
                 trustProxy: values.trustProxy,
                 cacheImages: values.cacheImages,
+                overwriteDnsServers: values.overwriteDnsServers,
               });
               mutate('/api/v1/settings/public');
               mutate('/api/v1/status');
@@ -425,6 +430,37 @@ const SettingsMain = () => {
                         );
                       }}
                     />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label
+                    htmlFor="overwriteDnsServers"
+                    className="checkbox-label"
+                  >
+                    <span className="mr-2">
+                      {intl.formatMessage(messages.overwriteDnsServers)}
+                    </span>
+                    <SettingsBadge badgeType="advanced" className="mr-2" />
+                    <SettingsBadge badgeType="restartRequired" />
+                    <span className="label-tip">
+                      {intl.formatMessage(messages.overwriteDnsServersTip)}
+                    </span>
+                  </label>
+                  <div className="form-input-area">
+                    <div className="form-input-field">
+                      <Field
+                        id="overwriteDnsServers"
+                        name="overwriteDnsServers"
+                        type="text"
+                      />
+                    </div>
+                    {errors.overwriteDnsServers &&
+                      touched.overwriteDnsServers &&
+                      typeof errors.overwriteDnsServers === 'string' && (
+                        <div className="error">
+                          {errors.overwriteDnsServers}
+                        </div>
+                      )}
                   </div>
                 </div>
                 <div className="actions">

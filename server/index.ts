@@ -84,6 +84,16 @@ app
     const settings = getSettings().load();
     restartFlag.initializeSettings(settings.main);
 
+    // Overwrite DNS servers
+    if (settings.main.overwriteDnsServers) {
+      cacheable.servers = settings.main.overwriteDnsServers
+        .split(',')
+        .map((server) => server.trim());
+      logger.info('Using custom DNS servers', {
+        label: 'Settings',
+      });
+    }
+
     // Migrate library types
     if (
       settings.plex.libraries.length > 1 &&

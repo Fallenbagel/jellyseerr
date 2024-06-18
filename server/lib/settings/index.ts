@@ -118,6 +118,7 @@ export interface MainSettings {
   mediaServerType: number;
   partialRequestsEnabled: boolean;
   locale: string;
+  overwriteDnsServers?: string;
 }
 
 interface PublicSettings {
