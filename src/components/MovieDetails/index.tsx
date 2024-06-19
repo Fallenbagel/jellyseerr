@@ -46,7 +46,7 @@ import { IssueStatus } from '@server/constants/issue';
 import { MediaStatus } from '@server/constants/media';
 import { MediaServerType } from '@server/constants/server';
 import type { MovieDetails as MovieDetailsType } from '@server/models/Movie';
-import { hasFlag } from 'country-flag-icons';
+import { countries } from 'country-flag-icons';
 import 'country-flag-icons/3x2/flags.css';
 import { uniqBy } from 'lodash';
 import getConfig from 'next/config';
@@ -777,7 +777,7 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                         className="flex items-center justify-end"
                         key={`prodcountry-${c.iso_3166_1}`}
                       >
-                        {hasFlag(c.iso_3166_1) && (
+                        {countries.includes(c.iso_3166_1) && (
                           <span
                             className={`mr-1.5 text-xs leading-5 flag:${c.iso_3166_1}`}
                           />

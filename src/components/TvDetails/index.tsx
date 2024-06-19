@@ -47,7 +47,7 @@ import { MediaRequestStatus, MediaStatus } from '@server/constants/media';
 import { MediaServerType } from '@server/constants/server';
 import type { Crew } from '@server/models/common';
 import type { TvDetails as TvDetailsType } from '@server/models/Tv';
-import { hasFlag } from 'country-flag-icons';
+import { countries } from 'country-flag-icons';
 import 'country-flag-icons/3x2/flags.css';
 import getConfig from 'next/config';
 import Link from 'next/link';
@@ -949,7 +949,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                         className="flex items-center justify-end"
                         key={`prodcountry-${c.iso_3166_1}`}
                       >
-                        {hasFlag(c.iso_3166_1) && (
+                        {countries.includes(c.iso_3166_1) && (
                           <span
                             className={`mr-1.5 text-xs leading-5 flag:${c.iso_3166_1}`}
                           />
