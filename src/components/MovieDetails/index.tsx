@@ -543,12 +543,18 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                       }}
                     />
                   </div>
-                  <div className="relative z-10 flex h-14 items-center justify-between p-4 text-gray-200 transition duration-300 group-hover:text-white">
+                  <div className="relative z-10 flex h-full items-center justify-between p-4 text-gray-200 transition duration-300 group-hover:text-white">
                     <div>{data.collection.name}</div>
                     <Button buttonSize="sm">
                       {intl.formatMessage(globalMessages.view)}
                     </Button>
                   </div>
+                </div>
+                <div className="relative z-10 flex h-14 items-center justify-between p-4 text-gray-200 transition duration-300 group-hover:text-white">
+                  <div>{data.collection.name}</div>
+                  <Button buttonSize="sm">
+                    {intl.formatMessage(globalMessages.view)}
+                  </Button>
                 </div>
               </Link>
             </div>
