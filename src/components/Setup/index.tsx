@@ -9,16 +9,17 @@ import SettingsPlex from '@app/components/Settings/SettingsPlex';
 import SettingsServices from '@app/components/Settings/SettingsServices';
 import SetupSteps from '@app/components/Setup/SetupSteps';
 import useLocale from '@app/hooks/useLocale';
+import defineMessages from '@app/utils/defineMessages';
 import { MediaServerType } from '@server/constants/server';
 import axios from 'axios';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import useSWR, { mutate } from 'swr';
 import SetupLogin from './SetupLogin';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Setup', {
   setup: 'Setup',
   finish: 'Finish Setup',
   finishing: 'Finishing…',

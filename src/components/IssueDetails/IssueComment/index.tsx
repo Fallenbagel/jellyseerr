@@ -1,6 +1,7 @@
 import Button from '@app/components/Common/Button';
 import Modal from '@app/components/Common/Modal';
 import { Permission, useUser } from '@app/hooks/useUser';
+import defineMessages from '@app/utils/defineMessages';
 import { Menu, Transition } from '@headlessui/react';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 import type { default as IssueCommentType } from '@server/entity/IssueComment';
@@ -9,11 +10,11 @@ import { Field, Form, Formik } from 'formik';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Fragment, useState } from 'react';
-import { defineMessages, FormattedRelativeTime, useIntl } from 'react-intl';
+import { FormattedRelativeTime, useIntl } from 'react-intl';
 import ReactMarkdown from 'react-markdown';
 import * as Yup from 'yup';
 
-const messages = defineMessages({
+const messages = defineMessages('components.IssueDetails.IssueComment', {
   postedby: 'Posted {relativeTime} by {username}',
   postedbyedited: 'Posted {relativeTime} by {username} (Edited)',
   delete: 'Delete Comment',

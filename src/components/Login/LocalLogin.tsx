@@ -1,6 +1,7 @@
 import Button from '@app/components/Common/Button';
 import SensitiveInput from '@app/components/Common/SensitiveInput';
 import useSettings from '@app/hooks/useSettings';
+import defineMessages from '@app/utils/defineMessages';
 import {
   ArrowLeftOnRectangleIcon,
   LifebuoyIcon,
@@ -9,10 +10,10 @@ import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import Link from 'next/link';
 import { useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import * as Yup from 'yup';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Login', {
   username: 'Username',
   email: 'Email Address',
   password: 'Password',

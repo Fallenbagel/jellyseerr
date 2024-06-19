@@ -1,11 +1,12 @@
 import AirDateBadge from '@app/components/AirDateBadge';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import defineMessages from '@app/utils/defineMessages';
 import type { SeasonWithEpisodes } from '@server/models/Tv';
 import Image from 'next/image';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import useSWR from 'swr';
 
-const messages = defineMessages({
+const messages = defineMessages('components.TvDetails.Season', {
   somethingwentwrong: 'Something went wrong while retrieving season data.',
   noepisodes: 'Episode list unavailable.',
 });

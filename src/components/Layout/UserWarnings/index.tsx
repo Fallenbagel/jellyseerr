@@ -1,9 +1,10 @@
 import { useUser } from '@app/hooks/useUser';
+import defineMessages from '@app/utils/defineMessages';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Layout.UserWarnings', {
   emailRequired: 'An email address is required.',
   emailInvalid: 'Email address is invalid.',
   passwordRequired: 'A password is required.',

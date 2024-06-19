@@ -1,12 +1,13 @@
 import Button from '@app/components/Common/Button';
 import type { User } from '@app/hooks/useUser';
 import { Permission, useUser } from '@app/hooks/useUser';
+import defineMessages from '@app/utils/defineMessages';
 import { CogIcon, UserIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
 import Link from 'next/link';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 
-const messages = defineMessages({
+const messages = defineMessages('components.UserProfile.ProfileHeader', {
   settings: 'Edit Settings',
   profile: 'View Profile',
   joindate: 'Joined {joindate}',

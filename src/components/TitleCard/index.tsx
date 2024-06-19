@@ -8,6 +8,7 @@ import Placeholder from '@app/components/TitleCard/Placeholder';
 import { useIsTouch } from '@app/hooks/useIsTouch';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { withProperties } from '@app/utils/typeHelpers';
 import { Transition } from '@headlessui/react';
 import {
@@ -21,7 +22,7 @@ import type { MediaType } from '@server/models/Search';
 import axios from 'axios';
 import Link from 'next/link';
 import { Fragment, useCallback, useEffect, useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import { mutate } from 'swr';
 
@@ -40,7 +41,7 @@ interface TitleCardProps {
   mutateParent?: () => void;
 }
 
-const messages = defineMessages({
+const messages = defineMessages('components.TitleCard', {
   addToWatchList: 'Add to watchlist',
   watchlistSuccess:
     '<strong>{title}</strong> added to watchlist  successfully!',

@@ -34,6 +34,7 @@
     "@formatjs/intl-locale": "3.1.1",
     "@formatjs/intl-pluralrules": "5.1.10",
     "@formatjs/intl-utils": "3.8.4",
+    "@formatjs/swc-plugin-experimental": "^0.4.0",
     "@headlessui/react": "1.7.12",
     "@heroicons/react": "2.0.16",
     "@supercharge/request-ip": "1.2.0",
@@ -101,7 +102,6 @@
     "zod": "3.20.6"
   },
   "devDependencies": {
-    "@babel/cli": "7.21.0",
     "@commitlint/cli": "17.4.4",
     "@commitlint/config-conventional": "17.4.4",
     "@semantic-release/changelog": "6.0.2",
@@ -135,8 +135,6 @@
     "@typescript-eslint/eslint-plugin": "5.54.0",
     "@typescript-eslint/parser": "5.54.0",
     "autoprefixer": "10.4.13",
-    "babel-plugin-react-intl": "8.2.25",
-    "babel-plugin-react-intl-auto": "3.3.0",
     "commitizen": "4.3.0",
     "copyfiles": "2.4.1",
     "cy-mobile-commands": "0.3.0",

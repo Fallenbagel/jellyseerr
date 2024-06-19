@@ -1,5 +1,6 @@
 import MiniQuotaDisplay from '@app/components/Layout/UserDropdown/MiniQuotaDisplay';
 import { useUser } from '@app/hooks/useUser';
+import defineMessages from '@app/utils/defineMessages';
 import { Menu, Transition } from '@headlessui/react';
 import {
   ArrowRightOnRectangleIcon,
@@ -11,9 +12,9 @@ import Image from 'next/image';
 import type { LinkProps } from 'next/link';
 import Link from 'next/link';
 import { forwardRef, Fragment } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Layout.UserDropdown', {
   myprofile: 'Profile',
   settings: 'Settings',
   requests: 'Requests',

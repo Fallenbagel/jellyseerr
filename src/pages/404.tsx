@@ -1,9 +1,10 @@
 import PageTitle from '@app/components/Common/PageTitle';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowRightCircleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 
-const messages = defineMessages({
+const messages = defineMessages('components.pages', {
   errormessagewithcode: '{statusCode} - {error}',
   pagenotfound: 'Page Not Found',
   returnHome: 'Return Home',

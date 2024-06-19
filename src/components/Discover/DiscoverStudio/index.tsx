@@ -4,13 +4,14 @@ import PageTitle from '@app/components/Common/PageTitle';
 import useDiscover from '@app/hooks/useDiscover';
 import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
+import defineMessages from '@app/utils/defineMessages';
 import type { ProductionCompany } from '@server/models/common';
 import type { MovieResult } from '@server/models/Search';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Discover.DiscoverStudio', {
   studioMovies: '{studio} Movies',
 });
 

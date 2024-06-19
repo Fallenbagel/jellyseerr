@@ -14,6 +14,7 @@ import { useUpdateQueryParams } from '@app/hooks/useUpdateQueryParams';
 import type { User } from '@app/hooks/useUser';
 import { Permission, UserType, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { Transition } from '@headlessui/react';
 import {
   BarsArrowDownIcon,
@@ -33,13 +34,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
 import JellyfinImportModal from './JellyfinImportModal';
 
-const messages = defineMessages({
+const messages = defineMessages('components.UserList', {
   users: 'Users',
   userlist: 'User List',
   importfrommediaserver: 'Import {mediaServerName} Users',

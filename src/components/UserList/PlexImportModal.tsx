@@ -2,10 +2,11 @@ import Alert from '@app/components/Common/Alert';
 import Modal from '@app/components/Common/Modal';
 import useSettings from '@app/hooks/useSettings';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import axios from 'axios';
 import Image from 'next/image';
 import { useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 
@@ -14,7 +15,7 @@ interface PlexImportProps {
   onComplete?: () => void;
 }
 
-const messages = defineMessages({
+const messages = defineMessages('components.UserList', {
   importfromplex: 'Import Plex Users',
   importfromplexerror: 'Something went wrong while importing Plex users.',
   importedfromplex:

@@ -2,12 +2,13 @@ import Alert from '@app/components/Common/Alert';
 import Modal from '@app/components/Common/Modal';
 import useSettings from '@app/hooks/useSettings';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import type { UserResultsResponse } from '@server/interfaces/api/userInterfaces';
 import axios from 'axios';
 import getConfig from 'next/config';
 import Image from 'next/image';
 import { useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 
@@ -17,7 +18,7 @@ interface JellyfinImportProps {
   children?: React.ReactNode;
 }
 
-const messages = defineMessages({
+const messages = defineMessages('components.UserList', {
   importfromJellyfin: 'Import {mediaServerName} Users',
   importfromJellyfinerror:
     'Something went wrong while importing {mediaServerName} users.',

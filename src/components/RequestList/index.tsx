@@ -6,6 +6,7 @@ import RequestItem from '@app/components/RequestList/RequestItem';
 import { useUpdateQueryParams } from '@app/hooks/useUpdateQueryParams';
 import { useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import {
   BarsArrowDownIcon,
   ChevronLeftIcon,
@@ -16,10 +17,10 @@ import type { RequestResultsResponse } from '@server/interfaces/api/requestInter
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import useSWR from 'swr';
 
-const messages = defineMessages({
+const messages = defineMessages('components.RequestList', {
   requests: 'Requests',
   showallrequests: 'Show All Requests',
   sortAdded: 'Most Recent',

@@ -1,15 +1,16 @@
 import PageTitle from '@app/components/Common/PageTitle';
+import defineMessages from '@app/utils/defineMessages';
 import type { Undefinable } from '@app/utils/typeHelpers';
 import { ArrowRightCircleIcon } from '@heroicons/react/24/outline';
 import type { NextPage } from 'next';
 import Link from 'next/link';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 
 interface ErrorProps {
   statusCode?: number;
 }
 
-const messages = defineMessages({
+const messages = defineMessages('components.pages', {
   errormessagewithcode: '{statusCode} - {error}',
   internalservererror: 'Internal Server Error',
   serviceunavailable: 'Service Unavailable',

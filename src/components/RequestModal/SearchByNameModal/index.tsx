@@ -1,12 +1,13 @@
 import Alert from '@app/components/Common/Alert';
 import Modal from '@app/components/Common/Modal';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import type { SonarrSeries } from '@server/api/servarr/sonarr';
 import Image from 'next/image';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import useSWR from 'swr';
 
-const messages = defineMessages({
+const messages = defineMessages('components.RequestModal.SearchByNameModal', {
   notvdbiddescription:
     'We were unable to automatically match this series. Please select the correct match below.',
   nomatches: 'We were unable to find a match for this series.',

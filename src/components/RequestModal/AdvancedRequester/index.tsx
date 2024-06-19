@@ -3,6 +3,7 @@ import { SmallLoadingSpinner } from '@app/components/Common/LoadingSpinner';
 import type { User } from '@app/hooks/useUser';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { formatBytes } from '@app/utils/numberHelpers';
 import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
@@ -15,7 +16,7 @@ import { hasPermission } from '@server/lib/permissions';
 import { isEqual } from 'lodash';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import Select from 'react-select';
 import useSWR from 'swr';
 
@@ -24,7 +25,7 @@ type OptionType = {
   label: string;
 };
 
-const messages = defineMessages({
+const messages = defineMessages('components.RequestModal.AdvancedRequester', {
   advancedoptions: 'Advanced',
   destinationserver: 'Destination Server',
   qualityprofile: 'Quality Profile',

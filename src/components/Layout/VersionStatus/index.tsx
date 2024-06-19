@@ -1,3 +1,4 @@
+import defineMessages from '@app/utils/defineMessages';
 import {
   ArrowUpCircleIcon,
   BeakerIcon,
@@ -6,10 +7,10 @@ import {
 } from '@heroicons/react/24/outline';
 import type { StatusResponse } from '@server/interfaces/api/settingsInterfaces';
 import Link from 'next/link';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import useSWR from 'swr';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Layout.VersionStatus', {
   streamdevelop: 'Jellyseerr Develop',
   streamstable: 'Jellyseerr Stable',
   outofdate: 'Out of Date',

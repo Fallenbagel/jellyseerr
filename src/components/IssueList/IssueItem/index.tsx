@@ -4,6 +4,7 @@ import CachedImage from '@app/components/Common/CachedImage';
 import { issueOptions } from '@app/components/IssueModal/constants';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { EyeIcon } from '@heroicons/react/24/solid';
 import { IssueStatus } from '@server/constants/issue';
 import { MediaType } from '@server/constants/media';
@@ -13,10 +14,10 @@ import type { TvDetails } from '@server/models/Tv';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useInView } from 'react-intersection-observer';
-import { defineMessages, FormattedRelativeTime, useIntl } from 'react-intl';
+import { FormattedRelativeTime, useIntl } from 'react-intl';
 import useSWR from 'swr';
 
-const messages = defineMessages({
+const messages = defineMessages('components.IssueList.IssueItem', {
   openeduserdate: '{date} by {user}',
   seasons: '{seasonCount, plural, one {Season} other {Seasons}}',
   episodes: '{episodeCount, plural, one {Episode} other {Episodes}}',
