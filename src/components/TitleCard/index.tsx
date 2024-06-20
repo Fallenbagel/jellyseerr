@@ -1,7 +1,9 @@
 import Spinner from '@app/assets/spinner.svg';
+import BlacklistModal from '@app/components/BlacklistModal';
 import Button from '@app/components/Common/Button';
 import CachedImage from '@app/components/Common/CachedImage';
 import StatusBadgeMini from '@app/components/Common/StatusBadgeMini';
+import Tooltip from '@app/components/Common/Tooltip';
 import RequestModal from '@app/components/RequestModal';
 import ErrorCard from '@app/components/TitleCard/ErrorCard';
 import Placeholder from '@app/components/TitleCard/Placeholder';
@@ -12,16 +14,19 @@ import { withProperties } from '@app/utils/typeHelpers';
 import { Transition } from '@headlessui/react';
 import {
   ArrowDownTrayIcon,
+  EyeIcon,
+  EyeSlashIcon,
   MinusCircleIcon,
   StarIcon,
 } from '@heroicons/react/24/outline';
 import { MediaStatus } from '@server/constants/media';
+import type { Blacklist } from '@server/entity/Blacklist';
 import type { Watchlist } from '@server/entity/Watchlist';
 import type { MediaType } from '@server/models/Search';
 import axios from 'axios';
 import Link from 'next/link';
 import type React from 'react';
-import { Fragment, useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import { mutate } from 'swr';
@@ -49,6 +54,13 @@ const messages = defineMessages({
     '<strong>{title}</strong> Removed from watchlist  successfully!',
   watchlistCancel: 'watchlist for <strong>{title}</strong> canceled.',
   watchlistError: 'Something went wrong try again.',
+  blacklistSuccess: '<strong>{title}</strong> was successfully blacklisted.',
+  blacklistError: 'Something went wrong try again.',
+  blacklistDuplicateError:
+    '<strong>{title}</strong> has already been blacklisted.',
+  removeFromBlacklistSuccess:
+    '<strong>{title}</strong> was successfully removed from the Blacklist.',
+  removefromBlacklist: 'Remove from Blacklist',
 });
 
 const TitleCard = ({
@@ -66,7 +78,7 @@ const TitleCard = ({
 }: TitleCardProps) => {
   const isTouch = useIsTouch();
   const intl = useIntl();
-  const { hasPermission } = useUser();
+  const { user, hasPermission } = useUser();
   const [isUpdating, setIsUpdating] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(status);
   const [showDetail, setShowDetail] = useState(false);
@@ -75,6 +87,8 @@ const TitleCard = ({
   const [toggleWatchlist, setToggleWatchlist] = useState<boolean>(
     !isAddedToWatchlist
   );
+  const [showBlacklistModal, setShowBlacklistModal] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   // Just to get the year from the date
   if (year) {
@@ -157,7 +171,102 @@ const TitleCard = ({
     }
   };
 
+  const onClickHideItemBtn = async (): Promise<void> => {
+    setIsUpdating(true);
+    const topNode = cardRef.current;
+
+    if (topNode) {
+      try {
+        const response = await axios.post<Blacklist>('/api/v1/blacklist', {
+          tmdbId: id,
+          mediaType,
+          title,
+          user: user?.id,
+        });
+        if (response.status === 201) {
+          addToast(
+            <span>
+              {intl.formatMessage(messages.blacklistSuccess, {
+                title,
+                strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+              })}
+            </span>,
+            { appearance: 'success', autoDismiss: true }
+          );
+          setCurrentStatus(MediaStatus.BLACKLISTED);
+          closeBlacklistModal();
+        }
+      } catch (e) {
+        if (e.response.status === 412) {
+          addToast(
+            <span>
+              {intl.formatMessage(messages.blacklistDuplicateError, {
+                title,
+                strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+              })}
+            </span>,
+            { appearance: 'info', autoDismiss: true }
+          );
+        } else {
+          addToast(intl.formatMessage(messages.blacklistError), {
+            appearance: 'error',
+            autoDismiss: true,
+          });
+        }
+      } finally {
+        setIsUpdating(false);
+        closeBlacklistModal();
+      }
+    } else {
+      addToast(intl.formatMessage(messages.blacklistError), {
+        appearance: 'error',
+        autoDismiss: true,
+      });
+    }
+  };
+
+  const onClickShowBlacklistBtn = async (): Promise<void> => {
+    setIsUpdating(true);
+    const topNode = cardRef.current;
+
+    if (topNode) {
+      try {
+        const response = await axios.delete<Blacklist>(
+          `/api/v1/blacklist/${id}`
+        );
+        if (response.status === 204) {
+          addToast(
+            <span>
+              {intl.formatMessage(messages.removeFromBlacklistSuccess, {
+                title,
+                strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+              })}
+            </span>,
+            { appearance: 'success', autoDismiss: true }
+          );
+          setCurrentStatus(MediaStatus.UNKNOWN);
+        }
+      } catch (e) {
+        addToast(intl.formatMessage(messages.blacklistError), {
+          appearance: 'error',
+          autoDismiss: true,
+        });
+      } finally {
+        setIsUpdating(false);
+      }
+    } else {
+      addToast(intl.formatMessage(messages.blacklistError), {
+        appearance: 'error',
+        autoDismiss: true,
+      });
+    }
+  };
+
   const closeModal = useCallback(() => setShowRequestModal(false), []);
+  const closeBlacklistModal = useCallback(
+    () => setShowBlacklistModal(false),
+    []
+  );
 
   const showRequestButton = hasPermission(
     [
@@ -169,10 +278,16 @@ const TitleCard = ({
     { type: 'or' }
   );
 
+  const showHideButton = hasPermission(
+    [Permission.MANAGE_BLACKLIST, Permission.MEDIA_BLACKLIST],
+    { type: 'or' }
+  );
+
   return (
     <div
       className={canExpand ? 'w-full' : 'w-36 sm:w-36 md:w-44'}
       data-testid="title-card"
+      ref={cardRef}
     >
       <RequestModal
         tmdbId={id}
@@ -188,6 +303,21 @@ const TitleCard = ({
         onUpdating={requestUpdating}
         onCancel={closeModal}
       />
+      {showBlacklistModal && (
+        <BlacklistModal
+          tmdbId={id}
+          type={
+            mediaType === 'movie'
+              ? 'movie'
+              : mediaType === 'collection'
+              ? 'collection'
+              : 'tv'
+          }
+          onCancel={closeBlacklistModal}
+          onComplete={onClickHideItemBtn}
+          isUpdating={isUpdating}
+        />
+      )}
       <div
         className={`relative transform-gpu cursor-default overflow-hidden rounded-xl bg-gray-800 bg-cover outline-none ring-1 transition duration-300 ${
           showDetail
@@ -226,7 +356,7 @@ const TitleCard = ({
           />
           <div className="absolute left-0 right-0 flex items-center justify-between p-2">
             <div
-              className={`pointer-events-none z-40 rounded-full border bg-opacity-80 shadow-md ${
+              className={`pointer-events-none z-40 self-start rounded-full border bg-opacity-80 shadow-md ${
                 mediaType === 'movie' || mediaType === 'collection'
                   ? 'border-blue-500 bg-blue-600'
                   : 'border-purple-600 bg-purple-600'
@@ -240,8 +370,8 @@ const TitleCard = ({
                   : intl.formatMessage(globalMessages.tvshow)}
               </div>
             </div>
-            {showDetail && (
-              <>
+            {showDetail && currentStatus !== MediaStatus.BLACKLISTED && (
+              <div className="flex flex-col gap-1">
                 {toggleWatchlist ? (
                   <Button
                     buttonType={'ghost'}
@@ -260,15 +390,47 @@ const TitleCard = ({
                     <MinusCircleIcon className={'h-3'} />
                   </Button>
                 )}
-              </>
+                {showHideButton &&
+                  currentStatus !== MediaStatus.PROCESSING &&
+                  currentStatus !== MediaStatus.AVAILABLE &&
+                  currentStatus !== MediaStatus.PARTIALLY_AVAILABLE &&
+                  currentStatus !== MediaStatus.PENDING && (
+                    <Button
+                      buttonType={'ghost'}
+                      className="z-40"
+                      buttonSize={'sm'}
+                      onClick={() => setShowBlacklistModal(true)}
+                    >
+                      <EyeSlashIcon className={'h-3'} />
+                    </Button>
+                  )}
+              </div>
             )}
+            {showDetail &&
+              showHideButton &&
+              currentStatus == MediaStatus.BLACKLISTED && (
+                <Tooltip
+                  content={intl.formatMessage(messages.removefromBlacklist)}
+                >
+                  <Button
+                    buttonType={'ghost'}
+                    className="z-40"
+                    buttonSize={'sm'}
+                    onClick={() => onClickShowBlacklistBtn()}
+                  >
+                    <EyeIcon className={'h-3'} />
+                  </Button>
+                </Tooltip>
+              )}
             {currentStatus && currentStatus !== MediaStatus.UNKNOWN && (
-              <div className="pointer-events-none z-40 flex items-center">
-                <StatusBadgeMini
-                  status={currentStatus}
-                  inProgress={inProgress}
-                  shrink
-                />
+              <div className="flex flex-col items-center gap-1">
+                <div className="pointer-events-none z-40 flex">
+                  <StatusBadgeMini
+                    status={currentStatus}
+                    inProgress={inProgress}
+                    shrink
+                  />
+                </div>
               </div>
             )}
           </div>

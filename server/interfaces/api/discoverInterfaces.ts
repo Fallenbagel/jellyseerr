@@ -1,3 +1,5 @@
+import type { User } from '@server/entity/User';
+
 export interface GenreSliderItem {
   id: number;
   name: string;
@@ -16,4 +18,12 @@ export interface WatchlistResponse {
   totalPages: number;
   totalResults: number;
   results: WatchlistItem[];
+}
+
+export interface BlacklistItem {
+  tmdbId: number;
+  mediaType: 'movie' | 'tv';
+  title?: string;
+  createdAt?: Date;
+  user: User;
 }

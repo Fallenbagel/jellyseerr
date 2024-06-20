@@ -1,3 +1,4 @@
+import type { BlacklistItem } from '@server/interfaces/api/discoverInterfaces';
 import type { PaginatedResponse } from './common';
 
 export type LogMessage = {
@@ -67,4 +68,8 @@ export interface StatusResponse {
   updateAvailable: boolean;
   commitsBehind: number;
   restartRequired: boolean;
+}
+
+export interface BlacklistResultsResponse extends PaginatedResponse {
+  results: BlacklistItem[];
 }
