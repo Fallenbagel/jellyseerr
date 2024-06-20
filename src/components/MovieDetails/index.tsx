@@ -28,6 +28,7 @@ import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
 import { sortCrewPriority } from '@app/utils/creditHelpers';
 import { refreshIntervalHelper } from '@app/utils/refreshIntervalHelper';
+import { urlLink } from '@app/utils/urlLink';
 import {
   ArrowRightCircleIcon,
   CloudIcon,
@@ -167,7 +168,7 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
   ) {
     mediaLinks.push({
       text: getAvalaibleMediaServerName(),
-      url: plexUrl,
+      url: urlLink(plexUrl),
       svg: <PlayIcon />,
     });
   }
@@ -181,7 +182,7 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
   ) {
     mediaLinks.push({
       text: getAvalaible4kMediaServerName(),
-      url: plexUrl4k,
+      url: urlLink(plexUrl4k),
       svg: <PlayIcon />,
     });
   }
@@ -351,7 +352,7 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
               inProgress={(data.mediaInfo?.downloadStatus ?? []).length > 0}
               tmdbId={data.mediaInfo?.tmdbId}
               mediaType="movie"
-              plexUrl={plexUrl}
+              plexUrl={urlLink(plexUrl)}
               serviceUrl={data.mediaInfo?.serviceUrl}
             />
             {settings.currentSettings.movie4kEnabled &&
@@ -375,7 +376,7 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                   }
                   tmdbId={data.mediaInfo?.tmdbId}
                   mediaType="movie"
-                  plexUrl={plexUrl4k}
+                  plexUrl={urlLink(plexUrl4k)}
                   serviceUrl={data.mediaInfo?.serviceUrl4k}
                 />
               )}

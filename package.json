@@ -75,6 +75,7 @@
     "react-ace": "10.1.0",
     "react-animate-height": "2.1.2",
     "react-aria": "3.23.0",
+    "react-device-detect": "^2.2.3",
     "react-dom": "18.2.0",
     "react-intersection-observer": "9.4.3",
     "react-intl": "6.2.10",
