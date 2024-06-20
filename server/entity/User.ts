@@ -119,6 +119,18 @@ export class User {
   @Column({ nullable: true })
   public tvQuotaDays?: number;
 
+  @Column({ nullable: true })
+  public radarrProfileId?: number;
+
+  @Column({ nullable: true })
+  public radarr4kProfileId?: number;
+
+  @Column({ nullable: true })
+  public sonarrProfileId?: number;
+
+  @Column({ nullable: true })
+  public sonarr4kProfileId?: number;
+
   @OneToOne(() => UserSettings, (settings) => settings.user, {
     cascade: true,
     eager: true,
