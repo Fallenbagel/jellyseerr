@@ -89,6 +89,7 @@
     "reflect-metadata": "0.1.13",
     "secure-random-password": "0.2.3",
     "semver": "7.3.8",
+    "sharp": "^0.33.4",
     "sqlite3": "5.1.4",
     "swagger-ui-express": "4.6.2",
     "swr": "2.0.4",
