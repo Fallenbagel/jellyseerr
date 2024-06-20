@@ -511,7 +511,7 @@ const SettingsJobs = () => {
           </Table.TBody>
         </Table>
       </div>
-      <div>
+      <div className="break-words">
         <h3 className="heading">{intl.formatMessage(messages.imagecache)}</h3>
         <p className="description">
           {intl.formatMessage(messages.imagecacheDescription, {
