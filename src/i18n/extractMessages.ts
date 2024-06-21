@@ -28,7 +28,11 @@ async function extractMessages(
         .replace(/^\s*(['"])?([a-zA-Z0-9_-]+)(['"])?:/gm, '"$2":')
         .replace(
           /'.*'/g,
-          (match) => `"${match.match(/'(.*)'/)?.[1].replace(/"/g, '\\"')}"`
+          (match) =>
+            `"${match
+              .match(/'(.*)'/)?.[1]
+              .replace(/\\/g, '\\\\')
+              .replace(/"/g, '\\"')}"`
         )
         .replace(/,$/, '');
       const messagesJson = JSON.parse(`{${formattedMessages}}`);
