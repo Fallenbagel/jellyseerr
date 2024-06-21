@@ -11,9 +11,11 @@ import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
 import { ApiError } from '@server/types/error';
+import { getHostname } from '@server/utils/getHostname';
 import * as EmailValidator from 'email-validator';
 import { Router } from 'express';
 import gravatarUrl from 'gravatar-url';
+import net from 'net';
 
 const authRoutes = Router();
 
@@ -221,30 +223,39 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
     username?: string;
     password?: string;
     hostname?: string;
+    port?: number;
+    urlBase?: string;
+    useSsl?: boolean;
     email?: string;
   };
 
   //Make sure jellyfin login is enabled, but only if jellyfin is not already configured
   if (
     settings.main.mediaServerType !== MediaServerType.JELLYFIN &&
-    settings.jellyfin.hostname !== ''
+    settings.main.mediaServerType != MediaServerType.NOT_CONFIGURED
   ) {
     return res.status(500).json({ error: 'Jellyfin login is disabled' });
   } else if (!body.username) {
     return res.status(500).json({ error: 'You must provide an username' });
-  } else if (settings.jellyfin.hostname !== '' && body.hostname) {
+  } else if (settings.jellyfin.ip !== '' && body.hostname) {
     return res
       .status(500)
       .json({ error: 'Jellyfin hostname already configured' });
-  } else if (settings.jellyfin.hostname === '' && !body.hostname) {
+  } else if (settings.jellyfin.ip === '' && !body.hostname) {
     return res.status(500).json({ error: 'No hostname provided.' });
   }
 
   try {
     const hostname =
-      settings.jellyfin.hostname !== ''
-        ? settings.jellyfin.hostname
-        : body.hostname ?? '';
+      settings.jellyfin.ip !== ''
+        ? getHostname()
+        : getHostname({
+            useSsl: body.useSsl,
+            ip: body.hostname,
+            port: body.port,
+            urlBase: body.urlBase,
+          });
+
     const { externalHostname } = getSettings().jellyfin;
 
     // Try to find deviceId that corresponds to jellyfin user, else generate a new one
@@ -260,22 +271,29 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         'base64'
       );
     }
+
     // First we need to attempt to log the user in to jellyfin
-    const jellyfinserver = new JellyfinAPI(hostname ?? '', undefined, deviceId);
-    let jellyfinHost =
+    const jellyfinserver = new JellyfinAPI(hostname, undefined, deviceId);
+    const jellyfinHost =
       externalHostname && externalHostname.length > 0
         ? externalHostname
         : hostname;
 
-    jellyfinHost = jellyfinHost.endsWith('/')
-      ? jellyfinHost.slice(0, -1)
-      : jellyfinHost;
+    const ip = req.ip;
+    let clientIp;
 
-    const ip = req.ip ? req.ip.split(':').reverse()[0] : undefined;
+    if (ip) {
+      if (net.isIPv4(ip)) {
+        clientIp = ip;
+      } else if (net.isIPv6(ip)) {
+        clientIp = ip.startsWith('::ffff:') ? ip.substring(7) : ip;
+      }
+    }
+
     const account = await jellyfinserver.login(
       body.username,
       body.password,
-      ip
+      clientIp
     );
 
     // Next let's see if the user already exists
@@ -317,8 +335,11 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
       const serverName = await jellyfinserver.getServerName();
 
       settings.jellyfin.name = serverName;
-      settings.jellyfin.hostname = body.hostname ?? '';
       settings.jellyfin.serverId = account.User.ServerId;
+      settings.jellyfin.ip = body.hostname ?? '';
+      settings.jellyfin.port = body.port ?? 8096;
+      settings.jellyfin.urlBase = body.urlBase ?? '';
+      settings.jellyfin.useSsl = body.useSsl ?? false;
       settings.save();
       startJobs();
 
@@ -433,7 +454,12 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
             label: 'Auth',
             error: e.errorCode,
             status: e.statusCode,
-            hostname: body.hostname,
+            hostname: getHostname({
+              useSsl: body.useSsl,
+              ip: body.hostname,
+              port: body.port,
+              urlBase: body.urlBase,
+            }),
           }
         );
         return next({
