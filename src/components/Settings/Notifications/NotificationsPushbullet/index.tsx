@@ -14,7 +14,7 @@ import useSWR from 'swr';
 import * as Yup from 'yup';
 
 const messages = defineMessages(
-  'components.Notifications.NotificationsPushbullet',
+  'components.Settings.Notifications.NotificationsPushbullet',
   {
     agentEnabled: 'Enable Agent',
     accessToken: 'Access Token',

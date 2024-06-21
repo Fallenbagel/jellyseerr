@@ -6,10 +6,13 @@ import type { QuotaResponse } from '@server/interfaces/api/userInterfaces';
 import { useIntl } from 'react-intl';
 import useSWR from 'swr';
 
-const messages = defineMessages('components.UserDropdown.MiniQuotaDisplay', {
-  movierequests: 'Movie Requests',
-  seriesrequests: 'Series Requests',
-});
+const messages = defineMessages(
+  'components.Layout.UserDropdown.MiniQuotaDisplay',
+  {
+    movierequests: 'Movie Requests',
+    seriesrequests: 'Series Requests',
+  }
+);
 
 type MiniQuotaDisplayProps = {
   userId: number;

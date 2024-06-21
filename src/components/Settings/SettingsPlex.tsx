@@ -29,7 +29,7 @@ const messages = defineMessages('components.Settings', {
   plex: 'Plex',
   plexsettings: 'Plex Settings',
   plexsettingsDescription:
-    'Configure the settings for your Plex server. Overseerr scans your Plex libraries to determine content availability.',
+    'Configure the settings for your Plex server. Jellyseerr scans your Plex libraries to determine content availability.',
   serverpreset: 'Server',
   serverLocal: 'local',
   serverRemote: 'remote',

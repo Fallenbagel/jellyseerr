@@ -15,7 +15,7 @@ import useSWR from 'swr';
 import * as Yup from 'yup';
 
 const messages = defineMessages(
-  'components.UserProfile.UserNotificationSettings',
+  'components.UserProfile.UserSettings.UserNotificationSettings',
   {
     telegramsettingssaved: 'Telegram notification settings saved successfully!',
     telegramsettingsfailed: 'Telegram notification settings failed to save.',

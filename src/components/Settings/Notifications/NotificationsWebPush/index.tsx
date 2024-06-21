@@ -12,7 +12,7 @@ import { useToasts } from 'react-toast-notifications';
 import useSWR, { mutate } from 'swr';
 
 const messages = defineMessages(
-  'components.Notifications.NotificationsWebPush',
+  'components.Settings.Notifications.NotificationsWebPush',
   {
     agentenabled: 'Enable Agent',
     webpushsettingssaved: 'Web push notification settings saved successfully!',

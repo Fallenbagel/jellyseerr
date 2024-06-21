@@ -13,7 +13,7 @@ import useSWR from 'swr';
 import * as Yup from 'yup';
 
 const messages = defineMessages(
-  'components.Notifications.NotificationsLunaSea',
+  'components.Settings.Notifications.NotificationsLunaSea',
   {
     agentenabled: 'Enable Agent',
     webhookUrl: 'Webhook URL',

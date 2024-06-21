@@ -10,7 +10,7 @@ interface ErrorProps {
   statusCode?: number;
 }
 
-const messages = defineMessages('components.pages', {
+const messages = defineMessages('pages', {
   errormessagewithcode: '{statusCode} - {error}',
   internalservererror: 'Internal Server Error',
   serviceunavailable: 'Service Unavailable',

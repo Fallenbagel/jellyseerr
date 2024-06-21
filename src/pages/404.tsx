@@ -4,7 +4,7 @@ import { ArrowRightCircleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useIntl } from 'react-intl';
 
-const messages = defineMessages('components.pages', {
+const messages = defineMessages('pages', {
   errormessagewithcode: '{statusCode} - {error}',
   pagenotfound: 'Page Not Found',
   returnHome: 'Return Home',

@@ -10,7 +10,7 @@ import type { TvResult } from '@server/models/Search';
 import { useRouter } from 'next/router';
 import { useIntl } from 'react-intl';
 
-const messages = defineMessages('components.Discover.DiscoverTvKeywork', {
+const messages = defineMessages('components.Discover.DiscoverTvKeyword', {
   keywordSeries: '{keywordTitle} Series',
 });
 
