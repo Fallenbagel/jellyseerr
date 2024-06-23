@@ -16,7 +16,7 @@ RUN \
 Run npm install --global pnpm
 
 COPY package.json pnpm-lock.yaml ./
-RUN CYPRESS_INSTALL_BINARY=0 pnpm install --frozen-lockfile --network-timeout 1000000
+RUN CYPRESS_INSTALL_BINARY=0 pnpm install --frozen-lockfile
 
 COPY . ./
 
