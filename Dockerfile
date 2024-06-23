@@ -9,7 +9,8 @@ RUN \
   case "${TARGETPLATFORM}" in \
   'linux/arm64' | 'linux/arm/v7') \
   apk update && \
-  apk add --no-cache python3 make g++ gcc libc6-compat bash \
+  apk add --no-cache python3 make g++ gcc libc6-compat bash && \
+  pnpm add -g node-gyp \
   ;; \
   esac
 
