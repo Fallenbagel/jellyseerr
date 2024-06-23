@@ -21,6 +21,8 @@ _The original Overseerr team have been busy and Jellyfin/Emby support aren't on 
 
 ## Current Features
 
+<!--  -->
+
 - Full Jellyfin/Emby/Plex integration including authentication with user import & management
 - Supports Movies, Shows and Mixed Libraries
 - Ability to change email addresses for smtp purposes
@@ -37,10 +39,6 @@ _The original Overseerr team have been busy and Jellyfin/Emby support aren't on 
 With more features on the way! Check out our [issue tracker](https://github.com/fallenbagel/jellyseerr/issues) to see the features which have already been requested.
 
 ## Getting Started
-
-#### Pre-requisite (Important)
-
-_*On Jellyfin/Emby, ensure the `Settings > Home > Automatically group content from the following folders into views such as 'Movies', 'Music' and 'TV'` is turned off*_
 
 ### Launching Jellyseerr using Docker (Recommended)
 
