@@ -14,7 +14,7 @@ RUN \
   ;; \
   esac
 
-COPY package.json pnpm-lock.lock ./
+COPY package.json pnpm-lock.yaml ./
 RUN CYPRESS_INSTALL_BINARY=0 pnpm install --frozen-lockfile --network-timeout 1000000
 
 COPY . ./
