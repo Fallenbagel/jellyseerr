@@ -3,6 +3,8 @@ FROM node:20-alpine
 COPY . /app
 WORKDIR /app
 
-RUN yarn
+Run npm install --global pnpm
 
-CMD yarn dev
+RUN pnpm install
+
+CMD pnpm dev
