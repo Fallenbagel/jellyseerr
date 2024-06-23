@@ -1,8 +1,15 @@
-FROM node:20-alpine
+# Docker build arguments
+ARG NODEJS_VERSION=20
+
+FROM node:${NODEJS_VERSION}-alpine
 
 COPY . /app
-WORKDIR /app
 
-RUN yarn
+ARG SOURCE_DIR=/app
+WORKDIR ${SOURCE_DIR}
 
-CMD yarn dev
+RUN npm install --global pnpm
+
+RUN pnpm install
+
+CMD pnpm dev

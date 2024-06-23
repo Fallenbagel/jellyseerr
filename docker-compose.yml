@@ -1,12 +1,13 @@
-version: '3'
 services:
   jellyseerr:
-    build:
-      context: .
-      dockerfile: Dockerfile.local
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    restart: unless-stopped
+    environment:
+      - LOG_LEVEL=debug
+      - TZ=${TZ} # timezone (ex: Europe/Paris), defined in .env
+#     - JELLYFIN_TYPE=emby (note for emby users: uncomment this line (this will allow you to use the play button))
     ports:
       - 5055:5055
     volumes:
-      - .:/app:rw,cached
-      - /app/node_modules
-      - /app/.next
+      - /path/to/appdata/config:/app/config
