@@ -10,9 +10,10 @@ RUN \
   'linux/arm64' | 'linux/arm/v7') \
   apk update && \
   apk add --no-cache python3 make g++ gcc libc6-compat bash && \
-  npm install -g pnpm \
   ;; \
   esac
+
+Run npm install --global pnpm
 
 COPY package.json pnpm-lock.yaml ./
 RUN CYPRESS_INSTALL_BINARY=0 pnpm install --frozen-lockfile --network-timeout 1000000
