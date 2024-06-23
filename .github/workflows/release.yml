@@ -28,6 +28,8 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Pnpm Setup
         uses: pnpm/action-setup@v4
+        with:
+          version: 8
       - name: Install dependencies
         run: pnpm install
       - name: Release
