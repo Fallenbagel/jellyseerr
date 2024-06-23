@@ -27,7 +27,7 @@ ENV COMMIT_TAG=${COMMIT_TAG}
 RUN pnpm build
 
 # remove development dependencies
-RUN pnpm prune --prod
+RUN pnpm prune --prod --ignore-scripts
 
 RUN rm -rf src server .next/cache
 
