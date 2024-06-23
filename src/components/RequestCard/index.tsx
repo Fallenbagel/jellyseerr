@@ -112,13 +112,15 @@ const RequestCardError = ({ requestData }: RequestCardErrorProps) => {
                       href={`/users/${requestData.requestedBy.id}`}
                       className="group flex items-center"
                     >
-                      <Image
-                        src={requestData.requestedBy.avatar}
-                        alt=""
-                        className="avatar-sm"
-                        width={20}
-                        height={20}
-                      />
+                      <span className="avatar-sm">
+                        <Image
+                          src={requestData.requestedBy.avatar}
+                          alt=""
+                          className="avatar-sm object-cover"
+                          width={20}
+                          height={20}
+                        />
+                      </span>
                       <span className="truncate group-hover:underline">
                         {requestData.requestedBy.displayName}
                       </span>
@@ -370,13 +372,15 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
                 href={`/users/${requestData.requestedBy.id}`}
                 className="group flex items-center"
               >
-                <Image
-                  src={requestData.requestedBy.avatar}
-                  alt=""
-                  className="avatar-sm object-cover"
-                  width={20}
-                  height={20}
-                />
+                <span className="avatar-sm">
+                  <Image
+                    src={requestData.requestedBy.avatar}
+                    alt=""
+                    className="avatar-sm object-cover"
+                    width={20}
+                    height={20}
+                  />
+                </span>
                 <span className="truncate font-semibold group-hover:text-white group-hover:underline">
                   {requestData.requestedBy.displayName}
                 </span>

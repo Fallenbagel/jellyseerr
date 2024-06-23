@@ -185,13 +185,15 @@ const RequestItemError = ({
                             href={`/users/${requestData.requestedBy.id}`}
                             className="group flex items-center truncate"
                           >
-                            <Image
-                              src={requestData.requestedBy.avatar}
-                              alt=""
-                              className="avatar-sm ml-1.5"
-                              width={20}
-                              height={20}
-                            />
+                            <span className="avatar-sm ml-1.5">
+                              <Image
+                                src={requestData.requestedBy.avatar}
+                                alt=""
+                                className="avatar-sm object-cover"
+                                width={20}
+                                height={20}
+                              />
+                            </span>
                             <span className="truncate text-sm group-hover:underline">
                               {requestData.requestedBy.displayName}
                             </span>
@@ -242,13 +244,15 @@ const RequestItemError = ({
                           href={`/users/${requestData.modifiedBy.id}`}
                           className="group flex items-center truncate"
                         >
-                          <Image
-                            src={requestData.modifiedBy.avatar}
-                            alt=""
-                            className="avatar-sm ml-1.5"
-                            width={20}
-                            height={20}
-                          />
+                          <span className="avatar-sm ml-1.5">
+                            <Image
+                              src={requestData.modifiedBy.avatar}
+                              alt=""
+                              className="avatar-sm object-cover"
+                              width={20}
+                              height={20}
+                            />
+                          </span>
                           <span className="truncate text-sm group-hover:underline">
                             {requestData.modifiedBy.displayName}
                           </span>
@@ -537,13 +541,15 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                           href={`/users/${requestData.requestedBy.id}`}
                           className="group flex items-center truncate"
                         >
-                          <Image
-                            src={requestData.requestedBy.avatar}
-                            alt=""
-                            className="avatar-sm ml-1.5 object-cover"
-                            width={20}
-                            height={20}
-                          />
+                          <span className="avatar-sm ml-1.5">
+                            <Image
+                              src={requestData.requestedBy.avatar}
+                              alt=""
+                              className="avatar-sm object-cover"
+                              width={20}
+                              height={20}
+                            />
+                          </span>
                           <span className="truncate text-sm font-semibold group-hover:text-white group-hover:underline">
                             {requestData.requestedBy.displayName}
                           </span>
@@ -594,13 +600,15 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                         href={`/users/${requestData.modifiedBy.id}`}
                         className="group flex items-center truncate"
                       >
-                        <Image
-                          src={requestData.modifiedBy.avatar}
-                          alt=""
-                          className="avatar-sm ml-1.5 object-cover"
-                          width={20}
-                          height={20}
-                        />
+                        <span className="avatar-sm ml-1.5">
+                          <Image
+                            src={requestData.requestedBy.avatar}
+                            alt=""
+                            className="avatar-sm object-cover"
+                            width={20}
+                            height={20}
+                          />
+                        </span>
                         <span className="truncate text-sm font-semibold group-hover:text-white group-hover:underline">
                           {requestData.modifiedBy.displayName}
                         </span>
