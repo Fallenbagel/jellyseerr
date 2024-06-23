@@ -116,7 +116,8 @@ const RequestCardError = ({ requestData }: RequestCardErrorProps) => {
                         src={requestData.requestedBy.avatar}
                         alt=""
                         className="avatar-sm"
-                        fill
+                        width={20}
+                        height={20}
                       />
                       <span className="truncate group-hover:underline">
                         {requestData.requestedBy.displayName}
@@ -373,7 +374,8 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
                   src={requestData.requestedBy.avatar}
                   alt=""
                   className="avatar-sm object-cover"
-                  fill
+                  width={20}
+                  height={20}
                 />
                 <span className="truncate font-semibold group-hover:text-white group-hover:underline">
                   {requestData.requestedBy.displayName}
