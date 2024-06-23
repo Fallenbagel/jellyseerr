@@ -1,4 +1,4 @@
-FROM node:18.18-alpine AS BUILD_IMAGE
+FROM node:20-alpine AS BUILD_IMAGE
 
 WORKDIR /app
 
@@ -34,7 +34,7 @@ RUN touch config/DOCKER
 RUN echo "{\"commitTag\": \"${COMMIT_TAG}\"}" > committag.json
 
 
-FROM node:18.18-alpine
+FROM node:20-alpine
 
 # Metadata for Github Package Registry
 LABEL org.opencontainers.image.source="https://github.com/Fallenbagel/jellyseerr"

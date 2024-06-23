@@ -53,7 +53,7 @@ https://hub.docker.com/r/fallenbagel/jellyseerr
 
 Pre-requisites:
 
-- Nodejs [v18](https://nodejs.org/download/release/v18.18.2)
+- Nodejs [v20](https://nodejs.org/en/download)
 - [Yarn](https://classic.yarnpkg.com/lang/en/docs/install)
 - Download/git clone the source code from the github (Either develop branch or main for stable)
 
@@ -73,7 +73,7 @@ _To set env variables such as `JELLYFIN_TYPE=emby` create a file called `.env` i
 
 **Pre-requisites:**
 
-- Nodejs [v18](https://nodejs.org/en/download/package-manager)
+- Nodejs [v20](https://nodejs.org/en/download)
 - [Yarn](https://classic.yarnpkg.com/lang/en/docs/install) (on Debian based distros, the package manager provided `yarn` is different and is a package called cmdlet. You can remove that using `apt-remove cmdlet` then install yarn using `npm install -g yarn`)
 - Git
 
