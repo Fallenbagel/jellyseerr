@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Pnpm Setup
-        uses: pnpm/aciton-setup@v4
+        uses: pnpm/action-setup@v4
         with:
           version: 8
       - name: Cypress run
