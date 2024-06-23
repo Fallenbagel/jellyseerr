@@ -14,11 +14,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Pnpm Setup
+        uses: pnpm/aciton-setup@v4
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
-          build: yarn cypress:build
-          start: yarn start
+          build: pnpm cypress:build
+          start: pnpm start
           wait-on: 'http://localhost:5055'
           record: true
         env:

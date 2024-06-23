@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "dev": "nodemon -e ts --watch server --watch overseerr-api.yml -e .json,.ts,.yml -x ts-node -r tsconfig-paths/register --files --project server/tsconfig.json server/index.ts",
     "build:server": "tsc --project server/tsconfig.json && copyfiles -u 2 server/templates/**/*.{html,pug} dist/templates && tsc-alias -p server/tsconfig.json",
     "build:next": "next build",
-    "build": "yarn build:next && yarn build:server",
+    "build": "pnpm build:next && pnpm build:server",
     "lint": "eslint \"./server/**/*.{ts,tsx}\" \"./src/**/*.{ts,tsx}\" --cache",
     "lintfix": "eslint \"./server/**/*.{ts,tsx}\" \"./src/**/*.{ts,tsx}\" --fix",
     "start": "NODE_ENV=production node dist/index.js",
@@ -16,13 +17,13 @@
     "migration:run": "ts-node -r tsconfig-paths/register --project server/tsconfig.json ./node_modules/typeorm/cli.js migration:run -d server/datasource.ts",
     "format": "prettier --loglevel warn --write --cache .",
     "format:check": "prettier --check --cache .",
-    "typecheck": "yarn typecheck:server && yarn typecheck:client",
+    "typecheck": "pnpm typecheck:server && pnpm typecheck:client",
     "typecheck:server": "tsc --project server/tsconfig.json --noEmit",
     "typecheck:client": "tsc --noEmit",
     "prepare": "husky install",
     "cypress:open": "cypress open",
     "cypress:prepare": "ts-node -r tsconfig-paths/register --files --project server/tsconfig.json server/scripts/prepareTestDb.ts",
-    "cypress:build": "yarn build && yarn cypress:prepare"
+    "cypress:build": "pnpm build && pnpm cypress:prepare"
   },
   "repository": {
     "type": "git",
@@ -92,7 +93,7 @@
     "sharp": "^0.33.4",
     "sqlite3": "5.1.4",
     "swagger-ui-express": "4.6.2",
-    "swr": "2.0.4",
+    "swr": "2.2.5",
     "typeorm": "0.3.12",
     "web-push": "3.5.0",
     "winston": "3.8.2",
@@ -165,7 +166,10 @@
     "tsconfig-paths": "4.1.2",
     "typescript": "4.9.5"
   },
-  "resolutions": {
+  "engines": {
+    "node": "^20.0.0"
+  },
+  "overrides": {
     "sqlite3/node-gyp": "8.4.1",
     "@types/express-session": "1.17.6"
   },

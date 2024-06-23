@@ -17,16 +17,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Pnpm Setup
+        uses: pnpm/action-setup@v4
       - name: Install dependencies
         env:
           HUSKY: 0
-        run: yarn
+        run: pnpm install
       - name: Lint
-        run: yarn lint
+        run: pnpm lint
       - name: Formatting
-        run: yarn format:check
+        run: pnpm format:check
       - name: Build
-        run: yarn build
+        run: pnpm build
 
   build_and_push:
     name: Build & Publish Docker Images
