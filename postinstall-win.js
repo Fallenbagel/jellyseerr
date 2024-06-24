@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-if (process.platform === 'win') {
+if (process.platform === 'win32') {
   const typeormPath = path.resolve('node_modules/typeorm');
 
   if (fs.existsSync(typeormPath)) {
