@@ -60,7 +60,7 @@ class ExternalAPI {
     }
 
     const url = this.formatUrl(endpoint, params);
-    const response = await fetch(url.href, {
+    const response = await fetch(url, {
       ...config,
       headers: {
         ...this.defaultHeaders,
@@ -93,7 +93,7 @@ class ExternalAPI {
     }
 
     const url = this.formatUrl(endpoint, params);
-    const response = await fetch(url.href, {
+    const response = await fetch(url, {
       method: 'POST',
       ...config,
       headers: {
@@ -128,7 +128,7 @@ class ExternalAPI {
     }
 
     const url = this.formatUrl(endpoint, params);
-    const response = await fetch(url.href, {
+    const response = await fetch(url, {
       method: 'PUT',
       ...config,
       headers: {
@@ -152,7 +152,7 @@ class ExternalAPI {
     config?: RequestInit
   ): Promise<T> {
     const url = this.formatUrl(endpoint, params);
-    const response = await fetch(url.href, {
+    const response = await fetch(url, {
       ...config,
       headers: {
         ...this.defaultHeaders,
@@ -186,7 +186,7 @@ class ExternalAPI {
         Date.now() - DEFAULT_ROLLING_BUFFER
       ) {
         const url = this.formatUrl(endpoint, params, overwriteBaseUrl);
-        fetch(url.href, {
+        fetch(url, {
           ...config,
           headers: {
             ...this.defaultHeaders,
@@ -201,7 +201,7 @@ class ExternalAPI {
     }
 
     const url = this.formatUrl(endpoint, params, overwriteBaseUrl);
-    const response = await fetch(url.href, {
+    const response = await fetch(url, {
       ...config,
       headers: {
         ...this.defaultHeaders,
@@ -228,12 +228,10 @@ class ExternalAPI {
       (baseUrl.endsWith('/') ? '' : '/') +
       (endpoint.startsWith('/') ? endpoint.slice(1) : endpoint);
     const url = new URL(href);
-    if (params) {
-      url.search = new URLSearchParams({
-        ...this.params,
-        ...params,
-      }).toString();
-    }
+    url.search = new URLSearchParams({
+      ...this.params,
+      ...params,
+    }).toString();
     return url;
   }
 
