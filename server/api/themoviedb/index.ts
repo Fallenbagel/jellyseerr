@@ -560,7 +560,7 @@ class TheMovieDb extends ExternalAPI {
           ? 'true'
           : 'false',
         with_genres: genre || '',
-        with_networks: network ? 'true' : 'false',
+        with_networks: network?.toString() || '',
         with_keywords: keywords || '',
         'with_runtime.gte': withRuntimeGte || '',
         'with_runtime.lte': withRuntimeLte || '',
