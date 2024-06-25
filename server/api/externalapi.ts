@@ -18,8 +18,8 @@ interface ExternalAPIOptions {
 
 class ExternalAPI {
   private baseUrl: string;
-  private params: Record<string, string>;
-  private defaultHeaders: { [key: string]: string };
+  protected params: Record<string, string>;
+  protected defaultHeaders: { [key: string]: string };
   private cache?: NodeCache;
 
   constructor(
