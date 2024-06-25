@@ -70,8 +70,6 @@ class RottenTomatoes extends ExternalAPI {
       },
       {
         headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
           'x-algolia-usertoken': settings.clientId,
         },
         nodeCache: cacheManager.getCache('rt').data,

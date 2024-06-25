@@ -111,8 +111,6 @@ class JellyfinAPI extends ExternalAPI {
       {
         headers: {
           'X-Emby-Authorization': authHeaderVal,
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
         },
       }
     );
@@ -127,7 +125,7 @@ class JellyfinAPI extends ExternalAPI {
     ClientIP?: string
   ): Promise<JellyfinLoginResponse> {
     const authenticate = async (useHeaders: boolean) => {
-      const headers =
+      const headers: { [key: string]: string } =
         useHeaders && ClientIP ? { 'X-Forwarded-For': ClientIP } : {};
 
       return this.post<JellyfinLoginResponse>(
@@ -136,6 +134,8 @@ class JellyfinAPI extends ExternalAPI {
           Username,
           Pw: Password,
         },
+        {},
+        undefined,
         { headers }
       );
     };
