@@ -39,7 +39,7 @@ jobs:
       - name: Lint
         run: pnpm lint
       - name: Formatting
-        run: pnpm format:check
+        run: pnpm format:check --ignore-path .prettierignore
       - name: Build
         run: pnpm build
 
