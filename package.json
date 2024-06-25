@@ -17,7 +17,7 @@
     "migration:create": "ts-node -r tsconfig-paths/register --project server/tsconfig.json ./node_modules/typeorm/cli.js migration:create -d server/datasource.ts",
     "migration:run": "ts-node -r tsconfig-paths/register --project server/tsconfig.json ./node_modules/typeorm/cli.js migration:run -d server/datasource.ts",
     "format": "prettier --loglevel warn --write --cache .",
-    "format:check": "prettier --check --cache .",
+    "format:check": "prettier --check --cache . --ignore-path .prettierignore",
     "typecheck": "pnpm typecheck:server && pnpm typecheck:client",
     "typecheck:server": "tsc --project server/tsconfig.json --noEmit",
     "typecheck:client": "tsc --noEmit",
