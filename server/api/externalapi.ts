@@ -1,4 +1,3 @@
-// import rateLimit from 'axios-rate-limit';
 import rateLimit from '@server/utils/rateLimit';
 import type NodeCache from 'node-cache';
 
