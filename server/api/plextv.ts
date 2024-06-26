@@ -263,7 +263,7 @@ class PlexTvAPI extends ExternalAPI {
         'X-Plex-Container-Start': offset.toString(),
         'X-Plex-Container-Size': size.toString(),
       });
-      const response = await fetch(
+      const response = await this.fetch(
         `https://metadata.provider.plex.tv/library/sections/watchlist/all?${params.toString()}`,
         {
           headers: this.defaultHeaders,

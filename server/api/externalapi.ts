@@ -1,4 +1,5 @@
 // import rateLimit from 'axios-rate-limit';
+import rateLimit from '@server/utils/rateLimit';
 import type NodeCache from 'node-cache';
 
 // 5 minute default TTL (in seconds)
@@ -17,9 +18,10 @@ interface ExternalAPIOptions {
 }
 
 class ExternalAPI {
-  private baseUrl: string;
+  protected fetch: typeof fetch;
   protected params: Record<string, string>;
   protected defaultHeaders: { [key: string]: string };
+  private baseUrl: string;
   private cache?: NodeCache;
 
   constructor(
@@ -28,10 +30,12 @@ class ExternalAPI {
     options: ExternalAPIOptions = {}
   ) {
     if (options.rateLimit) {
-      // this.axios = rateLimit(this.axios, {
-      //   maxRequests: options.rateLimit.maxRequests,
-      //   maxRPS: options.rateLimit.maxRPS,
-      // });
+      this.fetch = rateLimit(fetch, {
+        maxRequests: options.rateLimit.maxRequests,
+        maxRPS: options.rateLimit.maxRPS,
+      });
+    } else {
+      this.fetch = fetch;
     }
 
     this.baseUrl = baseUrl;
@@ -60,7 +64,7 @@ class ExternalAPI {
     }
 
     const url = this.formatUrl(endpoint, params);
-    const response = await fetch(url, {
+    const response = await this.fetch(url, {
       ...config,
       headers: {
         ...this.defaultHeaders,
@@ -93,7 +97,7 @@ class ExternalAPI {
     }
 
     const url = this.formatUrl(endpoint, params);
-    const response = await fetch(url, {
+    const response = await this.fetch(url, {
       method: 'POST',
       ...config,
       headers: {
@@ -128,7 +132,7 @@ class ExternalAPI {
     }
 
     const url = this.formatUrl(endpoint, params);
-    const response = await fetch(url, {
+    const response = await this.fetch(url, {
       method: 'PUT',
       ...config,
       headers: {
@@ -152,7 +156,7 @@ class ExternalAPI {
     config?: RequestInit
   ): Promise<T> {
     const url = this.formatUrl(endpoint, params);
-    const response = await fetch(url, {
+    const response = await this.fetch(url, {
       ...config,
       headers: {
         ...this.defaultHeaders,
@@ -186,7 +190,7 @@ class ExternalAPI {
         Date.now() - DEFAULT_ROLLING_BUFFER
       ) {
         const url = this.formatUrl(endpoint, params, overwriteBaseUrl);
-        fetch(url, {
+        this.fetch(url, {
           ...config,
           headers: {
             ...this.defaultHeaders,
@@ -201,7 +205,7 @@ class ExternalAPI {
     }
 
     const url = this.formatUrl(endpoint, params, overwriteBaseUrl);
-    const response = await fetch(url, {
+    const response = await this.fetch(url, {
       ...config,
       headers: {
         ...this.defaultHeaders,
