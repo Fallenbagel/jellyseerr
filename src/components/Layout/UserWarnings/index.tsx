@@ -24,6 +24,7 @@ const UserWarnings: React.FC<UserWarningsProps> = ({ onClick }) => {
   let res = null;
 
   //check if a user has warnings
+  console.log(user);
   if (user.warnings.length > 0) {
     user.warnings.forEach((warning) => {
       let link = '';
