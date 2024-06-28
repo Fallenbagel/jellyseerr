@@ -240,12 +240,13 @@ const SettingsPlex = ({ onComplete }: SettingsPlexProps) => {
       params.enable = activeLibraries.join(',');
     }
 
-    const url = new URL('/api/v1/settings/plex/library');
-    url.search = new URLSearchParams({
+    const searchParams = new URLSearchParams({
       sync: params.sync ? 'true' : 'false',
       ...(params.enable ? { enable: params.enable } : {}),
-    }).toString();
-    const res = await fetch(url);
+    });
+    const res = await fetch(
+      `/api/v1/settings/plex/library?${searchParams.toString()}`
+    );
     if (!res.ok) throw new Error();
 
     setIsSyncing(false);
@@ -332,16 +333,18 @@ const SettingsPlex = ({ onComplete }: SettingsPlexProps) => {
           .join(',');
       }
 
-      const url = new URL('/api/v1/settings/plex/library');
-      url.search = new URLSearchParams(params.enable ? params : {}).toString();
-      const res = await fetch(url);
+      const searchParams = new URLSearchParams(params.enable ? params : {});
+      const res = await fetch(
+        `/api/v1/settings/plex/library?${searchParams.toString()}`
+      );
       if (!res.ok) throw new Error();
     } else {
-      const url = new URL('/api/v1/settings/plex/library');
-      url.search = new URLSearchParams({
+      const searchParams = new URLSearchParams({
         enable: [...activeLibraries, libraryId].join(','),
-      }).toString();
-      const res = await fetch(url);
+      });
+      const res = await fetch(
+        `/api/v1/settings/plex/library?${searchParams.toString()}`
+      );
       if (!res.ok) throw new Error();
     }
     setIsSyncing(false);
