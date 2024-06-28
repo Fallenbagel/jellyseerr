@@ -166,12 +166,13 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
     }
 
     try {
-      const url = new URL('/api/v1/settings/jellyfin/library');
-      url.search = new URLSearchParams({
+      const searchParams = new URLSearchParams({
         sync: params.sync ? 'true' : 'false',
         ...(params.enable ? { enable: params.enable } : {}),
-      }).toString();
-      const res = await fetch(url);
+      });
+      const res = await fetch(
+        `/api/v1/settings/jellyfin/library?${searchParams.toString()}`
+      );
       if (!res.ok) throw new Error();
       setIsSyncing(false);
       revalidate();
@@ -249,16 +250,18 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
           .join(',');
       }
 
-      const url = new URL('/api/v1/settings/jellyfin/library');
-      url.search = new URLSearchParams(params.enable ? params : {}).toString();
-      const res = await fetch(url);
+      const searchParams = new URLSearchParams(params.enable ? params : {});
+      const res = await fetch(
+        `/api/v1/settings/jellyfin/library?${searchParams.toString}`
+      );
       if (!res.ok) throw new Error();
     } else {
-      const url = new URL('/api/v1/settings/jellyfin/library');
-      url.search = new URLSearchParams({
+      const searchParams = new URLSearchParams({
         enable: [...activeLibraries, libraryId].join(','),
-      }).toString();
-      const res = await fetch(url);
+      });
+      const res = await fetch(
+        `/api/v1/settings/jellyfin/library?${searchParams.toString()}`
+      );
       if (!res.ok) throw new Error();
     }
     if (onComplete) {

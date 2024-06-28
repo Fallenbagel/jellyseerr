@@ -224,18 +224,17 @@ class ExternalAPI {
     endpoint: string,
     params?: Record<string, string>,
     overwriteBaseUrl?: string
-  ): URL {
+  ): string {
     const baseUrl = overwriteBaseUrl || this.baseUrl;
     const href =
       baseUrl +
       (baseUrl.endsWith('/') ? '' : '/') +
       (endpoint.startsWith('/') ? endpoint.slice(1) : endpoint);
-    const url = new URL(href);
-    url.search = new URLSearchParams({
+    const searchParams = new URLSearchParams({
       ...this.params,
       ...params,
-    }).toString();
-    return url;
+    });
+    return `${href}?${searchParams.toString()}`;
   }
 
   private serializeCacheKey(
@@ -249,7 +248,7 @@ class ExternalAPI {
     return `${this.baseUrl}${endpoint}${JSON.stringify(params)}`;
   }
 
-  private async getDataFromResponse(response: Response): Promise<any> {
+  private async getDataFromResponse(response: Response) {
     const contentType = response.headers.get('Content-Type')?.split(';')[0];
     if (contentType === 'application/json') {
       return await response.json();
