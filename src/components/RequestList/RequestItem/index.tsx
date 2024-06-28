@@ -18,6 +18,7 @@ import {
 } from '@heroicons/react/24/solid';
 import { MediaRequestStatus } from '@server/constants/media';
 import type { MediaRequest } from '@server/entity/MediaRequest';
+import type { NonFunctionProperties } from '@server/interfaces/api/common';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
 import axios from 'axios';
@@ -43,6 +44,7 @@ const messages = defineMessages('components.RequestList.RequestItem', {
   tmdbid: 'TMDB ID',
   tvdbid: 'TheTVDB ID',
   unknowntitle: 'Unknown Title',
+  profileName: 'Profile',
 });
 
 const isMovie = (movie: MovieDetails | TvDetails): movie is MovieDetails => {
@@ -50,7 +52,7 @@ const isMovie = (movie: MovieDetails | TvDetails): movie is MovieDetails => {
 };
 
 interface RequestItemErrorProps {
-  requestData?: MediaRequest;
+  requestData?: NonFunctionProperties<MediaRequest>;
   revalidateList: () => void;
 }
 
@@ -283,7 +285,7 @@ const RequestItemError = ({
 };
 
 interface RequestItemProps {
-  request: MediaRequest;
+  request: NonFunctionProperties<MediaRequest> & { profileName?: string };
   revalidateList: () => void;
 }
 
@@ -302,19 +304,18 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
   const { data: title, error } = useSWR<MovieDetails | TvDetails>(
     inView ? url : null
   );
-  const { data: requestData, mutate: revalidate } = useSWR<MediaRequest>(
-    `/api/v1/request/${request.id}`,
-    {
-      fallbackData: request,
-      refreshInterval: refreshIntervalHelper(
-        {
-          downloadStatus: request.media.downloadStatus,
-          downloadStatus4k: request.media.downloadStatus4k,
-        },
-        15000
-      ),
-    }
-  );
+  const { data: requestData, mutate: revalidate } = useSWR<
+    NonFunctionProperties<MediaRequest>
+  >(`/api/v1/request/${request.id}`, {
+    fallbackData: request,
+    refreshInterval: refreshIntervalHelper(
+      {
+        downloadStatus: request.media.downloadStatus,
+        downloadStatus4k: request.media.downloadStatus4k,
+      },
+      15000
+    ),
+  });
 
   const [isRetrying, setRetrying] = useState(false);
 
@@ -405,6 +406,7 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
             />
           </div>
         )}
+        <p>{request.profileName}</p>
         <div className="relative flex w-full flex-col justify-between overflow-hidden sm:flex-row">
           <div className="relative z-10 flex w-full items-center overflow-hidden pl-4 pr-4 sm:pr-0 xl:w-7/12 2xl:w-2/3">
             <Link
@@ -618,6 +620,14 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                 </span>
               </div>
             )}
+            <div className="card-field">
+              <span className="card-field-name">
+                {intl.formatMessage(messages.profileName)}
+              </span>
+              <span className="flex truncate text-sm text-gray-300">
+                {request.profileName}
+              </span>
+            </div>
           </div>
         </div>
         <div className="z-10 mt-4 flex w-full flex-col justify-center space-y-2 pl-4 pr-4 xl:mt-0 xl:w-96 xl:items-end xl:pl-0">
