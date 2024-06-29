@@ -70,6 +70,10 @@ a:not(
   background: linear-gradient(0deg, #8238e9 0%, #5d42e6 100%);
 }
 
+.tabs__item--active {
+  background: linear-gradient(0deg, #8238e9 0%, #5d42e6 100%);
+}
+
 .footer {
   background: var(--ifm-navbar-background-color);
   border-top: 1px solid #2d3748;
