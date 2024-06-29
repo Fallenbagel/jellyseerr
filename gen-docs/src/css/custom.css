@@ -44,6 +44,13 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 
-.table-of-contents__link--active {
+.table-of-contents__link--active,
+a:not(
+    .card,
+    .menu__link,
+    .menu__link--sublist,
+    .menu__link--sublist-item,
+    .table-of-contents__link
+  ) {
   color: #793ae8;
 }
