@@ -91,8 +91,8 @@ const config: Config = {
       copyright: `Copyright © ${new Date().getFullYear()} Jellyseerr. Built with Docusaurus.`,
     },
     prism: {
-      theme: prismThemes.vsDark,
-      darkTheme: prismThemes.vsDark,
+      theme: prismThemes.shadesOfPurple,
+      darkTheme: prismThemes.shadesOfPurple,
       additionalLanguages: ['bash', 'powershell', 'yaml', 'nix'],
     },
   } satisfies Preset.ThemeConfig,
