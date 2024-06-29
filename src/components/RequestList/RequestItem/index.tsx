@@ -620,14 +620,16 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                 </span>
               </div>
             )}
-            <div className="card-field">
-              <span className="card-field-name">
-                {intl.formatMessage(messages.profileName)}
-              </span>
-              <span className="flex truncate text-sm text-gray-300">
-                {request.profileName}
-              </span>
-            </div>
+            {request.profileName && (
+              <div className="card-field">
+                <span className="card-field-name">
+                  {intl.formatMessage(messages.profileName)}
+                </span>
+                <span className="flex truncate text-sm text-gray-300">
+                  {request.profileName}
+                </span>
+              </div>
+            )}
           </div>
         </div>
         <div className="z-10 mt-4 flex w-full flex-col justify-center space-y-2 pl-4 pr-4 xl:mt-0 xl:w-96 xl:items-end xl:pl-0">
