@@ -1,0 +1,99 @@
+---
+title: Nix Package Manager (Advanced)
+description: Install Jellyseerr using Nix
+sidebar_position: 3
+---
+
+import JellyseerrVersion from '@site/src/components/JellyseerrVersion';
+
+# Nix Package Manager (Advanced)
+:::info
+This method is not recommended for most users. It is intended for advanced users who are using Nix as their package manager.
+:::
+
+:::warning
+The upstream Nix package for jellyseerr is not up-to-date. If you want to use **v<JellyseerrVersion />** of jellyseerr, you will need to [override the package](#overriding-the-package).
+:::
+
+## Installation
+To get up and running with jellyseerr using Nix, you can add the following to your `configuration.nix`:
+
+```nix
+{ config, pkgs, ... }:
+
+{
+  services.jellyseerr.enable = true;
+}
+```
+
+If you want more advanced configuration options, you can use the following:
+
+```nix
+{ config, pkgs, ... }:
+
+{
+  services.jellyseerr = {
+    enable = true;
+    port = 5055;
+    openFirewall = true;
+  };
+}
+```
+
+After adding the configuration to your `configuration.nix`, you can run the following command to install jellyseerr:
+
+```bash
+nixos-rebuild switch
+```
+After rebuild is complete jellyseerr should be running, verify that it is with the following command.
+```bash
+systemctl status jellyseerr
+```
+
+:::info
+You can now access Jellyseerr by visiting `http://localhost:5055` in your web browser.
+:::
+
+
+import CodeBlock from '@theme/CodeBlock';
+
+## Overriding the package
+If you want to use **Jellyseerr v<JellyseerrVersion />**, you will need to override the package. You can do this by adding the following to your `configuration.nix`:
+
+export const Version = () => {
+  const version = JellyseerrVersion();
+  const code = `
+{ config, pkgs, ... }:
+{
+  nixpkgs.config.packageOverrides = pkgs: {
+    jellyseerr = pkgs.jellyseerr.overrideAttrs (oldAttrs: rec {
+      version = "${version}";
+
+      src = pkgs.fetchFromGitHub {
+        owner = "fallenbagel";
+        repo = "jellyseerr";
+        rev = "v${version}";
+        sha256 = pkgs.lib.fakeSha256;
+      };
+
+      packageJSON = "\${src}/package.json";
+      offlineCache = pkgs.fetchYarnDeps {
+        yarnLock = "\${src}/yarn.lock";
+        sha256 = pkgs.lib.fakeSha256; 
+      };
+    }); 
+  };
+}`;
+
+  return (
+    <>
+      <CodeBlock className="language-nix">{code}</CodeBlock>
+    </>
+  );
+};
+
+<Version />
+
+:::tip
+You can replace the `sha256` with the actual hash that `nixos-rebuild` outputs when you run the command.
+:::
