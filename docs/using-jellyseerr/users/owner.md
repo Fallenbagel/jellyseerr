@@ -1,6 +1,7 @@
 ---
 title: Owner Account
 description: Your owner account is the primary account for managing Jellyseerr.
+sidebar_position: 1
 ---
 
 # Owner Account
