@@ -27,7 +27,8 @@ This application is designed to be a **one-stop-shop** for all your media reques
 
 ## We need your help!
 
-[Jellyseerr](https://github.com/Fallenbagel/jellyseerr) is a fork of Overseerr, with a heavy focus on Jellyfin and Emby integration. [Overseerr](https://github.com/sct/Overseerr) is an ambitious project where the original developers/contributors have already poured a lot of work into, and we wanted to build on top of that.
+[Jellyseerr](https://github.com/Fallenbagel/jellyseerr) is a fork of Overseerr, with a heavy focus on Jellyfin and Emby integration.
+[Overseerr](https://github.com/sct/overseerr) is an ambitious project where the original developers/contributors have already poured a lot of work into, and we wanted to build on top of that.
 
 We also have poured a lot of work into this project, and we have a lot more to do as well. We need your valuable feedback and help to find and fix bugs. Also, with Jellyseerr being an open-source project, anyone is welcome to contribute. We also encourage you to contribute to Overseerr as well.
 
