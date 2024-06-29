@@ -147,7 +147,9 @@ class PlexTvAPI extends ExternalAPI {
 
   public async getDevices(): Promise<PlexDevice[]> {
     try {
-      const devicesResp = await this.get('/api/resources?includeHttps=1');
+      const devicesResp = await this.get('/api/resources', {
+        includeHttps: '1',
+      });
       const parsedXml = await xml2js.parseStringPromise(
         devicesResp as DeviceResponse
       );
