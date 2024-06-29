@@ -33,7 +33,12 @@
   --ifm-color-content-secondary: #888f9b;
   --ifm-color-primary: var(--ifm-color-content);
   --ifm-hover-overlay: #374151;
-  --ifm-menu-color-background-active: #793ae8;
+  /* --ifm-menu-color-background-active: #793ae8; */
+  /* --ifm-menu-color-background-active: linear-gradient(
+    90deg,
+    #793ae8 0%,
+    #ff8c00 100%
+  ); */
   --ifm-color-primary-dark: #1f2b7f;
   --ifm-color-primary-darker: #16206b;
   --ifm-color-primary-darkest: #0d1456;
@@ -52,5 +57,20 @@ a:not(
     .menu__link--sublist-item,
     .table-of-contents__link
   ) {
-  color: #793ae8;
+  /* color: #793ae8; */
+  color: #6366f1;
+}
+
+.theme-admonition a {
+  color: #fff;
+}
+
+.menu__link--active,
+.menu__list-item-collapsible--active {
+  background: linear-gradient(0deg, #8238e9 0%, #5d42e6 100%);
+}
+
+.footer {
+  background: var(--ifm-navbar-background-color);
+  border-top: 1px solid #2d3748;
 }
