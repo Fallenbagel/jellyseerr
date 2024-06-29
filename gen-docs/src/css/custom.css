@@ -79,8 +79,21 @@ a:not(
   background: linear-gradient(0deg, #8238e9 0%, #5d42e6 100%);
 }
 
-.tabs__item--active {
+/* .tabs__item--active {
   background: linear-gradient(0deg, #8238e9 0%, #5d42e6 100%);
+} */
+
+.tabs__item {
+  border-bottom: 1px solid #fff;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  padding: 0.5rem 1rem;
+}
+
+.tabs__item--active {
+  /* background: rgba(255, 255, 255, 0.1); */
+  color: #a37ff0;
+  border-bottom: 3px solid #a37ff0;
 }
 
 .footer {
