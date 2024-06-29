@@ -42,6 +42,20 @@ const config: Config = {
     ],
   ],
 
+  themes: [
+    [
+      '@easyops-cn/docusaurus-search-local',
+      /**  @type {import("@easyops-cn/docusaurus-search-local").PluginOptions}  */
+      {
+        hashed: true,
+        indexBlog: false,
+        docsDir: '../docs',
+        docsRouteBasePath: '/',
+        explicitSearchResultPath: true,
+      },
+    ],
+  ],
+
   themeConfig: {
     image: 'img/docusaurus-social-card.jpg',
     colorMode: {
