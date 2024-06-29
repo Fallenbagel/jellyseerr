@@ -1,4 +1,4 @@
-name: Test deployment
+name: Test Docs deployment
 
 on:
   pull_request:
@@ -7,8 +7,6 @@ on:
     path:
       - 'docs/**'
       - 'gen-docs/**'
-    # Review gh actions docs if you want to further define triggers, paths, etc
-    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
 
 jobs:
   test-deploy:
