@@ -70,6 +70,10 @@ a:not(
   color: #6366f1;
 }
 
+.card {
+  background-color: rgb(31 41 55/0.9);
+}
+
 .theme-admonition a {
   color: #fff;
 }
