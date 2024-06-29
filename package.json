@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "postinstall": "node postinstall-win.js",
     "dev": "nodemon -e ts --watch server --watch overseerr-api.yml -e .json,.ts,.yml -x ts-node -r tsconfig-paths/register --files --project server/tsconfig.json server/index.ts",
     "build:server": "tsc --project server/tsconfig.json && copyfiles -u 2 server/templates/**/*.{html,pug} dist/templates && tsc-alias -p server/tsconfig.json",
     "build:next": "next build",
@@ -46,7 +47,6 @@
     "axios-rate-limit": "1.3.0",
     "bcrypt": "5.1.0",
     "bowser": "2.11.0",
-    "cacheable-lookup": "^7.0.0",
     "connect-typeorm": "1.1.4",
     "cookie-parser": "1.4.6",
     "copy-to-clipboard": "3.3.3",
