@@ -70,6 +70,12 @@ class ExternalAPI {
         ...config?.headers,
       },
     });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(
+        `${response.status} ${response.statusText}${text ? ': ' + text : ''}`
+      );
+    }
     const data = await this.getDataFromResponse(response);
 
     if (this.cache) {
