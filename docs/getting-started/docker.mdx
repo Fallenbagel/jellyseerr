@@ -133,7 +133,7 @@ or the Docker Desktop app:
 4. Enter a name for the volume (example: `jellyseerr-data`) and hit "Create"
 
 Then, create and start the Jellyseerr container:
-<Tabs groupId="docker-methods">
+<Tabs groupId="docker-methods" queryString>
   <TabItem value="docker-cli" label="Docker CLI">
 ```bash
 docker run -d --name jellyseerr -e LOG_LEVEL=debug -e TZ=Asia/Tashkent -p 5055:5055 -v "jellyseerr-data:/app/config" --restart unless-stopped fallenbagel/jellyseerr:latest
