@@ -118,6 +118,7 @@ export interface MainSettings {
   mediaServerType: number;
   partialRequestsEnabled: boolean;
   locale: string;
+  retryCount: number;
 }
 
 interface PublicSettings {
@@ -324,6 +325,7 @@ class Settings {
         mediaServerType: MediaServerType.NOT_CONFIGURED,
         partialRequestsEnabled: true,
         locale: 'en',
+        retryCount: 0,
       },
       plex: {
         name: '',
@@ -656,11 +658,17 @@ class Settings {
   }
 }
 
+let loaded = false;
 let settings: Settings | undefined;
 
 export const getSettings = (initialSettings?: AllSettings): Settings => {
   if (!settings) {
     settings = new Settings(initialSettings);
+  }
+
+  if (!loaded) {
+    settings.load();
+    loaded = true;
   }
 
   return settings;
