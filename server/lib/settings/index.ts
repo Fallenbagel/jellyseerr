@@ -47,6 +47,7 @@ export interface JellyfinSettings {
   jellyfinForgotPasswordUrl?: string;
   libraries: Library[];
   serverId: string;
+  apiKey: string;
 }
 export interface TautulliSettings {
   hostname?: string;
@@ -342,6 +343,7 @@ class Settings {
         jellyfinForgotPasswordUrl: '',
         libraries: [],
         serverId: '',
+        apiKey: '',
       },
       tautulli: {},
       radarr: [],
@@ -629,7 +631,7 @@ class Settings {
    * @param overrideSettings If passed in, will override all existing settings with these
    * values
    */
-  public load(overrideSettings?: AllSettings): Settings {
+  public async load(overrideSettings?: AllSettings): Promise<Settings> {
     if (overrideSettings) {
       this.data = overrideSettings;
       return this;
@@ -642,7 +644,7 @@ class Settings {
 
     if (data) {
       const parsedJson = JSON.parse(data);
-      this.data = runMigrations(parsedJson);
+      this.data = await runMigrations(parsedJson);
 
       this.data = merge(this.data, parsedJson);
 

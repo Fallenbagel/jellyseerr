@@ -405,6 +405,23 @@ class JellyfinAPI extends ExternalAPI {
       throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
     }
   }
+
+  public async createApiToken(appName: string): Promise<string> {
+    try {
+      await this.axios.post(`/Auth/Keys?App=${appName}`);
+      const apiKeys = await this.get<any>('/Auth/Keys');
+      return apiKeys.Items.reverse().find(
+        (item: any) => item.AppName === appName
+      ).AccessToken;
+    } catch (e) {
+      logger.error(
+        `Something went wrong while creating an API key the Jellyfin server: ${e.message}`,
+        { label: 'Jellyfin API' }
+      );
+
+      throw new ApiError(e.response?.status, ApiErrorCode.InvalidAuthToken);
+    }
+  }
 }
 
 export default JellyfinAPI;
