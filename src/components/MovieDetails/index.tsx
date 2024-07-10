@@ -306,32 +306,46 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
 
   const onClickWatchlistBtn = async (): Promise<void> => {
     setIsUpdating(true);
-    try {
-      const response = await axios.post<Watchlist>('/api/v1/watchlist', {
+
+    const res = await fetch('/api/v1/watchlist', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         tmdbId: movie?.id,
         mediaType: MediaType.MOVIE,
         title: movie?.title,
-      });
-      if (response.data) {
-        addToast(
-          <span>
-            {intl.formatMessage(messages.watchlistSuccess, {
-              title: movie?.title,
-              strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
-            })}
-          </span>,
-          { appearance: 'success', autoDismiss: true }
-        );
-      }
-    } catch (e) {
+      }),
+    });
+
+    if (!res.ok) {
       addToast(intl.formatMessage(messages.watchlistError), {
         appearance: 'error',
         autoDismiss: true,
       });
-    } finally {
+
       setIsUpdating(false);
-      setToggleWatchlist((prevState) => !prevState);
+      return;
     }
+
+    const data = await res.json();
+
+    if (data) {
+      addToast(
+        <span>
+          {intl.formatMessage(messages.watchlistSuccess, {
+            title: movie?.title,
+            strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+          })}
+        </span>,
+        { appearance: 'success', autoDismiss: true }
+      );
+    }
+
+    setIsUpdating(false);
+    setToggleWatchlist((prevState) => !prevState);
   };
 
   const onClickDeleteWatchlistBtn = async (): Promise<void> => {

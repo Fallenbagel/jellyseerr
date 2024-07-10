@@ -55,10 +55,8 @@ import {
   MediaType,
 } from '@server/constants/media';
 import { MediaServerType } from '@server/constants/server';
-import type { Watchlist } from '@server/entity/Watchlist';
 import type { Crew } from '@server/models/common';
 import type { TvDetails as TvDetailsType } from '@server/models/Tv';
-import axios from 'axios';
 import { countries } from 'country-flag-icons';
 import 'country-flag-icons/3x2/flags.css';
 import getConfig from 'next/config';
@@ -327,58 +325,75 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
 
   const onClickWatchlistBtn = async (): Promise<void> => {
     setIsUpdating(true);
-    try {
-      const response = await axios.post<Watchlist>('/api/v1/watchlist', {
+
+    const res = await fetch('/api/v1/watchlist', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         tmdbId: tv?.id,
         mediaType: MediaType.TV,
         title: tv?.name,
-      });
-      if (response.data) {
-        addToast(
-          <span>
-            {intl.formatMessage(messages.watchlistSuccess, {
-              title: tv?.name,
-              strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
-            })}
-          </span>,
-          { appearance: 'success', autoDismiss: true }
-        );
-      }
-    } catch (e) {
+      }),
+    });
+
+    if (!res.ok) {
       addToast(intl.formatMessage(messages.watchlistError), {
         appearance: 'error',
         autoDismiss: true,
       });
-    } finally {
+
       setIsUpdating(false);
-      setToggleWatchlist((prevState) => !prevState);
+      return;
     }
+
+    const data = await res.json();
+
+    if (data) {
+      addToast(
+        <span>
+          {intl.formatMessage(messages.watchlistSuccess, {
+            title: tv?.name,
+            strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+          })}
+        </span>,
+        { appearance: 'success', autoDismiss: true }
+      );
+    }
+
+    setIsUpdating(false);
+    setToggleWatchlist((prevState) => !prevState);
   };
 
   const onClickDeleteWatchlistBtn = async (): Promise<void> => {
     setIsUpdating(true);
-    try {
-      const response = await axios.delete<Watchlist>(
-        '/api/v1/watchlist/' + tv?.id
-      );
 
-      if (response.status === 204) {
-        addToast(
-          <span>
-            {intl.formatMessage(messages.watchlistDeleted, {
-              title: tv?.name,
-              strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
-            })}
-          </span>,
-          { appearance: 'info', autoDismiss: true }
-        );
-      }
-    } catch (e) {
+    const res = await fetch('/api/v1/watchlist/' + tv?.id, {
+      method: 'DELETE',
+    });
+
+    if (!res.ok) {
       addToast(intl.formatMessage(messages.watchlistError), {
         appearance: 'error',
         autoDismiss: true,
       });
-    } finally {
+
+      setIsUpdating(false);
+      return;
+    }
+
+    if (res.status === 204) {
+      addToast(
+        <span>
+          {intl.formatMessage(messages.watchlistDeleted, {
+            title: tv?.name,
+            strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+          })}
+        </span>,
+        { appearance: 'info', autoDismiss: true }
+      );
       setIsUpdating(false);
       setToggleWatchlist((prevState) => !prevState);
     }
