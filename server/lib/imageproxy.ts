@@ -118,7 +118,7 @@ class ImageProxy {
     this.key = key;
 
     if (options.rateLimitOptions) {
-      this.fetch = rateLimit(this.fetch, options.rateLimitOptions);
+      this.fetch = rateLimit(fetch, options.rateLimitOptions);
     } else {
       this.fetch = fetch;
     }
