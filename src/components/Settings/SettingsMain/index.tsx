@@ -47,11 +47,6 @@ const messages = defineMessages('components.Settings.SettingsMain', {
   cacheImages: 'Enable Image Caching',
   cacheImagesTip:
     'Cache externally sourced images (requires a significant amount of disk space)',
-  retryCount: 'Retry Count',
-  retryCountTip:
-    'Number of retry when a network request to an external service fails',
-  retryCountHoverTip:
-    'Do NOT enable this setting unless you understand what you are doing!',
   trustProxy: 'Enable Proxy Support',
   trustProxyTip:
     'Allow Jellyseerr to correctly register client IP addresses behind a proxy',
@@ -142,7 +137,6 @@ const SettingsMain = () => {
             partialRequestsEnabled: data?.partialRequestsEnabled,
             trustProxy: data?.trustProxy,
             cacheImages: data?.cacheImages,
-            retryCount: data?.retryCount,
           }}
           enableReinitialize
           validationSchema={MainSettingsSchema}
@@ -164,7 +158,6 @@ const SettingsMain = () => {
                   partialRequestsEnabled: values.partialRequestsEnabled,
                   trustProxy: values.trustProxy,
                   cacheImages: values.cacheImages,
-                  retryCount: values.retryCount,
                 }),
               });
               if (!res.ok) throw new Error();
@@ -344,32 +337,6 @@ const SettingsMain = () => {
                         setFieldValue('cacheImages', !values.cacheImages);
                       }}
                     />
-                  </div>
-                </div>
-                <div className="form-row">
-                  <label htmlFor="retryCount" className="checkbox-label">
-                    <span className="mr-2">
-                      {intl.formatMessage(messages.retryCount)}
-                    </span>
-                    <SettingsBadge badgeType="advanced" className="mr-2" />
-                    <span className="label-tip">
-                      {intl.formatMessage(messages.retryCountTip)}
-                    </span>
-                  </label>
-                  <div className="form-input-area">
-                    <div className="form-input-field">
-                      <Field
-                        id="retryCount"
-                        name="retryCount"
-                        type="text"
-                        inputMode="numeric"
-                      />
-                    </div>
-                    {errors.retryCount &&
-                      touched.retryCount &&
-                      typeof errors.retryCount === 'string' && (
-                        <div className="error">{errors.retryCount}</div>
-                      )}
                   </div>
                 </div>
                 <div className="form-row">

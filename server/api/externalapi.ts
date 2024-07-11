@@ -1,6 +1,4 @@
-import { getSettings } from '@server/lib/settings';
 import rateLimit from '@server/utils/rateLimit';
-import retry from '@server/utils/retry';
 import type NodeCache from 'node-cache';
 
 // 5 minute default TTL (in seconds)
@@ -37,11 +35,6 @@ class ExternalAPI {
       });
     } else {
       this.fetch = fetch;
-    }
-
-    const settings = getSettings();
-    if (settings.main.retryCount) {
-      this.fetch = retry(this.fetch, settings.main.retryCount);
     }
 
     this.baseUrl = baseUrl;

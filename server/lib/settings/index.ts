@@ -118,7 +118,6 @@ export interface MainSettings {
   mediaServerType: number;
   partialRequestsEnabled: boolean;
   locale: string;
-  retryCount: number;
 }
 
 interface PublicSettings {
@@ -325,7 +324,6 @@ class Settings {
         mediaServerType: MediaServerType.NOT_CONFIGURED,
         partialRequestsEnabled: true,
         locale: 'en',
-        retryCount: 0,
       },
       plex: {
         name: '',
