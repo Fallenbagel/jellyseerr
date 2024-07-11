@@ -38,8 +38,10 @@ import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 
-dns.setDefaultResultOrder('ipv4first');
-net.setDefaultAutoSelectFamily(false);
+if (process.env.forceIpv4First) {
+  dns.setDefaultResultOrder('ipv4first');
+  net.setDefaultAutoSelectFamily(false);
+}
 
 const API_SPEC_PATH = path.join(__dirname, '../overseerr-api.yml');
 
