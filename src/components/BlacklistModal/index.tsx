@@ -1,9 +1,10 @@
 import Modal from '@app/components/Common/Modal';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { Transition } from '@headlessui/react';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import useSWR from 'swr';
 
 interface BlacklistModalProps {
@@ -14,7 +15,7 @@ interface BlacklistModalProps {
   isUpdating?: boolean;
 }
 
-const messages = defineMessages({
+const messages = defineMessages('component.BlacklistModal', {
   blacklisting: 'Blacklisting',
 });
 

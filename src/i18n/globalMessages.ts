@@ -57,6 +57,13 @@ const globalMessages = defineMessages('i18n', {
   resolved: 'Resolved',
   blacklist: 'Blacklist',
   blacklisted: 'Blacklisted',
+  blacklistSuccess: '<strong>{title}</strong> was successfully blacklisted.',
+  blacklistError: 'Something went wrong try again.',
+  blacklistDuplicateError:
+    '<strong>{title}</strong> has already been blacklisted.',
+  removeFromBlacklistSuccess:
+    '<strong>{title}</strong> was successfully removed from the Blacklist.',
+  removefromBlacklist: 'Remove from Blacklist',
 });
 
 export default globalMessages;

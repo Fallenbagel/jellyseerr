@@ -1,19 +1,79 @@
+import { MediaType } from '@server/constants/media';
 import { getRepository } from '@server/datasource';
 import { Blacklist } from '@server/entity/Blacklist';
 import Media from '@server/entity/Media';
 import { NotFoundError } from '@server/entity/Watchlist';
-import { blacklistAdd } from '@server/interfaces/api/blacklistAdd';
+import type { BlacklistResultsResponse } from '@server/interfaces/api/blacklistInterfaces';
 import { Permission } from '@server/lib/permissions';
 import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { QueryFailedError } from 'typeorm';
+import { z } from 'zod';
 
 const blacklistRoutes = Router();
 
+export const blacklistAdd = z.object({
+  tmdbId: z.coerce.number(),
+  mediaType: z.nativeEnum(MediaType),
+  title: z.coerce.string().optional(),
+  user: z.coerce.number(),
+});
+
+blacklistRoutes.get(
+  '/',
+  isAuthenticated([Permission.MANAGE_BLACKLIST, Permission.VIEW_BLACKLIST], {
+    type: 'or',
+  }),
+  rateLimit({ windowMs: 60 * 1000, max: 50 }),
+  async (req, res, next) => {
+    const pageSize = req.query.take ? Number(req.query.take) : 25;
+    const skip = req.query.skip ? Number(req.query.skip) : 0;
+    const search = (req.query.search as string) ?? '';
+
+    try {
+      let query = getRepository(Blacklist)
+        .createQueryBuilder('blacklist')
+        .leftJoinAndSelect('blacklist.user', 'user');
+
+      if (search.length > 0) {
+        query = query.where('blacklist.title like :title', {
+          title: `%${search}%`,
+        });
+      }
+
+      const [blacklistedItems, itemsCount] = await query
+        .orderBy('blacklist.createdAt', 'DESC')
+        .take(pageSize)
+        .skip(skip)
+        .getManyAndCount();
+
+      return res.status(200).json({
+        pageInfo: {
+          pages: Math.ceil(itemsCount / pageSize),
+          pageSize,
+          results: itemsCount,
+          page: Math.ceil(skip / pageSize) + 1,
+        },
+        results: blacklistedItems,
+      } as BlacklistResultsResponse);
+    } catch (error) {
+      logger.error('Something went wrong while retrieving blacklisted items', {
+        label: 'Blacklist',
+        errorMessage: error.message,
+      });
+      return next({
+        status: 500,
+        message: 'Unable to retrieve blacklisted items.',
+      });
+    }
+  }
+);
+
 blacklistRoutes.post(
   '/',
-  isAuthenticated([Permission.MANAGE_BLACKLIST, Permission.MEDIA_BLACKLIST], {
+  isAuthenticated([Permission.MANAGE_BLACKLIST], {
     type: 'or',
   }),
   async (req, res, next) => {
@@ -51,7 +111,7 @@ blacklistRoutes.post(
 
 blacklistRoutes.delete(
   '/:id',
-  isAuthenticated([Permission.MANAGE_BLACKLIST, Permission.MEDIA_BLACKLIST], {
+  isAuthenticated([Permission.MANAGE_BLACKLIST], {
     type: 'or',
   }),
   async (req, res, next) => {

@@ -346,12 +346,6 @@ export const PermissionEdit = ({
       permission: Permission.MANAGE_BLACKLIST,
       children: [
         {
-          id: 'blacklistitems',
-          name: intl.formatMessage(messages.blacklistedItems),
-          description: intl.formatMessage(messages.blacklistedItemsDescription),
-          permission: Permission.MEDIA_BLACKLIST,
-        },
-        {
           id: 'viewblacklisteditems',
           name: intl.formatMessage(messages.viewblacklistedItems),
           description: intl.formatMessage(

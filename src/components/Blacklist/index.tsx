@@ -2,45 +2,44 @@ import Badge from '@app/components/Common/Badge';
 import Button from '@app/components/Common/Button';
 import CachedImage from '@app/components/Common/CachedImage';
 import ConfirmButton from '@app/components/Common/ConfirmButton';
+import Header from '@app/components/Common/Header';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import PageTitle from '@app/components/Common/PageTitle';
 import useDebouncedState from '@app/hooks/useDebouncedState';
 import { useUpdateQueryParams } from '@app/hooks/useUpdateQueryParams';
+import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
+import defineMessages from '@app/utils/defineMessages';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   MagnifyingGlassIcon,
   TrashIcon,
 } from '@heroicons/react/24/solid';
-import type { BlacklistItem } from '@server/interfaces/api/discoverInterfaces';
-import type { BlacklistResultsResponse } from '@server/interfaces/api/settingsInterfaces';
+import type {
+  BlacklistItem,
+  BlacklistResultsResponse,
+} from '@server/interfaces/api/blacklistInterfaces';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
-import axios from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import type { ChangeEvent } from 'react';
 import { useState } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { defineMessages, FormattedRelativeTime, useIntl } from 'react-intl';
+import { FormattedRelativeTime, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Blacklist', {
   blacklistsettings: 'Blacklist Settings',
   blacklistSettingsDescription: 'Manage blacklisted media.',
   mediaName: 'Name',
   mediaType: 'Type',
-  removefromblacklist: 'Remove from Blacklist',
   mediaTmdbId: 'tmdb Id',
   blacklistdate: 'date',
-  blacklisted: 'Blacklisted',
   blacklistedby: '{date} by {user}',
-  removeFromBlacklistSuccess:
-    '<strong>{title}</strong> was successfully removed from the Blacklist.',
-  blacklistError: 'Something went wrong try again.',
   blacklistNotFoundError: '<strong>{title}</strong> is not blacklisted.',
 });
 
@@ -48,8 +47,8 @@ const isMovie = (movie: MovieDetails | TvDetails): movie is MovieDetails => {
   return (movie as MovieDetails).title !== undefined;
 };
 
-const SettingsBlacklist = () => {
-  const [currentPageSize, setCurrentPageSize] = useState(25);
+const Blacklist = () => {
+  const [currentPageSize, setCurrentPageSize] = useState<number>(10);
   const [searchFilter, debouncedSearchFilter, setSearchFilter] =
     useDebouncedState('');
   const router = useRouter();
@@ -64,7 +63,7 @@ const SettingsBlacklist = () => {
     error,
     mutate: revalidate,
   } = useSWR<BlacklistResultsResponse>(
-    `/api/v1/settings/blacklist?take=${currentPageSize}
+    `/api/v1/blacklist/?take=${currentPageSize}
     &skip=${pageIndex * currentPageSize}
     ${debouncedSearchFilter ? `&search=${debouncedSearchFilter}` : ''}`,
     {
@@ -88,25 +87,13 @@ const SettingsBlacklist = () => {
     setSearchFilter(e.target.value as string);
   };
 
-  const hasNextPage = data?.pageInfo.pages ?? 0 > pageIndex + 1;
+  const hasNextPage = data && data.pageInfo.pages > pageIndex + 1;
   const hasPrevPage = pageIndex > 0;
 
   return (
     <>
-      <PageTitle
-        title={[
-          intl.formatMessage(globalMessages.blacklist),
-          intl.formatMessage(globalMessages.settings),
-        ]}
-      />
-      <div className="mb-6">
-        <h3 className="heading">
-          {intl.formatMessage(messages.blacklistsettings)}
-        </h3>
-        <p className="description">
-          {intl.formatMessage(messages.blacklistSettingsDescription)}
-        </p>
-      </div>
+      <PageTitle title={[intl.formatMessage(globalMessages.blacklist)]} />
+      <Header>{intl.formatMessage(globalMessages.blacklist)}</Header>
 
       <div className="mt-2 flex flex-grow flex-col sm:flex-grow-0 sm:flex-row sm:justify-end">
         <div className="mb-2 flex flex-grow sm:mb-0 sm:mr-2 md:flex-grow-0">
@@ -215,7 +202,7 @@ const SettingsBlacklist = () => {
   );
 };
 
-export default SettingsBlacklist;
+export default Blacklist;
 
 interface BlacklistedItemProps {
   item: BlacklistItem;
@@ -229,6 +216,7 @@ const BlacklistedItem = ({ item, revalidateList }: BlacklistedItemProps) => {
     triggerOnce: true,
   });
   const intl = useIntl();
+  const { hasPermission } = useUser();
 
   const url =
     item.mediaType === 'movie'
@@ -250,41 +238,40 @@ const BlacklistedItem = ({ item, revalidateList }: BlacklistedItemProps) => {
   const removeFromBlacklist = async (tmdbId: number, title?: string) => {
     setIsUpdating(true);
 
-    try {
-      const response = await axios.delete(`/api/v1/blacklist/${tmdbId}`);
-      if (response.status === 204) {
-        addToast(
-          <span>
-            {intl.formatMessage(messages.removeFromBlacklistSuccess, {
-              title,
-              strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
-            })}
-          </span>,
-          { appearance: 'success', autoDismiss: true }
-        );
-      }
+    const res = await fetch('/api/v1/blacklist/' + tmdbId, {
+      method: 'DELETE',
+    });
 
-      setIsUpdating(false);
-      revalidateList();
-    } catch (error) {
-      setIsUpdating(false);
-      revalidateList();
-      addToast(intl.formatMessage(messages.removefromblacklist), {
+    if (res.status === 204) {
+      addToast(
+        <span>
+          {intl.formatMessage(globalMessages.removeFromBlacklistSuccess, {
+            title,
+            strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+          })}
+        </span>,
+        { appearance: 'success', autoDismiss: true }
+      );
+    } else {
+      addToast(intl.formatMessage(globalMessages.blacklistError), {
         appearance: 'error',
         autoDismiss: true,
       });
     }
+
+    revalidateList();
+    setIsUpdating(false);
   };
 
   return (
-    <div className="relative flex w-full justify-between overflow-hidden rounded-xl bg-gray-800 py-4 text-gray-400 shadow-md ring-1 ring-gray-700 xl:h-28 xl:flex-row">
+    <div className="relative flex w-full flex-col justify-between overflow-hidden rounded-xl bg-gray-800 py-4 text-gray-400 shadow-md ring-1 ring-gray-700 xl:h-28 xl:flex-row">
       {title && title.backdropPath && (
         <div className="absolute inset-0 z-0 w-full bg-cover bg-center xl:w-2/3">
           <CachedImage
             src={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${title.backdropPath}`}
             alt=""
-            layout="fill"
-            objectFit="cover"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            fill
           />
           <div
             className="absolute inset-0"
@@ -303,21 +290,20 @@ const BlacklistedItem = ({ item, revalidateList }: BlacklistedItemProps) => {
                 ? `/movie/${item.tmdbId}`
                 : `/tv/${item.tmdbId}`
             }
+            className="relative h-auto w-12 flex-shrink-0 scale-100 transform-gpu overflow-hidden rounded-md transition duration-300 hover:scale-105"
           >
-            <a className="relative h-auto w-12 flex-shrink-0 scale-100 transform-gpu overflow-hidden rounded-md transition duration-300 hover:scale-105">
-              <CachedImage
-                src={
-                  title?.posterPath
-                    ? `https://image.tmdb.org/t/p/w300_and_h450_face${title.posterPath}`
-                    : '/images/overseerr_poster_not_found.png'
-                }
-                alt=""
-                layout="responsive"
-                width={600}
-                height={900}
-                objectFit="cover"
-              />
-            </a>
+            <CachedImage
+              src={
+                title?.posterPath
+                  ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${title.posterPath}`
+                  : '/images/overseerr_poster_not_found.png'
+              }
+              alt=""
+              sizes="100vw"
+              style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
+              width={600}
+              height={900}
+            />
           </Link>
           <div className="flex flex-col justify-center overflow-hidden pl-2 xl:pl-4">
             <div className="pt-0.5 text-xs font-medium text-white sm:pt-1">
@@ -334,9 +320,9 @@ const BlacklistedItem = ({ item, revalidateList }: BlacklistedItemProps) => {
                   : `/tv/${item.tmdbId}`
               }
             >
-              <a className="mr-2 min-w-0 truncate text-lg font-bold text-white hover:underline xl:text-xl">
+              <span className="mr-2 min-w-0 truncate text-lg font-bold text-white hover:underline xl:text-xl">
                 {title && (isMovie(title) ? title.title : title.name)}
-              </a>
+              </span>
             </Link>
           </div>
         </div>
@@ -352,7 +338,7 @@ const BlacklistedItem = ({ item, revalidateList }: BlacklistedItemProps) => {
           {item.createdAt && (
             <div className="card-field">
               <span className="card-field-name">
-                {intl.formatMessage(messages.blacklisted)}
+                {intl.formatMessage(globalMessages.blacklisted)}
               </span>
               <span className="flex truncate text-sm text-gray-300">
                 {intl.formatMessage(messages.blacklistedby, {
@@ -367,16 +353,19 @@ const BlacklistedItem = ({ item, revalidateList }: BlacklistedItemProps) => {
                   ),
                   user: (
                     <Link href={`/users/${item.user.id}`}>
-                      <a className="group flex items-center truncate">
-                        <img
+                      <span className="group flex items-center truncate">
+                        <CachedImage
                           src={item.user.avatar}
                           alt=""
-                          className="avatar-sm ml-1.5 object-cover"
+                          className="avatar-sm ml-1.5"
+                          width={20}
+                          height={20}
+                          style={{ objectFit: 'cover' }}
                         />
                         <span className="ml-1 truncate text-sm font-semibold group-hover:text-white group-hover:underline">
                           {item.user.displayName}
                         </span>
-                      </a>
+                      </span>
                     </Link>
                   ),
                 })}
@@ -401,23 +390,27 @@ const BlacklistedItem = ({ item, revalidateList }: BlacklistedItemProps) => {
         </div>
       </div>
       <div className="z-10 mt-4 flex w-full flex-col justify-center space-y-2 pl-4 pr-4 xl:mt-0 xl:w-96 xl:items-end xl:pl-0">
-        <ConfirmButton
-          onClick={() =>
-            removeFromBlacklist(
-              item.tmdbId,
-              title && (isMovie(title) ? title.title : title.name)
-            )
-          }
-          confirmText={intl.formatMessage(
-            isUpdating ? globalMessages.deleting : globalMessages.areyousure
-          )}
-          className={`w-full ${
-            isUpdating ? 'pointer-events-none opacity-50' : ''
-          }`}
-        >
-          <TrashIcon />
-          <span>{intl.formatMessage(messages.removefromblacklist)}</span>
-        </ConfirmButton>
+        {hasPermission(Permission.MANAGE_BLACKLIST) && (
+          <ConfirmButton
+            onClick={() =>
+              removeFromBlacklist(
+                item.tmdbId,
+                title && (isMovie(title) ? title.title : title.name)
+              )
+            }
+            confirmText={intl.formatMessage(
+              isUpdating ? globalMessages.deleting : globalMessages.areyousure
+            )}
+            className={`w-full ${
+              isUpdating ? 'pointer-events-none opacity-50' : ''
+            }`}
+          >
+            <TrashIcon />
+            <span>
+              {intl.formatMessage(globalMessages.removefromBlacklist)}
+            </span>
+          </ConfirmButton>
+        )}
       </div>
     </div>
   );

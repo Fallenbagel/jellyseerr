@@ -2,7 +2,7 @@ import { MediaStatus, type MediaType } from '@server/constants/media';
 import { getRepository } from '@server/datasource';
 import Media from '@server/entity/Media';
 import { User } from '@server/entity/User';
-import type { BlacklistItem } from '@server/interfaces/api/discoverInterfaces';
+import type { BlacklistItem } from '@server/interfaces/api/blacklistInterfaces';
 import {
   Column,
   CreateDateColumn,

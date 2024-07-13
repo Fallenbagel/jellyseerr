@@ -3,16 +3,16 @@ import Button from '@app/components/Common/Button';
 import Tooltip from '@app/components/Common/Tooltip';
 import { useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { CalendarIcon, TrashIcon, UserIcon } from '@heroicons/react/24/solid';
 import type { Blacklist } from '@server/entity/Blacklist';
-import axios from 'axios';
 import Link from 'next/link';
 import { useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
+import { useToasts } from 'react-toast-notifications';
 
-const messages = defineMessages({
+const messages = defineMessages('component.BlacklistBlock', {
   blacklistedby: 'Blacklisted By',
-  remove: 'Remove from blacklist',
   blacklistdate: 'Blacklisted date',
 });
 
@@ -25,10 +25,31 @@ const BlacklistBlock = ({ blacklistItem, onUpdate }: BlacklistBlockProps) => {
   const { user } = useUser();
   const intl = useIntl();
   const [isUpdating, setIsUpdating] = useState(false);
+  const { addToast } = useToasts();
 
-  const removeFromBlacklist = async (tmdbId: number) => {
+  const removeFromBlacklist = async (tmdbId: number, title?: string) => {
     setIsUpdating(true);
-    await axios.delete(`/api/v1/blacklist/${tmdbId}`);
+
+    const res = await fetch('/api/v1/blacklist/' + tmdbId, {
+      method: 'DELETE',
+    });
+
+    if (res.status === 204) {
+      addToast(
+        <span>
+          {intl.formatMessage(globalMessages.removeFromBlacklistSuccess, {
+            title,
+            strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+          })}
+        </span>,
+        { appearance: 'success', autoDismiss: true }
+      );
+    } else {
+      addToast(intl.formatMessage(globalMessages.blacklistError), {
+        appearance: 'error',
+        autoDismiss: true,
+      });
+    }
 
     if (onUpdate) {
       onUpdate();
@@ -53,18 +74,22 @@ const BlacklistBlock = ({ blacklistItem, onUpdate }: BlacklistBlockProps) => {
                     : `/users/${blacklistItem.user.id}`
                 }
               >
-                <a className="font-semibold text-gray-100 transition duration-300 hover:text-white hover:underline">
+                <span className="font-semibold text-gray-100 transition duration-300 hover:text-white hover:underline">
                   {blacklistItem.user.displayName}
-                </a>
+                </span>
               </Link>
             </span>
           </div>
         </div>
         <div className="ml-2 flex flex-shrink-0 flex-wrap">
-          <Tooltip content={intl.formatMessage(messages.remove)}>
+          <Tooltip
+            content={intl.formatMessage(globalMessages.removefromBlacklist)}
+          >
             <Button
               buttonType="danger"
-              onClick={() => removeFromBlacklist(blacklistItem.tmdbId)}
+              onClick={() =>
+                removeFromBlacklist(blacklistItem.tmdbId, blacklistItem.title)
+              }
               disabled={isUpdating}
             >
               <TrashIcon className="icon-sm" />

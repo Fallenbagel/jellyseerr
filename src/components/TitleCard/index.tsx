@@ -21,7 +21,6 @@ import {
   StarIcon,
 } from '@heroicons/react/24/outline';
 import { MediaStatus } from '@server/constants/media';
-import type { Blacklist } from '@server/entity/Blacklist';
 import type { Watchlist } from '@server/entity/Watchlist';
 import type { MediaType } from '@server/models/Search';
 import Link from 'next/link';
@@ -53,13 +52,6 @@ const messages = defineMessages('components.TitleCard', {
     '<strong>{title}</strong> Removed from watchlist  successfully!',
   watchlistCancel: 'watchlist for <strong>{title}</strong> canceled.',
   watchlistError: 'Something went wrong try again.',
-  blacklistSuccess: '<strong>{title}</strong> was successfully blacklisted.',
-  blacklistError: 'Something went wrong try again.',
-  blacklistDuplicateError:
-    '<strong>{title}</strong> has already been blacklisted.',
-  removeFromBlacklistSuccess:
-    '<strong>{title}</strong> was successfully removed from the Blacklist.',
-  removefromBlacklist: 'Remove from Blacklist',
 });
 
 const TitleCard = ({
@@ -105,6 +97,11 @@ const TitleCard = ({
 
   const requestUpdating = useCallback(
     (status: boolean) => setIsUpdating(status),
+    []
+  );
+
+  const closeBlacklistModal = useCallback(
+    () => setShowBlacklistModal(false),
     []
   );
 
@@ -185,49 +182,52 @@ const TitleCard = ({
     const topNode = cardRef.current;
 
     if (topNode) {
-      try {
-        const response = await axios.post<Blacklist>('/api/v1/blacklist', {
+      const res = await fetch('/api/v1/blacklist', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           tmdbId: id,
           mediaType,
           title,
           user: user?.id,
+        }),
+      });
+
+      if (res.status === 201) {
+        addToast(
+          <span>
+            {intl.formatMessage(globalMessages.blacklistSuccess, {
+              title,
+              strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+            })}
+          </span>,
+          { appearance: 'success', autoDismiss: true }
+        );
+        setCurrentStatus(MediaStatus.BLACKLISTED);
+      } else if (res.status === 412) {
+        addToast(
+          <span>
+            {intl.formatMessage(globalMessages.blacklistDuplicateError, {
+              title,
+              strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+            })}
+          </span>,
+          { appearance: 'info', autoDismiss: true }
+        );
+      } else {
+        addToast(intl.formatMessage(globalMessages.blacklistError), {
+          appearance: 'error',
+          autoDismiss: true,
         });
-        if (response.status === 201) {
-          addToast(
-            <span>
-              {intl.formatMessage(messages.blacklistSuccess, {
-                title,
-                strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
-              })}
-            </span>,
-            { appearance: 'success', autoDismiss: true }
-          );
-          setCurrentStatus(MediaStatus.BLACKLISTED);
-          closeBlacklistModal();
-        }
-      } catch (e) {
-        if (e.response.status === 412) {
-          addToast(
-            <span>
-              {intl.formatMessage(messages.blacklistDuplicateError, {
-                title,
-                strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
-              })}
-            </span>,
-            { appearance: 'info', autoDismiss: true }
-          );
-        } else {
-          addToast(intl.formatMessage(messages.blacklistError), {
-            appearance: 'error',
-            autoDismiss: true,
-          });
-        }
-      } finally {
-        setIsUpdating(false);
-        closeBlacklistModal();
       }
+
+      setIsUpdating(false);
+      closeBlacklistModal();
     } else {
-      addToast(intl.formatMessage(messages.blacklistError), {
+      addToast(intl.formatMessage(globalMessages.blacklistError), {
         appearance: 'error',
         autoDismiss: true,
       });
@@ -239,43 +239,38 @@ const TitleCard = ({
     const topNode = cardRef.current;
 
     if (topNode) {
-      try {
-        const response = await axios.delete<Blacklist>(
-          `/api/v1/blacklist/${id}`
+      const res = await fetch('/api/v1/blacklist/' + id, {
+        method: 'DELETE',
+      });
+
+      if (res.status === 204) {
+        addToast(
+          <span>
+            {intl.formatMessage(globalMessages.removeFromBlacklistSuccess, {
+              title,
+              strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+            })}
+          </span>,
+          { appearance: 'success', autoDismiss: true }
         );
-        if (response.status === 204) {
-          addToast(
-            <span>
-              {intl.formatMessage(messages.removeFromBlacklistSuccess, {
-                title,
-                strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
-              })}
-            </span>,
-            { appearance: 'success', autoDismiss: true }
-          );
-          setCurrentStatus(MediaStatus.UNKNOWN);
-        }
-      } catch (e) {
-        addToast(intl.formatMessage(messages.blacklistError), {
+        setCurrentStatus(MediaStatus.UNKNOWN);
+      } else {
+        addToast(intl.formatMessage(globalMessages.blacklistError), {
           appearance: 'error',
           autoDismiss: true,
         });
-      } finally {
-        setIsUpdating(false);
       }
     } else {
-      addToast(intl.formatMessage(messages.blacklistError), {
+      addToast(intl.formatMessage(globalMessages.blacklistError), {
         appearance: 'error',
         autoDismiss: true,
       });
     }
+
+    setIsUpdating(false);
   };
 
   const closeModal = useCallback(() => setShowRequestModal(false), []);
-  const closeBlacklistModal = useCallback(
-    () => setShowBlacklistModal(false),
-    []
-  );
 
   const showRequestButton = hasPermission(
     [
@@ -287,10 +282,9 @@ const TitleCard = ({
     { type: 'or' }
   );
 
-  const showHideButton = hasPermission(
-    [Permission.MANAGE_BLACKLIST, Permission.MEDIA_BLACKLIST],
-    { type: 'or' }
-  );
+  const showHideButton = hasPermission([Permission.MANAGE_BLACKLIST], {
+    type: 'or',
+  });
 
   return (
     <div
@@ -319,8 +313,8 @@ const TitleCard = ({
             mediaType === 'movie'
               ? 'movie'
               : mediaType === 'collection'
-              ? 'collection'
-              : 'tv'
+                ? 'collection'
+                : 'tv'
           }
           onCancel={closeBlacklistModal}
           onComplete={onClickHideItemBtn}
@@ -417,7 +411,9 @@ const TitleCard = ({
               showHideButton &&
               currentStatus == MediaStatus.BLACKLISTED && (
                 <Tooltip
-                  content={intl.formatMessage(messages.removefromBlacklist)}
+                  content={intl.formatMessage(
+                    globalMessages.removefromBlacklist
+                  )}
                 >
                   <Button
                     buttonType={'ghost'}
