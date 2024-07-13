@@ -38,7 +38,7 @@ import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 
-if (process.env.forceIpv4First) {
+if (process.env.forceIpv4First === 'true') {
   dns.setDefaultResultOrder('ipv4first');
   net.setDefaultAutoSelectFamily(false);
 }
