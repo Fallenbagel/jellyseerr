@@ -1,4 +1,5 @@
 import logger from '@server/logger';
+import type { RateLimitOptions } from '@server/utils/rateLimit';
 import rateLimit from '@server/utils/rateLimit';
 import { createHash } from 'crypto';
 import { promises } from 'fs';
@@ -107,10 +108,7 @@ class ImageProxy {
     baseUrl: string,
     options: {
       cacheVersion?: number;
-      rateLimitOptions?: {
-        maxRPS: number;
-        maxRequests: number;
-      };
+      rateLimitOptions?: RateLimitOptions;
     } = {}
   ) {
     this.cacheVersion = options.cacheVersion ?? 1;
@@ -118,7 +116,9 @@ class ImageProxy {
     this.key = key;
 
     if (options.rateLimitOptions) {
-      this.fetch = rateLimit(fetch, options.rateLimitOptions);
+      this.fetch = rateLimit(fetch, {
+        ...options.rateLimitOptions,
+      });
     } else {
       this.fetch = fetch;
     }

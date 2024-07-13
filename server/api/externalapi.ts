@@ -1,3 +1,4 @@
+import type { RateLimitOptions } from '@server/utils/rateLimit';
 import rateLimit from '@server/utils/rateLimit';
 import type NodeCache from 'node-cache';
 
@@ -10,10 +11,7 @@ const DEFAULT_ROLLING_BUFFER = 10000;
 interface ExternalAPIOptions {
   nodeCache?: NodeCache;
   headers?: Record<string, unknown>;
-  rateLimit?: {
-    maxRPS: number;
-    maxRequests: number;
-  };
+  rateLimit?: RateLimitOptions;
 }
 
 class ExternalAPI {
@@ -29,10 +27,7 @@ class ExternalAPI {
     options: ExternalAPIOptions = {}
   ) {
     if (options.rateLimit) {
-      this.fetch = rateLimit(fetch, {
-        maxRequests: options.rateLimit.maxRequests,
-        maxRPS: options.rateLimit.maxRPS,
-      });
+      this.fetch = rateLimit(fetch, options.rateLimit);
     } else {
       this.fetch = fetch;
     }
