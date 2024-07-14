@@ -299,8 +299,8 @@ const TitleCard = ({
           mediaType === 'movie'
             ? 'movie'
             : mediaType === 'collection'
-              ? 'collection'
-              : 'tv'
+            ? 'collection'
+            : 'tv'
         }
         onComplete={requestComplete}
         onUpdating={requestUpdating}
@@ -313,8 +313,8 @@ const TitleCard = ({
             mediaType === 'movie'
               ? 'movie'
               : mediaType === 'collection'
-                ? 'collection'
-                : 'tv'
+              ? 'collection'
+              : 'tv'
           }
           onCancel={closeBlacklistModal}
           onComplete={onClickHideItemBtn}
@@ -322,10 +322,11 @@ const TitleCard = ({
         />
       )}
       <div
-        className={`relative transform-gpu cursor-default overflow-hidden rounded-xl bg-gray-800 bg-cover outline-none ring-1 transition duration-300 ${showDetail
+        className={`relative transform-gpu cursor-default overflow-hidden rounded-xl bg-gray-800 bg-cover outline-none ring-1 transition duration-300 ${
+          showDetail
             ? 'scale-105 shadow-lg ring-gray-500'
             : 'scale-100 shadow ring-gray-700'
-          }`}
+        }`}
         style={{
           paddingBottom: '150%',
         }}
@@ -358,17 +359,18 @@ const TitleCard = ({
           />
           <div className="absolute left-0 right-0 flex items-center justify-between p-2">
             <div
-              className={`pointer-events-none z-40 self-start rounded-full border bg-opacity-80 shadow-md ${mediaType === 'movie' || mediaType === 'collection'
+              className={`pointer-events-none z-40 self-start rounded-full border bg-opacity-80 shadow-md ${
+                mediaType === 'movie' || mediaType === 'collection'
                   ? 'border-blue-500 bg-blue-600'
                   : 'border-purple-600 bg-purple-600'
-                }`}
+              }`}
             >
               <div className="flex h-4 items-center px-2 py-2 text-center text-xs font-medium uppercase tracking-wider text-white sm:h-5">
                 {mediaType === 'movie'
                   ? intl.formatMessage(globalMessages.movie)
                   : mediaType === 'collection'
-                    ? intl.formatMessage(globalMessages.collection)
-                    : intl.formatMessage(globalMessages.tvshow)}
+                  ? intl.formatMessage(globalMessages.collection)
+                  : intl.formatMessage(globalMessages.tvshow)}
               </div>
             </div>
             {showDetail && currentStatus !== MediaStatus.BLACKLISTED && (
@@ -468,8 +470,8 @@ const TitleCard = ({
                   mediaType === 'movie'
                     ? `/movie/${id}`
                     : mediaType === 'collection'
-                      ? `/collection/${id}`
-                      : `/tv/${id}`
+                    ? `/collection/${id}`
+                    : `/tv/${id}`
                 }
                 className="absolute inset-0 h-full w-full cursor-pointer overflow-hidden text-left"
                 style={{
@@ -479,11 +481,12 @@ const TitleCard = ({
               >
                 <div className="flex h-full w-full items-end">
                   <div
-                    className={`px-2 text-white ${!showRequestButton ||
-                        (currentStatus && currentStatus !== MediaStatus.UNKNOWN)
+                    className={`px-2 text-white ${
+                      !showRequestButton ||
+                      (currentStatus && currentStatus !== MediaStatus.UNKNOWN)
                         ? 'pb-2'
                         : 'pb-11'
-                      }`}
+                    }`}
                   >
                     {year && <div className="text-sm font-medium">{year}</div>}
 
@@ -505,8 +508,8 @@ const TitleCard = ({
                       style={{
                         WebkitLineClamp:
                           !showRequestButton ||
-                            (currentStatus &&
-                              currentStatus !== MediaStatus.UNKNOWN)
+                          (currentStatus &&
+                            currentStatus !== MediaStatus.UNKNOWN)
                             ? 5
                             : 3,
                         display: '-webkit-box',
