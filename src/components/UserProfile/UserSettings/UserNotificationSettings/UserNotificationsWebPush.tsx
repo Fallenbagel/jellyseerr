@@ -5,19 +5,22 @@ import NotificationTypeSelector, {
 } from '@app/components/NotificationTypeSelector';
 import { useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
 import type { UserSettingsNotificationsResponse } from '@server/interfaces/api/userSettingsInterfaces';
-import axios from 'axios';
 import { Form, Formik } from 'formik';
 import { useRouter } from 'next/router';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR, { mutate } from 'swr';
 
-const messages = defineMessages({
-  webpushsettingssaved: 'Web push notification settings saved successfully!',
-  webpushsettingsfailed: 'Web push notification settings failed to save.',
-});
+const messages = defineMessages(
+  'components.UserProfile.UserSettings.UserNotificationSettings',
+  {
+    webpushsettingssaved: 'Web push notification settings saved successfully!',
+    webpushsettingsfailed: 'Web push notification settings failed to save.',
+  }
+);
 
 const UserWebPushSettings = () => {
   const intl = useIntl();
@@ -44,18 +47,28 @@ const UserWebPushSettings = () => {
       enableReinitialize
       onSubmit={async (values) => {
         try {
-          await axios.post(`/api/v1/user/${user?.id}/settings/notifications`, {
-            pgpKey: data?.pgpKey,
-            discordId: data?.discordId,
-            pushbulletAccessToken: data?.pushbulletAccessToken,
-            pushoverApplicationToken: data?.pushoverApplicationToken,
-            pushoverUserKey: data?.pushoverUserKey,
-            telegramChatId: data?.telegramChatId,
-            telegramSendSilently: data?.telegramSendSilently,
-            notificationTypes: {
-              webpush: values.types,
-            },
-          });
+          const res = await fetch(
+            `/api/v1/user/${user?.id}/settings/notifications`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                pgpKey: data?.pgpKey,
+                discordId: data?.discordId,
+                pushbulletAccessToken: data?.pushbulletAccessToken,
+                pushoverApplicationToken: data?.pushoverApplicationToken,
+                pushoverUserKey: data?.pushoverUserKey,
+                telegramChatId: data?.telegramChatId,
+                telegramSendSilently: data?.telegramSendSilently,
+                notificationTypes: {
+                  webpush: values.types,
+                },
+              }),
+            }
+          );
+          if (!res.ok) throw new Error();
           mutate('/api/v1/settings/public');
           addToast(intl.formatMessage(messages.webpushsettingssaved), {
             appearance: 'success',

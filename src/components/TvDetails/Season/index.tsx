@@ -1,10 +1,12 @@
 import AirDateBadge from '@app/components/AirDateBadge';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import defineMessages from '@app/utils/defineMessages';
 import type { SeasonWithEpisodes } from '@server/models/Tv';
-import { defineMessages, useIntl } from 'react-intl';
+import Image from 'next/image';
+import { useIntl } from 'react-intl';
 import useSWR from 'swr';
 
-const messages = defineMessages({
+const messages = defineMessages('components.TvDetails.Season', {
   somethingwentwrong: 'Something went wrong while retrieving season data.',
   noepisodes: 'Episode list unavailable.',
 });
@@ -54,11 +56,14 @@ const Season = ({ seasonNumber, tvId }: SeasonProps) => {
                   {episode.overview && <p>{episode.overview}</p>}
                 </div>
                 {episode.stillPath && (
-                  <img
-                    className="h-auto w-full rounded-lg xl:h-32 xl:w-auto"
-                    src={`https://image.tmdb.org/t/p/original/${episode.stillPath}`}
-                    alt=""
-                  />
+                  <div className="relative aspect-video xl:h-32">
+                    <Image
+                      className="rounded-lg object-contain"
+                      src={`https://image.tmdb.org/t/p/original/${episode.stillPath}`}
+                      alt=""
+                      fill
+                    />
+                  </div>
                 )}
               </div>
             );

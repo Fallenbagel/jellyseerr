@@ -9,6 +9,7 @@ import type { DownloadingItem } from '@server/lib/downloadtracker';
 import downloadTracker from '@server/lib/downloadtracker';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
+import { getHostname } from '@server/utils/getHostname';
 import {
   AfterLoad,
   Column,
@@ -151,11 +152,11 @@ class Media {
   @Column({ nullable: true, type: 'varchar' })
   public ratingKey4k?: string | null;
 
-  @Column({ nullable: true })
-  public jellyfinMediaId?: string;
+  @Column({ nullable: true, type: 'varchar' })
+  public jellyfinMediaId?: string | null;
 
-  @Column({ nullable: true })
-  public jellyfinMediaId4k?: string;
+  @Column({ nullable: true, type: 'varchar' })
+  public jellyfinMediaId4k?: string | null;
 
   public serviceUrl?: string;
   public serviceUrl4k?: string;
@@ -213,15 +214,11 @@ class Media {
         getSettings().main.mediaServerType == MediaServerType.EMBY
           ? 'item'
           : 'details';
-      const { serverId, hostname, externalHostname } = getSettings().jellyfin;
-      let jellyfinHost =
+      const { serverId, externalHostname } = getSettings().jellyfin;
+      const jellyfinHost =
         externalHostname && externalHostname.length > 0
           ? externalHostname
-          : hostname;
-
-      jellyfinHost = jellyfinHost.endsWith('/')
-        ? jellyfinHost.slice(0, -1)
-        : jellyfinHost;
+          : getHostname();
 
       if (this.jellyfinMediaId) {
         this.mediaUrl = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId}&context=home&serverId=${serverId}`;

@@ -2,13 +2,14 @@ import Button from '@app/components/Common/Button';
 import JellyfinLogin from '@app/components/Login/JellyfinLogin';
 import PlexLoginButton from '@app/components/PlexLoginButton';
 import { useUser } from '@app/hooks/useUser';
+import defineMessages from '@app/utils/defineMessages';
 import { MediaServerType } from '@server/constants/server';
-import axios from 'axios';
-import type React from 'react';
 import { useEffect, useState } from 'react';
-import { defineMessages, FormattedMessage } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Setup', {
+  welcome: 'Welcome to Jellyseerr',
+  signinMessage: 'Get started by signing in',
   signin: 'Sign in to your account',
   signinWithJellyfin: 'Enter your Jellyfin details',
   signinWithEmby: 'Enter your Emby details',
@@ -39,11 +40,19 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({
 
   useEffect(() => {
     const login = async () => {
-      const response = await axios.post('/api/v1/auth/plex', {
-        authToken: authToken,
+      const res = await fetch('/api/v1/auth/plex', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          authToken: authToken,
+        }),
       });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
 
-      if (response.data?.email) {
+      if (data?.email) {
         revalidate();
       }
     };

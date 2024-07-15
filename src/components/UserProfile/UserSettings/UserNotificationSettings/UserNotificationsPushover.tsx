@@ -4,31 +4,34 @@ import NotificationTypeSelector from '@app/components/NotificationTypeSelector';
 import useSettings from '@app/hooks/useSettings';
 import { useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import type { PushoverSound } from '@server/api/pushover';
 import type { UserSettingsNotificationsResponse } from '@server/interfaces/api/userSettingsInterfaces';
-import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import { useRouter } from 'next/router';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
 
-const messages = defineMessages({
-  pushoversettingssaved: 'Pushover notification settings saved successfully!',
-  pushoversettingsfailed: 'Pushover notification settings failed to save.',
-  pushoverApplicationToken: 'Application API Token',
-  pushoverApplicationTokenTip:
-    '<ApplicationRegistrationLink>Register an application</ApplicationRegistrationLink> for use with {applicationTitle}',
-  pushoverUserKey: 'User or Group Key',
-  pushoverUserKeyTip:
-    'Your 30-character <UsersGroupsLink>user or group identifier</UsersGroupsLink>',
-  sound: 'Notification Sound',
-  deviceDefault: 'Device Default',
-  validationPushoverApplicationToken:
-    'You must provide a valid application token',
-  validationPushoverUserKey: 'You must provide a valid user or group key',
-});
+const messages = defineMessages(
+  'components.UserProfile.UserSettings.UserNotificationSettings',
+  {
+    pushoversettingssaved: 'Pushover notification settings saved successfully!',
+    pushoversettingsfailed: 'Pushover notification settings failed to save.',
+    pushoverApplicationToken: 'Application API Token',
+    pushoverApplicationTokenTip:
+      '<ApplicationRegistrationLink>Register an application</ApplicationRegistrationLink> for use with {applicationTitle}',
+    pushoverUserKey: 'User or Group Key',
+    pushoverUserKeyTip:
+      'Your 30-character <UsersGroupsLink>user or group identifier</UsersGroupsLink>',
+    sound: 'Notification Sound',
+    deviceDefault: 'Device Default',
+    validationPushoverApplicationToken:
+      'You must provide a valid application token',
+    validationPushoverUserKey: 'You must provide a valid user or group key',
+  }
+);
 
 const UserPushoverSettings = () => {
   const intl = useIntl();
@@ -93,18 +96,28 @@ const UserPushoverSettings = () => {
       enableReinitialize
       onSubmit={async (values) => {
         try {
-          await axios.post(`/api/v1/user/${user?.id}/settings/notifications`, {
-            pgpKey: data?.pgpKey,
-            discordId: data?.discordId,
-            pushbulletAccessToken: data?.pushbulletAccessToken,
-            pushoverApplicationToken: values.pushoverApplicationToken,
-            pushoverUserKey: values.pushoverUserKey,
-            telegramChatId: data?.telegramChatId,
-            telegramSendSilently: data?.telegramSendSilently,
-            notificationTypes: {
-              pushover: values.types,
-            },
-          });
+          const res = await fetch(
+            `/api/v1/user/${user?.id}/settings/notifications`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                pgpKey: data?.pgpKey,
+                discordId: data?.discordId,
+                pushbulletAccessToken: data?.pushbulletAccessToken,
+                pushoverApplicationToken: values.pushoverApplicationToken,
+                pushoverUserKey: values.pushoverUserKey,
+                telegramChatId: data?.telegramChatId,
+                telegramSendSilently: data?.telegramSendSilently,
+                notificationTypes: {
+                  pushover: values.types,
+                },
+              }),
+            }
+          );
+          if (!res.ok) throw new Error();
           addToast(intl.formatMessage(messages.pushoversettingssaved), {
             appearance: 'success',
             autoDismiss: true,

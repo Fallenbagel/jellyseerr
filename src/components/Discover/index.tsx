@@ -17,6 +17,7 @@ import MediaSlider from '@app/components/MediaSlider';
 import { encodeURIExtraParams } from '@app/hooks/useDiscover';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { Transition } from '@headlessui/react';
 import {
   ArrowDownOnSquareIcon,
@@ -27,13 +28,12 @@ import {
 } from '@heroicons/react/24/solid';
 import { DiscoverSliderType } from '@server/constants/discover';
 import type DiscoverSlider from '@server/entity/DiscoverSlider';
-import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Discover', {
   discover: 'Discover',
   emptywatchlist:
     'Media added to your <PlexWatchlistSupportLink>Plex Watchlist</PlexWatchlistSupportLink> will appear here.',
@@ -75,7 +75,14 @@ const Discover = () => {
 
   const updateSliders = async () => {
     try {
-      await axios.post('/api/v1/settings/discover', sliders);
+      const res = await fetch('/api/v1/settings/discover', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(sliders),
+      });
+      if (!res.ok) throw new Error();
 
       addToast(intl.formatMessage(messages.updatesuccess), {
         appearance: 'success',
@@ -93,7 +100,10 @@ const Discover = () => {
 
   const resetSliders = async () => {
     try {
-      await axios.get('/api/v1/settings/discover/reset');
+      const res = await fetch('/api/v1/settings/discover/reset', {
+        method: 'GET',
+      });
+      if (!res.ok) throw new Error();
 
       addToast(intl.formatMessage(messages.resetsuccess), {
         appearance: 'success',

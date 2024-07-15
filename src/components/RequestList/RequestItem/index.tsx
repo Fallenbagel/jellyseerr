@@ -7,6 +7,7 @@ import StatusBadge from '@app/components/StatusBadge';
 import useDeepLinks from '@app/hooks/useDeepLinks';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { refreshIntervalHelper } from '@app/utils/refreshIntervalHelper';
 import {
   ArrowPathIcon,
@@ -19,15 +20,15 @@ import { MediaRequestStatus } from '@server/constants/media';
 import type { MediaRequest } from '@server/entity/MediaRequest';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
-import axios from 'axios';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { defineMessages, FormattedRelativeTime, useIntl } from 'react-intl';
+import { FormattedRelativeTime, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 
-const messages = defineMessages({
+const messages = defineMessages('components.RequestList.RequestItem', {
   seasons: '{seasonCount, plural, one {Season} other {Seasons}}',
   failedretry: 'Something went wrong while retrying the request.',
   requested: 'Requested',
@@ -60,7 +61,10 @@ const RequestItemError = ({
   const { hasPermission } = useUser();
 
   const deleteRequest = async () => {
-    await axios.delete(`/api/v1/media/${requestData?.media.id}`);
+    const res = await fetch(`/api/v1/media/${requestData?.media.id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) throw new Error();
     revalidateList();
   };
 
@@ -179,17 +183,22 @@ const RequestItemError = ({
                           />
                         ),
                         user: (
-                          <Link href={`/users/${requestData.requestedBy.id}`}>
-                            <a className="group flex items-center truncate">
-                              <img
+                          <Link
+                            href={`/users/${requestData.requestedBy.id}`}
+                            className="group flex items-center truncate"
+                          >
+                            <span className="avatar-sm ml-1.5">
+                              <Image
                                 src={requestData.requestedBy.avatar}
                                 alt=""
-                                className="avatar-sm ml-1.5"
+                                className="avatar-sm object-cover"
+                                width={20}
+                                height={20}
                               />
-                              <span className="truncate text-sm group-hover:underline">
-                                {requestData.requestedBy.displayName}
-                              </span>
-                            </a>
+                            </span>
+                            <span className="truncate text-sm group-hover:underline">
+                              {requestData.requestedBy.displayName}
+                            </span>
                           </Link>
                         ),
                       })}
@@ -233,17 +242,22 @@ const RequestItemError = ({
                         />
                       ),
                       user: (
-                        <Link href={`/users/${requestData.modifiedBy.id}`}>
-                          <a className="group flex items-center truncate">
-                            <img
+                        <Link
+                          href={`/users/${requestData.modifiedBy.id}`}
+                          className="group flex items-center truncate"
+                        >
+                          <span className="avatar-sm ml-1.5">
+                            <Image
                               src={requestData.modifiedBy.avatar}
                               alt=""
-                              className="avatar-sm ml-1.5"
+                              className="avatar-sm object-cover"
+                              width={20}
+                              height={20}
                             />
-                            <span className="truncate text-sm group-hover:underline">
-                              {requestData.modifiedBy.displayName}
-                            </span>
-                          </a>
+                          </span>
+                          <span className="truncate text-sm group-hover:underline">
+                            {requestData.modifiedBy.displayName}
+                          </span>
                         </Link>
                       ),
                     })}
@@ -307,15 +321,22 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
   const [isRetrying, setRetrying] = useState(false);
 
   const modifyRequest = async (type: 'approve' | 'decline') => {
-    const response = await axios.post(`/api/v1/request/${request.id}/${type}`);
+    const res = await fetch(`/api/v1/request/${request.id}/${type}`, {
+      method: 'POST',
+    });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
 
-    if (response) {
+    if (data) {
       revalidate();
     }
   };
 
   const deleteRequest = async () => {
-    await axios.delete(`/api/v1/request/${request.id}`);
+    const res = await fetch(`/api/v1/request/${request.id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) throw new Error();
 
     revalidateList();
   };
@@ -324,7 +345,12 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
     setRetrying(true);
 
     try {
-      const result = await axios.post(`/api/v1/request/${request.id}/retry`);
+      const res = await fetch(`/api/v1/request/${request.id}/retry`, {
+        method: 'POST',
+      });
+      if (!res.ok) throw new Error();
+      const result = await res.json();
+
       revalidate(result.data);
     } catch (e) {
       addToast(intl.formatMessage(messages.failedretry), {
@@ -381,8 +407,8 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
             <CachedImage
               src={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${title.backdropPath}`}
               alt=""
-              layout="fill"
-              objectFit="cover"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              fill
             />
             <div
               className="absolute inset-0"
@@ -401,21 +427,20 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                   ? `/movie/${requestData.media.tmdbId}`
                   : `/tv/${requestData.media.tmdbId}`
               }
+              className="relative h-auto w-12 flex-shrink-0 scale-100 transform-gpu overflow-hidden rounded-md transition duration-300 hover:scale-105"
             >
-              <a className="relative h-auto w-12 flex-shrink-0 scale-100 transform-gpu overflow-hidden rounded-md transition duration-300 hover:scale-105">
-                <CachedImage
-                  src={
-                    title.posterPath
-                      ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${title.posterPath}`
-                      : '/images/overseerr_poster_not_found.png'
-                  }
-                  alt=""
-                  layout="responsive"
-                  width={600}
-                  height={900}
-                  objectFit="cover"
-                />
-              </a>
+              <CachedImage
+                src={
+                  title.posterPath
+                    ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${title.posterPath}`
+                    : '/images/overseerr_poster_not_found.png'
+                }
+                alt=""
+                sizes="100vw"
+                style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
+                width={600}
+                height={900}
+              />
             </Link>
             <div className="flex flex-col justify-center overflow-hidden pl-2 xl:pl-4">
               <div className="pt-0.5 text-xs font-medium text-white sm:pt-1">
@@ -430,10 +455,9 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                     ? `/movie/${requestData.media.tmdbId}`
                     : `/tv/${requestData.media.tmdbId}`
                 }
+                className="mr-2 min-w-0 truncate text-lg font-bold text-white hover:underline xl:text-xl"
               >
-                <a className="mr-2 min-w-0 truncate text-lg font-bold text-white hover:underline xl:text-xl">
-                  {isMovie(title) ? title.title : title.name}
-                </a>
+                {isMovie(title) ? title.title : title.name}
               </Link>
               {!isMovie(title) && request.seasons.length > 0 && (
                 <div className="card-field">
@@ -527,17 +551,22 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                         />
                       ),
                       user: (
-                        <Link href={`/users/${requestData.requestedBy.id}`}>
-                          <a className="group flex items-center truncate">
-                            <img
+                        <Link
+                          href={`/users/${requestData.requestedBy.id}`}
+                          className="group flex items-center truncate"
+                        >
+                          <span className="avatar-sm ml-1.5">
+                            <Image
                               src={requestData.requestedBy.avatar}
                               alt=""
-                              className="avatar-sm ml-1.5 object-cover"
+                              className="avatar-sm object-cover"
+                              width={20}
+                              height={20}
                             />
-                            <span className="truncate text-sm font-semibold group-hover:text-white group-hover:underline">
-                              {requestData.requestedBy.displayName}
-                            </span>
-                          </a>
+                          </span>
+                          <span className="truncate text-sm font-semibold group-hover:text-white group-hover:underline">
+                            {requestData.requestedBy.displayName}
+                          </span>
                         </Link>
                       ),
                     })}
@@ -581,17 +610,22 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                       />
                     ),
                     user: (
-                      <Link href={`/users/${requestData.modifiedBy.id}`}>
-                        <a className="group flex items-center truncate">
-                          <img
-                            src={requestData.modifiedBy.avatar}
+                      <Link
+                        href={`/users/${requestData.modifiedBy.id}`}
+                        className="group flex items-center truncate"
+                      >
+                        <span className="avatar-sm ml-1.5">
+                          <Image
+                            src={requestData.requestedBy.avatar}
                             alt=""
-                            className="avatar-sm ml-1.5 object-cover"
+                            className="avatar-sm object-cover"
+                            width={20}
+                            height={20}
                           />
-                          <span className="truncate text-sm font-semibold group-hover:text-white group-hover:underline">
-                            {requestData.modifiedBy.displayName}
-                          </span>
-                        </a>
+                        </span>
+                        <span className="truncate text-sm font-semibold group-hover:text-white group-hover:underline">
+                          {requestData.modifiedBy.displayName}
+                        </span>
                       </Link>
                     ),
                   })}

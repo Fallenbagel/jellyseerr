@@ -1,9 +1,13 @@
 name: Publish Snap
 
-on:
-  push:
-    branches:
-      - develop
+# turn off edge snap builds temporarily and make it manual
+
+# on:
+#  push:
+#    branches:
+#      - develop
+
+on: workflow_dispatch
 
 jobs:
   jobs:
@@ -12,7 +16,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.10.0
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -26,10 +30,9 @@ jobs:
         architecture:
           - amd64
           - arm64
-          - armhf
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Prepare
         id: prepare
         run: |
@@ -40,7 +43,7 @@ jobs:
             echo "RELEASE=edge" >> $GITHUB_OUTPUT
           fi
       - name: Set Up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: Configure Git
         run: git config --add safe.directory /data/parts/jellyseerr/src
       - name: Build Snap Package
@@ -49,7 +52,7 @@ jobs:
         with:
           architecture: ${{ matrix.architecture }}
       - name: Upload Snap Package
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jellyseerr-snap-package-${{ matrix.architecture }}
           path: ${{ steps.build.outputs.snap }}

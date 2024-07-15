@@ -4,19 +4,19 @@ import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import LibraryItem from '@app/components/Settings/LibraryItem';
 import useSettings from '@app/hooks/useSettings';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
+import { ApiErrorCode } from '@server/constants/error';
 import { MediaServerType } from '@server/constants/server';
 import type { JellyfinSettings } from '@server/lib/settings';
-import axios from 'axios';
 import { Field, Formik } from 'formik';
-import type React from 'react';
 import { useState } from 'react';
-import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Settings', {
   jellyfinsettings: '{mediaServerName} Settings',
   jellyfinsettingsDescription:
     'Configure the settings for your {mediaServerName} server. {mediaServerName} scans your {mediaServerName} libraries to see what content is available.',
@@ -33,9 +33,17 @@ const messages = defineMessages({
   jellyfinSettingsDescription:
     'Optionally configure the internal and external endpoints for your {mediaServerName} server. In most cases, the external URL is different to the internal URL. A custom password reset URL can also be set for {mediaServerName} login, in case you would like to redirect to a different password reset page.',
   externalUrl: 'External URL',
-  internalUrl: 'Internal URL',
+  hostname: 'Hostname or IP Address',
+  port: 'Port',
+  enablessl: 'Use SSL',
+  urlBase: 'URL Base',
   jellyfinForgotPasswordUrl: 'Forgot Password URL',
-  validationUrl: 'You must provide a valid URL',
+  jellyfinSyncFailedNoLibrariesFound: 'No libraries were found',
+  jellyfinSyncFailedAutomaticGroupedFolders:
+    'Custom authentication with Automatic Library Grouping not supported',
+  jellyfinSyncFailedGenericError:
+    'Something went wrong while syncing libraries',
+  invalidurlerror: 'Unable to connect to {mediaServerName} server.',
   syncing: 'Syncing',
   syncJellyfin: 'Sync Libraries',
   manualscanJellyfin: 'Manual Library Scan',
@@ -46,6 +54,12 @@ const messages = defineMessages({
   librariesRemaining: 'Libraries Remaining: {count}',
   startscan: 'Start Scan',
   cancelscan: 'Cancel Scan',
+  validationUrl: 'You must provide a valid URL',
+  validationHostnameRequired: 'You must provide a valid hostname or IP address',
+  validationPortRequired: 'You must provide a valid port number',
+  validationUrlTrailingSlash: 'URL must not end in a trailing slash',
+  validationUrlBaseLeadingSlash: 'URL base must have a leading slash',
+  validationUrlBaseTrailingSlash: 'URL base must not end in a trailing slash',
 });
 
 interface Library {
@@ -61,6 +75,7 @@ interface SyncStatus {
   currentLibrary?: Library;
   libraries: Library[];
 }
+
 interface SettingsJellyfinProps {
   showAdvancedSettings?: boolean;
   onComplete?: () => void;
@@ -71,6 +86,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
   showAdvancedSettings,
 }) => {
   const [isSyncing, setIsSyncing] = useState(false);
+  const toasts = useToasts();
 
   const {
     data,
@@ -88,18 +104,50 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
   const settings = useSettings();
 
   const JellyfinSettingsSchema = Yup.object().shape({
-    jellyfinExternalUrl: Yup.string().matches(
-      /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
-      intl.formatMessage(messages.validationUrl)
-    ),
-    jellyfinInternalUrl: Yup.string().matches(
-      /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
-      intl.formatMessage(messages.validationUrl)
-    ),
-    jellyfinForgotPasswordUrl: Yup.string().matches(
-      /^(https?:\/\/)?(?:[\w-]+\.)*[\w-]+(?::\d{2,5})?(?:\/[\w-]+)*(?:\/)?$/gm,
-      intl.formatMessage(messages.validationUrl)
-    ),
+    hostname: Yup.string()
+      .nullable()
+      .required(intl.formatMessage(messages.validationHostnameRequired))
+      .matches(
+        /^(((([a-z]|\d|_|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*)?([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])):((([a-z]|\d|_|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*)?([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))@)?(([a-z]|\d|_|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*)?([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])$/i,
+        intl.formatMessage(messages.validationHostnameRequired)
+      ),
+    port: Yup.number().when(['hostname'], {
+      is: (value: unknown) => !!value,
+      then: Yup.number()
+        .typeError(intl.formatMessage(messages.validationPortRequired))
+        .nullable()
+        .required(intl.formatMessage(messages.validationPortRequired)),
+      otherwise: Yup.number()
+        .typeError(intl.formatMessage(messages.validationPortRequired))
+        .nullable(),
+    }),
+    urlBase: Yup.string()
+      .test(
+        'leading-slash',
+        intl.formatMessage(messages.validationUrlBaseLeadingSlash),
+        (value) => !value || value.startsWith('/')
+      )
+      .test(
+        'trailing-slash',
+        intl.formatMessage(messages.validationUrlBaseTrailingSlash),
+        (value) => !value || !value.endsWith('/')
+      ),
+    jellyfinExternalUrl: Yup.string()
+      .nullable()
+      .url(intl.formatMessage(messages.validationUrl))
+      .test(
+        'no-trailing-slash',
+        intl.formatMessage(messages.validationUrlTrailingSlash),
+        (value) => !value || !value.endsWith('/')
+      ),
+    jellyfinForgotPasswordUrl: Yup.string()
+      .nullable()
+      .url(intl.formatMessage(messages.validationUrl))
+      .test(
+        'no-trailing-slash',
+        intl.formatMessage(messages.validationUrlTrailingSlash),
+        (value) => !value || !value.endsWith('/')
+      ),
   });
 
   const activeLibraries =
@@ -118,24 +166,77 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
       params.enable = activeLibraries.join(',');
     }
 
-    await axios.get('/api/v1/settings/jellyfin/library', {
-      params,
-    });
-    setIsSyncing(false);
-    revalidate();
+    try {
+      const searchParams = new URLSearchParams({
+        sync: params.sync ? 'true' : 'false',
+        ...(params.enable ? { enable: params.enable } : {}),
+      });
+      const res = await fetch(
+        `/api/v1/settings/jellyfin/library?${searchParams.toString()}`
+      );
+      if (!res.ok) throw new Error();
+      setIsSyncing(false);
+      revalidate();
+    } catch (e) {
+      if (e.response.data.message === 'SYNC_ERROR_GROUPED_FOLDERS') {
+        toasts.addToast(
+          intl.formatMessage(
+            messages.jellyfinSyncFailedAutomaticGroupedFolders
+          ),
+          {
+            autoDismiss: true,
+            appearance: 'warning',
+          }
+        );
+      } else if (e.response.data.message === 'SYNC_ERROR_NO_LIBRARIES') {
+        toasts.addToast(
+          intl.formatMessage(messages.jellyfinSyncFailedNoLibrariesFound),
+          {
+            autoDismiss: true,
+            appearance: 'error',
+          }
+        );
+      } else {
+        toasts.addToast(
+          intl.formatMessage(messages.jellyfinSyncFailedGenericError),
+          {
+            autoDismiss: true,
+            appearance: 'error',
+          }
+        );
+      }
+      setIsSyncing(false);
+      revalidate();
+    }
   };
 
   const startScan = async () => {
-    await axios.post('/api/v1/settings/jellyfin/sync', {
-      start: true,
+    const res = await fetch('/api/v1/settings/jellyfin/sync', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        start: true,
+      }),
     });
+    if (!res.ok) throw new Error();
+
     revalidateSync();
   };
 
   const cancelScan = async () => {
-    await axios.post('/api/v1/settings/jellyfin/sync', {
-      cancel: true,
+    const res = await fetch('/api/v1/settings/jellyfin/sync', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        cancel: true,
+      }),
     });
+    if (!res.ok) throw new Error();
+
     revalidateSync();
   };
 
@@ -150,15 +251,19 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
           .join(',');
       }
 
-      await axios.get('/api/v1/settings/jellyfin/library', {
-        params,
-      });
+      const searchParams = new URLSearchParams(params.enable ? params : {});
+      const res = await fetch(
+        `/api/v1/settings/jellyfin/library?${searchParams.toString}`
+      );
+      if (!res.ok) throw new Error();
     } else {
-      await axios.get('/api/v1/settings/jellyfin/library', {
-        params: {
-          enable: [...activeLibraries, libraryId].join(','),
-        },
+      const searchParams = new URLSearchParams({
+        enable: [...activeLibraries, libraryId].join(','),
       });
+      const res = await fetch(
+        `/api/v1/settings/jellyfin/library?${searchParams.toString()}`
+      );
+      if (!res.ok) throw new Error();
     }
     if (onComplete) {
       onComplete();
@@ -351,18 +456,31 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
           </div>
           <Formik
             initialValues={{
-              jellyfinInternalUrl: data?.hostname || '',
+              hostname: data?.ip,
+              port: data?.port ?? 8096,
+              useSsl: data?.useSsl,
+              urlBase: data?.urlBase || '',
               jellyfinExternalUrl: data?.externalHostname || '',
               jellyfinForgotPasswordUrl: data?.jellyfinForgotPasswordUrl || '',
             }}
             validationSchema={JellyfinSettingsSchema}
             onSubmit={async (values) => {
               try {
-                await axios.post('/api/v1/settings/jellyfin', {
-                  hostname: values.jellyfinInternalUrl,
-                  externalHostname: values.jellyfinExternalUrl,
-                  jellyfinForgotPasswordUrl: values.jellyfinForgotPasswordUrl,
-                } as JellyfinSettings);
+                const res = await fetch('/api/v1/settings/jellyfin', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    ip: values.hostname,
+                    port: Number(values.port),
+                    useSsl: values.useSsl,
+                    urlBase: values.urlBase,
+                    externalHostname: values.jellyfinExternalUrl,
+                    jellyfinForgotPasswordUrl: values.jellyfinForgotPasswordUrl,
+                  } as JellyfinSettings),
+                });
+                if (!res.ok) throw new Error();
 
                 addToast(
                   intl.formatMessage(messages.jellyfinSettingsSuccess, {
@@ -378,42 +496,123 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                   }
                 );
               } catch (e) {
-                addToast(
-                  intl.formatMessage(
-                    messages.jellyfinSettingsFailure,
-                    mediaServerFormatValues
-                  ),
-                  {
-                    autoDismiss: true,
-                    appearance: 'error',
-                  }
-                );
+                if (e.response?.data?.message === ApiErrorCode.InvalidUrl) {
+                  addToast(
+                    intl.formatMessage(
+                      messages.invalidurlerror,
+                      mediaServerFormatValues
+                    ),
+                    {
+                      autoDismiss: true,
+                      appearance: 'error',
+                    }
+                  );
+                } else {
+                  addToast(
+                    intl.formatMessage(
+                      messages.jellyfinSettingsFailure,
+                      mediaServerFormatValues
+                    ),
+                    {
+                      autoDismiss: true,
+                      appearance: 'error',
+                    }
+                  );
+                }
               } finally {
                 revalidate();
               }
             }}
           >
-            {({ errors, touched, handleSubmit, isSubmitting, isValid }) => {
+            {({
+              errors,
+              touched,
+              values,
+              setFieldValue,
+              handleSubmit,
+              isSubmitting,
+              isValid,
+            }) => {
               return (
                 <form className="section" onSubmit={handleSubmit}>
                   <div className="form-row">
-                    <label htmlFor="jellyfinInternalUrl" className="text-label">
-                      {intl.formatMessage(messages.internalUrl)}
+                    <label htmlFor="hostname" className="text-label">
+                      {intl.formatMessage(messages.hostname)}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <div className="form-input-area">
+                      <div className="form-input-field">
+                        <span className="inline-flex cursor-default items-center rounded-l-md border border-r-0 border-gray-500 bg-gray-800 px-3 text-gray-100 sm:text-sm">
+                          {values.useSsl ? 'https://' : 'http://'}
+                        </span>
+                        <Field
+                          type="text"
+                          inputMode="url"
+                          id="hostname"
+                          name="hostname"
+                          className="rounded-r-only"
+                        />
+                      </div>
+                      {errors.hostname &&
+                        touched.hostname &&
+                        typeof errors.hostname === 'string' && (
+                          <div className="error">{errors.hostname}</div>
+                        )}
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <label htmlFor="port" className="text-label">
+                      {intl.formatMessage(messages.port)}
+                      <span className="label-required">*</span>
+                    </label>
+                    <div className="form-input-area">
+                      <Field
+                        type="text"
+                        inputMode="numeric"
+                        id="port"
+                        name="port"
+                        className="short"
+                      />
+                      {errors.port &&
+                        touched.port &&
+                        typeof errors.port === 'string' && (
+                          <div className="error">{errors.port}</div>
+                        )}
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <label htmlFor="useSsl" className="checkbox-label">
+                      {intl.formatMessage(messages.enablessl)}
+                    </label>
+                    <div className="form-input-area">
+                      <Field
+                        type="checkbox"
+                        id="useSsl"
+                        name="useSsl"
+                        onChange={() => {
+                          setFieldValue('useSsl', !values.useSsl);
+                          setFieldValue('port', values.useSsl ? 8096 : 443);
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <label htmlFor="urlBase" className="text-label">
+                      {intl.formatMessage(messages.urlBase)}
                     </label>
                     <div className="form-input-area">
                       <div className="form-input-field">
                         <Field
                           type="text"
                           inputMode="url"
-                          id="jellyfinInternalUrl"
-                          name="jellyfinInternalUrl"
+                          id="urlBase"
+                          name="urlBase"
                         />
                       </div>
-                      {errors.jellyfinInternalUrl &&
-                        touched.jellyfinInternalUrl && (
-                          <div className="error">
-                            {errors.jellyfinInternalUrl}
-                          </div>
+                      {errors.urlBase &&
+                        touched.urlBase &&
+                        typeof errors.urlBase === 'string' && (
+                          <div className="error">{errors.urlBase}</div>
                         )}
                     </div>
                   </div>

@@ -5,16 +5,16 @@ import PermissionEdit from '@app/components/PermissionEdit';
 import QuotaSelector from '@app/components/QuotaSelector';
 import useSettings from '@app/hooks/useSettings';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
 import { MediaServerType } from '@server/constants/server';
 import type { MainSettings } from '@server/lib/settings';
-import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR, { mutate } from 'swr';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Settings.SettingsUsers', {
   users: 'Users',
   userSettings: 'User Settings',
   userSettingsDescription: 'Configure global and default user settings.',
@@ -83,21 +83,28 @@ const SettingsUsers = () => {
           enableReinitialize
           onSubmit={async (values) => {
             try {
-              await axios.post('/api/v1/settings/main', {
-                localLogin: values.localLogin,
-                newPlexLogin: values.newPlexLogin,
-                defaultQuotas: {
-                  movie: {
-                    quotaLimit: values.movieQuotaLimit,
-                    quotaDays: values.movieQuotaDays,
-                  },
-                  tv: {
-                    quotaLimit: values.tvQuotaLimit,
-                    quotaDays: values.tvQuotaDays,
-                  },
+              const res = await fetch('/api/v1/settings/main', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
                 },
-                defaultPermissions: values.defaultPermissions,
+                body: JSON.stringify({
+                  localLogin: values.localLogin,
+                  newPlexLogin: values.newPlexLogin,
+                  defaultQuotas: {
+                    movie: {
+                      quotaLimit: values.movieQuotaLimit,
+                      quotaDays: values.movieQuotaDays,
+                    },
+                    tv: {
+                      quotaLimit: values.tvQuotaLimit,
+                      quotaDays: values.tvQuotaDays,
+                    },
+                  },
+                  defaultPermissions: values.defaultPermissions,
+                }),
               });
+              if (!res.ok) throw new Error();
               mutate('/api/v1/settings/public');
 
               addToast(intl.formatMessage(messages.toastSettingsSuccess), {

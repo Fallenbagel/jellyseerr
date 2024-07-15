@@ -27,6 +27,7 @@ import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
 import { sortCrewPriority } from '@app/utils/creditHelpers';
+import defineMessages from '@app/utils/defineMessages';
 import { refreshIntervalHelper } from '@app/utils/refreshIntervalHelper';
 import {
   ArrowRightCircleIcon,
@@ -46,16 +47,16 @@ import { IssueStatus } from '@server/constants/issue';
 import { MediaStatus } from '@server/constants/media';
 import { MediaServerType } from '@server/constants/server';
 import type { MovieDetails as MovieDetailsType } from '@server/models/Movie';
-import { hasFlag } from 'country-flag-icons';
+import { countries } from 'country-flag-icons';
 import 'country-flag-icons/3x2/flags.css';
 import { uniqBy } from 'lodash';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import useSWR from 'swr';
 
-const messages = defineMessages({
+const messages = defineMessages('components.MovieDetails', {
   originaltitle: 'Original Title',
   releasedate:
     '{releaseCount, plural, one {Release Date} other {Release Dates}}',
@@ -237,8 +238,12 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
     movieAttributes.push(
       data.genres
         .map((g) => (
-          <Link href={`/discover/movies?genre=${g.id}`} key={`genre-${g.id}`}>
-            <a className="hover:underline">{g.name}</a>
+          <Link
+            href={`/discover/movies?genre=${g.id}`}
+            key={`genre-${g.id}`}
+            className="hover:underline"
+          >
+            {g.name}
           </Link>
         ))
         .reduce((prev, curr) => (
@@ -292,8 +297,8 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
           <CachedImage
             alt=""
             src={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${data.backdropPath}`}
-            layout="fill"
-            objectFit="cover"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            fill
             priority
           />
           <div
@@ -334,7 +339,8 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                 : '/images/overseerr_poster_not_found.png'
             }
             alt=""
-            layout="responsive"
+            sizes="100vw"
+            style={{ width: '100%', height: 'auto' }}
             width={600}
             height={900}
             priority
@@ -432,33 +438,38 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                 </Button>
               </Tooltip>
             )}
-          {hasPermission(Permission.MANAGE_REQUESTS) && data.mediaInfo && (
-            <Tooltip content={intl.formatMessage(messages.managemovie)}>
-              <Button
-                buttonType="ghost"
-                onClick={() => setShowManager(true)}
-                className="relative ml-2 first:ml-0"
-              >
-                <CogIcon className="!mr-0" />
-                {hasPermission(
-                  [Permission.MANAGE_ISSUES, Permission.VIEW_ISSUES],
-                  {
-                    type: 'or',
-                  }
-                ) &&
-                  (
-                    data.mediaInfo?.issues.filter(
-                      (issue) => issue.status === IssueStatus.OPEN
-                    ) ?? []
-                  ).length > 0 && (
-                    <>
-                      <div className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-red-600" />
-                      <div className="absolute -right-1 -top-1 h-3 w-3 animate-ping rounded-full bg-red-600" />
-                    </>
-                  )}
-              </Button>
-            </Tooltip>
-          )}
+          {hasPermission(Permission.MANAGE_REQUESTS) &&
+            data.mediaInfo &&
+            (data.mediaInfo.jellyfinMediaId ||
+              data.mediaInfo.jellyfinMediaId4k ||
+              data.mediaInfo.status !== MediaStatus.UNKNOWN ||
+              data.mediaInfo.status4k !== MediaStatus.UNKNOWN) && (
+              <Tooltip content={intl.formatMessage(messages.managemovie)}>
+                <Button
+                  buttonType="ghost"
+                  onClick={() => setShowManager(true)}
+                  className="relative ml-2 first:ml-0"
+                >
+                  <CogIcon className="!mr-0" />
+                  {hasPermission(
+                    [Permission.MANAGE_ISSUES, Permission.VIEW_ISSUES],
+                    {
+                      type: 'or',
+                    }
+                  ) &&
+                    (
+                      data.mediaInfo?.issues.filter(
+                        (issue) => issue.status === IssueStatus.OPEN
+                      ) ?? []
+                    ).length > 0 && (
+                      <>
+                        <div className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-red-600" />
+                        <div className="absolute -right-1 -top-1 h-3 w-3 animate-ping rounded-full bg-red-600" />
+                      </>
+                    )}
+                </Button>
+              </Tooltip>
+            )}
         </div>
       </div>
       <div className="media-overview">
@@ -476,18 +487,19 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                 {sortedCrew.slice(0, 6).map((person) => (
                   <li key={`crew-${person.job}-${person.id}`}>
                     <span>{person.job}</span>
-                    <Link href={`/person/${person.id}`}>
-                      <a className="crew-name">{person.name}</a>
+                    <Link href={`/person/${person.id}`} className="crew-name">
+                      {person.name}
                     </Link>
                   </li>
                 ))}
               </ul>
               <div className="mt-4 flex justify-end">
-                <Link href={`/movie/${data.id}/crew`}>
-                  <a className="flex items-center text-gray-400 transition duration-300 hover:text-gray-100">
-                    <span>{intl.formatMessage(messages.viewfullcrew)}</span>
-                    <ArrowRightCircleIcon className="ml-1.5 inline-block h-5 w-5" />
-                  </a>
+                <Link
+                  href={`/movie/${data.id}/crew`}
+                  className="flex items-center text-gray-400 transition duration-300 hover:text-gray-100"
+                >
+                  <span>{intl.formatMessage(messages.viewfullcrew)}</span>
+                  <ArrowRightCircleIcon className="ml-1.5 inline-block h-5 w-5" />
                 </Link>
               </div>
             </>
@@ -498,10 +510,9 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                 <Link
                   href={`/discover/movies?keywords=${keyword.id}`}
                   key={`keyword-id-${keyword.id}`}
+                  className="mb-2 mr-2 inline-flex last:mr-0"
                 >
-                  <a className="mb-2 mr-2 inline-flex last:mr-0">
-                    <Tag>{keyword.name}</Tag>
-                  </a>
+                  <Tag>{keyword.name}</Tag>
                 </Link>
               ))}
             </div>
@@ -511,31 +522,33 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
           {data.collection && (
             <div className="mb-6">
               <Link href={`/collection/${data.collection.id}`}>
-                <a>
-                  <div className="group relative z-0 scale-100 transform-gpu cursor-pointer overflow-hidden rounded-lg bg-gray-800 bg-cover bg-center shadow-md ring-1 ring-gray-700 transition duration-300 hover:scale-105 hover:ring-gray-500">
-                    <div className="absolute inset-0 z-0">
-                      <CachedImage
-                        src={`https://image.tmdb.org/t/p/w1440_and_h320_multi_faces/${data.collection.backdropPath}`}
-                        alt=""
-                        layout="fill"
-                        objectFit="cover"
-                      />
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          backgroundImage:
-                            'linear-gradient(180deg, rgba(31, 41, 55, 0.47) 0%, rgba(31, 41, 55, 0.80) 100%)',
-                        }}
-                      />
-                    </div>
-                    <div className="relative z-10 flex h-14 items-center justify-between p-4 text-gray-200 transition duration-300 group-hover:text-white">
-                      <div>{data.collection.name}</div>
-                      <Button buttonSize="sm">
-                        {intl.formatMessage(globalMessages.view)}
-                      </Button>
-                    </div>
+                <div className="group relative z-0 scale-100 transform-gpu cursor-pointer overflow-hidden rounded-lg bg-gray-800 bg-cover bg-center shadow-md ring-1 ring-gray-700 transition duration-300 hover:scale-105 hover:ring-gray-500">
+                  <div className="absolute inset-0 z-0">
+                    <CachedImage
+                      src={`https://image.tmdb.org/t/p/w1440_and_h320_multi_faces/${data.collection.backdropPath}`}
+                      alt=""
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      }}
+                      fill
+                    />
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        backgroundImage:
+                          'linear-gradient(180deg, rgba(31, 41, 55, 0.47) 0%, rgba(31, 41, 55, 0.80) 100%)',
+                      }}
+                    />
                   </div>
-                </a>
+                  <div className="relative z-10 flex h-full items-center justify-between p-4 text-gray-200 transition duration-300 group-hover:text-white">
+                    <div>{data.collection.name}</div>
+                    <Button buttonSize="sm">
+                      {intl.formatMessage(globalMessages.view)}
+                    </Button>
+                  </div>
+                </div>
               </Link>
             </div>
           )}
@@ -732,15 +745,13 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                   <Link
                     href={`/discover/movies/language/${data.originalLanguage}`}
                   >
-                    <a>
-                      {intl.formatDisplayName(data.originalLanguage, {
-                        type: 'language',
-                        fallback: 'none',
-                      }) ??
-                        data.spokenLanguages.find(
-                          (lng) => lng.iso_639_1 === data.originalLanguage
-                        )?.name}
-                    </a>
+                    {intl.formatDisplayName(data.originalLanguage, {
+                      type: 'language',
+                      fallback: 'none',
+                    }) ??
+                      data.spokenLanguages.find(
+                        (lng) => lng.iso_639_1 === data.originalLanguage
+                      )?.name}
                   </Link>
                 </span>
               </div>
@@ -759,7 +770,7 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                         className="flex items-center justify-end"
                         key={`prodcountry-${c.iso_3166_1}`}
                       >
-                        {hasFlag(c.iso_3166_1) && (
+                        {countries.includes(c.iso_3166_1) && (
                           <span
                             className={`mr-1.5 text-xs leading-5 flag:${c.iso_3166_1}`}
                           />
@@ -796,8 +807,9 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                         <Link
                           href={`/discover/movies/studio/${s.id}`}
                           key={`studio-${s.id}`}
+                          className="block"
                         >
-                          <a className="block">{s.name}</a>
+                          {s.name}
                         </Link>
                       );
                     })}
@@ -857,11 +869,13 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
       {data.credits.cast.length > 0 && (
         <>
           <div className="slider-header">
-            <Link href="/movie/[movieId]/cast" as={`/movie/${data.id}/cast`}>
-              <a className="slider-title">
-                <span>{intl.formatMessage(messages.cast)}</span>
-                <ArrowRightCircleIcon />
-              </a>
+            <Link
+              href="/movie/[movieId]/cast"
+              as={`/movie/${data.id}/cast`}
+              className="slider-title"
+            >
+              <span>{intl.formatMessage(messages.cast)}</span>
+              <ArrowRightCircleIcon />
             </Link>
           </div>
           <Slider

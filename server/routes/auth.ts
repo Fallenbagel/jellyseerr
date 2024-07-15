@@ -1,5 +1,6 @@
 import JellyfinAPI from '@server/api/jellyfin';
 import PlexTvAPI from '@server/api/plextv';
+import { ApiErrorCode } from '@server/constants/error';
 import { MediaServerType, ServerType } from '@server/constants/server';
 import { UserType } from '@server/constants/user';
 import { getRepository } from '@server/datasource';
@@ -9,9 +10,12 @@ import { Permission } from '@server/lib/permissions';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
+import { ApiError } from '@server/types/error';
+import { getHostname } from '@server/utils/getHostname';
 import * as EmailValidator from 'email-validator';
 import { Router } from 'express';
 import gravatarUrl from 'gravatar-url';
+import net from 'net';
 
 const authRoutes = Router();
 
@@ -219,6 +223,9 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
     username?: string;
     password?: string;
     hostname?: string;
+    port?: number;
+    urlBase?: string;
+    useSsl?: boolean;
     email?: string;
     serverType?: number;
   };
@@ -227,28 +234,33 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
   if (
     settings.main.mediaServerType !== MediaServerType.JELLYFIN &&
     settings.main.mediaServerType !== MediaServerType.EMBY &&
-    settings.jellyfin.hostname !== ''
+    settings.main.mediaServerType != MediaServerType.NOT_CONFIGURED &&
+    settings.jellyfin.ip !== ''
   ) {
     return res.status(500).json({ error: 'Jellyfin login is disabled' });
   }
 
   if (!body.username) {
     return res.status(500).json({ error: 'You must provide an username' });
-  }
-  if (settings.jellyfin.hostname !== '' && body.hostname) {
+  } else if (settings.jellyfin.ip !== '' && body.hostname) {
     return res
       .status(500)
       .json({ error: 'Jellyfin hostname already configured' });
-  }
-  if (settings.jellyfin.hostname === '' && !body.hostname) {
+  } else if (settings.jellyfin.ip === '' && !body.hostname) {
     return res.status(500).json({ error: 'No hostname provided.' });
   }
 
   try {
     const hostname =
-      settings.jellyfin.hostname !== ''
-        ? settings.jellyfin.hostname
-        : body.hostname ?? '';
+      settings.jellyfin.ip !== ''
+        ? getHostname()
+        : getHostname({
+            useSsl: body.useSsl,
+            ip: body.hostname,
+            port: body.port,
+            urlBase: body.urlBase,
+          });
+
     const { externalHostname } = getSettings().jellyfin;
 
     // Try to find deviceId that corresponds to jellyfin user, else generate a new one
@@ -264,26 +276,43 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         'base64'
       );
     }
+
     // First we need to attempt to log the user in to jellyfin
     const jellyfinserver = new JellyfinAPI(hostname ?? '', undefined, deviceId);
 
-    let jellyfinHost =
+    const jellyfinHost =
       externalHostname && externalHostname.length > 0
         ? externalHostname
         : hostname;
 
-    jellyfinHost = jellyfinHost.endsWith('/')
-      ? jellyfinHost.slice(0, -1)
-      : jellyfinHost;
+    const ip = req.ip;
+    let clientIp;
 
-    const account = await jellyfinserver.login(body.username, body.password);
+    if (ip) {
+      if (net.isIPv4(ip)) {
+        clientIp = ip;
+      } else if (net.isIPv6(ip)) {
+        clientIp = ip.startsWith('::ffff:') ? ip.substring(7) : ip;
+      }
+    }
 
-    // Check if the user already exists
+    const account = await jellyfinserver.login(
+      body.username,
+      body.password,
+      clientIp
+    );
+
+    // Next let's see if the user already exists
     user = await userRepository.findOne({
       where: { jellyfinUserId: account.User.Id },
     });
 
     if (!user && !(await userRepository.count())) {
+      // Check if user is admin on jellyfin
+      if (account.User.Policy.IsAdministrator === false) {
+        throw new ApiError(403, ApiErrorCode.NotAdmin);
+      }
+
       logger.info(
         'Sign-in attempt from Jellyfin user with access to the media server; creating initial admin user for Overseerr',
         {
@@ -330,15 +359,21 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
           throw new Error('select_server_type');
       }
 
-      settings.jellyfin.hostname = body.hostname ?? '';
+      const serverName = await jellyfinserver.getServerName();
+
+      settings.jellyfin.name = serverName;
       settings.jellyfin.serverId = account.User.ServerId;
+      settings.jellyfin.ip = body.hostname ?? '';
+      settings.jellyfin.port = body.port ?? 8096;
+      settings.jellyfin.urlBase = body.urlBase ?? '';
+      settings.jellyfin.useSsl = body.useSsl ?? false;
       settings.save();
       startJobs();
 
       await userRepository.save(user);
     }
     // User already exists, let's update their information
-    else if (body.username === user?.jellyfinUsername) {
+    else if (account.User.Id === user?.jellyfinUserId) {
       logger.info(
         `Found matching ${
           settings.main.mediaServerType === MediaServerType.JELLYFIN
@@ -374,11 +409,11 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         user.username = '';
       }
 
-      // If JELLYFIN_TYPE is set to 'emby' then set mediaServerType to EMBY
-      if (process.env.JELLYFIN_TYPE === 'emby') {
-        settings.main.mediaServerType = MediaServerType.EMBY;
-        settings.save();
-      }
+      // TODO: If JELLYFIN_TYPE is set to 'emby' then set mediaServerType to EMBY
+      // if (process.env.JELLYFIN_TYPE === 'emby') {
+      //   settings.main.mediaServerType = MediaServerType.EMBY;
+      //   settings.save();
+      // }
 
       await userRepository.save(user);
     } else if (!settings.main.newPlexLogin) {
@@ -439,38 +474,68 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
 
     return res.status(200).json(user?.filter() ?? {});
   } catch (e) {
-    if (e.message === 'Unauthorized') {
-      logger.warn(
-        'Failed login attempt from user with incorrect Jellyfin credentials',
-        {
-          label: 'Auth',
-          account: {
-            ip: req.ip,
-            email: body.username,
-            password: '__REDACTED__',
-          },
-        }
-      );
-      return next({
-        status: 401,
-        message: 'Unauthorized',
-      });
-    } else if (e.message === 'add_email') {
-      return next({
-        status: 406,
-        message: 'CREDENTIAL_ERROR_ADD_EMAIL',
-      });
-    } else if (e.message === 'select_server_type') {
-      return next({
-        status: 406,
-        message: 'CREDENTIAL_ERROR_NO_SERVER_TYPE',
-      });
-    } else {
-      logger.error(e.message, { label: 'Auth' });
-      return next({
-        status: 500,
-        message: 'Something went wrong.',
-      });
+    switch (e.errorCode) {
+      case ApiErrorCode.InvalidUrl:
+        logger.error(
+          `The provided ${
+            process.env.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin'
+          } is invalid or the server is not reachable.`,
+          {
+            label: 'Auth',
+            error: e.errorCode,
+            status: e.statusCode,
+            hostname: getHostname({
+              useSsl: body.useSsl,
+              ip: body.hostname,
+              port: body.port,
+              urlBase: body.urlBase,
+            }),
+          }
+        );
+        return next({
+          status: e.statusCode,
+          message: e.errorCode,
+        });
+
+      case ApiErrorCode.InvalidCredentials:
+        logger.warn(
+          'Failed login attempt from user with incorrect Jellyfin credentials',
+          {
+            label: 'Auth',
+            account: {
+              ip: req.ip,
+              email: body.username,
+              password: '__REDACTED__',
+            },
+          }
+        );
+        return next({
+          status: e.statusCode,
+          message: e.errorCode,
+        });
+
+      case ApiErrorCode.NotAdmin:
+        logger.warn(
+          'Failed login attempt from user without admin permissions',
+          {
+            label: 'Auth',
+            account: {
+              ip: req.ip,
+              email: body.username,
+            },
+          }
+        );
+        return next({
+          status: e.statusCode,
+          message: e.errorCode,
+        });
+
+      default:
+        logger.error(e.message, { label: 'Auth' });
+        return next({
+          status: 500,
+          message: 'Something went wrong.',
+        });
     }
   }
 });

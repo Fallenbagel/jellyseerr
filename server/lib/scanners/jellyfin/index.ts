@@ -12,6 +12,7 @@ import type { Library } from '@server/lib/settings';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import AsyncLock from '@server/utils/asyncLock';
+import { getHostname } from '@server/utils/getHostname';
 import { randomUUID as uuid } from 'crypto';
 import { uniqWith } from 'lodash';
 
@@ -83,13 +84,17 @@ class JellyfinScanner {
       }
 
       const has4k = metadata.MediaSources?.some((MediaSource) => {
-        return MediaSource.MediaStreams.some((MediaStream) => {
+        return MediaSource.MediaStreams.filter(
+          (MediaStream) => MediaStream.Type === 'Video'
+        ).some((MediaStream) => {
           return (MediaStream.Width ?? 0) > 2000;
         });
       });
 
       const hasOtherResolution = metadata.MediaSources?.some((MediaSource) => {
-        return MediaSource.MediaStreams.some((MediaStream) => {
+        return MediaSource.MediaStreams.filter(
+          (MediaStream) => MediaStream.Type === 'Video'
+        ).some((MediaStream) => {
           return (MediaStream.Width ?? 0) <= 2000;
         });
       });
@@ -168,9 +173,9 @@ class JellyfinScanner {
           newMedia.jellyfinMediaId =
             hasOtherResolution || (!this.enable4kMovie && has4k)
               ? metadata.Id
-              : undefined;
+              : null;
           newMedia.jellyfinMediaId4k =
-            has4k && this.enable4kMovie ? metadata.Id : undefined;
+            has4k && this.enable4kMovie ? metadata.Id : null;
           await mediaRepository.save(newMedia);
           this.log(`Saved ${metadata.Name}`);
         }
@@ -461,8 +466,9 @@ class JellyfinScanner {
               tmdbId: tvShow.id,
               tvdbId: tvShow.external_ids.tvdb_id,
               mediaAddedAt: new Date(metadata.DateCreated ?? ''),
-              jellyfinMediaId: Id,
-              jellyfinMediaId4k: Id,
+              jellyfinMediaId: isAllStandardSeasons ? Id : null,
+              jellyfinMediaId4k:
+                isAll4kSeasons && this.enable4kShow ? Id : null,
               status: isAllStandardSeasons
                 ? MediaStatus.AVAILABLE
                 : newSeasons.some(
@@ -590,7 +596,7 @@ class JellyfinScanner {
       }
 
       this.jfClient = new JellyfinAPI(
-        settings.jellyfin.hostname ?? '',
+        getHostname(),
         admin.jellyfinAuthToken,
         admin.jellyfinDeviceId
       );

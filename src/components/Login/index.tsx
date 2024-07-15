@@ -6,17 +6,18 @@ import LocalLogin from '@app/components/Login/LocalLogin';
 import PlexLoginButton from '@app/components/PlexLoginButton';
 import useSettings from '@app/hooks/useSettings';
 import { useUser } from '@app/hooks/useUser';
+import defineMessages from '@app/utils/defineMessages';
 import { Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { MediaServerType } from '@server/constants/server';
-import axios from 'axios';
 import { useRouter } from 'next/dist/client/router';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import useSWR from 'swr';
 import JellyfinLogin from './JellyfinLogin';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Login', {
   signin: 'Sign In',
   signinheader: 'Sign in to continue',
   signinwithplex: 'Use your Plex account',
@@ -40,9 +41,14 @@ const Login = () => {
     const login = async () => {
       setProcessing(true);
       try {
-        const response = await axios.post('/api/v1/auth/plex', { authToken });
+        const res = await fetch('/api/v1/auth/plex', {
+          method: 'POST',
+          body: JSON.stringify({ authToken }),
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
 
-        if (response.data?.id) {
+        if (data?.id) {
           revalidate();
         }
       } catch (e) {
@@ -93,8 +99,10 @@ const Login = () => {
         <LanguagePicker />
       </div>
       <div className="relative z-40 mt-10 flex flex-col items-center px-4 sm:mx-auto sm:w-full sm:max-w-md">
-        <img src="/logo_stacked.svg" className="mb-10 max-w-full" alt="Logo" />
-        <h2 className="mt-2 text-center text-3xl font-extrabold leading-9 text-gray-100">
+        <div className="relative h-48 w-full max-w-full">
+          <Image src="/logo_stacked.svg" alt="Logo" fill />
+        </div>
+        <h2 className="mt-12 text-center text-3xl font-extrabold leading-9 text-gray-100">
           {intl.formatMessage(messages.signinheader)}
         </h2>
       </div>
