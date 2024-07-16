@@ -117,6 +117,7 @@ const ManageSlideOver = ({
       });
       if (!res.ok) throw new Error();
       revalidate();
+      onClose();
     }
   };
 
