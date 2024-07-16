@@ -294,6 +294,7 @@ const ManageSlideOver = ({
               <BlacklistBlock
                 blacklistItem={data.mediaInfo.blacklist}
                 onUpdate={() => revalidate()}
+                onDelete={() => onClose()}
               />
             </div>
           </div>

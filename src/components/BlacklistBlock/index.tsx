@@ -19,9 +19,14 @@ const messages = defineMessages('component.BlacklistBlock', {
 interface BlacklistBlockProps {
   blacklistItem: Blacklist;
   onUpdate?: () => void;
+  onDelete?: () => void;
 }
 
-const BlacklistBlock = ({ blacklistItem, onUpdate }: BlacklistBlockProps) => {
+const BlacklistBlock = ({
+  blacklistItem,
+  onUpdate,
+  onDelete,
+}: BlacklistBlockProps) => {
   const { user } = useUser();
   const intl = useIntl();
   const [isUpdating, setIsUpdating] = useState(false);
@@ -51,9 +56,8 @@ const BlacklistBlock = ({ blacklistItem, onUpdate }: BlacklistBlockProps) => {
       });
     }
 
-    if (onUpdate) {
-      onUpdate();
-    }
+    onUpdate && onUpdate();
+    onDelete && onDelete();
 
     setIsUpdating(false);
   };
