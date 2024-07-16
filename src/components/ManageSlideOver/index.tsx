@@ -134,6 +134,7 @@ const ManageSlideOver = ({
       if (!res2.ok) throw new Error();
 
       revalidate();
+      onClose();
     }
   };
 
