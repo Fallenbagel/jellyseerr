@@ -89,10 +89,26 @@ const UserGeneralSettings = () => {
     user ? `/api/v1/user/${user?.id}/settings/main` : null
   );
 
+  /**
+   * Function to build a Yup validation according to the app settings: `localLogin`
+   *
+   * A valid email will be required when `localLogin` is `true`
+   */
+  function buildEmailFieldValidation() {
+    const baseValidation = Yup.string().required(
+      intl.formatMessage(messages.validationemailrequired)
+    );
+
+    if (currentSettings.localLogin) {
+      return baseValidation.email(
+        intl.formatMessage(messages.validationemailformat)
+      );
+    }
+    return baseValidation;
+  }
+
   const UserGeneralSettingsSchema = Yup.object().shape({
-    email: Yup.string()
-      .email(intl.formatMessage(messages.validationemailformat))
-      .required(intl.formatMessage(messages.validationemailrequired)),
+    email: buildEmailFieldValidation(),
     discordId: Yup.string()
       .nullable()
       .matches(/^\d{17,19}$/, intl.formatMessage(messages.validationDiscordId)),
@@ -236,8 +252,8 @@ const UserGeneralSettings = () => {
                     {user?.id === 1
                       ? intl.formatMessage(messages.owner)
                       : hasPermission(Permission.ADMIN)
-                      ? intl.formatMessage(messages.admin)
-                      : intl.formatMessage(messages.user)}
+                        ? intl.formatMessage(messages.admin)
+                        : intl.formatMessage(messages.user)}
                   </div>
                 </div>
               </div>
