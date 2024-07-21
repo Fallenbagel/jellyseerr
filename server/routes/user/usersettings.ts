@@ -1,4 +1,6 @@
+import JellyfinAPI from '@server/api/jellyfin';
 import { ApiErrorCode } from '@server/constants/error';
+import { MediaServerType } from '@server/constants/server';
 import { UserType } from '@server/constants/user';
 import { getRepository } from '@server/datasource';
 import { User } from '@server/entity/User';
@@ -12,8 +14,22 @@ import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
 import { ApiError } from '@server/types/error';
+import { getHostname } from '@server/utils/getHostname';
 import { Router } from 'express';
+import net from 'net';
 import { canMakePermissionsChange } from '.';
+
+const isOwnProfile = (): Middleware => {
+  return (req, res, next) => {
+    if (req.user?.id !== Number(req.params.id)) {
+      return next({
+        status: 403,
+        message: "You do not have permission to view this user's settings.",
+      });
+    }
+    next();
+  };
+};
 
 const isOwnProfileOrAdmin = (): Middleware => {
   const authMiddleware: Middleware = (req, res, next) => {
@@ -289,6 +305,127 @@ userSettingsRoutes.post<
     next({ status: 500, message: e.message });
   }
 });
+
+userSettingsRoutes.post<{ username: string; password: string }>(
+  '/linked-accounts/jellyfin',
+  isOwnProfile(),
+  async (req, res, next) => {
+    const settings = getSettings();
+    const userRepository = getRepository(User);
+
+    if (!req.user) {
+      return next({ status: 401, message: 'Unauthorized' });
+    }
+    // Make sure jellyfin login is enabled
+    if (settings.main.mediaServerType !== MediaServerType.JELLYFIN) {
+      return res.status(500).json({ error: 'Jellyfin login is disabled' });
+    }
+
+    // Do not allow linking of an already linked account
+    if (
+      await userRepository.exist({
+        where: { jellyfinUsername: req.body.username },
+      })
+    ) {
+      return res.status(422).json({
+        error:
+          'The specified Jellyfin account is already linked to a Jellyseerr user',
+      });
+    }
+
+    const hostname = getHostname();
+    const deviceId = Buffer.from(
+      `BOT_overseerr_${req.user.username ?? ''}`
+    ).toString('base64');
+
+    const jellyfinserver = new JellyfinAPI(hostname, undefined, deviceId);
+
+    const ip = req.ip;
+    let clientIp;
+    if (ip) {
+      if (net.isIPv4(ip)) {
+        clientIp = ip;
+      } else if (net.isIPv6(ip)) {
+        clientIp = ip.startsWith('::ffff:') ? ip.substring(7) : ip;
+      }
+    }
+
+    try {
+      const account = await jellyfinserver.login(
+        req.body.username,
+        req.body.password,
+        clientIp
+      );
+
+      // Do not allow linking of an already linked account
+      if (
+        await userRepository.exist({
+          where: { jellyfinUserId: account.User.Id },
+        })
+      ) {
+        return res.status(422).json({
+          error:
+            'The specified Jellyfin account is already linked to a Jellyseerr user',
+        });
+      }
+
+      const user = req.user;
+
+      // valid jellyfin user found, link to current user
+      user.userType = UserType.JELLYFIN;
+      user.jellyfinUserId = account.User.Id;
+      user.jellyfinUsername = account.User.Name;
+      user.jellyfinAuthToken = account.AccessToken;
+      user.jellyfinDeviceId = deviceId;
+      await userRepository.save(user);
+
+      return res.status(204).send();
+    } catch (e) {
+      logger.error('Failed to link Jellyfin account to user.', {
+        label: 'API',
+        ip: req.ip,
+        error: e,
+      });
+      if (
+        e instanceof ApiError &&
+        (e.errorCode == ApiErrorCode.InvalidCredentials ||
+          e.errorCode == ApiErrorCode.NotAdmin)
+      )
+        return next({ status: 401, message: 'Unauthorized' });
+
+      return next({ status: 500 });
+    }
+  }
+);
+
+userSettingsRoutes.delete<{ id: string }>(
+  '/linked-accounts/jellyfin',
+  isOwnProfileOrAdmin(),
+  async (req, res, next) => {
+    const userRepository = getRepository(User);
+
+    try {
+      const user = await userRepository.findOne({
+        where: { id: Number(req.params.id) },
+      });
+
+      if (!user) {
+        return next({ status: 404, message: 'User not found.' });
+      }
+
+      user.userType = UserType.LOCAL;
+      user.jellyfinUserId = null;
+      user.jellyfinUsername = null;
+      user.jellyfinAuthToken = null;
+      user.jellyfinDeviceId = null;
+      await userRepository.save(user);
+
+      return res.status(204).send();
+    } catch (e) {
+      next({ status: 500, message: e.message });
+    }
+  }
+);
 
 userSettingsRoutes.get<{ id: string }, UserSettingsNotificationsResponse>(
   '/notifications',
