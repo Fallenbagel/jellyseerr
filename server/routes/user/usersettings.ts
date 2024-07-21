@@ -1,4 +1,5 @@
 import JellyfinAPI from '@server/api/jellyfin';
+import PlexTvAPI from '@server/api/plextv';
 import { ApiErrorCode } from '@server/constants/error';
 import { MediaServerType } from '@server/constants/server';
 import { UserType } from '@server/constants/user';
@@ -305,6 +306,81 @@ userSettingsRoutes.post<
     next({ status: 500, message: e.message });
   }
 });
+
+userSettingsRoutes.post<{ authToken: string }>(
+  '/linked-accounts/plex',
+  isOwnProfile(),
+  async (req, res, next) => {
+    const settings = getSettings();
+    const userRepository = getRepository(User);
+
+    if (!req.user) {
+      return next({ status: 404, message: 'Unauthorized' });
+    }
+    // Make sure Plex login is enabled
+    if (settings.main.mediaServerType !== MediaServerType.PLEX) {
+      return res.status(500).json({ error: 'Plex login is disabled' });
+    }
+
+    // First we need to use this auth token to get the user's email from plex.tv
+    const plextv = new PlexTvAPI(req.body.authToken);
+    const account = await plextv.getUser();
+
+    // Do not allow linking of an already linked account
+    if (await userRepository.exist({ where: { plexId: account.id } })) {
+      return res.status(422).json({
+        error: 'This Plex account is already linked to a Jellyseerr user',
+      });
+    }
+
+    const user = req.user;
+
+    // Emails do not match
+    if (user.email !== account.email) {
+      return res.status(422).json({
+        error:
+          'This Plex account is registered under a different email address.',
+      });
+    }
+
+    // valid plex user found, link to current user
+    user.userType = UserType.PLEX;
+    user.plexId = account.id;
+    user.plexUsername = account.username;
+    user.plexToken = account.authToken;
+    await userRepository.save(user);
+
+    return res.status(204).send();
+  }
+);
+
+userSettingsRoutes.delete<{ id: string }>(
+  '/linked-accounts/plex',
+  isOwnProfileOrAdmin(),
+  async (req, res, next) => {
+    const userRepository = getRepository(User);
+
+    try {
+      const user = await userRepository.findOne({
+        where: { id: Number(req.params.id) },
+      });
+
+      if (!user) {
+        return next({ status: 404, message: 'User not found.' });
+      }
+
+      user.userType = UserType.LOCAL;
+      user.plexId = null;
+      user.plexUsername = null;
+      user.plexToken = null;
+      await userRepository.save(user);
+
+      return res.status(204).send();
+    } catch (e) {
+      next({ status: 500, message: e.message });
+    }
+  }
+);
 
 userSettingsRoutes.post<{ username: string; password: string }>(
   '/linked-accounts/jellyfin',

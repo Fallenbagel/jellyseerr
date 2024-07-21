@@ -7,7 +7,9 @@ import PageTitle from '@app/components/Common/PageTitle';
 import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import { RequestError } from '@app/types/error';
 import defineMessages from '@app/utils/defineMessages';
+import PlexOAuth from '@app/utils/plex';
 import { TrashIcon } from '@heroicons/react/24/solid';
 import { MediaServerType } from '@server/constants/server';
 import { useRouter } from 'next/router';
@@ -25,9 +27,14 @@ const messages = defineMessages(
       'You do not have any external accounts linked to your account.',
     noPermissionDescription:
       "You do not have permission to modify this user's linked accounts.",
+    plexErrorUnauthorized: 'Unable to connect to Plex using your credentials',
+    plexErrorExists: 'This account is already linked to a Plex user',
+    errorUnknown: 'An unknown error occurred',
     deleteFailed: 'Unable to delete linked account.',
   }
 );
+
+const plexOAuth = new PlexOAuth();
 
 const enum LinkedAccountType {
   Plex,
@@ -61,13 +68,50 @@ const UserLinkedAccountsSettings = () => {
       : []),
   ];
 
+  const linkPlexAccount = async () => {
+    setError(null);
+    try {
+      const authToken = await plexOAuth.login();
+      const res = await fetch(
+        `/api/v1/user/${user?.id}/settings/linked-accounts/plex`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ authToken }),
+        }
+      );
+      if (!res.ok) {
+        throw new RequestError(res);
+      }
+
+      await revalidateUser();
+    } catch (e) {
+      if (e instanceof RequestError && e.status == 401) {
+        setError(intl.formatMessage(messages.plexErrorUnauthorized));
+      } else if (e instanceof RequestError && e.status == 422) {
+        setError(intl.formatMessage(messages.plexErrorExists));
+      } else {
+        setError(intl.formatMessage(messages.errorServer));
+      }
+    }
+  };
+
   const linkable = [
+    {
+      name: 'Plex',
+      action: () => {
+        plexOAuth.preparePopup();
+        setTimeout(() => linkPlexAccount(), 1500);
+      },
+      hide:
+        settings.currentSettings.mediaServerType != MediaServerType.PLEX ||
+        accounts.some((a) => a.type == LinkedAccountType.Plex),
+    },
     {
       name: 'Jellyfin',
       action: () => setShowJellyfinModal(true),
       hide:
         settings.currentSettings.mediaServerType != MediaServerType.JELLYFIN ||
-        accounts.find((a) => a.type == LinkedAccountType.Jellyfin),
+        accounts.some((a) => a.type == LinkedAccountType.Jellyfin),
     },
   ].filter((l) => !l.hide);
 
@@ -82,7 +126,7 @@ const UserLinkedAccountsSettings = () => {
       setError(intl.formatMessage(messages.deleteFailed));
     }
 
-    revalidateUser();
+    await revalidateUser();
   };
 
   if (
