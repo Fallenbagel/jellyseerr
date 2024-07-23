@@ -53,5 +53,7 @@
     "components.Discover.DiscoverMovies.sortTitleAsc": "Naslov (a-ž) ↓",
     "components.Discover.CreateSlider.providetmdbgenreid": "Navedite ID žanra TMDB",
     "components.Discover.DiscoverTv.sortTitleDesc": "Naslov (a-ž) ↑",
-    "components.Discover.DiscoverSliderEdit.remove": "Odstrani"
+    "components.Discover.DiscoverSliderEdit.remove": "Odstrani",
+    "components.Discover.DiscoverTv.sortTmdbRatingAsc": "Ocena TMDB ↓",
+    "components.Discover.DiscoverTvGenre.genreSeries": "{genre} Series"
 }
