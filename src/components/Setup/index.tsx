@@ -178,7 +178,7 @@ const Setup = () => {
                 </div>
                 <div className="flex flex-col divide-y divide-gray-600 rounded-r border border-gray-600 py-2">
                   <div className="mb-2 flex flex-1 items-center justify-center py-2 px-2">
-                    <EmbyLogo className="h-10" />
+                    <EmbyLogo className="h-9" />
                   </div>
                   <div className="px-2 pt-2">
                     <button
