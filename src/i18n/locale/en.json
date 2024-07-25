@@ -1050,7 +1050,7 @@
   "components.Setup.setup": "Setup",
   "components.Setup.signin": "Sign In",
   "components.Setup.signinMessage": "Get started by signing in",
-  "components.Setup.signinWithEmby": "Enter yourtEmby details",
+  "components.Setup.signinWithEmby": "Enter your Emby details",
   "components.Setup.signinWithJellyfin": "Enter your Jellyfin details",
   "components.Setup.signinWithPlex": "Enter your Plex details",
   "components.Setup.subtitle": "Get started by choosing your media server",
