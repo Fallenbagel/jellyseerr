@@ -31,7 +31,7 @@ const messages = defineMessages('components.Setup', {
   finish: 'Finish Setup',
   finishing: 'Finishing…',
   continue: 'Continue',
-  servertype: 'Choose server type',
+  servertype: 'Choose Server Type',
   signin: 'Sign In',
   configuremediaserver: 'Configure Media Server',
   configureservices: 'Configure Services',
