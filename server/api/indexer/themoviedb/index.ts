@@ -1,4 +1,5 @@
 import ExternalAPI from '@server/api/externalapi';
+import type { TvShowIndexer } from '@server/api/indexer';
 import cacheManager from '@server/lib/cache';
 import { sortBy } from 'lodash';
 import type {
@@ -97,7 +98,7 @@ interface DiscoverTvOptions {
   watchProviders?: string;
 }
 
-class TheMovieDb extends ExternalAPI {
+class TheMovieDb extends ExternalAPI implements TvShowIndexer {
   private region?: string;
   private originalLanguage?: string;
   constructor({

@@ -37,6 +37,9 @@ export class UserSettings {
   public originalLanguage?: string;
 
   @Column({ nullable: true })
+  public tvdbToken?: string;
+
+  @Column({ nullable: true })
   public pgpKey?: string;
 
   @Column({ nullable: true })

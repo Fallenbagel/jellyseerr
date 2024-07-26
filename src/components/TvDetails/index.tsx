@@ -41,8 +41,8 @@ import {
   PlayIcon,
 } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
+import { ANIME_KEYWORD_ID } from '@server/api/indexer/themoviedb/constants';
 import type { RTRating } from '@server/api/rating/rottentomatoes';
-import { ANIME_KEYWORD_ID } from '@server/api/themoviedb/constants';
 import { IssueStatus } from '@server/constants/issue';
 import { MediaRequestStatus, MediaStatus } from '@server/constants/media';
 import { MediaServerType } from '@server/constants/server';
@@ -792,6 +792,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                             <Season
                               tvId={data.id}
                               seasonNumber={season.seasonNumber}
+                              seasonId={season.id}
                             />
                           </Disclosure.Panel>
                         </Transition>
