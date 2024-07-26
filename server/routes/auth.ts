@@ -446,7 +446,6 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
 
     return res.status(200).json(user?.filter() ?? {});
   } catch (e) {
-    console.error(e);
     switch (e.errorCode) {
       case ApiErrorCode.InvalidUrl:
         logger.error(
