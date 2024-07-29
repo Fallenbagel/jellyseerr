@@ -77,7 +77,7 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
         }),
       });
       if (!res.ok) throw new Error();
-      const { data: createdUsers } = await res.json();
+      const createdUsers = await res.json();
 
       if (!createdUsers.length) {
         throw new Error('No users were imported from Jellyfin.');

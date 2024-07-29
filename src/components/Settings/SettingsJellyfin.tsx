@@ -174,11 +174,18 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
       const res = await fetch(
         `/api/v1/settings/jellyfin/library?${searchParams.toString()}`
       );
-      if (!res.ok) throw new Error();
+      if (!res.ok) throw new Error(res.statusText, { cause: res });
       setIsSyncing(false);
       revalidate();
     } catch (e) {
-      if (e.response.data.message === 'SYNC_ERROR_GROUPED_FOLDERS') {
+      let errorData;
+      try {
+        errorData = await e.cause?.text();
+        errorData = JSON.parse(errorData);
+      } catch {
+        /* empty */
+      }
+      if (errorData?.message === 'SYNC_ERROR_GROUPED_FOLDERS') {
         toasts.addToast(
           intl.formatMessage(
             messages.jellyfinSyncFailedAutomaticGroupedFolders
@@ -188,7 +195,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
             appearance: 'warning',
           }
         );
-      } else if (e.response.data.message === 'SYNC_ERROR_NO_LIBRARIES') {
+      } else if (errorData?.message === 'SYNC_ERROR_NO_LIBRARIES') {
         toasts.addToast(
           intl.formatMessage(messages.jellyfinSyncFailedNoLibrariesFound),
           {
@@ -480,7 +487,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                     jellyfinForgotPasswordUrl: values.jellyfinForgotPasswordUrl,
                   } as JellyfinSettings),
                 });
-                if (!res.ok) throw new Error();
+                if (!res.ok) throw new Error(res.statusText, { cause: res });
 
                 addToast(
                   intl.formatMessage(messages.jellyfinSettingsSuccess, {
@@ -496,7 +503,14 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                   }
                 );
               } catch (e) {
-                if (e.response?.data?.message === ApiErrorCode.InvalidUrl) {
+                let errorData;
+                try {
+                  errorData = await e.cause?.text();
+                  errorData = JSON.parse(errorData);
+                } catch {
+                  /* empty */
+                }
+                if (errorData?.message === ApiErrorCode.InvalidUrl) {
                   addToast(
                     intl.formatMessage(
                       messages.invalidurlerror,

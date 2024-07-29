@@ -328,7 +328,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         case MediaServerType.EMBY:
           settings.main.mediaServerType = MediaServerType.EMBY;
           user = new User({
-            email: body.email,
+            email: body.email || account.User.Name,
             jellyfinUsername: account.User.Name,
             jellyfinUserId: account.User.Id,
             jellyfinDeviceId: deviceId,
@@ -336,14 +336,17 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
             permissions: Permission.ADMIN,
             avatar: account.User.PrimaryImageTag
               ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
-              : gravatarUrl(body.email ?? '', { default: 'mm', size: 200 }),
+              : gravatarUrl(body.email || account.User.Name, {
+                  default: 'mm',
+                  size: 200,
+                }),
             userType: UserType.EMBY,
           });
           break;
         case MediaServerType.JELLYFIN:
           settings.main.mediaServerType = MediaServerType.JELLYFIN;
           user = new User({
-            email: body.email,
+            email: body.email || account.User.Name,
             jellyfinUsername: account.User.Name,
             jellyfinUserId: account.User.Id,
             jellyfinDeviceId: deviceId,
@@ -351,7 +354,10 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
             permissions: Permission.ADMIN,
             avatar: account.User.PrimaryImageTag
               ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
-              : gravatarUrl(body.email ?? '', { default: 'mm', size: 200 }),
+              : gravatarUrl(body.email || account.User.Name, {
+                  default: 'mm',
+                  size: 200,
+                }),
             userType: UserType.JELLYFIN,
           });
           break;
@@ -398,7 +404,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
       if (account.User.PrimaryImageTag) {
         user.avatar = `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`;
       } else {
-        user.avatar = gravatarUrl(body.email ?? '', {
+        user.avatar = gravatarUrl(user.email || account.User.Name, {
           default: 'mm',
           size: 200,
         });
@@ -440,10 +446,6 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         }
       );
 
-      if (!body.email) {
-        throw new Error('add_email');
-      }
-
       user = new User({
         email: body.email,
         jellyfinUsername: account.User.Name,
@@ -453,7 +455,10 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         permissions: settings.main.defaultPermissions,
         avatar: account.User.PrimaryImageTag
           ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
-          : gravatarUrl(body.email ?? '', { default: 'mm', size: 200 }),
+          : gravatarUrl(body.email || account.User.Name, {
+              default: 'mm',
+              size: 200,
+            }),
         userType:
           settings.main.mediaServerType === MediaServerType.JELLYFIN
             ? UserType.JELLYFIN
