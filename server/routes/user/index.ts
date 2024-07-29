@@ -41,7 +41,19 @@ router.get('/', async (req, res, next) => {
         break;
       case 'displayname':
         query = query.orderBy(
-          "(CASE WHEN (user.username IS NULL OR user.username = '') THEN (CASE WHEN (user.plexUsername IS NULL OR user.plexUsername = '') THEN user.email ELSE LOWER(user.plexUsername) END) ELSE LOWER(user.username) END)",
+          `CASE WHEN (user.username IS NULL OR user.username = '') THEN (
+             CASE WHEN (user.plexUsername IS NULL OR user.plexUsername = '') THEN (
+               CASE WHEN (user.jellyfinUsername IS NULL OR user.jellyfinUsername = '') THEN
+                 user.email
+               ELSE
+                 LOWER(user.jellyfinUsername)
+               END)
+             ELSE
+               LOWER(user.jellyfinUsername)
+             END)
+           ELSE
+             LOWER(user.username)
+           END`,
           'ASC'
         );
         break;

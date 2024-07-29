@@ -98,9 +98,9 @@ userSettingsRoutes.post<
     }
 
     user.username = req.body.username;
-    user.email =
-      req.body.email ||
-      ((user.plexUsername || user.jellyfinUsername) as string);
+    if (user.jellyfinUsername) {
+      user.email = req.body.email || user.jellyfinUsername || user.email;
+    }
 
     // Update quota values only if the user has the correct permissions
     if (
