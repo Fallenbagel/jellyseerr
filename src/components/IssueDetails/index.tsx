@@ -264,9 +264,8 @@ const IssueDetails = () => {
           </div>
           <h1>
             <Link
-              href={`/${
-                issueData.media.mediaType === MediaType.MOVIE ? 'movie' : 'tv'
-              }/${data.id}`}
+              href={`/${issueData.media.mediaType === MediaType.MOVIE ? 'movie' : 'tv'
+                }/${data.id}`}
               className="hover:underline"
             >
               {title}
@@ -287,10 +286,10 @@ const IssueDetails = () => {
                   }
                   className="group ml-1 inline-flex h-full items-center xl:ml-1.5"
                 >
-                  <Image
-                    className="mr-0.5 h-5 w-5 scale-100 transform-gpu rounded-full object-cover transition duration-300 group-hover:scale-105 xl:mr-1 xl:h-6 xl:w-6"
-                    src={issueData.createdBy.avatar}
+                  <CachedImage
+                    src={`/avatarproxy/${issueData.createdBy.avatar}`}
                     alt=""
+                    className="mr-0.5 h-5 w-5 scale-100 transform-gpu rounded-full object-cover transition duration-300 group-hover:scale-105 xl:mr-1 xl:h-6 xl:w-6"
                     width={20}
                     height={20}
                   />
@@ -303,7 +302,7 @@ const IssueDetails = () => {
                 <FormattedRelativeTime
                   value={Math.floor(
                     (new Date(issueData.createdAt).getTime() - Date.now()) /
-                      1000
+                    1000
                   )}
                   updateIntervalInSeconds={1}
                   numeric="auto"
@@ -368,7 +367,7 @@ const IssueDetails = () => {
                   <FormattedRelativeTime
                     value={Math.floor(
                       (new Date(issueData.updatedAt).getTime() - Date.now()) /
-                        1000
+                      1000
                     )}
                     updateIntervalInSeconds={1}
                     numeric="auto"
@@ -389,16 +388,16 @@ const IssueDetails = () => {
                   <PlayIcon />
                   <span>
                     {settings.currentSettings.mediaServerType ===
-                    MediaServerType.EMBY
+                      MediaServerType.EMBY
                       ? intl.formatMessage(messages.playonplex, {
-                          mediaServerName: 'Emby',
-                        })
+                        mediaServerName: 'Emby',
+                      })
                       : settings.currentSettings.mediaServerType ===
                         MediaServerType.PLEX
-                      ? intl.formatMessage(messages.playonplex, {
+                        ? intl.formatMessage(messages.playonplex, {
                           mediaServerName: 'Plex',
                         })
-                      : intl.formatMessage(messages.playonplex, {
+                        : intl.formatMessage(messages.playonplex, {
                           mediaServerName: 'Jellyfin',
                         })}
                   </span>
@@ -437,16 +436,16 @@ const IssueDetails = () => {
                   <PlayIcon />
                   <span>
                     {settings.currentSettings.mediaServerType ===
-                    MediaServerType.EMBY
+                      MediaServerType.EMBY
                       ? intl.formatMessage(messages.play4konplex, {
-                          mediaServerName: 'Emby',
-                        })
+                        mediaServerName: 'Emby',
+                      })
                       : settings.currentSettings.mediaServerType ===
                         MediaServerType.PLEX
-                      ? intl.formatMessage(messages.play4konplex, {
+                        ? intl.formatMessage(messages.play4konplex, {
                           mediaServerName: 'Plex',
                         })
-                      : intl.formatMessage(messages.play4konplex, {
+                        : intl.formatMessage(messages.play4konplex, {
                           mediaServerName: 'Jellyfin',
                         })}
                   </span>
@@ -531,52 +530,52 @@ const IssueDetails = () => {
                         <div className="mt-4 flex items-center justify-end space-x-2">
                           {(hasPermission(Permission.MANAGE_ISSUES) ||
                             belongsToUser) && (
-                            <>
-                              {issueData.status === IssueStatus.OPEN ? (
-                                <Button
-                                  type="button"
-                                  buttonType="danger"
-                                  onClick={async () => {
-                                    await updateIssueStatus('resolved');
+                              <>
+                                {issueData.status === IssueStatus.OPEN ? (
+                                  <Button
+                                    type="button"
+                                    buttonType="danger"
+                                    onClick={async () => {
+                                      await updateIssueStatus('resolved');
 
-                                    if (values.message) {
-                                      handleSubmit();
-                                    }
-                                  }}
-                                >
-                                  <CheckCircleIcon />
-                                  <span>
-                                    {intl.formatMessage(
-                                      values.message
-                                        ? messages.closeissueandcomment
-                                        : messages.closeissue
-                                    )}
-                                  </span>
-                                </Button>
-                              ) : (
-                                <Button
-                                  type="button"
-                                  buttonType="default"
-                                  onClick={async () => {
-                                    await updateIssueStatus('open');
+                                      if (values.message) {
+                                        handleSubmit();
+                                      }
+                                    }}
+                                  >
+                                    <CheckCircleIcon />
+                                    <span>
+                                      {intl.formatMessage(
+                                        values.message
+                                          ? messages.closeissueandcomment
+                                          : messages.closeissue
+                                      )}
+                                    </span>
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    type="button"
+                                    buttonType="default"
+                                    onClick={async () => {
+                                      await updateIssueStatus('open');
 
-                                    if (values.message) {
-                                      handleSubmit();
-                                    }
-                                  }}
-                                >
-                                  <ArrowPathIcon />
-                                  <span>
-                                    {intl.formatMessage(
-                                      values.message
-                                        ? messages.reopenissueandcomment
-                                        : messages.reopenissue
-                                    )}
-                                  </span>
-                                </Button>
-                              )}
-                            </>
-                          )}
+                                      if (values.message) {
+                                        handleSubmit();
+                                      }
+                                    }}
+                                  >
+                                    <ArrowPathIcon />
+                                    <span>
+                                      {intl.formatMessage(
+                                        values.message
+                                          ? messages.reopenissueandcomment
+                                          : messages.reopenissue
+                                      )}
+                                    </span>
+                                  </Button>
+                                )}
+                              </>
+                            )}
                           <Button
                             type="submit"
                             buttonType="primary"
@@ -642,7 +641,7 @@ const IssueDetails = () => {
                 <FormattedRelativeTime
                   value={Math.floor(
                     (new Date(issueData.updatedAt).getTime() - Date.now()) /
-                      1000
+                    1000
                   )}
                   updateIntervalInSeconds={1}
                   numeric="auto"
@@ -663,16 +662,16 @@ const IssueDetails = () => {
                 <PlayIcon />
                 <span>
                   {settings.currentSettings.mediaServerType ===
-                  MediaServerType.EMBY
+                    MediaServerType.EMBY
                     ? intl.formatMessage(messages.playonplex, {
-                        mediaServerName: 'Emby',
-                      })
+                      mediaServerName: 'Emby',
+                    })
                     : settings.currentSettings.mediaServerType ===
                       MediaServerType.PLEX
-                    ? intl.formatMessage(messages.playonplex, {
+                      ? intl.formatMessage(messages.playonplex, {
                         mediaServerName: 'Plex',
                       })
-                    : intl.formatMessage(messages.playonplex, {
+                      : intl.formatMessage(messages.playonplex, {
                         mediaServerName: 'Jellyfin',
                       })}
                 </span>
@@ -710,16 +709,16 @@ const IssueDetails = () => {
                 <PlayIcon />
                 <span>
                   {settings.currentSettings.mediaServerType ===
-                  MediaServerType.EMBY
+                    MediaServerType.EMBY
                     ? intl.formatMessage(messages.play4konplex, {
-                        mediaServerName: 'Emby',
-                      })
+                      mediaServerName: 'Emby',
+                    })
                     : settings.currentSettings.mediaServerType ===
                       MediaServerType.PLEX
-                    ? intl.formatMessage(messages.play4konplex, {
+                      ? intl.formatMessage(messages.play4konplex, {
                         mediaServerName: 'Plex',
                       })
-                    : intl.formatMessage(messages.play4konplex, {
+                      : intl.formatMessage(messages.play4konplex, {
                         mediaServerName: 'Jellyfin',
                       })}
                 </span>

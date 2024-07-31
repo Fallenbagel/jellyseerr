@@ -21,7 +21,6 @@ import type { MediaRequest } from '@server/entity/MediaRequest';
 import type { NonFunctionProperties } from '@server/interfaces/api/common';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useInView } from 'react-intersection-observer';
@@ -190,8 +189,8 @@ const RequestItemError = ({
                             className="group flex items-center truncate"
                           >
                             <span className="avatar-sm ml-1.5">
-                              <Image
-                                src={requestData.requestedBy.avatar}
+                              <CachedImage
+                                src={`/avatarproxy/${requestData.requestedBy.avatar}`}
                                 alt=""
                                 className="avatar-sm object-cover"
                                 width={20}
@@ -249,8 +248,8 @@ const RequestItemError = ({
                           className="group flex items-center truncate"
                         >
                           <span className="avatar-sm ml-1.5">
-                            <Image
-                              src={requestData.modifiedBy.avatar}
+                            <CachedImage
+                              src={`/avatarproxy/${requestData.modifiedBy.avatar}`}
                               alt=""
                               className="avatar-sm object-cover"
                               width={20}
@@ -557,8 +556,8 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                           className="group flex items-center truncate"
                         >
                           <span className="avatar-sm ml-1.5">
-                            <Image
-                              src={requestData.requestedBy.avatar}
+                            <CachedImage
+                              src={`/avatarproxy/${requestData.requestedBy.avatar}`}
                               alt=""
                               className="avatar-sm object-cover"
                               width={20}
@@ -616,8 +615,8 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                         className="group flex items-center truncate"
                       >
                         <span className="avatar-sm ml-1.5">
-                          <Image
-                            src={requestData.requestedBy.avatar}
+                          <CachedImage
+                            src={`/avatarproxy/${requestData.requestedBy.avatar}`}
                             alt=""
                             className="avatar-sm object-cover"
                             width={20}
