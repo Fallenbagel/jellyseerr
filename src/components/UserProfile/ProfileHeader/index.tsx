@@ -1,9 +1,10 @@
 import Button from '@app/components/Common/Button';
+import CachedImage from '@app/components/Common/CachedImage';
 import type { User } from '@app/hooks/useUser';
 import { Permission, useUser } from '@app/hooks/useUser';
 import defineMessages from '@app/utils/defineMessages';
 import { CogIcon, UserIcon } from '@heroicons/react/24/solid';
-import Image from 'next/image';
+// import Image from 'next/image';
 import Link from 'next/link';
 import { useIntl } from 'react-intl';
 
@@ -42,9 +43,9 @@ const ProfileHeader = ({ user, isSettingsPage }: ProfileHeaderProps) => {
       <div className="flex items-end justify-items-end space-x-5">
         <div className="flex-shrink-0">
           <div className="relative">
-            <Image
+            <CachedImage
               className="h-24 w-24 rounded-full bg-gray-600 object-cover ring-1 ring-gray-700"
-              src={user.avatar}
+              src={`/avatarproxy/${user.avatar}`}
               alt=""
               width={96}
               height={96}

@@ -1,4 +1,5 @@
 import Button from '@app/components/Common/Button';
+import CachedImage from '@app/components/Common/CachedImage';
 import ConfirmButton from '@app/components/Common/ConfirmButton';
 import SlideOver from '@app/components/Common/SlideOver';
 import Tooltip from '@app/components/Common/Tooltip';
@@ -27,7 +28,6 @@ import type { RadarrSettings, SonarrSettings } from '@server/lib/settings';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
 import getConfig from 'next/config';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useIntl } from 'react-intl';
 import useSWR from 'swr';
@@ -355,8 +355,8 @@ const ManageSlideOver = ({
                                     key={`watch-user-${user.id}`}
                                     content={user.displayName}
                                   >
-                                    <Image
-                                      src={user.avatar}
+                                    <CachedImage
+                                      src={`avatarproxy/${user.avatar}`}
                                       alt={user.displayName}
                                       className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
                                       width={32}
@@ -516,8 +516,8 @@ const ManageSlideOver = ({
                                     key={`watch-user-${user.id}`}
                                     content={user.displayName}
                                   >
-                                    <Image
-                                      src={user.avatar}
+                                    <CachedImage
+                                      src={`avatarproxy/${user.avatar}`}
                                       alt={user.displayName}
                                       className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
                                       width={32}
