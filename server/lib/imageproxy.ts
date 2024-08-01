@@ -229,7 +229,7 @@ class ImageProxy {
         (response.headers.get('cache-control') ?? '0').split('=')[1]
       );
 
-      if (!maxAge) maxAge = 604800;
+      if (!maxAge) maxAge = 86400;
       const expireAt = Date.now() + maxAge * 1000;
       const etag = (response.headers.get('etag') ?? '').replace(/"/g, '');
 
