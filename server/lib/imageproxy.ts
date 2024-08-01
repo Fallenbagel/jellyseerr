@@ -171,6 +171,21 @@ class ImageProxy {
     return imageResponse;
   }
 
+  public async clearCachedImage(path: string) {
+    // find cacheKey
+    const cacheKey = this.getCacheKey(path);
+
+    try {
+      const directory = join(this.getCacheDirectory(), cacheKey);
+      await promises.rm(directory, { recursive: true });
+      logger.info(`Cleared ${path} image from cache 'avatar'`, {
+        label: 'Image Cache',
+      });
+    } catch (e) {
+      logger.error(e.message, { label: 'Image Cache' });
+    }
+  }
+
   private async get(cacheKey: string): Promise<ImageResponse | null> {
     try {
       const directory = join(this.getCacheDirectory(), cacheKey);
