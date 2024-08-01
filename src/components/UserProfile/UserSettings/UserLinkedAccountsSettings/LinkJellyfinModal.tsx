@@ -5,6 +5,7 @@ import { useUser } from '@app/hooks/useUser';
 import { RequestError } from '@app/types/error';
 import defineMessages from '@app/utils/defineMessages';
 import { Transition } from '@headlessui/react';
+import { MediaServerType } from '@server/constants/server';
 import { Field, Form, Formik } from 'formik';
 import { useState } from 'react';
 import { useIntl } from 'react-intl';
@@ -13,17 +14,18 @@ import * as Yup from 'yup';
 const messages = defineMessages(
   'components.UserProfile.UserSettings.LinkJellyfinModal',
   {
-    title: 'Link Jellyfin Account',
+    title: 'Link {mediaServerName} Account',
     description:
-      'Enter your Jellyfin credentials to link your account with Jellyseerr.',
+      'Enter your {mediaServerName} credentials to link your account with {applicationName}.',
     username: 'Username',
     password: 'Password',
     usernameRequired: 'You must provide a username',
     passwordRequired: 'You must provide a password',
     saving: 'Adding…',
     save: 'Link',
-    errorUnauthorized: 'Unable to connect to Jellyfin using your credentials',
-    errorExists: 'This account is already linked to a Jellyseerr user',
+    errorUnauthorized:
+      'Unable to connect to {mediaServerName} using your credentials',
+    errorExists: 'This account is already linked to a {applicationName} user',
     errorUnknown: 'An unknown error occurred',
   }
 );
@@ -52,6 +54,12 @@ const LinkJellyfinModal: React.FC<LinkJellyfinModalProps> = ({
       intl.formatMessage(messages.passwordRequired)
     ),
   });
+
+  const applicationName = settings.currentSettings.applicationTitle;
+  const mediaServerName =
+    settings.currentSettings.mediaServerType === MediaServerType.EMBY
+      ? 'Emby'
+      : 'Jellyfin';
 
   return (
     <Transition
@@ -91,11 +99,17 @@ const LinkJellyfinModal: React.FC<LinkJellyfinModalProps> = ({
             onSave();
           } catch (e) {
             if (e instanceof RequestError && e.status == 401) {
-              setError(intl.formatMessage(messages.errorUnauthorized));
+              setError(
+                intl.formatMessage(messages.errorUnauthorized, {
+                  mediaServerName,
+                })
+              );
             } else if (e instanceof RequestError && e.status == 422) {
-              setError(intl.formatMessage(messages.errorExists));
+              setError(
+                intl.formatMessage(messages.errorExists, { applicationName })
+              );
             } else {
-              setError(intl.formatMessage(messages.errorServer));
+              setError(intl.formatMessage(messages.errorUnknown));
             }
           }
         }}
@@ -116,12 +130,13 @@ const LinkJellyfinModal: React.FC<LinkJellyfinModalProps> = ({
               }
               okDisabled={isSubmitting || !isValid}
               onOk={() => handleSubmit()}
-              title={intl.formatMessage(messages.title)}
+              title={intl.formatMessage(messages.title, { mediaServerName })}
               dialogClass="sm:max-w-lg"
             >
               <Form id="link-jellyfin-account">
                 {intl.formatMessage(messages.description, {
-                  applicationName: settings.currentSettings.applicationTitle,
+                  mediaServerName,
+                  applicationName,
                 })}
                 {error && (
                   <div className="mt-2">

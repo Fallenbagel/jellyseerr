@@ -1,3 +1,4 @@
+import EmbyLogo from '@app/assets/services/emby-icon-only.svg';
 import JellyfinLogo from '@app/assets/services/jellyfin-icon.svg';
 import PlexLogo from '@app/assets/services/plex.svg';
 import Alert from '@app/components/Common/Alert';
@@ -5,7 +6,7 @@ import ConfirmButton from '@app/components/Common/ConfirmButton';
 import Dropdown from '@app/components/Common/Dropdown';
 import PageTitle from '@app/components/Common/PageTitle';
 import useSettings from '@app/hooks/useSettings';
-import { Permission, useUser } from '@app/hooks/useUser';
+import { Permission, UserType, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import { RequestError } from '@app/types/error';
 import defineMessages from '@app/utils/defineMessages';
@@ -13,7 +14,7 @@ import PlexOAuth from '@app/utils/plex';
 import { TrashIcon } from '@heroicons/react/24/solid';
 import { MediaServerType } from '@server/constants/server';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import useSWR from 'swr';
 import LinkJellyfinModal from './LinkJellyfinModal';
@@ -38,8 +39,9 @@ const messages = defineMessages(
 const plexOAuth = new PlexOAuth();
 
 const enum LinkedAccountType {
-  Plex,
-  Jellyfin,
+  Plex = 'Plex',
+  Jellyfin = 'Jellyfin',
+  Emby = 'Emby',
 }
 
 type LinkedAccount = {
@@ -63,14 +65,26 @@ const UserLinkedAccountsSettings = () => {
   const [showJellyfinModal, setShowJellyfinModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const accounts: LinkedAccount[] = [
-    ...(user?.plexUsername
-      ? [{ type: LinkedAccountType.Plex, username: user?.plexUsername }]
-      : []),
-    ...(user?.jellyfinUsername
-      ? [{ type: LinkedAccountType.Jellyfin, username: user?.jellyfinUsername }]
-      : []),
-  ];
+  const accounts: LinkedAccount[] = useMemo(() => {
+    const accounts: LinkedAccount[] = [];
+    if (!user) return accounts;
+    if (user.userType === UserType.PLEX && user.plexUsername)
+      accounts.push({
+        type: LinkedAccountType.Plex,
+        username: user.plexUsername,
+      });
+    if (user.userType === UserType.EMBY && user.jellyfinUsername)
+      accounts.push({
+        type: LinkedAccountType.Emby,
+        username: user.jellyfinUsername,
+      });
+    if (user.userType === UserType.JELLYFIN && user.jellyfinUsername)
+      accounts.push({
+        type: LinkedAccountType.Emby,
+        username: user.jellyfinUsername,
+      });
+    return accounts;
+  }, [user]);
 
   const linkPlexAccount = async () => {
     setError(null);
@@ -116,6 +130,13 @@ const UserLinkedAccountsSettings = () => {
       hide:
         settings.currentSettings.mediaServerType != MediaServerType.JELLYFIN ||
         accounts.some((a) => a.type == LinkedAccountType.Jellyfin),
+    },
+    {
+      name: 'Emby',
+      action: () => setShowJellyfinModal(true),
+      hide:
+        settings.currentSettings.mediaServerType != MediaServerType.EMBY ||
+        accounts.some((a) => a.type == LinkedAccountType.Emby),
     },
   ].filter((l) => !l.hide);
 
@@ -198,13 +219,15 @@ const UserLinkedAccountsSettings = () => {
                   <div className="flex aspect-square h-full items-center justify-center rounded-full bg-neutral-800">
                     <PlexLogo className="w-9" />
                   </div>
+                ) : acct.type == LinkedAccountType.Emby ? (
+                  <EmbyLogo />
                 ) : (
                   <JellyfinLogo />
                 )}
               </div>
               <div>
                 <div className="truncate text-sm font-bold text-gray-300">
-                  {acct.type == LinkedAccountType.Plex ? 'Plex' : 'Jellyfin'}
+                  {acct.type}
                 </div>
                 <div className="text-xl font-semibold text-white">
                   {acct.username}
