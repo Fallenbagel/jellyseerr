@@ -15,6 +15,7 @@ import { MediaServerType } from '@server/constants/server';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { useIntl } from 'react-intl';
+import useSWR from 'swr';
 import LinkJellyfinModal from './LinkJellyfinModal';
 
 const messages = defineMessages(
@@ -56,6 +57,9 @@ const UserLinkedAccountsSettings = () => {
     hasPermission,
     revalidate: revalidateUser,
   } = useUser({ id: Number(router.query.userId) });
+  const { data: passwordInfo } = useSWR<{ hasPassword: boolean }>(
+    user ? `/api/v1/user/${user?.id}/settings/password` : null
+  );
   const [showJellyfinModal, setShowJellyfinModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -149,6 +153,8 @@ const UserLinkedAccountsSettings = () => {
     );
   }
 
+  const enableMediaServerUnlink = user?.id !== 1 && passwordInfo?.hasPassword;
+
   return (
     <>
       <PageTitle
@@ -179,11 +185,7 @@ const UserLinkedAccountsSettings = () => {
           </div>
         )}
       </div>
-      {error && (
-        <Alert title={intl.formatMessage(globalMessages.failed)} type="error">
-          {error}
-        </Alert>
-      )}
+      {error && <Alert title={error} type="error" />}
       {accounts.length ? (
         <ul className="space-y-4">
           {accounts.map((acct, i) => (
@@ -209,17 +211,19 @@ const UserLinkedAccountsSettings = () => {
                 </div>
               </div>
               <div className="flex-grow" />
-              <ConfirmButton
-                onClick={() => {
-                  deleteRequest(
-                    acct.type == LinkedAccountType.Plex ? 'plex' : 'jellyfin'
-                  );
-                }}
-                confirmText={intl.formatMessage(globalMessages.areyousure)}
-              >
-                <TrashIcon />
-                <span>{intl.formatMessage(globalMessages.delete)}</span>
-              </ConfirmButton>
+              {enableMediaServerUnlink && (
+                <ConfirmButton
+                  onClick={() => {
+                    deleteRequest(
+                      acct.type == LinkedAccountType.Plex ? 'plex' : 'jellyfin'
+                    );
+                  }}
+                  confirmText={intl.formatMessage(globalMessages.areyousure)}
+                >
+                  <TrashIcon />
+                  <span>{intl.formatMessage(globalMessages.delete)}</span>
+                </ConfirmButton>
+              )}
             </li>
           ))}
         </ul>
