@@ -369,6 +369,28 @@ userSettingsRoutes.delete<{ id: string }>(
         return next({ status: 404, message: 'User not found.' });
       }
 
+      if (user.id === 1) {
+        return next({
+          status: 400,
+          message:
+            'Cannot unlink media server accounts for the primary administrator.',
+        });
+      }
+
+      const hasPassword = !!(
+        await userRepository.findOne({
+          where: { id: user.id },
+          select: ['id', 'password'],
+        })
+      )?.password;
+
+      if (!user.email || !hasPassword) {
+        return next({
+          status: 400,
+          message: 'User does not have a local email or password set.',
+        });
+      }
+
       user.userType = UserType.LOCAL;
       user.plexId = null;
       user.plexUsername = null;
@@ -487,6 +509,28 @@ userSettingsRoutes.delete<{ id: string }>(
 
       if (!user) {
         return next({ status: 404, message: 'User not found.' });
+      }
+
+      if (user.id === 1) {
+        return next({
+          status: 400,
+          message:
+            'Cannot unlink media server accounts for the primary administrator.',
+        });
+      }
+
+      const hasPassword = !!(
+        await userRepository.findOne({
+          where: { id: user.id },
+          select: ['id', 'password'],
+        })
+      )?.password;
+
+      if (!user.email || !hasPassword) {
+        return next({
+          status: 400,
+          message: 'User does not have a local email or password set.',
+        });
       }
 
       user.userType = UserType.LOCAL;
