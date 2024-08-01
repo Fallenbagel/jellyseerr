@@ -7,7 +7,7 @@ const router = Router();
 const avatarImageProxy = new ImageProxy('avatar', '');
 // Proxy avatar images
 router.get('/*', async (req, res) => {
-  const imagePath = req.path.startsWith('/') ? req.path.slice(1) : req.path;
+  const imagePath = req.url.startsWith('/') ? req.url.slice(1) : req.url;
   try {
     const imageData = await avatarImageProxy.getImage(imagePath);
 
