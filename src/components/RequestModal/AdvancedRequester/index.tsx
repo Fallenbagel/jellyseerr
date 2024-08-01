@@ -614,7 +614,7 @@ const AdvancedRequester = ({
                                   } flex items-center`}
                                 >
                                   <CachedImage
-                                    src={`/avatarproxy/${selectedUser.avatar}`}
+                                    src={`/avatarproxy/${user.avatar}`}
                                     alt=""
                                     className="h-6 w-6 flex-shrink-0 rounded-full object-cover"
                                     width={24}
