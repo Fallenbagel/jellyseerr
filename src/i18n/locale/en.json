@@ -987,7 +987,7 @@
   "components.Settings.plexlibraries": "Plex Libraries",
   "components.Settings.plexlibrariesDescription": "The libraries Jellyseerr scans for titles. Set up and save your Plex connection settings, then click the button below if no libraries are listed.",
   "components.Settings.plexsettings": "Plex Settings",
-  "components.Settings.plexsettingsDescription": "Configure the settings for your Plex server. Overseerr scans your Plex libraries to determine content availability.",
+  "components.Settings.plexsettingsDescription": "Configure the settings for your Plex server. Jellyseerr scans your Plex libraries to determine content availability.",
   "components.Settings.port": "Port",
   "components.Settings.radarrsettings": "Radarr Settings",
   "components.Settings.restartrequiredTooltip": "Jellyseerr must be restarted for changes to this setting to take effect",
