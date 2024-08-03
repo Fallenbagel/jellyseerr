@@ -2,30 +2,34 @@ import Button from '@app/components/Common/Button';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import NotificationTypeSelector from '@app/components/NotificationTypeSelector';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon, BeakerIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import { useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
 
-const messages = defineMessages({
-  agentenabled: 'Enable Agent',
-  webhookUrl: 'Webhook URL',
-  webhookUrlTip:
-    'Your user- or device-based <LunaSeaLink>notification webhook URL</LunaSeaLink>',
-  validationWebhookUrl: 'You must provide a valid URL',
-  profileName: 'Profile Name',
-  profileNameTip: 'Only required if not using the <code>default</code> profile',
-  settingsSaved: 'LunaSea notification settings saved successfully!',
-  settingsFailed: 'LunaSea notification settings failed to save.',
-  toastLunaSeaTestSending: 'Sending LunaSea test notification…',
-  toastLunaSeaTestSuccess: 'LunaSea test notification sent!',
-  toastLunaSeaTestFailed: 'LunaSea test notification failed to send.',
-  validationTypes: 'You must select at least one notification type',
-});
+const messages = defineMessages(
+  'components.Settings.Notifications.NotificationsLunaSea',
+  {
+    agentenabled: 'Enable Agent',
+    webhookUrl: 'Webhook URL',
+    webhookUrlTip:
+      'Your user- or device-based <LunaSeaLink>notification webhook URL</LunaSeaLink>',
+    validationWebhookUrl: 'You must provide a valid URL',
+    profileName: 'Profile Name',
+    profileNameTip:
+      'Only required if not using the <code>default</code> profile',
+    settingsSaved: 'LunaSea notification settings saved successfully!',
+    settingsFailed: 'LunaSea notification settings failed to save.',
+    toastLunaSeaTestSending: 'Sending LunaSea test notification…',
+    toastLunaSeaTestSuccess: 'LunaSea test notification sent!',
+    toastLunaSeaTestFailed: 'LunaSea test notification failed to send.',
+    validationTypes: 'You must select at least one notification type',
+  }
+);
 
 const NotificationsLunaSea = () => {
   const intl = useIntl();
@@ -64,14 +68,21 @@ const NotificationsLunaSea = () => {
       validationSchema={NotificationsLunaSeaSchema}
       onSubmit={async (values) => {
         try {
-          await axios.post('/api/v1/settings/notifications/lunasea', {
-            enabled: values.enabled,
-            types: values.types,
-            options: {
-              webhookUrl: values.webhookUrl,
-              profileName: values.profileName,
+          const res = await fetch('/api/v1/settings/notifications/lunasea', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
             },
+            body: JSON.stringify({
+              enabled: values.enabled,
+              types: values.types,
+              options: {
+                webhookUrl: values.webhookUrl,
+                profileName: values.profileName,
+              },
+            }),
           });
+          if (!res.ok) throw new Error();
           addToast(intl.formatMessage(messages.settingsSaved), {
             appearance: 'success',
             autoDismiss: true,
@@ -109,14 +120,24 @@ const NotificationsLunaSea = () => {
                 toastId = id;
               }
             );
-            await axios.post('/api/v1/settings/notifications/lunasea/test', {
-              enabled: true,
-              types: values.types,
-              options: {
-                webhookUrl: values.webhookUrl,
-                profileName: values.profileName,
-              },
-            });
+            const res = await fetch(
+              '/api/v1/settings/notifications/lunasea/test',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  enabled: true,
+                  types: values.types,
+                  options: {
+                    webhookUrl: values.webhookUrl,
+                    profileName: values.profileName,
+                  },
+                }),
+              }
+            );
+            if (!res.ok) throw new Error();
 
             if (toastId) {
               removeToast(toastId);

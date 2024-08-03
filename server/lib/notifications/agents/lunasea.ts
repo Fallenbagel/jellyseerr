@@ -3,7 +3,6 @@ import { MediaStatus } from '@server/constants/media';
 import type { NotificationAgentLunaSea } from '@server/lib/settings';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
-import axios from 'axios';
 import { hasNotificationType, Notification } from '..';
 import type { NotificationAgent, NotificationPayload } from './agent';
 import { BaseAgent } from './agent';
@@ -101,28 +100,39 @@ class LunaSeaAgent
     });
 
     try {
-      await axios.post(
-        settings.options.webhookUrl,
-        this.buildPayload(type, payload),
-        settings.options.profileName
+      const response = await fetch(settings.options.webhookUrl, {
+        method: 'POST',
+        headers: settings.options.profileName
           ? {
-              headers: {
-                Authorization: `Basic ${Buffer.from(
-                  `${settings.options.profileName}:`
-                ).toString('base64')}`,
-              },
+              'Content-Type': 'application/json',
             }
-          : undefined
-      );
+          : {
+              'Content-Type': 'application/json',
+              Authorization: `Basic ${Buffer.from(
+                `${settings.options.profileName}:`
+              ).toString('base64')}`,
+            },
+        body: JSON.stringify(this.buildPayload(type, payload)),
+      });
+      if (!response.ok) {
+        throw new Error(response.statusText, { cause: response });
+      }
 
       return true;
     } catch (e) {
+      let errorData;
+      try {
+        errorData = await e.cause?.text();
+        errorData = JSON.parse(errorData);
+      } catch {
+        /* empty */
+      }
       logger.error('Error sending LunaSea notification', {
         label: 'Notifications',
         type: Notification[type],
         subject: payload.subject,
         errorMessage: e.message,
-        response: e.response?.data,
+        response: errorData,
       });
 
       return false;

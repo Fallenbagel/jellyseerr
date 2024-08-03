@@ -2,35 +2,38 @@ import Button from '@app/components/Common/Button';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import NotificationTypeSelector from '@app/components/NotificationTypeSelector';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon, BeakerIcon } from '@heroicons/react/24/outline';
 import type { PushoverSound } from '@server/api/pushover';
-import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import { useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
 
-const messages = defineMessages({
-  agentenabled: 'Enable Agent',
-  accessToken: 'Application API Token',
-  accessTokenTip:
-    '<ApplicationRegistrationLink>Register an application</ApplicationRegistrationLink> for use with Jellyseerr',
-  userToken: 'User or Group Key',
-  userTokenTip:
-    'Your 30-character <UsersGroupsLink>user or group identifier</UsersGroupsLink>',
-  sound: 'Notification Sound',
-  deviceDefault: 'Device Default',
-  validationAccessTokenRequired: 'You must provide a valid application token',
-  validationUserTokenRequired: 'You must provide a valid user or group key',
-  pushoversettingssaved: 'Pushover notification settings saved successfully!',
-  pushoversettingsfailed: 'Pushover notification settings failed to save.',
-  toastPushoverTestSending: 'Sending Pushover test notification…',
-  toastPushoverTestSuccess: 'Pushover test notification sent!',
-  toastPushoverTestFailed: 'Pushover test notification failed to send.',
-  validationTypes: 'You must select at least one notification type',
-});
+const messages = defineMessages(
+  'components.Settings.Notifications.NotificationsPushover',
+  {
+    agentenabled: 'Enable Agent',
+    accessToken: 'Application API Token',
+    accessTokenTip:
+      '<ApplicationRegistrationLink>Register an application</ApplicationRegistrationLink> for use with Jellyseerr',
+    userToken: 'User or Group Key',
+    userTokenTip:
+      'Your 30-character <UsersGroupsLink>user or group identifier</UsersGroupsLink>',
+    sound: 'Notification Sound',
+    deviceDefault: 'Device Default',
+    validationAccessTokenRequired: 'You must provide a valid application token',
+    validationUserTokenRequired: 'You must provide a valid user or group key',
+    pushoversettingssaved: 'Pushover notification settings saved successfully!',
+    pushoversettingsfailed: 'Pushover notification settings failed to save.',
+    toastPushoverTestSending: 'Sending Pushover test notification…',
+    toastPushoverTestSuccess: 'Pushover test notification sent!',
+    toastPushoverTestFailed: 'Pushover test notification failed to send.',
+    validationTypes: 'You must select at least one notification type',
+  }
+);
 
 const NotificationsPushover = () => {
   const intl = useIntl();
@@ -90,14 +93,21 @@ const NotificationsPushover = () => {
       validationSchema={NotificationsPushoverSchema}
       onSubmit={async (values) => {
         try {
-          await axios.post('/api/v1/settings/notifications/pushover', {
-            enabled: values.enabled,
-            types: values.types,
-            options: {
-              accessToken: values.accessToken,
-              userToken: values.userToken,
+          const res = await fetch('/api/v1/settings/notifications/pushover', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
             },
+            body: JSON.stringify({
+              enabled: values.enabled,
+              types: values.types,
+              options: {
+                accessToken: values.accessToken,
+                userToken: values.userToken,
+              },
+            }),
           });
+          if (!res.ok) throw new Error();
           addToast(intl.formatMessage(messages.pushoversettingssaved), {
             appearance: 'success',
             autoDismiss: true,
@@ -135,16 +145,25 @@ const NotificationsPushover = () => {
                 toastId = id;
               }
             );
-            await axios.post('/api/v1/settings/notifications/pushover/test', {
-              enabled: true,
-              types: values.types,
-              options: {
-                accessToken: values.accessToken,
-                userToken: values.userToken,
-                sound: values.sound,
-              },
-            });
-
+            const res = await fetch(
+              '/api/v1/settings/notifications/pushover/test',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  enabled: true,
+                  types: values.types,
+                  options: {
+                    accessToken: values.accessToken,
+                    userToken: values.userToken,
+                    sound: values.sound,
+                  },
+                }),
+              }
+            );
+            if (!res.ok) throw new Error();
             if (toastId) {
               removeToast(toastId);
             }

@@ -8,6 +8,7 @@ import CreateSlider from '@app/components/Discover/CreateSlider';
 import GenreTag from '@app/components/GenreTag';
 import KeywordTag from '@app/components/KeywordTag';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import {
   ArrowUturnLeftIcon,
@@ -19,13 +20,12 @@ import {
 } from '@heroicons/react/24/solid';
 import { DiscoverSliderType } from '@server/constants/discover';
 import type DiscoverSlider from '@server/entity/DiscoverSlider';
-import axios from 'axios';
 import { useRef, useState } from 'react';
 import { useDrag, useDrop } from 'react-aria';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Discover.DiscoverSliderEdit', {
   deletesuccess: 'Sucessfully deleted slider.',
   deletefail: 'Failed to delete slider.',
   remove: 'Remove',
@@ -77,7 +77,10 @@ const DiscoverSliderEdit = ({
 
   const deleteSlider = async () => {
     try {
-      await axios.delete(`/api/v1/settings/discover/${slider.id}`);
+      const res = await fetch(`/api/v1/settings/discover/${slider.id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error();
       addToast(intl.formatMessage(messages.deletesuccess), {
         appearance: 'success',
         autoDismiss: true,
