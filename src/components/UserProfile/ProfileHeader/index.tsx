@@ -4,7 +4,6 @@ import type { User } from '@app/hooks/useUser';
 import { Permission, useUser } from '@app/hooks/useUser';
 import defineMessages from '@app/utils/defineMessages';
 import { CogIcon, UserIcon } from '@heroicons/react/24/solid';
-// import Image from 'next/image';
 import Link from 'next/link';
 import { useIntl } from 'react-intl';
 

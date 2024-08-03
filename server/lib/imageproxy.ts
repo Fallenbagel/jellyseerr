@@ -53,7 +53,15 @@ class ImageProxy {
       }
     } catch (e) {
       if (e.code === 'ENOENT') {
-        logger.error(e.message);
+        logger.error('Directory not found', {
+          label: 'Image Cache',
+          message: e.message,
+        });
+      } else {
+        logger.error('Failed to read directory', {
+          label: 'Image Cache',
+          message: e.message,
+        });
       }
     }
 
@@ -177,12 +185,18 @@ class ImageProxy {
 
     try {
       const directory = join(this.getCacheDirectory(), cacheKey);
+      const files = await promises.readdir(directory);
+
       await promises.rm(directory, { recursive: true });
-      logger.info(`Cleared ${path} image from cache 'avatar'`, {
+
+      logger.info(`Cleared ${files[0]} image from cache 'avatar'`, {
         label: 'Image Cache',
       });
     } catch (e) {
-      logger.error(e.message, { label: 'Image Cache' });
+      logger.error('Failed to clear cached image', {
+        label: 'Image Cache',
+        message: e.message,
+      });
     }
   }
 
@@ -236,10 +250,10 @@ class ImageProxy {
       const arrayBuffer = await response.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      const extension = (response.headers.get('content-type') ?? '').replace(
-        'image/',
-        ''
+      const extension = this.getMimeExtension(
+        response.headers.get('content-type') ?? ''
       );
+
       let maxAge = Number(
         (response.headers.get('cache-control') ?? '0').split('=')[1]
       );
@@ -314,6 +328,31 @@ class ImageProxy {
 
   private getCacheDirectory() {
     return path.join(baseCacheDirectory, this.key);
+  }
+
+  private getMimeExtension(mime: string): string {
+    switch (mime) {
+      case 'image/png':
+        return 'png';
+      case 'image/jpeg':
+        return 'jpeg';
+      case 'image/jpg':
+        return 'jpg';
+      case 'image/apng':
+        return 'apng';
+      case 'image/gif':
+        return 'gif';
+      case 'image/vnd.microsoft.icon':
+        return 'ico';
+      case 'image/tiff':
+        return 'tiff';
+      case 'image/webp':
+        return 'webp';
+      default:
+        break;
+    }
+
+    return '';
   }
 }
 
