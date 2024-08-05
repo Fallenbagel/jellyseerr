@@ -324,7 +324,6 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         jellyfinUsername: account.User.Name,
         jellyfinUserId: account.User.Id,
         jellyfinDeviceId: deviceId,
-        jellyfinAuthToken: account.AccessToken,
         permissions: Permission.ADMIN,
         avatar: account.User.PrimaryImageTag
           ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
@@ -366,10 +365,6 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
           jellyfinUsername: account.User.Name,
         }
       );
-      // Let's check if their authtoken is up to date
-      if (user.jellyfinAuthToken !== account.AccessToken) {
-        user.jellyfinAuthToken = account.AccessToken;
-      }
       // Update the users avatar with their jellyfin profile pic (incase it changed)
       if (account.User.PrimaryImageTag) {
         user.avatar = `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`;
@@ -421,7 +416,6 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         jellyfinUsername: account.User.Name,
         jellyfinUserId: account.User.Id,
         jellyfinDeviceId: deviceId,
-        jellyfinAuthToken: account.AccessToken,
         permissions: settings.main.defaultPermissions,
         avatar: account.User.PrimaryImageTag
           ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
