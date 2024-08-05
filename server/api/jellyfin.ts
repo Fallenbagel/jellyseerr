@@ -408,8 +408,8 @@ class JellyfinAPI extends ExternalAPI {
 
   public async createApiToken(appName: string): Promise<string> {
     try {
-      await this.axios.post(`/Auth/Keys?App=${appName}`);
-      const apiKeys = await this.get<any>('/Auth/Keys');
+      await this.post(`/Auth/Keys?App=${appName}`);
+      const apiKeys = await this.get<any>(`/Auth/Keys`);
       return apiKeys.Items.reverse().find(
         (item: any) => item.AppName === appName
       ).AccessToken;
