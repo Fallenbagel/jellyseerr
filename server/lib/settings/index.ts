@@ -77,6 +77,12 @@ export interface DVRSettings {
   tagRequests: boolean;
 }
 
+export interface TvdbSettings {
+  apiKey?: string;
+  pin?: string;
+  use: boolean;
+}
+
 export interface RadarrSettings extends DVRSettings {
   minimumAvailability: string;
 }
@@ -285,6 +291,7 @@ export interface AllSettings {
   plex: PlexSettings;
   jellyfin: JellyfinSettings;
   tautulli: TautulliSettings;
+  tvdb: TvdbSettings;
   radarr: RadarrSettings[];
   sonarr: SonarrSettings[];
   public: PublicSettings;
@@ -344,6 +351,7 @@ class Settings {
         serverId: '',
       },
       tautulli: {},
+      tvdb: { use: false },
       radarr: [],
       sonarr: [],
       public: {
@@ -510,6 +518,14 @@ class Settings {
 
   set tautulli(data: TautulliSettings) {
     this.data.tautulli = data;
+  }
+
+  get tvdb(): TvdbSettings {
+    return this.data.tvdb;
+  }
+
+  set tvdb(data: TvdbSettings) {
+    this.data.tvdb = data;
   }
 
   get radarr(): RadarrSettings[] {
