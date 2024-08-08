@@ -622,6 +622,29 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                       />
                     </div>
                   </div>
+                </>
+              )}
+              <div className="form-row">
+                <label htmlFor="apiKey" className="text-label">
+                  {intl.formatMessage(messages.apiKey)}
+                </label>
+                <div className="form-input-area">
+                  <div className="form-input-field">
+                    <SensitiveInput
+                      as="field"
+                      type="text"
+                      inputMode="url"
+                      id="apiKey"
+                      name="apiKey"
+                    />
+                  </div>
+                  {errors.apiKey && touched.apiKey && (
+                    <div className="error">{errors.apiKey}</div>
+                  )}
+                </div>
+              </div>
+              {showAdvancedSettings && (
+                <>
                   <div className="form-row">
                     <label htmlFor="urlBase" className="text-label">
                       {intl.formatMessage(messages.urlBase)}
@@ -685,25 +708,6 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                         {errors.jellyfinForgotPasswordUrl}
                       </div>
                     )}
-                </div>
-              </div>
-              <div className="form-row">
-                <label htmlFor="apiKey" className="text-label">
-                  {intl.formatMessage(messages.apiKey)}
-                </label>
-                <div className="form-input-area">
-                  <div className="form-input-field">
-                    <SensitiveInput
-                      as="field"
-                      type="text"
-                      inputMode="url"
-                      id="apiKey"
-                      name="apiKey"
-                    />
-                  </div>
-                  {errors.apiKey && touched.apiKey && (
-                    <div className="error">{errors.apiKey}</div>
-                  )}
                 </div>
               </div>
               <div className="actions">
