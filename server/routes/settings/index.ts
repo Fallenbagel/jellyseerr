@@ -270,7 +270,7 @@ settingsRoutes.post('/jellyfin', async (req, res, next) => {
 
     const jellyfinClient = new JellyfinAPI(
       getHostname(tempJellyfinSettings),
-      settings.jellyfin.apiKey,
+      tempJellyfinSettings.apiKey,
       admin.jellyfinDeviceId ?? ''
     );
 

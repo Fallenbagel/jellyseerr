@@ -93,9 +93,7 @@ export interface JellyfinLibraryItemExtended extends JellyfinLibraryItem {
 }
 
 class JellyfinAPI extends ExternalAPI {
-  private authToken?: string;
   private userId?: string;
-  private jellyfinHost: string;
 
   constructor(jellyfinHost: string, authToken?: string, deviceId?: string) {
     let authHeaderVal: string;
@@ -114,9 +112,6 @@ class JellyfinAPI extends ExternalAPI {
         },
       }
     );
-
-    this.jellyfinHost = jellyfinHost;
-    this.authToken = authToken;
   }
 
   public async login(

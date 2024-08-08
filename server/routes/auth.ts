@@ -334,6 +334,14 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         userType: UserType.JELLYFIN,
       });
 
+      // Create an API key on Jellyfin from this admin user
+      const jellyfinClient = new JellyfinAPI(
+        hostname,
+        account.AccessToken,
+        deviceId
+      );
+      const apiKey = await jellyfinClient.createApiToken('Jellyseerr');
+
       const serverName = await jellyfinserver.getServerName();
 
       settings.jellyfin.name = serverName;
@@ -342,6 +350,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
       settings.jellyfin.port = body.port ?? 8096;
       settings.jellyfin.urlBase = body.urlBase ?? '';
       settings.jellyfin.useSsl = body.useSsl ?? false;
+      settings.jellyfin.apiKey = apiKey;
       settings.save();
       startJobs();
 
