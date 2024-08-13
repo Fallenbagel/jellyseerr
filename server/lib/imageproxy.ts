@@ -3,6 +3,7 @@ import type { RateLimitOptions } from '@server/utils/rateLimit';
 import rateLimit from '@server/utils/rateLimit';
 import { createHash } from 'crypto';
 import { promises } from 'fs';
+import mime from 'mime/lite';
 import path, { join } from 'path';
 
 type ImageResponse = {
@@ -11,7 +12,7 @@ type ImageResponse = {
     curRevalidate: number;
     isStale: boolean;
     etag: string;
-    extension: string;
+    extension: string | null;
     cacheKey: string;
     cacheMiss: boolean;
   };
@@ -250,7 +251,7 @@ class ImageProxy {
       const arrayBuffer = await response.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      const extension = this.getMimeExtension(
+      const extension = mime.getExtension(
         response.headers.get('content-type') ?? ''
       );
 
@@ -294,7 +295,7 @@ class ImageProxy {
 
   private async writeToCacheDir(
     dir: string,
-    extension: string,
+    extension: string | null,
     maxAge: number,
     expireAt: number,
     buffer: Buffer,
@@ -328,31 +329,6 @@ class ImageProxy {
 
   private getCacheDirectory() {
     return path.join(baseCacheDirectory, this.key);
-  }
-
-  private getMimeExtension(mime: string): string {
-    switch (mime) {
-      case 'image/png':
-        return 'png';
-      case 'image/jpeg':
-        return 'jpeg';
-      case 'image/jpg':
-        return 'jpg';
-      case 'image/apng':
-        return 'apng';
-      case 'image/gif':
-        return 'gif';
-      case 'image/vnd.microsoft.icon':
-        return 'ico';
-      case 'image/tiff':
-        return 'tiff';
-      case 'image/webp':
-        return 'webp';
-      default:
-        break;
-    }
-
-    return '';
   }
 }
 
