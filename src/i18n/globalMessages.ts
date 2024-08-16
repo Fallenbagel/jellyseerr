@@ -63,6 +63,7 @@ const globalMessages = defineMessages('i18n', {
     '<strong>{title}</strong> has already been blacklisted.',
   removeFromBlacklistSuccess:
     '<strong>{title}</strong> was successfully removed from the Blacklist.',
+  addToBlacklist: 'Add to Blacklist',
   removefromBlacklist: 'Remove from Blacklist',
 });
 
