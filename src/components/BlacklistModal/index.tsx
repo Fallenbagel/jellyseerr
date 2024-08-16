@@ -10,6 +10,7 @@ import useSWR from 'swr';
 interface BlacklistModalProps {
   tmdbId: number;
   type: 'movie' | 'tv' | 'collection';
+  show: boolean;
   onComplete?: () => void;
   onCancel?: () => void;
   isUpdating?: boolean;
@@ -29,6 +30,7 @@ const isMovie = (
 const BlacklistModal = ({
   tmdbId,
   type,
+  show,
   onComplete,
   onCancel,
   isUpdating,
@@ -48,7 +50,7 @@ const BlacklistModal = ({
       leave="transition-opacity duration-300"
       leaveFrom="opacity-100"
       leaveTo="opacity-0"
-      show={true}
+      show={show}
     >
       <Modal
         loading={!data && !error}

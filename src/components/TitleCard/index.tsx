@@ -306,21 +306,20 @@ const TitleCard = ({
         onUpdating={requestUpdating}
         onCancel={closeModal}
       />
-      {showBlacklistModal && (
-        <BlacklistModal
-          tmdbId={id}
-          type={
-            mediaType === 'movie'
-              ? 'movie'
-              : mediaType === 'collection'
-              ? 'collection'
-              : 'tv'
-          }
-          onCancel={closeBlacklistModal}
-          onComplete={onClickHideItemBtn}
-          isUpdating={isUpdating}
-        />
-      )}
+      <BlacklistModal
+        tmdbId={id}
+        type={
+          mediaType === 'movie'
+            ? 'movie'
+            : mediaType === 'collection'
+            ? 'collection'
+            : 'tv'
+        }
+        show={showBlacklistModal}
+        onCancel={closeBlacklistModal}
+        onComplete={onClickHideItemBtn}
+        isUpdating={isUpdating}
+      />
       <div
         className={`relative transform-gpu cursor-default overflow-hidden rounded-xl bg-gray-800 bg-cover outline-none ring-1 transition duration-300 ${
           showDetail
