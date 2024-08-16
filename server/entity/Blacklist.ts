@@ -70,6 +70,10 @@ export class Blacklist implements BlacklistItem {
       },
     });
 
+    const blacklistRepository = getRepository(this);
+
+    await blacklistRepository.save(blacklist);
+
     if (!media) {
       media = new Media({
         tmdbId: blacklistRequest.tmdbId,
@@ -79,13 +83,13 @@ export class Blacklist implements BlacklistItem {
         blacklist: blacklist,
       });
 
-      const blacklistRepository = getRepository(this);
-
-      await blacklistRepository.save(blacklist);
+      await mediaRepository.save(media);
+    } else {
+      media.blacklist = blacklist;
+      media.status = MediaStatus.BLACKLISTED;
+      media.status4k = MediaStatus.BLACKLISTED;
 
       await mediaRepository.save(media);
-
-      return;
     }
   }
 }
