@@ -2,28 +2,31 @@ import Button from '@app/components/Common/Button';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import NotificationTypeSelector from '@app/components/NotificationTypeSelector';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon, BeakerIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import { useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
 
-const messages = defineMessages({
-  agentenabled: 'Enable Agent',
-  webhookUrl: 'Webhook URL',
-  webhookUrlTip:
-    'Create an <WebhookLink>Incoming Webhook</WebhookLink> integration',
-  slacksettingssaved: 'Slack notification settings saved successfully!',
-  slacksettingsfailed: 'Slack notification settings failed to save.',
-  toastSlackTestSending: 'Sending Slack test notification…',
-  toastSlackTestSuccess: 'Slack test notification sent!',
-  toastSlackTestFailed: 'Slack test notification failed to send.',
-  validationWebhookUrl: 'You must provide a valid URL',
-  validationTypes: 'You must select at least one notification type',
-});
+const messages = defineMessages(
+  'components.Settings.Notifications.NotificationsSlack',
+  {
+    agentenabled: 'Enable Agent',
+    webhookUrl: 'Webhook URL',
+    webhookUrlTip:
+      'Create an <WebhookLink>Incoming Webhook</WebhookLink> integration',
+    slacksettingssaved: 'Slack notification settings saved successfully!',
+    slacksettingsfailed: 'Slack notification settings failed to save.',
+    toastSlackTestSending: 'Sending Slack test notification…',
+    toastSlackTestSuccess: 'Slack test notification sent!',
+    toastSlackTestFailed: 'Slack test notification failed to send.',
+    validationWebhookUrl: 'You must provide a valid URL',
+    validationTypes: 'You must select at least one notification type',
+  }
+);
 
 const NotificationsSlack = () => {
   const intl = useIntl();
@@ -61,13 +64,20 @@ const NotificationsSlack = () => {
       validationSchema={NotificationsSlackSchema}
       onSubmit={async (values) => {
         try {
-          await axios.post('/api/v1/settings/notifications/slack', {
-            enabled: values.enabled,
-            types: values.types,
-            options: {
-              webhookUrl: values.webhookUrl,
+          const res = await fetch('/api/v1/settings/notifications/slack', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
             },
+            body: JSON.stringify({
+              enabled: values.enabled,
+              types: values.types,
+              options: {
+                webhookUrl: values.webhookUrl,
+              },
+            }),
           });
+          if (!res.ok) throw new Error();
           addToast(intl.formatMessage(messages.slacksettingssaved), {
             appearance: 'success',
             autoDismiss: true,
@@ -105,13 +115,23 @@ const NotificationsSlack = () => {
                 toastId = id;
               }
             );
-            await axios.post('/api/v1/settings/notifications/slack/test', {
-              enabled: true,
-              types: values.types,
-              options: {
-                webhookUrl: values.webhookUrl,
-              },
-            });
+            const res = await fetch(
+              '/api/v1/settings/notifications/slack/test',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  enabled: true,
+                  types: values.types,
+                  options: {
+                    webhookUrl: values.webhookUrl,
+                  },
+                }),
+              }
+            );
+            if (!res.ok) throw new Error();
 
             if (toastId) {
               removeToast(toastId);

@@ -15,7 +15,6 @@ import '@app/styles/globals.css';
 import { polyfillIntl } from '@app/utils/polyfillIntl';
 import { MediaServerType } from '@server/constants/server';
 import type { PublicSettingsResponse } from '@server/interfaces/api/settingsInterfaces';
-import axios from 'axios';
 import type { AppInitialProps, AppProps } from 'next/app';
 import App from 'next/app';
 import Head from 'next/head';
@@ -29,6 +28,8 @@ const loadLocaleData = (locale: AvailableLocale): Promise<any> => {
   switch (locale) {
     case 'ar':
       return import('../i18n/locale/ar.json');
+    case 'bg':
+      return import('../i18n/locale/bg.json');
     case 'ca':
       return import('../i18n/locale/ca.json');
     case 'cs':
@@ -41,8 +42,16 @@ const loadLocaleData = (locale: AvailableLocale): Promise<any> => {
       return import('../i18n/locale/el.json');
     case 'es':
       return import('../i18n/locale/es.json');
+    case 'es-MX':
+      return import('../i18n/locale/es_MX.json');
+    case 'fi':
+      return import('../i18n/locale/fi.json');
     case 'fr':
       return import('../i18n/locale/fr.json');
+    case 'he':
+      return import('../i18n/locale/he.json');
+    case 'hi':
+      return import('../i18n/locale/hi.json');
     case 'hr':
       return import('../i18n/locale/hr.json');
     case 'hu':
@@ -65,6 +74,8 @@ const loadLocaleData = (locale: AvailableLocale): Promise<any> => {
       return import('../i18n/locale/pt_BR.json');
     case 'pt-PT':
       return import('../i18n/locale/pt_PT.json');
+    case 'ro':
+      return import('../i18n/locale/ro.json');
     case 'ru':
       return import('../i18n/locale/ru.json');
     case 'sq':
@@ -97,10 +108,6 @@ interface ExtendedAppProps extends AppProps {
   currentSettings: PublicSettingsResponse;
 }
 
-if (typeof window === 'undefined') {
-  global.Intl = require('intl');
-}
-
 const CoreApp: Omit<NextAppComponentType, 'origGetInitialProps'> = ({
   Component,
   pageProps,
@@ -131,7 +138,11 @@ const CoreApp: Omit<NextAppComponentType, 'origGetInitialProps'> = ({
   return (
     <SWRConfig
       value={{
-        fetcher: (url) => axios.get(url).then((res) => res.data),
+        fetcher: async (resource, init) => {
+          const res = await fetch(resource, init);
+          if (!res.ok) throw new Error();
+          return await res.json();
+        },
         fallback: {
           '/api/v1/auth/me': user,
         },
@@ -194,13 +205,13 @@ CoreApp.getInitialProps = async (initialProps) => {
 
   if (ctx.res) {
     // Check if app is initialized and redirect if necessary
-    const response = await axios.get<PublicSettingsResponse>(
+    const res = await fetch(
       `http://localhost:${process.env.PORT || 5055}/api/v1/settings/public`
     );
+    if (!res.ok) throw new Error();
+    currentSettings = await res.json();
 
-    currentSettings = response.data;
-
-    const initialized = response.data.initialized;
+    const initialized = currentSettings.initialized;
 
     if (!initialized) {
       if (!router.pathname.match(/(setup|login\/plex)/)) {
@@ -212,7 +223,7 @@ CoreApp.getInitialProps = async (initialProps) => {
     } else {
       try {
         // Attempt to get the user by running a request to the local api
-        const response = await axios.get<User>(
+        const res = await fetch(
           `http://localhost:${process.env.PORT || 5055}/api/v1/auth/me`,
           {
             headers:
@@ -221,7 +232,8 @@ CoreApp.getInitialProps = async (initialProps) => {
                 : undefined,
           }
         );
-        user = response.data;
+        if (!res.ok) throw new Error();
+        user = await res.json();
 
         if (router.pathname.match(/(setup|login)/)) {
           ctx.res.writeHead(307, {

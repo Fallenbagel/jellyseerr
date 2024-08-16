@@ -8,20 +8,21 @@ import SearchByNameModal from '@app/components/RequestModal/SearchByNameModal';
 import useSettings from '@app/hooks/useSettings';
 import { useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { ANIME_KEYWORD_ID } from '@server/api/themoviedb/constants';
 import { MediaRequestStatus, MediaStatus } from '@server/constants/media';
 import type { MediaRequest } from '@server/entity/MediaRequest';
 import type SeasonRequest from '@server/entity/SeasonRequest';
+import type { NonFunctionProperties } from '@server/interfaces/api/common';
 import type { QuotaResponse } from '@server/interfaces/api/userInterfaces';
 import { Permission } from '@server/lib/permissions';
 import type { TvDetails } from '@server/models/Tv';
-import axios from 'axios';
 import { useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR, { mutate } from 'swr';
 
-const messages = defineMessages({
+const messages = defineMessages('components.RequestModal', {
   requestadmin: 'This request will be approved automatically.',
   requestSuccess: '<strong>{title}</strong> requested successfully!',
   requestseriestitle: 'Request Series',
@@ -57,7 +58,7 @@ interface RequestModalProps extends React.HTMLAttributes<HTMLDivElement> {
   onComplete?: (newStatus: MediaStatus) => void;
   onUpdating?: (isUpdating: boolean) => void;
   is4k?: boolean;
-  editRequest?: MediaRequest;
+  editRequest?: NonFunctionProperties<MediaRequest>;
 }
 
 const TvRequestModal = ({
@@ -110,22 +111,35 @@ const TvRequestModal = ({
 
     try {
       if (selectedSeasons.length > 0) {
-        await axios.put(`/api/v1/request/${editRequest.id}`, {
-          mediaType: 'tv',
-          serverId: requestOverrides?.server,
-          profileId: requestOverrides?.profile,
-          rootFolder: requestOverrides?.folder,
-          languageProfileId: requestOverrides?.language,
-          userId: requestOverrides?.user?.id,
-          tags: requestOverrides?.tags,
-          seasons: selectedSeasons,
+        const res = await fetch(`/api/v1/request/${editRequest.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            mediaType: 'tv',
+            serverId: requestOverrides?.server,
+            profileId: requestOverrides?.profile,
+            rootFolder: requestOverrides?.folder,
+            languageProfileId: requestOverrides?.language,
+            userId: requestOverrides?.user?.id,
+            tags: requestOverrides?.tags,
+            seasons: selectedSeasons,
+          }),
         });
+        if (!res.ok) throw new Error();
 
         if (alsoApproveRequest) {
-          await axios.post(`/api/v1/request/${editRequest.id}/approve`);
+          const res = await fetch(`/api/v1/request/${editRequest.id}/approve`, {
+            method: 'POST',
+          });
+          if (!res.ok) throw new Error();
         }
       } else {
-        await axios.delete(`/api/v1/request/${editRequest.id}`);
+        const res = await fetch(`/api/v1/request/${editRequest.id}`, {
+          method: 'DELETE',
+        });
+        if (!res.ok) throw new Error();
       }
       mutate('/api/v1/request?filter=all&take=10&sort=modified&skip=0');
 
@@ -190,23 +204,32 @@ const TvRequestModal = ({
           tags: requestOverrides.tags,
         };
       }
-      const response = await axios.post<MediaRequest>('/api/v1/request', {
-        mediaId: data?.id,
-        tvdbId: tvdbId ?? data?.externalIds.tvdbId,
-        mediaType: 'tv',
-        is4k,
-        seasons: settings.currentSettings.partialRequestsEnabled
-          ? selectedSeasons
-          : getAllSeasons().filter(
-              (season) => !getAllRequestedSeasons().includes(season)
-            ),
-        ...overrideParams,
+      const res = await fetch('/api/v1/request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mediaId: data?.id,
+          tvdbId: tvdbId ?? data?.externalIds.tvdbId,
+          mediaType: 'tv',
+          is4k,
+          seasons: settings.currentSettings.partialRequestsEnabled
+            ? selectedSeasons
+            : getAllSeasons().filter(
+                (season) => !getAllRequestedSeasons().includes(season)
+              ),
+          ...overrideParams,
+        }),
       });
+      if (!res.ok) throw new Error();
+      const mediaRequest: MediaRequest = await res.json();
+
       mutate('/api/v1/request?filter=all&take=10&sort=modified&skip=0');
 
-      if (response.data) {
+      if (mediaRequest) {
         if (onComplete) {
-          onComplete(response.data.media.status);
+          onComplete(mediaRequest.media.status);
         }
         addToast(
           <span>

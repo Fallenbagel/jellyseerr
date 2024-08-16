@@ -4,13 +4,18 @@
 module.exports = {
   env: {
     commitTag: process.env.COMMIT_TAG || 'local',
+    forceIpv4First: process.env.FORCE_IPV4_FIRST === 'true' ? 'true' : 'false',
   },
   publicRuntimeConfig: {
     // Will be available on both server and client
     JELLYFIN_TYPE: process.env.JELLYFIN_TYPE,
   },
   images: {
-    domains: ['image.tmdb.org'],
+    remotePatterns: [
+      { hostname: 'gravatar.com' },
+      { hostname: 'image.tmdb.org' },
+      { hostname: '*', protocol: 'https' },
+    ],
   },
   webpack(config) {
     config.module.rules.push({

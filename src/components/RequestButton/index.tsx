@@ -3,6 +3,7 @@ import RequestModal from '@app/components/RequestModal';
 import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import {
   CheckIcon,
@@ -12,11 +13,10 @@ import {
 import { MediaRequestStatus, MediaStatus } from '@server/constants/media';
 import type Media from '@server/entity/Media';
 import type { MediaRequest } from '@server/entity/MediaRequest';
-import axios from 'axios';
 import { useMemo, useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 
-const messages = defineMessages({
+const messages = defineMessages('components.RequestButton', {
   viewrequest: 'View Request',
   viewrequest4k: 'View 4K Request',
   requestmore: 'Request More',
@@ -93,9 +93,13 @@ const RequestButton = ({
     request: MediaRequest,
     type: 'approve' | 'decline'
   ) => {
-    const response = await axios.post(`/api/v1/request/${request.id}/${type}`);
+    const res = await fetch(`/api/v1/request/${request.id}/${type}`, {
+      method: 'POST',
+    });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
 
-    if (response) {
+    if (data) {
       onUpdate();
     }
   };
@@ -110,7 +114,11 @@ const RequestButton = ({
 
     await Promise.all(
       requests.map(async (request) => {
-        return axios.post(`/api/v1/request/${request.id}/${type}`);
+        const res = await fetch(`/api/v1/request/${request.id}/${type}`, {
+          method: 'POST',
+        });
+        if (!res.ok) throw new Error();
+        return res.json();
       })
     );
 

@@ -1,13 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import ExternalAPI from '@server/api/externalapi';
+import { ApiErrorCode } from '@server/constants/error';
+import availabilitySync from '@server/lib/availabilitySync';
 import logger from '@server/logger';
-import type { AxiosInstance } from 'axios';
-import axios from 'axios';
+import { ApiError } from '@server/types/error';
+import { getAppVersion } from '@server/utils/appVersion';
 
 export interface JellyfinUserResponse {
   Name: string;
   ServerId: string;
   ServerName: string;
   Id: string;
+  Configuration: {
+    GroupedFolders: string[];
+  };
+  Policy: {
+    IsAdministrator: boolean;
+  };
   PrimaryImageTag?: string;
 }
 
@@ -18,6 +27,13 @@ export interface JellyfinLoginResponse {
 
 export interface JellyfinUserListResponse {
   users: JellyfinUserResponse[];
+}
+
+interface JellyfinMediaFolder {
+  Name: string;
+  Id: string;
+  Type: string;
+  CollectionType: string;
 }
 
 export interface JellyfinLibrary {
@@ -76,48 +92,85 @@ export interface JellyfinLibraryItemExtended extends JellyfinLibraryItem {
   DateCreated?: string;
 }
 
-class JellyfinAPI {
-  private authToken?: string;
+class JellyfinAPI extends ExternalAPI {
   private userId?: string;
-  private jellyfinHost: string;
-  private axios: AxiosInstance;
 
   constructor(jellyfinHost: string, authToken?: string, deviceId?: string) {
-    this.jellyfinHost = jellyfinHost;
-    this.authToken = authToken;
-
-    let authHeaderVal = '';
-    if (this.authToken) {
-      authHeaderVal = `MediaBrowser Client="Overseerr", Device="Axios", DeviceId="${deviceId}", Version="10.8.0", Token="${authToken}"`;
+    let authHeaderVal: string;
+    if (authToken) {
+      authHeaderVal = `MediaBrowser Client="Jellyseerr", Device="Jellyseerr", DeviceId="${deviceId}", Version="${getAppVersion()}", Token="${authToken}"`;
     } else {
-      authHeaderVal = `MediaBrowser Client="Overseerr", Device="Axios", DeviceId="${deviceId}", Version="10.8.0"`;
+      authHeaderVal = `MediaBrowser Client="Jellyseerr", Device="Jellyseerr", DeviceId="${deviceId}", Version="${getAppVersion()}"`;
     }
 
-    this.axios = axios.create({
-      baseURL: this.jellyfinHost,
-      headers: {
-        'X-Emby-Authorization': authHeaderVal,
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-    });
+    super(
+      jellyfinHost,
+      {},
+      {
+        headers: {
+          'X-Emby-Authorization': authHeaderVal,
+        },
+      }
+    );
   }
 
   public async login(
     Username?: string,
-    Password?: string
+    Password?: string,
+    ClientIP?: string
   ): Promise<JellyfinLoginResponse> {
-    try {
-      const account = await this.axios.post<JellyfinLoginResponse>(
+    const authenticate = async (useHeaders: boolean) => {
+      const headers: { [key: string]: string } =
+        useHeaders && ClientIP ? { 'X-Forwarded-For': ClientIP } : {};
+
+      return this.post<JellyfinLoginResponse>(
         '/Users/AuthenticateByName',
         {
-          Username: Username,
+          Username,
           Pw: Password,
-        }
+        },
+        {},
+        undefined,
+        { headers }
       );
-      return account.data;
+    };
+
+    try {
+      return await authenticate(true);
     } catch (e) {
-      throw new Error('Unauthorized');
+      logger.debug(`Failed to authenticate with headers: ${e.message}`, {
+        label: 'Jellyfin API',
+        ip: ClientIP,
+      });
+    }
+
+    try {
+      return await authenticate(false);
+    } catch (e) {
+      const status = e.cause?.status;
+
+      const networkErrorCodes = new Set([
+        'ECONNREFUSED',
+        'EHOSTUNREACH',
+        'ENOTFOUND',
+        'ETIMEDOUT',
+        'ECONNRESET',
+        'EADDRINUSE',
+        'ENETDOWN',
+        'ENETUNREACH',
+        'EPIPE',
+        'ECONNABORTED',
+        'EPROTO',
+        'EHOSTDOWN',
+        'EAI_AGAIN',
+        'ERR_INVALID_URL',
+      ]);
+
+      if (networkErrorCodes.has(e.code) || status === 404) {
+        throw new ApiError(status, ApiErrorCode.InvalidUrl);
+      }
+
+      throw new ApiError(status, ApiErrorCode.InvalidCredentials);
     }
   }
 
@@ -126,69 +179,106 @@ class JellyfinAPI {
     return;
   }
 
+  public async getSystemInfo(): Promise<any> {
+    try {
+      const systemInfoResponse = await this.get<any>('/System/Info');
+
+      return systemInfoResponse;
+    } catch (e) {
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
+    }
+  }
+
   public async getServerName(): Promise<string> {
     try {
-      const account = await this.axios.get<JellyfinUserResponse>(
-        "/System/Info/Public'}"
+      const serverResponse = await this.get<JellyfinUserResponse>(
+        '/System/Info/Public'
       );
-      return account.data.ServerName;
+
+      return serverResponse.ServerName;
     } catch (e) {
       logger.error(
         `Something went wrong while getting the server name from the Jellyfin server: ${e.message}`,
         { label: 'Jellyfin API' }
       );
-      throw new Error('girl idk');
+
+      throw new ApiError(e.cause?.status, ApiErrorCode.Unknown);
     }
   }
 
   public async getUsers(): Promise<JellyfinUserListResponse> {
     try {
-      const account = await this.axios.get(`/Users`);
-      return { users: account.data };
+      const userReponse = await this.get<JellyfinUserResponse[]>(`/Users`);
+
+      return { users: userReponse };
     } catch (e) {
       logger.error(
         `Something went wrong while getting the account from the Jellyfin server: ${e.message}`,
         { label: 'Jellyfin API' }
       );
-      throw new Error('Invalid auth token');
+
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
     }
   }
 
   public async getUser(): Promise<JellyfinUserResponse> {
     try {
-      const account = await this.axios.get<JellyfinUserResponse>(
+      const userReponse = await this.get<JellyfinUserResponse>(
         `/Users/${this.userId ?? 'Me'}`
       );
-      return account.data;
+      return userReponse;
     } catch (e) {
       logger.error(
         `Something went wrong while getting the account from the Jellyfin server: ${e.message}`,
         { label: 'Jellyfin API' }
       );
-      throw new Error('Invalid auth token');
+
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
     }
   }
 
   public async getLibraries(): Promise<JellyfinLibrary[]> {
     try {
-      // TODO: Try to fix automatic grouping without fucking up LDAP users
-      // const libraries = await this.axios.get<any>('/Library/VirtualFolders');
+      const mediaFolderResponse = await this.get<any>(`/Library/MediaFolders`);
 
-      const account = await this.axios.get<any>(
-        `/Users/${this.userId ?? 'Me'}/Views`
-      );
+      return this.mapLibraries(mediaFolderResponse.Items);
+    } catch (mediaFoldersResponseError) {
+      // fallback to user views to get libraries
+      // this only and maybe/depending on factors affects LDAP users
+      try {
+        const mediaFolderResponse = await this.get<any>(
+          `/Users/${this.userId ?? 'Me'}/Views`
+        );
 
-      const response: JellyfinLibrary[] = account.data.Items.filter(
-        (Item: any) => {
-          return (
-            Item.Type === 'CollectionFolder' &&
-            Item.CollectionType !== 'music' &&
-            Item.CollectionType !== 'books' &&
-            Item.CollectionType !== 'musicvideos' &&
-            Item.CollectionType !== 'homevideos'
-          );
-        }
-      ).map((Item: any) => {
+        return this.mapLibraries(mediaFolderResponse.Items);
+      } catch (e) {
+        logger.error(
+          `Something went wrong while getting libraries from the Jellyfin server: ${e.message}`,
+          { label: 'Jellyfin API' }
+        );
+
+        return [];
+      }
+    }
+  }
+
+  private mapLibraries(mediaFolders: JellyfinMediaFolder[]): JellyfinLibrary[] {
+    const excludedTypes = [
+      'music',
+      'books',
+      'musicvideos',
+      'homevideos',
+      'boxsets',
+    ];
+
+    return mediaFolders
+      .filter((Item: JellyfinMediaFolder) => {
+        return (
+          Item.Type === 'CollectionFolder' &&
+          !excludedTypes.includes(Item.CollectionType)
+        );
+      })
+      .map((Item: JellyfinMediaFolder) => {
         return <JellyfinLibrary>{
           key: Item.Id,
           title: Item.Name,
@@ -196,24 +286,24 @@ class JellyfinAPI {
           agent: 'jellyfin',
         };
       });
-
-      return response;
-    } catch (e) {
-      logger.error(
-        `Something went wrong while getting libraries from the Jellyfin server: ${e.message}`,
-        { label: 'Jellyfin API' }
-      );
-      return [];
-    }
   }
 
   public async getLibraryContents(id: string): Promise<JellyfinLibraryItem[]> {
     try {
-      const contents = await this.axios.get<any>(
-        `/Users/${this.userId}/Items?SortBy=SortName&SortOrder=Ascending&IncludeItemTypes=Series,Movie,Others&Recursive=true&StartIndex=0&ParentId=${id}`
+      const libraryItemsResponse = await this.get<any>(
+        `/Users/${this.userId}/Items`,
+        {
+          SortBy: 'SortName',
+          SortOrder: 'Ascending',
+          IncludeItemTypes: 'Series,Movie,Others',
+          Recursive: 'true',
+          StartIndex: '0',
+          ParentId: id,
+          collapseBoxSetItems: 'false',
+        }
       );
 
-      return contents.data.Items.filter(
+      return libraryItemsResponse.Items.filter(
         (item: JellyfinLibraryItem) => item.LocationType !== 'Virtual'
       );
     } catch (e) {
@@ -221,55 +311,68 @@ class JellyfinAPI {
         `Something went wrong while getting library content from the Jellyfin server: ${e.message}`,
         { label: 'Jellyfin API' }
       );
-      throw new Error('Invalid auth token');
+
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
     }
   }
 
   public async getRecentlyAdded(id: string): Promise<JellyfinLibraryItem[]> {
     try {
-      const contents = await this.axios.get<any>(
-        `/Users/${this.userId}/Items/Latest?Limit=12&ParentId=${id}`
+      const itemResponse = await this.get<any>(
+        `/Users/${this.userId}/Items/Latest`,
+        {
+          Limit: '12',
+          ParentId: id,
+        }
       );
 
-      return contents.data;
+      return itemResponse;
     } catch (e) {
       logger.error(
         `Something went wrong while getting library content from the Jellyfin server: ${e.message}`,
         { label: 'Jellyfin API' }
       );
-      throw new Error('Invalid auth token');
+
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
     }
   }
 
-  public async getItemData(id: string): Promise<JellyfinLibraryItemExtended> {
+  public async getItemData(
+    id: string
+  ): Promise<JellyfinLibraryItemExtended | undefined> {
     try {
-      const contents = await this.axios.get<any>(
+      const itemResponse = await this.get<any>(
         `/Users/${this.userId}/Items/${id}`
       );
 
-      return contents.data;
+      return itemResponse;
     } catch (e) {
+      if (availabilitySync.running) {
+        if (e.cause?.status === 500) {
+          return undefined;
+        }
+      }
+
       logger.error(
         `Something went wrong while getting library content from the Jellyfin server: ${e.message}`,
         { label: 'Jellyfin API' }
       );
-      throw new Error('Invalid auth token');
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
     }
   }
 
   public async getSeasons(seriesID: string): Promise<JellyfinLibraryItem[]> {
     try {
-      const contents = await this.axios.get<any>(`/Shows/${seriesID}/Seasons`);
+      const seasonResponse = await this.get<any>(`/Shows/${seriesID}/Seasons`);
 
-      return contents.data.Items.filter(
-        (item: JellyfinLibraryItem) => item.LocationType !== 'Virtual'
-      );
+      return seasonResponse.Items;
     } catch (e) {
       logger.error(
         `Something went wrong while getting the list of seasons from the Jellyfin server: ${e.message}`,
         { label: 'Jellyfin API' }
       );
-      throw new Error('Invalid auth token');
+
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
     }
   }
 
@@ -278,11 +381,14 @@ class JellyfinAPI {
     seasonID: string
   ): Promise<JellyfinLibraryItem[]> {
     try {
-      const contents = await this.axios.get<any>(
-        `/Shows/${seriesID}/Episodes?seasonId=${seasonID}`
+      const episodeResponse = await this.get<any>(
+        `/Shows/${seriesID}/Episodes`,
+        {
+          seasonId: seasonID,
+        }
       );
 
-      return contents.data.Items.filter(
+      return episodeResponse.Items.filter(
         (item: JellyfinLibraryItem) => item.LocationType !== 'Virtual'
       );
     } catch (e) {
@@ -290,7 +396,25 @@ class JellyfinAPI {
         `Something went wrong while getting the list of episodes from the Jellyfin server: ${e.message}`,
         { label: 'Jellyfin API' }
       );
-      throw new Error('Invalid auth token');
+
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
+    }
+  }
+
+  public async createApiToken(appName: string): Promise<string> {
+    try {
+      await this.post(`/Auth/Keys?App=${appName}`);
+      const apiKeys = await this.get<any>(`/Auth/Keys`);
+      return apiKeys.Items.reverse().find(
+        (item: any) => item.AppName === appName
+      ).AccessToken;
+    } catch (e) {
+      logger.error(
+        `Something went wrong while creating an API key the Jellyfin server: ${e.message}`,
+        { label: 'Jellyfin API' }
+      );
+
+      throw new ApiError(e.response?.status, ApiErrorCode.InvalidAuthToken);
     }
   }
 }

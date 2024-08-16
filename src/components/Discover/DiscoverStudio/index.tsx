@@ -4,12 +4,14 @@ import PageTitle from '@app/components/Common/PageTitle';
 import useDiscover from '@app/hooks/useDiscover';
 import globalMessages from '@app/i18n/globalMessages';
 import Error from '@app/pages/_error';
+import defineMessages from '@app/utils/defineMessages';
 import type { ProductionCompany } from '@server/models/common';
 import type { MovieResult } from '@server/models/Search';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Discover.DiscoverStudio', {
   studioMovies: '{studio} Movies',
 });
 
@@ -46,11 +48,12 @@ const DiscoverMovieStudio = () => {
       <div className="mt-1 mb-5">
         <Header>
           {firstResultData?.studio.logoPath ? (
-            <div className="mb-6 flex justify-center">
-              <img
-                src={`//image.tmdb.org/t/p/w780_filter(duotone,ffffff,bababa)${firstResultData.studio.logoPath}`}
+            <div className="relative mb-6 flex h-24 justify-center sm:h-32">
+              <Image
+                src={`https://image.tmdb.org/t/p/w780_filter(duotone,ffffff,bababa)${firstResultData.studio.logoPath}`}
                 alt={firstResultData.studio.name}
-                className="max-h-24 sm:max-h-32"
+                className="object-contain"
+                fill
               />
             </div>
           ) : (

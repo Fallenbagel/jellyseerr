@@ -1,19 +1,22 @@
 import Button from '@app/components/Common/Button';
 import Tooltip from '@app/components/Common/Tooltip';
 import useSettings from '@app/hooks/useSettings';
+import defineMessages from '@app/utils/defineMessages';
 import { InformationCircleIcon } from '@heroicons/react/24/solid';
-import axios from 'axios';
+import { ApiErrorCode } from '@server/constants/error';
 import { Field, Form, Formik } from 'formik';
 import getConfig from 'next/config';
-import type React from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import * as Yup from 'yup';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Login', {
   username: 'Username',
   password: 'Password',
-  host: '{mediaServerName} URL',
+  hostname: '{mediaServerName} URL',
+  port: 'Port',
+  enablessl: 'Use SSL',
+  urlBase: 'URL Base',
   email: 'Email',
   emailtooltip:
     'Address does not need to be associated with your {mediaServerName} instance.',
@@ -23,8 +26,15 @@ const messages = defineMessages({
   validationemailformat: 'Valid email required',
   validationusernamerequired: 'Username required',
   validationpasswordrequired: 'Password required',
+  validationHostnameRequired: 'You must provide a valid hostname or IP address',
+  validationPortRequired: 'You must provide a valid port number',
+  validationUrlTrailingSlash: 'URL must not end in a trailing slash',
+  validationUrlBaseLeadingSlash: 'URL base must have a leading slash',
+  validationUrlBaseTrailingSlash: 'URL base must not end in a trailing slash',
   loginerror: 'Something went wrong while trying to sign in.',
+  adminerror: 'You must use an admin account to sign in.',
   credentialerror: 'The username or password is incorrect.',
+  invalidurlerror: 'Unable to connect to {mediaServerName} server.',
   signingin: 'Signing in…',
   signin: 'Sign In',
   initialsigningin: 'Connecting…',
@@ -48,16 +58,23 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
 
   if (initial) {
     const LoginSchema = Yup.object().shape({
-      host: Yup.string()
+      hostname: Yup.string().required(
+        intl.formatMessage(messages.validationhostrequired, {
+          mediaServerName:
+            publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+        })
+      ),
+      port: Yup.number().required(
+        intl.formatMessage(messages.validationPortRequired)
+      ),
+      urlBase: Yup.string()
         .matches(
-          /^(?:(?:(?:https?):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*\.?)(?::\d{2,5})?(?:[/?#]\S*)?$/,
-          intl.formatMessage(messages.validationhostformat)
+          /^(\/[^/].*[^/]$)/,
+          intl.formatMessage(messages.validationUrlBaseLeadingSlash)
         )
-        .required(
-          intl.formatMessage(messages.validationhostrequired, {
-            mediaServerName:
-              publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
-          })
+        .matches(
+          /^(.*[^/])$/,
+          intl.formatMessage(messages.validationUrlBaseTrailingSlash)
         ),
       email: Yup.string()
         .email(intl.formatMessage(messages.validationemailformat))
@@ -72,30 +89,63 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
       mediaServerName:
         publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
     };
+
     return (
       <Formik
         initialValues={{
           username: '',
           password: '',
-          host: '',
+          hostname: '',
+          port: 8096,
+          useSsl: false,
+          urlBase: '',
           email: '',
         }}
         validationSchema={LoginSchema}
         onSubmit={async (values) => {
           try {
-            await axios.post('/api/v1/auth/jellyfin', {
-              username: values.username,
-              password: values.password,
-              hostname: values.host,
-              email: values.email,
+            const res = await fetch('/api/v1/auth/jellyfin', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                username: values.username,
+                password: values.password,
+                hostname: values.hostname,
+                port: values.port,
+                useSsl: values.useSsl,
+                urlBase: values.urlBase,
+                email: values.email,
+              }),
             });
+            if (!res.ok) throw new Error(res.statusText, { cause: res });
           } catch (e) {
+            let errorData;
+            try {
+              errorData = await e.cause?.text();
+              errorData = JSON.parse(errorData);
+            } catch {
+              /* empty */
+            }
+            let errorMessage = null;
+            switch (errorData?.message) {
+              case ApiErrorCode.InvalidUrl:
+                errorMessage = messages.invalidurlerror;
+                break;
+              case ApiErrorCode.InvalidCredentials:
+                errorMessage = messages.credentialerror;
+                break;
+              case ApiErrorCode.NotAdmin:
+                errorMessage = messages.adminerror;
+                break;
+              default:
+                errorMessage = messages.loginerror;
+                break;
+            }
+
             toasts.addToast(
-              intl.formatMessage(
-                e.message == 'Request failed with status code 401'
-                  ? messages.credentialerror
-                  : messages.loginerror
-              ),
+              intl.formatMessage(errorMessage, mediaServerFormatValues),
               {
                 autoDismiss: true,
                 appearance: 'error',
@@ -106,32 +156,100 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
           }
         }}
       >
-        {({ errors, touched, isSubmitting, isValid }) => (
+        {({
+          errors,
+          touched,
+          values,
+          setFieldValue,
+          isSubmitting,
+          isValid,
+        }) => (
           <Form>
             <div className="sm:border-t sm:border-gray-800">
-              <label htmlFor="host" className="text-label">
-                {intl.formatMessage(messages.host, mediaServerFormatValues)}
+              <div className="flex flex-col sm:flex-row sm:gap-4">
+                <div className="w-full">
+                  <label htmlFor="hostname" className="text-label">
+                    {intl.formatMessage(
+                      messages.hostname,
+                      mediaServerFormatValues
+                    )}
+                  </label>
+                  <div className="mt-1 mb-2 sm:col-span-2 sm:mb-0 sm:mt-0">
+                    <div className="flex rounded-md shadow-sm">
+                      <span className="inline-flex cursor-default items-center rounded-l-md border border-r-0 border-gray-500 bg-gray-800 px-3 text-gray-100 sm:text-sm">
+                        {values.useSsl ? 'https://' : 'http://'}
+                      </span>
+                      <Field
+                        id="hostname"
+                        name="hostname"
+                        type="text"
+                        className="rounded-r-only flex-1"
+                        placeholder={intl.formatMessage(
+                          messages.hostname,
+                          mediaServerFormatValues
+                        )}
+                      />
+                    </div>
+                    {errors.hostname && touched.hostname && (
+                      <div className="error">{errors.hostname}</div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <label htmlFor="port" className="text-label">
+                    {intl.formatMessage(messages.port)}
+                  </label>
+                  <div className="mt-1 sm:mt-0">
+                    <Field
+                      id="port"
+                      name="port"
+                      inputMode="numeric"
+                      type="text"
+                      className="short flex-1"
+                      placeholder={intl.formatMessage(messages.port)}
+                    />
+                    {errors.port && touched.port && (
+                      <div className="error">{errors.port}</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <label htmlFor="useSsl" className="text-label mt-2">
+                {intl.formatMessage(messages.enablessl)}
+              </label>
+              <div className="mt-1 mb-2 sm:col-span-2">
+                <div className="flex rounded-md shadow-sm">
+                  <Field
+                    id="useSsl"
+                    name="useSsl"
+                    type="checkbox"
+                    onChange={() => {
+                      setFieldValue('useSsl', !values.useSsl);
+                      setFieldValue('port', values.useSsl ? 8096 : 443);
+                    }}
+                  />
+                </div>
+              </div>
+              <label htmlFor="urlBase" className="text-label mt-1">
+                {intl.formatMessage(messages.urlBase)}
               </label>
               <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
                 <div className="flex rounded-md shadow-sm">
                   <Field
-                    id="host"
-                    name="host"
                     type="text"
-                    placeholder={intl.formatMessage(
-                      messages.host,
-                      mediaServerFormatValues
-                    )}
+                    inputMode="url"
+                    id="urlBase"
+                    name="urlBase"
+                    placeholder={intl.formatMessage(messages.urlBase)}
                   />
                 </div>
-                {errors.host && touched.host && (
-                  <div className="error">{errors.host}</div>
+                {errors.urlBase && touched.urlBase && (
+                  <div className="error">{errors.urlBase}</div>
                 )}
               </div>
               <label
                 htmlFor="email"
-                className="text-label"
-                style={{ display: 'inline-flex' }}
+                className="text-label inline-flex gap-1 align-middle"
               >
                 {intl.formatMessage(messages.email)}
                 <span className="label-tip">
@@ -147,7 +265,7 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                   </Tooltip>
                 </span>
               </label>
-              <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
+              <div className="mt-1 sm:col-span-2 sm:mb-2 sm:mt-0">
                 <div className="flex rounded-md shadow-sm">
                   <Field
                     id="email"
@@ -234,11 +352,18 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
           validationSchema={LoginSchema}
           onSubmit={async (values) => {
             try {
-              await axios.post('/api/v1/auth/jellyfin', {
-                username: values.username,
-                password: values.password,
-                email: values.username,
+              const res = await fetch('/api/v1/auth/jellyfin', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  username: values.username,
+                  password: values.password,
+                  email: values.username,
+                }),
               });
+              if (!res.ok) throw new Error();
             } catch (e) {
               toasts.addToast(
                 intl.formatMessage(

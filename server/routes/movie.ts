@@ -3,7 +3,9 @@ import RottenTomatoes from '@server/api/rating/rottentomatoes';
 import { type RatingResponse } from '@server/api/ratings';
 import TheMovieDb from '@server/api/themoviedb';
 import { MediaType } from '@server/constants/media';
+import { getRepository } from '@server/datasource';
 import Media from '@server/entity/Media';
+import { Watchlist } from '@server/entity/Watchlist';
 import logger from '@server/logger';
 import { mapMovieDetails } from '@server/models/Movie';
 import { mapMovieResult } from '@server/models/Search';
@@ -17,12 +19,29 @@ movieRoutes.get('/:id', async (req, res, next) => {
   try {
     const tmdbMovie = await tmdb.getMovie({
       movieId: Number(req.params.id),
-      language: req.locale ?? (req.query.language as string),
+      language: (req.query.language as string) ?? req.locale,
     });
 
     const media = await Media.getMedia(tmdbMovie.id, MediaType.MOVIE);
 
-    return res.status(200).json(mapMovieDetails(tmdbMovie, media));
+    const onUserWatchlist = await getRepository(Watchlist).exist({
+      where: {
+        tmdbId: Number(req.params.id),
+        requestedBy: {
+          id: req.user?.id,
+        },
+      },
+    });
+
+    const data = mapMovieDetails(tmdbMovie, media, onUserWatchlist);
+
+    // TMDB issue where it doesnt fallback to English when no overview is available in requested locale.
+    if (!data.overview) {
+      const tvEnglish = await tmdb.getMovie({ movieId: Number(req.params.id) });
+      data.overview = tvEnglish.overview;
+    }
+
+    return res.status(200).json(data);
   } catch (e) {
     logger.debug('Something went wrong retrieving movie', {
       label: 'API',
@@ -43,7 +62,7 @@ movieRoutes.get('/:id/recommendations', async (req, res, next) => {
     const results = await tmdb.getMovieRecommendations({
       movieId: Number(req.params.id),
       page: Number(req.query.page),
-      language: req.locale ?? (req.query.language as string),
+      language: (req.query.language as string) ?? req.locale,
     });
 
     const media = await Media.getRelatedMedia(
@@ -85,7 +104,7 @@ movieRoutes.get('/:id/similar', async (req, res, next) => {
     const results = await tmdb.getMovieSimilar({
       movieId: Number(req.params.id),
       page: Number(req.query.page),
-      language: req.locale ?? (req.query.language as string),
+      language: (req.query.language as string) ?? req.locale,
     });
 
     const media = await Media.getRelatedMedia(

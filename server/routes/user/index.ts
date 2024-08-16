@@ -20,6 +20,7 @@ import { hasPermission, Permission } from '@server/lib/permissions';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
+import { getHostname } from '@server/utils/getHostname';
 import { Router } from 'express';
 import gravatarUrl from 'gravatar-url';
 import { findIndex, sortBy } from 'lodash';
@@ -40,7 +41,19 @@ router.get('/', async (req, res, next) => {
         break;
       case 'displayname':
         query = query.orderBy(
-          "(CASE WHEN (user.username IS NULL OR user.username = '') THEN (CASE WHEN (user.plexUsername IS NULL OR user.plexUsername = '') THEN user.email ELSE LOWER(user.plexUsername) END) ELSE LOWER(user.username) END)",
+          `CASE WHEN (user.username IS NULL OR user.username = '') THEN (
+             CASE WHEN (user.plexUsername IS NULL OR user.plexUsername = '') THEN (
+               CASE WHEN (user.jellyfinUsername IS NULL OR user.jellyfinUsername = '') THEN
+                 user.email
+               ELSE
+                 LOWER(user.jellyfinUsername)
+               END)
+             ELSE
+               LOWER(user.jellyfinUsername)
+             END)
+           ELSE
+             LOWER(user.username)
+           END`,
           'ASC'
         );
         break;
@@ -89,12 +102,13 @@ router.post(
       const settings = getSettings();
 
       const body = req.body;
+      const email = body.email || body.username;
       const userRepository = getRepository(User);
 
       const existingUser = await userRepository
         .createQueryBuilder('user')
         .where('user.email = :email', {
-          email: body.email.toLowerCase(),
+          email: email.toLowerCase(),
         })
         .getOne();
 
@@ -107,7 +121,7 @@ router.post(
       }
 
       const passedExplicitPassword = body.password && body.password.length > 0;
-      const avatar = gravatarUrl(body.email, { default: 'mm', size: 200 });
+      const avatar = gravatarUrl(email, { default: 'mm', size: 200 });
 
       if (
         !passedExplicitPassword &&
@@ -117,9 +131,9 @@ router.post(
       }
 
       const user = new User({
+        email,
         avatar: body.avatar ?? avatar,
         username: body.username,
-        email: body.email,
         password: body.password,
         permissions: settings.main.defaultPermissions,
         plexToken: '',
@@ -487,32 +501,27 @@ router.post(
       // taken from auth.ts
       const admin = await userRepository.findOneOrFail({
         where: { id: 1 },
-        select: [
-          'id',
-          'jellyfinAuthToken',
-          'jellyfinDeviceId',
-          'jellyfinUserId',
-        ],
+        select: ['id', 'jellyfinDeviceId', 'jellyfinUserId'],
         order: { id: 'ASC' },
       });
+
+      const hostname = getHostname();
       const jellyfinClient = new JellyfinAPI(
-        settings.jellyfin.hostname ?? '',
-        admin.jellyfinAuthToken ?? '',
+        hostname,
+        settings.jellyfin.apiKey,
         admin.jellyfinDeviceId ?? ''
       );
       jellyfinClient.setUserId(admin.jellyfinUserId ?? '');
 
       //const jellyfinUsersResponse = await jellyfinClient.getUsers();
       const createdUsers: User[] = [];
-      const { hostname, externalHostname } = getSettings().jellyfin;
-      let jellyfinHost =
+      const { externalHostname } = getSettings().jellyfin;
+
+      const jellyfinHost =
         externalHostname && externalHostname.length > 0
           ? externalHostname
           : hostname;
 
-      jellyfinHost = jellyfinHost.endsWith('/')
-        ? jellyfinHost.slice(0, -1)
-        : jellyfinHost;
       jellyfinClient.setUserId(admin.jellyfinUserId ?? '');
       const jellyfinUsers = await jellyfinClient.getUsers();
 
@@ -537,7 +546,10 @@ router.post(
             permissions: settings.main.defaultPermissions,
             avatar: jellyfinUser?.PrimaryImageTag
               ? `${jellyfinHost}/Users/${jellyfinUser.Id}/Images/Primary/?tag=${jellyfinUser.PrimaryImageTag}&quality=90`
-              : '/os_logo_square.png',
+              : gravatarUrl(jellyfinUser?.Name ?? '', {
+                  default: 'mm',
+                  size: 200,
+                }),
             userType: UserType.JELLYFIN,
           });
 

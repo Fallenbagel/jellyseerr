@@ -1,18 +1,18 @@
 import Button from '@app/components/Common/Button';
 import SensitiveInput from '@app/components/Common/SensitiveInput';
 import useSettings from '@app/hooks/useSettings';
+import defineMessages from '@app/utils/defineMessages';
 import {
   ArrowLeftOnRectangleIcon,
   LifebuoyIcon,
 } from '@heroicons/react/24/outline';
-import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import Link from 'next/link';
 import { useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import * as Yup from 'yup';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Login', {
   username: 'Username',
   email: 'Email Address',
   password: 'Password',
@@ -55,10 +55,17 @@ const LocalLogin = ({ revalidate }: LocalLoginProps) => {
       validationSchema={LoginSchema}
       onSubmit={async (values) => {
         try {
-          await axios.post('/api/v1/auth/local', {
-            email: values.email,
-            password: values.password,
+          const res = await fetch('/api/v1/auth/local', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: values.email,
+              password: values.password,
+            }),
           });
+          if (!res.ok) throw new Error();
         } catch (e) {
           setLoginError(intl.formatMessage(messages.loginerror));
         } finally {
@@ -137,7 +144,7 @@ const LocalLogin = ({ revalidate }: LocalLoginProps) => {
                   </span>
                   {passwordResetEnabled && (
                     <span className="inline-flex rounded-md shadow-sm">
-                      <Link href="/resetpassword" passHref>
+                      <Link href="/resetpassword" passHref legacyBehavior>
                         <Button as="a" buttonType="ghost">
                           <LifebuoyIcon />
                           <span>

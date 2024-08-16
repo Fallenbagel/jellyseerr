@@ -8,6 +8,7 @@ import RequestBlock from '@app/components/RequestBlock';
 import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { Bars4Icon, ServerIcon } from '@heroicons/react/24/outline';
 import {
   CheckCircleIcon,
@@ -25,13 +26,13 @@ import type { MediaWatchDataResponse } from '@server/interfaces/api/mediaInterfa
 import type { RadarrSettings, SonarrSettings } from '@server/lib/settings';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
-import axios from 'axios';
 import getConfig from 'next/config';
+import Image from 'next/image';
 import Link from 'next/link';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import useSWR from 'swr';
 
-const messages = defineMessages({
+const messages = defineMessages('components.ManageSlideOver', {
   manageModalTitle: 'Manage {mediaType}',
   manageModalIssues: 'Open Issues',
   manageModalRequests: 'Requests',
@@ -111,16 +112,29 @@ const ManageSlideOver = ({
 
   const deleteMedia = async () => {
     if (data.mediaInfo) {
-      await axios.delete(`/api/v1/media/${data.mediaInfo.id}`);
+      const res = await fetch(`/api/v1/media/${data.mediaInfo.id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error();
       revalidate();
+      onClose();
     }
   };
 
   const deleteMediaFile = async () => {
     if (data.mediaInfo) {
-      await axios.delete(`/api/v1/media/${data.mediaInfo.id}/file`);
-      await axios.delete(`/api/v1/media/${data.mediaInfo.id}`);
+      const res1 = await fetch(`/api/v1/media/${data.mediaInfo.id}/file`, {
+        method: 'DELETE',
+      });
+      if (!res1.ok) throw new Error();
+
+      const res2 = await fetch(`/api/v1/media/${data.mediaInfo.id}`, {
+        method: 'DELETE',
+      });
+      if (!res2.ok) throw new Error();
+
       revalidate();
+      onClose();
     }
   };
 
@@ -147,9 +161,16 @@ const ManageSlideOver = ({
 
   const markAvailable = async (is4k = false) => {
     if (data.mediaInfo) {
-      await axios.post(`/api/v1/media/${data.mediaInfo?.id}/available`, {
-        is4k,
+      const res = await fetch(`/api/v1/media/${data.mediaInfo?.id}/available`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          is4k,
+        }),
       });
+      if (!res.ok) throw new Error();
       revalidate();
     }
   };
@@ -328,19 +349,20 @@ const ManageSlideOver = ({
                                       : `/users/${user.id}`
                                   }
                                   key={`watch-user-${user.id}`}
+                                  className="z-0 mb-1 -mr-2 shrink-0 hover:z-50"
                                 >
-                                  <a className="z-0 mb-1 -mr-2 shrink-0 hover:z-50">
-                                    <Tooltip
-                                      key={`watch-user-${user.id}`}
-                                      content={user.displayName}
-                                    >
-                                      <img
-                                        src={user.avatar}
-                                        alt={user.displayName}
-                                        className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
-                                      />
-                                    </Tooltip>
-                                  </a>
+                                  <Tooltip
+                                    key={`watch-user-${user.id}`}
+                                    content={user.displayName}
+                                  >
+                                    <Image
+                                      src={user.avatar}
+                                      alt={user.displayName}
+                                      className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
+                                      width={32}
+                                      height={32}
+                                    />
+                                  </Tooltip>
                                 </Link>
                               ))}
                             </span>
@@ -488,19 +510,20 @@ const ManageSlideOver = ({
                                       : `/users/${user.id}`
                                   }
                                   key={`watch-user-${user.id}`}
+                                  className="z-0 mb-1 -mr-2 shrink-0 hover:z-50"
                                 >
-                                  <a className="z-0 mb-1 -mr-2 shrink-0 hover:z-50">
-                                    <Tooltip
-                                      key={`watch-user-${user.id}`}
-                                      content={user.displayName}
-                                    >
-                                      <img
-                                        src={user.avatar}
-                                        alt={user.displayName}
-                                        className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
-                                      />
-                                    </Tooltip>
-                                  </a>
+                                  <Tooltip
+                                    key={`watch-user-${user.id}`}
+                                    content={user.displayName}
+                                  >
+                                    <Image
+                                      src={user.avatar}
+                                      alt={user.displayName}
+                                      className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
+                                      width={32}
+                                      height={32}
+                                    />
+                                  </Tooltip>
                                 </Link>
                               ))}
                             </span>

@@ -3,9 +3,9 @@ import PermissionEdit from '@app/components/PermissionEdit';
 import type { User } from '@app/hooks/useUser';
 import { useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
-import axios from 'axios';
+import defineMessages from '@app/utils/defineMessages';
 import { useEffect, useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 
 interface BulkEditProps {
@@ -16,7 +16,7 @@ interface BulkEditProps {
   onSaving?: (isSaving: boolean) => void;
 }
 
-const messages = defineMessages({
+const messages = defineMessages('components.UserList', {
   userssaved: 'User permissions saved successfully!',
   userfail: 'Something went wrong while saving user permissions.',
   edituser: 'Edit User Permissions',
@@ -44,10 +44,18 @@ const BulkEditModal = ({
   const updateUsers = async () => {
     try {
       setIsSaving(true);
-      const { data: updated } = await axios.put<User[]>(`/api/v1/user`, {
-        ids: selectedUserIds,
-        permissions: currentPermission,
+      const res = await fetch('/api/v1/user', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ids: selectedUserIds,
+          permissions: currentPermission,
+        }),
       });
+      if (!res.ok) throw new Error();
+      const updated: User[] = await res.json();
       if (onComplete) {
         onComplete(updated);
       }
