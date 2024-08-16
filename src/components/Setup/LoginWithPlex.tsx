@@ -1,10 +1,10 @@
 import PlexLoginButton from '@app/components/PlexLoginButton';
 import { useUser } from '@app/hooks/useUser';
-import axios from 'axios';
+import defineMessages from '@app/utils/defineMessages';
 import { useEffect, useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Setup', {
   welcome: 'Welcome to Jellyseerr',
   signinMessage: 'Get started by signing in with your Plex account',
 });
@@ -24,9 +24,19 @@ const LoginWithPlex = ({ onComplete }: LoginWithPlexProps) => {
 
   useEffect(() => {
     const login = async () => {
-      const response = await axios.post('/api/v1/auth/plex', { authToken });
+      const res = await fetch('/api/v1/auth/plex', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          authToken,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
 
-      if (response.data?.id) {
+      if (data?.id) {
         revalidate();
       }
     };

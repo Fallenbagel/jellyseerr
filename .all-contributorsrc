@@ -286,6 +286,159 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "xeruf",
+      "name": "Janek",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13354331?v=4",
+      "profile": "https://github.com/xeruf",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "aleksasiriski",
+      "name": "Aleksa Siriški",
+      "avatar_url": "https://avatars.githubusercontent.com/u/31509435?v=4",
+      "profile": "https://aleksasiriski.dev",
+      "contributions": [
+        "infra"
+      ]
+    },
+    {
+      "login": "Danish-H",
+      "name": "Danish Humair",
+      "avatar_url": "https://avatars.githubusercontent.com/u/121830048?v=4",
+      "profile": "http://danishhumair.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "trackmastersteve",
+      "name": "Stephen Harris",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16858514?v=4",
+      "profile": "https://arm0.red",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "joshuaboniface",
+      "name": "Joshua M. Boniface",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4031396?v=4",
+      "profile": "https://www.boniface.me",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "gauthier-th",
+      "name": "Gauthier",
+      "avatar_url": "https://avatars.githubusercontent.com/u/37781713?v=4",
+      "profile": "https://gauthierth.fr/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Kara-Zor-El",
+      "name": "Kara",
+      "avatar_url": "https://avatars.githubusercontent.com/u/69772087?v=4",
+      "profile": "https://github.com/Kara-Zor-El",
+      "contributions": [
+        "infra"
+      ]
+    },
+    {
+      "login": "JoaquinOlivero",
+      "name": "Joaquin Olivero",
+      "avatar_url": "https://avatars.githubusercontent.com/u/66050823?v=4",
+      "profile": "https://joaquinolivero.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Bretterteig",
+      "name": "Julian Behr",
+      "avatar_url": "https://avatars.githubusercontent.com/u/47298401?v=4",
+      "profile": "https://github.com/Bretterteig",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "ThowZzy",
+      "name": "ThowZzy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/61882536?v=4",
+      "profile": "https://github.com/ThowZzy",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "j0srisk",
+      "name": "Joseph Risk",
+      "avatar_url": "https://avatars.githubusercontent.com/u/18372584?v=4",
+      "profile": "http://josephrisk.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Loetwiek",
+      "name": "Loetwiek",
+      "avatar_url": "https://avatars.githubusercontent.com/u/79059734?v=4",
+      "profile": "https://github.com/Loetwiek",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Fuochi",
+      "name": "Fuochi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4720478?v=4",
+      "profile": "https://github.com/Fuochi",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "mobihen",
+      "name": "Nir Israel Hen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35529491?v=4",
+      "profile": "https://mobihen.com",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "XDark187",
+      "name": "Baraa",
+      "avatar_url": "https://avatars.githubusercontent.com/u/39034192?v=4",
+      "profile": "https://github.com/XDark187",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "franciscofsales",
+      "name": "Francisco Sales",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7977645?v=4",
+      "profile": "https://github.com/franciscofsales",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "myselfolli",
+      "name": "Oliver Laing",
+      "avatar_url": "https://avatars.githubusercontent.com/u/37535998?v=4",
+      "profile": "https://github.com/myselfolli",
+      "contributions": [
+        "code"
+      ]
     }
   ]
 }

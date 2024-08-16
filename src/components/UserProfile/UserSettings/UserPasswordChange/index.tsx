@@ -5,38 +5,41 @@ import PageTitle from '@app/components/Common/PageTitle';
 import SensitiveInput from '@app/components/Common/SensitiveInput';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
-import Error from '@app/pages/_error';
+import ErrorPage from '@app/pages/_error';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
 import { Form, Formik } from 'formik';
 import { useRouter } from 'next/router';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
 
-const messages = defineMessages({
-  password: 'Password',
-  currentpassword: 'Current Password',
-  newpassword: 'New Password',
-  confirmpassword: 'Confirm Password',
-  toastSettingsSuccess: 'Password saved successfully!',
-  toastSettingsFailure: 'Something went wrong while saving the password.',
-  toastSettingsFailureVerifyCurrent:
-    'Something went wrong while saving the password. Was your current password entered correctly?',
-  validationCurrentPassword: 'You must provide your current password',
-  validationNewPassword: 'You must provide a new password',
-  validationNewPasswordLength:
-    'Password is too short; should be a minimum of 8 characters',
-  validationConfirmPassword: 'You must confirm the new password',
-  validationConfirmPasswordSame: 'Passwords must match',
-  noPasswordSet:
-    'This user account currently does not have a password set. Configure a password below to enable this account to sign in as a "local user."',
-  noPasswordSetOwnAccount:
-    'Your account currently does not have a password set. Configure a password below to enable sign-in as a "local user" using your email address.',
-  nopermissionDescription:
-    "You do not have permission to modify this user's password.",
-});
+const messages = defineMessages(
+  'components.UserProfile.UserSettings.UserPasswordChange',
+  {
+    password: 'Password',
+    currentpassword: 'Current Password',
+    newpassword: 'New Password',
+    confirmpassword: 'Confirm Password',
+    toastSettingsSuccess: 'Password saved successfully!',
+    toastSettingsFailure: 'Something went wrong while saving the password.',
+    toastSettingsFailureVerifyCurrent:
+      'Something went wrong while saving the password. Was your current password entered correctly?',
+    validationCurrentPassword: 'You must provide your current password',
+    validationNewPassword: 'You must provide a new password',
+    validationNewPasswordLength:
+      'Password is too short; should be a minimum of 8 characters',
+    validationConfirmPassword: 'You must confirm the new password',
+    validationConfirmPasswordSame: 'Passwords must match',
+    noPasswordSet:
+      'This user account currently does not have a password set. Configure a password below to enable this account to sign in as a "local user."',
+    noPasswordSetOwnAccount:
+      'Your account currently does not have a password set. Configure a password below to enable sign-in as a "local user" using your email address.',
+    nopermissionDescription:
+      "You do not have permission to modify this user's password.",
+  }
+);
 
 const UserPasswordChange = () => {
   const intl = useIntl();
@@ -76,7 +79,7 @@ const UserPasswordChange = () => {
   }
 
   if (!data) {
-    return <Error statusCode={500} />;
+    return <ErrorPage statusCode={500} />;
   }
 
   if (
@@ -119,11 +122,21 @@ const UserPasswordChange = () => {
         enableReinitialize
         onSubmit={async (values, { resetForm }) => {
           try {
-            await axios.post(`/api/v1/user/${user?.id}/settings/password`, {
-              currentPassword: values.currentPassword,
-              newPassword: values.newPassword,
-              confirmPassword: values.confirmPassword,
-            });
+            const res = await fetch(
+              `/api/v1/user/${user?.id}/settings/password`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  currentPassword: values.currentPassword,
+                  newPassword: values.newPassword,
+                  confirmPassword: values.confirmPassword,
+                }),
+              }
+            );
+            if (!res.ok) throw new Error();
 
             addToast(intl.formatMessage(messages.toastSettingsSuccess), {
               autoDismiss: true,

@@ -3,26 +3,29 @@ import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import NotificationTypeSelector from '@app/components/NotificationTypeSelector';
 import { useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
 import type { UserSettingsNotificationsResponse } from '@server/interfaces/api/userSettingsInterfaces';
-import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import { useRouter } from 'next/router';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
 
-const messages = defineMessages({
-  telegramsettingssaved: 'Telegram notification settings saved successfully!',
-  telegramsettingsfailed: 'Telegram notification settings failed to save.',
-  telegramChatId: 'Chat ID',
-  telegramChatIdTipLong:
-    '<TelegramBotLink>Start a chat</TelegramBotLink>, add <GetIdBotLink>@get_id_bot</GetIdBotLink>, and issue the <code>/my_id</code> command',
-  sendSilently: 'Send Silently',
-  sendSilentlyDescription: 'Send notifications with no sound',
-  validationTelegramChatId: 'You must provide a valid chat ID',
-});
+const messages = defineMessages(
+  'components.UserProfile.UserSettings.UserNotificationSettings',
+  {
+    telegramsettingssaved: 'Telegram notification settings saved successfully!',
+    telegramsettingsfailed: 'Telegram notification settings failed to save.',
+    telegramChatId: 'Chat ID',
+    telegramChatIdTipLong:
+      '<TelegramBotLink>Start a chat</TelegramBotLink>, add <GetIdBotLink>@get_id_bot</GetIdBotLink>, and issue the <code>/my_id</code> command',
+    sendSilently: 'Send Silently',
+    sendSilentlyDescription: 'Send notifications with no sound',
+    validationTelegramChatId: 'You must provide a valid chat ID',
+  }
+);
 
 const UserTelegramSettings = () => {
   const intl = useIntl();
@@ -67,18 +70,28 @@ const UserTelegramSettings = () => {
       enableReinitialize
       onSubmit={async (values) => {
         try {
-          await axios.post(`/api/v1/user/${user?.id}/settings/notifications`, {
-            pgpKey: data?.pgpKey,
-            discordId: data?.discordId,
-            pushbulletAccessToken: data?.pushbulletAccessToken,
-            pushoverApplicationToken: data?.pushoverApplicationToken,
-            pushoverUserKey: data?.pushoverUserKey,
-            telegramChatId: values.telegramChatId,
-            telegramSendSilently: values.telegramSendSilently,
-            notificationTypes: {
-              telegram: values.types,
-            },
-          });
+          const res = await fetch(
+            `/api/v1/user/${user?.id}/settings/notifications`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                pgpKey: data?.pgpKey,
+                discordId: data?.discordId,
+                pushbulletAccessToken: data?.pushbulletAccessToken,
+                pushoverApplicationToken: data?.pushoverApplicationToken,
+                pushoverUserKey: data?.pushoverUserKey,
+                telegramChatId: values.telegramChatId,
+                telegramSendSilently: values.telegramSendSilently,
+                notificationTypes: {
+                  telegram: values.types,
+                },
+              }),
+            }
+          );
+          if (!res.ok) throw new Error();
           addToast(intl.formatMessage(messages.telegramsettingssaved), {
             appearance: 'success',
             autoDismiss: true,

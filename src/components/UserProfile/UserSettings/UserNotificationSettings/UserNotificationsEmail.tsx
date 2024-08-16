@@ -8,24 +8,27 @@ import { OpenPgpLink } from '@app/components/Settings/Notifications/Notification
 import SettingsBadge from '@app/components/Settings/SettingsBadge';
 import { useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
 import type { UserSettingsNotificationsResponse } from '@server/interfaces/api/userSettingsInterfaces';
-import axios from 'axios';
 import { Form, Formik } from 'formik';
 import { useRouter } from 'next/router';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
 
-const messages = defineMessages({
-  emailsettingssaved: 'Email notification settings saved successfully!',
-  emailsettingsfailed: 'Email notification settings failed to save.',
-  pgpPublicKey: 'PGP Public Key',
-  pgpPublicKeyTip:
-    'Encrypt email messages using <OpenPgpLink>OpenPGP</OpenPgpLink>',
-  validationPgpPublicKey: 'You must provide a valid PGP public key',
-});
+const messages = defineMessages(
+  'components.UserProfile.UserSettings.UserNotificationSettings',
+  {
+    emailsettingssaved: 'Email notification settings saved successfully!',
+    emailsettingsfailed: 'Email notification settings failed to save.',
+    pgpPublicKey: 'PGP Public Key',
+    pgpPublicKeyTip:
+      'Encrypt email messages using <OpenPgpLink>OpenPGP</OpenPgpLink>',
+    validationPgpPublicKey: 'You must provide a valid PGP public key',
+  }
+);
 
 const UserEmailSettings = () => {
   const intl = useIntl();
@@ -63,18 +66,28 @@ const UserEmailSettings = () => {
       enableReinitialize
       onSubmit={async (values) => {
         try {
-          await axios.post(`/api/v1/user/${user?.id}/settings/notifications`, {
-            pgpKey: values.pgpKey,
-            discordId: data?.discordId,
-            pushbulletAccessToken: data?.pushbulletAccessToken,
-            pushoverApplicationToken: data?.pushoverApplicationToken,
-            pushoverUserKey: data?.pushoverUserKey,
-            telegramChatId: data?.telegramChatId,
-            telegramSendSilently: data?.telegramSendSilently,
-            notificationTypes: {
-              email: values.types,
-            },
-          });
+          const res = await fetch(
+            `/api/v1/user/${user?.id}/settings/notifications`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                pgpKey: values.pgpKey,
+                discordId: data?.discordId,
+                pushbulletAccessToken: data?.pushbulletAccessToken,
+                pushoverApplicationToken: data?.pushoverApplicationToken,
+                pushoverUserKey: data?.pushoverUserKey,
+                telegramChatId: data?.telegramChatId,
+                telegramSendSilently: data?.telegramSendSilently,
+                notificationTypes: {
+                  email: values.types,
+                },
+              }),
+            }
+          );
+          if (!res.ok) throw new Error();
           addToast(intl.formatMessage(messages.emailsettingssaved), {
             appearance: 'success',
             autoDismiss: true,

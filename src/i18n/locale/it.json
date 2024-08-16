@@ -1152,7 +1152,7 @@
   "components.Settings.SettingsMain.applicationurl": "URL applicazione",
   "components.Settings.SettingsMain.validationApplicationTitle": "Devi fornire un titolo dell'applicazione",
   "components.Settings.SettingsMain.validationApplicationUrl": "Devi fornire un URL valido",
-  "components.Settings.restartrequiredTooltip": "Overseerr deve essere riavviato per rendere effettive le modifiche",
+  "components.Settings.restartrequiredTooltip": "Jellyseerr deve essere riavviato per rendere effettive le modifiche",
   "components.TitleCard.tvdbid": "TheTVDB ID",
   "components.UserProfile.emptywatchlist": "I media aggiunti alla tua <PlexWatchlistSupportLink>Plex Watchlist</PlexWatchlistSupportLink> appariranno qui.",
   "components.TvDetails.status4k": "4K {status}",
@@ -1165,5 +1165,15 @@
   "components.Settings.SettingsMain.toastSettingsSuccess": "Impostazioni salvate con successo!",
   "components.UserProfile.plexwatchlist": "Plex Watchlist",
   "components.TvDetails.seasonstitle": "Stagioni",
-  "components.UserProfile.UserSettings.UserGeneralSettings.plexwatchlistsyncseriestip": "Richiedi automaticamente le serie presenti nella tua <PlexWatchlistSupportLink>Plex Watchlist</PlexWatchlistSupportLink>"
+  "components.UserProfile.UserSettings.UserGeneralSettings.plexwatchlistsyncseriestip": "Richiedi automaticamente le serie presenti nella tua <PlexWatchlistSupportLink>Plex Watchlist</PlexWatchlistSupportLink>",
+  "components.Discover.moviegenres": "Film per genere",
+  "components.RequestModal.requestseries4ktitle": "Richiedi serie in 4K",
+  "components.RequestModal.requestmovie4ktitle": "Richiedi film in 4K",
+  "components.Discover.FilterSlideover.tmdbuserscore": "Voto utenti TMDB",
+  "components.StatusBadge.openinarr": "Apri su {arr}",
+  "components.Settings.SonarrModal.animeSeriesType": "Tipo serie anime",
+  "components.Settings.SonarrModal.seriesType": "Tipo serie TV",
+  "components.RequestModal.requestmovietitle": "Richiedi film",
+  "components.Discover.FilterSlideover.tmdbuservotecount": "Numero voti utenti TMDB",
+  "components.RequestModal.requestseriestitle": "Richiedi serie"
 }

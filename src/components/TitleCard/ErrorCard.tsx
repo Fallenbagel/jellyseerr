@@ -1,8 +1,8 @@
 import Button from '@app/components/Common/Button';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { CheckIcon, TrashIcon } from '@heroicons/react/24/solid';
-import axios from 'axios';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { mutate } from 'swr';
 
 interface ErrorCardProps {
@@ -13,18 +13,21 @@ interface ErrorCardProps {
   canExpand?: boolean;
 }
 
-const messages = defineMessages({
+const messages = defineMessages('components.TitleCard', {
   mediaerror: '{mediaType} Not Found',
   tmdbid: 'TMDB ID',
   tvdbid: 'TheTVDB ID',
   cleardata: 'Clear Data',
 });
 
-const Error = ({ id, tmdbId, tvdbId, type, canExpand }: ErrorCardProps) => {
+const ErrorCard = ({ id, tmdbId, tvdbId, type, canExpand }: ErrorCardProps) => {
   const intl = useIntl();
 
   const deleteMedia = async () => {
-    await axios.delete(`/api/v1/media/${id}`);
+    const res = await fetch(`/api/v1/media/${id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) throw new Error();
     mutate('/api/v1/media?filter=allavailable&take=20&sort=mediaAdded');
     mutate('/api/v1/request?filter=all&take=10&sort=modified&skip=0');
   };
@@ -128,4 +131,4 @@ const Error = ({ id, tmdbId, tvdbId, type, canExpand }: ErrorCardProps) => {
     </div>
   );
 };
-export default Error;
+export default ErrorCard;
