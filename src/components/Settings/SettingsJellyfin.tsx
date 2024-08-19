@@ -62,6 +62,9 @@ const messages = defineMessages('components.Settings', {
   validationUrlTrailingSlash: 'URL must not end in a trailing slash',
   validationUrlBaseLeadingSlash: 'URL base must have a leading slash',
   validationUrlBaseTrailingSlash: 'URL base must not end in a trailing slash',
+  tip: 'Tip',
+  scanbackground:
+    'Scanning will run in the background. You can continue the setup process in the meantime.',
 });
 
 interface Library {
@@ -79,13 +82,13 @@ interface SyncStatus {
 }
 
 interface SettingsJellyfinProps {
-  showAdvancedSettings?: boolean;
+  isSetupSettings?: boolean;
   onComplete?: () => void;
 }
 
 const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
   onComplete,
-  showAdvancedSettings,
+  isSetupSettings,
 }) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const toasts = useToasts();
@@ -447,6 +450,14 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
           </div>
         </div>
       </div>
+      {isSetupSettings && (
+        <div className="text-sm text-gray-500">
+          <span className="mr-2">
+            <Badge>{intl.formatMessage(messages.tip)}</Badge>
+          </span>
+          {intl.formatMessage(messages.scanbackground)}
+        </div>
+      )}
       <div className="mt-10 mb-6">
         <h3 className="heading">
           {intl.formatMessage(
@@ -548,7 +559,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
         }) => {
           return (
             <form className="section" onSubmit={handleSubmit}>
-              {showAdvancedSettings && (
+              {!isSetupSettings && (
                 <>
                   <div className="form-row">
                     <label htmlFor="hostname" className="text-label">
@@ -632,7 +643,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                   )}
                 </div>
               </div>
-              {showAdvancedSettings && (
+              {!isSetupSettings && (
                 <>
                   <div className="form-row">
                     <label htmlFor="urlBase" className="text-label">
@@ -699,7 +710,9 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                     )}
                 </div>
               </div>
-              <div className="actions">
+              <div
+                className={`actions ${isSetupSettings ? 'mt-0 border-0' : ''}`}
+              >
                 <div className="flex justify-end">
                   <span className="ml-3 inline-flex rounded-md shadow-sm">
                     <Button

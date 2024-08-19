@@ -2,7 +2,6 @@ import EmbyLogo from '@app/assets/services/emby.svg';
 import JellyfinLogo from '@app/assets/services/jellyfin.svg';
 import PlexLogo from '@app/assets/services/plex.svg';
 import AppDataWarning from '@app/components/AppDataWarning';
-import Badge from '@app/components/Common/Badge';
 import Button from '@app/components/Common/Button';
 import ImageFader from '@app/components/Common/ImageFader';
 import PageTitle from '@app/components/Common/PageTitle';
@@ -36,9 +35,6 @@ const messages = defineMessages('components.Setup', {
   signin: 'Sign In',
   configuremediaserver: 'Configure Media Server',
   configureservices: 'Configure Services',
-  tip: 'Tip',
-  scanbackground:
-    'Scanning will run in the background. You can continue the setup process in the meantime.',
 });
 
 const Setup = () => {
@@ -225,16 +221,10 @@ const Setup = () => {
                 />
               ) : (
                 <SettingsJellyfin
-                  showAdvancedSettings={false}
+                  isSetupSettings
                   onComplete={() => setMediaServerSettingsComplete(true)}
                 />
               )}
-              <div className="mt-4 text-sm text-gray-500">
-                <span className="mr-2">
-                  <Badge>{intl.formatMessage(messages.tip)}</Badge>
-                </span>
-                {intl.formatMessage(messages.scanbackground)}
-              </div>
               <div className="actions">
                 <div className="flex justify-end">
                   <span className="ml-3 inline-flex rounded-md shadow-sm">
