@@ -10,7 +10,6 @@ import defineMessages from '@app/utils/defineMessages';
 import { Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { MediaServerType } from '@server/constants/server';
-import axios from 'axios';
 import getConfig from 'next/config';
 import { useRouter } from 'next/dist/client/router';
 import Image from 'next/image';
@@ -44,13 +43,28 @@ const Login = () => {
     const login = async () => {
       setProcessing(true);
       try {
-        const response = await axios.post('/api/v1/auth/plex', { authToken });
+        const res = await fetch('/api/v1/auth/plex', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ authToken }),
+        });
+        if (!res.ok) throw new Error(res.statusText, { cause: res });
+        const data = await res.json();
 
-        if (response.data?.id) {
+        if (data?.id) {
           revalidate();
         }
       } catch (e) {
-        setError(e.response.data.message);
+        let errorData;
+        try {
+          errorData = await e.cause?.text();
+          errorData = JSON.parse(errorData);
+        } catch {
+          /* empty */
+        }
+        setError(errorData?.message);
         setAuthToken(undefined);
         setProcessing(false);
       }

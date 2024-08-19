@@ -7,7 +7,6 @@ import {
   ClockIcon,
 } from '@heroicons/react/24/outline';
 import { CogIcon, UserIcon } from '@heroicons/react/24/solid';
-import axios from 'axios';
 import Image from 'next/image';
 import type { LinkProps } from 'next/link';
 import Link from 'next/link';
@@ -39,9 +38,13 @@ const UserDropdown = () => {
   const { user, revalidate } = useUser();
 
   const logout = async () => {
-    const response = await axios.post('/api/v1/auth/logout');
+    const res = await fetch('/api/v1/auth/logout', {
+      method: 'POST',
+    });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
 
-    if (response.data?.status === 'ok') {
+    if (data?.status === 'ok') {
       revalidate();
     }
   };
@@ -87,9 +90,11 @@ const UserDropdown = () => {
                   <span className="truncate text-xl font-semibold text-gray-200">
                     {user?.displayName}
                   </span>
-                  <span className="truncate text-sm text-gray-400">
-                    {user?.email}
-                  </span>
+                  {user?.displayName?.toLowerCase() !== user?.email && (
+                    <span className="truncate text-sm text-gray-400">
+                      {user?.email}
+                    </span>
+                  )}
                 </div>
               </div>
               {user && <MiniQuotaDisplay userId={user?.id} />}

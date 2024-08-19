@@ -155,13 +155,13 @@ export interface IMDBRating {
  */
 class IMDBRadarrProxy extends ExternalAPI {
   constructor() {
-    super('https://api.radarr.video/v1', {
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      nodeCache: cacheManager.getCache('imdb').data,
-    });
+    super(
+      'https://api.radarr.video/v1',
+      {},
+      {
+        nodeCache: cacheManager.getCache('imdb').data,
+      }
+    );
   }
 
   /**
@@ -175,7 +175,11 @@ class IMDBRadarrProxy extends ExternalAPI {
         `/movie/imdb/${IMDBid}`
       );
 
-      if (!data?.length || data[0].ImdbId !== IMDBid) {
+      if (
+        !data?.length ||
+        data[0].ImdbId !== IMDBid ||
+        !data[0].MovieRatings.Imdb
+      ) {
         return null;
       }
 

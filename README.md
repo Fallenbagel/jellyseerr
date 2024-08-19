@@ -11,17 +11,13 @@
 <a href="http://jellyseerr.borgcube.de/engage/jellyseerr/"><img src="http://jellyseerr.borgcube.de/widget/jellyseerr/jellyseerr-frontend/svg-badge.svg" alt="Translation status" /></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-40-orange.svg"/></a>
+<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-47-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 **Jellyseerr** is a free and open source software application for managing requests for your media library.
 It is a fork of [Overseerr](https://github.com/sct/overseerr) built to bring support for [Jellyfin](https://github.com/jellyfin/jellyfin) & [Emby](https://github.com/MediaBrowser/Emby) media servers!
 
-_The original Overseerr team have been busy and Jellyfin/Emby support aren't on their roadmap, so we started this project as we wanted to bring the Overseerr experience to the Jellyfin/Emby Community!_
-
 ## Current Features
-
-<!--  -->
 
 - Full Jellyfin/Emby/Plex integration including authentication with user import & management
 - Supports Movies, Shows and Mixed Libraries
@@ -39,6 +35,10 @@ _The original Overseerr team have been busy and Jellyfin/Emby support aren't on 
 With more features on the way! Check out our [issue tracker](https://github.com/fallenbagel/jellyseerr/issues) to see the features which have already been requested.
 
 ## Getting Started
+
+Check out our documentation for instructions on how to install and run Jellyseerr:
+
+[//]: # 'TODO: move this to the docs'
 
 ### Launching Jellyseerr using Docker (Recommended)
 
@@ -211,86 +211,14 @@ pnpm start
 (You can use task scheduler to run a bat script with `@echo off` and `pnpm start` to run jellyseerr in the background)
 (You can also use nssm to run jellyseerr as a service, see [nssm](https://nssm.cc/usage) for more information)
 
-_To set env variables such as `JELLYFIN_TYPE=emby` create a file called `.env` in the root directory of jellyseerr_
-
-#### Linux
-
-**Pre-requisites:**
-
-- Nodejs [v20](https://nodejs.org/en/download)
-- Pnpm [v9](https://pnpm.io/installation)
-- Git
-
-**Steps:**
-
-1. Assuming you want the root folder for the jellyseerr source code to be cloned to `/opt`
-
-```bash
-cd /opt
-```
-
-2. Then execute the following commands to clone and checkout to the stable version
-
-```bash
-git clone https://github.com/Fallenbagel/jellyseerr.git && cd jellyseerr
-git checkout main
-```
-
-3. Then install the dependencies and build the dist
-
-```bash
-CYPRESS_INSTALL_BINARY=0 pnpm install --frozen-lockfile
-pnpm build
-```
-
-4. Now you can start jellyseerr using `pnpm start` and opening http://localhost:5055 in your browser.
-
-5. If you want to run jellyseerr as a _Systemd-service:_
-
-- assuming jellyseerr was cloned to `/opt/`
-- first create the environment file at `/etc/jellyseerr/jellyseerr.conf`
-
-Environment file:
-
-```
-# Jellyseerr's default port is 5055, if you want to use both, change this.
-# specify on which port to listen
-PORT=5055
-
-# specify on which interface to listen, by default jellyseerr listens on all interfaces
-#HOST=127.0.0.1
-
-# Uncomment if your media server is emby instead of jellyfin.
-# JELLYFIN_TYPE=emby
-```
-
-- Then run the command `which node` to find your node path (assuming it's at `/usr/bin/node`)
-- Then create the service file using `sudo systemctl edit jellyseerr.service` or creating and editing a file at `/etc/systemd/system/jellyseerr.service`
-
-Service file contents:
-
-```
-[Unit]
-Description=Jellyseerr Service
-Wants=network-online.target
-After=network-online.target
-
-[Service]
-EnvironmentFile=/etc/jellyseerr/jellyseerr.conf
-Environment=NODE_ENV=production
-Type=exec
-Restart=on-failure
-WorkingDirectory=/opt/jellyseerr
-ExecStart=/usr/bin/node dist/index.js
-
-[Install]
-WantedBy=multi-user.target
-```
+https://docs.jellyseerr.dev/getting-started/
 
 ### Packages:
 
 Archlinux: [AUR](https://aur.archlinux.org/packages/jellyseerr)
-Nixpkg: [Nixpkg](https://search.nixos.org/packages?channel=unstable&show=jellyseerr)
+
+Nix: [Nixpkg](https://search.nixos.org/packages?channel=unstable&show=jellyseerr)
+
 ~Snap: [Snap](https://snapcraft.io/jellyseerr)~(Deprecated)
 
 ## Preview
@@ -299,6 +227,7 @@ Nixpkg: [Nixpkg](https://search.nixos.org/packages?channel=unstable&show=jellyse
 
 ## Support
 
+- Check out the [Jellyseerr Documentation](https://docs.jellyseerr.dev) before asking for help. Your question might already be in the docs!
 - You can get support on [Discord](https://discord.gg/ckbvBtDJgC).
 - You can ask questions in the Help category of our [GitHub Discussions](https://github.com/fallenbagel/jellyseerr/discussions).
 - Bug reports and feature requests can be submitted via [GitHub Issues](https://github.com/fallenbagel/jellyseerr/issues).
@@ -381,6 +310,15 @@ Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcon
       <td align="center" valign="top" width="14.28%"><a href="https://joaquinolivero.com"><img src="https://avatars.githubusercontent.com/u/66050823?v=4?s=100" width="100px;" alt="Joaquin Olivero"/><br /><sub><b>Joaquin Olivero</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=JoaquinOlivero" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Bretterteig"><img src="https://avatars.githubusercontent.com/u/47298401?v=4?s=100" width="100px;" alt="Julian Behr"/><br /><sub><b>Julian Behr</b></sub></a><br /><a href="#translation-Bretterteig" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ThowZzy"><img src="https://avatars.githubusercontent.com/u/61882536?v=4?s=100" width="100px;" alt="ThowZzy"/><br /><sub><b>ThowZzy</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=ThowZzy" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://josephrisk.com"><img src="https://avatars.githubusercontent.com/u/18372584?v=4?s=100" width="100px;" alt="Joseph Risk"/><br /><sub><b>Joseph Risk</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=j0srisk" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Loetwiek"><img src="https://avatars.githubusercontent.com/u/79059734?v=4?s=100" width="100px;" alt="Loetwiek"/><br /><sub><b>Loetwiek</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=Loetwiek" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Fuochi"><img src="https://avatars.githubusercontent.com/u/4720478?v=4?s=100" width="100px;" alt="Fuochi"/><br /><sub><b>Fuochi</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=Fuochi" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://mobihen.com"><img src="https://avatars.githubusercontent.com/u/35529491?v=4?s=100" width="100px;" alt="Nir Israel Hen"/><br /><sub><b>Nir Israel Hen</b></sub></a><br /><a href="#translation-mobihen" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/XDark187"><img src="https://avatars.githubusercontent.com/u/39034192?v=4?s=100" width="100px;" alt="Baraa"/><br /><sub><b>Baraa</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=XDark187" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/franciscofsales"><img src="https://avatars.githubusercontent.com/u/7977645?v=4?s=100" width="100px;" alt="Francisco Sales"/><br /><sub><b>Francisco Sales</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=franciscofsales" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/myselfolli"><img src="https://avatars.githubusercontent.com/u/37535998?v=4?s=100" width="100px;" alt="Oliver Laing"/><br /><sub><b>Oliver Laing</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=myselfolli" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
