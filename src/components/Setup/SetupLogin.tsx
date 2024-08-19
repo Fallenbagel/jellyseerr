@@ -2,14 +2,13 @@ import Accordion from '@app/components/Common/Accordion';
 import JellyfinLogin from '@app/components/Login/JellyfinLogin';
 import PlexLoginButton from '@app/components/PlexLoginButton';
 import { useUser } from '@app/hooks/useUser';
+import defineMessages from '@app/utils/defineMessages';
 import { MediaServerType } from '@server/constants/server';
-import axios from 'axios';
 import getConfig from 'next/config';
-import type React from 'react';
 import { useEffect, useState } from 'react';
-import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Setup', {
   welcome: 'Welcome to Jellyseerr',
   signinMessage: 'Get started by signing in',
   signinWithJellyfin: 'Use your {mediaServerName} account',
@@ -34,11 +33,19 @@ const SetupLogin: React.FC<LoginWithMediaServerProps> = ({ onComplete }) => {
 
   useEffect(() => {
     const login = async () => {
-      const response = await axios.post('/api/v1/auth/plex', {
-        authToken: authToken,
+      const res = await fetch('/api/v1/auth/plex', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          authToken: authToken,
+        }),
       });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
 
-      if (response.data?.email) {
+      if (data?.email) {
         revalidate();
       }
     };

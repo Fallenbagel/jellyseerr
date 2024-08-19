@@ -5,21 +5,24 @@ import PageTitle from '@app/components/Common/PageTitle';
 import PermissionEdit from '@app/components/PermissionEdit';
 import { useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
-import Error from '@app/pages/_error';
+import ErrorPage from '@app/pages/_error';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
 import { Form, Formik } from 'formik';
 import { useRouter } from 'next/router';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 
-const messages = defineMessages({
-  toastSettingsSuccess: 'Permissions saved successfully!',
-  toastSettingsFailure: 'Something went wrong while saving settings.',
-  permissions: 'Permissions',
-  unauthorizedDescription: 'You cannot modify your own permissions.',
-});
+const messages = defineMessages(
+  'components.UserProfile.UserSettings.UserPermissions',
+  {
+    toastSettingsSuccess: 'Permissions saved successfully!',
+    toastSettingsFailure: 'Something went wrong while saving settings.',
+    permissions: 'Permissions',
+    unauthorizedDescription: 'You cannot modify your own permissions.',
+  }
+);
 
 const UserPermissions = () => {
   const intl = useIntl();
@@ -42,7 +45,7 @@ const UserPermissions = () => {
   }
 
   if (!data) {
-    return <Error statusCode={500} />;
+    return <ErrorPage statusCode={500} />;
   }
 
   if (currentUser?.id !== 1 && currentUser?.id === user?.id) {
@@ -80,10 +83,19 @@ const UserPermissions = () => {
         enableReinitialize
         onSubmit={async (values) => {
           try {
-            await axios.post(`/api/v1/user/${user?.id}/settings/permissions`, {
-              permissions: values.currentPermissions ?? 0,
-            });
-
+            const res = await fetch(
+              `/api/v1/user/${user?.id}/settings/permissions`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  permissions: values.currentPermissions ?? 0,
+                }),
+              }
+            );
+            if (!res.ok) throw new Error();
             addToast(intl.formatMessage(messages.toastSettingsSuccess), {
               autoDismiss: true,
               appearance: 'success',

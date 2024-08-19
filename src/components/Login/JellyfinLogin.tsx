@@ -1,17 +1,16 @@
 import Button from '@app/components/Common/Button';
 import Tooltip from '@app/components/Common/Tooltip';
 import useSettings from '@app/hooks/useSettings';
+import defineMessages from '@app/utils/defineMessages';
 import { InformationCircleIcon } from '@heroicons/react/24/solid';
 import { ApiErrorCode } from '@server/constants/error';
-import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import getConfig from 'next/config';
-import type React from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import * as Yup from 'yup';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Login', {
   username: 'Username',
   password: 'Password',
   hostname: '{mediaServerName} URL',
@@ -105,18 +104,32 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
         validationSchema={LoginSchema}
         onSubmit={async (values) => {
           try {
-            await axios.post('/api/v1/auth/jellyfin', {
-              username: values.username,
-              password: values.password,
-              hostname: values.hostname,
-              port: values.port,
-              useSsl: values.useSsl,
-              urlBase: values.urlBase,
-              email: values.email,
+            const res = await fetch('/api/v1/auth/jellyfin', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                username: values.username,
+                password: values.password,
+                hostname: values.hostname,
+                port: values.port,
+                useSsl: values.useSsl,
+                urlBase: values.urlBase,
+                email: values.email,
+              }),
             });
+            if (!res.ok) throw new Error(res.statusText, { cause: res });
           } catch (e) {
+            let errorData;
+            try {
+              errorData = await e.cause?.text();
+              errorData = JSON.parse(errorData);
+            } catch {
+              /* empty */
+            }
             let errorMessage = null;
-            switch (e.response?.data?.message) {
+            switch (errorData?.message) {
               case ApiErrorCode.InvalidUrl:
                 errorMessage = messages.invalidurlerror;
                 break;
@@ -339,11 +352,18 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
           validationSchema={LoginSchema}
           onSubmit={async (values) => {
             try {
-              await axios.post('/api/v1/auth/jellyfin', {
-                username: values.username,
-                password: values.password,
-                email: values.username,
+              const res = await fetch('/api/v1/auth/jellyfin', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  username: values.username,
+                  password: values.password,
+                  email: values.username,
+                }),
               });
+              if (!res.ok) throw new Error();
             } catch (e) {
               toasts.addToast(
                 intl.formatMessage(

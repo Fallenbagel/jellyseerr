@@ -2,24 +2,27 @@ import Alert from '@app/components/Common/Alert';
 import Button from '@app/components/Common/Button';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon, BeakerIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR, { mutate } from 'swr';
 
-const messages = defineMessages({
-  agentenabled: 'Enable Agent',
-  webpushsettingssaved: 'Web push notification settings saved successfully!',
-  webpushsettingsfailed: 'Web push notification settings failed to save.',
-  toastWebPushTestSending: 'Sending web push test notification…',
-  toastWebPushTestSuccess: 'Web push test notification sent!',
-  toastWebPushTestFailed: 'Web push test notification failed to send.',
-  httpsRequirement:
-    'In order to receive web push notifications, Jellyseerr must be served over HTTPS.',
-});
+const messages = defineMessages(
+  'components.Settings.Notifications.NotificationsWebPush',
+  {
+    agentenabled: 'Enable Agent',
+    webpushsettingssaved: 'Web push notification settings saved successfully!',
+    webpushsettingsfailed: 'Web push notification settings failed to save.',
+    toastWebPushTestSending: 'Sending web push test notification…',
+    toastWebPushTestSuccess: 'Web push test notification sent!',
+    toastWebPushTestFailed: 'Web push test notification failed to send.',
+    httpsRequirement:
+      'In order to receive web push notifications, Jellyseerr must be served over HTTPS.',
+  }
+);
 
 const NotificationsWebPush = () => {
   const intl = useIntl();
@@ -54,10 +57,17 @@ const NotificationsWebPush = () => {
         }}
         onSubmit={async (values) => {
           try {
-            await axios.post('/api/v1/settings/notifications/webpush', {
-              enabled: values.enabled,
-              options: {},
+            const res = await fetch('/api/v1/settings/notifications/webpush', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                enabled: values.enabled,
+                options: {},
+              }),
             });
+            if (!res.ok) throw new Error();
             mutate('/api/v1/settings/public');
             addToast(intl.formatMessage(messages.webpushsettingssaved), {
               appearance: 'success',
@@ -88,10 +98,20 @@ const NotificationsWebPush = () => {
                   toastId = id;
                 }
               );
-              await axios.post('/api/v1/settings/notifications/webpush/test', {
-                enabled: true,
-                options: {},
-              });
+              const res = await fetch(
+                '/api/v1/settings/notifications/webpush/test',
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    enabled: true,
+                    options: {},
+                  }),
+                }
+              );
+              if (!res.ok) throw new Error();
 
               if (toastId) {
                 removeToast(toastId);

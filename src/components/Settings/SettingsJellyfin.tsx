@@ -1,22 +1,22 @@
 import Badge from '@app/components/Common/Badge';
 import Button from '@app/components/Common/Button';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import SensitiveInput from '@app/components/Common/SensitiveInput';
 import LibraryItem from '@app/components/Settings/LibraryItem';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
 import { ApiErrorCode } from '@server/constants/error';
 import type { JellyfinSettings } from '@server/lib/settings';
-import axios from 'axios';
 import { Field, Formik } from 'formik';
 import getConfig from 'next/config';
-import type React from 'react';
 import { useState } from 'react';
-import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Settings', {
   jellyfinsettings: '{mediaServerName} Settings',
   jellyfinsettingsDescription:
     'Configure the settings for your {mediaServerName} server. {mediaServerName} scans your {mediaServerName} libraries to see what content is available.',
@@ -31,13 +31,14 @@ const messages = defineMessages({
   jellyfinSettingsSuccess: '{mediaServerName} settings saved successfully!',
   jellyfinSettings: '{mediaServerName} Settings',
   jellyfinSettingsDescription:
-    'Optionally configure the internal and external endpoints for your {mediaServerName} server. In most cases, the external URL is different to the internal URL. A custom password reset URL can also be set for {mediaServerName} login, in case you would like to redirect to a different password reset page.',
+    'Optionally configure the internal and external endpoints for your {mediaServerName} server. In most cases, the external URL is different to the internal URL. A custom password reset URL can also be set for {mediaServerName} login, in case you would like to redirect to a different password reset page. You can also change the Jellyfin API key, which was automatically generated previously.',
   externalUrl: 'External URL',
   hostname: 'Hostname or IP Address',
   port: 'Port',
   enablessl: 'Use SSL',
   urlBase: 'URL Base',
   jellyfinForgotPasswordUrl: 'Forgot Password URL',
+  apiKey: 'API key',
   jellyfinSyncFailedNoLibrariesFound: 'No libraries were found',
   jellyfinSyncFailedAutomaticGroupedFolders:
     'Custom authentication with Automatic Library Grouping not supported',
@@ -167,13 +168,25 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
     }
 
     try {
-      await axios.get('/api/v1/settings/jellyfin/library', {
-        params,
+      const searchParams = new URLSearchParams({
+        sync: params.sync ? 'true' : 'false',
+        ...(params.enable ? { enable: params.enable } : {}),
       });
+      const res = await fetch(
+        `/api/v1/settings/jellyfin/library?${searchParams.toString()}`
+      );
+      if (!res.ok) throw new Error(res.statusText, { cause: res });
       setIsSyncing(false);
       revalidate();
     } catch (e) {
-      if (e.response.data.message === 'SYNC_ERROR_GROUPED_FOLDERS') {
+      let errorData;
+      try {
+        errorData = await e.cause?.text();
+        errorData = JSON.parse(errorData);
+      } catch {
+        /* empty */
+      }
+      if (errorData?.message === 'SYNC_ERROR_GROUPED_FOLDERS') {
         toasts.addToast(
           intl.formatMessage(
             messages.jellyfinSyncFailedAutomaticGroupedFolders
@@ -183,7 +196,7 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
             appearance: 'warning',
           }
         );
-      } else if (e.response.data.message === 'SYNC_ERROR_NO_LIBRARIES') {
+      } else if (errorData?.message === 'SYNC_ERROR_NO_LIBRARIES') {
         toasts.addToast(
           intl.formatMessage(messages.jellyfinSyncFailedNoLibrariesFound),
           {
@@ -206,16 +219,32 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
   };
 
   const startScan = async () => {
-    await axios.post('/api/v1/settings/jellyfin/sync', {
-      start: true,
+    const res = await fetch('/api/v1/settings/jellyfin/sync', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        start: true,
+      }),
     });
+    if (!res.ok) throw new Error();
+
     revalidateSync();
   };
 
   const cancelScan = async () => {
-    await axios.post('/api/v1/settings/jellyfin/sync', {
-      cancel: true,
+    const res = await fetch('/api/v1/settings/jellyfin/sync', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        cancel: true,
+      }),
     });
+    if (!res.ok) throw new Error();
+
     revalidateSync();
   };
 
@@ -230,15 +259,19 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
           .join(',');
       }
 
-      await axios.get('/api/v1/settings/jellyfin/library', {
-        params,
-      });
+      const searchParams = new URLSearchParams(params.enable ? params : {});
+      const res = await fetch(
+        `/api/v1/settings/jellyfin/library?${searchParams.toString()}`
+      );
+      if (!res.ok) throw new Error();
     } else {
-      await axios.get('/api/v1/settings/jellyfin/library', {
-        params: {
-          enable: [...activeLibraries, libraryId].join(','),
-        },
+      const searchParams = new URLSearchParams({
+        enable: [...activeLibraries, libraryId].join(','),
       });
+      const res = await fetch(
+        `/api/v1/settings/jellyfin/library?${searchParams.toString()}`
+      );
+      if (!res.ok) throw new Error();
     }
     if (onComplete) {
       onComplete();
@@ -413,105 +446,121 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
           </div>
         </div>
       </div>
-      {showAdvancedSettings && (
-        <>
-          <div className="mt-10 mb-6">
-            <h3 className="heading">
-              {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                ? intl.formatMessage(messages.jellyfinSettings, {
-                    mediaServerName: 'Emby',
-                  })
-                : intl.formatMessage(messages.jellyfinSettings, {
-                    mediaServerName: 'Jellyfin',
-                  })}
-            </h3>
-            <p className="description">
-              {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                ? intl.formatMessage(messages.jellyfinSettingsDescription, {
-                    mediaServerName: 'Emby',
-                  })
-                : intl.formatMessage(messages.jellyfinSettingsDescription, {
-                    mediaServerName: 'Jellyfin',
-                  })}
-            </p>
-          </div>
-          <Formik
-            initialValues={{
-              hostname: data?.ip,
-              port: data?.port ?? 8096,
-              useSsl: data?.useSsl,
-              urlBase: data?.urlBase || '',
-              jellyfinExternalUrl: data?.externalHostname || '',
-              jellyfinForgotPasswordUrl: data?.jellyfinForgotPasswordUrl || '',
-            }}
-            validationSchema={JellyfinSettingsSchema}
-            onSubmit={async (values) => {
-              try {
-                await axios.post('/api/v1/settings/jellyfin', {
-                  ip: values.hostname,
-                  port: Number(values.port),
-                  useSsl: values.useSsl,
-                  urlBase: values.urlBase,
-                  externalHostname: values.jellyfinExternalUrl,
-                  jellyfinForgotPasswordUrl: values.jellyfinForgotPasswordUrl,
-                } as JellyfinSettings);
+      <div className="mt-10 mb-6">
+        <h3 className="heading">
+          {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+            ? intl.formatMessage(messages.jellyfinSettings, {
+                mediaServerName: 'Emby',
+              })
+            : intl.formatMessage(messages.jellyfinSettings, {
+                mediaServerName: 'Jellyfin',
+              })}
+        </h3>
+        <p className="description">
+          {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+            ? intl.formatMessage(messages.jellyfinSettingsDescription, {
+                mediaServerName: 'Emby',
+              })
+            : intl.formatMessage(messages.jellyfinSettingsDescription, {
+                mediaServerName: 'Jellyfin',
+              })}
+        </p>
+      </div>
+      <Formik
+        initialValues={{
+          hostname: data?.ip,
+          port: data?.port ?? 8096,
+          useSsl: data?.useSsl,
+          urlBase: data?.urlBase || '',
+          jellyfinExternalUrl: data?.externalHostname || '',
+          jellyfinForgotPasswordUrl: data?.jellyfinForgotPasswordUrl || '',
+          apiKey: data?.apiKey,
+        }}
+        validationSchema={JellyfinSettingsSchema}
+        onSubmit={async (values) => {
+          try {
+            const res = await fetch('/api/v1/settings/jellyfin', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                ip: values.hostname,
+                port: Number(values.port),
+                useSsl: values.useSsl,
+                urlBase: values.urlBase,
+                externalHostname: values.jellyfinExternalUrl,
+                jellyfinForgotPasswordUrl: values.jellyfinForgotPasswordUrl,
+                apiKey: values.apiKey,
+              } as JellyfinSettings),
+            });
+            if (!res.ok) throw new Error(res.statusText, { cause: res });
 
-                addToast(
-                  intl.formatMessage(messages.jellyfinSettingsSuccess, {
-                    mediaServerName:
-                      publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                        ? 'Emby'
-                        : 'Jellyfin',
-                  }),
-                  {
-                    autoDismiss: true,
-                    appearance: 'success',
-                  }
-                );
-              } catch (e) {
-                if (e.response?.data?.message === ApiErrorCode.InvalidUrl) {
-                  addToast(
-                    intl.formatMessage(messages.invalidurlerror, {
-                      mediaServerName:
-                        publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                          ? 'Emby'
-                          : 'Jellyfin',
-                    }),
-                    {
-                      autoDismiss: true,
-                      appearance: 'error',
-                    }
-                  );
-                } else {
-                  addToast(
-                    intl.formatMessage(messages.jellyfinSettingsFailure, {
-                      mediaServerName:
-                        publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                          ? 'Emby'
-                          : 'Jellyfin',
-                    }),
-                    {
-                      autoDismiss: true,
-                      appearance: 'error',
-                    }
-                  );
-                }
-              } finally {
-                revalidate();
+            addToast(
+              intl.formatMessage(messages.jellyfinSettingsSuccess, {
+                mediaServerName:
+                  publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                    ? 'Emby'
+                    : 'Jellyfin',
+              }),
+              {
+                autoDismiss: true,
+                appearance: 'success',
               }
-            }}
-          >
-            {({
-              errors,
-              touched,
-              values,
-              setFieldValue,
-              handleSubmit,
-              isSubmitting,
-              isValid,
-            }) => {
-              return (
-                <form className="section" onSubmit={handleSubmit}>
+            );
+          } catch (e) {
+            let errorData;
+            try {
+              errorData = await e.cause?.text();
+              errorData = JSON.parse(errorData);
+            } catch {
+              /* empty */
+            }
+            if (errorData?.message === ApiErrorCode.InvalidUrl) {
+              addToast(
+                intl.formatMessage(messages.invalidurlerror, {
+                  mediaServerName:
+                    publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                      ? 'Emby'
+                      : 'Jellyfin',
+                }),
+                {
+                  autoDismiss: true,
+                  appearance: 'error',
+                }
+              );
+            } else {
+              addToast(
+                intl.formatMessage(messages.jellyfinSettingsFailure, {
+                  mediaServerName:
+                    publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                      ? 'Emby'
+                      : 'Jellyfin',
+                }),
+                {
+                  autoDismiss: true,
+                  appearance: 'error',
+                }
+              );
+            }
+          } finally {
+            revalidate();
+          }
+        }}
+      >
+        {({
+          errors,
+          touched,
+          values,
+          setFieldValue,
+          handleSubmit,
+          isSubmitting,
+          isValid,
+        }) => {
+          return (
+            <form className="section" onSubmit={handleSubmit}>
+              {showAdvancedSettings && (
+                <>
                   <div className="form-row">
                     <label htmlFor="hostname" className="text-label">
                       {intl.formatMessage(messages.hostname)}
@@ -573,6 +622,29 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                       />
                     </div>
                   </div>
+                </>
+              )}
+              <div className="form-row">
+                <label htmlFor="apiKey" className="text-label">
+                  {intl.formatMessage(messages.apiKey)}
+                </label>
+                <div className="form-input-area">
+                  <div className="form-input-field">
+                    <SensitiveInput
+                      as="field"
+                      type="text"
+                      inputMode="url"
+                      id="apiKey"
+                      name="apiKey"
+                    />
+                  </div>
+                  {errors.apiKey && touched.apiKey && (
+                    <div className="error">{errors.apiKey}</div>
+                  )}
+                </div>
+              </div>
+              {showAdvancedSettings && (
+                <>
                   <div className="form-row">
                     <label htmlFor="urlBase" className="text-label">
                       {intl.formatMessage(messages.urlBase)}
@@ -593,75 +665,73 @@ const SettingsJellyfin: React.FC<SettingsJellyfinProps> = ({
                         )}
                     </div>
                   </div>
-                  <div className="form-row">
-                    <label htmlFor="jellyfinExternalUrl" className="text-label">
-                      {intl.formatMessage(messages.externalUrl)}
-                    </label>
-                    <div className="form-input-area">
-                      <div className="form-input-field">
-                        <Field
-                          type="text"
-                          inputMode="url"
-                          id="jellyfinExternalUrl"
-                          name="jellyfinExternalUrl"
-                        />
-                      </div>
-                      {errors.jellyfinExternalUrl &&
-                        touched.jellyfinExternalUrl && (
-                          <div className="error">
-                            {errors.jellyfinExternalUrl}
-                          </div>
-                        )}
-                    </div>
+                </>
+              )}
+              <div className="form-row">
+                <label htmlFor="jellyfinExternalUrl" className="text-label">
+                  {intl.formatMessage(messages.externalUrl)}
+                </label>
+                <div className="form-input-area">
+                  <div className="form-input-field">
+                    <Field
+                      type="text"
+                      inputMode="url"
+                      id="jellyfinExternalUrl"
+                      name="jellyfinExternalUrl"
+                    />
                   </div>
-                  <div className="form-row">
-                    <label
-                      htmlFor="jellyfinForgotPasswordUrl"
-                      className="text-label"
+                  {errors.jellyfinExternalUrl &&
+                    touched.jellyfinExternalUrl && (
+                      <div className="error">{errors.jellyfinExternalUrl}</div>
+                    )}
+                </div>
+              </div>
+              <div className="form-row">
+                <label
+                  htmlFor="jellyfinForgotPasswordUrl"
+                  className="text-label"
+                >
+                  {intl.formatMessage(messages.jellyfinForgotPasswordUrl)}
+                </label>
+                <div className="form-input-area">
+                  <div className="form-input-field">
+                    <Field
+                      type="text"
+                      inputMode="url"
+                      id="jellyfinForgotPasswordUrl"
+                      name="jellyfinForgotPasswordUrl"
+                    />
+                  </div>
+                  {errors.jellyfinForgotPasswordUrl &&
+                    touched.jellyfinForgotPasswordUrl && (
+                      <div className="error">
+                        {errors.jellyfinForgotPasswordUrl}
+                      </div>
+                    )}
+                </div>
+              </div>
+              <div className="actions">
+                <div className="flex justify-end">
+                  <span className="ml-3 inline-flex rounded-md shadow-sm">
+                    <Button
+                      buttonType="primary"
+                      type="submit"
+                      disabled={isSubmitting || !isValid}
                     >
-                      {intl.formatMessage(messages.jellyfinForgotPasswordUrl)}
-                    </label>
-                    <div className="form-input-area">
-                      <div className="form-input-field">
-                        <Field
-                          type="text"
-                          inputMode="url"
-                          id="jellyfinForgotPasswordUrl"
-                          name="jellyfinForgotPasswordUrl"
-                        />
-                      </div>
-                      {errors.jellyfinForgotPasswordUrl &&
-                        touched.jellyfinForgotPasswordUrl && (
-                          <div className="error">
-                            {errors.jellyfinForgotPasswordUrl}
-                          </div>
-                        )}
-                    </div>
-                  </div>
-                  <div className="actions">
-                    <div className="flex justify-end">
-                      <span className="ml-3 inline-flex rounded-md shadow-sm">
-                        <Button
-                          buttonType="primary"
-                          type="submit"
-                          disabled={isSubmitting || !isValid}
-                        >
-                          <ArrowDownOnSquareIcon />
-                          <span>
-                            {isSubmitting
-                              ? intl.formatMessage(globalMessages.saving)
-                              : intl.formatMessage(globalMessages.save)}
-                          </span>
-                        </Button>
+                      <ArrowDownOnSquareIcon />
+                      <span>
+                        {isSubmitting
+                          ? intl.formatMessage(globalMessages.saving)
+                          : intl.formatMessage(globalMessages.save)}
                       </span>
-                    </div>
-                  </div>
-                </form>
-              );
-            }}
-          </Formik>
-        </>
-      )}
+                    </Button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          );
+        }}
+      </Formik>
     </>
   );
 };

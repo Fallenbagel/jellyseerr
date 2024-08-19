@@ -320,17 +320,27 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
       // with admin permission
       settings.main.mediaServerType = MediaServerType.JELLYFIN;
       user = new User({
-        email: body.email,
+        email: body.email || account.User.Name,
         jellyfinUsername: account.User.Name,
         jellyfinUserId: account.User.Id,
         jellyfinDeviceId: deviceId,
-        jellyfinAuthToken: account.AccessToken,
         permissions: Permission.ADMIN,
         avatar: account.User.PrimaryImageTag
           ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
-          : gravatarUrl(body.email ?? '', { default: 'mm', size: 200 }),
+          : gravatarUrl(body.email || account.User.Name, {
+              default: 'mm',
+              size: 200,
+            }),
         userType: UserType.JELLYFIN,
       });
+
+      // Create an API key on Jellyfin from this admin user
+      const jellyfinClient = new JellyfinAPI(
+        hostname,
+        account.AccessToken,
+        deviceId
+      );
+      const apiKey = await jellyfinClient.createApiToken('Jellyseerr');
 
       const serverName = await jellyfinserver.getServerName();
 
@@ -340,6 +350,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
       settings.jellyfin.port = body.port ?? 8096;
       settings.jellyfin.urlBase = body.urlBase ?? '';
       settings.jellyfin.useSsl = body.useSsl ?? false;
+      settings.jellyfin.apiKey = apiKey;
       settings.save();
       startJobs();
 
@@ -363,15 +374,11 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
           jellyfinUsername: account.User.Name,
         }
       );
-      // Let's check if their authtoken is up to date
-      if (user.jellyfinAuthToken !== account.AccessToken) {
-        user.jellyfinAuthToken = account.AccessToken;
-      }
       // Update the users avatar with their jellyfin profile pic (incase it changed)
       if (account.User.PrimaryImageTag) {
         user.avatar = `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`;
       } else {
-        user.avatar = gravatarUrl(user.email, {
+        user.avatar = gravatarUrl(user.email || account.User.Name, {
           default: 'mm',
           size: 200,
         });
@@ -413,20 +420,18 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         }
       );
 
-      if (!body.email) {
-        throw new Error('add_email');
-      }
-
       user = new User({
         email: body.email,
         jellyfinUsername: account.User.Name,
         jellyfinUserId: account.User.Id,
         jellyfinDeviceId: deviceId,
-        jellyfinAuthToken: account.AccessToken,
         permissions: settings.main.defaultPermissions,
         avatar: account.User.PrimaryImageTag
           ? `${jellyfinHost}/Users/${account.User.Id}/Images/Primary/?tag=${account.User.PrimaryImageTag}&quality=90`
-          : gravatarUrl(body.email, { default: 'mm', size: 200 }),
+          : gravatarUrl(body.email || account.User.Name, {
+              default: 'mm',
+              size: 200,
+            }),
         userType: UserType.JELLYFIN,
       });
       //initialize Jellyfin/Emby users with local login
@@ -730,6 +735,7 @@ authRoutes.post('/reset-password/:guid', async (req, res, next) => {
     });
   }
   user.recoveryLinkExpirationDate = null;
+  await user.setPassword(req.body.password);
   userRepository.save(user);
   logger.info('Successfully reset password', {
     label: 'API',

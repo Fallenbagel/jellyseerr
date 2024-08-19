@@ -11,13 +11,11 @@
 <a href="http://jellyseerr.borgcube.de/engage/jellyseerr/"><img src="http://jellyseerr.borgcube.de/widget/jellyseerr/jellyseerr-frontend/svg-badge.svg" alt="Translation status" /></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-40-orange.svg"/></a>
+<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-47-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 **Jellyseerr** is a free and open source software application for managing requests for your media library.
 It is a fork of [Overseerr](https://github.com/sct/overseerr) built to bring support for [Jellyfin](https://github.com/jellyfin/jellyfin) & [Emby](https://github.com/MediaBrowser/Emby) media servers!
-
-_The original Overseerr team have been busy and Jellyfin/Emby support aren't on their roadmap, so we started this project as we wanted to bring the Overseerr experience to the Jellyfin/Emby Community!_
 
 ## Current Features
 
@@ -38,9 +36,9 @@ With more features on the way! Check out our [issue tracker](https://github.com/
 
 ## Getting Started
 
-#### Pre-requisite (Important)
+Check out our documentation for instructions on how to install and run Jellyseerr:
 
-_*On Jellyfin/Emby, ensure the `Settings > Home > Automatically group content from the following folders into views such as 'Movies', 'Music' and 'TV'` is turned off*_
+[//]: # 'TODO: move this to the docs'
 
 ### Launching Jellyseerr using Docker (Recommended)
 
@@ -95,7 +93,7 @@ DB_SSL_CERT_FILE= # Path to certificate chain in pem format for the private key
    ```
 5. Start Jellyseerr
 
-### Building from source (ADVANCED):
+### Building latest version from source (ADVANCED):
 
 #### Windows
 
@@ -114,6 +112,7 @@ yarn start
 ```
 
 (You can use task scheduler to run a bat script with `@echo off` and `yarn start` to run jellyseerr in the background)
+(You can also use nssm to run jellyseerr as a service, see [nssm](https://nssm.cc/usage) for more information)
 
 _To set env variables such as `JELLYFIN_TYPE=emby` create a file called `.env` in the root directory of jellyseerr_
 
@@ -191,11 +190,36 @@ ExecStart=/usr/bin/node dist/index.js
 WantedBy=multi-user.target
 ```
 
+### Building develop branch from source (ADVANCED):
+
+#### Windows
+
+Pre-requisites:
+
+- Nodejs [v20](https://nodejs.org/en/download)
+- Pnpm [v9](https://pnpm.io/installation)
+- Download/git clone the source code from the github (Either develop branch or main for stable)
+
+```cmd
+npm i -g win-node-env
+set CYPRESS_INSTALL_BINARY=0
+pnpm install --frozen-lockfile
+pnpm run build
+pnpm start
+```
+
+(You can use task scheduler to run a bat script with `@echo off` and `pnpm start` to run jellyseerr in the background)
+(You can also use nssm to run jellyseerr as a service, see [nssm](https://nssm.cc/usage) for more information)
+
+https://docs.jellyseerr.dev/getting-started/
+
 ### Packages:
 
 Archlinux: [AUR](https://aur.archlinux.org/packages/jellyseerr)
-Nixpkg: [Nixpkg](https://search.nixos.org/packages?channel=unstable&show=jellyseerr)
-Snap: [Snap](https://snapcraft.io/jellyseerr)
+
+Nix: [Nixpkg](https://search.nixos.org/packages?channel=unstable&show=jellyseerr)
+
+~Snap: [Snap](https://snapcraft.io/jellyseerr)~(Deprecated)
 
 ## Preview
 
@@ -203,6 +227,7 @@ Snap: [Snap](https://snapcraft.io/jellyseerr)
 
 ## Support
 
+- Check out the [Jellyseerr Documentation](https://docs.jellyseerr.dev) before asking for help. Your question might already be in the docs!
 - You can get support on [Discord](https://discord.gg/ckbvBtDJgC).
 - You can ask questions in the Help category of our [GitHub Discussions](https://github.com/fallenbagel/jellyseerr/discussions).
 - Bug reports and feature requests can be submitted via [GitHub Issues](https://github.com/fallenbagel/jellyseerr/issues).
@@ -285,6 +310,15 @@ Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcon
       <td align="center" valign="top" width="14.28%"><a href="https://joaquinolivero.com"><img src="https://avatars.githubusercontent.com/u/66050823?v=4?s=100" width="100px;" alt="Joaquin Olivero"/><br /><sub><b>Joaquin Olivero</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=JoaquinOlivero" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Bretterteig"><img src="https://avatars.githubusercontent.com/u/47298401?v=4?s=100" width="100px;" alt="Julian Behr"/><br /><sub><b>Julian Behr</b></sub></a><br /><a href="#translation-Bretterteig" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ThowZzy"><img src="https://avatars.githubusercontent.com/u/61882536?v=4?s=100" width="100px;" alt="ThowZzy"/><br /><sub><b>ThowZzy</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=ThowZzy" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://josephrisk.com"><img src="https://avatars.githubusercontent.com/u/18372584?v=4?s=100" width="100px;" alt="Joseph Risk"/><br /><sub><b>Joseph Risk</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=j0srisk" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Loetwiek"><img src="https://avatars.githubusercontent.com/u/79059734?v=4?s=100" width="100px;" alt="Loetwiek"/><br /><sub><b>Loetwiek</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=Loetwiek" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Fuochi"><img src="https://avatars.githubusercontent.com/u/4720478?v=4?s=100" width="100px;" alt="Fuochi"/><br /><sub><b>Fuochi</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=Fuochi" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://mobihen.com"><img src="https://avatars.githubusercontent.com/u/35529491?v=4?s=100" width="100px;" alt="Nir Israel Hen"/><br /><sub><b>Nir Israel Hen</b></sub></a><br /><a href="#translation-mobihen" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/XDark187"><img src="https://avatars.githubusercontent.com/u/39034192?v=4?s=100" width="100px;" alt="Baraa"/><br /><sub><b>Baraa</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=XDark187" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/franciscofsales"><img src="https://avatars.githubusercontent.com/u/7977645?v=4?s=100" width="100px;" alt="Francisco Sales"/><br /><sub><b>Francisco Sales</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=franciscofsales" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/myselfolli"><img src="https://avatars.githubusercontent.com/u/37535998?v=4?s=100" width="100px;" alt="Oliver Laing"/><br /><sub><b>Oliver Laing</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=myselfolli" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
