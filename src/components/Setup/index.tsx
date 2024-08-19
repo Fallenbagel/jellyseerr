@@ -12,11 +12,12 @@ import SettingsPlex from '@app/components/Settings/SettingsPlex';
 import SettingsServices from '@app/components/Settings/SettingsServices';
 import SetupSteps from '@app/components/Setup/SetupSteps';
 import useLocale from '@app/hooks/useLocale';
+import useSettings from '@app/hooks/useSettings';
 import defineMessages from '@app/utils/defineMessages';
 import { MediaServerType } from '@server/constants/server';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import useSWR, { mutate } from 'swr';
 import SetupLogin from './SetupLogin';
@@ -51,6 +52,7 @@ const Setup = () => {
   );
   const router = useRouter();
   const { locale } = useLocale();
+  const settings = useSettings();
 
   const finishSetup = async () => {
     setIsUpdating(true);
@@ -84,6 +86,16 @@ const Setup = () => {
     refreshWhenHidden: false,
     revalidateOnFocus: false,
   });
+
+  useEffect(() => {
+    if (
+      settings.currentSettings.mediaServerType !==
+      MediaServerType.NOT_CONFIGURED
+    ) {
+      setCurrentStep(3);
+      setMediaServerType(settings.currentSettings.mediaServerType);
+    }
+  }, [settings.currentSettings.mediaServerType]);
 
   return (
     <div className="relative flex min-h-screen flex-col justify-center bg-gray-900 py-12">
