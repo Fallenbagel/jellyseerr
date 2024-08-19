@@ -82,7 +82,7 @@ const messages: { [messageName: string]: MessageDescriptor } = defineMessages(
       'When enabled in settings, Jellyseerr will proxy and cache images from pre-configured external sources. Cached images are saved into your config folder. You can find the files in <code>{appDataPath}/cache/images</code>.',
     imagecachecount: 'Images Cached',
     imagecachesize: 'Total Cache Size',
-    useravatars: 'User Avatars',
+    usersavatars: "Users' Avatars",
   }
 );
 
@@ -576,7 +576,7 @@ const SettingsJobs = () => {
             </tr>
             <tr>
               <Table.TD>
-                {intl.formatMessage(messages.useravatars)} (avatar)
+                {intl.formatMessage(messages.usersavatars)} (avatar)
               </Table.TD>
               <Table.TD>
                 {intl.formatNumber(
