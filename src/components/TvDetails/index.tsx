@@ -1133,7 +1133,10 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                   {streamingProviders.map((p) => {
                     return (
                       <Tooltip content={p.name}>
-                        <span className="opacity-60" key={`provider-${p.id}`}>
+                        <span
+                          className="opacity-50 transition duration-300 hover:opacity-100"
+                          key={`provider-${p.id}`}
+                        >
                           <CachedImage
                             src={'https://image.tmdb.org/t/p/w45/' + p.logoPath}
                             alt={p.name}
