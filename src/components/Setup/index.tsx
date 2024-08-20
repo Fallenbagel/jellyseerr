@@ -84,6 +84,9 @@ const Setup = () => {
   });
 
   useEffect(() => {
+    if (settings.currentSettings.initialized) {
+      router.push('/');
+    }
     if (
       settings.currentSettings.mediaServerType !==
       MediaServerType.NOT_CONFIGURED
@@ -91,7 +94,11 @@ const Setup = () => {
       setCurrentStep(3);
       setMediaServerType(settings.currentSettings.mediaServerType);
     }
-  }, [settings.currentSettings.mediaServerType]);
+  }, [
+    settings.currentSettings.mediaServerType,
+    settings.currentSettings.initialized,
+    router,
+  ]);
 
   return (
     <div className="relative flex min-h-screen flex-col justify-center bg-gray-900 py-12">
