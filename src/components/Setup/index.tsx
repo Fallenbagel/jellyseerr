@@ -100,7 +100,7 @@ const Setup = () => {
     router,
   ]);
 
-  if (settings.currentSettings.initialized) return;
+  if (settings.currentSettings.initialized) return <></>;
 
   return (
     <div className="relative flex min-h-screen flex-col justify-center bg-gray-900 py-12">
