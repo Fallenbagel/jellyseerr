@@ -1,5 +1,6 @@
 import Modal from '@app/components/Common/Modal';
 import SensitiveInput from '@app/components/Common/SensitiveInput';
+import type { DVRTestResponse } from '@app/components/Settings/SettingsServices';
 import globalMessages from '@app/i18n/globalMessages';
 import defineMessages from '@app/utils/defineMessages';
 import { Transition } from '@headlessui/react';
@@ -77,26 +78,11 @@ const messages = defineMessages('components.Settings.SonarrModal', {
   selecttags: 'Select tags',
 });
 
-interface TestResponse {
-  profiles: {
+interface SonarrTestResponse extends DVRTestResponse {
+  languageProfiles: {
     id: number;
     name: string;
-  }[];
-  rootFolders: {
-    id: number;
-    path: string;
-  }[];
-  languageProfiles:
-    | {
-        id: number;
-        name: string;
-      }[]
-    | null;
-  tags: {
-    id: number;
-    label: string;
-  }[];
-  urlBase?: string;
+  }[] | null;
 }
 
 interface SonarrModalProps {
@@ -111,7 +97,7 @@ const SonarrModal = ({ onClose, sonarr, onSave }: SonarrModalProps) => {
   const { addToast } = useToasts();
   const [isValidated, setIsValidated] = useState(sonarr ? true : false);
   const [isTesting, setIsTesting] = useState(false);
-  const [testResponse, setTestResponse] = useState<TestResponse>({
+  const [testResponse, setTestResponse] = useState<SonarrTestResponse>({
     profiles: [],
     rootFolders: [],
     languageProfiles: null,
@@ -197,7 +183,7 @@ const SonarrModal = ({ onClose, sonarr, onSave }: SonarrModalProps) => {
           }),
         });
         if (!res.ok) throw new Error();
-        const data: TestResponse = await res.json();
+        const data: SonarrTestResponse = await res.json();
 
         setIsValidated(true);
         setTestResponse(data);

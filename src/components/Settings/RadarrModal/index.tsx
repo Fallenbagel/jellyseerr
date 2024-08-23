@@ -1,14 +1,21 @@
+import Button from '@app/components/Common/Button';
 import Modal from '@app/components/Common/Modal';
 import SensitiveInput from '@app/components/Common/SensitiveInput';
+import type { DVRTestResponse } from '@app/components/Settings/SettingsServices';
 import globalMessages from '@app/i18n/globalMessages';
 import defineMessages from '@app/utils/defineMessages';
 import { Transition } from '@headlessui/react';
-import type { RadarrSettings } from '@server/lib/settings';
+import { PlusIcon } from '@heroicons/react/24/solid';
+import type { TmdbGenre } from '@server/api/themoviedb/interfaces';
+import type OverrideRule from '@server/entity/OverrideRule';
+import type { OverrideRuleResultsResponse } from '@server/interfaces/api/overrideRuleInterfaces';
+import type { Language, RadarrSettings } from '@server/lib/settings';
 import { Field, Formik } from 'formik';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import Select from 'react-select';
 import { useToasts } from 'react-toast-notifications';
+import useSWR from 'swr';
 import * as Yup from 'yup';
 
 type OptionType = {
@@ -69,41 +76,46 @@ const messages = defineMessages('components.Settings.RadarrModal', {
   announced: 'Announced',
   inCinemas: 'In Cinemas',
   released: 'Released',
+  overrideRules: 'Override Rules',
+  addrule: 'New Override Rule',
 });
-
-interface TestResponse {
-  profiles: {
-    id: number;
-    name: string;
-  }[];
-  rootFolders: {
-    id: number;
-    path: string;
-  }[];
-  tags: {
-    id: number;
-    label: string;
-  }[];
-  urlBase?: string;
-}
 
 interface RadarrModalProps {
   radarr: RadarrSettings | null;
-  onClose: () => void;
+  onClose?: () => void;
   onSave: () => void;
+  overrideRuleModal: { open: boolean; rule: OverrideRule | null };
+  setOverrideRuleModal: ({
+    open,
+    rule,
+    testResponse,
+  }: {
+    open: boolean;
+    rule: OverrideRule | null;
+    testResponse: DVRTestResponse;
+  }) => void;
 }
 
-const RadarrModal = ({ onClose, radarr, onSave }: RadarrModalProps) => {
+const RadarrModal = ({
+  onClose,
+  radarr,
+  onSave,
+  overrideRuleModal,
+  setOverrideRuleModal,
+}: RadarrModalProps) => {
   const intl = useIntl();
+  const { data: rules, mutate: revalidate } =
+    useSWR<OverrideRuleResultsResponse>('/api/v1/overrideRule');
   const initialLoad = useRef(false);
   const { addToast } = useToasts();
   const [isValidated, setIsValidated] = useState(radarr ? true : false);
   const [isTesting, setIsTesting] = useState(false);
-  const [testResponse, setTestResponse] = useState<TestResponse>({
+  const [testResponse, setTestResponse] = useState<DVRTestResponse>({
     profiles: [],
     rootFolders: [],
     tags: [],
   });
+
   const RadarrSettingsSchema = Yup.object().shape({
     name: Yup.string().required(
       intl.formatMessage(messages.validationNameRequired)
@@ -219,6 +231,10 @@ const RadarrModal = ({ onClose, radarr, onSave }: RadarrModalProps) => {
       });
     }
   }, [radarr, testConnection]);
+
+  useEffect(() => {
+    revalidate();
+  }, [overrideRuleModal, revalidate]);
 
   return (
     <Transition
@@ -363,6 +379,7 @@ const RadarrModal = ({ onClose, radarr, onSave }: RadarrModalProps) => {
                       values.is4k ? messages.edit4kradarr : messages.editradarr
                     )
               }
+              backgroundClickable={!overrideRuleModal.open}
             >
               <div className="mb-6">
                 <div className="form-row">
@@ -753,12 +770,152 @@ const RadarrModal = ({ onClose, radarr, onSave }: RadarrModalProps) => {
                   </div>
                 </div>
               </div>
+              <h3 className="mb-4 text-xl font-bold leading-8 text-gray-100">
+                {intl.formatMessage(messages.overrideRules)}
+              </h3>
+              <ul className="flex gap-6">
+                {rules && (
+                  <OverrideRules
+                    rules={rules}
+                    setOverrideRuleModal={setOverrideRuleModal}
+                    testResponse={testResponse}
+                    radarr={radarr}
+                  />
+                )}
+                <li className="col-span-1 h-32 w-80 rounded-lg border-2 border-dashed border-gray-400 shadow sm:h-44">
+                  <div className="flex h-full w-full items-center justify-center">
+                    <Button
+                      buttonType="ghost"
+                      onClick={() =>
+                        setOverrideRuleModal({
+                          open: true,
+                          rule: null,
+                          testResponse,
+                        })
+                      }
+                      disabled={!isValidated}
+                    >
+                      <PlusIcon />
+                      <span>{intl.formatMessage(messages.addrule)}</span>
+                    </Button>
+                  </div>
+                </li>
+              </ul>
             </Modal>
           );
         }}
       </Formik>
     </Transition>
   );
+};
+
+interface OverrideRulesProps {
+  rules: OverrideRule[];
+  setOverrideRuleModal: ({
+    open,
+    rule,
+    testResponse,
+  }: {
+    open: boolean;
+    rule: OverrideRule | null;
+    testResponse: DVRTestResponse;
+  }) => void;
+  testResponse: DVRTestResponse;
+  radarr: RadarrSettings | null;
+}
+const OverrideRules = ({
+  rules,
+  setOverrideRuleModal,
+  testResponse,
+  radarr,
+}: OverrideRulesProps) => {
+  const intl = useIntl();
+  const { data: languages } = useSWR<Language[]>('/api/v1/languages');
+  const { data: genres } = useSWR<TmdbGenre[]>('/api/v1/genres/movie');
+
+  return rules
+    ?.filter(
+      (rule) =>
+        rule.radarrServiceId !== null && rule.radarrServiceId === radarr?.id
+    )
+    .map((rule) => (
+      <button
+        className="col-span-2 h-32 w-80 rounded-lg bg-gray-800 text-left shadow ring-1 ring-gray-500 sm:h-44"
+        onClick={() => setOverrideRuleModal({ open: true, rule, testResponse })}
+      >
+        <div className="flex w-full items-center justify-between space-x-6 p-4">
+          <div className="flex-1 truncate">
+            <span className="text-lg">If</span>
+            {rule.genre && (
+              <p className="truncate text-sm leading-5 text-gray-300">
+                <span className="mr-2 font-bold">Genre</span>
+                <div className="inline-flex gap-2">
+                  {rule.genre.split(',').map((genreId) => (
+                    <span>
+                      {genres?.find((g) => g.id === Number(genreId))?.name}
+                    </span>
+                  ))}
+                </div>
+              </p>
+            )}
+            {rule.language && (
+              <p className="truncate text-sm leading-5 text-gray-300">
+                <span className="mr-2 font-bold">Language</span>
+                <div className="inline-flex gap-2">
+                  {rule.language
+                    .split('|')
+                    .filter((languageId) => languageId !== 'server')
+                    .map((languageId) => {
+                      const language = languages?.find(
+                        (language) => language.iso_639_1 === languageId
+                      );
+                      if (!language) return null;
+                      const languageName =
+                        intl.formatDisplayName(language.iso_639_1, {
+                          type: 'language',
+                          fallback: 'none',
+                        }) ?? language.english_name;
+                      return <span>{languageName}</span>;
+                    })}
+                </div>
+              </p>
+            )}
+            <span className="text-lg">Then</span>
+            {rule.profileId && (
+              <p className="runcate text-sm leading-5 text-gray-300">
+                <span className="mr-2 font-bold">Profile ID</span>
+                {
+                  testResponse.profiles.find(
+                    (profile) => rule.profileId === profile.id
+                  )?.name
+                }
+              </p>
+            )}
+            {rule.rootFolder && (
+              <p className="truncate text-sm leading-5 text-gray-300">
+                <span className="mr-2 font-bold">Root Folder</span>
+                {rule.rootFolder}
+              </p>
+            )}
+            {rule.tags && rule.tags.length > 0 && (
+              <p className="truncate text-sm leading-5 text-gray-300">
+                <span className="mr-2 font-bold">Tags</span>
+                <div className="inline-flex gap-2">
+                  {rule.tags.map((tag) => (
+                    <span>
+                      {
+                        testResponse.tags?.find((t) => t.id === Number(tag))
+                          ?.label
+                      }
+                    </span>
+                  ))}
+                </div>
+              </p>
+            )}
+          </div>
+        </div>
+      </button>
+    ));
 };
 
 export default RadarrModal;
