@@ -13,6 +13,7 @@ import {
   MediaType,
 } from '@server/constants/media';
 import { getRepository } from '@server/datasource';
+import OverrideRule from '@server/entity/OverrideRule';
 import type { MediaRequestBody } from '@server/interfaces/api/requestInterfaces';
 import notificationManager, { Notification } from '@server/lib/notifications';
 import { Permission } from '@server/lib/permissions';
@@ -713,48 +714,6 @@ export class MediaRequest {
           return;
         }
 
-        let rootFolder = radarrSettings.activeDirectory;
-        let qualityProfile = radarrSettings.activeProfileId;
-        let tags = radarrSettings.tags ? [...radarrSettings.tags] : [];
-
-        if (
-          this.rootFolder &&
-          this.rootFolder !== '' &&
-          this.rootFolder !== radarrSettings.activeDirectory
-        ) {
-          rootFolder = this.rootFolder;
-          logger.info(`Request has an override root folder: ${rootFolder}`, {
-            label: 'Media Request',
-            requestId: this.id,
-            mediaId: this.media.id,
-          });
-        }
-
-        if (
-          this.profileId &&
-          this.profileId !== radarrSettings.activeProfileId
-        ) {
-          qualityProfile = this.profileId;
-          logger.info(
-            `Request has an override quality profile ID: ${qualityProfile}`,
-            {
-              label: 'Media Request',
-              requestId: this.id,
-              mediaId: this.media.id,
-            }
-          );
-        }
-
-        if (this.tags && !isEqual(this.tags, radarrSettings.tags)) {
-          tags = this.tags;
-          logger.info(`Request has override tags`, {
-            label: 'Media Request',
-            requestId: this.id,
-            mediaId: this.media.id,
-            tagIds: tags,
-          });
-        }
-
         const tmdb = new TheMovieDb();
         const radarr = new RadarrAPI({
           apiKey: radarrSettings.apiKey,
@@ -773,6 +732,137 @@ export class MediaRequest {
             mediaId: this.media.id,
           });
           return;
+        }
+
+        let rootFolder = radarrSettings.activeDirectory;
+        let qualityProfile = radarrSettings.activeProfileId;
+        let tags = radarrSettings.tags ? [...radarrSettings.tags] : [];
+
+        const overrideRuleRepository = getRepository(OverrideRule);
+        const overrideRules = await overrideRuleRepository.find({
+          where: { radarrServiceId: radarrSettings.id },
+        });
+        const appliedOverrideRules = overrideRules.filter((rule) => {
+          if (
+            rule.genre &&
+            !rule.genre
+              .split(',')
+              .some((genreId) =>
+                movie.genres.map((genre) => genre.id).includes(Number(genreId))
+              )
+          ) {
+            return false;
+          }
+          if (
+            rule.language &&
+            !rule.language
+              .split('|')
+              .some((languageId) => languageId === movie.original_language)
+          ) {
+            return false;
+          }
+          if (
+            rule.keywords &&
+            !rule.keywords
+              .split(',')
+              .some((keywordId) =>
+                movie.keywords.keywords
+                  .map((keyword) => keyword.id)
+                  .includes(Number(keywordId))
+              )
+          ) {
+            return false;
+          }
+          return true;
+        });
+
+        if (
+          this.rootFolder &&
+          this.rootFolder !== '' &&
+          this.rootFolder !== radarrSettings.activeDirectory
+        ) {
+          rootFolder = this.rootFolder;
+          logger.info(
+            `Request has a manually overriden root folder: ${rootFolder}`,
+            {
+              label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
+            }
+          );
+        } else {
+          const overrideRootFolder = appliedOverrideRules.find(
+            (rule) => rule.rootFolder
+          )?.rootFolder;
+          if (overrideRootFolder) {
+            rootFolder = overrideRootFolder;
+            logger.info(
+              `Request has an override root folder from override rules: ${rootFolder}`,
+              {
+                label: 'Media Request',
+                requestId: this.id,
+                mediaId: this.media.id,
+              }
+            );
+          }
+        }
+
+        if (
+          this.profileId &&
+          this.profileId !== radarrSettings.activeProfileId
+        ) {
+          qualityProfile = this.profileId;
+          logger.info(
+            `Request has a manually overriden quality profile ID: ${qualityProfile}`,
+            {
+              label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
+            }
+          );
+        } else {
+          const overrideProfileId = appliedOverrideRules.find(
+            (rule) => rule.profileId
+          )?.profileId;
+          if (overrideProfileId) {
+            qualityProfile = overrideProfileId;
+            logger.info(
+              `Request has an override quality profile ID from override rules: ${qualityProfile}`,
+              {
+                label: 'Media Request',
+                requestId: this.id,
+                mediaId: this.media.id,
+              }
+            );
+          }
+        }
+
+        if (this.tags && !isEqual(this.tags, radarrSettings.tags)) {
+          tags = this.tags;
+          logger.info(`Request has manually overriden tags`, {
+            label: 'Media Request',
+            requestId: this.id,
+            mediaId: this.media.id,
+            tagIds: tags,
+          });
+        } else {
+          const overrideTags = appliedOverrideRules.find(
+            (rule) => rule.tags
+          )?.tags;
+          if (overrideTags) {
+            tags = [
+              ...new Set([
+                ...tags,
+                ...overrideTags.split(',').map((tag) => Number(tag)),
+              ]),
+            ];
+            logger.info(`Request has override tags from override rules`, {
+              label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
+              tagIds: tags,
+            });
+          }
         }
 
         if (radarrSettings.tagRequests) {
@@ -1019,29 +1109,100 @@ export class MediaRequest {
             ? [...sonarrSettings.tags]
             : [];
 
+        const overrideRuleRepository = getRepository(OverrideRule);
+        const overrideRules = await overrideRuleRepository.find({
+          where: { radarrServiceId: sonarrSettings.id },
+        });
+        const appliedOverrideRules = overrideRules.filter((rule) => {
+          if (
+            rule.genre &&
+            !rule.genre
+              .split(',')
+              .some((genreId) =>
+                series.genres.map((genre) => genre.id).includes(Number(genreId))
+              )
+          ) {
+            return false;
+          }
+          if (
+            rule.language &&
+            !rule.language
+              .split('|')
+              .some((languageId) => languageId === series.original_language)
+          ) {
+            return false;
+          }
+          if (
+            rule.keywords &&
+            !rule.keywords
+              .split(',')
+              .some((keywordId) =>
+                series.keywords.results
+                  .map((keyword) => keyword.id)
+                  .includes(Number(keywordId))
+              )
+          ) {
+            return false;
+          }
+          return true;
+        });
+
         if (
           this.rootFolder &&
           this.rootFolder !== '' &&
           this.rootFolder !== rootFolder
         ) {
           rootFolder = this.rootFolder;
-          logger.info(`Request has an override root folder: ${rootFolder}`, {
-            label: 'Media Request',
-            requestId: this.id,
-            mediaId: this.media.id,
-          });
-        }
-
-        if (this.profileId && this.profileId !== qualityProfile) {
-          qualityProfile = this.profileId;
           logger.info(
-            `Request has an override quality profile ID: ${qualityProfile}`,
+            `Request has a manually overriden root folder: ${rootFolder}`,
             {
               label: 'Media Request',
               requestId: this.id,
               mediaId: this.media.id,
             }
           );
+        } else {
+          const overrideRootFolder = appliedOverrideRules.find(
+            (rule) => rule.rootFolder
+          )?.rootFolder;
+          if (overrideRootFolder) {
+            rootFolder = overrideRootFolder;
+            logger.info(
+              `Request has an override root folder from override rules: ${rootFolder}`,
+              {
+                label: 'Media Request',
+                requestId: this.id,
+                mediaId: this.media.id,
+              }
+            );
+          }
+        }
+
+        if (this.profileId && this.profileId !== qualityProfile) {
+          qualityProfile = this.profileId;
+          logger.info(
+            `Request has a manually overriden quality profile ID: ${qualityProfile}`,
+            {
+              label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
+            }
+          );
+        } else {
+          const overrideProfileId = appliedOverrideRules.find(
+            (rule) => rule.profileId
+          )?.profileId;
+          if (overrideProfileId) {
+            qualityProfile = overrideProfileId;
+            logger.info(
+              `Request has an override quality profile ID from override rules: ${qualityProfile}`,
+              {
+                label: 'Media Request',
+                requestId: this.id,
+                mediaId: this.media.id,
+              }
+            );
+          }
         }
 
         if (
@@ -1061,12 +1222,30 @@ export class MediaRequest {
 
         if (this.tags && !isEqual(this.tags, tags)) {
           tags = this.tags;
-          logger.info(`Request has override tags`, {
+          logger.info(`Request has manually overriden tags`, {
             label: 'Media Request',
             requestId: this.id,
             mediaId: this.media.id,
             tagIds: tags,
           });
+        } else {
+          const overrideTags = appliedOverrideRules.find(
+            (rule) => rule.tags
+          )?.tags;
+          if (overrideTags) {
+            tags = [
+              ...new Set([
+                ...tags,
+                ...overrideTags.split(',').map((tag) => Number(tag)),
+              ]),
+            ];
+            logger.info(`Request has override tags from override rules`, {
+              label: 'Media Request',
+              requestId: this.id,
+              mediaId: this.media.id,
+              tagIds: tags,
+            });
+          }
         }
 
         if (sonarrSettings.tagRequests) {

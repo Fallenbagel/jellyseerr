@@ -2,12 +2,9 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './User';
 
 @Entity()
 class OverrideRule {
@@ -29,18 +26,14 @@ class OverrideRule {
   @Column({ nullable: true })
   public keywords?: string;
 
-  @ManyToMany(() => User)
-  @JoinTable()
-  public users: User[];
-
   @Column({ type: 'int', nullable: true })
   public profileId?: number;
 
   @Column({ nullable: true })
   public rootFolder?: string;
 
-  @Column({ type: 'simple-array', nullable: true })
-  public tags?: number[];
+  @Column({ nullable: true })
+  public tags?: string;
 
   @CreateDateColumn()
   public createdAt: Date;

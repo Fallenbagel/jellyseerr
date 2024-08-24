@@ -289,7 +289,6 @@ const SettingsServices = () => {
         <SonarrModal
           sonarr={editSonarrModal.sonarr}
           onClose={() => {
-            console.log(overrideRuleModal);
             if (!overrideRuleModal.open)
               setEditSonarrModal({ open: false, sonarr: null });
           }}
