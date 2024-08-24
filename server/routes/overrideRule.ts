@@ -29,6 +29,7 @@ overrideRuleRoutes.post<
   {
     genre?: string;
     language?: string;
+    keywords?: string;
     profileId?: number;
     rootFolder?: string;
     tags?: number[];
@@ -42,6 +43,7 @@ overrideRuleRoutes.post<
     const rule = new OverrideRule({
       genre: req.body.genre,
       language: req.body.language,
+      keywords: req.body.keywords,
       profileId: req.body.profileId,
       rootFolder: req.body.rootFolder,
       tags: req.body.tags,
@@ -49,9 +51,9 @@ overrideRuleRoutes.post<
       sonarrServiceId: req.body.sonarrServiceId,
     });
 
-    const newIssue = await overrideRuleRepository.save(rule);
+    const newRule = await overrideRuleRepository.save(rule);
 
-    return res.status(200).json(newIssue);
+    return res.status(200).json(newRule);
   } catch (e) {
     next({ status: 404, message: e.message });
   }
@@ -63,6 +65,7 @@ overrideRuleRoutes.put<
   {
     genre?: string;
     language?: string;
+    keywords?: string;
     profileId?: number;
     rootFolder?: string;
     tags?: number[];
@@ -85,18 +88,45 @@ overrideRuleRoutes.put<
 
     rule.genre = req.body.genre;
     rule.language = req.body.language;
+    rule.keywords = req.body.keywords;
     rule.profileId = req.body.profileId;
     rule.rootFolder = req.body.rootFolder;
     rule.tags = req.body.tags;
     rule.radarrServiceId = req.body.radarrServiceId;
     rule.sonarrServiceId = req.body.sonarrServiceId;
 
-    const newIssue = await overrideRuleRepository.save(rule);
+    const newRule = await overrideRuleRepository.save(rule);
 
-    return res.status(200).json(newIssue);
+    return res.status(200).json(newRule);
   } catch (e) {
     next({ status: 404, message: e.message });
   }
 });
+
+overrideRuleRoutes.delete<{ ruleId: string }, OverrideRule>(
+  '/:ruleId',
+  isAuthenticated(Permission.ADMIN),
+  async (req, res, next) => {
+    const overrideRuleRepository = getRepository(OverrideRule);
+
+    try {
+      const rule = await overrideRuleRepository.findOne({
+        where: {
+          id: Number(req.params.ruleId),
+        },
+      });
+
+      if (!rule) {
+        return next({ status: 404, message: 'Override Rule not found.' });
+      }
+
+      await overrideRuleRepository.remove(rule);
+
+      return res.status(200).json(rule);
+    } catch (e) {
+      next({ status: 404, message: e.message });
+    }
+  }
+);
 
 export default overrideRuleRoutes;
