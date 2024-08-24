@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import EmbyConnectAPI from '@server/api/embyconnect';
 import ExternalAPI from '@server/api/externalapi';
 import { ApiErrorCode } from '@server/constants/error';
 import availabilitySync from '@server/lib/availabilitySync';
 import logger from '@server/logger';
 import { ApiError } from '@server/types/error';
 import { getAppVersion } from '@server/utils/appVersion';
+import * as EmailValidator from 'email-validator';
 
 export interface JellyfinUserResponse {
   Name: string;
@@ -94,6 +96,7 @@ export interface JellyfinLibraryItemExtended extends JellyfinLibraryItem {
 
 class JellyfinAPI extends ExternalAPI {
   private userId?: string;
+  private deviceId?: string;
 
   constructor(jellyfinHost: string, authToken?: string, deviceId?: string) {
     let authHeaderVal: string;
@@ -112,6 +115,7 @@ class JellyfinAPI extends ExternalAPI {
         },
       }
     );
+    this.deviceId = deviceId;
   }
 
   public async login(
@@ -169,9 +173,34 @@ class JellyfinAPI extends ExternalAPI {
       if (networkErrorCodes.has(e.code) || status === 404) {
         throw new ApiError(status, ApiErrorCode.InvalidUrl);
       }
-
-      throw new ApiError(status, ApiErrorCode.InvalidCredentials);
     }
+
+    if (Username && EmailValidator.validate(Username)) {
+      try {
+        return await this.authenticateWithEmbyConnect(
+          ClientIP,
+          Username,
+          Password
+        );
+      } catch (e) {
+        logger.debug(`Emby Connect authentication failed: ${e}`);
+        throw new ApiError(e.cause?.status, ApiErrorCode.InvalidCredentials);
+      }
+    } else {
+      throw new ApiError(401, ApiErrorCode.InvalidCredentials);
+    }
+  }
+
+  private async authenticateWithEmbyConnect(
+    ClientIP: string | undefined,
+    Username: string | undefined,
+    Password: string | undefined
+  ): Promise<JellyfinLoginResponse> {
+    const connectApi = new EmbyConnectAPI({
+      ClientIP: ClientIP,
+      DeviceId: this.deviceId,
+    });
+    return await connectApi.authenticateConnectUser(Username, Password);
   }
 
   public setUserId(userId: string): void {
