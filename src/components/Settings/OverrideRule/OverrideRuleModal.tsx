@@ -1,6 +1,6 @@
 import Modal from '@app/components/Common/Modal';
 import LanguageSelector from '@app/components/LanguageSelector';
-import { GenreSelector } from '@app/components/Selector';
+import { GenreSelector, KeywordSelector } from '@app/components/Selector';
 import type { DVRTestResponse } from '@app/components/Settings/SettingsServices';
 import useSettings from '@app/hooks/useSettings';
 import globalMessages from '@app/i18n/globalMessages';
@@ -16,6 +16,15 @@ const messages = defineMessages('components.Settings.RadarrModal', {
   createrule: 'New Override Rule',
   editrule: 'Edit Override Rule',
   create: 'Create rule',
+  conditions: 'Conditions',
+  conditionsDescription:
+    'Specifies conditions before applying parameter changes. Each field must be validated for the rules to be applied (AND operation). A field is considered verified if any of its properties match (OR operation).',
+  settings: 'Settings',
+  settingsDescription:
+    'Specifies which settings will be changed when the above conditions are met.',
+  genres: 'Genres',
+  languages: 'Languages',
+  keywords: 'Keywords',
   rootfolder: 'Root Folder',
   selectRootFolder: 'Select root folder',
   qualityprofile: 'Quality Profile',
@@ -67,7 +76,7 @@ const OverrideRuleModal = ({
         initialValues={{
           genre: rule?.genre,
           language: rule?.language,
-          // keywords: [],
+          keywords: rule?.keywords,
           profileId: rule?.profileId,
           rootFolder: rule?.rootFolder,
           tags: rule?.tags,
@@ -77,6 +86,7 @@ const OverrideRuleModal = ({
             const submission = {
               genre: values.genre || null,
               language: values.language || null,
+              keywords: values.keywords || null,
               profileId: Number(values.profileId) || null,
               rootFolder: values.rootFolder || null,
               tags: values.tags || null,
@@ -151,11 +161,14 @@ const OverrideRuleModal = ({
             >
               <div className="mb-6">
                 <h3 className="text-lg font-bold leading-8 text-gray-100">
-                  Condition
+                  {intl.formatMessage(messages.conditions)}
                 </h3>
+                <p className="description">
+                  {intl.formatMessage(messages.conditionsDescription)}
+                </p>
                 <div className="form-row">
                   <label htmlFor="genre" className="text-label">
-                    Genres
+                    {intl.formatMessage(messages.genres)}
                   </label>
                   <div className="form-input-area">
                     <div className="form-input-field">
@@ -180,7 +193,7 @@ const OverrideRuleModal = ({
                 </div>
                 <div className="form-row">
                   <label htmlFor="language" className="text-label">
-                    Language
+                    {intl.formatMessage(messages.languages)}
                   </label>
                   <div className="form-input-area">
                     <div className="form-input-field">
@@ -193,6 +206,30 @@ const OverrideRuleModal = ({
                         }}
                       />
                     </div>
+                    {errors.language &&
+                      touched.language &&
+                      typeof errors.language === 'string' && (
+                        <div className="error">{errors.language}</div>
+                      )}
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label htmlFor="keywords" className="text-label">
+                    {intl.formatMessage(messages.keywords)}
+                  </label>
+                  <div className="form-input-area">
+                    <div className="form-input-field">
+                      <KeywordSelector
+                        defaultValue={values.keywords}
+                        isMulti
+                        onChange={(value) => {
+                          setFieldValue(
+                            'keywords',
+                            value?.map((v) => v.value).join(',')
+                          );
+                        }}
+                      />
+                    </div>
                     {errors.genre &&
                       touched.genre &&
                       typeof errors.genre === 'string' && (
@@ -201,8 +238,11 @@ const OverrideRuleModal = ({
                   </div>
                 </div>
                 <h3 className="mt-4 text-lg font-bold leading-8 text-gray-100">
-                  Settings
+                  {intl.formatMessage(messages.settings)}
                 </h3>
+                <p className="description">
+                  {intl.formatMessage(messages.settingsDescription)}
+                </p>
                 <div className="form-row">
                   <label htmlFor="rootFolderRule" className="text-label">
                     {intl.formatMessage(messages.rootfolder)}

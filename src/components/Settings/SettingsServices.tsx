@@ -6,7 +6,7 @@ import Button from '@app/components/Common/Button';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import Modal from '@app/components/Common/Modal';
 import PageTitle from '@app/components/Common/PageTitle';
-import OverrideRuleModal from '@app/components/Settings/OverrideRuleModal';
+import OverrideRuleModal from '@app/components/Settings/OverrideRule/OverrideRuleModal';
 import RadarrModal from '@app/components/Settings/RadarrModal';
 import SonarrModal from '@app/components/Settings/SonarrModal';
 import globalMessages from '@app/i18n/globalMessages';
@@ -288,12 +288,18 @@ const SettingsServices = () => {
       {editSonarrModal.open && (
         <SonarrModal
           sonarr={editSonarrModal.sonarr}
-          onClose={() => setEditSonarrModal({ open: false, sonarr: null })}
+          onClose={() => {
+            console.log(overrideRuleModal);
+            if (!overrideRuleModal.open)
+              setEditSonarrModal({ open: false, sonarr: null });
+          }}
           onSave={() => {
             revalidateSonarr();
             mutate('/api/v1/settings/public');
             setEditSonarrModal({ open: false, sonarr: null });
           }}
+          overrideRuleModal={overrideRuleModal}
+          setOverrideRuleModal={setOverrideRuleModal}
         />
       )}
       <Transition

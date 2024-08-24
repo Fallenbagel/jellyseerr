@@ -26,6 +26,9 @@ class OverrideRule {
   @Column({ nullable: true })
   public language?: string;
 
+  @Column({ nullable: true })
+  public keywords?: string;
+
   @ManyToMany(() => User)
   @JoinTable()
   public users: User[];
