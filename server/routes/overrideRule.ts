@@ -32,7 +32,7 @@ overrideRuleRoutes.post<
     keywords?: string;
     profileId?: number;
     rootFolder?: string;
-    tags?: number[];
+    tags?: string;
     radarrServiceId?: number;
     sonarrServiceId?: number;
   }
@@ -68,7 +68,7 @@ overrideRuleRoutes.put<
     keywords?: string;
     profileId?: number;
     rootFolder?: string;
-    tags?: number[];
+    tags?: string;
     radarrServiceId?: number;
     sonarrServiceId?: number;
   }

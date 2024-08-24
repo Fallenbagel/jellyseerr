@@ -200,7 +200,6 @@ const OverrideRuleModal = ({
                       <LanguageSelector
                         value={values.language}
                         serverValue={currentSettings.originalLanguage}
-                        isUserSettings
                         setFieldValue={(_key, value) => {
                           setFieldValue('language', value);
                         }}
@@ -315,7 +314,8 @@ const OverrideRuleModal = ({
                       classNamePrefix="react-select"
                       value={
                         (values?.tags
-                          ?.map((tagId) => {
+                          ?.split(',')
+                          .map((tagId) => {
                             const foundTag = testResponse.tags.find(
                               (tag) => tag.id === Number(tagId)
                             );
@@ -336,7 +336,7 @@ const OverrideRuleModal = ({
                       onChange={(value) => {
                         setFieldValue(
                           'tags',
-                          value.map((option) => option.value)
+                          value.map((option) => option.value).join(',')
                         );
                       }}
                       noOptionsMessage={() =>

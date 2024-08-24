@@ -1084,6 +1084,7 @@ const SonarrModal = ({
                     setOverrideRuleModal={setOverrideRuleModal}
                     testResponse={testResponse}
                     sonarr={sonarr}
+                    revalidate={revalidate}
                   />
                 )}
                 <li className="min-h-[8rem] rounded-lg border-2 border-dashed border-gray-400 shadow sm:min-h-[11rem]">

@@ -39,6 +39,7 @@ interface OverrideRuleTileProps {
   testResponse: DVRTestResponse;
   radarr?: RadarrSettings | null;
   sonarr?: SonarrSettings | null;
+  revalidate: () => void;
 }
 
 const OverrideRuleTile = ({
@@ -47,6 +48,7 @@ const OverrideRuleTile = ({
   testResponse,
   radarr,
   sonarr,
+  revalidate,
 }: OverrideRuleTileProps) => {
   const intl = useIntl();
   const [keywords, setKeywords] = useState<Keyword[] | null>(null);
@@ -172,7 +174,7 @@ const OverrideRuleTile = ({
                   {intl.formatMessage(messages.tags)}
                 </span>
                 <div className="inline-flex gap-2">
-                  {rule.tags.map((tag) => (
+                  {rule.tags.split(',').map((tag) => (
                     <span>
                       {
                         testResponse.tags?.find((t) => t.id === Number(tag))
@@ -205,6 +207,7 @@ const OverrideRuleTile = ({
                     method: 'DELETE',
                   });
                   if (!res.ok) throw new Error();
+                  revalidate();
                 }}
                 className="focus:ring-blue relative inline-flex w-0 flex-1 items-center justify-center rounded-br-lg border border-transparent py-4 text-sm font-medium leading-5 text-gray-200 transition duration-150 ease-in-out hover:text-white focus:z-10 focus:border-gray-500 focus:outline-none"
               >
