@@ -744,6 +744,14 @@ export class MediaRequest {
         });
         const appliedOverrideRules = overrideRules.filter((rule) => {
           if (
+            rule.users &&
+            !rule.users
+              .split(',')
+              .some((userId) => Number(userId) === this.requestedBy.id)
+          ) {
+            return false;
+          }
+          if (
             rule.genre &&
             !rule.genre
               .split(',')
@@ -1114,6 +1122,14 @@ export class MediaRequest {
           where: { radarrServiceId: sonarrSettings.id },
         });
         const appliedOverrideRules = overrideRules.filter((rule) => {
+          if (
+            rule.users &&
+            !rule.users
+              .split(',')
+              .some((userId) => Number(userId) === this.requestedBy.id)
+          ) {
+            return false;
+          }
           if (
             rule.genre &&
             !rule.genre

@@ -3760,6 +3760,11 @@ paths:
             type: string
             enum: [created, updated, requests, displayname]
             default: created
+        - in: query
+          name: q
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: A JSON array of all users

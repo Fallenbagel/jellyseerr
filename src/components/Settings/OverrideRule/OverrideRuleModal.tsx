@@ -1,6 +1,10 @@
 import Modal from '@app/components/Common/Modal';
 import LanguageSelector from '@app/components/LanguageSelector';
-import { GenreSelector, KeywordSelector } from '@app/components/Selector';
+import {
+  GenreSelector,
+  KeywordSelector,
+  UserSelector,
+} from '@app/components/Selector';
 import type { DVRTestResponse } from '@app/components/Settings/SettingsServices';
 import useSettings from '@app/hooks/useSettings';
 import globalMessages from '@app/i18n/globalMessages';
@@ -22,6 +26,7 @@ const messages = defineMessages('components.Settings.RadarrModal', {
   settings: 'Settings',
   settingsDescription:
     'Specifies which settings will be changed when the above conditions are met.',
+  users: 'Users',
   genres: 'Genres',
   languages: 'Languages',
   keywords: 'Keywords',
@@ -74,6 +79,7 @@ const OverrideRuleModal = ({
     >
       <Formik
         initialValues={{
+          users: rule?.users,
           genre: rule?.genre,
           language: rule?.language,
           keywords: rule?.keywords,
@@ -84,6 +90,7 @@ const OverrideRuleModal = ({
         onSubmit={async (values) => {
           try {
             const submission = {
+              users: values.users || null,
               genre: values.genre || null,
               language: values.language || null,
               keywords: values.keywords || null,
@@ -149,7 +156,10 @@ const OverrideRuleModal = ({
               okDisabled={
                 isSubmitting ||
                 !isValid ||
-                (!values.genre && !values.language) ||
+                (!values.users &&
+                  !values.genre &&
+                  !values.language &&
+                  !values.keywords) ||
                 (!values.rootFolder && !values.profileId && !values.tags)
               }
               onOk={() => handleSubmit()}
@@ -167,13 +177,37 @@ const OverrideRuleModal = ({
                   {intl.formatMessage(messages.conditionsDescription)}
                 </p>
                 <div className="form-row">
+                  <label htmlFor="users" className="text-label">
+                    {intl.formatMessage(messages.users)}
+                  </label>
+                  <div className="form-input-area">
+                    <div className="form-input-field">
+                      <UserSelector
+                        defaultValue={values.users}
+                        isMulti
+                        onChange={(users) => {
+                          setFieldValue(
+                            'users',
+                            users?.map((v) => v.value).join(',')
+                          );
+                        }}
+                      />
+                    </div>
+                    {errors.users &&
+                      touched.users &&
+                      typeof errors.users === 'string' && (
+                        <div className="error">{errors.users}</div>
+                      )}
+                  </div>
+                </div>
+                <div className="form-row">
                   <label htmlFor="genre" className="text-label">
                     {intl.formatMessage(messages.genres)}
                   </label>
                   <div className="form-input-area">
                     <div className="form-input-field">
                       <GenreSelector
-                        type="movie"
+                        type={radarrId ? 'movie' : 'tv'}
                         defaultValue={values.genre}
                         isMulti
                         onChange={(genres) => {
@@ -229,10 +263,10 @@ const OverrideRuleModal = ({
                         }}
                       />
                     </div>
-                    {errors.genre &&
-                      touched.genre &&
-                      typeof errors.genre === 'string' && (
-                        <div className="error">{errors.genre}</div>
+                    {errors.keywords &&
+                      touched.keywords &&
+                      typeof errors.keywords === 'string' && (
+                        <div className="error">{errors.keywords}</div>
                       )}
                   </div>
                 </div>
