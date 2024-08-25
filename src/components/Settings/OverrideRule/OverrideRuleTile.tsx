@@ -4,6 +4,7 @@ import defineMessages from '@app/utils/defineMessages';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
 import type { TmdbGenre } from '@server/api/themoviedb/interfaces';
 import type OverrideRule from '@server/entity/OverrideRule';
+import type { User } from '@server/entity/User';
 import type {
   Language,
   RadarrSettings,
@@ -18,6 +19,7 @@ const messages = defineMessages('components.Settings.OverrideRuleTile', {
   qualityprofile: 'Quality Profile',
   rootfolder: 'Root Folder',
   tags: 'Tags',
+  users: 'Users',
   genre: 'Genre',
   language: 'Language',
   keywords: 'Keywords',
@@ -51,6 +53,7 @@ const OverrideRuleTile = ({
   revalidate,
 }: OverrideRuleTileProps) => {
   const intl = useIntl();
+  const [users, setUsers] = useState<User[] | null>(null);
   const [keywords, setKeywords] = useState<Keyword[] | null>(null);
   const { data: languages } = useSWR<Language[]>('/api/v1/languages');
   const { data: genres } = useSWR<TmdbGenre[]>('/api/v1/genres/movie');
@@ -70,6 +73,19 @@ const OverrideRuleTile = ({
           })
       );
       setKeywords(keywords);
+      const users = await Promise.all(
+        rules
+          .map((rule) => rule.users?.split(','))
+          .flat()
+          .filter((userId) => userId)
+          .map(async (userId) => {
+            const res = await fetch(`/api/v1/user/${userId}`);
+            if (!res.ok) throw new Error();
+            const user: User = await res.json();
+            return user;
+          })
+      );
+      setUsers(users);
     })();
   }, [rules]);
 
@@ -87,6 +103,25 @@ const OverrideRuleTile = ({
             <span className="text-lg">
               {intl.formatMessage(messages.conditions)}
             </span>
+            {rule.users && (
+              <p className="truncate text-sm leading-5 text-gray-300">
+                <span className="mr-2 font-bold">
+                  {intl.formatMessage(messages.users)}
+                </span>
+                <div className="inline-flex gap-2">
+                  {rule.users.split(',').map((userId) => {
+                    return (
+                      <span>
+                        {
+                          users?.find((user) => user.id === Number(userId))
+                            ?.displayName
+                        }
+                      </span>
+                    );
+                  })}
+                </div>
+              </p>
+            )}
             {rule.genre && (
               <p className="truncate text-sm leading-5 text-gray-300">
                 <span className="mr-2 font-bold">

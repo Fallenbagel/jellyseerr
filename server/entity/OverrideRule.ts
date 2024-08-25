@@ -18,6 +18,9 @@ class OverrideRule {
   public sonarrServiceId?: number;
 
   @Column({ nullable: true })
+  public users?: string;
+
+  @Column({ nullable: true })
   public genre?: string;
 
   @Column({ nullable: true })

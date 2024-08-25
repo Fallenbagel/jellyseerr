@@ -27,6 +27,7 @@ overrideRuleRoutes.post<
   Record<string, string>,
   OverrideRule,
   {
+    users?: string;
     genre?: string;
     language?: string;
     keywords?: string;
@@ -41,6 +42,7 @@ overrideRuleRoutes.post<
 
   try {
     const rule = new OverrideRule({
+      users: req.body.users,
       genre: req.body.genre,
       language: req.body.language,
       keywords: req.body.keywords,
@@ -63,6 +65,7 @@ overrideRuleRoutes.put<
   { ruleId: string },
   OverrideRule,
   {
+    users?: string;
     genre?: string;
     language?: string;
     keywords?: string;
@@ -86,6 +89,7 @@ overrideRuleRoutes.put<
       return next({ status: 404, message: 'Override Rule not found.' });
     }
 
+    rule.users = req.body.users;
     rule.genre = req.body.genre;
     rule.language = req.body.language;
     rule.keywords = req.body.keywords;
