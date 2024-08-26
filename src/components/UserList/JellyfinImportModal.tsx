@@ -6,7 +6,6 @@ import globalMessages from '@app/i18n/globalMessages';
 import defineMessages from '@app/utils/defineMessages';
 import { MediaServerType } from '@server/constants/server';
 import type { UserResultsResponse } from '@server/interfaces/api/userInterfaces';
-import Image from 'next/image';
 import { useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
@@ -158,7 +157,7 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
               title={intl.formatMessage(messages.newJellyfinsigninenabled, {
                 mediaServerName:
                   settings.currentSettings.mediaServerType ===
-                    MediaServerType.EMBY
+                  MediaServerType.EMBY
                     ? 'Emby'
                     : 'Jellyfin',
                 strong: (msg: React.ReactNode) => (
@@ -190,13 +189,15 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
                           >
                             <span
                               aria-hidden="true"
-                              className={`${isAllUsers() ? 'bg-indigo-500' : 'bg-gray-800'
-                                } absolute mx-auto h-4 w-9 rounded-full transition-colors duration-200 ease-in-out`}
+                              className={`${
+                                isAllUsers() ? 'bg-indigo-500' : 'bg-gray-800'
+                              } absolute mx-auto h-4 w-9 rounded-full transition-colors duration-200 ease-in-out`}
                             ></span>
                             <span
                               aria-hidden="true"
-                              className={`${isAllUsers() ? 'translate-x-5' : 'translate-x-0'
-                                } absolute left-0 inline-block h-5 w-5 transform rounded-full border border-gray-200 bg-white shadow transition-transform duration-200 ease-in-out group-focus:border-blue-300 group-focus:ring`}
+                              className={`${
+                                isAllUsers() ? 'translate-x-5' : 'translate-x-0'
+                              } absolute left-0 inline-block h-5 w-5 transform rounded-full border border-gray-200 bg-white shadow transition-transform duration-200 ease-in-out group-focus:border-blue-300 group-focus:ring`}
                             ></span>
                           </span>
                         </th>
@@ -230,17 +231,19 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
                               >
                                 <span
                                   aria-hidden="true"
-                                  className={`${isSelectedUser(user.id)
-                                    ? 'bg-indigo-500'
-                                    : 'bg-gray-800'
-                                    } absolute mx-auto h-4 w-9 rounded-full transition-colors duration-200 ease-in-out`}
+                                  className={`${
+                                    isSelectedUser(user.id)
+                                      ? 'bg-indigo-500'
+                                      : 'bg-gray-800'
+                                  } absolute mx-auto h-4 w-9 rounded-full transition-colors duration-200 ease-in-out`}
                                 ></span>
                                 <span
                                   aria-hidden="true"
-                                  className={`${isSelectedUser(user.id)
-                                    ? 'translate-x-5'
-                                    : 'translate-x-0'
-                                    } absolute left-0 inline-block h-5 w-5 transform rounded-full border border-gray-200 bg-white shadow transition-transform duration-200 ease-in-out group-focus:border-blue-300 group-focus:ring`}
+                                  className={`${
+                                    isSelectedUser(user.id)
+                                      ? 'translate-x-5'
+                                      : 'translate-x-0'
+                                  } absolute left-0 inline-block h-5 w-5 transform rounded-full border border-gray-200 bg-white shadow transition-transform duration-200 ease-in-out group-focus:border-blue-300 group-focus:ring`}
                                 ></span>
                               </span>
                             </td>

@@ -343,6 +343,14 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
                 }),
             userType: UserType.EMBY,
           });
+
+          if (
+            user.avatar.includes('https://gravatar.com') &&
+            user.avatar.includes('default=mm&size=200')
+          ) {
+            user.avatar = 'https://gravatar.com/avatar/?default=mm&size=200';
+          }
+
           break;
         case MediaServerType.JELLYFIN:
           settings.main.mediaServerType = MediaServerType.JELLYFIN;
@@ -361,6 +369,14 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
                 }),
             userType: UserType.JELLYFIN,
           });
+
+          if (
+            user.avatar.includes('https://gravatar.com') &&
+            user.avatar.includes('default=mm&size=200')
+          ) {
+            user.avatar = 'https://gravatar.com/avatar/?default=mm&size=200';
+          }
+
           break;
         default:
           throw new Error('select_server_type');
@@ -415,15 +431,23 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         }
         user.avatar = avatar;
       } else {
-        const avatar = gravatarUrl(user.email || account.User.Name, {
+        let avatar = gravatarUrl(user.email || account.User.Name, {
           default: 'mm',
           size: 200,
         });
+
+        if (
+          avatar.includes('https://gravatar.com') &&
+          avatar.includes('default=mm&size=200')
+        ) {
+          avatar = 'https://gravatar.com/avatar/?default=mm&size=200';
+        }
 
         if (avatar !== user.avatar) {
           const avatarProxy = new ImageProxy('avatar', '');
           avatarProxy.clearCachedImage(user.avatar);
         }
+
         user.avatar = avatar;
       }
       user.jellyfinUsername = account.User.Name;
@@ -474,6 +498,13 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
             ? UserType.JELLYFIN
             : UserType.EMBY,
       });
+
+      if (
+        user.avatar.includes('https://gravatar.com') &&
+        user.avatar.includes('default=mm&size=200')
+      ) {
+        user.avatar = 'https://gravatar.com/avatar/?default=mm&size=200';
+      }
       //initialize Jellyfin/Emby users with local login
       const passedExplicitPassword = body.password && body.password.length > 0;
       if (passedExplicitPassword) {

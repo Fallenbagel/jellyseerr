@@ -28,7 +28,6 @@ import type { MediaWatchDataResponse } from '@server/interfaces/api/mediaInterfa
 import type { RadarrSettings, SonarrSettings } from '@server/lib/settings';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useIntl } from 'react-intl';
 import useSWR from 'swr';
@@ -314,8 +313,8 @@ const ManageSlideOver = ({
                     {!!watchData?.data && (
                       <div
                         className={`grid grid-cols-1 divide-y divide-gray-700 overflow-hidden border-gray-700 text-sm text-gray-300 shadow ${data.mediaInfo?.tautulliUrl
-                          ? 'rounded-t-md border-x border-t'
-                          : 'rounded-md border'
+                            ? 'rounded-t-md border-x border-t'
+                            : 'rounded-md border'
                           }`}
                       >
                         <div className="grid grid-cols-3 divide-x divide-gray-700">
@@ -471,8 +470,8 @@ const ManageSlideOver = ({
                     {watchData?.data4k && (
                       <div
                         className={`grid grid-cols-1 divide-y divide-gray-700 overflow-hidden border-gray-700 text-sm text-gray-300 shadow ${data.mediaInfo?.tautulliUrl4k
-                          ? 'rounded-t-md border-x border-t'
-                          : 'rounded-md border'
+                            ? 'rounded-t-md border-x border-t'
+                            : 'rounded-md border'
                           }`}
                       >
                         <div className="grid grid-cols-3 divide-x divide-gray-700">

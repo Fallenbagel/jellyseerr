@@ -29,7 +29,6 @@ import { MediaServerType } from '@server/constants/server';
 import type { UserResultsResponse } from '@server/interfaces/api/userInterfaces';
 import { hasPermission } from '@server/lib/permissions';
 import { Field, Form, Formik } from 'formik';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -104,7 +103,8 @@ const UserList = () => {
     error,
     mutate: revalidate,
   } = useSWR<UserResultsResponse>(
-    `/api/v1/user?take=${currentPageSize}&skip=${pageIndex * currentPageSize
+    `/api/v1/user?take=${currentPageSize}&skip=${
+      pageIndex * currentPageSize
     }&sort=${currentSort}`
   );
 
@@ -215,9 +215,9 @@ const UserList = () => {
       !value
         ? Yup.string()
         : Yup.string().min(
-          8,
-          intl.formatMessage(messages.validationpasswordminchars)
-        )
+            8,
+            intl.formatMessage(messages.validationpasswordminchars)
+          )
     ),
   });
 
@@ -406,8 +406,9 @@ const UserList = () => {
                     </div>
                   </div>
                   <div
-                    className={`form-row ${passwordGenerationEnabled ? '' : 'opacity-50'
-                      }`}
+                    className={`form-row ${
+                      passwordGenerationEnabled ? '' : 'opacity-50'
+                    }`}
                   >
                     <label htmlFor="genpassword" className="checkbox-label">
                       {intl.formatMessage(messages.autogeneratepassword)}
@@ -426,8 +427,9 @@ const UserList = () => {
                     </div>
                   </div>
                   <div
-                    className={`form-row ${values.genpassword ? 'opacity-50' : ''
-                      }`}
+                    className={`form-row ${
+                      values.genpassword ? 'opacity-50' : ''
+                    }`}
                   >
                     <label htmlFor="password" className="text-label">
                       {intl.formatMessage(messages.password)}
@@ -532,16 +534,16 @@ const UserList = () => {
               <InboxArrowDownIcon />
               <span>
                 {settings.currentSettings.mediaServerType ===
-                  MediaServerType.EMBY
+                MediaServerType.EMBY
                   ? intl.formatMessage(messages.importfrommediaserver, {
-                    mediaServerName: 'Emby',
-                  })
+                      mediaServerName: 'Emby',
+                    })
                   : settings.currentSettings.mediaServerType ===
                     MediaServerType.PLEX
-                    ? intl.formatMessage(messages.importfrommediaserver, {
+                  ? intl.formatMessage(messages.importfrommediaserver, {
                       mediaServerName: 'Plex',
                     })
-                    : intl.formatMessage(messages.importfrommediaserver, {
+                  : intl.formatMessage(messages.importfrommediaserver, {
                       mediaServerName: 'Jellyfin',
                     })}
               </span>
@@ -655,19 +657,19 @@ const UserList = () => {
                       user.jellyfinUsername ||
                       user.plexUsername
                     )?.toLowerCase() !== user.email && (
-                        <div className="text-sm leading-5 text-gray-300">
-                          {user.email}
-                        </div>
-                      )}
+                      <div className="text-sm leading-5 text-gray-300">
+                        {user.email}
+                      </div>
+                    )}
                   </div>
                 </div>
               </Table.TD>
               <Table.TD>
                 {user.id === currentUser?.id ||
-                  currentHasPermission(
-                    [Permission.MANAGE_REQUESTS, Permission.REQUEST_VIEW],
-                    { type: 'or' }
-                  ) ? (
+                currentHasPermission(
+                  [Permission.MANAGE_REQUESTS, Permission.REQUEST_VIEW],
+                  { type: 'or' }
+                ) ? (
                   <Link
                     href={`/users/${user.id}/requests`}
                     className="text-sm leading-5 transition duration-300 hover:underline"
@@ -705,8 +707,8 @@ const UserList = () => {
                 {user.id === 1
                   ? intl.formatMessage(messages.owner)
                   : hasPermission(Permission.ADMIN, user.permissions)
-                    ? intl.formatMessage(messages.admin)
-                    : intl.formatMessage(messages.user)}
+                  ? intl.formatMessage(messages.admin)
+                  : intl.formatMessage(messages.user)}
               </Table.TD>
               <Table.TD>
                 {intl.formatDate(user.createdAt, {
