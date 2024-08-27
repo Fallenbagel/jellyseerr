@@ -2,7 +2,9 @@
 import EmbyConnectAPI from '@server/api/embyconnect';
 import ExternalAPI from '@server/api/externalapi';
 import { ApiErrorCode } from '@server/constants/error';
+import { MediaServerType } from '@server/constants/server';
 import availabilitySync from '@server/lib/availabilitySync';
+import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { ApiError } from '@server/types/error';
 import { getAppVersion } from '@server/utils/appVersion';
@@ -175,13 +177,20 @@ class JellyfinAPI extends ExternalAPI {
       }
     }
 
-    if (Username && EmailValidator.validate(Username)) {
+    const settings = getSettings();
+
+    if (
+      settings.main.mediaServerType === MediaServerType.EMBY &&
+      Username &&
+      EmailValidator.validate(Username)
+    ) {
       try {
-        return await this.authenticateWithEmbyConnect(
-          ClientIP,
-          Username,
-          Password
-        );
+        const connectApi = new EmbyConnectAPI({
+          ClientIP: ClientIP,
+          DeviceId: this.deviceId,
+        });
+
+        return await connectApi.authenticateConnectUser(Username, Password);
       } catch (e) {
         logger.debug(`Emby Connect authentication failed: ${e}`);
         throw new ApiError(e.cause?.status, ApiErrorCode.InvalidCredentials);
@@ -189,18 +198,6 @@ class JellyfinAPI extends ExternalAPI {
     } else {
       throw new ApiError(401, ApiErrorCode.InvalidCredentials);
     }
-  }
-
-  private async authenticateWithEmbyConnect(
-    ClientIP: string | undefined,
-    Username: string | undefined,
-    Password: string | undefined
-  ): Promise<JellyfinLoginResponse> {
-    const connectApi = new EmbyConnectAPI({
-      ClientIP: ClientIP,
-      DeviceId: this.deviceId,
-    });
-    return await connectApi.authenticateConnectUser(Username, Password);
   }
 
   public setUserId(userId: string): void {

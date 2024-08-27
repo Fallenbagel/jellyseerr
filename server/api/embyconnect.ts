@@ -60,9 +60,9 @@ class EmbyConnectAPI extends ExternalAPI {
   }
 
   public async authenticateConnectUser(Email?: string, Password?: string) {
-    logger.debug(
-      `Attempting to authenticate via EmbyConnect with email: ${Email}`
-    );
+    logger.debug(`Attempting to authenticate via EmbyConnect with email:`, {
+      Email,
+    });
 
     const connectAuthResponse = await this.getConnectUserAccessToken(
       Email,
@@ -76,8 +76,7 @@ class EmbyConnectAPI extends ExternalAPI {
 
     const matchingServer = this.findMatchingServer(linkedServers);
 
-    const embyServerApi = new EmbyServerApi(getHostname(), this.ClientIP);
-    const localUserExchangeResponse = await embyServerApi.localAuthExchange(
+    const localUserExchangeResponse = await this.localAuthExchange(
       matchingServer.AccessKey,
       connectAuthResponse.User.Id,
       this.DeviceId
@@ -170,36 +169,31 @@ class EmbyConnectAPI extends ExternalAPI {
 
     return matchingServer;
   }
-}
 
-class EmbyServerApi extends ExternalAPI {
-  private ClientIP?: string;
-  constructor(embyHost: string, ClientIP?: string) {
-    super(embyHost, {}, {});
-    this.ClientIP = ClientIP;
-  }
-
-  async localAuthExchange(
+  private async localAuthExchange(
     accessKey: string,
     userId: string,
     deviceId?: string
   ): Promise<LocalUserAuthExchangeResponse> {
     try {
-      return await this.get('/emby/Connect/Exchange', {
-        format: 'json',
-        ConnectUserId: userId,
-        'X-Emby-Client': 'Jellyseerr',
-        'X-Emby-Device-Id': deviceId ?? uniqueId(),
-        'X-Emby-Client-Version': getAppVersion(),
-        'X-Emby-Device-Name': 'Jellyseerr',
-        'X-Emby-Token': accessKey,
-      });
+      return this.get(
+        '/emby/Connect/Exchange',
+        {
+          format: 'json',
+          ConnectUserId: userId,
+          'X-Emby-Client': 'Jellyseerr',
+          'X-Emby-Device-Id': deviceId ?? uniqueId(),
+          'X-Emby-Client-Version': getAppVersion(),
+          'X-Emby-Device-Name': 'Jellyseerr',
+          'X-Emby-Token': accessKey,
+        },
+        undefined,
+        {},
+        getHostname()
+      );
     } catch (e) {
-      logger.error(`Failed to do local user auth exchange: ${e.message}`, {
-        label: 'EmbyConnect.EmbyServer API',
-        ip: this.ClientIP,
-      });
-      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
+      logger.debug('Failed local user auth exchange');
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidCredentials);
     }
   }
 }
