@@ -11,7 +11,7 @@ router.get('/*', async (req, res) => {
 
   try {
     if (
-      imagePath.includes('https://gravatar.com') &&
+      imagePath.startsWith('https://gravatar.com') &&
       imagePath.includes('default=mm&size=200')
     ) {
       imagePath = 'https://gravatar.com/avatar/?default=mm&size=200';
