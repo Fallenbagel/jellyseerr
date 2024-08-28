@@ -345,7 +345,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
           });
 
           if (
-            user.avatar.startsWith('https://gravatar.com') &&
+            user.avatar.startsWith('https://gravatar.com/') &&
             user.avatar.includes('default=mm&size=200')
           ) {
             user.avatar = 'https://gravatar.com/avatar/?default=mm&size=200';
@@ -371,7 +371,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
           });
 
           if (
-            user.avatar.startsWith('https://gravatar.com') &&
+            user.avatar.startsWith('https://gravatar.com/') &&
             user.avatar.includes('default=mm&size=200')
           ) {
             user.avatar = 'https://gravatar.com/avatar/?default=mm&size=200';
@@ -437,7 +437,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         });
 
         if (
-          avatar.startsWith('https://gravatar.com') &&
+          avatar.startsWith('https://gravatar.com/') &&
           avatar.includes('default=mm&size=200')
         ) {
           avatar = 'https://gravatar.com/avatar/?default=mm&size=200';
@@ -500,7 +500,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
       });
 
       if (
-        user.avatar.startsWith('https://gravatar.com') &&
+        user.avatar.startsWith('https://gravatar.com/') &&
         user.avatar.includes('default=mm&size=200')
       ) {
         user.avatar = 'https://gravatar.com/avatar/?default=mm&size=200';
