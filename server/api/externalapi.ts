@@ -47,8 +47,7 @@ class ExternalAPI {
     endpoint: string,
     params?: Record<string, string>,
     ttl?: number,
-    config?: RequestInit,
-    overwriteBaseUrl?: string
+    config?: RequestInit
   ): Promise<T> {
     const cacheKey = this.serializeCacheKey(endpoint, {
       ...this.params,
@@ -59,7 +58,7 @@ class ExternalAPI {
       return cachedItem;
     }
 
-    const url = this.formatUrl(endpoint, params, overwriteBaseUrl);
+    const url = this.formatUrl(endpoint, params);
     const response = await this.fetch(url, {
       ...config,
       headers: {

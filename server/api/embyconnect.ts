@@ -176,24 +176,33 @@ class EmbyConnectAPI extends ExternalAPI {
     deviceId?: string
   ): Promise<LocalUserAuthExchangeResponse> {
     try {
-      return this.get(
-        '/emby/Connect/Exchange',
+      const params = new URLSearchParams({
+        format: 'json',
+        ConnectUserId: userId,
+        'X-Emby-Client': 'Jellyseerr',
+        'X-Emby-Device-Id': deviceId ?? uniqueId(),
+        'X-Emby-Client-Version': getAppVersion(),
+        'X-Emby-Device-Name': 'Jellyseerr',
+        'X-Emby-Token': accessKey,
+      });
+
+      const response = await fetch(
+        `${getHostname()}/emby/Connect/Exchange?${params}`,
         {
-          format: 'json',
-          ConnectUserId: userId,
-          'X-Emby-Client': 'Jellyseerr',
-          'X-Emby-Device-Id': deviceId ?? uniqueId(),
-          'X-Emby-Client-Version': getAppVersion(),
-          'X-Emby-Device-Name': 'Jellyseerr',
-          'X-Emby-Token': accessKey,
-        },
-        undefined,
-        {},
-        getHostname()
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
       );
+
+      if (!response.ok) {
+        throw new Error(response.statusText, { cause: response });
+      }
+
+      return await response.json();
     } catch (e) {
       logger.debug('Failed local user auth exchange');
-      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidCredentials);
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
     }
   }
 }
