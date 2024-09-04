@@ -368,7 +368,7 @@ const ManageSlideOver = ({
                                     content={user.displayName}
                                   >
                                     <CachedImage
-                                      src={`/avatarproxy/${user.avatar}`}
+                                      src={user.avatar}
                                       alt={user.displayName}
                                       className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
                                       width={32}
@@ -527,7 +527,7 @@ const ManageSlideOver = ({
                                     content={user.displayName}
                                   >
                                     <CachedImage
-                                      src={`/avatarproxy/${user.avatar}`}
+                                      src={user.avatar}
                                       alt={user.displayName}
                                       className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
                                       width={32}

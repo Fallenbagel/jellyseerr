@@ -122,14 +122,7 @@ router.post(
       }
 
       const passedExplicitPassword = body.password && body.password.length > 0;
-      let avatar = gravatarUrl(email, { default: 'mm', size: 200 });
-
-      if (
-        avatar.startsWith('https://gravatar.com/') &&
-        avatar.includes('default=mm&size=200')
-      ) {
-        avatar = 'https://gravatar.com/avatar/?default=mm&size=200';
-      }
+      const avatar = gravatarUrl(email, { default: 'mm', size: 200 });
 
       if (
         !passedExplicitPassword &&
@@ -563,13 +556,6 @@ router.post(
                 ? UserType.JELLYFIN
                 : UserType.EMBY,
           });
-
-          if (
-            newUser.avatar.startsWith('https://gravatar.com/') &&
-            newUser.avatar.includes('default=mm&size=200')
-          ) {
-            newUser.avatar = 'https://gravatar.com/avatar/?default=mm&size=200';
-          }
 
           await userRepository.save(newUser);
           createdUsers.push(newUser);

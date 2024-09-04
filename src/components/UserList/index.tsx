@@ -635,7 +635,7 @@ const UserList = () => {
                   >
                     <CachedImage
                       className="h-10 w-10 rounded-full object-cover"
-                      src={`/avatarproxy/${user.avatar}`}
+                      src={user.avatar}
                       alt=""
                       width={40}
                       height={40}

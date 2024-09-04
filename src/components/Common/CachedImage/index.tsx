@@ -16,8 +16,15 @@ const CachedImage = ({ src, ...props }: ImageProps) => {
   if (typeof imageUrl === 'string' && imageUrl.startsWith('http')) {
     const parsedUrl = new URL(imageUrl);
 
-    if (parsedUrl.host === 'image.tmdb.org' && currentSettings.cacheImages) {
-      imageUrl = imageUrl.replace('https://image.tmdb.org', '/imageproxy');
+    console.log(parsedUrl);
+
+    if (parsedUrl.host === 'image.tmdb.org') {
+      if (currentSettings.cacheImages)
+        imageUrl = imageUrl.replace('https://image.tmdb.org', '/imageproxy');
+    }
+
+    if (parsedUrl.protocol === 'http:') {
+      imageUrl = '/avatarproxy/' + imageUrl;
     }
   }
 

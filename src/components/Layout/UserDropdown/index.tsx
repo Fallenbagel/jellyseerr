@@ -58,7 +58,7 @@ const UserDropdown = () => {
         >
           <CachedImage
             className="h-8 w-8 rounded-full object-cover sm:h-10 sm:w-10"
-            src={user && user.avatar ? `/avatarproxy/${user.avatar}` : ''}
+            src={user ? user.avatar : ''}
             alt=""
             width={40}
             height={40}
@@ -81,7 +81,7 @@ const UserDropdown = () => {
               <div className="flex items-center space-x-2">
                 <CachedImage
                   className="h-8 w-8 rounded-full object-cover sm:h-10 sm:w-10"
-                  src={user && user.avatar ? `/avatarproxy/${user.avatar}` : ''}
+                  src={user ? user.avatar : ''}
                   alt=""
                   width={40}
                   height={40}

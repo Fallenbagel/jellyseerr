@@ -7,16 +7,9 @@ const router = Router();
 const avatarImageProxy = new ImageProxy('avatar', '');
 // Proxy avatar images
 router.get('/*', async (req, res) => {
-  let imagePath = req.url.startsWith('/') ? req.url.slice(1) : req.url;
+  const imagePath = req.url.startsWith('/') ? req.url.slice(1) : req.url;
 
   try {
-    if (
-      imagePath.startsWith('https://gravatar.com/') &&
-      imagePath.includes('default=mm&size=200')
-    ) {
-      imagePath = 'https://gravatar.com/avatar/?default=mm&size=200';
-    }
-
     const imageData = await avatarImageProxy.getImage(imagePath);
 
     res.writeHead(200, {

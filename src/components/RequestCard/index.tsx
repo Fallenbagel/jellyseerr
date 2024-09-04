@@ -116,7 +116,7 @@ const RequestCardError = ({ requestData }: RequestCardErrorProps) => {
                     >
                       <span className="avatar-sm">
                         <CachedImage
-                          src={`/avatarproxy/${requestData.requestedBy.avatar}`}
+                          src={requestData.requestedBy.avatar}
                           alt=""
                           className="avatar-sm object-cover"
                           width={20}
@@ -390,7 +390,7 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
               >
                 <span className="avatar-sm">
                   <CachedImage
-                    src={`/avatarproxy/${requestData.requestedBy.avatar}`}
+                    src={requestData.requestedBy.avatar}
                     alt=""
                     className="avatar-sm object-cover"
                     width={20}

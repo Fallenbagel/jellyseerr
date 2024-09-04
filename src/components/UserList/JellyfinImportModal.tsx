@@ -251,7 +251,7 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
                               <div className="flex items-center">
                                 <CachedImage
                                   className="h-10 w-10 flex-shrink-0 rounded-full"
-                                  src={`/avatarproxy/${user.thumb}`}
+                                  src={user.thumb}
                                   alt=""
                                   width={40}
                                   height={40}

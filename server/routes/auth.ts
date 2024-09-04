@@ -344,13 +344,6 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
             userType: UserType.EMBY,
           });
 
-          if (
-            user.avatar.startsWith('https://gravatar.com/') &&
-            user.avatar.includes('default=mm&size=200')
-          ) {
-            user.avatar = 'https://gravatar.com/avatar/?default=mm&size=200';
-          }
-
           break;
         case MediaServerType.JELLYFIN:
           settings.main.mediaServerType = MediaServerType.JELLYFIN;
@@ -369,13 +362,6 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
                 }),
             userType: UserType.JELLYFIN,
           });
-
-          if (
-            user.avatar.startsWith('https://gravatar.com/') &&
-            user.avatar.includes('default=mm&size=200')
-          ) {
-            user.avatar = 'https://gravatar.com/avatar/?default=mm&size=200';
-          }
 
           break;
         default:
@@ -431,17 +417,10 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         }
         user.avatar = avatar;
       } else {
-        let avatar = gravatarUrl(user.email || account.User.Name, {
+        const avatar = gravatarUrl(user.email || account.User.Name, {
           default: 'mm',
           size: 200,
         });
-
-        if (
-          avatar.startsWith('https://gravatar.com/') &&
-          avatar.includes('default=mm&size=200')
-        ) {
-          avatar = 'https://gravatar.com/avatar/?default=mm&size=200';
-        }
 
         if (avatar !== user.avatar) {
           const avatarProxy = new ImageProxy('avatar', '');
@@ -499,12 +478,6 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
             : UserType.EMBY,
       });
 
-      if (
-        user.avatar.startsWith('https://gravatar.com/') &&
-        user.avatar.includes('default=mm&size=200')
-      ) {
-        user.avatar = 'https://gravatar.com/avatar/?default=mm&size=200';
-      }
       //initialize Jellyfin/Emby users with local login
       const passedExplicitPassword = body.password && body.password.length > 0;
       if (passedExplicitPassword) {

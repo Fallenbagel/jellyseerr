@@ -190,7 +190,7 @@ class ImageProxy {
 
       await promises.rm(directory, { recursive: true });
 
-      logger.info(`Cleared ${files[0]} image from cache 'avatar'`, {
+      logger.info(`Cleared ${files[0]} from cache 'avatar'`, {
         label: 'Image Cache',
       });
     } catch (e) {

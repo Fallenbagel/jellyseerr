@@ -190,7 +190,7 @@ const RequestItemError = ({
                           >
                             <span className="avatar-sm ml-1.5">
                               <CachedImage
-                                src={`/avatarproxy/${requestData.requestedBy.avatar}`}
+                                src={requestData.requestedBy.avatar}
                                 alt=""
                                 className="avatar-sm object-cover"
                                 width={20}
@@ -249,7 +249,7 @@ const RequestItemError = ({
                         >
                           <span className="avatar-sm ml-1.5">
                             <CachedImage
-                              src={`/avatarproxy/${requestData.modifiedBy.avatar}`}
+                              src={requestData.modifiedBy.avatar}
                               alt=""
                               className="avatar-sm object-cover"
                               width={20}
@@ -557,7 +557,7 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                         >
                           <span className="avatar-sm ml-1.5">
                             <CachedImage
-                              src={`/avatarproxy/${requestData.requestedBy.avatar}`}
+                              src={requestData.requestedBy.avatar}
                               alt=""
                               className="avatar-sm object-cover"
                               width={20}
@@ -616,7 +616,7 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                       >
                         <span className="avatar-sm ml-1.5">
                           <CachedImage
-                            src={`/avatarproxy/${requestData.requestedBy.avatar}`}
+                            src={requestData.requestedBy.avatar}
                             alt=""
                             className="avatar-sm object-cover"
                             width={20}
