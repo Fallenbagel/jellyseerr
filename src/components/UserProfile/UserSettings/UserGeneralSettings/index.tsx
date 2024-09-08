@@ -14,9 +14,9 @@ import globalMessages from '@app/i18n/globalMessages';
 import ErrorPage from '@app/pages/_error';
 import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
+import { ApiErrorCode } from '@server/constants/error';
 import type { UserSettingsGeneralResponse } from '@server/interfaces/api/userSettingsInterfaces';
 import { Field, Form, Formik } from 'formik';
-import getConfig from 'next/config';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
@@ -43,6 +43,7 @@ const messages = defineMessages(
     user: 'User',
     toastSettingsSuccess: 'Settings saved successfully!',
     toastSettingsFailure: 'Something went wrong while saving settings.',
+    toastSettingsFailureEmail: 'This email is already taken!',
     region: 'Discover Region',
     regionTip: 'Filter content by regional availability',
     originallanguage: 'Discover Language',
@@ -69,7 +70,6 @@ const messages = defineMessages(
 
 const UserGeneralSettings = () => {
   const intl = useIntl();
-  const { publicRuntimeConfig } = getConfig();
   const { addToast } = useToasts();
   const { locale, setLocale } = useLocale();
   const [movieQuotaEnabled, setMovieQuotaEnabled] = useState(false);
@@ -180,7 +180,7 @@ const UserGeneralSettings = () => {
                 watchlistSyncTv: values.watchlistSyncTv,
               }),
             });
-            if (!res.ok) throw new Error();
+            if (!res.ok) throw new Error(res.statusText, { cause: res });
 
             if (currentUser?.id === user?.id && setLocale) {
               setLocale(
@@ -195,10 +195,24 @@ const UserGeneralSettings = () => {
               appearance: 'success',
             });
           } catch (e) {
-            addToast(intl.formatMessage(messages.toastSettingsFailure), {
-              autoDismiss: true,
-              appearance: 'error',
-            });
+            let errorData;
+            try {
+              errorData = await e.cause?.text();
+              errorData = JSON.parse(errorData);
+            } catch {
+              /* empty */
+            }
+            if (errorData?.message === ApiErrorCode.InvalidEmail) {
+              addToast(intl.formatMessage(messages.toastSettingsFailureEmail), {
+                autoDismiss: true,
+                appearance: 'error',
+              });
+            } else {
+              addToast(intl.formatMessage(messages.toastSettingsFailure), {
+                autoDismiss: true,
+                appearance: 'error',
+              });
+            }
           } finally {
             revalidate();
             revalidateUser();
@@ -229,7 +243,7 @@ const UserGeneralSettings = () => {
                       <Badge badgeType="default">
                         {intl.formatMessage(messages.localuser)}
                       </Badge>
-                    ) : publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? (
+                    ) : user?.userType === UserType.EMBY ? (
                       <Badge badgeType="success">
                         {intl.formatMessage(messages.mediaServerUser, {
                           mediaServerName: 'Emby',
