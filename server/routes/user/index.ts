@@ -2,6 +2,7 @@ import JellyfinAPI from '@server/api/jellyfin';
 import PlexTvAPI from '@server/api/plextv';
 import TautulliAPI from '@server/api/tautulli';
 import { MediaType } from '@server/constants/media';
+import { MediaServerType } from '@server/constants/server';
 import { UserType } from '@server/constants/user';
 import { getRepository } from '@server/datasource';
 import Media from '@server/entity/Media';
@@ -501,17 +502,14 @@ router.post(
       // taken from auth.ts
       const admin = await userRepository.findOneOrFail({
         where: { id: 1 },
-        select: [
-          'id',
-          'jellyfinAuthToken',
-          'jellyfinDeviceId',
-          'jellyfinUserId',
-        ],
+        select: ['id', 'jellyfinDeviceId', 'jellyfinUserId'],
         order: { id: 'ASC' },
       });
+
+      const hostname = getHostname();
       const jellyfinClient = new JellyfinAPI(
-        getHostname(),
-        admin.jellyfinAuthToken ?? '',
+        hostname,
+        settings.jellyfin.apiKey,
         admin.jellyfinDeviceId ?? ''
       );
       jellyfinClient.setUserId(admin.jellyfinUserId ?? '');
@@ -519,7 +517,6 @@ router.post(
       //const jellyfinUsersResponse = await jellyfinClient.getUsers();
       const createdUsers: User[] = [];
       const { externalHostname } = getSettings().jellyfin;
-      const hostname = getHostname();
 
       const jellyfinHost =
         externalHostname && externalHostname.length > 0
@@ -554,7 +551,10 @@ router.post(
                   default: 'mm',
                   size: 200,
                 }),
-            userType: UserType.JELLYFIN,
+            userType:
+              settings.main.mediaServerType === MediaServerType.JELLYFIN
+                ? UserType.JELLYFIN
+                : UserType.EMBY,
           });
 
           await userRepository.save(newUser);
