@@ -650,6 +650,12 @@ class Settings {
 
       this.data = merge(this.data, parsedJson);
 
+      if (process.env.API_KEY) {
+        if (this.main.apiKey != process.env.API_KEY) {
+          this.main.apiKey = process.env.API_KEY;
+        }
+      }
+
       this.save();
     }
     return this;
