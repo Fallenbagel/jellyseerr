@@ -10,5 +10,3 @@ services:
       - .:/app:rw,cached
       - /app/node_modules
       - /app/.next
-    environment:
-      - API_KEY
