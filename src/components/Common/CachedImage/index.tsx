@@ -16,14 +16,10 @@ const CachedImage = ({ src, ...props }: ImageProps) => {
   if (typeof imageUrl === 'string' && imageUrl.startsWith('http')) {
     const parsedUrl = new URL(imageUrl);
 
-    console.log(parsedUrl);
-
     if (parsedUrl.host === 'image.tmdb.org') {
       if (currentSettings.cacheImages)
         imageUrl = imageUrl.replace('https://image.tmdb.org', '/imageproxy');
-    }
-
-    if (parsedUrl.protocol === 'http:') {
+    } else if (parsedUrl.host !== 'gravatar.com') {
       imageUrl = '/avatarproxy/' + imageUrl;
     }
   }
