@@ -238,7 +238,7 @@
   "i18n.requested": "Solicitado",
   "i18n.retry": "Tentar Novamente",
   "i18n.failed": "Falhou",
-  "components.TvDetails.watchtrailer": "Assistir Trailer",
+  "components.TvDetails.watchtrailer": "Assisitir Trailer",
   "components.TvDetails.firstAirDate": "Primeira Exibição",
   "components.Settings.Notifications.validationChatIdRequired": "Você deve prover um ID de Chat válido",
   "components.Settings.Notifications.validationBotAPIRequired": "Você deve prover uma chave de autorização do Bot",
