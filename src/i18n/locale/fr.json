@@ -1301,7 +1301,7 @@
   "components.UserProfile.UserSettings.UserNotificationSettings.deviceDefault": "Appareil par défaut",
   "components.UserList.importedfromJellyfin": "<strong>{userCount}</strong> {mediaServerName} {userCount, plural, one {user} other {users}} importé(s) avec succès !",
   "components.UserProfile.UserSettings.UserNotificationSettings.sound": "Son de notification",
-  "components.UserProfile.localWatchlist": "Watchlist de {username}",
+  "components.UserProfile.localWatchlist": "Liste de lecture de {username}",
   "components.Login.invalidurlerror": "Impossible de se connecter au serveur {mediaServerName}.",
   "components.MovieDetails.removefromwatchlist": "Supprimer de la liste de surveillance",
   "components.Login.adminerror": "Vous devez utiliser un compte administrateur pour vous connecter.",
