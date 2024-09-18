@@ -211,36 +211,36 @@ const ManageSlideOver = ({
       <div className="space-y-6">
         {((data?.mediaInfo?.downloadStatus ?? []).length > 0 ||
           (data?.mediaInfo?.downloadStatus4k ?? []).length > 0) && (
-            <div>
-              <h3 className="mb-2 text-xl font-bold">
-                {intl.formatMessage(messages.downloadstatus)}
-              </h3>
-              <div className="overflow-hidden rounded-md border border-gray-700 shadow">
-                <ul>
-                  {data.mediaInfo?.downloadStatus?.map((status, index) => (
-                    <Tooltip
-                      key={`dl-status-${status.externalId}-${index}`}
-                      content={status.title}
-                    >
-                      <li className="border-b border-gray-700 last:border-b-0">
-                        <DownloadBlock downloadItem={status} />
-                      </li>
-                    </Tooltip>
-                  ))}
-                  {data.mediaInfo?.downloadStatus4k?.map((status, index) => (
-                    <Tooltip
-                      key={`dl-status-${status.externalId}-${index}`}
-                      content={status.title}
-                    >
-                      <li className="border-b border-gray-700 last:border-b-0">
-                        <DownloadBlock downloadItem={status} is4k />
-                      </li>
-                    </Tooltip>
-                  ))}
-                </ul>
-              </div>
+          <div>
+            <h3 className="mb-2 text-xl font-bold">
+              {intl.formatMessage(messages.downloadstatus)}
+            </h3>
+            <div className="overflow-hidden rounded-md border border-gray-700 shadow">
+              <ul>
+                {data.mediaInfo?.downloadStatus?.map((status, index) => (
+                  <Tooltip
+                    key={`dl-status-${status.externalId}-${index}`}
+                    content={status.title}
+                  >
+                    <li className="border-b border-gray-700 last:border-b-0">
+                      <DownloadBlock downloadItem={status} />
+                    </li>
+                  </Tooltip>
+                ))}
+                {data.mediaInfo?.downloadStatus4k?.map((status, index) => (
+                  <Tooltip
+                    key={`dl-status-${status.externalId}-${index}`}
+                    content={status.title}
+                  >
+                    <li className="border-b border-gray-700 last:border-b-0">
+                      <DownloadBlock downloadItem={status} is4k />
+                    </li>
+                  </Tooltip>
+                ))}
+              </ul>
             </div>
-          )}
+          </div>
+        )}
         {hasPermission([Permission.MANAGE_ISSUES, Permission.VIEW_ISSUES], {
           type: 'or',
         }) &&
@@ -312,10 +312,11 @@ const ManageSlideOver = ({
                   <div>
                     {!!watchData?.data && (
                       <div
-                        className={`grid grid-cols-1 divide-y divide-gray-700 overflow-hidden border-gray-700 text-sm text-gray-300 shadow ${data.mediaInfo?.tautulliUrl
+                        className={`grid grid-cols-1 divide-y divide-gray-700 overflow-hidden border-gray-700 text-sm text-gray-300 shadow ${
+                          data.mediaInfo?.tautulliUrl
                             ? 'rounded-t-md border-x border-t'
                             : 'rounded-md border'
-                          }`}
+                        }`}
                       >
                         <div className="grid grid-cols-3 divide-x divide-gray-700">
                           <div className="px-4 py-3">
@@ -390,8 +391,9 @@ const ManageSlideOver = ({
                       >
                         <Button
                           buttonType="ghost"
-                          className={`w-full ${watchData?.data ? 'rounded-t-none' : ''
-                            }`}
+                          className={`w-full ${
+                            watchData?.data ? 'rounded-t-none' : ''
+                          }`}
                         >
                           <Bars4Icon />
                           <span>
@@ -469,10 +471,11 @@ const ManageSlideOver = ({
                   <div>
                     {watchData?.data4k && (
                       <div
-                        className={`grid grid-cols-1 divide-y divide-gray-700 overflow-hidden border-gray-700 text-sm text-gray-300 shadow ${data.mediaInfo?.tautulliUrl4k
+                        className={`grid grid-cols-1 divide-y divide-gray-700 overflow-hidden border-gray-700 text-sm text-gray-300 shadow ${
+                          data.mediaInfo?.tautulliUrl4k
                             ? 'rounded-t-md border-x border-t'
                             : 'rounded-md border'
-                          }`}
+                        }`}
                       >
                         <div className="grid grid-cols-3 divide-x divide-gray-700">
                           <div className="px-4 py-3">
@@ -549,8 +552,9 @@ const ManageSlideOver = ({
                       >
                         <Button
                           buttonType="ghost"
-                          className={`w-full ${watchData?.data4k ? 'rounded-t-none' : ''
-                            }`}
+                          className={`w-full ${
+                            watchData?.data4k ? 'rounded-t-none' : ''
+                          }`}
                         >
                           <Bars4Icon />
                           <span>
@@ -673,12 +677,12 @@ const ManageSlideOver = ({
                       ),
                       mediaServerName:
                         settings.currentSettings.mediaServerType ===
-                          MediaServerType.EMBY
+                        MediaServerType.EMBY
                           ? 'Emby'
                           : settings.currentSettings.mediaServerType ===
                             MediaServerType.PLEX
-                            ? 'Plex'
-                            : 'Jellyfin',
+                          ? 'Plex'
+                          : 'Jellyfin',
                     })}
                   </div>
                 </div>
