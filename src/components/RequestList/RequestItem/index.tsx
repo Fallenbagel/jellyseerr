@@ -323,8 +323,12 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
 
   const deleteMediaFile = async () => {
     if (request.media) {
-      await axios.delete(`/api/v1/media/${request.media.id}/file`);
-      await axios.delete(`/api/v1/media/${request.media.id}`);
+      await fetch(`/api/v1/media/${request.media.id}/file`, {
+        method: 'DELETE',
+      });
+      await fetch(`/api/v1/media/${request.media.id}`, {
+        method: 'DELETE',
+      });
       revalidateList();
     }
   };
