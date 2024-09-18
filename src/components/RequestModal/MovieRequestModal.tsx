@@ -5,18 +5,19 @@ import AdvancedRequester from '@app/components/RequestModal/AdvancedRequester';
 import QuotaDisplay from '@app/components/RequestModal/QuotaDisplay';
 import { useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { MediaStatus } from '@server/constants/media';
 import type { MediaRequest } from '@server/entity/MediaRequest';
+import type { NonFunctionProperties } from '@server/interfaces/api/common';
 import type { QuotaResponse } from '@server/interfaces/api/userInterfaces';
 import { Permission } from '@server/lib/permissions';
 import type { MovieDetails } from '@server/models/Movie';
-import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR, { mutate } from 'swr';
 
-const messages = defineMessages({
+const messages = defineMessages('components.RequestModal', {
   requestadmin: 'This request will be approved automatically.',
   requestSuccess: '<strong>{title}</strong> requested successfully!',
   requestCancel: 'Request for <strong>{title}</strong> canceled.',
@@ -38,7 +39,7 @@ const messages = defineMessages({
 interface RequestModalProps extends React.HTMLAttributes<HTMLDivElement> {
   tmdbId: number;
   is4k?: boolean;
-  editRequest?: MediaRequest;
+  editRequest?: NonFunctionProperties<MediaRequest>;
   onCancel?: () => void;
   onComplete?: (newStatus: MediaStatus) => void;
   onUpdating?: (isUpdating: boolean) => void;
@@ -88,15 +89,23 @@ const MovieRequestModal = ({
           tags: requestOverrides.tags,
         };
       }
-      const response = await axios.post<MediaRequest>('/api/v1/request', {
-        mediaId: data?.id,
-        mediaType: 'movie',
-        is4k,
-        ...overrideParams,
+      const res = await fetch('/api/v1/request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mediaId: data?.id,
+          mediaType: 'movie',
+          is4k,
+          ...overrideParams,
+        }),
       });
+      if (!res.ok) throw new Error();
+      const mediaRequest: MediaRequest = await res.json();
       mutate('/api/v1/request?filter=all&take=10&sort=modified&skip=0');
 
-      if (response.data) {
+      if (mediaRequest) {
         if (onComplete) {
           onComplete(
             hasPermission(
@@ -135,12 +144,14 @@ const MovieRequestModal = ({
     setIsUpdating(true);
 
     try {
-      const response = await axios.delete<MediaRequest>(
-        `/api/v1/request/${editRequest?.id}`
-      );
+      const res = await fetch(`/api/v1/request/${editRequest?.id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error();
+
       mutate('/api/v1/request?filter=all&take=10&sort=modified&skip=0');
 
-      if (response.status === 204) {
+      if (res.status === 204) {
         if (onComplete) {
           onComplete(MediaStatus.UNKNOWN);
         }
@@ -163,17 +174,27 @@ const MovieRequestModal = ({
     setIsUpdating(true);
 
     try {
-      await axios.put(`/api/v1/request/${editRequest?.id}`, {
-        mediaType: 'movie',
-        serverId: requestOverrides?.server,
-        profileId: requestOverrides?.profile,
-        rootFolder: requestOverrides?.folder,
-        userId: requestOverrides?.user?.id,
-        tags: requestOverrides?.tags,
+      const res = await fetch(`/api/v1/request/${editRequest?.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mediaType: 'movie',
+          serverId: requestOverrides?.server,
+          profileId: requestOverrides?.profile,
+          rootFolder: requestOverrides?.folder,
+          userId: requestOverrides?.user?.id,
+          tags: requestOverrides?.tags,
+        }),
       });
+      if (!res.ok) throw new Error();
 
       if (alsoApproveRequest) {
-        await axios.post(`/api/v1/request/${editRequest?.id}/approve`);
+        const res = await fetch(`/api/v1/request/${editRequest?.id}/approve`, {
+          method: 'POST',
+        });
+        if (!res.ok) throw new Error();
       }
       mutate('/api/v1/request?filter=all&take=10&sort=modified&skip=0');
 

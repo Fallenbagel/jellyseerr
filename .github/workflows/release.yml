@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -26,8 +26,23 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Pnpm Setup
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - name: Get pnpm store directory
+        shell: sh
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
       - name: Install dependencies
-        run: yarn
+        run: pnpm install
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -35,60 +50,59 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: npx semantic-release
 
-  build-snap:
-    name: Build Snap Package (${{ matrix.architecture }})
-    needs: semantic-release
-    runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-      matrix:
-        architecture:
-          - amd64
-          - arm64
-          - armhf
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Switch to main branch
-        run: git checkout main
-      - name: Pull latest changes
-        run: git pull
-      - name: Prepare
-        id: prepare
-        run: |
-          git fetch --prune --tags
-          if [[ $GITHUB_REF == refs/tags/* || $GITHUB_REF == refs/heads/master ]]; then
-            echo "RELEASE=stable" >> $GITHUB_OUTPUT
-          else
-            echo "RELEASE=edge" >> $GITHUB_OUTPUT
-          fi
-      - name: Set Up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          image: tonistiigi/binfmt@sha256:df15403e06a03c2f461c1f7938b171fda34a5849eb63a70e2a2109ed5a778bde
-      - name: Build Snap Package
-        uses: diddlesnaps/snapcraft-multiarch-action@v1
-        id: build
-        with:
-          architecture: ${{ matrix.architecture }}
-      - name: Upload Snap Package
-        uses: actions/upload-artifact@v4
-        with:
-          name: jellyseerr-snap-package-${{ matrix.architecture }}
-          path: ${{ steps.build.outputs.snap }}
-      - name: Review Snap Package
-        uses: diddlesnaps/snapcraft-review-tools-action@v1
-        with:
-          snap: ${{ steps.build.outputs.snap }}
-      - name: Publish Snap Package
-        uses: snapcore/action-publish@v1
-        env:
-          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAP_LOGIN }}
-        with:
-          snap: ${{ steps.build.outputs.snap }}
-          release: ${{ steps.prepare.outputs.RELEASE }}
+  # build-snap:
+  #   name: Build Snap Package (${{ matrix.architecture }})
+  #   needs: semantic-release
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       architecture:
+  #         - amd64
+  #         - arm64
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #     - name: Switch to main branch
+  #       run: git checkout main
+  #     - name: Pull latest changes
+  #       run: git pull
+  #     - name: Prepare
+  #       id: prepare
+  #       run: |
+  #         git fetch --prune --tags
+  #         if [[ $GITHUB_REF == refs/tags/* || $GITHUB_REF == refs/heads/master ]]; then
+  #           echo "RELEASE=stable" >> $GITHUB_OUTPUT
+  #         else
+  #           echo "RELEASE=edge" >> $GITHUB_OUTPUT
+  #         fi
+  #     - name: Set Up QEMU
+  #       uses: docker/setup-qemu-action@v3
+  #       with:
+  #         image: tonistiigi/binfmt@sha256:df15403e06a03c2f461c1f7938b171fda34a5849eb63a70e2a2109ed5a778bde
+  #     - name: Build Snap Package
+  #       uses: diddlesnaps/snapcraft-multiarch-action@v1
+  #       id: build
+  #       with:
+  #         architecture: ${{ matrix.architecture }}
+  #     - name: Upload Snap Package
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: jellyseerr-snap-package-${{ matrix.architecture }}
+  #         path: ${{ steps.build.outputs.snap }}
+  #     - name: Review Snap Package
+  #       uses: diddlesnaps/snapcraft-review-tools-action@v1
+  #       with:
+  #         snap: ${{ steps.build.outputs.snap }}
+  #     - name: Publish Snap Package
+  #       uses: snapcore/action-publish@v1
+  #       env:
+  #         SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAP_LOGIN }}
+  #       with:
+  #         snap: ${{ steps.build.outputs.snap }}
+  #         release: ${{ steps.prepare.outputs.RELEASE }}
 
   discord:
     name: Send Discord Notification

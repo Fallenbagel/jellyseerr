@@ -1,3 +1,4 @@
+import BlacklistBlock from '@app/components/BlacklistBlock';
 import Button from '@app/components/Common/Button';
 import ConfirmButton from '@app/components/Common/ConfirmButton';
 import SlideOver from '@app/components/Common/SlideOver';
@@ -8,6 +9,7 @@ import RequestBlock from '@app/components/RequestBlock';
 import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { Bars4Icon, ServerIcon } from '@heroicons/react/24/outline';
 import {
   CheckCircleIcon,
@@ -25,13 +27,12 @@ import type { MediaWatchDataResponse } from '@server/interfaces/api/mediaInterfa
 import type { RadarrSettings, SonarrSettings } from '@server/lib/settings';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
-import axios from 'axios';
-import getConfig from 'next/config';
+import Image from 'next/image';
 import Link from 'next/link';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import useSWR from 'swr';
 
-const messages = defineMessages({
+const messages = defineMessages('components.ManageSlideOver', {
   manageModalTitle: 'Manage {mediaType}',
   manageModalIssues: 'Open Issues',
   manageModalRequests: 'Requests',
@@ -94,7 +95,6 @@ const ManageSlideOver = ({
   const { user: currentUser, hasPermission } = useUser();
   const intl = useIntl();
   const settings = useSettings();
-  const { publicRuntimeConfig } = getConfig();
   const { data: watchData } = useSWR<MediaWatchDataResponse>(
     settings.currentSettings.mediaServerType === MediaServerType.PLEX &&
       data.mediaInfo &&
@@ -111,16 +111,29 @@ const ManageSlideOver = ({
 
   const deleteMedia = async () => {
     if (data.mediaInfo) {
-      await axios.delete(`/api/v1/media/${data.mediaInfo.id}`);
+      const res = await fetch(`/api/v1/media/${data.mediaInfo.id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error();
       revalidate();
+      onClose();
     }
   };
 
   const deleteMediaFile = async () => {
     if (data.mediaInfo) {
-      await axios.delete(`/api/v1/media/${data.mediaInfo.id}/file`);
-      await axios.delete(`/api/v1/media/${data.mediaInfo.id}`);
+      const res1 = await fetch(`/api/v1/media/${data.mediaInfo.id}/file`, {
+        method: 'DELETE',
+      });
+      if (!res1.ok) throw new Error();
+
+      const res2 = await fetch(`/api/v1/media/${data.mediaInfo.id}`, {
+        method: 'DELETE',
+      });
+      if (!res2.ok) throw new Error();
+
       revalidate();
+      onClose();
     }
   };
 
@@ -147,9 +160,16 @@ const ManageSlideOver = ({
 
   const markAvailable = async (is4k = false) => {
     if (data.mediaInfo) {
-      await axios.post(`/api/v1/media/${data.mediaInfo?.id}/available`, {
-        is4k,
+      const res = await fetch(`/api/v1/media/${data.mediaInfo?.id}/available`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          is4k,
+        }),
       });
+      if (!res.ok) throw new Error();
       revalidate();
     }
   };
@@ -265,6 +285,20 @@ const ManageSlideOver = ({
             </div>
           </div>
         )}
+        {data.mediaInfo?.status === MediaStatus.BLACKLISTED && (
+          <div>
+            <h3 className="mb-2 text-xl font-bold">
+              {intl.formatMessage(globalMessages.blacklist)}
+            </h3>
+            <div className="overflow-hidden rounded-md border border-gray-700 shadow">
+              <BlacklistBlock
+                blacklistItem={data.mediaInfo.blacklist}
+                onUpdate={() => revalidate()}
+                onDelete={() => onClose()}
+              />
+            </div>
+          </div>
+        )}
         {hasPermission(Permission.ADMIN) &&
           (data.mediaInfo?.serviceUrl ||
             data.mediaInfo?.tautulliUrl ||
@@ -328,19 +362,20 @@ const ManageSlideOver = ({
                                       : `/users/${user.id}`
                                   }
                                   key={`watch-user-${user.id}`}
+                                  className="z-0 mb-1 -mr-2 shrink-0 hover:z-50"
                                 >
-                                  <a className="z-0 mb-1 -mr-2 shrink-0 hover:z-50">
-                                    <Tooltip
-                                      key={`watch-user-${user.id}`}
-                                      content={user.displayName}
-                                    >
-                                      <img
-                                        src={user.avatar}
-                                        alt={user.displayName}
-                                        className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
-                                      />
-                                    </Tooltip>
-                                  </a>
+                                  <Tooltip
+                                    key={`watch-user-${user.id}`}
+                                    content={user.displayName}
+                                  >
+                                    <Image
+                                      src={user.avatar}
+                                      alt={user.displayName}
+                                      className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
+                                      width={32}
+                                      height={32}
+                                    />
+                                  </Tooltip>
                                 </Link>
                               ))}
                             </span>
@@ -488,19 +523,20 @@ const ManageSlideOver = ({
                                       : `/users/${user.id}`
                                   }
                                   key={`watch-user-${user.id}`}
+                                  className="z-0 mb-1 -mr-2 shrink-0 hover:z-50"
                                 >
-                                  <a className="z-0 mb-1 -mr-2 shrink-0 hover:z-50">
-                                    <Tooltip
-                                      key={`watch-user-${user.id}`}
-                                      content={user.displayName}
-                                    >
-                                      <img
-                                        src={user.avatar}
-                                        alt={user.displayName}
-                                        className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
-                                      />
-                                    </Tooltip>
-                                  </a>
+                                  <Tooltip
+                                    key={`watch-user-${user.id}`}
+                                    content={user.displayName}
+                                  >
+                                    <Image
+                                      src={user.avatar}
+                                      alt={user.displayName}
+                                      className="h-8 w-8 scale-100 transform-gpu rounded-full object-cover ring-1 ring-gray-500 transition duration-300 hover:scale-105"
+                                      width={32}
+                                      height={32}
+                                    />
+                                  </Tooltip>
                                 </Link>
                               ))}
                             </span>
@@ -582,32 +618,17 @@ const ManageSlideOver = ({
               </div>
             </div>
           )}
-        {hasPermission(Permission.ADMIN) && data?.mediaInfo && (
-          <div>
-            <h3 className="mb-2 text-xl font-bold">
-              {intl.formatMessage(messages.manageModalAdvanced)}
-            </h3>
-            <div className="space-y-2">
-              {data?.mediaInfo.status !== MediaStatus.AVAILABLE && (
-                <Button
-                  onClick={() => markAvailable()}
-                  className="w-full"
-                  buttonType="success"
-                >
-                  <CheckCircleIcon />
-                  <span>
-                    {intl.formatMessage(
-                      mediaType === 'movie'
-                        ? messages.markavailable
-                        : messages.markallseasonsavailable
-                    )}
-                  </span>
-                </Button>
-              )}
-              {data?.mediaInfo.status4k !== MediaStatus.AVAILABLE &&
-                settings.currentSettings.series4kEnabled && (
+        {hasPermission(Permission.ADMIN) &&
+          data?.mediaInfo &&
+          data.mediaInfo.status !== MediaStatus.BLACKLISTED && (
+            <div>
+              <h3 className="mb-2 text-xl font-bold">
+                {intl.formatMessage(messages.manageModalAdvanced)}
+              </h3>
+              <div className="space-y-2">
+                {data?.mediaInfo.status !== MediaStatus.AVAILABLE && (
                   <Button
-                    onClick={() => markAvailable(true)}
+                    onClick={() => markAvailable()}
                     className="w-full"
                     buttonType="success"
                   >
@@ -615,41 +636,59 @@ const ManageSlideOver = ({
                     <span>
                       {intl.formatMessage(
                         mediaType === 'movie'
-                          ? messages.mark4kavailable
-                          : messages.markallseasons4kavailable
+                          ? messages.markavailable
+                          : messages.markallseasonsavailable
                       )}
                     </span>
                   </Button>
                 )}
-              <div>
-                <ConfirmButton
-                  onClick={() => deleteMedia()}
-                  confirmText={intl.formatMessage(globalMessages.areyousure)}
-                  className="w-full"
-                >
-                  <DocumentMinusIcon />
-                  <span>
-                    {intl.formatMessage(messages.manageModalClearMedia)}
-                  </span>
-                </ConfirmButton>
-                <div className="mt-2 text-xs text-gray-400">
-                  {intl.formatMessage(messages.manageModalClearMediaWarning, {
-                    mediaType: intl.formatMessage(
-                      mediaType === 'movie' ? messages.movie : messages.tvshow
-                    ),
-                    mediaServerName:
-                      publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                        ? 'Emby'
-                        : settings.currentSettings.mediaServerType ===
-                          MediaServerType.PLEX
-                        ? 'Plex'
-                        : 'Jellyfin',
-                  })}
+                {data?.mediaInfo.status4k !== MediaStatus.AVAILABLE &&
+                  settings.currentSettings.series4kEnabled && (
+                    <Button
+                      onClick={() => markAvailable(true)}
+                      className="w-full"
+                      buttonType="success"
+                    >
+                      <CheckCircleIcon />
+                      <span>
+                        {intl.formatMessage(
+                          mediaType === 'movie'
+                            ? messages.mark4kavailable
+                            : messages.markallseasons4kavailable
+                        )}
+                      </span>
+                    </Button>
+                  )}
+                <div>
+                  <ConfirmButton
+                    onClick={() => deleteMedia()}
+                    confirmText={intl.formatMessage(globalMessages.areyousure)}
+                    className="w-full"
+                  >
+                    <DocumentMinusIcon />
+                    <span>
+                      {intl.formatMessage(messages.manageModalClearMedia)}
+                    </span>
+                  </ConfirmButton>
+                  <div className="mt-2 text-xs text-gray-400">
+                    {intl.formatMessage(messages.manageModalClearMediaWarning, {
+                      mediaType: intl.formatMessage(
+                        mediaType === 'movie' ? messages.movie : messages.tvshow
+                      ),
+                      mediaServerName:
+                        settings.currentSettings.mediaServerType ===
+                        MediaServerType.EMBY
+                          ? 'Emby'
+                          : settings.currentSettings.mediaServerType ===
+                            MediaServerType.PLEX
+                          ? 'Plex'
+                          : 'Jellyfin',
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
     </SlideOver>
   );

@@ -5,17 +5,16 @@ import PermissionEdit from '@app/components/PermissionEdit';
 import QuotaSelector from '@app/components/QuotaSelector';
 import useSettings from '@app/hooks/useSettings';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
 import { MediaServerType } from '@server/constants/server';
 import type { MainSettings } from '@server/lib/settings';
-import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
-import getConfig from 'next/config';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR, { mutate } from 'swr';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Settings.SettingsUsers', {
   users: 'Users',
   userSettings: 'User Settings',
   userSettingsDescription: 'Configure global and default user settings.',
@@ -42,11 +41,19 @@ const SettingsUsers = () => {
     mutate: revalidate,
   } = useSWR<MainSettings>('/api/v1/settings/main');
   const settings = useSettings();
-  const { publicRuntimeConfig } = getConfig();
 
   if (!data && !error) {
     return <LoadingSpinner />;
   }
+
+  const mediaServerFormatValues = {
+    mediaServerName:
+      settings.currentSettings.mediaServerType === MediaServerType.JELLYFIN
+        ? 'Jellyfin'
+        : settings.currentSettings.mediaServerType === MediaServerType.EMBY
+        ? 'Emby'
+        : undefined,
+  };
 
   return (
     <>
@@ -76,21 +83,28 @@ const SettingsUsers = () => {
           enableReinitialize
           onSubmit={async (values) => {
             try {
-              await axios.post('/api/v1/settings/main', {
-                localLogin: values.localLogin,
-                newPlexLogin: values.newPlexLogin,
-                defaultQuotas: {
-                  movie: {
-                    quotaLimit: values.movieQuotaLimit,
-                    quotaDays: values.movieQuotaDays,
-                  },
-                  tv: {
-                    quotaLimit: values.tvQuotaLimit,
-                    quotaDays: values.tvQuotaDays,
-                  },
+              const res = await fetch('/api/v1/settings/main', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
                 },
-                defaultPermissions: values.defaultPermissions,
+                body: JSON.stringify({
+                  localLogin: values.localLogin,
+                  newPlexLogin: values.newPlexLogin,
+                  defaultQuotas: {
+                    movie: {
+                      quotaLimit: values.movieQuotaLimit,
+                      quotaDays: values.movieQuotaDays,
+                    },
+                    tv: {
+                      quotaLimit: values.tvQuotaLimit,
+                      quotaDays: values.tvQuotaDays,
+                    },
+                  },
+                  defaultPermissions: values.defaultPermissions,
+                }),
               });
+              if (!res.ok) throw new Error();
               mutate('/api/v1/settings/public');
 
               addToast(intl.formatMessage(messages.toastSettingsSuccess), {
@@ -114,16 +128,10 @@ const SettingsUsers = () => {
                   <label htmlFor="localLogin" className="checkbox-label">
                     {intl.formatMessage(messages.localLogin)}
                     <span className="label-tip">
-                      {intl.formatMessage(messages.localLoginTip, {
-                        mediaServerName:
-                          settings.currentSettings.mediaServerType ===
-                          MediaServerType.PLEX
-                            ? 'Plex'
-                            : settings.currentSettings.mediaServerType ===
-                              MediaServerType.JELLYFIN
-                            ? 'Jellyfin'
-                            : 'Emby',
-                      })}
+                      {intl.formatMessage(
+                        messages.localLoginTip,
+                        mediaServerFormatValues
+                      )}
                     </span>
                   </label>
                   <div className="form-input-area">
@@ -139,25 +147,15 @@ const SettingsUsers = () => {
                 </div>
                 <div className="form-row">
                   <label htmlFor="newPlexLogin" className="checkbox-label">
-                    {intl.formatMessage(messages.newPlexLogin, {
-                      mediaServerName:
-                        publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                          ? 'Emby'
-                          : settings.currentSettings.mediaServerType ===
-                            MediaServerType.PLEX
-                          ? 'Plex'
-                          : 'Jellyfin',
-                    })}
+                    {intl.formatMessage(
+                      messages.newPlexLogin,
+                      mediaServerFormatValues
+                    )}
                     <span className="label-tip">
-                      {intl.formatMessage(messages.newPlexLoginTip, {
-                        mediaServerName:
-                          publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                            ? 'Emby'
-                            : settings.currentSettings.mediaServerType ===
-                              MediaServerType.PLEX
-                            ? 'Plex'
-                            : 'Jellyfin',
-                      })}
+                      {intl.formatMessage(
+                        messages.newPlexLoginTip,
+                        mediaServerFormatValues
+                      )}
                     </span>
                   </label>
                   <div className="form-input-area">

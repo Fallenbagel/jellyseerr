@@ -3,12 +3,14 @@ import SonarrAPI from '@server/api/servarr/sonarr';
 import { MediaStatus, MediaType } from '@server/constants/media';
 import { MediaServerType } from '@server/constants/server';
 import { getRepository } from '@server/datasource';
+import { Blacklist } from '@server/entity/Blacklist';
 import type { User } from '@server/entity/User';
 import { Watchlist } from '@server/entity/Watchlist';
 import type { DownloadingItem } from '@server/lib/downloadtracker';
 import downloadTracker from '@server/lib/downloadtracker';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
+import { getHostname } from '@server/utils/getHostname';
 import {
   AfterLoad,
   Column,
@@ -16,6 +18,7 @@ import {
   Entity,
   Index,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -65,7 +68,7 @@ class Media {
 
     try {
       const media = await mediaRepository.findOne({
-        where: { tmdbId: id, mediaType },
+        where: { tmdbId: id, mediaType: mediaType },
         relations: { requests: true, issues: true },
       });
 
@@ -114,6 +117,11 @@ class Media {
 
   @OneToMany(() => Issue, (issue) => issue.media, { cascade: true })
   public issues: Issue[];
+
+  @OneToOne(() => Blacklist, (blacklist) => blacklist.media, {
+    eager: true,
+  })
+  public blacklist: Blacklist;
 
   @CreateDateColumn()
   public createdAt: Date;
@@ -210,16 +218,14 @@ class Media {
       }
     } else {
       const pageName =
-        process.env.JELLYFIN_TYPE === 'emby' ? 'item' : 'details';
-      const { serverId, hostname, externalHostname } = getSettings().jellyfin;
-      let jellyfinHost =
+        getSettings().main.mediaServerType == MediaServerType.EMBY
+          ? 'item'
+          : 'details';
+      const { serverId, externalHostname } = getSettings().jellyfin;
+      const jellyfinHost =
         externalHostname && externalHostname.length > 0
           ? externalHostname
-          : hostname;
-
-      jellyfinHost = jellyfinHost.endsWith('/')
-        ? jellyfinHost.slice(0, -1)
-        : jellyfinHost;
+          : getHostname();
 
       if (this.jellyfinMediaId) {
         this.mediaUrl = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId}&context=home&serverId=${serverId}`;

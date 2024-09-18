@@ -2,12 +2,12 @@ import Alert from '@app/components/Common/Alert';
 import Modal from '@app/components/Common/Modal';
 import useSettings from '@app/hooks/useSettings';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
+import { MediaServerType } from '@server/constants/server';
 import type { UserResultsResponse } from '@server/interfaces/api/userInterfaces';
-import axios from 'axios';
-import getConfig from 'next/config';
-import type React from 'react';
+import Image from 'next/image';
 import { useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 
@@ -17,7 +17,7 @@ interface JellyfinImportProps {
   children?: React.ReactNode;
 }
 
-const messages = defineMessages({
+const messages = defineMessages('components.UserList', {
   importfromJellyfin: 'Import {mediaServerName} Users',
   importfromJellyfinerror:
     'Something went wrong while importing {mediaServerName} users.',
@@ -36,7 +36,6 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
 }) => {
   const intl = useIntl();
   const settings = useSettings();
-  const { publicRuntimeConfig } = getConfig();
   const { addToast } = useToasts();
   const [isImporting, setImporting] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
@@ -56,22 +55,21 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
     `/api/v1/user?take=${children}`
   );
 
-  data?.forEach((user, pos) => {
-    if (
-      existingUsers?.results.some((data) => data.jellyfinUserId === user.id)
-    ) {
-      data?.splice(pos, 1);
-    }
-  });
-
   const importUsers = async () => {
     setImporting(true);
 
     try {
-      const { data: createdUsers } = await axios.post(
-        '/api/v1/user/import-from-jellyfin',
-        { jellyfinUserIds: selectedUsers }
-      );
+      const res = await fetch('/api/v1/user/import-from-jellyfin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          jellyfinUserIds: selectedUsers,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      const createdUsers = await res.json();
 
       if (!createdUsers.length) {
         throw new Error('No users were imported from Jellyfin.');
@@ -82,7 +80,9 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
           userCount: createdUsers.length,
           strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
           mediaServerName:
-            publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+            settings.currentSettings.mediaServerType === MediaServerType.EMBY
+              ? 'Emby'
+              : 'Jellyfin',
         }),
         {
           autoDismiss: true,
@@ -97,7 +97,9 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
       addToast(
         intl.formatMessage(messages.importfromJellyfinerror, {
           mediaServerName:
-            publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+            settings.currentSettings.mediaServerType === MediaServerType.EMBY
+              ? 'Emby'
+              : 'Jellyfin',
         }),
         {
           autoDismiss: true,
@@ -135,7 +137,9 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
       loading={!data && !error}
       title={intl.formatMessage(messages.importfromJellyfin, {
         mediaServerName:
-          publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+          settings.currentSettings.mediaServerType === MediaServerType.EMBY
+            ? 'Emby'
+            : 'Jellyfin',
       })}
       onOk={() => {
         importUsers();
@@ -152,7 +156,8 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
             <Alert
               title={intl.formatMessage(messages.newJellyfinsigninenabled, {
                 mediaServerName:
-                  publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                  settings.currentSettings.mediaServerType ===
+                  MediaServerType.EMBY
                     ? 'Emby'
                     : 'Jellyfin',
                 strong: (msg: React.ReactNode) => (
@@ -202,62 +207,71 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-700 bg-gray-600">
-                      {data?.map((user) => (
-                        <tr key={`user-${user.id}`}>
-                          <td className="whitespace-nowrap px-4 py-4 text-sm font-medium leading-5 text-gray-100">
-                            <span
-                              role="checkbox"
-                              tabIndex={0}
-                              aria-checked={isSelectedUser(user.id)}
-                              onClick={() => toggleUser(user.id)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter' || e.key === 'Space') {
-                                  toggleUser(user.id);
-                                }
-                              }}
-                              className="relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer items-center justify-center pt-2 focus:outline-none"
-                            >
+                      {data
+                        ?.filter(
+                          (user) =>
+                            !existingUsers?.results.some(
+                              (u) => u.jellyfinUserId === user.id
+                            )
+                        )
+                        .map((user) => (
+                          <tr key={`user-${user.id}`}>
+                            <td className="whitespace-nowrap px-4 py-4 text-sm font-medium leading-5 text-gray-100">
                               <span
-                                aria-hidden="true"
-                                className={`${
-                                  isSelectedUser(user.id)
-                                    ? 'bg-indigo-500'
-                                    : 'bg-gray-800'
-                                } absolute mx-auto h-4 w-9 rounded-full transition-colors duration-200 ease-in-out`}
-                              ></span>
-                              <span
-                                aria-hidden="true"
-                                className={`${
-                                  isSelectedUser(user.id)
-                                    ? 'translate-x-5'
-                                    : 'translate-x-0'
-                                } absolute left-0 inline-block h-5 w-5 transform rounded-full border border-gray-200 bg-white shadow transition-transform duration-200 ease-in-out group-focus:border-blue-300 group-focus:ring`}
-                              ></span>
-                            </span>
-                          </td>
-                          <td className="whitespace-nowrap px-1 py-4 text-sm font-medium leading-5 text-gray-100 md:px-6">
-                            <div className="flex items-center">
-                              <img
-                                className="h-10 w-10 flex-shrink-0 rounded-full"
-                                src={user.thumb}
-                                alt=""
-                              />
-                              <div className="ml-4">
-                                <div className="text-base font-bold leading-5">
-                                  {user.username}
-                                </div>
-                                {/* {user.username &&
+                                role="checkbox"
+                                tabIndex={0}
+                                aria-checked={isSelectedUser(user.id)}
+                                onClick={() => toggleUser(user.id)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === 'Space') {
+                                    toggleUser(user.id);
+                                  }
+                                }}
+                                className="relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer items-center justify-center pt-2 focus:outline-none"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  className={`${
+                                    isSelectedUser(user.id)
+                                      ? 'bg-indigo-500'
+                                      : 'bg-gray-800'
+                                  } absolute mx-auto h-4 w-9 rounded-full transition-colors duration-200 ease-in-out`}
+                                ></span>
+                                <span
+                                  aria-hidden="true"
+                                  className={`${
+                                    isSelectedUser(user.id)
+                                      ? 'translate-x-5'
+                                      : 'translate-x-0'
+                                  } absolute left-0 inline-block h-5 w-5 transform rounded-full border border-gray-200 bg-white shadow transition-transform duration-200 ease-in-out group-focus:border-blue-300 group-focus:ring`}
+                                ></span>
+                              </span>
+                            </td>
+                            <td className="whitespace-nowrap px-1 py-4 text-sm font-medium leading-5 text-gray-100 md:px-6">
+                              <div className="flex items-center">
+                                <Image
+                                  className="h-10 w-10 flex-shrink-0 rounded-full"
+                                  src={user.thumb}
+                                  alt=""
+                                  width={40}
+                                  height={40}
+                                />
+                                <div className="ml-4">
+                                  <div className="text-base font-bold leading-5">
+                                    {user.username}
+                                  </div>
+                                  {/* {user.username &&
                                   user.username.toLowerCase() !==
                                   user.email && (
                                     <div className="text-sm leading-5 text-gray-300">
                                       {user.email}
                                     </div>
                                   )} */}
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
@@ -269,7 +283,9 @@ const JellyfinImportModal: React.FC<JellyfinImportProps> = ({
         <Alert
           title={intl.formatMessage(messages.noJellyfinuserstoimport, {
             mediaServerName:
-              publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? 'Emby' : 'Jellyfin',
+              settings.currentSettings.mediaServerType === MediaServerType.EMBY
+                ? 'Emby'
+                : 'Jellyfin',
           })}
           type="info"
         />

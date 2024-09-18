@@ -3,10 +3,11 @@ import PermissionOption from '@app/components/PermissionOption';
 import useSettings from '@app/hooks/useSettings';
 import type { User } from '@app/hooks/useUser';
 import { Permission } from '@app/hooks/useUser';
+import defineMessages from '@app/utils/defineMessages';
 import { MediaServerType } from '@server/constants/server';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 
-export const messages = defineMessages({
+export const messages = defineMessages('components.PermissionEdit', {
   admin: 'Admin',
   adminDescription:
     'Full administrator access. Bypasses all other permission checks.',
@@ -77,6 +78,13 @@ export const messages = defineMessages({
   viewwatchlists: 'View {mediaServerName} Watchlists',
   viewwatchlistsDescription:
     "Grant permission to view other users' {mediaServerName} Watchlists.",
+  manageblacklist: 'Manage Blacklist',
+  manageblacklistDescription: 'Grant permission to manage blacklisted media.',
+  blacklistedItems: 'Blacklist media.',
+  blacklistedItemsDescription: 'Grant permission to blacklist media.',
+  viewblacklistedItems: 'View blacklisted media.',
+  viewblacklistedItemsDescription:
+    'Grant permission to view blacklisted media.',
 });
 
 interface PermissionEditProps {
@@ -328,6 +336,22 @@ export const PermissionEdit = ({
           name: intl.formatMessage(messages.viewissues),
           description: intl.formatMessage(messages.viewissuesDescription),
           permission: Permission.VIEW_ISSUES,
+        },
+      ],
+    },
+    {
+      id: 'manageblacklist',
+      name: intl.formatMessage(messages.manageblacklist),
+      description: intl.formatMessage(messages.manageblacklistDescription),
+      permission: Permission.MANAGE_BLACKLIST,
+      children: [
+        {
+          id: 'viewblacklisteditems',
+          name: intl.formatMessage(messages.viewblacklistedItems),
+          description: intl.formatMessage(
+            messages.viewblacklistedItemsDescription
+          ),
+          permission: Permission.VIEW_BLACKLIST,
         },
       ],
     },

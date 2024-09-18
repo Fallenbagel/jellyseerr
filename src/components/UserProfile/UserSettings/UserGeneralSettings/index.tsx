@@ -11,60 +11,65 @@ import useLocale from '@app/hooks/useLocale';
 import useSettings from '@app/hooks/useSettings';
 import { Permission, UserType, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
-import Error from '@app/pages/_error';
+import ErrorPage from '@app/pages/_error';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
+import { ApiErrorCode } from '@server/constants/error';
 import type { UserSettingsGeneralResponse } from '@server/interfaces/api/userSettingsInterfaces';
-import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
-import getConfig from 'next/config';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
 
-const messages = defineMessages({
-  general: 'General',
-  generalsettings: 'General Settings',
-  displayName: 'Display Name',
-  email: 'Email',
-  save: 'Save Changes',
-  saving: 'Saving…',
-  mediaServerUser: '{mediaServerName} User',
-  accounttype: 'Account Type',
-  plexuser: 'Plex User',
-  localuser: 'Local User',
-  role: 'Role',
-  owner: 'Owner',
-  admin: 'Admin',
-  user: 'User',
-  toastSettingsSuccess: 'Settings saved successfully!',
-  toastSettingsFailure: 'Something went wrong while saving settings.',
-  region: 'Discover Region',
-  regionTip: 'Filter content by regional availability',
-  originallanguage: 'Discover Language',
-  originallanguageTip: 'Filter content by original language',
-  movierequestlimit: 'Movie Request Limit',
-  seriesrequestlimit: 'Series Request Limit',
-  enableOverride: 'Override Global Limit',
-  applanguage: 'Display Language',
-  languageDefault: 'Default ({language})',
-  discordId: 'Discord User ID',
-  discordIdTip:
-    'The <FindDiscordIdLink>multi-digit ID number</FindDiscordIdLink> associated with your Discord user account',
-  validationDiscordId: 'You must provide a valid Discord user ID',
-  plexwatchlistsyncmovies: 'Auto-Request Movies',
-  plexwatchlistsyncmoviestip:
-    'Automatically request movies on your <PlexWatchlistSupportLink>Plex Watchlist</PlexWatchlistSupportLink>',
-  plexwatchlistsyncseries: 'Auto-Request Series',
-  plexwatchlistsyncseriestip:
-    'Automatically request series on your <PlexWatchlistSupportLink>Plex Watchlist</PlexWatchlistSupportLink>',
-});
+const messages = defineMessages(
+  'components.UserProfile.UserSettings.UserGeneralSettings',
+  {
+    general: 'General',
+    generalsettings: 'General Settings',
+    displayName: 'Display Name',
+    email: 'Email',
+    save: 'Save Changes',
+    saving: 'Saving…',
+    mediaServerUser: '{mediaServerName} User',
+    accounttype: 'Account Type',
+    plexuser: 'Plex User',
+    localuser: 'Local User',
+    role: 'Role',
+    owner: 'Owner',
+    admin: 'Admin',
+    user: 'User',
+    toastSettingsSuccess: 'Settings saved successfully!',
+    toastSettingsFailure: 'Something went wrong while saving settings.',
+    toastSettingsFailureEmail: 'This email is already taken!',
+    region: 'Discover Region',
+    regionTip: 'Filter content by regional availability',
+    originallanguage: 'Discover Language',
+    originallanguageTip: 'Filter content by original language',
+    movierequestlimit: 'Movie Request Limit',
+    seriesrequestlimit: 'Series Request Limit',
+    enableOverride: 'Override Global Limit',
+    applanguage: 'Display Language',
+    languageDefault: 'Default ({language})',
+    discordId: 'Discord User ID',
+    discordIdTip:
+      'The <FindDiscordIdLink>multi-digit ID number</FindDiscordIdLink> associated with your Discord user account',
+    validationemailrequired: 'Email required',
+    validationemailformat: 'Valid email required',
+    validationDiscordId: 'You must provide a valid Discord user ID',
+    plexwatchlistsyncmovies: 'Auto-Request Movies',
+    plexwatchlistsyncmoviestip:
+      'Automatically request movies on your <PlexWatchlistSupportLink>Plex Watchlist</PlexWatchlistSupportLink>',
+    plexwatchlistsyncseries: 'Auto-Request Series',
+    plexwatchlistsyncseriestip:
+      'Automatically request series on your <PlexWatchlistSupportLink>Plex Watchlist</PlexWatchlistSupportLink>',
+  }
+);
 
 const UserGeneralSettings = () => {
   const intl = useIntl();
-  const { publicRuntimeConfig } = getConfig();
   const { addToast } = useToasts();
   const { locale, setLocale } = useLocale();
   const [movieQuotaEnabled, setMovieQuotaEnabled] = useState(false);
@@ -88,6 +93,14 @@ const UserGeneralSettings = () => {
   );
 
   const UserGeneralSettingsSchema = Yup.object().shape({
+    email:
+      user?.id === 1
+        ? Yup.string()
+            .email(intl.formatMessage(messages.validationemailformat))
+            .required(intl.formatMessage(messages.validationemailrequired))
+        : Yup.string().email(
+            intl.formatMessage(messages.validationemailformat)
+          ),
     discordId: Yup.string()
       .nullable()
       .matches(/^\d{17,19}$/, intl.formatMessage(messages.validationDiscordId)),
@@ -107,7 +120,7 @@ const UserGeneralSettings = () => {
   }
 
   if (!data) {
-    return <Error statusCode={500} />;
+    return <ErrorPage statusCode={500} />;
   }
 
   return (
@@ -126,7 +139,7 @@ const UserGeneralSettings = () => {
       <Formik
         initialValues={{
           displayName: data?.username ?? '',
-          email: data?.email ?? '',
+          email: data?.email?.includes('@') ? data.email : '',
           discordId: data?.discordId ?? '',
           locale: data?.locale,
           region: data?.region,
@@ -142,22 +155,32 @@ const UserGeneralSettings = () => {
         enableReinitialize
         onSubmit={async (values) => {
           try {
-            await axios.post(`/api/v1/user/${user?.id}/settings/main`, {
-              username: values.displayName,
-              email: values.email,
-              discordId: values.discordId,
-              locale: values.locale,
-              region: values.region,
-              originalLanguage: values.originalLanguage,
-              movieQuotaLimit: movieQuotaEnabled
-                ? values.movieQuotaLimit
-                : null,
-              movieQuotaDays: movieQuotaEnabled ? values.movieQuotaDays : null,
-              tvQuotaLimit: tvQuotaEnabled ? values.tvQuotaLimit : null,
-              tvQuotaDays: tvQuotaEnabled ? values.tvQuotaDays : null,
-              watchlistSyncMovies: values.watchlistSyncMovies,
-              watchlistSyncTv: values.watchlistSyncTv,
+            const res = await fetch(`/api/v1/user/${user?.id}/settings/main`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                username: values.displayName,
+                email:
+                  values.email || user?.jellyfinUsername || user?.plexUsername,
+                discordId: values.discordId,
+                locale: values.locale,
+                region: values.region,
+                originalLanguage: values.originalLanguage,
+                movieQuotaLimit: movieQuotaEnabled
+                  ? values.movieQuotaLimit
+                  : null,
+                movieQuotaDays: movieQuotaEnabled
+                  ? values.movieQuotaDays
+                  : null,
+                tvQuotaLimit: tvQuotaEnabled ? values.tvQuotaLimit : null,
+                tvQuotaDays: tvQuotaEnabled ? values.tvQuotaDays : null,
+                watchlistSyncMovies: values.watchlistSyncMovies,
+                watchlistSyncTv: values.watchlistSyncTv,
+              }),
             });
+            if (!res.ok) throw new Error(res.statusText, { cause: res });
 
             if (currentUser?.id === user?.id && setLocale) {
               setLocale(
@@ -172,10 +195,24 @@ const UserGeneralSettings = () => {
               appearance: 'success',
             });
           } catch (e) {
-            addToast(intl.formatMessage(messages.toastSettingsFailure), {
-              autoDismiss: true,
-              appearance: 'error',
-            });
+            let errorData;
+            try {
+              errorData = await e.cause?.text();
+              errorData = JSON.parse(errorData);
+            } catch {
+              /* empty */
+            }
+            if (errorData?.message === ApiErrorCode.InvalidEmail) {
+              addToast(intl.formatMessage(messages.toastSettingsFailureEmail), {
+                autoDismiss: true,
+                appearance: 'error',
+              });
+            } else {
+              addToast(intl.formatMessage(messages.toastSettingsFailure), {
+                autoDismiss: true,
+                appearance: 'error',
+              });
+            }
           } finally {
             revalidate();
             revalidateUser();
@@ -206,7 +243,7 @@ const UserGeneralSettings = () => {
                       <Badge badgeType="default">
                         {intl.formatMessage(messages.localuser)}
                       </Badge>
-                    ) : publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? (
+                    ) : user?.userType === UserType.EMBY ? (
                       <Badge badgeType="success">
                         {intl.formatMessage(messages.mediaServerUser, {
                           mediaServerName: 'Emby',
@@ -247,7 +284,9 @@ const UserGeneralSettings = () => {
                       name="displayName"
                       type="text"
                       placeholder={
-                        user?.plexUsername ? user.plexUsername : user?.email
+                        user?.username ||
+                        user?.jellyfinUsername ||
+                        user?.plexUsername
                       }
                     />
                   </div>
@@ -272,6 +311,7 @@ const UserGeneralSettings = () => {
                       name="email"
                       type="text"
                       placeholder="example@domain.com"
+                      disabled={user?.plexUsername}
                       className={
                         user?.warnings.find((w) => w === 'userEmailRequired')
                           ? 'border-2 border-red-400 focus:border-blue-600'

@@ -1,3 +1,5 @@
+import RadarrAPI from '@server/api/servarr/radarr';
+import SonarrAPI from '@server/api/servarr/sonarr';
 import {
   MediaRequestStatus,
   MediaStatus,
@@ -6,6 +8,7 @@ import {
 import { getRepository } from '@server/datasource';
 import Media from '@server/entity/Media';
 import {
+  BlacklistedMediaError,
   DuplicateMediaRequestError,
   MediaRequest,
   NoSeasonsAvailableError,
@@ -19,6 +22,7 @@ import type {
   RequestResultsResponse,
 } from '@server/interfaces/api/requestInterfaces';
 import { Permission } from '@server/lib/permissions';
+import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
 import { Router } from 'express';
@@ -143,6 +147,62 @@ requestRoutes.get<Record<string, unknown>, RequestResultsResponse>(
         .skip(skip)
         .getManyAndCount();
 
+      const settings = getSettings();
+
+      // get all quality profiles for every configured sonarr server
+      const sonarrServers = await Promise.all(
+        settings.sonarr.map(async (sonarrSetting) => {
+          const sonarr = new SonarrAPI({
+            apiKey: sonarrSetting.apiKey,
+            url: SonarrAPI.buildUrl(sonarrSetting, '/api/v3'),
+          });
+
+          return {
+            id: sonarrSetting.id,
+            profiles: await sonarr.getProfiles(),
+          };
+        })
+      );
+
+      // get all quality profiles for every configured radarr server
+      const radarrServers = await Promise.all(
+        settings.radarr.map(async (radarrSetting) => {
+          const radarr = new RadarrAPI({
+            apiKey: radarrSetting.apiKey,
+            url: RadarrAPI.buildUrl(radarrSetting, '/api/v3'),
+          });
+
+          return {
+            id: radarrSetting.id,
+            profiles: await radarr.getProfiles(),
+          };
+        })
+      );
+
+      // add profile names to the media requests, with undefined if not found
+      const requestsWithProfileNames = requests.map((r) => {
+        switch (r.type) {
+          case MediaType.MOVIE: {
+            const profileName = radarrServers
+              .find((serverr) => serverr.id === r.serverId)
+              ?.profiles.find((profile) => profile.id === r.profileId)?.name;
+
+            return {
+              ...r,
+              profileName,
+            };
+          }
+          case MediaType.TV: {
+            return {
+              ...r,
+              profileName: sonarrServers
+                .find((serverr) => serverr.id === r.serverId)
+                ?.profiles.find((profile) => profile.id === r.profileId)?.name,
+            };
+          }
+        }
+      });
+
       return res.status(200).json({
         pageInfo: {
           pages: Math.ceil(requestCount / pageSize),
@@ -150,7 +210,7 @@ requestRoutes.get<Record<string, unknown>, RequestResultsResponse>(
           results: requestCount,
           page: Math.ceil(skip / pageSize) + 1,
         },
-        results: requests,
+        results: requestsWithProfileNames,
       });
     } catch (e) {
       next({ status: 500, message: e.message });
@@ -184,6 +244,8 @@ requestRoutes.post<never, MediaRequest, MediaRequestBody>(
           return next({ status: 409, message: error.message });
         case NoSeasonsAvailableError:
           return next({ status: 202, message: error.message });
+        case BlacklistedMediaError:
+          return next({ status: 403, message: error.message });
         default:
           return next({ status: 500, message: error.message });
       }

@@ -12,6 +12,7 @@ import type { Library } from '@server/lib/settings';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import AsyncLock from '@server/utils/asyncLock';
+import { getHostname } from '@server/utils/getHostname';
 import { randomUUID as uuid } from 'crypto';
 import { uniqWith } from 'lodash';
 
@@ -83,13 +84,17 @@ class JellyfinScanner {
       }
 
       const has4k = metadata.MediaSources?.some((MediaSource) => {
-        return MediaSource.MediaStreams.some((MediaStream) => {
+        return MediaSource.MediaStreams.filter(
+          (MediaStream) => MediaStream.Type === 'Video'
+        ).some((MediaStream) => {
           return (MediaStream.Width ?? 0) > 2000;
         });
       });
 
       const hasOtherResolution = metadata.MediaSources?.some((MediaSource) => {
-        return MediaSource.MediaStreams.some((MediaStream) => {
+        return MediaSource.MediaStreams.filter(
+          (MediaStream) => MediaStream.Type === 'Video'
+        ).some((MediaStream) => {
           return (MediaStream.Width ?? 0) <= 2000;
         });
       });
@@ -562,7 +567,10 @@ class JellyfinScanner {
   public async run(): Promise<void> {
     const settings = getSettings();
 
-    if (settings.main.mediaServerType != MediaServerType.JELLYFIN) {
+    if (
+      settings.main.mediaServerType != MediaServerType.JELLYFIN &&
+      settings.main.mediaServerType != MediaServerType.EMBY
+    ) {
       return;
     }
 
@@ -577,12 +585,7 @@ class JellyfinScanner {
       const userRepository = getRepository(User);
       const admin = await userRepository.findOne({
         where: { id: 1 },
-        select: [
-          'id',
-          'jellyfinAuthToken',
-          'jellyfinUserId',
-          'jellyfinDeviceId',
-        ],
+        select: ['id', 'jellyfinUserId', 'jellyfinDeviceId'],
         order: { id: 'ASC' },
       });
 
@@ -591,8 +594,8 @@ class JellyfinScanner {
       }
 
       this.jfClient = new JellyfinAPI(
-        settings.jellyfin.hostname ?? '',
-        admin.jellyfinAuthToken,
+        getHostname(),
+        settings.jellyfin.apiKey,
         admin.jellyfinDeviceId
       );
 

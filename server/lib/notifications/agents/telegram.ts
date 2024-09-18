@@ -5,7 +5,6 @@ import { User } from '@server/entity/User';
 import type { NotificationAgentTelegram } from '@server/lib/settings';
 import { getSettings, NotificationAgentKey } from '@server/lib/settings';
 import logger from '@server/logger';
-import axios from 'axios';
 import {
   hasNotificationType,
   Notification,
@@ -175,18 +174,34 @@ class TelegramAgent
       });
 
       try {
-        await axios.post(endpoint, {
-          ...notificationPayload,
-          chat_id: settings.options.chatId,
-          disable_notification: !!settings.options.sendSilently,
-        } as TelegramMessagePayload | TelegramPhotoPayload);
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...notificationPayload,
+            chat_id: settings.options.chatId,
+            disable_notification: !!settings.options.sendSilently,
+          } as TelegramMessagePayload | TelegramPhotoPayload),
+        });
+        if (!response.ok) {
+          throw new Error(response.statusText, { cause: response });
+        }
       } catch (e) {
+        let errorData;
+        try {
+          errorData = await e.cause?.text();
+          errorData = JSON.parse(errorData);
+        } catch {
+          /* empty */
+        }
         logger.error('Error sending Telegram notification', {
           label: 'Notifications',
           type: Notification[type],
           subject: payload.subject,
           errorMessage: e.message,
-          response: e.response?.data,
+          response: errorData,
         });
 
         return false;
@@ -210,20 +225,36 @@ class TelegramAgent
         });
 
         try {
-          await axios.post(endpoint, {
-            ...notificationPayload,
-            chat_id: payload.notifyUser.settings.telegramChatId,
-            disable_notification:
-              !!payload.notifyUser.settings.telegramSendSilently,
-          } as TelegramMessagePayload | TelegramPhotoPayload);
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              ...notificationPayload,
+              chat_id: payload.notifyUser.settings.telegramChatId,
+              disable_notification:
+                !!payload.notifyUser.settings.telegramSendSilently,
+            } as TelegramMessagePayload | TelegramPhotoPayload),
+          });
+          if (!response.ok) {
+            throw new Error(response.statusText, { cause: response });
+          }
         } catch (e) {
+          let errorData;
+          try {
+            errorData = await e.cause?.text();
+            errorData = JSON.parse(errorData);
+          } catch {
+            /* empty */
+          }
           logger.error('Error sending Telegram notification', {
             label: 'Notifications',
             recipient: payload.notifyUser.displayName,
             type: Notification[type],
             subject: payload.subject,
             errorMessage: e.message,
-            response: e.response?.data,
+            response: errorData,
           });
 
           return false;
@@ -257,19 +288,35 @@ class TelegramAgent
               });
 
               try {
-                await axios.post(endpoint, {
-                  ...notificationPayload,
-                  chat_id: user.settings.telegramChatId,
-                  disable_notification: !!user.settings?.telegramSendSilently,
-                } as TelegramMessagePayload | TelegramPhotoPayload);
+                const response = await fetch(endpoint, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    ...notificationPayload,
+                    chat_id: user.settings.telegramChatId,
+                    disable_notification: !!user.settings?.telegramSendSilently,
+                  } as TelegramMessagePayload | TelegramPhotoPayload),
+                });
+                if (!response.ok) {
+                  throw new Error(response.statusText, { cause: response });
+                }
               } catch (e) {
+                let errorData;
+                try {
+                  errorData = await e.cause?.text();
+                  errorData = JSON.parse(errorData);
+                } catch {
+                  /* empty */
+                }
                 logger.error('Error sending Telegram notification', {
                   label: 'Notifications',
                   recipient: user.displayName,
                   type: Notification[type],
                   subject: payload.subject,
                   errorMessage: e.message,
-                  response: e.response?.data,
+                  response: errorData,
                 });
 
                 return false;

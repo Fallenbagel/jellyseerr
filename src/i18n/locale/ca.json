@@ -1240,5 +1240,12 @@
   "components.StatusBadge.seasonepisodenumber": "S{seasonNumber}E{episodeNumber}",
   "components.Settings.SettingsJobsCache.availability-sync": "Sincronització de disponibilitat de contingut",
   "components.Discover.tmdbmoviestreamingservices": "Serveis de transmissió de pel·lícules TMDB",
-  "components.Discover.tmdbtvstreamingservices": "Serveis de transmissió de TV TMDB"
+  "components.Discover.tmdbtvstreamingservices": "Serveis de transmissió de TV TMDB",
+  "components.Layout.UserWarnings.emailRequired": "És requereix un n correu electrònic.",
+  "components.Layout.UserWarnings.passwordRequired": "Es requereix una contrasenya.",
+  "components.Login.description": "Com que és la primera vegada que inicieu sessió a {applicationName}, es necessita afegir un correu electrònic vàlid.",
+  "components.Discover.FilterSlideover.tmdbuservotecount": "Recompte de vots d'usuaris de TMDB",
+  "components.Discover.FilterSlideover.voteCount": "Nombre de vots entre {minValue} i {maxValue}",
+  "components.Layout.UserWarnings.emailInvalid": "El correu electrònic no és vàlid.",
+  "components.Login.credentialerror": "El nom d'usuari o la contrasenya són incorrectes."
 }

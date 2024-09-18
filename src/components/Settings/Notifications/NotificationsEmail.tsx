@@ -3,16 +3,16 @@ import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import SensitiveInput from '@app/components/Common/SensitiveInput';
 import SettingsBadge from '@app/components/Settings/SettingsBadge';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon, BeakerIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import { useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR, { mutate } from 'swr';
 import * as Yup from 'yup';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Settings.Notifications', {
   validationSmtpHostRequired: 'You must provide a valid hostname or IP address',
   validationSmtpPortRequired: 'You must provide a valid port number',
   agentenabled: 'Enable Agent',
@@ -147,24 +147,31 @@ const NotificationsEmail = () => {
       validationSchema={NotificationsEmailSchema}
       onSubmit={async (values) => {
         try {
-          await axios.post('/api/v1/settings/notifications/email', {
-            enabled: values.enabled,
-            options: {
-              userEmailRequired: values.userEmailRequired,
-              emailFrom: values.emailFrom,
-              smtpHost: values.smtpHost,
-              smtpPort: Number(values.smtpPort),
-              secure: values.encryption === 'implicit',
-              ignoreTls: values.encryption === 'none',
-              requireTls: values.encryption === 'opportunistic',
-              authUser: values.authUser,
-              authPass: values.authPass,
-              allowSelfSigned: values.allowSelfSigned,
-              senderName: values.senderName,
-              pgpPrivateKey: values.pgpPrivateKey,
-              pgpPassword: values.pgpPassword,
+          const res = await fetch('/api/v1/settings/notifications/email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
             },
+            body: JSON.stringify({
+              enabled: values.enabled,
+              options: {
+                userEmailRequired: values.userEmailRequired,
+                emailFrom: values.emailFrom,
+                smtpHost: values.smtpHost,
+                smtpPort: Number(values.smtpPort),
+                secure: values.encryption === 'implicit',
+                ignoreTls: values.encryption === 'none',
+                requireTls: values.encryption === 'opportunistic',
+                authUser: values.authUser,
+                authPass: values.authPass,
+                allowSelfSigned: values.allowSelfSigned,
+                senderName: values.senderName,
+                pgpPrivateKey: values.pgpPrivateKey,
+                pgpPassword: values.pgpPassword,
+              },
+            }),
           });
+          if (!res.ok) throw new Error();
           mutate('/api/v1/settings/public');
 
           addToast(intl.formatMessage(messages.emailsettingssaved), {
@@ -196,22 +203,32 @@ const NotificationsEmail = () => {
                 toastId = id;
               }
             );
-            await axios.post('/api/v1/settings/notifications/email/test', {
-              enabled: true,
-              options: {
-                emailFrom: values.emailFrom,
-                smtpHost: values.smtpHost,
-                smtpPort: Number(values.smtpPort),
-                secure: values.encryption === 'implicit',
-                ignoreTls: values.encryption === 'none',
-                requireTls: values.encryption === 'opportunistic',
-                authUser: values.authUser,
-                authPass: values.authPass,
-                senderName: values.senderName,
-                pgpPrivateKey: values.pgpPrivateKey,
-                pgpPassword: values.pgpPassword,
-              },
-            });
+            const res = await fetch(
+              '/api/v1/settings/notifications/email/test',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  enabled: true,
+                  options: {
+                    emailFrom: values.emailFrom,
+                    smtpHost: values.smtpHost,
+                    smtpPort: Number(values.smtpPort),
+                    secure: values.encryption === 'implicit',
+                    ignoreTls: values.encryption === 'none',
+                    requireTls: values.encryption === 'opportunistic',
+                    authUser: values.authUser,
+                    authPass: values.authPass,
+                    senderName: values.senderName,
+                    pgpPrivateKey: values.pgpPrivateKey,
+                    pgpPassword: values.pgpPassword,
+                  },
+                }),
+              }
+            );
+            if (!res.ok) throw new Error();
 
             if (toastId) {
               removeToast(toastId);

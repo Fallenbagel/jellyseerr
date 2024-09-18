@@ -32,9 +32,16 @@ import * as OpenApiValidator from 'express-openapi-validator';
 import type { Store } from 'express-session';
 import session from 'express-session';
 import next from 'next';
+import dns from 'node:dns';
+import net from 'node:net';
 import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
+
+if (process.env.forceIpv4First === 'true') {
+  dns.setDefaultResultOrder('ipv4first');
+  net.setDefaultAutoSelectFamily(false);
+}
 
 const API_SPEC_PATH = path.join(__dirname, '../overseerr-api.yml');
 
@@ -56,7 +63,7 @@ app
     }
 
     // Load Settings
-    const settings = getSettings().load();
+    const settings = await getSettings().load();
     restartFlag.initializeSettings(settings.main);
 
     // Migrate library types
@@ -121,7 +128,7 @@ app
       try {
         const descriptor = Object.getOwnPropertyDescriptor(req, 'ip');
         if (descriptor?.writable === true) {
-          req.ip = getClientIp(req) ?? '';
+          (req as any).ip = getClientIp(req) ?? '';
         }
       } catch (e) {
         logger.error('Failed to attach the ip to the request', {

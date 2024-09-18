@@ -5,7 +5,6 @@ import { User } from '@server/entity/User';
 import type { NotificationAgentPushover } from '@server/lib/settings';
 import { getSettings, NotificationAgentKey } from '@server/lib/settings';
 import logger from '@server/logger';
-import axios from 'axios';
 import {
   hasNotificationType,
   Notification,
@@ -14,7 +13,12 @@ import {
 import type { NotificationAgent, NotificationPayload } from './agent';
 import { BaseAgent } from './agent';
 
-interface PushoverPayload {
+interface PushoverImagePayload {
+  attachment_base64: string;
+  attachment_type: string;
+}
+
+interface PushoverPayload extends PushoverImagePayload {
   token: string;
   user: string;
   title: string;
@@ -43,10 +47,46 @@ class PushoverAgent
     return true;
   }
 
-  private getNotificationPayload(
+  private async getImagePayload(
+    imageUrl: string
+  ): Promise<Partial<PushoverImagePayload>> {
+    try {
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error(response.statusText, { cause: response });
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      const base64 = Buffer.from(arrayBuffer).toString('base64');
+      const contentType = (
+        response.headers.get('Content-Type') ||
+        response.headers.get('content-type')
+      )?.toString();
+
+      return {
+        attachment_base64: base64,
+        attachment_type: contentType,
+      };
+    } catch (e) {
+      let errorData;
+      try {
+        errorData = await e.cause?.text();
+        errorData = JSON.parse(errorData);
+      } catch {
+        /* empty */
+      }
+      logger.error('Error getting image payload', {
+        label: 'Notifications',
+        errorMessage: e.message,
+        response: errorData,
+      });
+      return {};
+    }
+  }
+
+  private async getNotificationPayload(
     type: Notification,
     payload: NotificationPayload
-  ): Partial<PushoverPayload> {
+  ): Promise<Partial<PushoverPayload>> {
     const { applicationUrl, applicationTitle } = getSettings().main;
 
     const title = payload.event ?? payload.subject;
@@ -122,6 +162,16 @@ class PushoverAgent
       ? `View ${payload.issue ? 'Issue' : 'Media'} in ${applicationTitle}`
       : undefined;
 
+    let attachment_base64;
+    let attachment_type;
+    if (payload.image) {
+      const imagePayload = await this.getImagePayload(payload.image);
+      if (imagePayload.attachment_base64 && imagePayload.attachment_type) {
+        attachment_base64 = imagePayload.attachment_base64;
+        attachment_type = imagePayload.attachment_type;
+      }
+    }
+
     return {
       title,
       message,
@@ -129,6 +179,8 @@ class PushoverAgent
       url_title,
       priority,
       html: 1,
+      attachment_base64,
+      attachment_type,
     };
   }
 
@@ -138,7 +190,10 @@ class PushoverAgent
   ): Promise<boolean> {
     const settings = this.getSettings();
     const endpoint = 'https://api.pushover.net/1/messages.json';
-    const notificationPayload = this.getNotificationPayload(type, payload);
+    const notificationPayload = await this.getNotificationPayload(
+      type,
+      payload
+    );
 
     // Send system notification
     if (
@@ -155,19 +210,35 @@ class PushoverAgent
       });
 
       try {
-        await axios.post(endpoint, {
-          ...notificationPayload,
-          token: settings.options.accessToken,
-          user: settings.options.userToken,
-          sound: settings.options.sound,
-        } as PushoverPayload);
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...notificationPayload,
+            token: settings.options.accessToken,
+            user: settings.options.userToken,
+            sound: settings.options.sound,
+          } as PushoverPayload),
+        });
+        if (!response.ok) {
+          throw new Error(response.statusText, { cause: response });
+        }
       } catch (e) {
+        let errorData;
+        try {
+          errorData = await e.cause?.text();
+          errorData = JSON.parse(errorData);
+        } catch {
+          /* empty */
+        }
         logger.error('Error sending Pushover notification', {
           label: 'Notifications',
           type: Notification[type],
           subject: payload.subject,
           errorMessage: e.message,
-          response: e.response?.data,
+          response: errorData,
         });
 
         return false;
@@ -195,20 +266,36 @@ class PushoverAgent
         });
 
         try {
-          await axios.post(endpoint, {
-            ...notificationPayload,
-            token: payload.notifyUser.settings.pushoverApplicationToken,
-            user: payload.notifyUser.settings.pushoverUserKey,
-            sound: payload.notifyUser.settings.pushoverSound,
-          } as PushoverPayload);
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              ...notificationPayload,
+              token: payload.notifyUser.settings.pushoverApplicationToken,
+              user: payload.notifyUser.settings.pushoverUserKey,
+              sound: payload.notifyUser.settings.pushoverSound,
+            } as PushoverPayload),
+          });
+          if (!response.ok) {
+            throw new Error(response.statusText, { cause: response });
+          }
         } catch (e) {
+          let errorData;
+          try {
+            errorData = await e.cause?.text();
+            errorData = JSON.parse(errorData);
+          } catch {
+            /* empty */
+          }
           logger.error('Error sending Pushover notification', {
             label: 'Notifications',
             recipient: payload.notifyUser.displayName,
             type: Notification[type],
             subject: payload.subject,
             errorMessage: e.message,
-            response: e.response?.data,
+            response: errorData,
           });
 
           return false;
@@ -245,19 +332,35 @@ class PushoverAgent
               });
 
               try {
-                await axios.post(endpoint, {
-                  ...notificationPayload,
-                  token: user.settings.pushoverApplicationToken,
-                  user: user.settings.pushoverUserKey,
-                } as PushoverPayload);
+                const response = await fetch(endpoint, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    ...notificationPayload,
+                    token: user.settings.pushoverApplicationToken,
+                    user: user.settings.pushoverUserKey,
+                  } as PushoverPayload),
+                });
+                if (!response.ok) {
+                  throw new Error(response.statusText, { cause: response });
+                }
               } catch (e) {
+                let errorData;
+                try {
+                  errorData = await e.cause?.text();
+                  errorData = JSON.parse(errorData);
+                } catch {
+                  /* empty */
+                }
                 logger.error('Error sending Pushover notification', {
                   label: 'Notifications',
                   recipient: user.displayName,
                   type: Notification[type],
                   subject: payload.subject,
                   errorMessage: e.message,
-                  response: e.response?.data,
+                  response: errorData,
                 });
 
                 return false;
