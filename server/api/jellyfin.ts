@@ -20,6 +20,15 @@ export interface JellyfinUserResponse {
   PrimaryImageTag?: string;
 }
 
+export interface JellyfinDeviceResponse {
+  Id: string;
+  DeviceName: string;
+}
+
+export interface JellyfinSessionResponse {
+  Devices: JellyfinDeviceResponse[];
+}
+
 export interface JellyfinLoginResponse {
   User: JellyfinUserResponse;
   AccessToken: string;
@@ -398,6 +407,46 @@ class JellyfinAPI extends ExternalAPI {
         { label: 'Jellyfin API' }
       );
 
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
+    }
+  }
+
+  public async playOnDevice(
+    deviceParam: string,
+    idParam: string
+  ): Promise<string> {
+    try {
+      // Get the list of controllables
+      const controllableSessions = await this.get<JellyfinDeviceResponse[]>(
+        `/Sessions?ControllableByUserId=${this.userId}`
+      );
+      const devices = controllableSessions.map((session) => ({
+        id: session.Id,
+        deviceName: session.DeviceName,
+      }));
+
+      const deviceSessionId = devices.filter((device) => {
+        return device.deviceName == deviceParam;
+      })[0].id;
+
+      await this.post<JellyfinDeviceResponse[]>(
+        `/Sessions/${deviceSessionId}/Playing?ItemIds=${Number(
+          idParam
+        )}&PlayCommand=PlayNow&StartPositionTicks=0`
+      );
+
+      return 'OK';
+    } catch (e) {
+      if (availabilitySync.running) {
+        if (e.cause?.status === 500) {
+          return 'ERROR';
+        }
+      }
+
+      logger.error(
+        `Something went wrong while getting library content from the Jellyfin server: ${e.message}`,
+        { label: 'Jellyfin API' }
+      );
       throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
     }
   }
