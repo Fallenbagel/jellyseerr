@@ -5782,6 +5782,30 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/MovieResult'
+  /movie/{movieId}/play/{deviceName}:
+    get:
+      summary: Plays a given movie on a device with a given name.
+      description: Starts playback in Jellyfin / Emby API
+      tags:
+        - movies
+      parameters:
+        - in: path
+          name: movieId
+          required: true
+          schema:
+            type: number
+            example: 337401
+        - in: path
+          name: deviceName
+          required: true
+          schema:
+            type: string
+            example: Dicey
+      responses:
+        '200':
+          description: Playback started
+        '500':
+          description: Playback failed
   /movie/{movieId}/ratings:
     get:
       summary: Get movie ratings
