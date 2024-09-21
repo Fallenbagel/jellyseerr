@@ -1,8 +1,10 @@
+import Button from '@app/components/Common/Button';
 import { menuMessages } from '@app/components/Layout/Sidebar';
 import useClickOutside from '@app/hooks/useClickOutside';
 import { Permission, useUser } from '@app/hooks/useUser';
 import { Transition } from '@headlessui/react';
 import {
+  ArrowLeftIcon,
   ClockIcon,
   CogIcon,
   EllipsisHorizontalIcon,
@@ -139,6 +141,13 @@ const MobileMenu = () => {
         leaveTo="opacity-0 translate-y-0"
         className="absolute top-0 left-0 right-0 flex w-full -translate-y-full flex-col space-y-6 border-t border-gray-600 bg-gray-900 bg-opacity-90 px-6 py-6 font-semibold text-gray-100 backdrop-blur"
       >
+        <Button
+          className="flex items-center space-x-2"
+          onClick={() => router.back()} // Use router.back() here
+          aria-label="Go back"
+        >
+          <ArrowLeftIcon className="mr-3 h-6 w-6" />
+        </Button>
         {filteredLinks.map((link) => {
           const isActive = router.pathname.match(link.activeRegExp);
           return (
@@ -167,6 +176,13 @@ const MobileMenu = () => {
       </Transition>
       <div className="padding-bottom-safe border-t border-gray-600 bg-gray-800 bg-opacity-90 backdrop-blur">
         <div className="flex h-full items-center justify-between px-6 py-4 text-gray-100">
+          <Button
+            className="flex items-center space-x-2"
+            onClick={() => router.back()} // Use router.back() here
+            aria-label="Go back"
+          >
+            <ArrowLeftIcon className="mr-3 h-6 w-6" />
+          </Button>
           {filteredLinks
             .slice(0, filteredLinks.length === 5 ? 5 : 4)
             .map((link) => {
