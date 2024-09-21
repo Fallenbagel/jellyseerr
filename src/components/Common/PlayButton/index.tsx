@@ -5,7 +5,7 @@ interface PlayButtonProps {
   links: PlayButtonLink[];
   device?: string;
   className?: string;
-  movieId?: number;
+  movieId?: string;
 }
 
 export interface PlayButtonLink {
