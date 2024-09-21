@@ -2,7 +2,6 @@ import Layout from '@app/components/Layout';
 import LoadingBar from '@app/components/LoadingBar';
 import PWAHeader from '@app/components/PWAHeader';
 import ServiceWorkerSetup from '@app/components/ServiceWorkerSetup';
-import StatusChecker from '@app/components/StatusChecker';
 import Toast from '@app/components/Toast';
 import ToastContainer from '@app/components/ToastContainer';
 import { InteractionProvider } from '@app/context/InteractionContext';
@@ -168,7 +167,6 @@ const CoreApp: Omit<NextAppComponentType, 'origGetInitialProps'> = ({
                     applicationTitle={currentSettings.applicationTitle}
                   />
                 </Head>
-                <StatusChecker />
                 <ServiceWorkerSetup />
                 <UserContext initialUser={user}>{component}</UserContext>
               </ToastProvider>
