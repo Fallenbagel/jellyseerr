@@ -17,11 +17,13 @@ import { MediaServerType } from '@server/constants/server';
 import type { PublicSettingsResponse } from '@server/interfaces/api/settingsInterfaces';
 import type { AppInitialProps, AppProps } from 'next/app';
 import App from 'next/app';
+import { Inter } from 'next/font/google';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import { IntlProvider } from 'react-intl';
 import { ToastProvider } from 'react-toast-notifications';
 import { SWRConfig } from 'swr';
+const inter = Inter({ subsets: ['latin'] });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const loadLocaleData = (locale: AvailableLocale): Promise<any> => {
@@ -136,47 +138,49 @@ const CoreApp: Omit<NextAppComponentType, 'origGetInitialProps'> = ({
   }
 
   return (
-    <SWRConfig
-      value={{
-        fetcher: async (resource, init) => {
-          const res = await fetch(resource, init);
-          if (!res.ok) throw new Error();
-          return await res.json();
-        },
-        fallback: {
-          '/api/v1/auth/me': user,
-        },
-      }}
-    >
-      <LanguageContext.Provider value={{ locale: currentLocale, setLocale }}>
-        <IntlProvider
-          locale={currentLocale}
-          defaultLocale="en"
-          messages={loadedMessages}
-        >
-          <LoadingBar />
-          <SettingsProvider currentSettings={currentSettings}>
-            <InteractionProvider>
-              <ToastProvider components={{ Toast, ToastContainer }}>
-                <Head>
-                  <title>{currentSettings.applicationTitle}</title>
-                  <meta
-                    name="viewport"
-                    content="initial-scale=1, viewport-fit=cover, width=device-width"
-                  ></meta>
-                  <PWAHeader
-                    applicationTitle={currentSettings.applicationTitle}
-                  />
-                </Head>
-                <StatusChecker />
-                <ServiceWorkerSetup />
-                <UserContext initialUser={user}>{component}</UserContext>
-              </ToastProvider>
-            </InteractionProvider>
-          </SettingsProvider>
-        </IntlProvider>
-      </LanguageContext.Provider>
-    </SWRConfig>
+    <main className={inter.className}>
+      <SWRConfig
+        value={{
+          fetcher: async (resource, init) => {
+            const res = await fetch(resource, init);
+            if (!res.ok) throw new Error();
+            return await res.json();
+          },
+          fallback: {
+            '/api/v1/auth/me': user,
+          },
+        }}
+      >
+        <LanguageContext.Provider value={{ locale: currentLocale, setLocale }}>
+          <IntlProvider
+            locale={currentLocale}
+            defaultLocale="en"
+            messages={loadedMessages}
+          >
+            <LoadingBar />
+            <SettingsProvider currentSettings={currentSettings}>
+              <InteractionProvider>
+                <ToastProvider components={{ Toast, ToastContainer }}>
+                  <Head>
+                    <title>{currentSettings.applicationTitle}</title>
+                    <meta
+                      name="viewport"
+                      content="initial-scale=1, viewport-fit=cover, width=device-width"
+                    ></meta>
+                    <PWAHeader
+                      applicationTitle={currentSettings.applicationTitle}
+                    />
+                  </Head>
+                  <StatusChecker />
+                  <ServiceWorkerSetup />
+                  <UserContext initialUser={user}>{component}</UserContext>
+                </ToastProvider>
+              </InteractionProvider>
+            </SettingsProvider>
+          </IntlProvider>
+        </LanguageContext.Provider>
+      </SWRConfig>
+    </main>
   );
 };
 
