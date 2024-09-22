@@ -53,6 +53,10 @@
 }
 
 @layer components {
+  *:disabled {
+    opacity: 0.7;
+  }
+
   .searchbar {
     padding-top: env(safe-area-inset-top);
     height: calc(4rem + env(safe-area-inset-top));

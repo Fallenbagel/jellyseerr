@@ -44,6 +44,9 @@ const messages = defineMessages('components.Settings.SettingsMain', {
   csrfProtectionTip: 'Set external API access to read-only (requires HTTPS)',
   csrfProtectionHoverTip:
     'Do NOT enable this setting unless you understand what you are doing!',
+  cspFrameAncestorDomains: 'Frame-Ancestor Domains',
+  cspFrameAncestorDomainsTip:
+    'Domains to allow embedding Jellyseer as iframe, object or embed. Incompatible with CSRF-Protection',
   cacheImages: 'Enable Image Caching',
   cacheImagesTip:
     'Cache externally sourced images (requires a significant amount of disk space)',
@@ -130,6 +133,7 @@ const SettingsMain = () => {
             applicationTitle: data?.applicationTitle,
             applicationUrl: data?.applicationUrl,
             csrfProtection: data?.csrfProtection,
+            cspFrameAncestorDomains: data?.cspFrameAncestorDomains,
             hideAvailable: data?.hideAvailable,
             locale: data?.locale ?? 'en',
             region: data?.region,
@@ -151,6 +155,7 @@ const SettingsMain = () => {
                   applicationTitle: values.applicationTitle,
                   applicationUrl: values.applicationUrl,
                   csrfProtection: values.csrfProtection,
+                  cspFrameAncestorDomains: values.cspFrameAncestorDomains,
                   hideAvailable: values.hideAvailable,
                   locale: values.locale,
                   region: values.region,
@@ -316,6 +321,31 @@ const SettingsMain = () => {
                         }}
                       />
                     </Tooltip>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label
+                    htmlFor="cspFrameAncestorDomains"
+                    className="text-label"
+                  >
+                    <span className="mr-2">
+                      {intl.formatMessage(messages.cspFrameAncestorDomains)}
+                    </span>
+                    <SettingsBadge badgeType="advanced" className="mr-2" />
+                    <SettingsBadge badgeType="restartRequired" />
+                    <span className="label-tip">
+                      {intl.formatMessage(messages.cspFrameAncestorDomainsTip)}
+                    </span>
+                  </label>
+                  <div className="form-input-area">
+                    <div className="form-input-field">
+                      <Field
+                        id="cspFrameAncestorDomains"
+                        name="cspFrameAncestorDomains"
+                        type="text"
+                        disabled={values.csrfProtection}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="form-row">

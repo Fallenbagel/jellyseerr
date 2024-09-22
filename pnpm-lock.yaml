@@ -95,6 +95,9 @@ importers:
       gravatar-url:
         specifier: 3.1.0
         version: 3.1.0
+      helmet:
+        specifier: ^7.1.0
+        version: 7.1.0
       lodash:
         specifier: 4.17.21
         version: 4.17.21
@@ -5291,6 +5294,10 @@ packages:
   he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
+
+  helmet@7.1.0:
+    resolution: {integrity: sha512-g+HZqgfbpXdCkme/Cd/mZkV0aV3BZZZSugecH03kl38m/Kmdx8jKjBikpDj2cr+Iynv4KpYEviojNdTJActJAg==}
+    engines: {node: '>=16.0.0'}
 
   hermes-estree@0.19.1:
     resolution: {integrity: sha512-daLGV3Q2MKk8w4evNMKwS8zBE/rcpA800nu1Q5kM08IKijoSnPe9Uo1iIxzPKRkn95IxxsgBMPeYHt3VG4ej2g==}
@@ -15594,6 +15601,8 @@ snapshots:
   hast-util-whitespace@2.0.1: {}
 
   he@1.2.0: {}
+
+  helmet@7.1.0: {}
 
   hermes-estree@0.19.1: {}
 
