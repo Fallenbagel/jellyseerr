@@ -6,18 +6,18 @@ import LocalLogin from '@app/components/Login/LocalLogin';
 import PlexLoginButton from '@app/components/PlexLoginButton';
 import useSettings from '@app/hooks/useSettings';
 import { useUser } from '@app/hooks/useUser';
+import defineMessages from '@app/utils/defineMessages';
 import { Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { MediaServerType } from '@server/constants/server';
-import axios from 'axios';
-import getConfig from 'next/config';
 import { useRouter } from 'next/dist/client/router';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import useSWR from 'swr';
 import JellyfinLogin from './JellyfinLogin';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Login', {
   signin: 'Sign In',
   signinheader: 'Sign in to continue',
   signinwithplex: 'Use your Plex account',
@@ -33,7 +33,6 @@ const Login = () => {
   const { user, revalidate } = useUser();
   const router = useRouter();
   const settings = useSettings();
-  const { publicRuntimeConfig } = getConfig();
 
   // Effect that is triggered when the `authToken` comes back from the Plex OAuth
   // We take the token and attempt to sign in. If we get a success message, we will
@@ -42,13 +41,28 @@ const Login = () => {
     const login = async () => {
       setProcessing(true);
       try {
-        const response = await axios.post('/api/v1/auth/plex', { authToken });
+        const res = await fetch('/api/v1/auth/plex', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ authToken }),
+        });
+        if (!res.ok) throw new Error(res.statusText, { cause: res });
+        const data = await res.json();
 
-        if (response.data?.id) {
+        if (data?.id) {
           revalidate();
         }
       } catch (e) {
-        setError(e.response.data.message);
+        let errorData;
+        try {
+          errorData = await e.cause?.text();
+          errorData = JSON.parse(errorData);
+        } catch {
+          /* empty */
+        }
+        setError(errorData?.message);
         setAuthToken(undefined);
         setProcessing(false);
       }
@@ -72,6 +86,15 @@ const Login = () => {
     revalidateOnFocus: false,
   });
 
+  const mediaServerFormatValues = {
+    mediaServerName:
+      settings.currentSettings.mediaServerType === MediaServerType.JELLYFIN
+        ? 'Jellyfin'
+        : settings.currentSettings.mediaServerType === MediaServerType.EMBY
+        ? 'Emby'
+        : undefined,
+  };
+
   return (
     <div className="relative flex min-h-screen flex-col bg-gray-900 py-14">
       <PageTitle title={intl.formatMessage(messages.signin)} />
@@ -86,8 +109,10 @@ const Login = () => {
         <LanguagePicker />
       </div>
       <div className="relative z-40 mt-10 flex flex-col items-center px-4 sm:mx-auto sm:w-full sm:max-w-md">
-        <img src="/logo_stacked.svg" className="mb-10 max-w-full" alt="Logo" />
-        <h2 className="mt-2 text-center text-3xl font-extrabold leading-9 text-gray-100">
+        <div className="relative h-48 w-full max-w-full">
+          <Image src="/logo_stacked.svg" alt="Logo" fill />
+        </div>
+        <h2 className="mt-12 text-center text-3xl font-extrabold leading-9 text-gray-100">
           {intl.formatMessage(messages.signinheader)}
         </h2>
       </div>
@@ -136,12 +161,10 @@ const Login = () => {
                     {settings.currentSettings.mediaServerType ==
                     MediaServerType.PLEX
                       ? intl.formatMessage(messages.signinwithplex)
-                      : intl.formatMessage(messages.signinwithjellyfin, {
-                          mediaServerName:
-                            publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
-                              ? 'Emby'
-                              : 'Jellyfin',
-                        })}
+                      : intl.formatMessage(
+                          messages.signinwithjellyfin,
+                          mediaServerFormatValues
+                        )}
                   </button>
                   <AccordionContent isOpen={openIndexes.includes(0)}>
                     <div className="px-10 py-8">

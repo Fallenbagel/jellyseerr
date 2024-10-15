@@ -7,6 +7,7 @@ import {
   CogIcon,
   EllipsisHorizontalIcon,
   ExclamationTriangleIcon,
+  EyeSlashIcon,
   FilmIcon,
   SparklesIcon,
   TvIcon,
@@ -16,6 +17,7 @@ import {
   ClockIcon as FilledClockIcon,
   CogIcon as FilledCogIcon,
   ExclamationTriangleIcon as FilledExclamationTriangleIcon,
+  EyeSlashIcon as FilledEyeSlashIcon,
   FilmIcon as FilledFilmIcon,
   SparklesIcon as FilledSparklesIcon,
   TvIcon as FilledTvIcon,
@@ -85,6 +87,18 @@ const MobileMenu = () => {
       activeRegExp: /^\/requests/,
     },
     {
+      href: '/blacklist',
+      content: intl.formatMessage(menuMessages.blacklist),
+      svgIcon: <EyeSlashIcon className="h-6 w-6" />,
+      svgIconSelected: <FilledEyeSlashIcon className="h-6 w-6" />,
+      activeRegExp: /^\/blacklist/,
+      requiredPermission: [
+        Permission.MANAGE_BLACKLIST,
+        Permission.VIEW_BLACKLIST,
+      ],
+      permissionType: 'or',
+    },
+    {
       href: '/issues',
       content: intl.formatMessage(menuMessages.issues),
       svgIcon: <ExclamationTriangleIcon className="h-6 w-6" />,
@@ -142,25 +156,25 @@ const MobileMenu = () => {
         {filteredLinks.map((link) => {
           const isActive = router.pathname.match(link.activeRegExp);
           return (
-            <Link key={`mobile-menu-link-${link.href}`} href={link.href}>
-              <a
-                className={`flex items-center space-x-2 ${
-                  isActive ? 'text-indigo-500' : ''
-                }`}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setIsOpen(false);
-                  }
-                }}
-                onClick={() => setIsOpen(false)}
-                role="button"
-                tabIndex={0}
-              >
-                {cloneElement(isActive ? link.svgIconSelected : link.svgIcon, {
-                  className: 'h-5 w-5',
-                })}
-                <span>{link.content}</span>
-              </a>
+            <Link
+              key={`mobile-menu-link-${link.href}`}
+              href={link.href}
+              className={`flex items-center space-x-2 ${
+                isActive ? 'text-indigo-500' : ''
+              }`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setIsOpen(false);
+                }
+              }}
+              onClick={() => setIsOpen(false)}
+              role="button"
+              tabIndex={0}
+            >
+              {cloneElement(isActive ? link.svgIconSelected : link.svgIcon, {
+                className: 'h-5 w-5',
+              })}
+              <span>{link.content}</span>
             </Link>
           );
         })}
@@ -173,19 +187,19 @@ const MobileMenu = () => {
               const isActive =
                 router.pathname.match(link.activeRegExp) && !isOpen;
               return (
-                <Link key={`mobile-menu-link-${link.href}`} href={link.href}>
-                  <a
-                    className={`flex flex-col items-center space-y-1 ${
-                      isActive ? 'text-indigo-500' : ''
-                    }`}
-                  >
-                    {cloneElement(
-                      isActive ? link.svgIconSelected : link.svgIcon,
-                      {
-                        className: 'h-6 w-6',
-                      }
-                    )}
-                  </a>
+                <Link
+                  key={`mobile-menu-link-${link.href}`}
+                  href={link.href}
+                  className={`flex flex-col items-center space-y-1 ${
+                    isActive ? 'text-indigo-500' : ''
+                  }`}
+                >
+                  {cloneElement(
+                    isActive ? link.svgIconSelected : link.svgIcon,
+                    {
+                      className: 'h-6 w-6',
+                    }
+                  )}
                 </Link>
               );
             })}

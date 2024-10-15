@@ -1,6 +1,6 @@
-import { defineMessages } from 'react-intl';
+import defineMessages from '@app/utils/defineMessages';
 
-const globalMessages = defineMessages({
+const globalMessages = defineMessages('i18n', {
   available: 'Available',
   partiallyavailable: 'Partially Available',
   processing: 'Processing',
@@ -55,6 +55,16 @@ const globalMessages = defineMessages({
   noresults: 'No results.',
   open: 'Open',
   resolved: 'Resolved',
+  blacklist: 'Blacklist',
+  blacklisted: 'Blacklisted',
+  blacklistSuccess: '<strong>{title}</strong> was successfully blacklisted.',
+  blacklistError: 'Something went wrong try again.',
+  blacklistDuplicateError:
+    '<strong>{title}</strong> has already been blacklisted.',
+  removeFromBlacklistSuccess:
+    '<strong>{title}</strong> was successfully removed from the Blacklist.',
+  addToBlacklist: 'Add to Blacklist',
+  removefromBlacklist: 'Remove from Blacklist',
 });
 
 export default globalMessages;

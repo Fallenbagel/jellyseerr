@@ -3,16 +3,16 @@ import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import SensitiveInput from '@app/components/Common/SensitiveInput';
 import NotificationTypeSelector from '@app/components/NotificationTypeSelector';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon, BeakerIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import { useState } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 import * as Yup from 'yup';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Settings.Notifications', {
   agentenabled: 'Enable Agent',
   botUsername: 'Bot Username',
   botUsernameTip:
@@ -83,16 +83,23 @@ const NotificationsTelegram = () => {
       validationSchema={NotificationsTelegramSchema}
       onSubmit={async (values) => {
         try {
-          await axios.post('/api/v1/settings/notifications/telegram', {
-            enabled: values.enabled,
-            types: values.types,
-            options: {
-              botAPI: values.botAPI,
-              chatId: values.chatId,
-              sendSilently: values.sendSilently,
-              botUsername: values.botUsername,
+          const res = await fetch('/api/v1/settings/notifications/telegram', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
             },
+            body: JSON.stringify({
+              enabled: values.enabled,
+              types: values.types,
+              options: {
+                botAPI: values.botAPI,
+                chatId: values.chatId,
+                sendSilently: values.sendSilently,
+                botUsername: values.botUsername,
+              },
+            }),
           });
+          if (!res.ok) throw new Error();
 
           addToast(intl.formatMessage(messages.telegramsettingssaved), {
             appearance: 'success',
@@ -131,16 +138,26 @@ const NotificationsTelegram = () => {
                 toastId = id;
               }
             );
-            await axios.post('/api/v1/settings/notifications/telegram/test', {
-              enabled: true,
-              types: values.types,
-              options: {
-                botAPI: values.botAPI,
-                chatId: values.chatId,
-                sendSilently: values.sendSilently,
-                botUsername: values.botUsername,
-              },
-            });
+            const res = await fetch(
+              '/api/v1/settings/notifications/telegram/test',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  enabled: true,
+                  types: values.types,
+                  options: {
+                    botAPI: values.botAPI,
+                    chatId: values.chatId,
+                    sendSilently: values.sendSilently,
+                    botUsername: values.botUsername,
+                  },
+                }),
+              }
+            );
+            if (!res.ok) throw new Error();
 
             if (toastId) {
               removeToast(toastId);

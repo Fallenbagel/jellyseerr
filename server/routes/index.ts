@@ -23,6 +23,7 @@ import restartFlag from '@server/utils/restartFlag';
 import { isPerson } from '@server/utils/typeHelpers';
 import { Router } from 'express';
 import authRoutes from './auth';
+import blacklistRoutes from './blacklist';
 import collectionRoutes from './collection';
 import discoverRoutes, { createTmdbWithRegionLanguage } from './discover';
 import issueRoutes from './issue';
@@ -144,6 +145,7 @@ router.use('/search', isAuthenticated(), searchRoutes);
 router.use('/discover', isAuthenticated(), discoverRoutes);
 router.use('/request', isAuthenticated(), requestRoutes);
 router.use('/watchlist', isAuthenticated(), watchlistRoutes);
+router.use('/blacklist', isAuthenticated(), blacklistRoutes);
 router.use('/movie', isAuthenticated(), movieRoutes);
 router.use('/tv', isAuthenticated(), tvRoutes);
 router.use('/media', isAuthenticated(), mediaRoutes);
@@ -237,7 +239,7 @@ router.get('/genres/movie', isAuthenticated(), async (req, res, next) => {
 
   try {
     const genres = await tmdb.getMovieGenres({
-      language: req.locale ?? (req.query.language as string),
+      language: (req.query.language as string) ?? req.locale,
     });
 
     return res.status(200).json(genres);
@@ -258,7 +260,7 @@ router.get('/genres/tv', isAuthenticated(), async (req, res, next) => {
 
   try {
     const genres = await tmdb.getTvGenres({
-      language: req.locale ?? (req.query.language as string),
+      language: (req.query.language as string) ?? req.locale,
     });
 
     return res.status(200).json(genres);

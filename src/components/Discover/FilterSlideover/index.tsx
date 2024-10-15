@@ -8,6 +8,7 @@ import {
   CompanySelector,
   GenreSelector,
   KeywordSelector,
+  StatusSelector,
   WatchProviderSelector,
 } from '@app/components/Selector';
 import useSettings from '@app/hooks/useSettings';
@@ -15,11 +16,12 @@ import {
   useBatchUpdateQueryParams,
   useUpdateQueryParams,
 } from '@app/hooks/useUpdateQueryParams';
+import defineMessages from '@app/utils/defineMessages';
 import { XCircleIcon } from '@heroicons/react/24/outline';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import Datepicker from 'react-tailwindcss-datepicker-sct';
 
-const messages = defineMessages({
+const messages = defineMessages('components.Discover.FilterSlideover', {
   filters: 'Filters',
   activefilters:
     '{count, plural, one {# Active Filter} other {# Active Filters}}',
@@ -39,6 +41,7 @@ const messages = defineMessages({
   runtime: 'Runtime',
   streamingservices: 'Streaming Services',
   voteCount: 'Number of votes between {minValue} and {maxValue}',
+  status: 'Status',
 });
 
 type FilterSlideoverProps = {
@@ -149,6 +152,23 @@ const FilterSlideover = ({
             updateQueryParams('genre', value?.map((v) => v.value).join(','));
           }}
         />
+        {type === 'tv' && (
+          <>
+            <span className="text-lg font-semibold">
+              {intl.formatMessage(messages.status)}
+            </span>
+            <StatusSelector
+              defaultValue={currentFilters.status}
+              isMulti
+              onChange={(value) => {
+                updateQueryParams(
+                  'status',
+                  value?.map((v) => v.value).join('|')
+                );
+              }}
+            />
+          </>
+        )}
         <span className="text-lg font-semibold">
           {intl.formatMessage(messages.keywords)}
         </span>

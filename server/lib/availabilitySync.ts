@@ -16,6 +16,7 @@ import { User } from '@server/entity/User';
 import type { RadarrSettings, SonarrSettings } from '@server/lib/settings';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
+import { getHostname } from '@server/utils/getHostname';
 
 class AvailabilitySync {
   public running = false;
@@ -62,39 +63,55 @@ class AvailabilitySync {
       ) {
         admin = await userRepository.findOne({
           where: { id: 1 },
-          select: [
-            'id',
-            'jellyfinAuthToken',
-            'jellyfinUserId',
-            'jellyfinDeviceId',
-          ],
+          select: ['id', 'jellyfinUserId', 'jellyfinDeviceId'],
           order: { id: 'ASC' },
         });
       }
 
-      if (mediaServerType === MediaServerType.PLEX) {
-        if (admin && admin.plexToken) {
-          this.plexClient = new PlexAPI({ plexToken: admin.plexToken });
-        } else {
-          logger.error('Plex admin is not configured.');
-        }
-      } else if (
-        mediaServerType === MediaServerType.JELLYFIN ||
-        mediaServerType === MediaServerType.EMBY
-      ) {
-        if (admin) {
-          this.jellyfinClient = new JellyfinAPI(
-            settings.jellyfin.hostname ?? '',
-            admin.jellyfinAuthToken,
-            admin.jellyfinDeviceId
-          );
+      switch (mediaServerType) {
+        case MediaServerType.PLEX:
+          if (admin && admin.plexToken) {
+            this.plexClient = new PlexAPI({ plexToken: admin.plexToken });
+          } else {
+            logger.error('Plex admin is not configured.');
+          }
+          break;
+        case MediaServerType.JELLYFIN:
+        case MediaServerType.EMBY:
+          if (admin) {
+            this.jellyfinClient = new JellyfinAPI(
+              getHostname(),
+              settings.jellyfin.apiKey,
+              admin.jellyfinDeviceId
+            );
 
-          this.jellyfinClient.setUserId(admin.jellyfinUserId ?? '');
-        } else {
-          logger.error('Jellyfin admin is not configured.');
-        }
-      } else {
-        logger.error('An admin is not configured.');
+            this.jellyfinClient.setUserId(admin.jellyfinUserId ?? '');
+
+            try {
+              await this.jellyfinClient.getSystemInfo();
+            } catch (e) {
+              logger.error('Sync interrupted.', {
+                label: 'AvailabilitySync',
+                status: e.statusCode,
+                error: e.name,
+                errorMessage: e.errorCode,
+              });
+
+              this.running = false;
+              return;
+            }
+          } else {
+            logger.error('Jellyfin admin is not configured.');
+
+            this.running = false;
+            return;
+          }
+          break;
+        default:
+          logger.error('An admin is not configured.');
+
+          this.running = false;
+          return;
       }
 
       for await (const media of this.loadAvailableMediaPaginated(pageSize)) {

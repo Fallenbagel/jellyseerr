@@ -5,18 +5,19 @@ import DownloadBlock from '@app/components/DownloadBlock';
 import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
+import defineMessages from '@app/utils/defineMessages';
 import { MediaStatus } from '@server/constants/media';
 import { MediaServerType } from '@server/constants/server';
 import type { DownloadingItem } from '@server/lib/downloadtracker';
-import getConfig from 'next/config';
-import { defineMessages, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 
-const messages = defineMessages({
+const messages = defineMessages('components.StatusBadge', {
   status: '{status}',
   status4k: '4K {status}',
   playonplex: 'Play on {mediaServerName}',
   openinarr: 'Open in {arr}',
   managemedia: 'Manage {mediaType}',
+  seasonnumber: 'S{seasonNumber}',
   seasonepisodenumber: 'S{seasonNumber}E{episodeNumber}',
 });
 
@@ -46,7 +47,6 @@ const StatusBadge = ({
   const intl = useIntl();
   const { hasPermission } = useUser();
   const settings = useSettings();
-  const { publicRuntimeConfig } = getConfig();
 
   let mediaLink: string | undefined;
   let mediaLinkDescription: string | undefined;
@@ -84,7 +84,7 @@ const StatusBadge = ({
     mediaLink = plexUrl;
     mediaLinkDescription = intl.formatMessage(messages.playonplex, {
       mediaServerName:
-        publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+        settings.currentSettings.mediaServerType === MediaServerType.EMBY
           ? 'Emby'
           : settings.currentSettings.mediaServerType === MediaServerType.PLEX
           ? 'Plex'
@@ -106,22 +106,34 @@ const StatusBadge = ({
     }
   }
 
-  const tooltipContent = (
-    <ul>
-      {downloadItem.map((status, index) => (
-        <li
-          key={`dl-status-${status.externalId}-${index}`}
-          className="border-b border-gray-700 last:border-b-0"
-        >
-          <DownloadBlock
-            downloadItem={status}
-            title={Array.isArray(title) ? title[index] : title}
-            is4k={is4k}
-          />
-        </li>
-      ))}
-    </ul>
-  );
+  const tooltipContent =
+    mediaType === 'tv' &&
+    downloadItem.length > 1 &&
+    downloadItem.every(
+      (item) =>
+        item.downloadId && item.downloadId === downloadItem[0].downloadId
+    ) ? (
+      <DownloadBlock
+        downloadItem={downloadItem[0]}
+        title={Array.isArray(title) ? title[0] : title}
+        is4k={is4k}
+      />
+    ) : (
+      <ul>
+        {downloadItem.map((status, index) => (
+          <li
+            key={`dl-status-${status.externalId}-${index}`}
+            className="border-b border-gray-700 last:border-b-0"
+          >
+            <DownloadBlock
+              downloadItem={status}
+              title={Array.isArray(title) ? title[index] : title}
+              is4k={is4k}
+            />
+          </li>
+        ))}
+      </ul>
+    );
 
   const badgeDownloadProgress = (
     <div
@@ -176,14 +188,27 @@ const StatusBadge = ({
               </span>
               {inProgress && (
                 <>
-                  {mediaType === 'tv' && downloadItem[0].episode && (
-                    <span className="ml-1">
-                      {intl.formatMessage(messages.seasonepisodenumber, {
-                        seasonNumber: downloadItem[0].episode.seasonNumber,
-                        episodeNumber: downloadItem[0].episode.episodeNumber,
-                      })}
-                    </span>
-                  )}
+                  {mediaType === 'tv' &&
+                    downloadItem[0].episode &&
+                    (downloadItem.length > 1 &&
+                    downloadItem.every(
+                      (item) =>
+                        item.downloadId &&
+                        item.downloadId === downloadItem[0].downloadId
+                    ) ? (
+                      <span className="ml-1">
+                        {intl.formatMessage(messages.seasonnumber, {
+                          seasonNumber: downloadItem[0].episode.seasonNumber,
+                        })}
+                      </span>
+                    ) : (
+                      <span className="ml-1">
+                        {intl.formatMessage(messages.seasonepisodenumber, {
+                          seasonNumber: downloadItem[0].episode.seasonNumber,
+                          episodeNumber: downloadItem[0].episode.episodeNumber,
+                        })}
+                      </span>
+                    ))}
                   <Spinner className="ml-1 h-3 w-3" />
                 </>
               )}
@@ -229,14 +254,27 @@ const StatusBadge = ({
               </span>
               {inProgress && (
                 <>
-                  {mediaType === 'tv' && downloadItem[0].episode && (
-                    <span className="ml-1">
-                      {intl.formatMessage(messages.seasonepisodenumber, {
-                        seasonNumber: downloadItem[0].episode.seasonNumber,
-                        episodeNumber: downloadItem[0].episode.episodeNumber,
-                      })}
-                    </span>
-                  )}
+                  {mediaType === 'tv' &&
+                    downloadItem[0].episode &&
+                    (downloadItem.length > 1 &&
+                    downloadItem.every(
+                      (item) =>
+                        item.downloadId &&
+                        item.downloadId === downloadItem[0].downloadId
+                    ) ? (
+                      <span className="ml-1">
+                        {intl.formatMessage(messages.seasonnumber, {
+                          seasonNumber: downloadItem[0].episode.seasonNumber,
+                        })}
+                      </span>
+                    ) : (
+                      <span className="ml-1">
+                        {intl.formatMessage(messages.seasonepisodenumber, {
+                          seasonNumber: downloadItem[0].episode.seasonNumber,
+                          episodeNumber: downloadItem[0].episode.episodeNumber,
+                        })}
+                      </span>
+                    ))}
                   <Spinner className="ml-1 h-3 w-3" />
                 </>
               )}
@@ -282,14 +320,27 @@ const StatusBadge = ({
               </span>
               {inProgress && (
                 <>
-                  {mediaType === 'tv' && downloadItem[0].episode && (
-                    <span className="ml-1">
-                      {intl.formatMessage(messages.seasonepisodenumber, {
-                        seasonNumber: downloadItem[0].episode.seasonNumber,
-                        episodeNumber: downloadItem[0].episode.episodeNumber,
-                      })}
-                    </span>
-                  )}
+                  {mediaType === 'tv' &&
+                    downloadItem[0].episode &&
+                    (downloadItem.length > 1 &&
+                    downloadItem.every(
+                      (item) =>
+                        item.downloadId &&
+                        item.downloadId === downloadItem[0].downloadId
+                    ) ? (
+                      <span className="ml-1">
+                        {intl.formatMessage(messages.seasonnumber, {
+                          seasonNumber: downloadItem[0].episode.seasonNumber,
+                        })}
+                      </span>
+                    ) : (
+                      <span className="ml-1">
+                        {intl.formatMessage(messages.seasonepisodenumber, {
+                          seasonNumber: downloadItem[0].episode.seasonNumber,
+                          episodeNumber: downloadItem[0].episode.episodeNumber,
+                        })}
+                      </span>
+                    ))}
                   <Spinner className="ml-1 h-3 w-3" />
                 </>
               )}
@@ -304,6 +355,17 @@ const StatusBadge = ({
           <Badge badgeType="warning" href={mediaLink}>
             {intl.formatMessage(is4k ? messages.status4k : messages.status, {
               status: intl.formatMessage(globalMessages.pending),
+            })}
+          </Badge>
+        </Tooltip>
+      );
+
+    case MediaStatus.BLACKLISTED:
+      return (
+        <Tooltip content={mediaLinkDescription}>
+          <Badge badgeType="danger" href={mediaLink}>
+            {intl.formatMessage(is4k ? messages.status4k : messages.status, {
+              status: intl.formatMessage(globalMessages.blacklisted),
             })}
           </Badge>
         </Tooltip>
