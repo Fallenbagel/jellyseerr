@@ -1,3 +1,166 @@
+# [2.0.0](https://github.com/fallenbagel/jellyseerr/compare/v1.9.2...v2.0.0) (2024-10-15)
+
+
+### Bug Fixes
+
+* abort availability sync job if auth token invalid/connection lost ([#845](https://github.com/fallenbagel/jellyseerr/issues/845)) ([bdee340](https://github.com/fallenbagel/jellyseerr/commit/bdee34053080c8975a88ba16a9e8f402e10fe7e1))
+* add an error message to say when an email is already taken ([#947](https://github.com/fallenbagel/jellyseerr/issues/947)) ([89e0a83](https://github.com/fallenbagel/jellyseerr/commit/89e0a831ec85a6905f539f59b7523bb1feb90bcf))
+* add missing brackets ([#888](https://github.com/fallenbagel/jellyseerr/issues/888)) ([6cea8bb](https://github.com/fallenbagel/jellyseerr/commit/6cea8bba592b8db566b4d8147630385f5c377f1b))
+* add missing content-type header ([#887](https://github.com/fallenbagel/jellyseerr/issues/887)) ([2be9c7d](https://github.com/fallenbagel/jellyseerr/commit/2be9c7dcc1f418726a19e99cfdb3933257a03c6f))
+* add missing header when creating an issue ([#879](https://github.com/fallenbagel/jellyseerr/issues/879)) ([084e1b2](https://github.com/fallenbagel/jellyseerr/commit/084e1b224e109f0f8279741b9a5ead138396d7f8))
+* add missing parameter to delete requests from ExternalAPI ([#904](https://github.com/fallenbagel/jellyseerr/issues/904)) ([36d98a2](https://github.com/fallenbagel/jellyseerr/commit/36d98a2681921a8770027b78878688f2782e8b77)), closes [#903](https://github.com/fallenbagel/jellyseerr/issues/903)
+* **api:** fix nextjs error handler ([#882](https://github.com/fallenbagel/jellyseerr/issues/882)) ([0116c13](https://github.com/fallenbagel/jellyseerr/commit/0116c13e0632d1ccec43299fbb10cd71db45bc29))
+* **api:** handle non-existent ratings on IMDb ([#822](https://github.com/fallenbagel/jellyseerr/issues/822)) ([74a2d25](https://github.com/fallenbagel/jellyseerr/commit/74a2d25f153b07a0cae5b44adca5fa1fed5a3b9e))
+* **api:** save new password when reset password of local account ([#886](https://github.com/fallenbagel/jellyseerr/issues/886)) ([5cc4389](https://github.com/fallenbagel/jellyseerr/commit/5cc43898256b130c2576f34a3d4e7ce6a3940d3e))
+* **blacklist:** add blacklist to mobile menu ([#980](https://github.com/fallenbagel/jellyseerr/issues/980)) ([f390da4](https://github.com/fallenbagel/jellyseerr/commit/f390da486625a22951956ba96867de63f73bfc2b)), closes [#979](https://github.com/fallenbagel/jellyseerr/issues/979)
+* change SeriesSearch to MissingEpisodeSearch for season requests ([#711](https://github.com/fallenbagel/jellyseerr/issues/711)) ([ee7e91c](https://github.com/fallenbagel/jellyseerr/commit/ee7e91c7c948b17b556a625919eb1252a721bb6e))
+* **docker:** add postinstall script ([#839](https://github.com/fallenbagel/jellyseerr/issues/839)) ([f714132](https://github.com/fallenbagel/jellyseerr/commit/f7141329094d88eb0940b1db1f21376142cb8893))
+* enhance error messages when Fetch API fails ([#893](https://github.com/fallenbagel/jellyseerr/issues/893)) ([fccfca6](https://github.com/fallenbagel/jellyseerr/commit/fccfca6ed06c8dc599e1ea4b1b3dbac48eb3a7f6))
+* handle status badge for season packs ([#927](https://github.com/fallenbagel/jellyseerr/issues/927)) ([80f6301](https://github.com/fallenbagel/jellyseerr/commit/80f63017ac5e9b1720a19c761dbef4dd517f1c2c))
+* length of undefined on users warnings ([#875](https://github.com/fallenbagel/jellyseerr/issues/875)) ([c600566](https://github.com/fallenbagel/jellyseerr/commit/c600566ac0045c2314f9013b063007b087ee4327))
+* remove DNS caching ([#837](https://github.com/fallenbagel/jellyseerr/issues/837)) ([268c7df](https://github.com/fallenbagel/jellyseerr/commit/268c7df28eea8b911d6a53297f5ce296983067ce))
+* remove email requirement for the user, and use the username if no email provided ([#900](https://github.com/fallenbagel/jellyseerr/issues/900)) ([d5f817e](https://github.com/fallenbagel/jellyseerr/commit/d5f817e734131cdacc229361d9498a095af57950))
+* remove protocol-relative URLs from next/image ([#889](https://github.com/fallenbagel/jellyseerr/issues/889)) ([c80d9a8](https://github.com/fallenbagel/jellyseerr/commit/c80d9a853a2a3451293a5382ef183c18add0c040))
+* resize episode preview image ([#842](https://github.com/fallenbagel/jellyseerr/issues/842)) ([96ba53f](https://github.com/fallenbagel/jellyseerr/commit/96ba53fecc7b9d269f0d974051ab62836b0102bc))
+* resize header image in network and studio pages ([#902](https://github.com/fallenbagel/jellyseerr/issues/902)) ([4220855](https://github.com/fallenbagel/jellyseerr/commit/422085523e5dfc132f3c3ca19eaa87117828b7be))
+* rewrite request from axios to Fetch ([#920](https://github.com/fallenbagel/jellyseerr/issues/920)) ([9aee888](https://github.com/fallenbagel/jellyseerr/commit/9aee8887d3cca6e018f4be1c8400c22e86bf8dab))
+* rewrite the rate limit utility ([#896](https://github.com/fallenbagel/jellyseerr/issues/896)) ([3fc14c9](https://github.com/fallenbagel/jellyseerr/commit/3fc14c9e2262463afec666e7f54e38d0d36cff68))
+* **session:** set the correct TTL for the cookie store ([#992](https://github.com/fallenbagel/jellyseerr/issues/992)) ([96e1d40](https://github.com/fallenbagel/jellyseerr/commit/96e1d40304749ce00d2ff7359efc39a1d9724358)), closes [#991](https://github.com/fallenbagel/jellyseerr/issues/991)
+* set correct user type when importing from emby ([#949](https://github.com/fallenbagel/jellyseerr/issues/949)) ([e57d265](https://github.com/fallenbagel/jellyseerr/commit/e57d2654d1c634a91649722d3a2bf4d73c4a02ca)), closes [#948](https://github.com/fallenbagel/jellyseerr/issues/948)
+* **setup:** page display when homepage is loading ([#940](https://github.com/fallenbagel/jellyseerr/issues/940)) ([7423bbb](https://github.com/fallenbagel/jellyseerr/commit/7423bbbffc5bee2e52e3348254f035dc8527d973))
+* **tmdb:** fallback movie/show overview to English when none is available in requested locale ([#928](https://github.com/fallenbagel/jellyseerr/issues/928)) ([12f908d](https://github.com/fallenbagel/jellyseerr/commit/12f908de7f5fbd717a5f151858b6edee3be13ed9)), closes [#925](https://github.com/fallenbagel/jellyseerr/issues/925)
+* update the filter removing existing users from Jellyfin import modal ([#924](https://github.com/fallenbagel/jellyseerr/issues/924)) ([61dcd8e](https://github.com/fallenbagel/jellyseerr/commit/61dcd8e487d7886773ccb12501623c17838476e5))
+
+
+### Code Refactoring
+
+* **jellyfin:** abstract jellyfin hostname, updated ui to reflect it, better validation ([#773](https://github.com/fallenbagel/jellyseerr/issues/773)) ([38ad875](https://github.com/fallenbagel/jellyseerr/commit/38ad875dd7848b4e92ac3ccdd16dbf785f6a5c4d))
+
+
+### Features
+
+* add environment variable for API key ([#831](https://github.com/fallenbagel/jellyseerr/issues/831)) ([45ef150](https://github.com/fallenbagel/jellyseerr/commit/45ef150e36944d456cc9440574b5ac75f2e4bbc1))
+* adds status filter for tv shows ([#796](https://github.com/fallenbagel/jellyseerr/issues/796)) ([cfd1bc2](https://github.com/fallenbagel/jellyseerr/commit/cfd1bc253557d6e19725743b8aa9a2fa33bbe760)), closes [#605](https://github.com/fallenbagel/jellyseerr/issues/605)
+* allow request managers to delete data from sonarr/radarr ([#644](https://github.com/fallenbagel/jellyseerr/issues/644)) ([a5d22ba](https://github.com/fallenbagel/jellyseerr/commit/a5d22ba5b83dd0e812b16f06476d993b5d59cb2a))
+* blacklist items from Discover page ([#632](https://github.com/fallenbagel/jellyseerr/issues/632)) ([818aa60](https://github.com/fallenbagel/jellyseerr/commit/818aa60aac185da07bfb71b08e0448939b63a736)), closes [#490](https://github.com/fallenbagel/jellyseerr/issues/490)
+* Jellyfin/Emby server type setup ([#685](https://github.com/fallenbagel/jellyseerr/issues/685)) ([15cb949](https://github.com/fallenbagel/jellyseerr/commit/15cb949f1f2e617853f90ae7bb8ae5d6622f610e))
+* **jellyfinapi:** switch to API tokens instead of auth tokens ([#868](https://github.com/fallenbagel/jellyseerr/issues/868)) ([bd4da6d](https://github.com/fallenbagel/jellyseerr/commit/bd4da6d5fc8cb55c2bc3d9a8336787cbd30814d0))
+* Option on item's page to add/remove from watchlist ([#781](https://github.com/fallenbagel/jellyseerr/issues/781)) ([2348f23](https://github.com/fallenbagel/jellyseerr/commit/2348f23f433195d64dee3e6eeede296fca5fdbc9)), closes [#730](https://github.com/fallenbagel/jellyseerr/issues/730)
+* refresh monitored downloads before getting queue items ([#994](https://github.com/fallenbagel/jellyseerr/issues/994)) ([92ba262](https://github.com/fallenbagel/jellyseerr/commit/92ba26207dcb1ddd696e0f01931d2609c521ae45)), closes [#866](https://github.com/fallenbagel/jellyseerr/issues/866)
+* show quality profile on request ([#847](https://github.com/fallenbagel/jellyseerr/issues/847)) ([6445332](https://github.com/fallenbagel/jellyseerr/commit/64453320d36595e75dcb710dfd43997bf2d2acd5))
+* **translation:** added full Hebrew translation ([#871](https://github.com/fallenbagel/jellyseerr/issues/871)) ([c96ca67](https://github.com/fallenbagel/jellyseerr/commit/c96ca6742e0a6d5685319c52f995fe06e439a450))
+* update Plex logo ([#884](https://github.com/fallenbagel/jellyseerr/issues/884)) ([3a363ae](https://github.com/fallenbagel/jellyseerr/commit/3a363ae1ffa7f384be6f7d25f8558b1e55a73fb3))
+
+
+### Reverts
+
+* fix(api): fix nextjs error handler ([#882](https://github.com/fallenbagel/jellyseerr/issues/882)) ([#892](https://github.com/fallenbagel/jellyseerr/issues/892)) ([62dbde4](https://github.com/fallenbagel/jellyseerr/commit/62dbde448c7f7d530de8534bb8538452d0f91276))
+
+
+### BREAKING CHANGES
+
+* This commit deprecates the JELLYFIN_TYPE variable to identify Emby media server and
+instead rely on the mediaServerType that is set in the `settings.json`. Existing environment
+variable users can log out and log back in to set the mediaServerType to `3` (Emby).
+
+* feat(api): add severType to the api
+* This adds a serverType to the `/auth/jellyfin` which requires a serverType to be
+set (`jellyfin`/`emby`)
+
+* refactor: use enums for serverType and rename selectedservice to serverType
+
+* refactor(auth): jellyfin/emby authentication to set MediaServerType
+
+* fix: issue page formatMessage for 4k media
+
+* refactor: cleaner way of handling serverType change using MediaServerType instead of strings
+
+instead of using strings now it will use MediaServerType enums for serverType
+
+* revert: removed conditional render of the auto-request permission
+
+reverts the conditional render toshow the auto-request permission if the mediaServerType was set to
+Plex as this should be handled in a different PR and Cypress tests should be modified
+accordingly(currently cypress test would fail if this conditional check is there)
+
+* feat: add server type step to setup
+
+* feat: migrate existing emby setups to use emby mediaServerType
+
+* fix: scan jobs not running when media server type is emby
+
+* fix: emby media server type migration
+
+* refactor: change emby logo to full logo
+
+* style: decrease emby logo size in setup screen
+
+* refactor: use title case for servertype i18n message
+
+* refactor(i18n): fix a typo
+
+* refactor: use enums instead of numbers
+
+* fix: remove old references to JELLYFIN_TYPE environment variable
+
+* fix: go back to the last step when refresh the setup page
+
+* fix: move "scanning in background" tip next to the scanning section
+
+* fix: redirect the setup page when Jellyseerr is already setup
+* **jellyfin:** Jellyfin settings now does not include a hostname. Instead it abstracted it to ip,
+port, useSsl, and urlBase. However, migration of old settings to new settings should work
+automatically.
+
+* refactor: remove console logs and use getHostname and ApiErrorCodes
+
+* fix: store req.body jellyfin settings temporarily and store only if valid
+
+This should fix the issue where settings are saved even if the url
+was invalid. Now the settings will only be saved if the url is
+valid. Sort of like a test connection.
+
+* refactor: clean up commented out code
+
+* refactor(i18n): extract translation keys
+
+* fix(auth): auth failing with jellyfin login is disabled
+
+* fix(settings): jellyfin migrations replacing the rest of the settings
+
+* fix(settings): jellyfin hostname should be carried out if hostname exists
+
+* fix(settings): merging the wrong settings source
+
+* refactor(settings): use migrator for dynamic settings migrations
+
+* refactor(settingsmigrator): settings migration handler and the migrations
+
+* test(cypress): fix cypress tests failing
+
+cypress settings were lacking some of the jobs so when the startJobs() is called when the app
+starts, it was failing to schedule the jobs where their cron timings were not specified in the
+cypress settings. Therefore, this commit adds those jobs back. In addition, other setting options
+were added to keep cypress settings consistent with a normal user.
+
+* chore(prettierignore): ignore cypress/config/settings.cypress.json as it does not need prettier
+
+* chore(prettier): ran formatter on cypress config to fix format check error
+
+format check locally passes on this file. However, it fails during the github actions format check.
+Therefore, json language features formatter was run instead of prettier to see if that fixes the
+issue.
+
+* test(cypress): add only missing jobs to the cypress settings
+
+* ci: attempt at trying to get formatter to pass on cypress config json file
+
+* refactor: revert the changes brought to try and fix formatter
+
+added back the rest of the cypress settings and removed cypress settings from .prettierignore
+
+* refactor(settings): better erorr logging when jellyfin connection test fails in settings page
+
 ## [1.9.2](https://github.com/fallenbagel/jellyseerr/compare/v1.9.1...v1.9.2) (2024-06-13)
 
 
