@@ -18,19 +18,17 @@ const CachedImage = ({ src, type, ...props }: CachedImageProps) => {
 
   let imageUrl: string;
 
-  if (src.startsWith('/')) {
-    // that's not an image to proxy
-    imageUrl = src;
-  } else if (type === 'tmdb') {
+  if (type === 'tmdb') {
     // tmdb stuff
-    imageUrl = currentSettings.cacheImages
-      ? src.replace('https://image.tmdb.org', '/imageproxy')
-      : src;
+    imageUrl =
+      currentSettings.cacheImages && !src.startsWith('/')
+        ? src.replace('https://image.tmdb.org', '/imageproxy')
+        : src;
   } else if (type === 'avatar') {
     // jellyfin avatar (in any)
     const jellyfinAvatar = src.match(
-      /^(.*?)(\/Users\/\w+\/Images\/Primary\/\?tag=\w+&quality=90)$/
-    )?.[2];
+      /^.*?(\/Users\/\w+\/Images\/Primary\/?\?tag=\w+&quality=90)$/
+    )?.[1];
     imageUrl = jellyfinAvatar ? `/avatarproxy` + jellyfinAvatar : src;
   } else {
     return null;
