@@ -1,4 +1,6 @@
+import { MediaServerType } from '@server/constants/server';
 import ImageProxy from '@server/lib/imageproxy';
+import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { getHostname } from '@server/utils/getHostname';
 import { Router } from 'express';
@@ -14,7 +16,14 @@ router.get('/*', async (req, res) => {
       /(\/Users\/\w+\/Images\/Primary\/?\?tag=\w+&quality=90)$/
     )?.[1];
     if (!jellyfinAvatar) {
-      throw new Error('Provided URL is not a Jellyfin avatar.');
+      const mediaServerType = getSettings().main.mediaServerType;
+      throw new Error(
+        `Provided URL is not ${
+          mediaServerType === MediaServerType.JELLYFIN
+            ? 'a Jellyfin'
+            : 'an Emby'
+        } avatar.`
+      );
     }
 
     const imageUrl = new URL(jellyfinAvatar, getHostname());
