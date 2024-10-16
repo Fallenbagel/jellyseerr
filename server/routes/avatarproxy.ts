@@ -11,7 +11,7 @@ router.get('/*', async (req, res) => {
   let imagePath = '';
   try {
     const jellyfinAvatar = req.url.match(
-      /.*?(\/Users\/\w+\/Images\/Primary\/?\?tag=\w+&quality=90)$/
+      /(\/Users\/\w+\/Images\/Primary\/?\?tag=\w+&quality=90)$/
     )?.[1];
     if (!jellyfinAvatar) {
       throw new Error('Provided URL is not a Jellyfin avatar.');

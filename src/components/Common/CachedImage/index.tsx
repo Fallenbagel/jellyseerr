@@ -27,7 +27,7 @@ const CachedImage = ({ src, type, ...props }: CachedImageProps) => {
   } else if (type === 'avatar') {
     // jellyfin avatar (in any)
     const jellyfinAvatar = src.match(
-      /^.*?(\/Users\/\w+\/Images\/Primary\/?\?tag=\w+&quality=90)$/
+      /(\/Users\/\w+\/Images\/Primary\/?\?tag=\w+&quality=90)$/
     )?.[1];
     imageUrl = jellyfinAvatar ? `/avatarproxy` + jellyfinAvatar : src;
   } else {
