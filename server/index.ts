@@ -37,7 +37,14 @@ import dns from 'node:dns';
 import net from 'node:net';
 import path from 'path';
 import swaggerUi from 'swagger-ui-express';
+import { Agent, setGlobalDispatcher } from 'undici';
 import YAML from 'yamljs';
+
+// Set the global dispatcher to use autoSelectFamily
+// attempt to fix ipv6 issues
+setGlobalDispatcher(
+  new Agent({ connect: { timeout: 60_000, autoSelectFamily: true } })
+);
 
 if (process.env.forceIpv4First === 'true') {
   dns.setDefaultResultOrder('ipv4first');
