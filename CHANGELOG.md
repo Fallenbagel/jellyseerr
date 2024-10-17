@@ -1,3 +1,13 @@
+## [2.0.1](https://github.com/fallenbagel/jellyseerr/compare/v2.0.0...v2.0.1) (2024-10-17)
+
+
+### Bug Fixes
+
+* fetch override to attach XSRF token to fix csrfProtection issue ([#1014](https://github.com/fallenbagel/jellyseerr/issues/1014)) ([4945b54](https://github.com/fallenbagel/jellyseerr/commit/4945b5429848b36fc0ee41cf0277ed79f53d8286)), closes [#1011](https://github.com/fallenbagel/jellyseerr/issues/1011)
+* handle non-existent rottentomatoes rating ([#1018](https://github.com/fallenbagel/jellyseerr/issues/1018)) ([a351264](https://github.com/fallenbagel/jellyseerr/commit/a351264b878b2660ae7a6415f26d38b52015c591))
+* rewrite avatarproxy and CachedImage ([#1016](https://github.com/fallenbagel/jellyseerr/issues/1016)) ([4e48fdf](https://github.com/fallenbagel/jellyseerr/commit/4e48fdf2cb9f76ae5c25073b585718650abd3288)), closes [#1012](https://github.com/fallenbagel/jellyseerr/issues/1012) [#1013](https://github.com/fallenbagel/jellyseerr/issues/1013)
+* use jellyfinMediaId4k for mediaUrl4k ([#1006](https://github.com/fallenbagel/jellyseerr/issues/1006)) ([a0f80fe](https://github.com/fallenbagel/jellyseerr/commit/a0f80fe7647ef4a9025ca93407cd21ddc640fed1)), closes [#520](https://github.com/fallenbagel/jellyseerr/issues/520)
+
 # [2.0.0](https://github.com/fallenbagel/jellyseerr/compare/v1.9.2...v2.0.0) (2024-10-15)
 
 
