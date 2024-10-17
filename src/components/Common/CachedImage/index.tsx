@@ -22,7 +22,7 @@ const CachedImage = ({ src, type, ...props }: CachedImageProps) => {
     // tmdb stuff
     imageUrl =
       currentSettings.cacheImages && !src.startsWith('/')
-        ? src.replace(/^https:\/\/image\.tmdb\.org\//, 'imageproxy/')
+        ? src.replace(/^https:\/\/image\.tmdb\.org\//, '/imageproxy/')
         : src;
   } else if (type === 'avatar') {
     // jellyfin avatar (in any)
