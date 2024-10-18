@@ -99,12 +99,12 @@ interface DiscoverTvOptions {
 }
 
 class TheMovieDb extends ExternalAPI {
-  private region?: string;
+  private discoverRegion?: string;
   private originalLanguage?: string;
   constructor({
-    region,
+    discoverRegion,
     originalLanguage,
-  }: { region?: string; originalLanguage?: string } = {}) {
+  }: { discoverRegion?: string; originalLanguage?: string } = {}) {
     super(
       'https://api.themoviedb.org/3',
       {
@@ -118,7 +118,7 @@ class TheMovieDb extends ExternalAPI {
         },
       }
     );
-    this.region = region;
+    this.discoverRegion = discoverRegion;
     this.originalLanguage = originalLanguage;
   }
 
@@ -469,7 +469,7 @@ class TheMovieDb extends ExternalAPI {
         page: page.toString(),
         include_adult: includeAdult ? 'true' : 'false',
         language,
-        region: this.region || '',
+        region: this.discoverRegion || '',
         with_original_language:
           originalLanguage && originalLanguage !== 'all'
             ? originalLanguage
@@ -541,7 +541,7 @@ class TheMovieDb extends ExternalAPI {
         sort_by: sortBy,
         page: page.toString(),
         language,
-        region: this.region || '',
+        region: this.discoverRegion || '',
         // Set our release date values, but check if one is set and not the other,
         // so we can force a past date or a future date. TMDB Requires both values if one is set!
         'first_air_date.gte':
@@ -594,7 +594,7 @@ class TheMovieDb extends ExternalAPI {
         {
           page: page.toString(),
           language,
-          region: this.region || '',
+          region: this.discoverRegion || '',
           originalLanguage: this.originalLanguage || '',
         }
       );
@@ -620,7 +620,7 @@ class TheMovieDb extends ExternalAPI {
         {
           page: page.toString(),
           language,
-          region: this.region || '',
+          region: this.discoverRegion || '',
         }
       );
 

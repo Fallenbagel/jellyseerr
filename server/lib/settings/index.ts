@@ -113,7 +113,8 @@ export interface MainSettings {
   hideAvailable: boolean;
   localLogin: boolean;
   newPlexLogin: boolean;
-  region: string;
+  discoverRegion: string;
+  streamingRegion: string;
   originalLanguage: string;
   trustProxy: boolean;
   mediaServerType: number;
@@ -132,7 +133,8 @@ interface FullPublicSettings extends PublicSettings {
   localLogin: boolean;
   movie4kEnabled: boolean;
   series4kEnabled: boolean;
-  region: string;
+  discoverRegion: string;
+  streamingRegion: string;
   originalLanguage: string;
   mediaServerType: number;
   jellyfinExternalHost?: string;
@@ -319,7 +321,8 @@ class Settings {
         hideAvailable: false,
         localLogin: true,
         newPlexLogin: true,
-        region: '',
+        discoverRegion: '',
+        streamingRegion: '',
         originalLanguage: '',
         trustProxy: false,
         mediaServerType: MediaServerType.NOT_CONFIGURED,
@@ -552,7 +555,8 @@ class Settings {
       series4kEnabled: this.data.sonarr.some(
         (sonarr) => sonarr.is4k && sonarr.isDefault
       ),
-      region: this.data.main.region,
+      discoverRegion: this.data.main.discoverRegion,
+      streamingRegion: this.data.main.streamingRegion,
       originalLanguage: this.data.main.originalLanguage,
       mediaServerType: this.main.mediaServerType,
       partialRequestsEnabled: this.data.main.partialRequestsEnabled,
