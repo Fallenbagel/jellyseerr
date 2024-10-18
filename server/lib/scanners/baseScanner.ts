@@ -618,6 +618,22 @@ class BaseScanner<T> {
   get protectedBundleSize(): number {
     return this.bundleSize;
   }
+
+  protected async processUnmonitoredMovie(tmdbId: number): Promise<void> {
+    const mediaRepository = getRepository(Media);
+    await this.asyncLock.dispatch(tmdbId, async () => {
+      const existing = await this.getExisting(tmdbId, MediaType.MOVIE);
+      // For some reason the status of missing movies isn't PENDING but PROCESSING
+      if (existing && existing.status === MediaStatus.PROCESSING) {
+        existing.status = MediaStatus.UNKNOWN;
+        await mediaRepository.save(existing);
+        this.log(
+          `Movie TMDB ID ${tmdbId} unmonitored from Radarr. Media status set to UNKNOWN.`,
+          'info'
+        );
+      }
+    });
+  }
 }
 
 export default BaseScanner;
