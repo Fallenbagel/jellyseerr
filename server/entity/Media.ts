@@ -129,10 +129,10 @@ class Media {
   @UpdateDateColumn()
   public updatedAt: Date;
 
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ type: 'timestamp without time zone', default: () => 'now()' })
   public lastSeasonChange: Date;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ type: 'timestamp without time zone', default: () => 'now()' })
   public mediaAddedAt: Date;
 
   @Column({ nullable: true, type: 'int' })
