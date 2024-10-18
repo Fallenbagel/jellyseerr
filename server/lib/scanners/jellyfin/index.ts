@@ -96,7 +96,7 @@ class JellyfinScanner {
           (MediaStream) => MediaStream.Type === 'Video'
         ).some((MediaStream) => {
           return (MediaStream.Width ?? 0) <= 2000;
-        });
+        }) || (MediaSource.Container && MediaSource.Container === "strm");
       });
 
       await this.asyncLock.dispatch(newMedia.tmdbId, async () => {
@@ -325,18 +325,18 @@ class JellyfinScanner {
                 // and then not modifying the status if there are 0 items
                 existingSeason.status =
                   totalStandard >= season.episode_count ||
-                  existingSeason.status === MediaStatus.AVAILABLE
+                    existingSeason.status === MediaStatus.AVAILABLE
                     ? MediaStatus.AVAILABLE
                     : totalStandard > 0
-                    ? MediaStatus.PARTIALLY_AVAILABLE
-                    : existingSeason.status;
+                      ? MediaStatus.PARTIALLY_AVAILABLE
+                      : existingSeason.status;
                 existingSeason.status4k =
                   (this.enable4kShow && total4k >= season.episode_count) ||
-                  existingSeason.status4k === MediaStatus.AVAILABLE
+                    existingSeason.status4k === MediaStatus.AVAILABLE
                     ? MediaStatus.AVAILABLE
                     : this.enable4kShow && total4k > 0
-                    ? MediaStatus.PARTIALLY_AVAILABLE
-                    : existingSeason.status4k;
+                      ? MediaStatus.PARTIALLY_AVAILABLE
+                      : existingSeason.status4k;
               } else {
                 newSeasons.push(
                   new Season({
@@ -347,14 +347,14 @@ class JellyfinScanner {
                       totalStandard >= season.episode_count
                         ? MediaStatus.AVAILABLE
                         : totalStandard > 0
-                        ? MediaStatus.PARTIALLY_AVAILABLE
-                        : MediaStatus.UNKNOWN,
+                          ? MediaStatus.PARTIALLY_AVAILABLE
+                          : MediaStatus.UNKNOWN,
                     status4k:
                       this.enable4kShow && total4k >= season.episode_count
                         ? MediaStatus.AVAILABLE
                         : this.enable4kShow && total4k > 0
-                        ? MediaStatus.PARTIALLY_AVAILABLE
-                        : MediaStatus.UNKNOWN,
+                          ? MediaStatus.PARTIALLY_AVAILABLE
+                          : MediaStatus.UNKNOWN,
                   })
                 );
               }
@@ -370,18 +370,18 @@ class JellyfinScanner {
             newSeasons.filter(
               (season) => season.status === MediaStatus.AVAILABLE
             ).length +
-              (media?.seasons.filter(
-                (season) => season.status === MediaStatus.AVAILABLE
-              ).length ?? 0) >=
+            (media?.seasons.filter(
+              (season) => season.status === MediaStatus.AVAILABLE
+            ).length ?? 0) >=
             filteredSeasons.length;
 
           const isAll4kSeasons =
             newSeasons.filter(
               (season) => season.status4k === MediaStatus.AVAILABLE
             ).length +
-              (media?.seasons.filter(
-                (season) => season.status4k === MediaStatus.AVAILABLE
-              ).length ?? 0) >=
+            (media?.seasons.filter(
+              (season) => season.status4k === MediaStatus.AVAILABLE
+            ).length ?? 0) >=
             filteredSeasons.length;
 
           if (media) {
@@ -404,8 +404,7 @@ class JellyfinScanner {
             // the lastSeasonChange field so we can trigger notifications
             if (newStandardSeasonAvailable > currentStandardSeasonAvailable) {
               this.log(
-                `Detected ${
-                  newStandardSeasonAvailable - currentStandardSeasonAvailable
+                `Detected ${newStandardSeasonAvailable - currentStandardSeasonAvailable
                 } new standard season(s) for ${tvShow.name}`,
                 'debug'
               );
@@ -415,8 +414,7 @@ class JellyfinScanner {
 
             if (new4kSeasonAvailable > current4kSeasonAvailable) {
               this.log(
-                `Detected ${
-                  new4kSeasonAvailable - current4kSeasonAvailable
+                `Detected ${new4kSeasonAvailable - current4kSeasonAvailable
                 } new 4K season(s) for ${tvShow.name}`,
                 'debug'
               );
@@ -444,10 +442,10 @@ class JellyfinScanner {
               isAllStandardSeasons || shouldStayAvailable
                 ? MediaStatus.AVAILABLE
                 : media.seasons.some(
-                    (season) => season.status !== MediaStatus.UNKNOWN
-                  )
-                ? MediaStatus.PARTIALLY_AVAILABLE
-                : MediaStatus.UNKNOWN;
+                  (season) => season.status !== MediaStatus.UNKNOWN
+                )
+                  ? MediaStatus.PARTIALLY_AVAILABLE
+                  : MediaStatus.UNKNOWN;
             media.status4k =
               (isAll4kSeasons || shouldStayAvailable4k) && this.enable4kShow
                 ? MediaStatus.AVAILABLE
@@ -455,8 +453,8 @@ class JellyfinScanner {
                   media.seasons.some(
                     (season) => season.status4k !== MediaStatus.UNKNOWN
                   )
-                ? MediaStatus.PARTIALLY_AVAILABLE
-                : MediaStatus.UNKNOWN;
+                  ? MediaStatus.PARTIALLY_AVAILABLE
+                  : MediaStatus.UNKNOWN;
             await mediaRepository.save(media);
             this.log(`Updating existing title: ${tvShow.name}`);
           } else {
@@ -472,10 +470,10 @@ class JellyfinScanner {
               status: isAllStandardSeasons
                 ? MediaStatus.AVAILABLE
                 : newSeasons.some(
-                    (season) => season.status !== MediaStatus.UNKNOWN
-                  )
-                ? MediaStatus.PARTIALLY_AVAILABLE
-                : MediaStatus.UNKNOWN,
+                  (season) => season.status !== MediaStatus.UNKNOWN
+                )
+                  ? MediaStatus.PARTIALLY_AVAILABLE
+                  : MediaStatus.UNKNOWN,
               status4k:
                 isAll4kSeasons && this.enable4kShow
                   ? MediaStatus.AVAILABLE
@@ -483,8 +481,8 @@ class JellyfinScanner {
                     newSeasons.some(
                       (season) => season.status4k !== MediaStatus.UNKNOWN
                     )
-                  ? MediaStatus.PARTIALLY_AVAILABLE
-                  : MediaStatus.UNKNOWN,
+                    ? MediaStatus.PARTIALLY_AVAILABLE
+                    : MediaStatus.UNKNOWN,
             });
             await mediaRepository.save(newMedia);
             this.log(`Saved ${tvShow.name}`);
@@ -495,8 +493,7 @@ class JellyfinScanner {
       }
     } catch (e) {
       this.log(
-        `Failed to process Jellyfin item. Id: ${
-          jellyfinitem.SeriesId ?? jellyfinitem.SeasonId ?? jellyfinitem.Id
+        `Failed to process Jellyfin item. Id: ${jellyfinitem.SeriesId ?? jellyfinitem.SeasonId ?? jellyfinitem.Id
         }`,
         'error',
         {
