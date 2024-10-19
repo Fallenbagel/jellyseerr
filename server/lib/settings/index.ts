@@ -79,8 +79,6 @@ export interface DVRSettings {
 }
 
 export interface TvdbSettings {
-  apiKey?: string;
-  pin?: string;
   use: boolean;
 }
 
