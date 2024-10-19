@@ -13,11 +13,12 @@ export const runMigrations = async (
   let migrated = settings;
 
   try {
-    // let's create a backup of the settings
-    fs.writeFileSync(
-      SETTINGS_PATH.replace('.json', '.old.json'),
-      JSON.stringify(settings, undefined, ' ')
-    );
+    // we read old backup and create a backup of currents settings
+    const BACKUP_PATH = SETTINGS_PATH.replace('.json', '.old.json');
+    const oldBackup = fs.existsSync(BACKUP_PATH)
+      ? fs.readFileSync(BACKUP_PATH)
+      : null;
+    fs.writeFileSync(BACKUP_PATH, JSON.stringify(settings, undefined, ' '));
 
     const migrations = fs
       .readdirSync(migrationsDir)
@@ -58,6 +59,10 @@ export const runMigrations = async (
         // something went wrong while saving file
         throw new Error('Unable to save settings after migration.');
       }
+    } else if (oldBackup) {
+      // no migration occured
+      // we save the old backup (to avoid settings.json and settings.old.json being the same)
+      fs.writeFileSync(BACKUP_PATH, oldBackup.toString());
     }
   } catch (e) {
     logger.error(
