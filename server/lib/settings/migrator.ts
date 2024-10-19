@@ -10,19 +10,41 @@ export const runMigrations = async (
   settings: AllSettings,
   SETTINGS_PATH: string
 ): Promise<AllSettings> => {
-  const migrations = fs
-    .readdirSync(migrationsDir)
-    .filter((file) => file.endsWith('.js') || file.endsWith('.ts'))
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    .map((file) => require(path.join(migrationsDir, file)).default);
-
   let migrated = settings;
 
   try {
+    // let's create a backup of the settings
+    fs.writeFileSync(
+      SETTINGS_PATH.replace('.json', '.old.json'),
+      JSON.stringify(settings, undefined, ' ')
+    );
+
+    const migrations = fs
+      .readdirSync(migrationsDir)
+      .filter((file) => file.endsWith('.js') || file.endsWith('.ts'));
+
     const settingsBefore = JSON.stringify(migrated);
 
     for (const migration of migrations) {
-      migrated = await migration(migrated);
+      try {
+        logger.debug(`Checking migration '${migration}'...`, {
+          label: 'Settings Migrator',
+        });
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const fn = require(path.join(migrationsDir, migration)).default;
+        const newSettings = await fn(migrated);
+        if (JSON.stringify(migrated) !== JSON.stringify(migrated)) {
+          logger.debug(`Migration '${migration}' has been applied.`, {
+            label: 'Settings Migrator',
+          });
+        }
+        migrated = newSettings;
+      } catch (e) {
+        logger.error(`Error while running migration '${migration}'`, {
+          label: 'Settings Migrator',
+        });
+        throw e;
+      }
     }
 
     const settingsAfter = JSON.stringify(migrated);
