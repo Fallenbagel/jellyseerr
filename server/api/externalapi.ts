@@ -69,12 +69,15 @@ class ExternalAPI {
     if (!response.ok) {
       const text = await response.text();
       throw new Error(
-        `${response.status} ${response.statusText}${text ? ': ' + text : ''}`
+        `${response.status} ${response.statusText}${text ? ': ' + text : ''}`,
+        {
+          cause: response,
+        }
       );
     }
     const data = await this.getDataFromResponse(response);
 
-    if (this.cache) {
+    if (this.cache && ttl !== 0) {
       this.cache.set(cacheKey, data, ttl ?? DEFAULT_TTL);
     }
 
@@ -83,7 +86,7 @@ class ExternalAPI {
 
   protected async post<T>(
     endpoint: string,
-    data: Record<string, unknown>,
+    data?: Record<string, unknown>,
     params?: Record<string, string>,
     ttl?: number,
     config?: RequestInit
@@ -105,11 +108,20 @@ class ExternalAPI {
         ...this.defaultHeaders,
         ...config?.headers,
       },
-      body: JSON.stringify(data),
+      body: data ? JSON.stringify(data) : undefined,
     });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(
+        `${response.status} ${response.statusText}${text ? ': ' + text : ''}`,
+        {
+          cause: response,
+        }
+      );
+    }
     const resData = await this.getDataFromResponse(response);
 
-    if (this.cache) {
+    if (this.cache && ttl !== 0) {
       this.cache.set(cacheKey, resData, ttl ?? DEFAULT_TTL);
     }
 
@@ -142,9 +154,18 @@ class ExternalAPI {
       },
       body: JSON.stringify(data),
     });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(
+        `${response.status} ${response.statusText}${text ? ': ' + text : ''}`,
+        {
+          cause: response,
+        }
+      );
+    }
     const resData = await this.getDataFromResponse(response);
 
-    if (this.cache) {
+    if (this.cache && ttl !== 0) {
       this.cache.set(cacheKey, resData, ttl ?? DEFAULT_TTL);
     }
 
@@ -158,12 +179,22 @@ class ExternalAPI {
   ): Promise<T> {
     const url = this.formatUrl(endpoint, params);
     const response = await this.fetch(url, {
+      method: 'DELETE',
       ...config,
       headers: {
         ...this.defaultHeaders,
         ...config?.headers,
       },
     });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(
+        `${response.status} ${response.statusText}${text ? ': ' + text : ''}`,
+        {
+          cause: response,
+        }
+      );
+    }
     const data = await this.getDataFromResponse(response);
 
     return data;
@@ -198,6 +229,17 @@ class ExternalAPI {
             ...config?.headers,
           },
         }).then(async (response) => {
+          if (!response.ok) {
+            const text = await response.text();
+            throw new Error(
+              `${response.status} ${response.statusText}${
+                text ? ': ' + text : ''
+              }`,
+              {
+                cause: response,
+              }
+            );
+          }
           const data = await this.getDataFromResponse(response);
           this.cache?.set(cacheKey, data, ttl ?? DEFAULT_TTL);
         });
@@ -213,6 +255,15 @@ class ExternalAPI {
         ...config?.headers,
       },
     });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(
+        `${response.status} ${response.statusText}${text ? ': ' + text : ''}`,
+        {
+          cause: response,
+        }
+      );
+    }
     const data = await this.getDataFromResponse(response);
 
     if (this.cache) {
@@ -236,7 +287,12 @@ class ExternalAPI {
       ...this.params,
       ...params,
     });
-    return `${href}?${searchParams.toString()}`;
+    return (
+      href +
+      (searchParams.toString().length
+        ? '?' + searchParams.toString()
+        : searchParams.toString())
+    );
   }
 
   private serializeCacheKey(
@@ -251,20 +307,24 @@ class ExternalAPI {
   }
 
   private async getDataFromResponse(response: Response) {
-    const contentType = response.headers.get('Content-Type')?.split(';')[0];
-    if (contentType === 'application/json') {
+    const contentType = response.headers.get('Content-Type');
+    if (contentType?.includes('application/json')) {
       return await response.json();
     } else if (
-      contentType === 'application/xml' ||
-      contentType === 'text/html' ||
-      contentType === 'text/plain'
+      contentType?.includes('application/xml') ||
+      contentType?.includes('text/html') ||
+      contentType?.includes('text/plain')
     ) {
       return await response.text();
     } else {
       try {
         return await response.json();
       } catch {
-        return await response.blob();
+        try {
+          return await response.blob();
+        } catch {
+          return null;
+        }
       }
     }
   }

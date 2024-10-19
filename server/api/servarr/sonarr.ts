@@ -257,11 +257,18 @@ class SonarrAPI extends ServarrBase<{
 
       return createdSeriesData;
     } catch (e) {
+      let errorData;
+      try {
+        errorData = await e.cause?.text();
+        errorData = JSON.parse(errorData);
+      } catch {
+        /* empty */
+      }
       logger.error('Something went wrong while adding a series to Sonarr.', {
         label: 'Sonarr API',
         errorMessage: e.message,
         options,
-        response: e?.response?.data,
+        response: errorData,
       });
       throw new Error('Failed to add series');
     }
@@ -296,10 +303,10 @@ class SonarrAPI extends ServarrBase<{
     });
 
     try {
-      await this.runCommand('SeriesSearch', { seriesId });
+      await this.runCommand('MissingEpisodeSearch', { seriesId });
     } catch (e) {
       logger.error(
-        'Something went wrong while executing Sonarr series search.',
+        'Something went wrong while executing Sonarr missing episode search.',
         {
           label: 'Sonarr API',
           errorMessage: e.message,

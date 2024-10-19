@@ -19,6 +19,7 @@ import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import clearCookies from '@server/middleware/clearcookies';
 import routes from '@server/routes';
+import avatarproxy from '@server/routes/avatarproxy';
 import imageproxy from '@server/routes/imageproxy';
 import { getAppVersion } from '@server/utils/appVersion';
 import restartFlag from '@server/utils/restartFlag';
@@ -63,7 +64,7 @@ app
     }
 
     // Load Settings
-    const settings = getSettings();
+    const settings = await getSettings().load();
     restartFlag.initializeSettings(settings.main);
 
     // Migrate library types
@@ -174,7 +175,7 @@ app
         },
         store: new TypeormStore({
           cleanupLimit: 2,
-          ttl: 1000 * 60 * 60 * 24 * 30,
+          ttl: 60 * 60 * 24 * 30,
         }).connect(sessionRespository) as Store,
       })
     );
@@ -202,6 +203,7 @@ app
 
     // Do not set cookies so CDNs can cache them
     server.use('/imageproxy', clearCookies, imageproxy);
+    server.use('/avatarproxy', clearCookies, avatarproxy);
 
     server.get('*', (req, res) => handle(req, res));
     server.use(

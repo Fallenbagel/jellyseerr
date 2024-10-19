@@ -403,6 +403,51 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "mobihen",
+      "name": "Nir Israel Hen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35529491?v=4",
+      "profile": "https://mobihen.com",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "XDark187",
+      "name": "Baraa",
+      "avatar_url": "https://avatars.githubusercontent.com/u/39034192?v=4",
+      "profile": "https://github.com/XDark187",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "franciscofsales",
+      "name": "Francisco Sales",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7977645?v=4",
+      "profile": "https://github.com/franciscofsales",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "myselfolli",
+      "name": "Oliver Laing",
+      "avatar_url": "https://avatars.githubusercontent.com/u/37535998?v=4",
+      "profile": "https://github.com/myselfolli",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "M0NsTeRRR",
+      "name": "Ludovic Ortega",
+      "avatar_url": "https://avatars.githubusercontent.com/u/37785089?v=4",
+      "profile": "https://github.com/M0NsTeRRR",
+      "contributions": [
+        "security"
+      ]
     }
   ]
 }

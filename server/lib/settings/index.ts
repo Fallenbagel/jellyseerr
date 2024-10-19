@@ -47,6 +47,7 @@ export interface JellyfinSettings {
   jellyfinForgotPasswordUrl?: string;
   libraries: Library[];
   serverId: string;
+  apiKey: string;
 }
 export interface TautulliSettings {
   hostname?: string;
@@ -349,6 +350,7 @@ class Settings {
         jellyfinForgotPasswordUrl: '',
         libraries: [],
         serverId: '',
+        apiKey: '',
       },
       tautulli: {},
       tvdb: { use: false },
@@ -625,7 +627,11 @@ class Settings {
   }
 
   private generateApiKey(): string {
-    return Buffer.from(`${Date.now()}${randomUUID()}`).toString('base64');
+    if (process.env.API_KEY) {
+      return process.env.API_KEY;
+    } else {
+      return Buffer.from(`${Date.now()}${randomUUID()}`).toString('base64');
+    }
   }
 
   private generateVapidKeys(force = false): void {
@@ -645,7 +651,7 @@ class Settings {
    * @param overrideSettings If passed in, will override all existing settings with these
    * values
    */
-  public load(overrideSettings?: AllSettings): Settings {
+  public async load(overrideSettings?: AllSettings): Promise<Settings> {
     if (overrideSettings) {
       this.data = overrideSettings;
       return this;
@@ -658,9 +664,15 @@ class Settings {
 
     if (data) {
       const parsedJson = JSON.parse(data);
-      this.data = runMigrations(parsedJson);
+      this.data = await runMigrations(parsedJson, SETTINGS_PATH);
 
       this.data = merge(this.data, parsedJson);
+
+      if (process.env.API_KEY) {
+        if (this.main.apiKey != process.env.API_KEY) {
+          this.main.apiKey = process.env.API_KEY;
+        }
+      }
 
       this.save();
     }
@@ -672,17 +684,11 @@ class Settings {
   }
 }
 
-let loaded = false;
 let settings: Settings | undefined;
 
 export const getSettings = (initialSettings?: AllSettings): Settings => {
   if (!settings) {
     settings = new Settings(initialSettings);
-  }
-
-  if (!loaded) {
-    settings.load();
-    loaded = true;
   }
 
   return settings;

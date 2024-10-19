@@ -93,9 +93,7 @@ export interface JellyfinLibraryItemExtended extends JellyfinLibraryItem {
 }
 
 class JellyfinAPI extends ExternalAPI {
-  private authToken?: string;
   private userId?: string;
-  private jellyfinHost: string;
 
   constructor(jellyfinHost: string, authToken?: string, deviceId?: string) {
     let authHeaderVal: string;
@@ -114,9 +112,6 @@ class JellyfinAPI extends ExternalAPI {
         },
       }
     );
-
-    this.jellyfinHost = jellyfinHost;
-    this.authToken = authToken;
   }
 
   public async login(
@@ -152,7 +147,7 @@ class JellyfinAPI extends ExternalAPI {
     try {
       return await authenticate(false);
     } catch (e) {
-      const status = e.response?.status;
+      const status = e.cause?.status;
 
       const networkErrorCodes = new Set([
         'ECONNREFUSED',
@@ -190,7 +185,7 @@ class JellyfinAPI extends ExternalAPI {
 
       return systemInfoResponse;
     } catch (e) {
-      throw new ApiError(e.response?.status, ApiErrorCode.InvalidAuthToken);
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
     }
   }
 
@@ -207,7 +202,7 @@ class JellyfinAPI extends ExternalAPI {
         { label: 'Jellyfin API' }
       );
 
-      throw new ApiError(e.response?.status, ApiErrorCode.Unknown);
+      throw new ApiError(e.cause?.status, ApiErrorCode.Unknown);
     }
   }
 
@@ -222,7 +217,7 @@ class JellyfinAPI extends ExternalAPI {
         { label: 'Jellyfin API' }
       );
 
-      throw new ApiError(e.response?.status, ApiErrorCode.InvalidAuthToken);
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
     }
   }
 
@@ -238,7 +233,7 @@ class JellyfinAPI extends ExternalAPI {
         { label: 'Jellyfin API' }
       );
 
-      throw new ApiError(e.response?.status, ApiErrorCode.InvalidAuthToken);
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
     }
   }
 
@@ -317,7 +312,7 @@ class JellyfinAPI extends ExternalAPI {
         { label: 'Jellyfin API' }
       );
 
-      throw new ApiError(e.response?.status, ApiErrorCode.InvalidAuthToken);
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
     }
   }
 
@@ -338,7 +333,7 @@ class JellyfinAPI extends ExternalAPI {
         { label: 'Jellyfin API' }
       );
 
-      throw new ApiError(e.response?.status, ApiErrorCode.InvalidAuthToken);
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
     }
   }
 
@@ -353,7 +348,7 @@ class JellyfinAPI extends ExternalAPI {
       return itemResponse;
     } catch (e) {
       if (availabilitySync.running) {
-        if (e.response && e.response.status === 500) {
+        if (e.cause?.status === 500) {
           return undefined;
         }
       }
@@ -362,7 +357,7 @@ class JellyfinAPI extends ExternalAPI {
         `Something went wrong while getting library content from the Jellyfin server: ${e.message}`,
         { label: 'Jellyfin API' }
       );
-      throw new ApiError(e.response?.status, ApiErrorCode.InvalidAuthToken);
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
     }
   }
 
@@ -377,7 +372,7 @@ class JellyfinAPI extends ExternalAPI {
         { label: 'Jellyfin API' }
       );
 
-      throw new ApiError(e.response?.status, ApiErrorCode.InvalidAuthToken);
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
     }
   }
 
@@ -399,6 +394,23 @@ class JellyfinAPI extends ExternalAPI {
     } catch (e) {
       logger.error(
         `Something went wrong while getting the list of episodes from the Jellyfin server: ${e.message}`,
+        { label: 'Jellyfin API' }
+      );
+
+      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidAuthToken);
+    }
+  }
+
+  public async createApiToken(appName: string): Promise<string> {
+    try {
+      await this.post(`/Auth/Keys?App=${appName}`);
+      const apiKeys = await this.get<any>(`/Auth/Keys`);
+      return apiKeys.Items.reverse().find(
+        (item: any) => item.AppName === appName
+      ).AccessToken;
+    } catch (e) {
+      logger.error(
+        `Something went wrong while creating an API key the Jellyfin server: ${e.message}`,
         { label: 'Jellyfin API' }
       );
 

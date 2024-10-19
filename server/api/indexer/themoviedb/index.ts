@@ -96,6 +96,7 @@ interface DiscoverTvOptions {
   sortBy?: SortOptions;
   watchRegion?: string;
   watchProviders?: string;
+  withStatus?: string; // Returning Series: 0 Planned: 1 In Production: 2 Ended: 3 Cancelled: 4 Pilot: 5
 }
 
 class TheMovieDb extends ExternalAPI implements TvShowIndexer {
@@ -524,6 +525,7 @@ class TheMovieDb extends ExternalAPI implements TvShowIndexer {
     voteCountLte,
     watchProviders,
     watchRegion,
+    withStatus,
   }: DiscoverTvOptions = {}): Promise<TmdbSearchTvResponse> => {
     try {
       const defaultFutureDate = new Date(
@@ -571,6 +573,7 @@ class TheMovieDb extends ExternalAPI implements TvShowIndexer {
         'vote_count.lte': voteCountLte || '',
         with_watch_providers: watchProviders || '',
         watch_region: watchRegion || '',
+        with_status: withStatus || '',
       });
 
       return data;

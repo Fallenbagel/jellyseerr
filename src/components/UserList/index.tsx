@@ -1,6 +1,7 @@
 import Alert from '@app/components/Common/Alert';
 import Badge from '@app/components/Common/Badge';
 import Button from '@app/components/Common/Button';
+import CachedImage from '@app/components/Common/CachedImage';
 import Header from '@app/components/Common/Header';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import Modal from '@app/components/Common/Modal';
@@ -28,8 +29,6 @@ import { MediaServerType } from '@server/constants/server';
 import type { UserResultsResponse } from '@server/interfaces/api/userInterfaces';
 import { hasPermission } from '@server/lib/permissions';
 import { Field, Form, Formik } from 'formik';
-import getConfig from 'next/config';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -68,14 +67,15 @@ const messages = defineMessages('components.UserList', {
   usercreatedfailedexisting:
     'The provided email address is already in use by another user.',
   usercreatedsuccess: 'User created successfully!',
-  displayName: 'Display Name',
+  username: 'Username',
   email: 'Email Address',
   password: 'Password',
   passwordinfodescription:
     'Configure an application URL and enable email notifications to allow automatic password generation.',
   autogeneratepassword: 'Automatically Generate Password',
   autogeneratepasswordTip: 'Email a server-generated password to the user',
-  validationEmail: 'You must provide a valid email address',
+  validationUsername: 'You must provide an username',
+  validationEmail: 'Email required',
   sortCreated: 'Join Date',
   sortDisplayName: 'Display Name',
   sortRequests: 'Request Count',
@@ -89,7 +89,6 @@ const UserList = () => {
   const intl = useIntl();
   const router = useRouter();
   const settings = useSettings();
-  const { publicRuntimeConfig } = getConfig();
   const { addToast } = useToasts();
   const { user: currentUser, hasPermission: currentHasPermission } = useUser();
   const [currentSort, setCurrentSort] = useState<Sort>('displayname');
@@ -208,9 +207,10 @@ const UserList = () => {
   }
 
   const CreateUserSchema = Yup.object().shape({
-    email: Yup.string()
-      .required(intl.formatMessage(messages.validationEmail))
-      .email(intl.formatMessage(messages.validationEmail)),
+    username: Yup.string().required(
+      intl.formatMessage(messages.validationUsername)
+    ),
+    email: Yup.string().email(intl.formatMessage(messages.validationEmail)),
     password: Yup.lazy((value) =>
       !value
         ? Yup.string()
@@ -258,7 +258,7 @@ const UserList = () => {
             setDeleteModal({ isOpen: false, user: deleteModal.user })
           }
           title={intl.formatMessage(messages.deleteuser)}
-          subTitle={deleteModal.user?.displayName}
+          subTitle={deleteModal.user?.username}
         >
           {intl.formatMessage(messages.deleteconfirm)}
         </Modal>
@@ -276,7 +276,7 @@ const UserList = () => {
       >
         <Formik
           initialValues={{
-            displayName: '',
+            username: '',
             email: '',
             password: '',
             genpassword: false,
@@ -290,21 +290,28 @@ const UserList = () => {
                   'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                  username: values.displayName,
+                  username: values.username,
                   email: values.email,
                   password: values.genpassword ? null : values.password,
                 }),
               });
-              if (!res.ok) throw new Error();
+              if (!res.ok) throw new Error(res.statusText, { cause: res });
               addToast(intl.formatMessage(messages.usercreatedsuccess), {
                 appearance: 'success',
                 autoDismiss: true,
               });
               setCreateModal({ isOpen: false });
             } catch (e) {
+              let errorData;
+              try {
+                errorData = await e.cause?.text();
+                errorData = JSON.parse(errorData);
+              } catch {
+                /* empty */
+              }
               addToast(
                 intl.formatMessage(
-                  e.response.data.errors?.includes('USER_EXISTS')
+                  errorData.errors?.includes('USER_EXISTS')
                     ? messages.usercreatedfailedexisting
                     : messages.usercreatedfailed
                 ),
@@ -363,23 +370,24 @@ const UserList = () => {
                   )}
                 <Form className="section">
                   <div className="form-row">
-                    <label htmlFor="displayName" className="text-label">
-                      {intl.formatMessage(messages.displayName)}
+                    <label htmlFor="username" className="text-label">
+                      {intl.formatMessage(messages.username)}
+                      <span className="label-required">*</span>
                     </label>
                     <div className="form-input-area">
                       <div className="form-input-field">
-                        <Field
-                          id="displayName"
-                          name="displayName"
-                          type="text"
-                        />
+                        <Field id="username" name="username" type="text" />
                       </div>
+                      {errors.username &&
+                        touched.username &&
+                        typeof errors.username === 'string' && (
+                          <div className="error">{errors.username}</div>
+                        )}
                     </div>
                   </div>
                   <div className="form-row">
                     <label htmlFor="email" className="text-label">
                       {intl.formatMessage(messages.email)}
-                      <span className="label-required">*</span>
                     </label>
                     <div className="form-input-area">
                       <div className="form-input-field">
@@ -525,7 +533,8 @@ const UserList = () => {
             >
               <InboxArrowDownIcon />
               <span>
-                {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                {settings.currentSettings.mediaServerType ===
+                MediaServerType.EMBY
                   ? intl.formatMessage(messages.importfrommediaserver, {
                       mediaServerName: 'Emby',
                     })
@@ -624,7 +633,8 @@ const UserList = () => {
                     href={`/users/${user.id}`}
                     className="h-10 w-10 flex-shrink-0"
                   >
-                    <Image
+                    <CachedImage
+                      type="avatar"
                       className="h-10 w-10 rounded-full object-cover"
                       src={user.avatar}
                       alt=""
@@ -638,9 +648,16 @@ const UserList = () => {
                       className="text-base font-bold leading-5 transition duration-300 hover:underline"
                       data-testid="user-list-username-link"
                     >
-                      {user.displayName}
+                      {user.username ||
+                        user.jellyfinUsername ||
+                        user.plexUsername ||
+                        user.email}
                     </Link>
-                    {user.displayName.toLowerCase() !== user.email && (
+                    {(
+                      user.username ||
+                      user.jellyfinUsername ||
+                      user.plexUsername
+                    )?.toLowerCase() !== user.email && (
                       <div className="text-sm leading-5 text-gray-300">
                         {user.email}
                       </div>
@@ -673,7 +690,7 @@ const UserList = () => {
                   <Badge badgeType="default">
                     {intl.formatMessage(messages.localuser)}
                   </Badge>
-                ) : publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? (
+                ) : user.userType === UserType.EMBY ? (
                   <Badge badgeType="success">
                     {intl.formatMessage(messages.mediaServerUser, {
                       mediaServerName: 'Emby',

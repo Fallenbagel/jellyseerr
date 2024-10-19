@@ -567,7 +567,10 @@ class JellyfinScanner {
   public async run(): Promise<void> {
     const settings = getSettings();
 
-    if (settings.main.mediaServerType != MediaServerType.JELLYFIN) {
+    if (
+      settings.main.mediaServerType != MediaServerType.JELLYFIN &&
+      settings.main.mediaServerType != MediaServerType.EMBY
+    ) {
       return;
     }
 
@@ -582,12 +585,7 @@ class JellyfinScanner {
       const userRepository = getRepository(User);
       const admin = await userRepository.findOne({
         where: { id: 1 },
-        select: [
-          'id',
-          'jellyfinAuthToken',
-          'jellyfinUserId',
-          'jellyfinDeviceId',
-        ],
+        select: ['id', 'jellyfinUserId', 'jellyfinDeviceId'],
         order: { id: 'ASC' },
       });
 
@@ -597,7 +595,7 @@ class JellyfinScanner {
 
       this.jfClient = new JellyfinAPI(
         getHostname(),
-        admin.jellyfinAuthToken,
+        settings.jellyfin.apiKey,
         admin.jellyfinDeviceId
       );
 

@@ -8,10 +8,10 @@
 <p align="center">
 <a href="https://discord.gg/ckbvBtDJgC"><img src="https://img.shields.io/discord/952656177924300932" alt="Discord"></a>
 <a href="https://hub.docker.com/r/fallenbagel/jellyseerr"><img src="https://img.shields.io/docker/pulls/fallenbagel/jellyseerr" alt="Docker pulls"></a>
-<a href="http://jellyseerr.borgcube.de/engage/jellyseerr/"><img src="http://jellyseerr.borgcube.de/widget/jellyseerr/jellyseerr-frontend/svg-badge.svg" alt="Translation status" /></a>
+<a href="http://translate.jellyseerr.dev/engage/jellyseerr/"><img src="http://translate.jellyseerr.dev/widget/jellyseerr/jellyseerr-frontend/svg-badge.svg" alt="Translation status" /></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-40-orange.svg"/></a>
+<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-48-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 **Jellyseerr** is a free and open source software application for managing requests for your media library.
@@ -137,6 +137,16 @@ Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcon
       <td align="center" valign="top" width="14.28%"><a href="https://joaquinolivero.com"><img src="https://avatars.githubusercontent.com/u/66050823?v=4?s=100" width="100px;" alt="Joaquin Olivero"/><br /><sub><b>Joaquin Olivero</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=JoaquinOlivero" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Bretterteig"><img src="https://avatars.githubusercontent.com/u/47298401?v=4?s=100" width="100px;" alt="Julian Behr"/><br /><sub><b>Julian Behr</b></sub></a><br /><a href="#translation-Bretterteig" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ThowZzy"><img src="https://avatars.githubusercontent.com/u/61882536?v=4?s=100" width="100px;" alt="ThowZzy"/><br /><sub><b>ThowZzy</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=ThowZzy" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://josephrisk.com"><img src="https://avatars.githubusercontent.com/u/18372584?v=4?s=100" width="100px;" alt="Joseph Risk"/><br /><sub><b>Joseph Risk</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=j0srisk" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Loetwiek"><img src="https://avatars.githubusercontent.com/u/79059734?v=4?s=100" width="100px;" alt="Loetwiek"/><br /><sub><b>Loetwiek</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=Loetwiek" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Fuochi"><img src="https://avatars.githubusercontent.com/u/4720478?v=4?s=100" width="100px;" alt="Fuochi"/><br /><sub><b>Fuochi</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=Fuochi" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://mobihen.com"><img src="https://avatars.githubusercontent.com/u/35529491?v=4?s=100" width="100px;" alt="Nir Israel Hen"/><br /><sub><b>Nir Israel Hen</b></sub></a><br /><a href="#translation-mobihen" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/XDark187"><img src="https://avatars.githubusercontent.com/u/39034192?v=4?s=100" width="100px;" alt="Baraa"/><br /><sub><b>Baraa</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=XDark187" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/franciscofsales"><img src="https://avatars.githubusercontent.com/u/7977645?v=4?s=100" width="100px;" alt="Francisco Sales"/><br /><sub><b>Francisco Sales</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=franciscofsales" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/myselfolli"><img src="https://avatars.githubusercontent.com/u/37535998?v=4?s=100" width="100px;" alt="Oliver Laing"/><br /><sub><b>Oliver Laing</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=myselfolli" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/M0NsTeRRR"><img src="https://avatars.githubusercontent.com/u/37785089?v=4?s=100" width="100px;" alt="Ludovic Ortega"/><br /><sub><b>Ludovic Ortega</b></sub></a><br /><a href="#security-M0NsTeRRR" title="Security">🛡️</a></td>
     </tr>
   </tbody>
 </table>

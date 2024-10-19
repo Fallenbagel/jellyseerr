@@ -3,6 +3,7 @@ import SonarrAPI from '@server/api/servarr/sonarr';
 import { MediaStatus, MediaType } from '@server/constants/media';
 import { MediaServerType } from '@server/constants/server';
 import { getRepository } from '@server/datasource';
+import { Blacklist } from '@server/entity/Blacklist';
 import type { User } from '@server/entity/User';
 import { Watchlist } from '@server/entity/Watchlist';
 import type { DownloadingItem } from '@server/lib/downloadtracker';
@@ -17,6 +18,7 @@ import {
   Entity,
   Index,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -66,7 +68,7 @@ class Media {
 
     try {
       const media = await mediaRepository.findOne({
-        where: { tmdbId: id, mediaType },
+        where: { tmdbId: id, mediaType: mediaType },
         relations: { requests: true, issues: true },
       });
 
@@ -115,6 +117,11 @@ class Media {
 
   @OneToMany(() => Issue, (issue) => issue.media, { cascade: true })
   public issues: Issue[];
+
+  @OneToOne(() => Blacklist, (blacklist) => blacklist.media, {
+    eager: true,
+  })
+  public blacklist: Blacklist;
 
   @CreateDateColumn()
   public createdAt: Date;
@@ -211,9 +218,10 @@ class Media {
       }
     } else {
       const pageName =
-        process.env.JELLYFIN_TYPE === 'emby' ? 'item' : 'details';
+        getSettings().main.mediaServerType == MediaServerType.EMBY
+          ? 'item'
+          : 'details';
       const { serverId, externalHostname } = getSettings().jellyfin;
-
       const jellyfinHost =
         externalHostname && externalHostname.length > 0
           ? externalHostname
@@ -223,7 +231,7 @@ class Media {
         this.mediaUrl = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId}&context=home&serverId=${serverId}`;
       }
       if (this.jellyfinMediaId4k) {
-        this.mediaUrl4k = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId}&context=home&serverId=${serverId}`;
+        this.mediaUrl4k = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId4k}&context=home&serverId=${serverId}`;
       }
     }
   }
