@@ -48,8 +48,8 @@ import {
   MinusCircleIcon,
   StarIcon,
 } from '@heroicons/react/24/solid';
+import { ANIME_KEYWORD_ID } from '@server/api/indexer/themoviedb/constants';
 import type { RTRating } from '@server/api/rating/rottentomatoes';
-import { ANIME_KEYWORD_ID } from '@server/api/themoviedb/constants';
 import { IssueStatus } from '@server/constants/issue';
 import {
   MediaRequestStatus,
