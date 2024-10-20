@@ -1,3 +1,6 @@
+import type { TvShowIndexer } from '@server/api/indexer';
+import TheMovieDb from '@server/api/indexer/themoviedb';
+import Tvdb from '@server/api/indexer/tvdb';
 import { MediaServerType } from '@server/constants/server';
 import { Permission } from '@server/lib/permissions';
 import { runMigrations } from '@server/lib/settings/migrator';
@@ -76,6 +79,10 @@ export interface DVRSettings {
   syncEnabled: boolean;
   preventSearch: boolean;
   tagRequests: boolean;
+}
+
+export interface TvdbSettings {
+  use: boolean;
 }
 
 export interface RadarrSettings extends DVRSettings {
@@ -286,6 +293,7 @@ export interface AllSettings {
   plex: PlexSettings;
   jellyfin: JellyfinSettings;
   tautulli: TautulliSettings;
+  tvdb: TvdbSettings;
   radarr: RadarrSettings[];
   sonarr: SonarrSettings[];
   public: PublicSettings;
@@ -346,6 +354,7 @@ class Settings {
         apiKey: '',
       },
       tautulli: {},
+      tvdb: { use: false },
       radarr: [],
       sonarr: [],
       public: {
@@ -514,6 +523,14 @@ class Settings {
     this.data.tautulli = data;
   }
 
+  get tvdb(): TvdbSettings {
+    return this.data.tvdb;
+  }
+
+  set tvdb(data: TvdbSettings) {
+    this.data.tvdb = data;
+  }
+
   get radarr(): RadarrSettings[] {
     return this.data.radarr;
   }
@@ -676,6 +693,15 @@ export const getSettings = (initialSettings?: AllSettings): Settings => {
   }
 
   return settings;
+};
+
+export const getIndexer = (): TvShowIndexer => {
+  const settings = getSettings();
+  if (settings.tvdb.use) {
+    return new Tvdb();
+  } else {
+    return new TheMovieDb();
+  }
 };
 
 export default Settings;
