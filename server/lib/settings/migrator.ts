@@ -15,11 +15,12 @@ export const runMigrations = async (
   try {
     // we read old backup and create a backup of currents settings
     const BACKUP_PATH = SETTINGS_PATH.replace('.json', '.old.json');
-    const backupExists = await fs
-      .access(BACKUP_PATH, fs.constants.F_OK)
-      .then(() => true)
-      .catch(() => false);
-    const oldBackup = backupExists ? await fs.readFile(BACKUP_PATH) : null;
+    let oldBackup: Buffer | null = null;
+    try {
+      oldBackup = await fs.readFile(BACKUP_PATH);
+    } catch {
+      /* empty */
+    }
     await fs.writeFile(BACKUP_PATH, JSON.stringify(settings, undefined, ' '));
 
     const migrations = (await fs.readdir(migrationsDir)).filter(
