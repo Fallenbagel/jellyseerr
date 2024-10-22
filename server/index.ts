@@ -22,7 +22,6 @@ import routes from '@server/routes';
 import avatarproxy from '@server/routes/avatarproxy';
 import imageproxy from '@server/routes/imageproxy';
 import { getAppVersion } from '@server/utils/appVersion';
-import bindHttpMethod from '@server/utils/bindHttpMethod';
 import restartFlag from '@server/utils/restartFlag';
 import { getClientIp } from '@supercharge/request-ip';
 import { TypeormStore } from 'connect-typeorm/out';
@@ -33,14 +32,12 @@ import express from 'express';
 import * as OpenApiValidator from 'express-openapi-validator';
 import type { Store } from 'express-session';
 import session from 'express-session';
-import http from 'http';
-import https from 'https';
-import { HttpsProxyAgent } from 'https-proxy-agent';
 import next from 'next';
 import dns from 'node:dns';
 import net from 'node:net';
 import path from 'path';
 import swaggerUi from 'swagger-ui-express';
+import { ProxyAgent, setGlobalDispatcher } from 'undici';
 import YAML from 'yamljs';
 
 if (process.env.forceIpv4First === 'true') {
@@ -73,21 +70,7 @@ app
 
     // Register HTTP proxy
     if (settings.main.httpProxy) {
-      const agent = new HttpsProxyAgent(settings.main.httpProxy);
-
-      (globalThis as any)[Symbol.for('undici.globalDispatcher.1')] = agent;
-
-      http.globalAgent = agent;
-      https.globalAgent = agent;
-
-      const httpGet = http.get;
-      const httpRequest = http.request;
-      const httpsGet = https.get;
-      const httpsRequest = https.request;
-      http.get = bindHttpMethod(httpGet, agent);
-      http.request = bindHttpMethod(httpRequest, agent);
-      https.get = bindHttpMethod(httpsGet, agent);
-      https.request = bindHttpMethod(httpsRequest, agent);
+      setGlobalDispatcher(new ProxyAgent(settings.main.httpProxy));
     }
 
     // Migrate library types
