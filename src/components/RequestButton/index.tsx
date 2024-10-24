@@ -294,6 +294,23 @@ const RequestButton = ({
     });
   } else if (
     mediaType === 'tv' &&
+    hasPermission([Permission.REQUEST, Permission.REQUEST_TV], {
+      type: 'or',
+    }) &&
+    media &&
+    media.status === MediaStatus.PARTIALLY_AVAILABLE
+  ) {
+    buttons.push({
+      id: 'request-more',
+      text: intl.formatMessage(messages.requestmore),
+      action: () => {
+        setEditRequest(false);
+        setShowRequestModal(true);
+      },
+      svg: <ArrowDownTrayIcon />,
+    });
+  } else if (
+    mediaType === 'tv' &&
     (!activeRequest || activeRequest.requestedBy.id !== user?.id) &&
     hasPermission([Permission.REQUEST, Permission.REQUEST_TV], {
       type: 'or',
