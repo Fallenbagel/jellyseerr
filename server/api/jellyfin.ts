@@ -76,6 +76,7 @@ export interface JellyfinMediaSource {
   Path: string;
   Type: string;
   VideoType: string;
+  Container?: string;
   MediaStreams: JellyfinMediaStream[];
 }
 
