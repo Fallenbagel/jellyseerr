@@ -56,11 +56,11 @@ export class User {
   })
   public email: string;
 
-  @Column({ nullable: true })
-  public plexUsername?: string;
+  @Column({ type: 'varchar', nullable: true })
+  public plexUsername?: string | null;
 
-  @Column({ nullable: true })
-  public jellyfinUsername?: string;
+  @Column({ type: 'varchar', nullable: true })
+  public jellyfinUsername?: string | null;
 
   @Column({ nullable: true })
   public username?: string;
@@ -77,20 +77,20 @@ export class User {
   @Column({ type: 'integer', default: UserType.PLEX })
   public userType: UserType;
 
-  @Column({ nullable: true, select: true })
-  public plexId?: number;
+  @Column({ type: 'integer', nullable: true, select: true })
+  public plexId?: number | null;
 
-  @Column({ nullable: true })
-  public jellyfinUserId?: string;
+  @Column({ type: 'varchar', nullable: true })
+  public jellyfinUserId?: string | null;
 
-  @Column({ nullable: true })
-  public jellyfinDeviceId?: string;
+  @Column({ type: 'varchar', nullable: true })
+  public jellyfinDeviceId?: string | null;
 
-  @Column({ nullable: true })
-  public jellyfinAuthToken?: string;
+  @Column({ type: 'varchar', nullable: true })
+  public jellyfinAuthToken?: string | null;
 
-  @Column({ nullable: true })
-  public plexToken?: string;
+  @Column({ type: 'varchar', nullable: true })
+  public plexToken?: string | null;
 
   @Column({ type: 'integer', default: 0 })
   public permissions = 0;
