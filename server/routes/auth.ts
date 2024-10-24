@@ -389,6 +389,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
           jellyfinUsername: account.User.Name,
         }
       );
+      user.avatar = `/avatarproxy/${account.User.Id}`;
       user.jellyfinUsername = account.User.Name;
 
       if (user.username === account.User.Name) {
