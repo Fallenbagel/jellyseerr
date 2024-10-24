@@ -168,6 +168,9 @@ components:
         csrfProtection:
           type: boolean
           example: false
+        cspFrameAncestorDomains:
+          type: string
+          example: 'example.com'
         hideAvailable:
           type: boolean
           example: false

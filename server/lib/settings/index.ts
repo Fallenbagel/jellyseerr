@@ -104,6 +104,7 @@ export interface MainSettings {
   applicationTitle: string;
   applicationUrl: string;
   csrfProtection: boolean;
+  cspFrameAncestorDomains: string;
   cacheImages: boolean;
   defaultPermissions: number;
   defaultQuotas: {
@@ -310,6 +311,7 @@ class Settings {
         applicationTitle: 'Jellyseerr',
         applicationUrl: '',
         csrfProtection: false,
+        cspFrameAncestorDomains: '',
         cacheImages: false,
         defaultPermissions: Permission.REQUEST,
         defaultQuotas: {
