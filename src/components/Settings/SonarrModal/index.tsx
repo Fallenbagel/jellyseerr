@@ -87,10 +87,12 @@ const messages = defineMessages('components.Settings.SonarrModal', {
 });
 
 interface SonarrTestResponse extends DVRTestResponse {
-  languageProfiles: {
-    id: number;
-    name: string;
-  }[] | null;
+  languageProfiles:
+    | {
+        id: number;
+        name: string;
+      }[]
+    | null;
 }
 
 interface SonarrModalProps {
