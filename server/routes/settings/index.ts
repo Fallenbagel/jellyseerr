@@ -32,7 +32,6 @@ import { getHostname } from '@server/utils/getHostname';
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import fs from 'fs';
-import gravatarUrl from 'gravatar-url';
 import { escapeRegExp, merge, omit, set, sortBy } from 'lodash';
 import { rescheduleJob } from 'node-schedule';
 import path from 'path';
@@ -377,11 +376,6 @@ settingsRoutes.get('/jellyfin/library', async (req, res, next) => {
 
 settingsRoutes.get('/jellyfin/users', async (req, res) => {
   const settings = getSettings();
-  const { externalHostname } = settings.jellyfin;
-  const jellyfinHost =
-    externalHostname && externalHostname.length > 0
-      ? externalHostname
-      : getHostname();
 
   const userRepository = getRepository(User);
   const admin = await userRepository.findOneOrFail({
@@ -400,9 +394,7 @@ settingsRoutes.get('/jellyfin/users', async (req, res) => {
   const users = resp.users.map((user) => ({
     username: user.Name,
     id: user.Id,
-    thumb: user.PrimaryImageTag
-      ? `${jellyfinHost}/Users/${user.Id}/Images/Primary/?tag=${user.PrimaryImageTag}&quality=90`
-      : gravatarUrl(user.Name, { default: 'mm', size: 200 }),
+    thumb: `/avatarproxy/${user.Id}`,
     email: user.Name,
   }));
 

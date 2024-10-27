@@ -1991,6 +1991,9 @@ paths:
                   appDataPath:
                     type: string
                     example: /app/config
+                  appDataPermissions:
+                    type: boolean
+                    example: true
   /settings/main:
     get:
       summary: Get main settings

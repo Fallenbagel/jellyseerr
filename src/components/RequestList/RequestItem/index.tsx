@@ -42,6 +42,7 @@ const messages = defineMessages('components.RequestList.RequestItem', {
   tmdbid: 'TMDB ID',
   tvdbid: 'TheTVDB ID',
   unknowntitle: 'Unknown Title',
+  removearr: 'Remove from {arr}',
   profileName: 'Profile',
 });
 
@@ -190,6 +191,7 @@ const RequestItemError = ({
                           >
                             <span className="avatar-sm ml-1.5">
                               <CachedImage
+                                type="avatar"
                                 src={requestData.requestedBy.avatar}
                                 alt=""
                                 className="avatar-sm object-cover"
@@ -249,6 +251,7 @@ const RequestItemError = ({
                         >
                           <span className="avatar-sm ml-1.5">
                             <CachedImage
+                              type="avatar"
                               src={requestData.modifiedBy.avatar}
                               alt=""
                               className="avatar-sm object-cover"
@@ -341,6 +344,18 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
     revalidateList();
   };
 
+  const deleteMediaFile = async () => {
+    if (request.media) {
+      await fetch(`/api/v1/media/${request.media.id}/file`, {
+        method: 'DELETE',
+      });
+      await fetch(`/api/v1/media/${request.media.id}`, {
+        method: 'DELETE',
+      });
+      revalidateList();
+    }
+  };
+
   const retryRequest = async () => {
     setRetrying(true);
 
@@ -405,6 +420,7 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
         {title.backdropPath && (
           <div className="absolute inset-0 z-0 w-full bg-cover bg-center xl:w-2/3">
             <CachedImage
+              type="tmdb"
               src={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${title.backdropPath}`}
               alt=""
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -430,6 +446,7 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
               className="relative h-auto w-12 flex-shrink-0 scale-100 transform-gpu overflow-hidden rounded-md transition duration-300 hover:scale-105"
             >
               <CachedImage
+                type="tmdb"
                 src={
                   title.posterPath
                     ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${title.posterPath}`
@@ -557,6 +574,7 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                         >
                           <span className="avatar-sm ml-1.5">
                             <CachedImage
+                              type="avatar"
                               src={requestData.requestedBy.avatar}
                               alt=""
                               className="avatar-sm object-cover"
@@ -616,7 +634,8 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                       >
                         <span className="avatar-sm ml-1.5">
                           <CachedImage
-                            src={requestData.requestedBy.avatar}
+                            type="avatar"
+                            src={requestData.modifiedBy.avatar}
                             alt=""
                             className="avatar-sm object-cover"
                             width={20}
@@ -666,14 +685,28 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
             )}
           {requestData.status !== MediaRequestStatus.PENDING &&
             hasPermission(Permission.MANAGE_REQUESTS) && (
-              <ConfirmButton
-                onClick={() => deleteRequest()}
-                confirmText={intl.formatMessage(globalMessages.areyousure)}
-                className="w-full"
-              >
-                <TrashIcon />
-                <span>{intl.formatMessage(messages.deleterequest)}</span>
-              </ConfirmButton>
+              <>
+                <ConfirmButton
+                  onClick={() => deleteRequest()}
+                  confirmText={intl.formatMessage(globalMessages.areyousure)}
+                  className="w-full"
+                >
+                  <TrashIcon />
+                  <span>{intl.formatMessage(messages.deleterequest)}</span>
+                </ConfirmButton>
+                <ConfirmButton
+                  onClick={() => deleteMediaFile()}
+                  confirmText={intl.formatMessage(globalMessages.areyousure)}
+                  className="w-full"
+                >
+                  <TrashIcon />
+                  <span>
+                    {intl.formatMessage(messages.removearr, {
+                      arr: request.type === 'movie' ? 'Radarr' : 'Sonarr',
+                    })}
+                  </span>
+                </ConfirmButton>
+              </>
             )}
           {requestData.status === MediaRequestStatus.PENDING &&
             hasPermission(Permission.MANAGE_REQUESTS) && (

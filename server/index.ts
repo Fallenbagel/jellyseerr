@@ -21,6 +21,7 @@ import clearCookies from '@server/middleware/clearcookies';
 import routes from '@server/routes';
 import avatarproxy from '@server/routes/avatarproxy';
 import imageproxy from '@server/routes/imageproxy';
+import { appDataPermissions } from '@server/utils/appDataVolume';
 import { getAppVersion } from '@server/utils/appVersion';
 import restartFlag from '@server/utils/restartFlag';
 import { getClientIp } from '@supercharge/request-ip';
@@ -38,6 +39,7 @@ import dns from 'node:dns';
 import net from 'node:net';
 import path from 'path';
 import swaggerUi from 'swagger-ui-express';
+import { ProxyAgent, setGlobalDispatcher } from 'undici';
 import YAML from 'yamljs';
 
 if (process.env.forceIpv4First === 'true') {
@@ -51,6 +53,12 @@ logger.info(`Starting Overseerr version ${getAppVersion()}`);
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
+
+if (!appDataPermissions()) {
+  logger.error(
+    'Something went wrong while checking config folder! Please ensure the config folder is set up properly.\nhttps://docs.jellyseerr.dev/getting-started'
+  );
+}
 
 app
   .prepare()
@@ -67,6 +75,11 @@ app
     // Load Settings
     const settings = await getSettings().load();
     restartFlag.initializeSettings(settings.main);
+
+    // Register HTTP proxy
+    if (settings.main.httpProxy) {
+      setGlobalDispatcher(new ProxyAgent(settings.main.httpProxy));
+    }
 
     // Migrate library types
     if (
@@ -197,7 +210,7 @@ app
         },
         store: new TypeormStore({
           cleanupLimit: 2,
-          ttl: 1000 * 60 * 60 * 24 * 30,
+          ttl: 60 * 60 * 24 * 30,
         }).connect(sessionRespository) as Store,
       })
     );
