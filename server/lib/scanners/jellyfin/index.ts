@@ -96,7 +96,7 @@ class JellyfinScanner {
           (MediaStream) => MediaStream.Type === 'Video'
         ).some((MediaStream) => {
           return (MediaStream.Width ?? 0) <= 2000;
-        }) || (MediaSource.Container && MediaSource.Container === "strm");
+        }) || MediaSource.Container === 'strm';
       });
 
       await this.asyncLock.dispatch(newMedia.tmdbId, async () => {
