@@ -119,6 +119,7 @@ export interface MainSettings {
   mediaServerType: number;
   partialRequestsEnabled: boolean;
   locale: string;
+  httpProxy: string;
 }
 
 interface PublicSettings {
@@ -325,6 +326,7 @@ class Settings {
         mediaServerType: MediaServerType.NOT_CONFIGURED,
         partialRequestsEnabled: true,
         locale: 'en',
+        httpProxy: '',
       },
       plex: {
         name: '',
@@ -648,7 +650,7 @@ class Settings {
 
     if (data) {
       const parsedJson = JSON.parse(data);
-      this.data = await runMigrations(parsedJson);
+      this.data = await runMigrations(parsedJson, SETTINGS_PATH);
 
       this.data = merge(this.data, parsedJson);
 
