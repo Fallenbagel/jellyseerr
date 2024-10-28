@@ -2,9 +2,9 @@ name: Code Formatting
 
 on:
   pull_request:
-    branches: [main]
+    branches: [develop]
   push:
-    branches: [main]
+    branches: [develop]
 
 jobs:
   format:
