@@ -325,18 +325,18 @@ class JellyfinScanner {
                 // and then not modifying the status if there are 0 items
                 existingSeason.status =
                   totalStandard >= season.episode_count ||
-                    existingSeason.status === MediaStatus.AVAILABLE
+                  existingSeason.status === MediaStatus.AVAILABLE
                     ? MediaStatus.AVAILABLE
                     : totalStandard > 0
-                      ? MediaStatus.PARTIALLY_AVAILABLE
-                      : existingSeason.status;
+                    ? MediaStatus.PARTIALLY_AVAILABLE
+                    : existingSeason.status;
                 existingSeason.status4k =
                   (this.enable4kShow && total4k >= season.episode_count) ||
-                    existingSeason.status4k === MediaStatus.AVAILABLE
+                  existingSeason.status4k === MediaStatus.AVAILABLE
                     ? MediaStatus.AVAILABLE
                     : this.enable4kShow && total4k > 0
-                      ? MediaStatus.PARTIALLY_AVAILABLE
-                      : existingSeason.status4k;
+                    ? MediaStatus.PARTIALLY_AVAILABLE
+                    : existingSeason.status4k;
               } else {
                 newSeasons.push(
                   new Season({
@@ -347,14 +347,14 @@ class JellyfinScanner {
                       totalStandard >= season.episode_count
                         ? MediaStatus.AVAILABLE
                         : totalStandard > 0
-                          ? MediaStatus.PARTIALLY_AVAILABLE
-                          : MediaStatus.UNKNOWN,
+                        ? MediaStatus.PARTIALLY_AVAILABLE
+                        : MediaStatus.UNKNOWN,
                     status4k:
                       this.enable4kShow && total4k >= season.episode_count
                         ? MediaStatus.AVAILABLE
                         : this.enable4kShow && total4k > 0
-                          ? MediaStatus.PARTIALLY_AVAILABLE
-                          : MediaStatus.UNKNOWN,
+                        ? MediaStatus.PARTIALLY_AVAILABLE
+                        : MediaStatus.UNKNOWN,
                   })
                 );
               }
@@ -444,8 +444,8 @@ class JellyfinScanner {
                 : media.seasons.some(
                   (season) => season.status !== MediaStatus.UNKNOWN
                 )
-                  ? MediaStatus.PARTIALLY_AVAILABLE
-                  : MediaStatus.UNKNOWN;
+                ? MediaStatus.PARTIALLY_AVAILABLE
+                : MediaStatus.UNKNOWN;
             media.status4k =
               (isAll4kSeasons || shouldStayAvailable4k) && this.enable4kShow
                 ? MediaStatus.AVAILABLE
@@ -472,8 +472,8 @@ class JellyfinScanner {
                 : newSeasons.some(
                   (season) => season.status !== MediaStatus.UNKNOWN
                 )
-                  ? MediaStatus.PARTIALLY_AVAILABLE
-                  : MediaStatus.UNKNOWN,
+                ? MediaStatus.PARTIALLY_AVAILABLE
+                : MediaStatus.UNKNOWN,
               status4k:
                 isAll4kSeasons && this.enable4kShow
                   ? MediaStatus.AVAILABLE
@@ -481,8 +481,8 @@ class JellyfinScanner {
                     newSeasons.some(
                       (season) => season.status4k !== MediaStatus.UNKNOWN
                     )
-                    ? MediaStatus.PARTIALLY_AVAILABLE
-                    : MediaStatus.UNKNOWN,
+                  ? MediaStatus.PARTIALLY_AVAILABLE
+                  : MediaStatus.UNKNOWN,
             });
             await mediaRepository.save(newMedia);
             this.log(`Saved ${tvShow.name}`);
