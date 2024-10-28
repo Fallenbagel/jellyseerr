@@ -453,8 +453,8 @@ class JellyfinScanner {
                   media.seasons.some(
                     (season) => season.status4k !== MediaStatus.UNKNOWN
                   )
-                  ? MediaStatus.PARTIALLY_AVAILABLE
-                  : MediaStatus.UNKNOWN;
+                ? MediaStatus.PARTIALLY_AVAILABLE
+                : MediaStatus.UNKNOWN;
             await mediaRepository.save(media);
             this.log(`Updating existing title: ${tvShow.name}`);
           } else {
