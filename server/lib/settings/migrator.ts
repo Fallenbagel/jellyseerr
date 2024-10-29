@@ -15,9 +15,9 @@ export const runMigrations = async (
   try {
     // we read old backup and create a backup of currents settings
     const BACKUP_PATH = SETTINGS_PATH.replace('.json', '.old.json');
-    let oldBackup: Buffer | null = null;
+    let oldBackup: string | null = null;
     try {
-      oldBackup = await fs.readFile(BACKUP_PATH);
+      oldBackup = await fs.readFile(BACKUP_PATH, 'utf-8');
     } catch {
       /* empty */
     }
@@ -37,7 +37,7 @@ export const runMigrations = async (
         const { default: migrationFn } = await import(
           path.join(migrationsDir, migration)
         );
-        const newSettings = await migrationFn(migrated);
+        const newSettings = await migrationFn(structuredClone(migrated));
         if (JSON.stringify(migrated) !== JSON.stringify(newSettings)) {
           logger.debug(`Migration '${migration}' has been applied.`, {
             label: 'Settings Migrator',
