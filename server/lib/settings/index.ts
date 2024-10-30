@@ -630,7 +630,8 @@ class Settings {
 
     if (data) {
       const parsedJson = JSON.parse(data);
-      this.data = await runMigrations(parsedJson, SETTINGS_PATH);
+      const migratedData = await runMigrations(parsedJson, SETTINGS_PATH);
+      this.data = merge(this.data, migratedData);
     }
 
     // generate keys and ids if it's missing
