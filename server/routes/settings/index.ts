@@ -72,10 +72,7 @@ settingsRoutes.get('/main', (req, res, next) => {
 settingsRoutes.post('/main', async (req, res) => {
   const settings = getSettings();
 
-  console.log('body', req.body);
-  console.log('before', settings.main);
   settings.main = merge(settings.main, req.body);
-  console.log('merged', settings.main);
   await settings.save();
 
   return res.status(200).json(settings.main);
