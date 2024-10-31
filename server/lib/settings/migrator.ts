@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import type { AllSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import fs from 'fs/promises';
@@ -45,10 +44,20 @@ export const runMigrations = async (
         }
         migrated = newSettings;
       } catch (e) {
-        logger.error(`Error while running migration '${migration}'`, {
-          label: 'Settings Migrator',
-        });
-        throw e;
+        // we stop jellyseerr if the migration failed
+        logger.error(
+          `Error while running migration '${migration}': ${e.message}`,
+          {
+            label: 'Settings Migrator',
+          }
+        );
+        logger.error(
+          'A common cause for this error is a permission issue with your configuration folder, a network issue or a corrupted database.',
+          {
+            label: 'Settings Migrator',
+          }
+        );
+        process.exit();
       }
     }
 
@@ -72,22 +81,18 @@ export const runMigrations = async (
       await fs.writeFile(BACKUP_PATH, oldBackup.toString());
     }
   } catch (e) {
+    // we stop jellyseerr if the migration failed
     logger.error(
       `Something went wrong while running settings migrations: ${e.message}`,
-      { label: 'Settings Migrator' }
+      {
+        label: 'Settings Migrator',
+      }
     );
-    // we stop jellyseerr if the migration failed
-    console.log(
-      '===================================================================='
-    );
-    console.log(
-      '       SOMETHING WENT WRONG WHILE RUNNING SETTINGS MIGRATIONS       '
-    );
-    console.log(
-      '   Please check that your configuration folder is properly set up   '
-    );
-    console.log(
-      '===================================================================='
+    logger.error(
+      'A common cause for this issue is a permission error of your configuration folder.',
+      {
+        label: 'Settings Migrator',
+      }
     );
     process.exit();
   }
