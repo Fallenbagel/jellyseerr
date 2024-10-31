@@ -33,6 +33,7 @@ import express from 'express';
 import * as OpenApiValidator from 'express-openapi-validator';
 import type { Store } from 'express-session';
 import session from 'express-session';
+import helmet from 'helmet';
 import next from 'next';
 import dns from 'node:dns';
 import net from 'node:net';
@@ -172,6 +173,23 @@ app
       });
     }
 
+    // Setup Content-Security-Policy
+    server.use(
+      helmet.contentSecurityPolicy({
+        useDefaults: false,
+        directives: {
+          'default-src':
+            helmet.contentSecurityPolicy.dangerouslyDisableDefaultSrc,
+          'frame-ancestors': [
+            "'self'",
+            ...(settings.main.cspFrameAncestorDomains
+              ? [settings.main.cspFrameAncestorDomains]
+              : []),
+          ],
+        },
+      })
+    );
+
     // Set up sessions
     const sessionRespository = getRepository(Session);
     server.use(
@@ -183,7 +201,11 @@ app
         cookie: {
           maxAge: 1000 * 60 * 60 * 24 * 30,
           httpOnly: true,
-          sameSite: settings.main.csrfProtection ? 'strict' : 'lax',
+          sameSite: settings.main.csrfProtection
+            ? 'strict'
+            : settings.main.cspFrameAncestorDomains
+            ? 'none'
+            : 'lax',
           secure: 'auto',
         },
         store: new TypeormStore({

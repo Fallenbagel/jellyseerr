@@ -874,6 +874,8 @@
   "components.Settings.SettingsMain.applicationurl": "Application URL",
   "components.Settings.SettingsMain.cacheImages": "Enable Image Caching",
   "components.Settings.SettingsMain.cacheImagesTip": "Cache externally sourced images (requires a significant amount of disk space)",
+  "components.Settings.SettingsMain.cspFrameAncestorDomains": "Frame-Ancestor Domains",
+  "components.Settings.SettingsMain.cspFrameAncestorDomainsTip": "Domains to allow embedding Jellyseer as iframe, object or embed. Incompatible with CSRF-Protection",
   "components.Settings.SettingsMain.csrfProtection": "Enable CSRF Protection",
   "components.Settings.SettingsMain.csrfProtectionHoverTip": "Do NOT enable this setting unless you understand what you are doing!",
   "components.Settings.SettingsMain.csrfProtectionTip": "Set external API access to read-only (requires HTTPS)",
