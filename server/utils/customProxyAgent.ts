@@ -52,17 +52,27 @@ export default async function createCustomProxyAgent(
         ).toString('base64')}`
       : undefined;
 
-  const proxyAgent = new ProxyAgent({
-    uri: proxySettings.useSsl
-      ? 'https://'
-      : 'http://' + proxySettings.hostname + ':' + proxySettings.port,
-    token,
-    interceptors: {
-      Client: [noProxyInterceptor],
-    },
-  });
+  try {
+    const proxyAgent = new ProxyAgent({
+      uri:
+        (proxySettings.useSsl ? 'https://' : 'http://') +
+        proxySettings.hostname +
+        ':' +
+        proxySettings.port,
+      token,
+      interceptors: {
+        Client: [noProxyInterceptor],
+      },
+    });
 
-  setGlobalDispatcher(proxyAgent);
+    setGlobalDispatcher(proxyAgent);
+  } catch (e) {
+    logger.error('Failed to connect to the proxy: ' + e.message, {
+      label: 'Proxy',
+    });
+    setGlobalDispatcher(defaultAgent);
+    return;
+  }
 
   try {
     const res = await fetch('https://www.google.com', { method: 'HEAD' });
