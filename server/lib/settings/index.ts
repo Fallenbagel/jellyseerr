@@ -2,7 +2,7 @@ import { MediaServerType } from '@server/constants/server';
 import { Permission } from '@server/lib/permissions';
 import { runMigrations } from '@server/lib/settings/migrator';
 import { randomUUID } from 'crypto';
-import fs from 'fs';
+import fs from 'fs/promises';
 import { merge } from 'lodash';
 import path from 'path';
 import webpush from 'web-push';
@@ -99,6 +99,17 @@ interface Quota {
   quotaDays?: number;
 }
 
+export interface ProxySettings {
+  enabled: boolean;
+  hostname: string;
+  port: number;
+  useSsl: boolean;
+  user: string;
+  password: string;
+  bypassFilter: string;
+  bypassLocalAddresses: boolean;
+}
+
 export interface MainSettings {
   apiKey: string;
   applicationTitle: string;
@@ -119,6 +130,7 @@ export interface MainSettings {
   mediaServerType: number;
   partialRequestsEnabled: boolean;
   locale: string;
+  proxy: ProxySettings;
 }
 
 interface PublicSettings {
@@ -325,6 +337,16 @@ class Settings {
         mediaServerType: MediaServerType.NOT_CONFIGURED,
         partialRequestsEnabled: true,
         locale: 'en',
+        proxy: {
+          enabled: false,
+          hostname: '',
+          port: 8080,
+          useSsl: false,
+          user: '',
+          password: '',
+          bypassFilter: '',
+          bypassLocalAddresses: true,
+        },
       },
       plex: {
         name: '',
@@ -479,10 +501,6 @@ class Settings {
   }
 
   get main(): MainSettings {
-    if (!this.data.main.apiKey) {
-      this.data.main.apiKey = this.generateApiKey();
-      this.save();
-    }
     return this.data.main;
   }
 
@@ -584,42 +602,28 @@ class Settings {
   }
 
   get clientId(): string {
-    if (!this.data.clientId) {
-      this.data.clientId = randomUUID();
-      this.save();
-    }
-
     return this.data.clientId;
   }
 
   get vapidPublic(): string {
-    this.generateVapidKeys();
-
     return this.data.vapidPublic;
   }
 
   get vapidPrivate(): string {
-    this.generateVapidKeys();
-
     return this.data.vapidPrivate;
   }
 
-  public regenerateApiKey(): MainSettings {
+  public async regenerateApiKey(): Promise<MainSettings> {
     this.main.apiKey = this.generateApiKey();
-    this.save();
+    await this.save();
     return this.main;
   }
 
   private generateApiKey(): string {
-    return Buffer.from(`${Date.now()}${randomUUID()}`).toString('base64');
-  }
-
-  private generateVapidKeys(force = false): void {
-    if (!this.data.vapidPublic || !this.data.vapidPrivate || force) {
-      const vapidKeys = webpush.generateVAPIDKeys();
-      this.data.vapidPrivate = vapidKeys.privateKey;
-      this.data.vapidPublic = vapidKeys.publicKey;
-      this.save();
+    if (process.env.API_KEY) {
+      return process.env.API_KEY;
+    } else {
+      return Buffer.from(`${Date.now()}${randomUUID()}`).toString('base64');
     }
   }
 
@@ -637,24 +641,51 @@ class Settings {
       return this;
     }
 
-    if (!fs.existsSync(SETTINGS_PATH)) {
-      this.save();
+    let data;
+    try {
+      data = await fs.readFile(SETTINGS_PATH, 'utf-8');
+    } catch {
+      await this.save();
     }
-    const data = fs.readFileSync(SETTINGS_PATH, 'utf-8');
 
     if (data) {
       const parsedJson = JSON.parse(data);
-      this.data = await runMigrations(parsedJson);
-
-      this.data = merge(this.data, parsedJson);
-
-      this.save();
+      const migratedData = await runMigrations(parsedJson, SETTINGS_PATH);
+      this.data = merge(this.data, migratedData);
     }
+
+    // generate keys and ids if it's missing
+    let change = false;
+    if (!this.data.main.apiKey) {
+      this.data.main.apiKey = this.generateApiKey();
+      change = true;
+    } else if (process.env.API_KEY) {
+      if (this.main.apiKey != process.env.API_KEY) {
+        this.main.apiKey = process.env.API_KEY;
+      }
+    }
+    if (!this.data.clientId) {
+      this.data.clientId = randomUUID();
+      change = true;
+    }
+    if (!this.data.vapidPublic || !this.data.vapidPrivate) {
+      const vapidKeys = webpush.generateVAPIDKeys();
+      this.data.vapidPrivate = vapidKeys.privateKey;
+      this.data.vapidPublic = vapidKeys.publicKey;
+      change = true;
+    }
+    if (change) {
+      await this.save();
+    }
+
     return this;
   }
 
-  public save(): void {
-    fs.writeFileSync(SETTINGS_PATH, JSON.stringify(this.data, undefined, ' '));
+  public async save(): Promise<void> {
+    await fs.writeFile(
+      SETTINGS_PATH,
+      JSON.stringify(this.data, undefined, ' ')
+    );
   }
 }
 

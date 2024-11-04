@@ -28,8 +28,6 @@ import type Issue from '@server/entity/Issue';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
 import { Field, Form, Formik } from 'formik';
-import getConfig from 'next/config';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
@@ -108,7 +106,6 @@ const IssueDetails = () => {
     (opt) => opt.issueType === issueData?.issueType
   );
   const settings = useSettings();
-  const { publicRuntimeConfig } = getConfig();
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -220,6 +217,7 @@ const IssueDetails = () => {
       {data.backdropPath && (
         <div className="media-page-bg-image">
           <CachedImage
+            type="tmdb"
             alt=""
             src={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${data.backdropPath}`}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -238,6 +236,7 @@ const IssueDetails = () => {
       <div className="media-header">
         <div className="media-poster">
           <CachedImage
+            type="tmdb"
             src={
               data.posterPath
                 ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${data.posterPath}`
@@ -289,10 +288,11 @@ const IssueDetails = () => {
                   }
                   className="group ml-1 inline-flex h-full items-center xl:ml-1.5"
                 >
-                  <Image
-                    className="mr-0.5 h-5 w-5 scale-100 transform-gpu rounded-full object-cover transition duration-300 group-hover:scale-105 xl:mr-1 xl:h-6 xl:w-6"
+                  <CachedImage
+                    type="avatar"
                     src={issueData.createdBy.avatar}
                     alt=""
+                    className="mr-0.5 h-5 w-5 scale-100 transform-gpu rounded-full object-cover transition duration-300 group-hover:scale-105 xl:mr-1 xl:h-6 xl:w-6"
                     width={20}
                     height={20}
                   />
@@ -390,7 +390,8 @@ const IssueDetails = () => {
                 >
                   <PlayIcon />
                   <span>
-                    {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                    {settings.currentSettings.mediaServerType ===
+                    MediaServerType.EMBY
                       ? intl.formatMessage(messages.playonplex, {
                           mediaServerName: 'Emby',
                         })
@@ -437,7 +438,8 @@ const IssueDetails = () => {
                 >
                   <PlayIcon />
                   <span>
-                    {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                    {settings.currentSettings.mediaServerType ===
+                    MediaServerType.EMBY
                       ? intl.formatMessage(messages.play4konplex, {
                           mediaServerName: 'Emby',
                         })
@@ -662,7 +664,8 @@ const IssueDetails = () => {
               >
                 <PlayIcon />
                 <span>
-                  {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                  {settings.currentSettings.mediaServerType ===
+                  MediaServerType.EMBY
                     ? intl.formatMessage(messages.playonplex, {
                         mediaServerName: 'Emby',
                       })
@@ -708,7 +711,8 @@ const IssueDetails = () => {
               >
                 <PlayIcon />
                 <span>
-                  {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                  {settings.currentSettings.mediaServerType ===
+                  MediaServerType.EMBY
                     ? intl.formatMessage(messages.play4konplex, {
                         mediaServerName: 'Emby',
                       })

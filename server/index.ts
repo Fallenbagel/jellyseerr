@@ -19,8 +19,11 @@ import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import clearCookies from '@server/middleware/clearcookies';
 import routes from '@server/routes';
+import avatarproxy from '@server/routes/avatarproxy';
 import imageproxy from '@server/routes/imageproxy';
+import { appDataPermissions } from '@server/utils/appDataVolume';
 import { getAppVersion } from '@server/utils/appVersion';
+import createCustomProxyAgent from '@server/utils/customProxyAgent';
 import restartFlag from '@server/utils/restartFlag';
 import { getClientIp } from '@supercharge/request-ip';
 import { TypeormStore } from 'connect-typeorm/out';
@@ -50,6 +53,12 @@ const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
+if (!appDataPermissions()) {
+  logger.error(
+    'Something went wrong while checking config folder! Please ensure the config folder is set up properly.\nhttps://docs.jellyseerr.dev/getting-started'
+  );
+}
+
 app
   .prepare()
   .then(async () => {
@@ -69,6 +78,11 @@ app
     // Load Settings
     const settings = await getSettings().load();
     restartFlag.initializeSettings(settings.main);
+
+    // Register HTTP proxy
+    if (settings.main.proxy.enabled) {
+      await createCustomProxyAgent(settings.main.proxy);
+    }
 
     // Migrate library types
     if (
@@ -178,7 +192,7 @@ app
         },
         store: new TypeormStore({
           cleanupLimit: 2,
-          ttl: 1000 * 60 * 60 * 24 * 30,
+          ttl: 60 * 60 * 24 * 30,
         }).connect(sessionRespository) as Store,
       })
     );
@@ -206,6 +220,7 @@ app
 
     // Do not set cookies so CDNs can cache them
     server.use('/imageproxy', clearCookies, imageproxy);
+    server.use('/avatarproxy', clearCookies, avatarproxy);
 
     server.get('*', (req, res) => handle(req, res));
     server.use(

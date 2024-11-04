@@ -1,6 +1,7 @@
 import Alert from '@app/components/Common/Alert';
 import Badge from '@app/components/Common/Badge';
 import Button from '@app/components/Common/Button';
+import CachedImage from '@app/components/Common/CachedImage';
 import Header from '@app/components/Common/Header';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import Modal from '@app/components/Common/Modal';
@@ -28,8 +29,6 @@ import { MediaServerType } from '@server/constants/server';
 import type { UserResultsResponse } from '@server/interfaces/api/userInterfaces';
 import { hasPermission } from '@server/lib/permissions';
 import { Field, Form, Formik } from 'formik';
-import getConfig from 'next/config';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -90,7 +89,6 @@ const UserList = () => {
   const intl = useIntl();
   const router = useRouter();
   const settings = useSettings();
-  const { publicRuntimeConfig } = getConfig();
   const { addToast } = useToasts();
   const { user: currentUser, hasPermission: currentHasPermission } = useUser();
   const [currentSort, setCurrentSort] = useState<Sort>('displayname');
@@ -535,7 +533,8 @@ const UserList = () => {
             >
               <InboxArrowDownIcon />
               <span>
-                {publicRuntimeConfig.JELLYFIN_TYPE == 'emby'
+                {settings.currentSettings.mediaServerType ===
+                MediaServerType.EMBY
                   ? intl.formatMessage(messages.importfrommediaserver, {
                       mediaServerName: 'Emby',
                     })
@@ -634,7 +633,8 @@ const UserList = () => {
                     href={`/users/${user.id}`}
                     className="h-10 w-10 flex-shrink-0"
                   >
-                    <Image
+                    <CachedImage
+                      type="avatar"
                       className="h-10 w-10 rounded-full object-cover"
                       src={user.avatar}
                       alt=""
@@ -690,7 +690,7 @@ const UserList = () => {
                   <Badge badgeType="default">
                     {intl.formatMessage(messages.localuser)}
                   </Badge>
-                ) : publicRuntimeConfig.JELLYFIN_TYPE == 'emby' ? (
+                ) : user.userType === UserType.EMBY ? (
                   <Badge badgeType="success">
                     {intl.formatMessage(messages.mediaServerUser, {
                       mediaServerName: 'Emby',

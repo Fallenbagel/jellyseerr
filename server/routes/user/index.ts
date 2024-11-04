@@ -2,6 +2,7 @@ import JellyfinAPI from '@server/api/jellyfin';
 import PlexTvAPI from '@server/api/plextv';
 import TautulliAPI from '@server/api/tautulli';
 import { MediaType } from '@server/constants/media';
+import { MediaServerType } from '@server/constants/server';
 import { UserType } from '@server/constants/user';
 import { getRepository } from '@server/datasource';
 import Media from '@server/entity/Media';
@@ -515,12 +516,6 @@ router.post(
 
       //const jellyfinUsersResponse = await jellyfinClient.getUsers();
       const createdUsers: User[] = [];
-      const { externalHostname } = getSettings().jellyfin;
-
-      const jellyfinHost =
-        externalHostname && externalHostname.length > 0
-          ? externalHostname
-          : hostname;
 
       jellyfinClient.setUserId(admin.jellyfinUserId ?? '');
       const jellyfinUsers = await jellyfinClient.getUsers();
@@ -544,13 +539,11 @@ router.post(
             ).toString('base64'),
             email: jellyfinUser?.Name,
             permissions: settings.main.defaultPermissions,
-            avatar: jellyfinUser?.PrimaryImageTag
-              ? `${jellyfinHost}/Users/${jellyfinUser.Id}/Images/Primary/?tag=${jellyfinUser.PrimaryImageTag}&quality=90`
-              : gravatarUrl(jellyfinUser?.Name ?? '', {
-                  default: 'mm',
-                  size: 200,
-                }),
-            userType: UserType.JELLYFIN,
+            avatar: `/avatarproxy/${jellyfinUser?.Id}`,
+            userType:
+              settings.main.mediaServerType === MediaServerType.JELLYFIN
+                ? UserType.JELLYFIN
+                : UserType.EMBY,
           });
 
           await userRepository.save(newUser);

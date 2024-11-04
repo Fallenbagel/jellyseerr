@@ -7,6 +7,7 @@ import PageTitle from '@app/components/Common/PageTitle';
 import Table from '@app/components/Common/Table';
 import useLocale from '@app/hooks/useLocale';
 import useSettings from '@app/hooks/useSettings';
+
 import globalMessages from '@app/i18n/globalMessages';
 import defineMessages from '@app/utils/defineMessages';
 import { formatBytes } from '@app/utils/numberHelpers';
@@ -57,8 +58,8 @@ const messages: { [messageName: string]: MessageDescriptor } = defineMessages(
     'plex-recently-added-scan': 'Plex Recently Added Scan',
     'plex-full-scan': 'Plex Full Library Scan',
     'plex-watchlist-sync': 'Plex Watchlist Sync',
-    'jellyfin-recently-added-scan': 'Jellyfin Recently Added Scan',
     'jellyfin-full-scan': 'Jellyfin Full Library Scan',
+    'jellyfin-recently-added-scan': 'Jellyfin Recently Added Scan',
     'availability-sync': 'Media Availability Sync',
     'radarr-scan': 'Radarr Scan',
     'sonarr-scan': 'Sonarr Scan',
@@ -81,6 +82,7 @@ const messages: { [messageName: string]: MessageDescriptor } = defineMessages(
       'When enabled in settings, Jellyseerr will proxy and cache images from pre-configured external sources. Cached images are saved into your config folder. You can find the files in <code>{appDataPath}/cache/images</code>.',
     imagecachecount: 'Images Cached',
     imagecachesize: 'Total Cache Size',
+    usersavatars: "Users' Avatars",
   }
 );
 
@@ -166,6 +168,20 @@ const SettingsJobs = () => {
   });
   const [isSaving, setIsSaving] = useState(false);
   const settings = useSettings();
+
+  if (settings.currentSettings.mediaServerType === MediaServerType.EMBY) {
+    messages['jellyfin-recently-added-scan'] = {
+      id: 'jellyfin-recently-added-scan',
+      defaultMessage: 'Emby Recently Added Scan',
+    };
+  }
+
+  if (settings.currentSettings.mediaServerType === MediaServerType.EMBY) {
+    messages['jellyfin-full-scan'] = {
+      id: 'jellyfin-full-scan',
+      defaultMessage: 'Emby Full Library Scan',
+    };
+  }
 
   if (!data && !error) {
     return <LoadingSpinner />;
@@ -556,6 +572,19 @@ const SettingsJobs = () => {
               </Table.TD>
               <Table.TD>
                 {formatBytes(cacheData?.imageCache.tmdb.size ?? 0)}
+              </Table.TD>
+            </tr>
+            <tr>
+              <Table.TD>
+                {intl.formatMessage(messages.usersavatars)} (avatar)
+              </Table.TD>
+              <Table.TD>
+                {intl.formatNumber(
+                  cacheData?.imageCache.avatar.imageCount ?? 0
+                )}
+              </Table.TD>
+              <Table.TD>
+                {formatBytes(cacheData?.imageCache.avatar.size ?? 0)}
               </Table.TD>
             </tr>
           </Table.TBody>
