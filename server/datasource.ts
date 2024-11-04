@@ -103,14 +103,10 @@ export const isPgsql = process.env.DB_TYPE === 'postgres';
 
 function getDataSource(): DataSourceOptions {
   if (process.env.NODE_ENV === 'production') {
-    if (isPgsql) {
-      return postgresProdConfig;
-    }
-    return prodConfig;
-  } else if (isPgsql) {
-    return postgresDevConfig;
+    return isPgsql ? postgresProdConfig : prodConfig;
+  } else {
+    return isPgsql ? postgresDevConfig : devConfig;
   }
-  return devConfig;
 }
 
 const dataSource = new DataSource(getDataSource());
