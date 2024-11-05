@@ -1,7 +1,7 @@
 import type { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddBlacklist1699901142442 implements MigrationInterface {
-  name = 'AddBlacklist1699901142442';
+export class AddBlacklist1730770837441 implements MigrationInterface {
+  name = 'AddBlacklist1730770837441';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(

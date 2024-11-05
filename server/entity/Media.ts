@@ -10,6 +10,7 @@ import type { DownloadingItem } from '@server/lib/downloadtracker';
 import downloadTracker from '@server/lib/downloadtracker';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
+import { DbAwareColumn } from '@server/utils/DbColumnHelper';
 import { getHostname } from '@server/utils/getHostname';
 import {
   AfterLoad,
@@ -129,10 +130,10 @@ class Media {
   @UpdateDateColumn()
   public updatedAt: Date;
 
-  @Column({ type: 'timestamp without time zone', default: () => 'now()' })
+  @DbAwareColumn({ type: 'datetime', default: () => 'now()' })
   public lastSeasonChange: Date;
 
-  @Column({ type: 'timestamp without time zone', default: () => 'now()' })
+  @DbAwareColumn({ type: 'datetime', default: () => 'now()' })
   public mediaAddedAt: Date;
 
   @Column({ nullable: true, type: 'int' })
