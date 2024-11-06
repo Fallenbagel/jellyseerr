@@ -58,7 +58,9 @@ class RadarrAPI extends ServarrBase<{ movieId: number }> {
   public async getMovieByTmdbId(id: number): Promise<RadarrMovie> {
     try {
       const data = await this.get<RadarrMovie[]>('/movie/lookup', {
-        term: `tmdb:${id}`,
+        params: {
+          term: `tmdb:${id}`,
+        },
       });
 
       if (!data[0]) {
@@ -222,8 +224,10 @@ class RadarrAPI extends ServarrBase<{ movieId: number }> {
     try {
       const { id, title } = await this.getMovieByTmdbId(movieId);
       await this.delete(`/movie/${id}`, {
-        deleteFiles: 'true',
-        addImportExclusion: 'false',
+        params: {
+          deleteFiles: 'true',
+          addImportExclusion: 'false',
+        },
       });
       logger.info(`[Radarr] Removed movie ${title}`);
     } catch (e) {

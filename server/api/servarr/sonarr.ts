@@ -138,7 +138,9 @@ class SonarrAPI extends ServarrBase<{
   public async getSeriesByTitle(title: string): Promise<SonarrSeries[]> {
     try {
       const data = await this.get<SonarrSeries[]>('/series/lookup', {
-        term: title,
+        params: {
+          term: title,
+        },
       });
 
       if (!data[0]) {
@@ -159,7 +161,9 @@ class SonarrAPI extends ServarrBase<{
   public async getSeriesByTvdbId(id: number): Promise<SonarrSeries> {
     try {
       const data = await this.get<SonarrSeries[]>('/series/lookup', {
-        term: `tvdb:${id}`,
+        params: {
+          term: `tvdb:${id}`,
+        },
       });
 
       if (!data[0]) {
@@ -345,8 +349,10 @@ class SonarrAPI extends ServarrBase<{
     try {
       const { id, title } = await this.getSeriesByTvdbId(serieId);
       await this.delete(`/series/${id}`, {
-        deleteFiles: 'true',
-        addImportExclusion: 'false',
+        params: {
+          deleteFiles: 'true',
+          addImportExclusion: 'false',
+        },
       });
       logger.info(`[Radarr] Removed serie ${title}`);
     } catch (e) {

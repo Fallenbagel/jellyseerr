@@ -160,7 +160,9 @@ class ServarrBase<QueueItemAppendT> extends ExternalAPI {
       const data = await this.get<QueueResponse<QueueItemAppendT>>(
         `/queue`,
         {
-          includeEpisode: 'true',
+          params: {
+            includeEpisode: 'true',
+          },
         },
         0
       );

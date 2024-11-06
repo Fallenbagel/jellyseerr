@@ -1,9 +1,9 @@
-import ExternalAPI from '@server/api/externalapi';
 import type { PlexDevice } from '@server/interfaces/api/plexInterfaces';
 import cacheManager from '@server/lib/cache';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import xml2js from 'xml2js';
+import ExternalAPI from './externalapi';
 
 interface PlexAccountResponse {
   user: PlexUser;
@@ -137,6 +137,8 @@ class PlexTvAPI extends ExternalAPI {
       {
         headers: {
           'X-Plex-Token': authToken,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
         },
         nodeCache: cacheManager.getCache('plextv').data,
       }
@@ -147,11 +149,15 @@ class PlexTvAPI extends ExternalAPI {
 
   public async getDevices(): Promise<PlexDevice[]> {
     try {
-      const devicesResp = await this.get('/api/resources', {
-        includeHttps: '1',
-      });
+      const devicesResp = await this.axios.get(
+        '/api/resources?includeHttps=1',
+        {
+          transformResponse: [],
+          responseType: 'text',
+        }
+      );
       const parsedXml = await xml2js.parseStringPromise(
-        devicesResp as DeviceResponse
+        devicesResp.data as DeviceResponse
       );
       return parsedXml?.MediaContainer?.Device?.map((pxml: DeviceResponse) => ({
         name: pxml.$.name,
@@ -199,11 +205,11 @@ class PlexTvAPI extends ExternalAPI {
 
   public async getUser(): Promise<PlexUser> {
     try {
-      const account = await this.get<PlexAccountResponse>(
+      const account = await this.axios.get<PlexAccountResponse>(
         '/users/account.json'
       );
 
-      return account.user;
+      return account.data.user;
     } catch (e) {
       logger.error(
         `Something went wrong while getting the account from plex.tv: ${e.message}`,
@@ -243,10 +249,13 @@ class PlexTvAPI extends ExternalAPI {
   }
 
   public async getUsers(): Promise<UsersResponse> {
-    const data = await this.get('/api/users');
+    const response = await this.axios.get('/api/users', {
+      transformResponse: [],
+      responseType: 'text',
+    });
 
     const parsedXml = (await xml2js.parseStringPromise(
-      data as string
+      response.data
     )) as UsersResponse;
     return parsedXml;
   }
@@ -261,49 +270,49 @@ class PlexTvAPI extends ExternalAPI {
     items: PlexWatchlistItem[];
   }> {
     try {
-      const params = new URLSearchParams({
-        'X-Plex-Container-Start': offset.toString(),
-        'X-Plex-Container-Size': size.toString(),
-      });
-      const response = await this.fetch(
-        `https://metadata.provider.plex.tv/library/sections/watchlist/all?${params.toString()}`,
+      const response = await this.axios.get<WatchlistResponse>(
+        '/library/sections/watchlist/all',
         {
-          headers: this.defaultHeaders,
+          params: {
+            'X-Plex-Container-Start': offset,
+            'X-Plex-Container-Size': size,
+          },
+          baseURL: 'https://metadata.provider.plex.tv',
         }
       );
-      const data = (await response.json()) as WatchlistResponse;
 
       const watchlistDetails = await Promise.all(
-        (data.MediaContainer.Metadata ?? []).map(async (watchlistItem) => {
-          const detailedResponse = await this.getRolling<MetadataResponse>(
-            `/library/metadata/${watchlistItem.ratingKey}`,
-            {},
-            undefined,
-            {},
-            'https://metadata.provider.plex.tv'
-          );
+        (response.data.MediaContainer.Metadata ?? []).map(
+          async (watchlistItem) => {
+            const detailedResponse = await this.getRolling<MetadataResponse>(
+              `/library/metadata/${watchlistItem.ratingKey}`,
+              {
+                baseURL: 'https://metadata.provider.plex.tv',
+              }
+            );
 
-          const metadata = detailedResponse.MediaContainer.Metadata[0];
+            const metadata = detailedResponse.MediaContainer.Metadata[0];
 
-          const tmdbString = metadata.Guid.find((guid) =>
-            guid.id.startsWith('tmdb')
-          );
-          const tvdbString = metadata.Guid.find((guid) =>
-            guid.id.startsWith('tvdb')
-          );
+            const tmdbString = metadata.Guid.find((guid) =>
+              guid.id.startsWith('tmdb')
+            );
+            const tvdbString = metadata.Guid.find((guid) =>
+              guid.id.startsWith('tvdb')
+            );
 
-          return {
-            ratingKey: metadata.ratingKey,
-            // This should always be set? But I guess it also cannot be?
-            // We will filter out the 0's afterwards
-            tmdbId: tmdbString ? Number(tmdbString.id.split('//')[1]) : 0,
-            tvdbId: tvdbString
-              ? Number(tvdbString.id.split('//')[1])
-              : undefined,
-            title: metadata.title,
-            type: metadata.type,
-          };
-        })
+            return {
+              ratingKey: metadata.ratingKey,
+              // This should always be set? But I guess it also cannot be?
+              // We will filter out the 0's afterwards
+              tmdbId: tmdbString ? Number(tmdbString.id.split('//')[1]) : 0,
+              tvdbId: tvdbString
+                ? Number(tvdbString.id.split('//')[1])
+                : undefined,
+              title: metadata.title,
+              type: metadata.type,
+            };
+          }
+        )
       );
 
       const filteredList = watchlistDetails.filter((detail) => detail.tmdbId);
@@ -311,7 +320,7 @@ class PlexTvAPI extends ExternalAPI {
       return {
         offset,
         size,
-        totalSize: data.MediaContainer.totalSize,
+        totalSize: response.data.MediaContainer.totalSize,
         items: filteredList,
       };
     } catch (e) {

@@ -129,8 +129,6 @@ class JellyfinAPI extends ExternalAPI {
           Username,
           Pw: Password,
         },
-        {},
-        undefined,
         { headers }
       );
     };
@@ -293,13 +291,15 @@ class JellyfinAPI extends ExternalAPI {
       const libraryItemsResponse = await this.get<any>(
         `/Users/${this.userId}/Items`,
         {
-          SortBy: 'SortName',
-          SortOrder: 'Ascending',
-          IncludeItemTypes: 'Series,Movie,Others',
-          Recursive: 'true',
-          StartIndex: '0',
-          ParentId: id,
-          collapseBoxSetItems: 'false',
+          params: {
+            SortBy: 'SortName',
+            SortOrder: 'Ascending',
+            IncludeItemTypes: 'Series,Movie,Others',
+            Recursive: 'true',
+            StartIndex: '0',
+            ParentId: id,
+            collapseBoxSetItems: 'false',
+          },
         }
       );
 
@@ -321,8 +321,10 @@ class JellyfinAPI extends ExternalAPI {
       const itemResponse = await this.get<any>(
         `/Users/${this.userId}/Items/Latest`,
         {
-          Limit: '12',
-          ParentId: id,
+          params: {
+            Limit: '12',
+            ParentId: id,
+          },
         }
       );
 
@@ -384,7 +386,9 @@ class JellyfinAPI extends ExternalAPI {
       const episodeResponse = await this.get<any>(
         `/Shows/${seriesID}/Episodes`,
         {
-          seasonId: seasonID,
+          params: {
+            seasonId: seasonID,
+          },
         }
       );
 

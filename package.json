@@ -43,6 +43,7 @@
     "@svgr/webpack": "6.5.1",
     "@tanem/react-nprogress": "5.0.30",
     "ace-builds": "1.15.2",
+    "axios": "^1.7.7",
     "bcrypt": "5.1.0",
     "bowser": "2.11.0",
     "connect-typeorm": "1.1.4",
