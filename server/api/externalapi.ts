@@ -1,5 +1,5 @@
 import type { RateLimitOptions } from '@server/utils/rateLimit';
-import rateLimit from '@server/utils/rateLimit';
+// import rateLimit from '@server/utils/rateLimit';
 import type NodeCache from 'node-cache';
 
 // 5 minute default TTL (in seconds)
@@ -26,11 +26,12 @@ class ExternalAPI {
     params: Record<string, string> = {},
     options: ExternalAPIOptions = {}
   ) {
-    if (options.rateLimit) {
-      this.fetch = rateLimit(fetch, options.rateLimit);
-    } else {
-      this.fetch = fetch;
-    }
+    // if (options.rateLimit) {
+    //   this.fetch = rateLimit(fetch, options.rateLimit);
+    // } else {
+    //   this.fetch = fetch;
+    // }
+    this.fetch = fetch;
 
     const url = new URL(baseUrl);
 

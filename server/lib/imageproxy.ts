@@ -1,6 +1,6 @@
 import logger from '@server/logger';
 import type { RateLimitOptions } from '@server/utils/rateLimit';
-import rateLimit from '@server/utils/rateLimit';
+// import rateLimit from '@server/utils/rateLimit';
 import { createHash } from 'crypto';
 import { promises } from 'fs';
 import mime from 'mime/lite';
@@ -150,13 +150,14 @@ class ImageProxy {
     this.baseUrl = baseUrl;
     this.key = key;
 
-    if (options.rateLimitOptions) {
-      this.fetch = rateLimit(fetch, {
-        ...options.rateLimitOptions,
-      });
-    } else {
-      this.fetch = fetch;
-    }
+    // if (options.rateLimitOptions) {
+    //   this.fetch = rateLimit(fetch, {
+    //     ...options.rateLimitOptions,
+    //   });
+    // } else {
+    //   this.fetch = fetch;
+    // }
+    this.fetch = fetch;
     this.headers = options.headers || null;
   }
 
