@@ -20,7 +20,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Pnpm Setup
         uses: pnpm/action-setup@v4
@@ -42,7 +42,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd gen-docs 
+          cd gen-docs
           pnpm install --frozen-lockfile
 
       - name: Build website
