@@ -106,7 +106,7 @@ class DownloadTracker {
                 { label: 'Download Tracker' }
               );
             }
-          } catch {
+          } catch (e) {
             logger.error(
               `Unable to get queue from Radarr server: ${server.name}`,
               {

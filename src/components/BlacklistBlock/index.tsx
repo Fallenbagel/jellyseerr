@@ -6,6 +6,7 @@ import globalMessages from '@app/i18n/globalMessages';
 import defineMessages from '@app/utils/defineMessages';
 import { CalendarIcon, TrashIcon, UserIcon } from '@heroicons/react/24/solid';
 import type { Blacklist } from '@server/entity/Blacklist';
+import axios from 'axios';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useIntl } from 'react-intl';
@@ -35,11 +36,8 @@ const BlacklistBlock = ({
   const removeFromBlacklist = async (tmdbId: number, title?: string) => {
     setIsUpdating(true);
 
-    const res = await fetch('/api/v1/blacklist/' + tmdbId, {
-      method: 'DELETE',
-    });
-
-    if (res.status === 204) {
+    try {
+      await axios.delete('/api/v1/blacklist/' + tmdbId);
       addToast(
         <span>
           {intl.formatMessage(globalMessages.removeFromBlacklistSuccess, {
@@ -49,7 +47,7 @@ const BlacklistBlock = ({
         </span>,
         { appearance: 'success', autoDismiss: true }
       );
-    } else {
+    } catch {
       addToast(intl.formatMessage(globalMessages.blacklistError), {
         appearance: 'error',
         autoDismiss: true,

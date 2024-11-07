@@ -5,6 +5,7 @@ import { User } from '@server/entity/User';
 import type { NotificationAgentPushbullet } from '@server/lib/settings';
 import { getSettings, NotificationAgentKey } from '@server/lib/settings';
 import logger from '@server/logger';
+import axios from 'axios';
 import {
   hasNotificationType,
   Notification,
@@ -122,20 +123,15 @@ class PushbulletAgent
       });
 
       try {
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Token': settings.options.accessToken,
-          },
-          body: JSON.stringify({
-            ...notificationPayload,
-            channel_tag: settings.options.channelTag,
-          }),
-        });
-        if (!response.ok) {
-          throw new Error(response.statusText, { cause: response });
-        }
+        await axios.post(
+          endpoint,
+          { ...notificationPayload, channel_tag: settings.options.channelTag },
+          {
+            headers: {
+              'Access-Token': settings.options.accessToken,
+            },
+          }
+        );
       } catch (e) {
         let errorData;
         try {
@@ -174,17 +170,11 @@ class PushbulletAgent
         });
 
         try {
-          const response = await fetch(endpoint, {
-            method: 'POST',
+          await axios.post(endpoint, notificationPayload, {
             headers: {
-              'Content-Type': 'application/json',
               'Access-Token': payload.notifyUser.settings.pushbulletAccessToken,
             },
-            body: JSON.stringify(notificationPayload),
           });
-          if (!response.ok) {
-            throw new Error(response.statusText, { cause: response });
-          }
         } catch (e) {
           let errorData;
           try {
@@ -235,17 +225,11 @@ class PushbulletAgent
               });
 
               try {
-                const response = await fetch(endpoint, {
-                  method: 'POST',
+                await axios.post(endpoint, notificationPayload, {
                   headers: {
-                    'Content-Type': 'application/json',
                     'Access-Token': user.settings.pushbulletAccessToken,
                   },
-                  body: JSON.stringify(notificationPayload),
                 });
-                if (!response.ok) {
-                  throw new Error(response.statusText, { cause: response });
-                }
               } catch (e) {
                 let errorData;
                 try {

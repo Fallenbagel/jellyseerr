@@ -20,6 +20,7 @@ import type {
   CacheResponse,
 } from '@server/interfaces/api/settingsInterfaces';
 import type { JobId } from '@server/lib/settings';
+import axios from 'axios';
 import cronstrue from 'cronstrue/i18n';
 import { Fragment, useReducer, useState } from 'react';
 import type { MessageDescriptor } from 'react-intl';
@@ -188,10 +189,7 @@ const SettingsJobs = () => {
   }
 
   const runJob = async (job: Job) => {
-    const res = await fetch(`/api/v1/settings/jobs/${job.id}/run`, {
-      method: 'POST',
-    });
-    if (!res.ok) throw new Error();
+    await axios.post(`/api/v1/settings/jobs/${job.id}/run`);
     addToast(
       intl.formatMessage(messages.jobstarted, {
         jobname: intl.formatMessage(messages[job.id] ?? messages.unknownJob),
@@ -205,10 +203,7 @@ const SettingsJobs = () => {
   };
 
   const cancelJob = async (job: Job) => {
-    const res = await fetch(`/api/v1/settings/jobs/${job.id}/cancel`, {
-      method: 'POST',
-    });
-    if (!res.ok) throw new Error();
+    await axios.post(`/api/v1/settings/jobs/${job.id}/cancel`);
     addToast(
       intl.formatMessage(messages.jobcancelled, {
         jobname: intl.formatMessage(messages[job.id] ?? messages.unknownJob),
@@ -222,10 +217,7 @@ const SettingsJobs = () => {
   };
 
   const flushCache = async (cache: CacheItem) => {
-    const res = await fetch(`/api/v1/settings/cache/${cache.id}/flush`, {
-      method: 'POST',
-    });
-    if (!res.ok) throw new Error();
+    await axios.post(`/api/v1/settings/cache/${cache.id}/flush`);
     addToast(
       intl.formatMessage(messages.cacheflushed, { cachename: cache.name }),
       {
@@ -252,19 +244,12 @@ const SettingsJobs = () => {
       }
 
       setIsSaving(true);
-      const res = await fetch(
+      await axios.post(
         `/api/v1/settings/jobs/${jobModalState.job.id}/schedule`,
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            schedule: jobScheduleCron.join(' '),
-          }),
+          schedule: jobScheduleCron.join(' '),
         }
       );
-      if (!res.ok) throw new Error();
 
       addToast(intl.formatMessage(messages.jobScheduleEditSaved), {
         appearance: 'success',

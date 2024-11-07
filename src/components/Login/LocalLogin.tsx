@@ -6,6 +6,7 @@ import {
   ArrowLeftOnRectangleIcon,
   LifebuoyIcon,
 } from '@heroicons/react/24/outline';
+import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -55,17 +56,10 @@ const LocalLogin = ({ revalidate }: LocalLoginProps) => {
       validationSchema={LoginSchema}
       onSubmit={async (values) => {
         try {
-          const res = await fetch('/api/v1/auth/local', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email: values.email,
-              password: values.password,
-            }),
+          await axios.post('/api/v1/auth/local', {
+            email: values.email,
+            password: values.password,
           });
-          if (!res.ok) throw new Error();
         } catch (e) {
           setLoginError(intl.formatMessage(messages.loginerror));
         } finally {

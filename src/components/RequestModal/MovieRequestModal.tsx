@@ -12,6 +12,7 @@ import type { NonFunctionProperties } from '@server/interfaces/api/common';
 import type { QuotaResponse } from '@server/interfaces/api/userInterfaces';
 import { Permission } from '@server/lib/permissions';
 import type { MovieDetails } from '@server/models/Movie';
+import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
@@ -89,23 +90,15 @@ const MovieRequestModal = ({
           tags: requestOverrides.tags,
         };
       }
-      const res = await fetch('/api/v1/request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          mediaId: data?.id,
-          mediaType: 'movie',
-          is4k,
-          ...overrideParams,
-        }),
+      const response = await axios.post<MediaRequest>('/api/v1/request', {
+        mediaId: data?.id,
+        mediaType: 'movie',
+        is4k,
+        ...overrideParams,
       });
-      if (!res.ok) throw new Error();
-      const mediaRequest: MediaRequest = await res.json();
       mutate('/api/v1/request?filter=all&take=10&sort=modified&skip=0');
 
-      if (mediaRequest) {
+      if (response.data) {
         if (onComplete) {
           onComplete(
             hasPermission(
@@ -144,14 +137,12 @@ const MovieRequestModal = ({
     setIsUpdating(true);
 
     try {
-      const res = await fetch(`/api/v1/request/${editRequest?.id}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) throw new Error();
-
+      const response = await axios.delete<MediaRequest>(
+        `/api/v1/request/${editRequest?.id}`
+      );
       mutate('/api/v1/request?filter=all&take=10&sort=modified&skip=0');
 
-      if (res.status === 204) {
+      if (response.status === 204) {
         if (onComplete) {
           onComplete(MediaStatus.UNKNOWN);
         }
@@ -174,27 +165,17 @@ const MovieRequestModal = ({
     setIsUpdating(true);
 
     try {
-      const res = await fetch(`/api/v1/request/${editRequest?.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          mediaType: 'movie',
-          serverId: requestOverrides?.server,
-          profileId: requestOverrides?.profile,
-          rootFolder: requestOverrides?.folder,
-          userId: requestOverrides?.user?.id,
-          tags: requestOverrides?.tags,
-        }),
+      await axios.put(`/api/v1/request/${editRequest?.id}`, {
+        mediaType: 'movie',
+        serverId: requestOverrides?.server,
+        profileId: requestOverrides?.profile,
+        rootFolder: requestOverrides?.folder,
+        userId: requestOverrides?.user?.id,
+        tags: requestOverrides?.tags,
       });
-      if (!res.ok) throw new Error();
 
       if (alsoApproveRequest) {
-        const res = await fetch(`/api/v1/request/${editRequest?.id}/approve`, {
-          method: 'POST',
-        });
-        if (!res.ok) throw new Error();
+        await axios.post(`/api/v1/request/${editRequest?.id}/approve`);
       }
       mutate('/api/v1/request?filter=all&take=10&sort=modified&skip=0');
 

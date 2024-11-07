@@ -109,6 +109,8 @@ class JellyfinAPI extends ExternalAPI {
       {
         headers: {
           'X-Emby-Authorization': authHeaderVal,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
         },
       }
     );
@@ -120,7 +122,7 @@ class JellyfinAPI extends ExternalAPI {
     ClientIP?: string
   ): Promise<JellyfinLoginResponse> {
     const authenticate = async (useHeaders: boolean) => {
-      const headers: { [key: string]: string } =
+      const headers =
         useHeaders && ClientIP ? { 'X-Forwarded-For': ClientIP } : {};
 
       return this.post<JellyfinLoginResponse>(
@@ -129,8 +131,6 @@ class JellyfinAPI extends ExternalAPI {
           Username,
           Pw: Password,
         },
-        {},
-        undefined,
         { headers }
       );
     };
@@ -291,16 +291,7 @@ class JellyfinAPI extends ExternalAPI {
   public async getLibraryContents(id: string): Promise<JellyfinLibraryItem[]> {
     try {
       const libraryItemsResponse = await this.get<any>(
-        `/Users/${this.userId}/Items`,
-        {
-          SortBy: 'SortName',
-          SortOrder: 'Ascending',
-          IncludeItemTypes: 'Series,Movie,Others',
-          Recursive: 'true',
-          StartIndex: '0',
-          ParentId: id,
-          collapseBoxSetItems: 'false',
-        }
+        `/Users/${this.userId}/Items?SortBy=SortName&SortOrder=Ascending&IncludeItemTypes=Series,Movie,Others&Recursive=true&StartIndex=0&ParentId=${id}&collapseBoxSetItems=false`
       );
 
       return libraryItemsResponse.Items.filter(
@@ -319,11 +310,7 @@ class JellyfinAPI extends ExternalAPI {
   public async getRecentlyAdded(id: string): Promise<JellyfinLibraryItem[]> {
     try {
       const itemResponse = await this.get<any>(
-        `/Users/${this.userId}/Items/Latest`,
-        {
-          Limit: '12',
-          ParentId: id,
-        }
+        `/Users/${this.userId}/Items/Latest?Limit=12&ParentId=${id}`
       );
 
       return itemResponse;
@@ -382,10 +369,7 @@ class JellyfinAPI extends ExternalAPI {
   ): Promise<JellyfinLibraryItem[]> {
     try {
       const episodeResponse = await this.get<any>(
-        `/Shows/${seriesID}/Episodes`,
-        {
-          seasonId: seasonID,
-        }
+        `/Shows/${seriesID}/Episodes?seasonId=${seasonID}`
       );
 
       return episodeResponse.Items.filter(

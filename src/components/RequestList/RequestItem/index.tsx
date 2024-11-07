@@ -21,6 +21,7 @@ import type { MediaRequest } from '@server/entity/MediaRequest';
 import type { NonFunctionProperties } from '@server/interfaces/api/common';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
+import axios from 'axios';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useInView } from 'react-intersection-observer';
@@ -63,10 +64,7 @@ const RequestItemError = ({
   const { hasPermission } = useUser();
 
   const deleteRequest = async () => {
-    const res = await fetch(`/api/v1/media/${requestData?.media.id}`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) throw new Error();
+    await axios.delete(`/api/v1/media/${requestData?.media.id}`);
     revalidateList();
   };
 
@@ -324,34 +322,27 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
   const [isRetrying, setRetrying] = useState(false);
 
   const modifyRequest = async (type: 'approve' | 'decline') => {
-    const res = await fetch(`/api/v1/request/${request.id}/${type}`, {
-      method: 'POST',
-    });
-    if (!res.ok) throw new Error();
-    const data = await res.json();
+    const response = await axios.post(`/api/v1/request/${request.id}/${type}`);
 
-    if (data) {
+    if (response) {
       revalidate();
     }
   };
 
   const deleteRequest = async () => {
-    const res = await fetch(`/api/v1/request/${request.id}`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) throw new Error();
+    await axios.delete(`/api/v1/request/${request.id}`);
 
     revalidateList();
   };
 
   const deleteMediaFile = async () => {
     if (request.media) {
-      await fetch(`/api/v1/media/${request.media.id}/file`, {
-        method: 'DELETE',
-      });
-      await fetch(`/api/v1/media/${request.media.id}`, {
-        method: 'DELETE',
-      });
+      try {
+        await axios.delete(`/api/v1/media/${request.media.id}/file`);
+        await axios.delete(`/api/v1/media/${request.media.id}`);
+      } catch {
+        /* empty */
+      }
       revalidateList();
     }
   };
@@ -360,12 +351,7 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
     setRetrying(true);
 
     try {
-      const res = await fetch(`/api/v1/request/${request.id}/retry`, {
-        method: 'POST',
-      });
-      if (!res.ok) throw new Error();
-      const result = await res.json();
-
+      const result = await axios.post(`/api/v1/request/${request.id}/retry`);
       revalidate(result.data);
     } catch (e) {
       addToast(intl.formatMessage(messages.failedretry), {

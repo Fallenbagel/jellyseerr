@@ -13,6 +13,7 @@ import defineMessages from '@app/utils/defineMessages';
 import { Transition } from '@headlessui/react';
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/solid';
 import type { RadarrSettings, SonarrSettings } from '@server/lib/settings';
+import axios from 'axios';
 import { Fragment, useState } from 'react';
 import { useIntl } from 'react-intl';
 import useSWR, { mutate } from 'swr';
@@ -195,14 +196,9 @@ const SettingsServices = () => {
   });
 
   const deleteServer = async () => {
-    const res = await fetch(
-      `/api/v1/settings/${deleteServerModal.type}/${deleteServerModal.serverId}`,
-      {
-        method: 'DELETE',
-      }
+    await axios.delete(
+      `/api/v1/settings/${deleteServerModal.type}/${deleteServerModal.serverId}`
     );
-    if (!res.ok) throw new Error();
-
     setDeleteServerModal({ open: false, serverId: null, type: 'radarr' });
     revalidateRadarr();
     revalidateSonarr();

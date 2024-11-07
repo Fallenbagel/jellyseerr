@@ -18,6 +18,7 @@ import type {
   ProductionCompany,
   WatchProviderDetails,
 } from '@server/models/common';
+import axios from 'axios';
 import { orderBy } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
@@ -75,9 +76,11 @@ export const CompanySelector = ({
         return;
       }
 
-      const res = await fetch(`/api/v1/studio/${defaultValue}`);
-      if (!res.ok) throw new Error();
-      const studio: ProductionCompany = await res.json();
+      const response = await axios.get<ProductionCompany>(
+        `/api/v1/studio/${defaultValue}`
+      );
+
+      const studio = response.data;
 
       setDefaultDataValue([
         {
@@ -95,15 +98,16 @@ export const CompanySelector = ({
       return [];
     }
 
-    const res = await fetch(
-      `/api/v1/search/company?query=${encodeURIExtraParams(inputValue)}`
+    const results = await axios.get<TmdbCompanySearchResponse>(
+      '/api/v1/search/company',
+      {
+        params: {
+          query: encodeURIExtraParams(inputValue),
+        },
+      }
     );
-    if (!res.ok) {
-      throw new Error('Network response was not ok');
-    }
-    const results: TmdbCompanySearchResponse = await res.json();
 
-    return results.results.map((result) => ({
+    return results.data.results.map((result) => ({
       label: result.name,
       value: result.id,
     }));
@@ -157,15 +161,11 @@ export const GenreSelector = ({
 
       const genres = defaultValue.split(',');
 
-      const res = await fetch(`/api/v1/genres/${type}`);
-      if (!res.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const response: TmdbGenre[] = await res.json();
+      const response = await axios.get<TmdbGenre[]>(`/api/v1/genres/${type}`);
 
       const genreData = genres
-        .filter((genre) => response.find((gd) => gd.id === Number(genre)))
-        .map((g) => response.find((gd) => gd.id === Number(g)))
+        .filter((genre) => response.data.find((gd) => gd.id === Number(genre)))
+        .map((g) => response.data.find((gd) => gd.id === Number(g)))
         .map((g) => ({
           label: g?.name ?? '',
           value: g?.id ?? 0,
@@ -178,11 +178,11 @@ export const GenreSelector = ({
   }, [defaultValue, type]);
 
   const loadGenreOptions = async (inputValue: string) => {
-    const res = await fetch(`/api/v1/discover/genreslider/${type}`);
-    if (!res.ok) throw new Error();
-    const results: GenreSliderItem[] = await res.json();
+    const results = await axios.get<GenreSliderItem[]>(
+      `/api/v1/discover/genreslider/${type}`
+    );
 
-    return results
+    return results.data
       .map((result) => ({
         label: result.name,
         value: result.id,
@@ -298,13 +298,11 @@ export const KeywordSelector = ({
 
       const keywords = await Promise.all(
         defaultValue.split(',').map(async (keywordId) => {
-          const res = await fetch(`/api/v1/keyword/${keywordId}`);
-          if (!res.ok) {
-            throw new Error('Network response was not ok');
-          }
-          const keyword: Keyword = await res.json();
+          const keyword = await axios.get<Keyword>(
+            `/api/v1/keyword/${keywordId}`
+          );
 
-          return keyword;
+          return keyword.data;
         })
       );
 
@@ -320,15 +318,16 @@ export const KeywordSelector = ({
   }, [defaultValue]);
 
   const loadKeywordOptions = async (inputValue: string) => {
-    const res = await fetch(
-      `/api/v1/search/keyword?query=${encodeURIExtraParams(inputValue)}`
+    const results = await axios.get<TmdbKeywordSearchResponse>(
+      '/api/v1/search/keyword',
+      {
+        params: {
+          query: encodeURIExtraParams(inputValue),
+        },
+      }
     );
-    if (!res.ok) {
-      throw new Error('Network response was not ok');
-    }
-    const results: TmdbKeywordSearchResponse = await res.json();
 
-    return results.results.map((result) => ({
+    return results.data.results.map((result) => ({
       label: result.name,
       value: result.id,
     }));
