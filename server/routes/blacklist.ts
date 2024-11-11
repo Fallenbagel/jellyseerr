@@ -7,7 +7,6 @@ import { Permission } from '@server/lib/permissions';
 import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
 import { Router } from 'express';
-import rateLimit from 'express-rate-limit';
 import { EntityNotFoundError, QueryFailedError } from 'typeorm';
 import { z } from 'zod';
 
@@ -25,7 +24,6 @@ blacklistRoutes.get(
   isAuthenticated([Permission.MANAGE_BLACKLIST, Permission.VIEW_BLACKLIST], {
     type: 'or',
   }),
-  rateLimit({ windowMs: 60 * 1000, max: 50 }),
   async (req, res, next) => {
     const pageSize = req.query.take ? Number(req.query.take) : 25;
     const skip = req.query.skip ? Number(req.query.skip) : 0;
