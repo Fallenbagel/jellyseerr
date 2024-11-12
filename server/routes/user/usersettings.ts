@@ -178,9 +178,8 @@ userSettingsRoutes.post<
         status: e.statusCode,
         message: e.errorCode,
       });
-    } else {
-      return next({ status: 500, message: e.message });
     }
+    return next({ status: 500, message: e.message });
   }
 });
 
@@ -288,16 +287,16 @@ userSettingsRoutes.post<
 userSettingsRoutes.post<{ authToken: string }>(
   '/linked-accounts/plex',
   isOwnProfile(),
-  async (req, res, next) => {
+  async (req, res) => {
     const settings = getSettings();
     const userRepository = getRepository(User);
 
     if (!req.user) {
-      return next({ status: 404, message: 'Unauthorized' });
+      return res.status(404).json({ code: ApiErrorCode.Unauthorized });
     }
     // Make sure Plex login is enabled
     if (settings.main.mediaServerType !== MediaServerType.PLEX) {
-      return res.status(500).json({ error: 'Plex login is disabled' });
+      return res.status(500).json({ message: 'Plex login is disabled' });
     }
 
     // First we need to use this auth token to get the user's email from plex.tv
@@ -307,7 +306,7 @@ userSettingsRoutes.post<{ authToken: string }>(
     // Do not allow linking of an already linked account
     if (await userRepository.exist({ where: { plexId: account.id } })) {
       return res.status(422).json({
-        error: 'This Plex account is already linked to a Jellyseerr user',
+        message: 'This Plex account is already linked to a Jellyseerr user',
       });
     }
 
@@ -316,7 +315,7 @@ userSettingsRoutes.post<{ authToken: string }>(
     // Emails do not match
     if (user.email !== account.email) {
       return res.status(422).json({
-        error:
+        message:
           'This Plex account is registered under a different email address.',
       });
     }
@@ -335,13 +334,13 @@ userSettingsRoutes.post<{ authToken: string }>(
 userSettingsRoutes.delete<{ id: string }>(
   '/linked-accounts/plex',
   isOwnProfileOrAdmin(),
-  async (req, res, next) => {
+  async (req, res) => {
     const settings = getSettings();
     const userRepository = getRepository(User);
 
     // Make sure Plex login is enabled
     if (settings.main.mediaServerType !== MediaServerType.PLEX) {
-      return res.status(500).json({ error: 'Plex login is disabled' });
+      return res.status(500).json({ message: 'Plex login is disabled' });
     }
 
     try {
@@ -350,12 +349,11 @@ userSettingsRoutes.delete<{ id: string }>(
       });
 
       if (!user) {
-        return next({ status: 404, message: 'User not found.' });
+        return res.status(404).json({ message: 'User not found.' });
       }
 
       if (user.id === 1) {
-        return next({
-          status: 400,
+        return res.status(400).json({
           message:
             'Cannot unlink media server accounts for the primary administrator.',
         });
@@ -369,8 +367,7 @@ userSettingsRoutes.delete<{ id: string }>(
       )?.password;
 
       if (!user.email || !hasPassword) {
-        return next({
-          status: 400,
+        return res.status(400).json({
           message: 'User does not have a local email or password set.',
         });
       }
@@ -383,7 +380,7 @@ userSettingsRoutes.delete<{ id: string }>(
 
       return res.status(204).send();
     } catch (e) {
-      next({ status: 500, message: e.message });
+      return res.status(500).json({ message: e.message });
     }
   }
 );
@@ -391,19 +388,21 @@ userSettingsRoutes.delete<{ id: string }>(
 userSettingsRoutes.post<{ username: string; password: string }>(
   '/linked-accounts/jellyfin',
   isOwnProfile(),
-  async (req, res, next) => {
+  async (req, res) => {
     const settings = getSettings();
     const userRepository = getRepository(User);
 
     if (!req.user) {
-      return next({ status: 401, message: 'Unauthorized' });
+      return res.status(401).json({ code: ApiErrorCode.Unauthorized });
     }
     // Make sure jellyfin login is enabled
     if (
       settings.main.mediaServerType !== MediaServerType.JELLYFIN &&
       settings.main.mediaServerType !== MediaServerType.EMBY
     ) {
-      return res.status(500).json({ error: 'Jellyfin/Emby login is disabled' });
+      return res
+        .status(500)
+        .json({ message: 'Jellyfin/Emby login is disabled' });
     }
 
     // Do not allow linking of an already linked account
@@ -413,7 +412,7 @@ userSettingsRoutes.post<{ username: string; password: string }>(
       })
     ) {
       return res.status(422).json({
-        error: 'The specified account is already linked to a Jellyseerr user',
+        message: 'The specified account is already linked to a Jellyseerr user',
       });
     }
 
@@ -425,7 +424,7 @@ userSettingsRoutes.post<{ username: string; password: string }>(
     const jellyfinserver = new JellyfinAPI(hostname, undefined, deviceId);
 
     const ip = req.ip;
-    let clientIp;
+    let clientIp: string | undefined;
     if (ip) {
       if (net.isIPv4(ip)) {
         clientIp = ip;
@@ -448,7 +447,8 @@ userSettingsRoutes.post<{ username: string; password: string }>(
         })
       ) {
         return res.status(422).json({
-          error: 'The specified account is already linked to a Jellyseerr user',
+          message:
+            'The specified account is already linked to a Jellyseerr user',
         });
       }
 
@@ -474,12 +474,12 @@ userSettingsRoutes.post<{ username: string; password: string }>(
       });
       if (
         e instanceof ApiError &&
-        (e.errorCode == ApiErrorCode.InvalidCredentials ||
-          e.errorCode == ApiErrorCode.NotAdmin)
-      )
-        return next({ status: 401, message: 'Unauthorized' });
+        e.errorCode === ApiErrorCode.InvalidCredentials
+      ) {
+        return res.status(401).json({ code: e.errorCode });
+      }
 
-      return next({ status: 500 });
+      return res.status(500).send();
     }
   }
 );
@@ -487,7 +487,7 @@ userSettingsRoutes.post<{ username: string; password: string }>(
 userSettingsRoutes.delete<{ id: string }>(
   '/linked-accounts/jellyfin',
   isOwnProfileOrAdmin(),
-  async (req, res, next) => {
+  async (req, res) => {
     const settings = getSettings();
     const userRepository = getRepository(User);
 
@@ -496,7 +496,9 @@ userSettingsRoutes.delete<{ id: string }>(
       settings.main.mediaServerType !== MediaServerType.JELLYFIN &&
       settings.main.mediaServerType !== MediaServerType.EMBY
     ) {
-      return res.status(500).json({ error: 'Jellyfin/Emby login is disabled' });
+      return res
+        .status(500)
+        .json({ message: 'Jellyfin/Emby login is disabled' });
     }
 
     try {
@@ -505,12 +507,11 @@ userSettingsRoutes.delete<{ id: string }>(
       });
 
       if (!user) {
-        return next({ status: 404, message: 'User not found.' });
+        return res.status(404).json({ message: 'User not found.' });
       }
 
       if (user.id === 1) {
-        return next({
-          status: 400,
+        return res.status(400).json({
           message:
             'Cannot unlink media server accounts for the primary administrator.',
         });
@@ -524,8 +525,7 @@ userSettingsRoutes.delete<{ id: string }>(
       )?.password;
 
       if (!user.email || !hasPassword) {
-        return next({
-          status: 400,
+        return res.status(400).json({
           message: 'User does not have a local email or password set.',
         });
       }
@@ -539,7 +539,7 @@ userSettingsRoutes.delete<{ id: string }>(
 
       return res.status(204).send();
     } catch (e) {
-      next({ status: 500, message: e.message });
+      return res.status(500).json({ message: e.message });
     }
   }
 );
