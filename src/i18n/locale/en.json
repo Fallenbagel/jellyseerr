@@ -1320,7 +1320,7 @@
   "components.UserProfile.UserSettings.UserLinkedAccountsSettings.deleteFailed": "Unable to delete linked account.",
   "components.UserProfile.UserSettings.UserLinkedAccountsSettings.errorUnknown": "An unknown error occurred",
   "components.UserProfile.UserSettings.UserLinkedAccountsSettings.linkedAccounts": "Linked Accounts",
-  "components.UserProfile.UserSettings.UserLinkedAccountsSettings.linkedAccountsHint": "These external accounts are linked to your Jellyseerr account.",
+  "components.UserProfile.UserSettings.UserLinkedAccountsSettings.linkedAccountsHint": "These external accounts are linked to your {applicationName} account.",
   "components.UserProfile.UserSettings.UserLinkedAccountsSettings.noLinkedAccounts": "You do not have any external accounts linked to your account.",
   "components.UserProfile.UserSettings.UserLinkedAccountsSettings.noPermissionDescription": "You do not have permission to modify this user's linked accounts.",
   "components.UserProfile.UserSettings.UserLinkedAccountsSettings.plexErrorExists": "This account is already linked to a Plex user",
