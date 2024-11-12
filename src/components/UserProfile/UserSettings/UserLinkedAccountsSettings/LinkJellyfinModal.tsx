@@ -2,7 +2,6 @@ import Alert from '@app/components/Common/Alert';
 import Modal from '@app/components/Common/Modal';
 import useSettings from '@app/hooks/useSettings';
 import { useUser } from '@app/hooks/useUser';
-import { RequestError } from '@app/types/error';
 import defineMessages from '@app/utils/defineMessages';
 import { Transition } from '@headlessui/react';
 import { MediaServerType } from '@server/constants/server';
@@ -94,23 +93,25 @@ const LinkJellyfinModal: React.FC<LinkJellyfinModalProps> = ({
                 }),
               }
             );
-            if (!res.ok) throw new RequestError(res);
-
-            onSave();
-          } catch (e) {
-            if (e instanceof RequestError && e.status == 401) {
-              setError(
-                intl.formatMessage(messages.errorUnauthorized, {
-                  mediaServerName,
-                })
-              );
-            } else if (e instanceof RequestError && e.status == 422) {
-              setError(
-                intl.formatMessage(messages.errorExists, { applicationName })
-              );
+            if (!res.ok) {
+              if (res.status === 401) {
+                setError(
+                  intl.formatMessage(messages.errorUnauthorized, {
+                    mediaServerName,
+                  })
+                );
+              } else if (res.status === 422) {
+                setError(
+                  intl.formatMessage(messages.errorExists, { applicationName })
+                );
+              } else {
+                setError(intl.formatMessage(messages.errorUnknown));
+              }
             } else {
-              setError(intl.formatMessage(messages.errorUnknown));
+              onSave();
             }
+          } catch (e) {
+            setError(intl.formatMessage(messages.errorUnknown));
           }
         }}
       >
