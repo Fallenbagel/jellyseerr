@@ -8,7 +8,6 @@ import PageTitle from '@app/components/Common/PageTitle';
 import useSettings from '@app/hooks/useSettings';
 import { Permission, UserType, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
-import { RequestError } from '@app/types/error';
 import defineMessages from '@app/utils/defineMessages';
 import PlexOAuth from '@app/utils/plex';
 import { TrashIcon } from '@heroicons/react/24/solid';
@@ -100,18 +99,18 @@ const UserLinkedAccountsSettings = () => {
         }
       );
       if (!res.ok) {
-        throw new RequestError(res);
-      }
-
-      await revalidateUser();
-    } catch (e) {
-      if (e instanceof RequestError && e.status === 401) {
-        setError(intl.formatMessage(messages.plexErrorUnauthorized));
-      } else if (e instanceof RequestError && e.status === 422) {
-        setError(intl.formatMessage(messages.plexErrorExists));
+        if (res.status === 401) {
+          setError(intl.formatMessage(messages.plexErrorUnauthorized));
+        } else if (res.status === 422) {
+          setError(intl.formatMessage(messages.plexErrorExists));
+        } else {
+          setError(intl.formatMessage(messages.errorUnknown));
+        }
       } else {
-        setError(intl.formatMessage(messages.errorServer));
+        await revalidateUser();
       }
+    } catch (e) {
+      setError(intl.formatMessage(messages.errorUnknown));
     }
   };
 
@@ -169,7 +168,7 @@ const UserLinkedAccountsSettings = () => {
           </h3>
         </div>
         <Alert
-          title={intl.formatMessage(messages.nopermissionDescription)}
+          title={intl.formatMessage(messages.noPermissionDescription)}
           type="error"
         />
       </>
