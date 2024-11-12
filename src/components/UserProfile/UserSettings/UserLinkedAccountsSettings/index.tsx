@@ -24,7 +24,7 @@ const messages = defineMessages(
   {
     linkedAccounts: 'Linked Accounts',
     linkedAccountsHint:
-      'These external accounts are linked to your Jellyseerr account.',
+      'These external accounts are linked to your {applicationName} account.',
     noLinkedAccounts:
       'You do not have any external accounts linked to your account.',
     noPermissionDescription:
@@ -64,6 +64,8 @@ const UserLinkedAccountsSettings = () => {
   );
   const [showJellyfinModal, setShowJellyfinModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const applicationName = settings.currentSettings.applicationTitle;
 
   const accounts: LinkedAccount[] = useMemo(() => {
     const accounts: LinkedAccount[] = [];
@@ -191,7 +193,9 @@ const UserLinkedAccountsSettings = () => {
             {intl.formatMessage(messages.linkedAccounts)}
           </h3>
           <h6 className="description">
-            {intl.formatMessage(messages.linkedAccountsHint)}
+            {intl.formatMessage(messages.linkedAccountsHint, {
+              applicationName,
+            })}
           </h6>
         </div>
         {currentUser?.id == user?.id && !!linkable.length && (
