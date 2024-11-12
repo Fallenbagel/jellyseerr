@@ -38,7 +38,7 @@ const messages = defineMessages(
 
 const plexOAuth = new PlexOAuth();
 
-const enum LinkedAccountType {
+enum LinkedAccountType {
   Plex = 'Plex',
   Jellyfin = 'Jellyfin',
   Emby = 'Emby',
@@ -82,7 +82,7 @@ const UserLinkedAccountsSettings = () => {
       });
     if (user.userType === UserType.JELLYFIN && user.jellyfinUsername)
       accounts.push({
-        type: LinkedAccountType.Emby,
+        type: LinkedAccountType.Jellyfin,
         username: user.jellyfinUsername,
       });
     return accounts;
@@ -105,9 +105,9 @@ const UserLinkedAccountsSettings = () => {
 
       await revalidateUser();
     } catch (e) {
-      if (e instanceof RequestError && e.status == 401) {
+      if (e instanceof RequestError && e.status === 401) {
         setError(intl.formatMessage(messages.plexErrorUnauthorized));
-      } else if (e instanceof RequestError && e.status == 422) {
+      } else if (e instanceof RequestError && e.status === 422) {
         setError(intl.formatMessage(messages.plexErrorExists));
       } else {
         setError(intl.formatMessage(messages.errorServer));
@@ -123,22 +123,22 @@ const UserLinkedAccountsSettings = () => {
         setTimeout(() => linkPlexAccount(), 1500);
       },
       hide:
-        settings.currentSettings.mediaServerType != MediaServerType.PLEX ||
-        accounts.some((a) => a.type == LinkedAccountType.Plex),
+        settings.currentSettings.mediaServerType !== MediaServerType.PLEX ||
+        accounts.some((a) => a.type === LinkedAccountType.Plex),
     },
     {
       name: 'Jellyfin',
       action: () => setShowJellyfinModal(true),
       hide:
-        settings.currentSettings.mediaServerType != MediaServerType.JELLYFIN ||
-        accounts.some((a) => a.type == LinkedAccountType.Jellyfin),
+        settings.currentSettings.mediaServerType !== MediaServerType.JELLYFIN ||
+        accounts.some((a) => a.type === LinkedAccountType.Jellyfin),
     },
     {
       name: 'Emby',
       action: () => setShowJellyfinModal(true),
       hide:
-        settings.currentSettings.mediaServerType != MediaServerType.EMBY ||
-        accounts.some((a) => a.type == LinkedAccountType.Emby),
+        settings.currentSettings.mediaServerType !== MediaServerType.EMBY ||
+        accounts.some((a) => a.type === LinkedAccountType.Emby),
     },
   ].filter((l) => !l.hide);
 
@@ -198,7 +198,7 @@ const UserLinkedAccountsSettings = () => {
             })}
           </h6>
         </div>
-        {currentUser?.id == user?.id && !!linkable.length && (
+        {currentUser?.id === user?.id && !!linkable.length && (
           <div>
             <Dropdown text="Link Account" buttonType="ghost">
               {linkable.map(({ name, action }) => (
@@ -219,11 +219,11 @@ const UserLinkedAccountsSettings = () => {
               className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-800 bg-opacity-50 px-4 py-5 shadow ring-1 ring-gray-700 sm:p-6"
             >
               <div className="w-12">
-                {acct.type == LinkedAccountType.Plex ? (
+                {acct.type === LinkedAccountType.Plex ? (
                   <div className="flex aspect-square h-full items-center justify-center rounded-full bg-neutral-800">
                     <PlexLogo className="w-9" />
                   </div>
-                ) : acct.type == LinkedAccountType.Emby ? (
+                ) : acct.type === LinkedAccountType.Emby ? (
                   <EmbyLogo />
                 ) : (
                   <JellyfinLogo />
@@ -242,7 +242,7 @@ const UserLinkedAccountsSettings = () => {
                 <ConfirmButton
                   onClick={() => {
                     deleteRequest(
-                      acct.type == LinkedAccountType.Plex ? 'plex' : 'jellyfin'
+                      acct.type === LinkedAccountType.Plex ? 'plex' : 'jellyfin'
                     );
                   }}
                   confirmText={intl.formatMessage(globalMessages.areyousure)}
