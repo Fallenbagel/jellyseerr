@@ -1,3 +1,28 @@
+# [2.1.0](https://github.com/fallenbagel/jellyseerr/compare/v2.0.1...v2.1.0) (2024-11-12)
+
+
+### Bug Fixes
+
+* **blacklist:** request data only when modal is shown, remove useless ratelimit and lazy load blacklist ([#1084](https://github.com/fallenbagel/jellyseerr/issues/1084)) ([694913c](https://github.com/fallenbagel/jellyseerr/commit/694913c767c558147f413e2375b2512567541127))
+* cache Jellyfin/Emby avatars from API ([#1045](https://github.com/fallenbagel/jellyseerr/issues/1045)) ([0bbcfcb](https://github.com/fallenbagel/jellyseerr/commit/0bbcfcbd5e03137aba35ceb07e42f623aefa41d7))
+* **externalapi:** extract basic auth and pass it through header ([#1062](https://github.com/fallenbagel/jellyseerr/issues/1062)) ([cf59102](https://github.com/fallenbagel/jellyseerr/commit/cf59102ef91fa0e907cc6369b0fe60b503c823ca)), closes [#1027](https://github.com/fallenbagel/jellyseerr/issues/1027)
+* fixes wrong avatar rendered for the modifiedBy user in request list ([#1028](https://github.com/fallenbagel/jellyseerr/issues/1028)) ([cbb1a74](https://github.com/fallenbagel/jellyseerr/commit/cbb1a74526ef5c003b7081c31146c52e7e551d60)), closes [#1017](https://github.com/fallenbagel/jellyseerr/issues/1017)
+* **i18n:** update extractMessages function for better escaping of characters ([#1079](https://github.com/fallenbagel/jellyseerr/issues/1079)) ([a2d2fd3](https://github.com/fallenbagel/jellyseerr/commit/a2d2fd3c2a53fc98d6288bd049fd8e37a1914280))
+* remove language profiles dropdown for Sonarr v4 ([#1000](https://github.com/fallenbagel/jellyseerr/issues/1000)) ([d331798](https://github.com/fallenbagel/jellyseerr/commit/d331798b28a7bd32a27fc0ccbad2354be2e15b02)), closes [#207](https://github.com/fallenbagel/jellyseerr/issues/207)
+* resolve error when setup on second attempt ([#1061](https://github.com/fallenbagel/jellyseerr/issues/1061)) ([64f4610](https://github.com/fallenbagel/jellyseerr/commit/64f4610b9ffcad01c24ecdd81b8b3a2f3db4c98d))
+* **setup:** add leading slash validation for baseUrl ([#1083](https://github.com/fallenbagel/jellyseerr/issues/1083)) ([2829c25](https://github.com/fallenbagel/jellyseerr/commit/2829c2548aa0cd03f92433d3bc3b9b2739e98486))
+* update i18n translations ([#1090](https://github.com/fallenbagel/jellyseerr/issues/1090)) ([f25b32a](https://github.com/fallenbagel/jellyseerr/commit/f25b32aec8ec3c2fd40ccfc6a83f18ddc99c1a15))
+* use fs/promises for settings ([#1057](https://github.com/fallenbagel/jellyseerr/issues/1057)) ([f2ed101](https://github.com/fallenbagel/jellyseerr/commit/f2ed101e522561dab8563b744d908ff036c957c5))
+
+
+### Features
+
+* add a warning if permissions are missing from config folder ([#1030](https://github.com/fallenbagel/jellyseerr/issues/1030)) ([f2b6315](https://github.com/fallenbagel/jellyseerr/commit/f2b63156d1d4aa903eb261d2c80c059c39d9091b))
+* add bypass list, bypass local addresses and username/password to proxy setting ([#1059](https://github.com/fallenbagel/jellyseerr/issues/1059)) ([ca838a0](https://github.com/fallenbagel/jellyseerr/commit/ca838a00fa4acb0ccdfbac8be4cf7fde493346f7))
+* add more logs to migrations and create a settings backup ([#1036](https://github.com/fallenbagel/jellyseerr/issues/1036)) ([326001c](https://github.com/fallenbagel/jellyseerr/commit/326001c3ecc92dc730f327130a71e797882a62b9))
+* exit Jellyseerr when migration fails ([#1026](https://github.com/fallenbagel/jellyseerr/issues/1026)) ([a2b3408](https://github.com/fallenbagel/jellyseerr/commit/a2b3408c9aa5e22e1193f535c969325254f08193))
+* proxy setting ([#1031](https://github.com/fallenbagel/jellyseerr/issues/1031)) ([4b4eeb6](https://github.com/fallenbagel/jellyseerr/commit/4b4eeb6ec707e0971fe8745910edbfb546bf25fe))
+
 ## [2.0.1](https://github.com/fallenbagel/jellyseerr/compare/v2.0.0...v2.0.1) (2024-10-17)
 
 
