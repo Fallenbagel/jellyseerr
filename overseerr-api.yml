@@ -4427,6 +4427,8 @@ paths:
       responses:
         '204':
           description: Unlinking account succeeded
+        '400':
+          description: Unlink request invalid
         '404':
           description: User does not exist
   /user/{userId}/settings/linked-accounts/jellyfin:
@@ -4475,6 +4477,8 @@ paths:
       responses:
         '204':
           description: Unlinking account succeeded
+        '400':
+          description: Unlink request invalid
         '404':
           description: User does not exist
   /user/{userId}/settings/notifications:
