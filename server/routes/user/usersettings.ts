@@ -344,9 +344,13 @@ userSettingsRoutes.delete<{ id: string }>(
     }
 
     try {
-      const user = await userRepository.findOne({
-        where: { id: Number(req.params.id) },
-      });
+      const user = await userRepository
+        .createQueryBuilder('user')
+        .addSelect('user.password')
+        .where({
+          id: Number(req.params.id),
+        })
+        .getOne();
 
       if (!user) {
         return res.status(404).json({ message: 'User not found.' });
@@ -359,14 +363,7 @@ userSettingsRoutes.delete<{ id: string }>(
         });
       }
 
-      const hasPassword = !!(
-        await userRepository.findOne({
-          where: { id: user.id },
-          select: ['id', 'password'],
-        })
-      )?.password;
-
-      if (!user.email || !hasPassword) {
+      if (!user.email || !user.password) {
         return res.status(400).json({
           message: 'User does not have a local email or password set.',
         });
@@ -502,9 +499,13 @@ userSettingsRoutes.delete<{ id: string }>(
     }
 
     try {
-      const user = await userRepository.findOne({
-        where: { id: Number(req.params.id) },
-      });
+      const user = await userRepository
+        .createQueryBuilder('user')
+        .addSelect('user.password')
+        .where({
+          id: Number(req.params.id),
+        })
+        .getOne();
 
       if (!user) {
         return res.status(404).json({ message: 'User not found.' });
@@ -517,14 +518,7 @@ userSettingsRoutes.delete<{ id: string }>(
         });
       }
 
-      const hasPassword = !!(
-        await userRepository.findOne({
-          where: { id: user.id },
-          select: ['id', 'password'],
-        })
-      )?.password;
-
-      if (!user.email || !hasPassword) {
+      if (!user.email || !user.password) {
         return res.status(400).json({
           message: 'User does not have a local email or password set.',
         });
