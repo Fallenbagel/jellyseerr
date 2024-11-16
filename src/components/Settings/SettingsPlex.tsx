@@ -191,7 +191,7 @@ const SettingsPlex = ({ onComplete }: SettingsPlexProps) => {
       }),
       tautulliExternalUrl: Yup.string()
         .matches(
-          /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}(\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*))?$/i,
+          /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}(\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*))?$/i,
           intl.formatMessage(messages.validationUrl)
         )
         .test(
