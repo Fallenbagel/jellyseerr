@@ -48,8 +48,8 @@ import {
   MinusCircleIcon,
   StarIcon,
 } from '@heroicons/react/24/solid';
+import { ANIME_KEYWORD_ID } from '@server/api/indexer/themoviedb/constants';
 import type { RTRating } from '@server/api/rating/rottentomatoes';
-import { ANIME_KEYWORD_ID } from '@server/api/themoviedb/constants';
 import { IssueStatus } from '@server/constants/issue';
 import {
   MediaRequestStatus,
@@ -119,9 +119,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
   const intl = useIntl();
   const { locale } = useLocale();
   const [showRequestModal, setShowRequestModal] = useState(false);
-  const [showManager, setShowManager] = useState(
-    router.query.manage == '1' ? true : false
-  );
+  const [showManager, setShowManager] = useState(router.query.manage == '1');
   const [showIssueModal, setShowIssueModal] = useState(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [toggleWatchlist, setToggleWatchlist] = useState<boolean>(
@@ -157,7 +155,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
   );
 
   useEffect(() => {
-    setShowManager(router.query.manage == '1' ? true : false);
+    setShowManager(router.query.manage == '1');
   }, [router.query.manage]);
 
   const closeBlacklistModal = useCallback(
@@ -189,7 +187,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     })
   ) {
     mediaLinks.push({
-      text: getAvalaibleMediaServerName(),
+      text: getAvailableMediaServerName(),
       url: plexUrl,
       svg: <PlayIcon />,
     });
@@ -203,7 +201,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     })
   ) {
     mediaLinks.push({
-      text: getAvalaible4kMediaServerName(),
+      text: getAvailable4kMediaServerName(),
       url: plexUrl4k,
       svg: <PlayIcon />,
     });
@@ -307,7 +305,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     data?.watchProviders?.find((provider) => provider.iso_3166_1 === region)
       ?.flatrate ?? [];
 
-  function getAvalaibleMediaServerName() {
+  function getAvailableMediaServerName() {
     if (settings.currentSettings.mediaServerType === MediaServerType.EMBY) {
       return intl.formatMessage(messages.play, { mediaServerName: 'Emby' });
     }
@@ -319,7 +317,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     return intl.formatMessage(messages.play, { mediaServerName: 'Jellyfin' });
   }
 
-  function getAvalaible4kMediaServerName() {
+  function getAvailable4kMediaServerName() {
     if (settings.currentSettings.mediaServerType === MediaServerType.EMBY) {
       return intl.formatMessage(messages.play, { mediaServerName: 'Emby' });
     }

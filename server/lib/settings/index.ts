@@ -1,3 +1,6 @@
+import type { TvShowIndexer } from '@server/api/indexer';
+import TheMovieDb from '@server/api/indexer/themoviedb';
+import Tvdb from '@server/api/indexer/tvdb';
 import { MediaServerType } from '@server/constants/server';
 import { Permission } from '@server/lib/permissions';
 import { runMigrations } from '@server/lib/settings/migrator';
@@ -304,6 +307,7 @@ export interface AllSettings {
   public: PublicSettings;
   notifications: NotificationSettings;
   jobs: Record<JobId, JobSettings>;
+  tvdb: boolean;
 }
 
 const SETTINGS_PATH = process.env.CONFIG_DIRECTORY
@@ -369,6 +373,7 @@ class Settings {
         apiKey: '',
       },
       tautulli: {},
+      tvdb: false,
       radarr: [],
       sonarr: [],
       public: {
@@ -532,6 +537,14 @@ class Settings {
 
   set tautulli(data: TautulliSettings) {
     this.data.tautulli = data;
+  }
+
+  get tvdb(): boolean {
+    return this.data.tvdb;
+  }
+
+  set tvdb(data: boolean) {
+    this.data.tvdb = data;
   }
 
   get radarr(): RadarrSettings[] {
@@ -699,6 +712,15 @@ export const getSettings = (initialSettings?: AllSettings): Settings => {
   }
 
   return settings;
+};
+
+export const getIndexer = (): TvShowIndexer => {
+  const settings = getSettings();
+  if (settings.tvdb) {
+    return new Tvdb();
+  } else {
+    return new TheMovieDb();
+  }
 };
 
 export default Settings;

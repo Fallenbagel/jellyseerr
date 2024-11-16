@@ -5,7 +5,7 @@ import type {
   TmdbTvEpisodeResult,
   TmdbTvRatingResult,
   TmdbTvSeasonResult,
-} from '@server/api/themoviedb/interfaces';
+} from '@server/api/indexer/themoviedb/interfaces';
 import type Media from '@server/entity/Media';
 import type {
   Cast,
@@ -124,7 +124,7 @@ const mapEpisodeResult = (episode: TmdbTvEpisodeResult): Episode => ({
   seasonNumber: episode.season_number,
   showId: episode.show_id,
   voteAverage: episode.vote_average,
-  voteCount: episode.vote_cuont,
+  voteCount: episode.vote_count,
   stillPath: episode.still_path,
 });
 
