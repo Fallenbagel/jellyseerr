@@ -1120,7 +1120,7 @@ export class MediaRequest {
 
         const overrideRuleRepository = getRepository(OverrideRule);
         const overrideRules = await overrideRuleRepository.find({
-          where: { radarrServiceId: sonarrSettings.id },
+          where: { sonarrServiceId: sonarrSettings.id },
         });
         const appliedOverrideRules = overrideRules.filter((rule) => {
           if (
