@@ -9,7 +9,7 @@ import TabItem from '@theme/TabItem';
 
 ### Option 1: Change your DNS servers
 
-This error usually comes from your DNS servers not being able to resolve the hostname of the TMDB API, because your Internet Service Provider (ISP) is blocking it.
+This error often comes from your Internet Service Provider (ISP) blocking TMDB API. The ISP may block the DNS resolution to the TMDB API hostname.
 
 To fix this, you can change your DNS servers to a public DNS service like Google's DNS or Cloudflare's DNS:
 
@@ -107,7 +107,15 @@ services:
   </TabItem>
 </Tabs>
 
-### Option 3: Check that your server can reach TMDB API
+### Option 3: Use Jellyseerr through a proxy
+
+If you can't change your DNS servers or force IPV4 resolution, you can use Jellyseerr through a proxy.
+
+In some places (like China), the ISP blocks not only the DNS resolution but also the connection to the TMDB API.
+
+You can configure Jellyseerr to use a proxy with the [HTTP(S) Proxy](/using-jellyseerr/settings/general#https-proxy) setting.
+
+### Option 4: Check that your server can reach TMDB API
 
 Make sure that your server can reach the TMDB API by running the following command:
 
