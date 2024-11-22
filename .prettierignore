@@ -11,4 +11,4 @@ public/
 docs/
 
 # helm charts
-charts
+**/charts
