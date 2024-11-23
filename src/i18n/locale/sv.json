@@ -1298,5 +1298,18 @@
   "components.Setup.configuremediaserver": "Konfigurera Media Server",
   "components.UserProfile.localWatchlist": "{username}'s Bevakningslista",
   "components.Settings.Notifications.userEmailRequired": "Kräv användarens e-postadress",
-  "components.UserProfile.UserSettings.UserGeneralSettings.email": "E-post"
+  "components.UserProfile.UserSettings.UserGeneralSettings.email": "E-post",
+  "components.Login.back": "Backa",
+  "components.Login.hostname": "{mediaServerName} URL",
+  "components.Login.validationHostnameRequired": "Du måste ange ett giltigt värdnamn eller IP address",
+  "components.Login.invalidurlerror": "Kunde inte ansluta till {mediaServerName} server.",
+  "components.Login.port": "Port",
+  "components.Login.servertype": "Server typ",
+  "components.Login.urlBase": "Bas URL",
+  "components.Login.validationPortRequired": "Du måste ange ett giltigt port nummer",
+  "components.Login.validationUrlBaseLeadingSlash": "Bas url måste innehålla ett frammåt slash",
+  "components.Login.validationUrlBaseTrailingSlash": "Bas URL kan inte sluta med en slash",
+  "components.Login.adminerror": "Du måste använda ett administratörskonto för att logga in.",
+  "components.Login.enablessl": "Använd SSL",
+  "components.Discover.FilterSlideover.status": "Status"
 }
