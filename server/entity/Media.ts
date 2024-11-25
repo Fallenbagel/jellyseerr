@@ -43,6 +43,10 @@ class Media {
         finalIds = tmdbIds;
       }
 
+      if (finalIds.length === 0) {
+        return [];
+      }
+
       const media = await mediaRepository
         .createQueryBuilder('media')
         .leftJoinAndSelect(
