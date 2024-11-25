@@ -1,8 +1,8 @@
-# jellyseerr
+# Jellyseerr
 
 ![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.1.0](https://img.shields.io/badge/AppVersion-2.1.0-informational?style=flat-square)
 
-jellyseerr helm chart for Kubernetes
+Jellyseerr helm chart for Kubernetes
 
 **Homepage:** <https://github.com/Fallenbagel/jellyseerr>
 
