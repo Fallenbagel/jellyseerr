@@ -170,6 +170,7 @@ export interface NotificationAgentDiscord extends NotificationAgentConfig {
     botUsername?: string;
     botAvatarUrl?: string;
     webhookUrl: string;
+    webhookRoleId?: string;
     enableMentions: boolean;
   };
 }
@@ -281,6 +282,7 @@ export type JobId =
   | 'plex-recently-added-scan'
   | 'plex-full-scan'
   | 'plex-watchlist-sync'
+  | 'plex-refresh-token'
   | 'radarr-scan'
   | 'sonarr-scan'
   | 'download-sync'
@@ -394,6 +396,7 @@ class Settings {
             types: 0,
             options: {
               webhookUrl: '',
+              webhookRoleId: '',
               enableMentions: true,
             },
           },
@@ -467,7 +470,10 @@ class Settings {
           schedule: '0 0 3 * * *',
         },
         'plex-watchlist-sync': {
-          schedule: '0 */10 * * * *',
+          schedule: '0 */3 * * * *',
+        },
+        'plex-refresh-token': {
+          schedule: '0 0 5 * * *',
         },
         'radarr-scan': {
           schedule: '0 0 4 * * *',

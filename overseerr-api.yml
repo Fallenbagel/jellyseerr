@@ -1273,6 +1273,8 @@ components:
               type: string
             webhookUrl:
               type: string
+            webhookRoleId:
+              type: string
             enableMentions:
               type: boolean
     SlackSettings:
@@ -4142,6 +4144,21 @@ paths:
         '412':
           description: Item has already been blacklisted
   /blacklist/{tmdbId}:
+    get:
+      summary: Get media from blacklist
+      tags:
+        - blacklist
+      parameters:
+        - in: path
+          name: tmdbId
+          description: tmdbId ID
+          required: true
+          example: '1'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Blacklist details in JSON
     delete:
       summary: Remove media from blacklist
       tags:
@@ -5469,7 +5486,7 @@ paths:
                     - type: array
                       items:
                         type: number
-                        minimum: 1
+                        minimum: 0
                     - type: string
                       enum: [all]
                 is4k:
@@ -5575,7 +5592,7 @@ paths:
                   type: array
                   items:
                     type: number
-                    minimum: 1
+                    minimum: 0
                 is4k:
                   type: boolean
                   example: false
