@@ -291,7 +291,8 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
     const account = await jellyfinserver.login(
       body.username,
       body.password,
-      clientIp
+      clientIp,
+      body.serverType || settings.main.mediaServerType
     );
 
     // Next let's see if the user already exists

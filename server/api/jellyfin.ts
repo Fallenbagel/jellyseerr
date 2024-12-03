@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import ExternalAPI from '@server/api/externalapi';
 import { ApiErrorCode } from '@server/constants/error';
+import { MediaServerType } from '@server/constants/server';
 import availabilitySync from '@server/lib/availabilitySync';
 import logger from '@server/logger';
 import { ApiError } from '@server/types/error';
@@ -117,11 +118,20 @@ class JellyfinAPI extends ExternalAPI {
   public async login(
     Username?: string,
     Password?: string,
-    ClientIP?: string
+    ClientIP?: string,
+    serverType?: MediaServerType
   ): Promise<JellyfinLoginResponse> {
     const authenticate = async (useHeaders: boolean) => {
-      const headers: { [key: string]: string } =
-        useHeaders && ClientIP ? { 'X-Forwarded-For': ClientIP } : {};
+      let headers: { [key: string]: string } = {};
+      if (useHeaders && ClientIP) {
+        headers = { 'X-Forwarded-For': ClientIP };
+      }
+      if (serverType === MediaServerType.EMBY) {
+        headers = {
+          ...headers,
+          'Accept-Encoding': 'gzip',
+        };
+      }
 
       return this.post<JellyfinLoginResponse>(
         '/Users/AuthenticateByName',
