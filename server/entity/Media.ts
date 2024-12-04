@@ -132,10 +132,10 @@ class Media {
   @UpdateDateColumn()
   public updatedAt: Date;
 
-  @DbAwareColumn({ type: 'datetime', default: () => 'now()' })
+  @DbAwareColumn({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   public lastSeasonChange: Date;
 
-  @DbAwareColumn({ type: 'datetime', default: () => 'now()' })
+  @DbAwareColumn({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   public mediaAddedAt: Date;
 
   @Column({ nullable: true, type: 'int' })
