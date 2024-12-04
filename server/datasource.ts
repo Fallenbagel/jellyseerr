@@ -1,5 +1,4 @@
 import fs from 'fs';
-import * as process from 'process';
 import type { TlsOptions } from 'tls';
 import type { DataSourceOptions, EntityTarget, Repository } from 'typeorm';
 import { DataSource } from 'typeorm';
