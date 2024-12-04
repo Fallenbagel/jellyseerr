@@ -132,10 +132,23 @@ class Media {
   @UpdateDateColumn()
   public updatedAt: Date;
 
+  /**
+   * The `lastSeasonChange` column stores the date and time when the media was added to the library.
+   * It needs to be database-aware because SQLite supports `datetime` while PostgreSQL supports `timestamp with timezone (timestampz)`.
+   */
   @DbAwareColumn({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   public lastSeasonChange: Date;
 
-  @DbAwareColumn({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  /**
+   * The `mediaAddedAt` column stores the date and time when the media was added to the library.
+   * It needs to be database-aware because SQLite supports `datetime` while PostgreSQL supports `timestamp with timezone (timestampz)`.
+   * This column is nullable because it can be null when the media is not yet synced to the library.
+   */
+  @DbAwareColumn({
+    type: 'datetime',
+    default: () => 'CURRENT_TIMESTAMP',
+    nullable: true,
+  })
   public mediaAddedAt: Date;
 
   @Column({ nullable: true, type: 'int' })
