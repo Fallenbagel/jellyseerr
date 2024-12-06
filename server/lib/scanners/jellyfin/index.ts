@@ -216,7 +216,9 @@ class JellyfinScanner {
             tvId: Number(metadata.ProviderIds.Tmdb),
           });
         } catch {
-          /* empty */
+          this.log('No TMDb ID found for this title.', 'debug', {
+            jellyfinitem,
+          });
         }
       }
       if (!tvShow && metadata.ProviderIds.Tvdb) {
@@ -500,7 +502,9 @@ class JellyfinScanner {
           }
         });
       } else {
-        this.log(`failed show: ${metadata.Name}`);
+        this.log('No TMDb or TVDb ID found for this title.', 'debug', {
+          jellyfinitem,
+        });
       }
     } catch (e) {
       this.log(
