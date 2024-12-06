@@ -210,14 +210,23 @@ class JellyfinScanner {
         return;
       }
 
-      if (metadata.ProviderIds.Tvdb) {
-        tvShow = await this.tmdb.getShowByTvdbId({
-          tvdbId: Number(metadata.ProviderIds.Tvdb),
-        });
-      } else if (metadata.ProviderIds.Tmdb) {
-        tvShow = await this.tmdb.getTvShow({
-          tvId: Number(metadata.ProviderIds.Tmdb),
-        });
+      if (metadata.ProviderIds.Tmdb) {
+        try {
+          tvShow = await this.tmdb.getTvShow({
+            tvId: Number(metadata.ProviderIds.Tmdb),
+          });
+        } catch {
+          /* empty */
+        }
+      }
+      if (!tvShow && metadata.ProviderIds.Tvdb) {
+        try {
+          tvShow = await this.tmdb.getShowByTvdbId({
+            tvdbId: Number(metadata.ProviderIds.Tvdb),
+          });
+        } catch {
+          /* empty */
+        }
       }
 
       if (tvShow) {
