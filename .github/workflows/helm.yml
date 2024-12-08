@@ -47,7 +47,7 @@ jobs:
               # get current release version
               oras discover ghcr.io/${GITHUB_REPOSITORY@L}/${chart}${CHART_SUFFIX}:${current_version}
 
-              if [ "$?" -eq 1 ]; then
+              if [ $? -ne 0 ]; then
                 helm dependency build "$chart_path"
                 helm package "$chart_path" --destination ./.cr-release-packages
               else
