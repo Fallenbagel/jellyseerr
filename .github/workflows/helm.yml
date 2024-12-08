@@ -29,6 +29,13 @@ jobs:
       - name: Install Oras
         uses: oras-project/setup-oras@v1
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Package helm charts
         run: |
           mkdir -p ./.cr-release-packages
@@ -90,13 +97,6 @@ jobs:
         with:
           name: artifacts
           path: .cr-release-packages/
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push charts to GHCR
         env:
