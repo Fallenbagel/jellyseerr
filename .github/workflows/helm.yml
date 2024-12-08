@@ -22,6 +22,9 @@ jobs:
       - name: Install helm
         uses: azure/setup-helm@v4
 
+      - name: Install Oras
+        uses: oras-project/setup-oras@v1
+
       - name: Package helm charts
         run: |
           mkdir -p ./.cr-release-packages
@@ -77,9 +80,6 @@ jobs:
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
-
-      - name: Install Oras
-        uses: oras-project/setup-oras@v1
 
       - name: Downloads artifacts
         uses: actions/download-artifact@v4
