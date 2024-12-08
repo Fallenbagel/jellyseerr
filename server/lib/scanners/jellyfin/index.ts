@@ -504,9 +504,13 @@ class JellyfinScanner {
           }
         });
       } else {
-        this.log('No information found for this show', 'debug', {
-          jellyfinitem,
-        });
+        this.log(
+          `No information found for the show: ${metadata.Name}`,
+          'debug',
+          {
+            jellyfinitem,
+          }
+        );
       }
     } catch (e) {
       this.log(
