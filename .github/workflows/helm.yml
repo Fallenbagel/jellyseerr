@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read
     outputs:
       has_artifacts: ${{ steps.check-artifacts.outputs.has_artifacts }}
     steps:
