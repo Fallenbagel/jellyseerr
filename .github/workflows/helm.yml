@@ -1,9 +1,12 @@
 name: Release Charts
 
 on:
-    push:
-      branches:
-        - develop
+  push:
+    branches:
+      - develop
+
+env:
+  CHART_SUFFIX: "-chart"
 
 jobs:
   package-helm-chart:
@@ -28,17 +31,17 @@ jobs:
       - name: Package helm charts
         run: |
           mkdir -p ./.cr-release-packages
-          for chart in ./charts/*; do
-            if [ -d "$chart" ] && [ -f "$chart/Chart.yaml" ]; then
+          for chart_path in ./charts/*; do
+            if [ -d "$chart_path" ] && [ -f "$chart_path/Chart.yaml" ]; then
+              chart=$(basename "$chart_path")
               # get current version
-              current_version=$(grep '^version:' "$chart/Chart.yaml" | awk '{print $2}')
-              # get latest release version
-              oras discover ghcr.io/${GITHUB_REPOSITORY}/${chart} --output json |& tee oci-tags-output.log
-              previous_version=$(cat oci-tags-output.log | jq -r '.references[].tag' | sort -V | tail -n 1)
+              current_version=$(grep '^version:' "$chart_path/Chart.yaml" | awk '{print $2}')
+              # get current release version
+              oras discover ghcr.io/${GITHUB_REPOSITORY@L}/${chart}${CHART_SUFFIX}:${current_version}
 
-              if [ "$current_version" != "$previous_version" ]; then
-                helm dependency build "$chart"
-                helm package "$chart" --destination ./.cr-release-packages
+              if [ "$?" -eq 1 ]; then
+                helm dependency build "$chart_path"
+                helm package "$chart_path" --destination ./.cr-release-packages
               else
                 echo "No version change for $chart. Skipping."
               fi
@@ -98,22 +101,21 @@ jobs:
         env:
           COSIGN_YES: true
         run: |
-          for chart in `find .cr-release-packages -name '*.tgz' -print`; do
+          for chart_path in `find .cr-release-packages -name '*.tgz' -print`; do
             # push chart to OCI  
-            helm push ${chart} oci://ghcr.io/${GITHUB_REPOSITORY@L} |& tee helm-push-output.log
-            file_name=${chart##*/}
-            chart_folder=${file_name%-*}
-            chart_name=${chart_folder}-chart
+            helm push ${chart_path} oci://ghcr.io/${GITHUB_REPOSITORY@L} |& tee helm-push-output.log
+            chart_release_file=$(basename "$chart_path")
+            chart=${chart_release_file%-*}
             chart_digest=$(awk -F "[, ]+" '/Digest/{print $NF}' < helm-push-output.log)
             # sign chart
-            cosign sign "ghcr.io/${GITHUB_REPOSITORY@L}/${chart_name}@${chart_digest}"
+            cosign sign "ghcr.io/${GITHUB_REPOSITORY@L}/${chart}${CHART_SUFFIX}@${chart_digest}"
             # push artifacthub-repo.yml to OCI
             oras push \
-              ghcr.io/${GITHUB_REPOSITORY@L}/${chart_name}:artifacthub.io \
+              ghcr.io/${GITHUB_REPOSITORY@L}/${chart}${CHART_SUFFIX}:artifacthub.io \
               --config /dev/null:application/vnd.cncf.artifacthub.config.v1+yaml \
-              charts/$chart_folder/artifacthub-repo.yml:application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml \
+              charts/$chart/artifacthub-repo.yml:application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml \
               |& tee oras-push-output.log
             artifacthub_digest=$(grep "Digest:" oras-push-output.log | awk '{print $2}')
             # sign artifacthub-repo.yml
-            cosign sign "ghcr.io/${GITHUB_REPOSITORY@L}/${chart_name}:artifacthub.io@${artifacthub_digest}"
+            cosign sign "ghcr.io/${GITHUB_REPOSITORY@L}/${chart}${CHART_SUFFIX}:artifacthub.io@${artifacthub_digest}"
           done
