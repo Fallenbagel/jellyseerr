@@ -85,6 +85,7 @@ class SonarrScanner
   private async processSonarrSeries(sonarrSeries: SonarrSeries) {
     try {
       const mediaRepository = getRepository(Media);
+      const settings = getSettings();
       const server4k = this.enable4kShow && this.currentServer.is4k;
       const processableSeasons: ProcessableSeason[] = [];
       let tvShow: TmdbTvDetails;
@@ -110,6 +111,14 @@ class SonarrScanner
       for (const season of filteredSeasons) {
         const totalAvailableEpisodes = season.statistics?.episodeFileCount ?? 0;
 
+        if (
+          settings.main.removeUnmonitoredEnabled &&
+          season.monitored === false &&
+          totalAvailableEpisodes === 0
+        ) {
+          this.processUnmonitoredSeason(tmdbId, season);
+        }
+
         processableSeasons.push({
           seasonNumber: season.seasonNumber,
           episodes: !server4k ? totalAvailableEpisodes : 0,
@@ -117,6 +126,7 @@ class SonarrScanner
           totalEpisodes: season.statistics?.totalEpisodeCount ?? 0,
           processing: season.monitored && totalAvailableEpisodes === 0,
           is4kOverride: server4k,
+          monitored: season.monitored,
         });
       }
 
