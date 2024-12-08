@@ -1,6 +1,6 @@
 import type { AllSettings } from '@server/lib/settings';
 
-const migrateHostname = (settings: any): AllSettings => {
+const migrateRegionSetting = (settings: any): AllSettings => {
   const oldRegion = settings.main.region;
   if (oldRegion) {
     settings.main.discoverRegion = oldRegion;
@@ -14,4 +14,4 @@ const migrateHostname = (settings: any): AllSettings => {
   return settings;
 };
 
-export default migrateHostname;
+export default migrateRegionSetting;
