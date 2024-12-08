@@ -102,7 +102,8 @@ jobs:
             # push chart to OCI  
             helm push ${chart} oci://ghcr.io/${GITHUB_REPOSITORY@L} |& tee helm-push-output.log
             file_name=${chart##*/}
-            chart_name=${file_name%-*}-charts
+            chart_folder=${file_name%-*}
+            chart_name=${chart_folder}-chart
             chart_digest=$(awk -F "[, ]+" '/Digest/{print $NF}' < helm-push-output.log)
             # sign chart
             cosign sign "ghcr.io/${GITHUB_REPOSITORY@L}/${chart_name}@${chart_digest}"
@@ -110,7 +111,7 @@ jobs:
             oras push \
               ghcr.io/${GITHUB_REPOSITORY@L}/${chart_name}:artifacthub.io \
               --config /dev/null:application/vnd.cncf.artifacthub.config.v1+yaml \
-              charts/$chart_name/artifacthub-repo.yml:application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml \
+              charts/$chart_folder/artifacthub-repo.yml:application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml \
               |& tee oras-push-output.log
             artifacthub_digest=$(grep "Digest:" oras-push-output.log | awk '{print $2}')
             # sign artifacthub-repo.yml
