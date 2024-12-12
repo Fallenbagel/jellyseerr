@@ -119,7 +119,7 @@ class TelegramAgent
       message += `\n\*Issue Type:\* ${IssueTypeName[payload.issue.issueType]}`;
       message += `\n\*Issue Status:\* ${
         payload.issue.status === IssueStatus.OPEN ? 'Open' : 'Resolved'
-        }`;
+      }`;
     }
 
     for (const extra of payload.extra ?? []) {
@@ -130,27 +130,27 @@ class TelegramAgent
       ? payload.issue
         ? `${applicationUrl}/issues/${payload.issue.id}`
         : payload.media
-          ? `${applicationUrl}/${payload.media.mediaType}/${payload.media.tmdbId}`
-          : undefined
+        ? `${applicationUrl}/${payload.media.mediaType}/${payload.media.tmdbId}`
+        : undefined
       : undefined;
 
     if (url) {
       message += `\n\n\[View ${
         payload.issue ? 'Issue' : 'Media'
-        } in ${this.escapeText(applicationTitle)}\]\(${url}\)`;
+      } in ${this.escapeText(applicationTitle)}\]\(${url}\)`;
     }
     /* eslint-enable */
 
     return payload.image
       ? {
-        photo: payload.image,
-        caption: message,
-        parse_mode: 'MarkdownV2',
-      }
+          photo: payload.image,
+          caption: message,
+          parse_mode: 'MarkdownV2',
+        }
       : {
-        text: message,
-        parse_mode: 'MarkdownV2',
-      };
+          text: message,
+          parse_mode: 'MarkdownV2',
+        };
   }
 
   public async send(
@@ -160,7 +160,7 @@ class TelegramAgent
     const settings = this.getSettings();
     const endpoint = `${this.baseUrl}bot${settings.options.botAPI}/${
       payload.image ? 'sendPhoto' : 'sendMessage'
-      }`;
+    }`;
     const notificationPayload = this.getNotificationPayload(type, payload);
 
     // Send system notification
