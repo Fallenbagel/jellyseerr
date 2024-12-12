@@ -17,6 +17,7 @@ interface TelegramMessagePayload {
   text: string;
   parse_mode: string;
   chat_id: string;
+  message_thread_id: string;
   disable_notification: boolean;
 }
 
@@ -25,6 +26,7 @@ interface TelegramPhotoPayload {
   caption: string;
   parse_mode: string;
   chat_id: string;
+  message_thread_id: string;
   disable_notification: boolean;
 }
 
@@ -117,7 +119,7 @@ class TelegramAgent
       message += `\n\*Issue Type:\* ${IssueTypeName[payload.issue.issueType]}`;
       message += `\n\*Issue Status:\* ${
         payload.issue.status === IssueStatus.OPEN ? 'Open' : 'Resolved'
-      }`;
+        }`;
     }
 
     for (const extra of payload.extra ?? []) {
@@ -128,27 +130,27 @@ class TelegramAgent
       ? payload.issue
         ? `${applicationUrl}/issues/${payload.issue.id}`
         : payload.media
-        ? `${applicationUrl}/${payload.media.mediaType}/${payload.media.tmdbId}`
-        : undefined
+          ? `${applicationUrl}/${payload.media.mediaType}/${payload.media.tmdbId}`
+          : undefined
       : undefined;
 
     if (url) {
       message += `\n\n\[View ${
         payload.issue ? 'Issue' : 'Media'
-      } in ${this.escapeText(applicationTitle)}\]\(${url}\)`;
+        } in ${this.escapeText(applicationTitle)}\]\(${url}\)`;
     }
     /* eslint-enable */
 
     return payload.image
       ? {
-          photo: payload.image,
-          caption: message,
-          parse_mode: 'MarkdownV2',
-        }
+        photo: payload.image,
+        caption: message,
+        parse_mode: 'MarkdownV2',
+      }
       : {
-          text: message,
-          parse_mode: 'MarkdownV2',
-        };
+        text: message,
+        parse_mode: 'MarkdownV2',
+      };
   }
 
   public async send(
@@ -158,7 +160,7 @@ class TelegramAgent
     const settings = this.getSettings();
     const endpoint = `${this.baseUrl}bot${settings.options.botAPI}/${
       payload.image ? 'sendPhoto' : 'sendMessage'
-    }`;
+      }`;
     const notificationPayload = this.getNotificationPayload(type, payload);
 
     // Send system notification
@@ -182,6 +184,7 @@ class TelegramAgent
           body: JSON.stringify({
             ...notificationPayload,
             chat_id: settings.options.chatId,
+            message_thread_id: settings.options.messageThreadId,
             disable_notification: !!settings.options.sendSilently,
           } as TelegramMessagePayload | TelegramPhotoPayload),
         });
@@ -233,6 +236,7 @@ class TelegramAgent
             body: JSON.stringify({
               ...notificationPayload,
               chat_id: payload.notifyUser.settings.telegramChatId,
+              message_thread_id: payload.notifyUser.settings.telegramMessageThreadId,
               disable_notification:
                 !!payload.notifyUser.settings.telegramSendSilently,
             } as TelegramMessagePayload | TelegramPhotoPayload),
@@ -296,6 +300,7 @@ class TelegramAgent
                   body: JSON.stringify({
                     ...notificationPayload,
                     chat_id: user.settings.telegramChatId,
+                    message_thread_id: user.settings.telegramMessageThreadId,
                     disable_notification: !!user.settings?.telegramSendSilently,
                   } as TelegramMessagePayload | TelegramPhotoPayload),
                 });
