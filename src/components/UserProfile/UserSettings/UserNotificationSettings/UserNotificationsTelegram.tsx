@@ -22,11 +22,13 @@ const messages = defineMessages(
     telegramChatIdTipLong:
       '<TelegramBotLink>Start a chat</TelegramBotLink>, add <GetIdBotLink>@get_id_bot</GetIdBotLink>, and issue the <code>/my_id</code> command',
     telegramMessageThreadId: 'Thread/Topic ID',
-    telegramMessageThreadIdTip: "If your group-chat has topics enabled, you can specify a thread/topic's ID here",
+    telegramMessageThreadIdTip:
+      "If your group-chat has topics enabled, you can specify a thread/topic's ID here",
     sendSilently: 'Send Silently',
     sendSilentlyDescription: 'Send notifications with no sound',
     validationTelegramChatId: 'You must provide a valid chat ID',
-    validationTelegramMessageThreadId: 'The thread/topic ID must be a positive whole number',
+    validationTelegramMessageThreadId:
+      'The thread/topic ID must be a positive whole number',
   }
 );
 
@@ -61,7 +63,9 @@ const UserTelegramSettings = () => {
         is: (enabled: boolean, types: number) => enabled && !!types,
         then: Yup.string()
           .nullable()
-          .required(intl.formatMessage(messages.validationTelegramMessageThreadId)),
+          .required(
+            intl.formatMessage(messages.validationTelegramMessageThreadId)
+          ),
         otherwise: Yup.string().nullable(),
       })
       .matches(
@@ -197,7 +201,9 @@ const UserTelegramSettings = () => {
                 {errors.telegramMessageThreadId &&
                   touched.telegramMessageThreadId &&
                   typeof errors.telegramMessageThreadId === 'string' && (
-                    <div className="error">{errors.telegramMessageThreadId}</div>
+                    <div className="error">
+                      {errors.telegramMessageThreadId}
+                    </div>
                   )}
               </div>
             </div>

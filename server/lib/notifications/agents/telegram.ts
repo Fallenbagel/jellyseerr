@@ -236,7 +236,8 @@ class TelegramAgent
             body: JSON.stringify({
               ...notificationPayload,
               chat_id: payload.notifyUser.settings.telegramChatId,
-              message_thread_id: payload.notifyUser.settings.telegramMessageThreadId,
+              message_thread_id:
+                payload.notifyUser.settings.telegramMessageThreadId,
               disable_notification:
                 !!payload.notifyUser.settings.telegramSendSilently,
             } as TelegramMessagePayload | TelegramPhotoPayload),

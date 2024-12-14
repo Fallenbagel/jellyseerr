@@ -379,7 +379,8 @@ userSettingsRoutes.post<{ id: string }, UserSettingsNotificationsResponse>(
         user.settings.pushoverUserKey = req.body.pushoverUserKey;
         user.settings.pushoverSound = req.body.pushoverSound;
         user.settings.telegramChatId = req.body.telegramChatId;
-        user.settings.telegramMessageThreadId = req.body.telegramMessageThreadId;
+        user.settings.telegramMessageThreadId =
+          req.body.telegramMessageThreadId;
         user.settings.telegramSendSilently = req.body.telegramSendSilently;
         user.settings.notificationTypes = Object.assign(
           {},

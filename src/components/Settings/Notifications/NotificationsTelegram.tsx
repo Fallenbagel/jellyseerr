@@ -24,10 +24,12 @@ const messages = defineMessages('components.Settings.Notifications', {
   chatIdTip:
     'Start a chat with your bot, add <GetIdBotLink>@get_id_bot</GetIdBotLink>, and issue the <code>/my_id</code> command',
   messageThreadId: 'Thread/Topic ID',
-  messageThreadIdTip: "If your group-chat has topics enabled, you can specify a thread/topic's ID here",
+  messageThreadIdTip:
+    "If your group-chat has topics enabled, you can specify a thread/topic's ID here",
   validationBotAPIRequired: 'You must provide a bot authorization token',
   validationChatIdRequired: 'You must provide a valid chat ID',
-  validationMessageThreadId: 'The thread/topic ID must be a positive whole number',
+  validationMessageThreadId:
+    'The thread/topic ID must be a positive whole number',
   telegramsettingssaved: 'Telegram notification settings saved successfully!',
   telegramsettingsfailed: 'Telegram notification settings failed to save.',
   toastTelegramTestSending: 'Sending Telegram test notification…',
@@ -75,10 +77,7 @@ const NotificationsTelegram = () => {
           .required(intl.formatMessage(messages.validationMessageThreadId)),
         otherwise: Yup.string().nullable(),
       })
-      .matches(
-        /^\d+$/,
-        intl.formatMessage(messages.validationMessageThreadId)
-      ),
+      .matches(/^\d+$/, intl.formatMessage(messages.validationMessageThreadId)),
   });
 
   if (!data && !error) {
