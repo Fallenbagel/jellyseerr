@@ -134,6 +134,7 @@ export interface MainSettings {
   enableSpecialEpisodes: boolean;
   forceIpv4First: boolean;
   dnsServers: string;
+  removeUnmonitoredEnabled: boolean;
   locale: string;
   proxy: ProxySettings;
 }
@@ -158,6 +159,7 @@ interface FullPublicSettings extends PublicSettings {
   jellyfinServerName?: string;
   partialRequestsEnabled: boolean;
   enableSpecialEpisodes: boolean;
+  removeUnmonitoredEnabled: boolean;
   cacheImages: boolean;
   vapidPublic: string;
   enablePushRegistration: boolean;
@@ -350,6 +352,7 @@ class Settings {
         enableSpecialEpisodes: false,
         forceIpv4First: false,
         dnsServers: '',
+        removeUnmonitoredEnabled: false,
         locale: 'en',
         proxy: {
           enabled: false,
@@ -595,6 +598,7 @@ class Settings {
       mediaServerType: this.main.mediaServerType,
       partialRequestsEnabled: this.data.main.partialRequestsEnabled,
       enableSpecialEpisodes: this.data.main.enableSpecialEpisodes,
+      removeUnmonitoredEnabled: this.data.main.removeUnmonitoredEnabled,
       cacheImages: this.data.main.cacheImages,
       vapidPublic: this.vapidPublic,
       enablePushRegistration: this.data.notifications.agents.webpush.enabled,

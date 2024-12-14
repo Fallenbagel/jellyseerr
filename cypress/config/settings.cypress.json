@@ -25,6 +25,7 @@
     "enableSpecialEpisodes": false,
     "forceIpv4First": false,
     "dnsServers": "",
+    "removeUnmonitoredEnabled": false,
     "locale": "en"
   },
   "plex": {
