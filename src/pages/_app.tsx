@@ -197,6 +197,7 @@ CoreApp.getInitialProps = async (initialProps) => {
     originalLanguage: '',
     mediaServerType: MediaServerType.NOT_CONFIGURED,
     partialRequestsEnabled: true,
+    removeUnmonitoredEnabled: false,
     cacheImages: false,
     vapidPublic: '',
     enablePushRegistration: false,

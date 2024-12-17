@@ -37,6 +37,7 @@ export interface PublicSettingsResponse {
   originalLanguage: string;
   mediaServerType: number;
   partialRequestsEnabled: boolean;
+  removeUnmonitoredEnabled: boolean;
   cacheImages: boolean;
   vapidPublic: string;
   enablePushRegistration: boolean;
