@@ -228,9 +228,9 @@ const RequestList = () => {
                 }
               >
                 {currentSortDirection === 'asc' ? (
-                  <ArrowUpIcon className={'h-3'} />
+                  <ArrowUpIcon className="h-3" />
                 ) : (
-                  <ArrowDownIcon className={'h-3'} />
+                  <ArrowDownIcon className="h-3" />
                 )}
               </Button>
             </Tooltip>
