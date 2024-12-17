@@ -218,9 +218,9 @@ const RequestList = () => {
             </select>
             <Tooltip content={intl.formatMessage(messages.sortDirection)}>
               <Button
-                buttonType={'ghost'}
+                buttonType="ghost"
                 className="z-40 mr-2 rounded-l-none"
-                buttonSize={'md'}
+                buttonSize="md"
                 onClick={() =>
                   setCurrentSortDirection(
                     currentSortDirection === 'asc' ? 'desc' : 'asc'
