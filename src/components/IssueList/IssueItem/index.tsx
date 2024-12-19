@@ -11,7 +11,6 @@ import { MediaType } from '@server/constants/media';
 import type Issue from '@server/entity/Issue';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useInView } from 'react-intersection-observer';
 import { FormattedRelativeTime, useIntl } from 'react-intl';
@@ -113,6 +112,7 @@ const IssueItem = ({ issue }: IssueItemProps) => {
       {title.backdropPath && (
         <div className="absolute inset-0 z-0 w-full bg-cover bg-center xl:w-2/3">
           <CachedImage
+            type="tmdb"
             src={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${title.backdropPath}`}
             alt=""
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -138,6 +138,7 @@ const IssueItem = ({ issue }: IssueItemProps) => {
             className="relative h-auto w-12 flex-shrink-0 scale-100 transform-gpu overflow-hidden rounded-md transition duration-300 hover:scale-105"
           >
             <CachedImage
+              type="tmdb"
               src={
                 title.posterPath
                   ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${title.posterPath}`
@@ -226,7 +227,8 @@ const IssueItem = ({ issue }: IssueItemProps) => {
                         href={`/users/${issue.createdBy.id}`}
                         className="group flex items-center truncate"
                       >
-                        <Image
+                        <CachedImage
+                          type="avatar"
                           src={issue.createdBy.avatar}
                           alt=""
                           className="avatar-sm ml-1.5 object-cover"

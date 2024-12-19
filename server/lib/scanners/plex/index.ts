@@ -129,7 +129,7 @@ class PlexScanner
           });
 
           settings.plex.libraries = newLibraries;
-          settings.save();
+          await settings.save();
         }
       } else {
         for (const library of this.libraries) {
@@ -278,9 +278,7 @@ class PlexScanner
     const seasons = tvShow.seasons;
     const processableSeasons: ProcessableSeason[] = [];
 
-    const filteredSeasons = seasons.filter((sn) => sn.season_number !== 0);
-
-    for (const season of filteredSeasons) {
+    for (const season of seasons) {
       const matchedPlexSeason = metadata.Children?.Metadata.find(
         (md) => Number(md.index) === season.season_number
       );

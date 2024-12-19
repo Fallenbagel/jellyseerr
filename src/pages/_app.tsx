@@ -12,6 +12,7 @@ import { SettingsProvider } from '@app/context/SettingsContext';
 import { UserContext } from '@app/context/UserContext';
 import type { User } from '@app/hooks/useUser';
 import '@app/styles/globals.css';
+import '@app/utils/fetchOverride';
 import { polyfillIntl } from '@app/utils/polyfillIntl';
 import { MediaServerType } from '@server/constants/server';
 import type { PublicSettingsResponse } from '@server/interfaces/api/settingsInterfaces';
@@ -191,7 +192,8 @@ CoreApp.getInitialProps = async (initialProps) => {
     movie4kEnabled: false,
     series4kEnabled: false,
     localLogin: true,
-    region: '',
+    discoverRegion: '',
+    streamingRegion: '',
     originalLanguage: '',
     mediaServerType: MediaServerType.NOT_CONFIGURED,
     partialRequestsEnabled: true,

@@ -29,12 +29,12 @@ import { z } from 'zod';
 export const createTmdbWithRegionLanguage = (user?: User): TheMovieDb => {
   const settings = getSettings();
 
-  const region =
-    user?.settings?.region === 'all'
+  const discoverRegion =
+    user?.settings?.streamingRegion === 'all'
       ? ''
-      : user?.settings?.region
-      ? user?.settings?.region
-      : settings.main.region;
+      : user?.settings?.streamingRegion
+      ? user?.settings?.streamingRegion
+      : settings.main.discoverRegion;
 
   const originalLanguage =
     user?.settings?.originalLanguage === 'all'
@@ -44,7 +44,7 @@ export const createTmdbWithRegionLanguage = (user?: User): TheMovieDb => {
       : settings.main.originalLanguage;
 
   return new TheMovieDb({
-    region,
+    discoverRegion,
     originalLanguage,
   });
 };
@@ -875,6 +875,7 @@ discoverRoutes.get<Record<string, unknown>, WatchlistResponse>(
       totalPages: Math.ceil(watchlist.totalSize / itemsPerPage),
       totalResults: watchlist.totalSize,
       results: watchlist.items.map((item) => ({
+        id: item.tmdbId,
         ratingKey: item.ratingKey,
         title: item.title,
         mediaType: item.type === 'show' ? 'tv' : 'movie',

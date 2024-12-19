@@ -12,7 +12,7 @@ sonarrRoutes.get('/', (_req, res) => {
   res.status(200).json(settings.sonarr);
 });
 
-sonarrRoutes.post('/', (req, res) => {
+sonarrRoutes.post('/', async (req, res) => {
   const settings = getSettings();
 
   const newSonarr = req.body as SonarrSettings;
@@ -31,7 +31,7 @@ sonarrRoutes.post('/', (req, res) => {
   }
 
   settings.sonarr = [...settings.sonarr, newSonarr];
-  settings.save();
+  await settings.save();
 
   return res.status(201).json(newSonarr);
 });
@@ -43,13 +43,14 @@ sonarrRoutes.post('/test', async (req, res, next) => {
       url: SonarrAPI.buildUrl(req.body, '/api/v3'),
     });
 
-    const urlBase = await sonarr
-      .getSystemStatus()
-      .then((value) => value.urlBase)
-      .catch(() => req.body.baseUrl);
+    const systemStatus = await sonarr.getSystemStatus();
+    const sonarrMajorVersion = Number(systemStatus.version.split('.')[0]);
+
+    const urlBase = systemStatus.urlBase;
     const profiles = await sonarr.getProfiles();
     const folders = await sonarr.getRootFolders();
-    const languageProfiles = await sonarr.getLanguageProfiles();
+    const languageProfiles =
+      sonarrMajorVersion <= 3 ? await sonarr.getLanguageProfiles() : null;
     const tags = await sonarr.getTags();
 
     return res.status(200).json({
@@ -72,7 +73,7 @@ sonarrRoutes.post('/test', async (req, res, next) => {
   }
 });
 
-sonarrRoutes.put<{ id: string }>('/:id', (req, res) => {
+sonarrRoutes.put<{ id: string }>('/:id', async (req, res) => {
   const settings = getSettings();
 
   const sonarrIndex = settings.sonarr.findIndex(
@@ -100,12 +101,12 @@ sonarrRoutes.put<{ id: string }>('/:id', (req, res) => {
     ...req.body,
     id: Number(req.params.id),
   } as SonarrSettings;
-  settings.save();
+  await settings.save();
 
   return res.status(200).json(settings.sonarr[sonarrIndex]);
 });
 
-sonarrRoutes.delete<{ id: string }>('/:id', (req, res) => {
+sonarrRoutes.delete<{ id: string }>('/:id', async (req, res) => {
   const settings = getSettings();
 
   const sonarrIndex = settings.sonarr.findIndex(
@@ -119,7 +120,7 @@ sonarrRoutes.delete<{ id: string }>('/:id', (req, res) => {
   }
 
   const removed = settings.sonarr.splice(sonarrIndex, 1);
-  settings.save();
+  await settings.save();
 
   return res.status(200).json(removed[0]);
 });

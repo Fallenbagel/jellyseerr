@@ -1,6 +1,6 @@
 name: 🐛 Bug Report
 description: Report a problem
-labels: ['type:bug', 'awaiting-triage']
+labels: ['bug', 'awaiting triage']
 body:
   - type: markdown
     attributes:
@@ -55,6 +55,14 @@ body:
         - tablet
     validations:
       required: true
+  - type: dropdown
+    id: database
+    attributes:
+      options:
+        - SQLite (default)
+        - PostgreSQL
+      label: Database
+      description: Which database backend are you using?
   - type: input
     id: device
     attributes:

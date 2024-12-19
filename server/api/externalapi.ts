@@ -1,3 +1,5 @@
+import { MediaServerType } from '@server/constants/server';
+import { getSettings } from '@server/lib/settings';
 import type { RateLimitOptions } from '@server/utils/rateLimit';
 import rateLimit from '@server/utils/rateLimit';
 import type NodeCache from 'node-cache';
@@ -32,13 +34,32 @@ class ExternalAPI {
       this.fetch = fetch;
     }
 
-    this.baseUrl = baseUrl;
-    this.params = params;
+    const url = new URL(baseUrl);
+
+    const settings = getSettings();
+
     this.defaultHeaders = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
+      ...((url.username || url.password) && {
+        Authorization: `Basic ${Buffer.from(
+          `${url.username}:${url.password}`
+        ).toString('base64')}`,
+      }),
+      ...(settings.main.mediaServerType === MediaServerType.EMBY && {
+        'Accept-Encoding': 'gzip',
+      }),
       ...options.headers,
     };
+
+    if (url.username || url.password) {
+      url.username = '';
+      url.password = '';
+      baseUrl = url.toString();
+    }
+
+    this.baseUrl = baseUrl;
+    this.params = params;
     this.cache = options.nodeCache;
   }
 
@@ -76,7 +97,7 @@ class ExternalAPI {
     }
     const data = await this.getDataFromResponse(response);
 
-    if (this.cache) {
+    if (this.cache && ttl !== 0) {
       this.cache.set(cacheKey, data, ttl ?? DEFAULT_TTL);
     }
 
@@ -120,7 +141,7 @@ class ExternalAPI {
     }
     const resData = await this.getDataFromResponse(response);
 
-    if (this.cache) {
+    if (this.cache && ttl !== 0) {
       this.cache.set(cacheKey, resData, ttl ?? DEFAULT_TTL);
     }
 
@@ -164,7 +185,7 @@ class ExternalAPI {
     }
     const resData = await this.getDataFromResponse(response);
 
-    if (this.cache) {
+    if (this.cache && ttl !== 0) {
       this.cache.set(cacheKey, resData, ttl ?? DEFAULT_TTL);
     }
 

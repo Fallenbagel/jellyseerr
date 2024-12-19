@@ -38,6 +38,8 @@ tags:
     description: Endpoints related to getting service (Radarr/Sonarr) details.
   - name: watchlist
     description: Collection of media to watch later
+  - name: blacklist
+    description: Blacklisted media from discovery page.
 servers:
   - url: '{server}/api/v1'
     variables:
@@ -46,6 +48,19 @@ servers:
 
 components:
   schemas:
+    Blacklist:
+      type: object
+      properties:
+        tmdbId:
+          type: number
+          example: 1
+        title:
+          type: string
+        media:
+          $ref: '#/components/schemas/MediaInfo'
+        userId:
+          type: number
+          example: 1
     Watchlist:
       type: object
       properties:
@@ -128,9 +143,11 @@ components:
       properties:
         locale:
           type: string
-        region:
+        discoverRegion:
           type: string
         originalLanguage:
+          type: string
+        streamingRegion:
           type: string
     MainSettings:
       type: object
@@ -1258,6 +1275,8 @@ components:
               type: string
             webhookUrl:
               type: string
+            webhookRoleId:
+              type: string
             enableMentions:
               type: boolean
     SlackSettings:
@@ -1973,6 +1992,9 @@ paths:
                   appDataPath:
                     type: string
                     example: /app/config
+                  appDataPermissions:
+                    type: boolean
+                    example: true
   /settings/main:
     get:
       summary: Get main settings
@@ -2767,6 +2789,15 @@ paths:
                     type: object
                     properties:
                       tmdb:
+                        type: object
+                        properties:
+                          size:
+                            type: number
+                            example: 123456
+                          imageCount:
+                            type: number
+                            example: 123
+                      avatar:
                         type: object
                         properties:
                           size:
@@ -4042,6 +4073,109 @@ paths:
                       restricted:
                         type: boolean
                         example: false
+  /blacklist:
+    get:
+      summary: Returns blacklisted items
+      description: Returns list of all blacklisted media
+      tags:
+        - settings
+      parameters:
+        - in: query
+          name: take
+          schema:
+            type: number
+            nullable: true
+            example: 25
+        - in: query
+          name: skip
+          schema:
+            type: number
+            nullable: true
+            example: 0
+        - in: query
+          name: search
+          schema:
+            type: string
+            nullable: true
+            example: dune
+      responses:
+        '200':
+          description: Blacklisted items returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pageInfo:
+                    $ref: '#/components/schemas/PageInfo'
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        user:
+                          $ref: '#/components/schemas/User'
+                        createdAt:
+                          type: string
+                          example: 2024-04-21T01:55:44.000Z
+                        id:
+                          type: number
+                          example: 1
+                        mediaType:
+                          type: string
+                          example: movie
+                        title:
+                          type: string
+                          example: Dune
+                        tmdbId:
+                          type: number
+                          example: 438631
+    post:
+      summary: Add media to blacklist
+      tags:
+        - blacklist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Blacklist'
+      responses:
+        '201':
+          description: Item succesfully blacklisted
+        '412':
+          description: Item has already been blacklisted
+  /blacklist/{tmdbId}:
+    get:
+      summary: Get media from blacklist
+      tags:
+        - blacklist
+      parameters:
+        - in: path
+          name: tmdbId
+          description: tmdbId ID
+          required: true
+          example: '1'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Blacklist details in JSON
+    delete:
+      summary: Remove media from blacklist
+      tags:
+        - blacklist
+      parameters:
+        - in: path
+          name: tmdbId
+          description: tmdbId ID
+          required: true
+          example: '1'
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Succesfully removed media item
   /watchlist:
     post:
       summary: Add media to watchlist
@@ -5305,6 +5439,12 @@ paths:
             enum: [added, modified]
             default: added
         - in: query
+          name: sortDirection
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - in: query
           name: requestedBy
           schema:
             type: number
@@ -5354,7 +5494,7 @@ paths:
                     - type: array
                       items:
                         type: number
-                        minimum: 1
+                        minimum: 0
                     - type: string
                       enum: [all]
                 is4k:
@@ -5460,7 +5600,7 @@ paths:
                   type: array
                   items:
                     type: number
-                    minimum: 1
+                    minimum: 0
                 is4k:
                   type: boolean
                   example: false

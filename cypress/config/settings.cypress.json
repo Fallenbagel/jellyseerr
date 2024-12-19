@@ -16,7 +16,8 @@
     "hideAvailable": false,
     "localLogin": true,
     "newPlexLogin": true,
-    "region": "",
+    "discoverRegion": "",
+    "streamingRegion": "",
     "originalLanguage": "",
     "trustProxy": false,
     "mediaServerType": 1,
@@ -75,6 +76,7 @@
         "types": 0,
         "options": {
           "webhookUrl": "",
+          "webhookRoleId": "",
           "enableMentions": true
         }
       },

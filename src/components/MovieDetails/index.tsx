@@ -5,6 +5,7 @@ import RTRotten from '@app/assets/rt_rotten.svg';
 import ImdbLogo from '@app/assets/services/imdb.svg';
 import Spinner from '@app/assets/spinner.svg';
 import TmdbLogo from '@app/assets/tmdb_logo.svg';
+import BlacklistModal from '@app/components/BlacklistModal';
 import Button from '@app/components/Common/Button';
 import CachedImage from '@app/components/Common/CachedImage';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
@@ -35,6 +36,7 @@ import {
   CloudIcon,
   CogIcon,
   ExclamationTriangleIcon,
+  EyeSlashIcon,
   FilmIcon,
   PlayIcon,
   TicketIcon,
@@ -55,7 +57,7 @@ import 'country-flag-icons/3x2/flags.css';
 import { uniqBy } from 'lodash';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
@@ -125,6 +127,9 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
   const [toggleWatchlist, setToggleWatchlist] = useState<boolean>(
     !movie?.onUserWatchlist
   );
+  const [isBlacklistUpdating, setIsBlacklistUpdating] =
+    useState<boolean>(false);
+  const [showBlacklistModal, setShowBlacklistModal] = useState(false);
   const { addToast } = useToasts();
 
   const {
@@ -154,6 +159,11 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
   useEffect(() => {
     setShowManager(router.query.manage == '1' ? true : false);
   }, [router.query.manage]);
+
+  const closeBlacklistModal = useCallback(
+    () => setShowBlacklistModal(false),
+    []
+  );
 
   const { mediaUrl: plexUrl, mediaUrl4k: plexUrl4k } = useDeepLinks({
     mediaUrl: data?.mediaInfo?.mediaUrl,
@@ -212,14 +222,14 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
     });
   }
 
-  const region = user?.settings?.region
-    ? user.settings.region
-    : settings.currentSettings.region
-    ? settings.currentSettings.region
+  const discoverRegion = user?.settings?.discoverRegion
+    ? user.settings.discoverRegion
+    : settings.currentSettings.discoverRegion
+    ? settings.currentSettings.discoverRegion
     : 'US';
 
   const releases = data.releases.results.find(
-    (r) => r.iso_3166_1 === region
+    (r) => r.iso_3166_1 === discoverRegion
   )?.release_dates;
 
   // Release date types:
@@ -272,9 +282,15 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
     );
   }
 
+  const streamingRegion = user?.settings?.streamingRegion
+    ? user.settings.streamingRegion
+    : settings.currentSettings.streamingRegion
+    ? settings.currentSettings.streamingRegion
+    : 'US';
   const streamingProviders =
-    data?.watchProviders?.find((provider) => provider.iso_3166_1 === region)
-      ?.flatrate ?? [];
+    data?.watchProviders?.find(
+      (provider) => provider.iso_3166_1 === streamingRegion
+    )?.flatrate ?? [];
 
   function getAvalaibleMediaServerName() {
     if (settings.currentSettings.mediaServerType === MediaServerType.EMBY) {
@@ -374,6 +390,60 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
     }
   };
 
+  const onClickHideItemBtn = async (): Promise<void> => {
+    setIsBlacklistUpdating(true);
+
+    const res = await fetch('/api/v1/blacklist', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        tmdbId: movie?.id,
+        mediaType: 'movie',
+        title: movie?.title,
+        user: user?.id,
+      }),
+    });
+
+    if (res.status === 201) {
+      addToast(
+        <span>
+          {intl.formatMessage(globalMessages.blacklistSuccess, {
+            title: movie?.title,
+            strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+          })}
+        </span>,
+        { appearance: 'success', autoDismiss: true }
+      );
+
+      revalidate();
+    } else if (res.status === 412) {
+      addToast(
+        <span>
+          {intl.formatMessage(globalMessages.blacklistDuplicateError, {
+            title: movie?.title,
+            strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+          })}
+        </span>,
+        { appearance: 'info', autoDismiss: true }
+      );
+    } else {
+      addToast(intl.formatMessage(globalMessages.blacklistError), {
+        appearance: 'error',
+        autoDismiss: true,
+      });
+    }
+
+    setIsBlacklistUpdating(false);
+    closeBlacklistModal();
+  };
+
+  const showHideButton = hasPermission([Permission.MANAGE_BLACKLIST], {
+    type: 'or',
+  });
+
   return (
     <div
       className="media-page"
@@ -384,6 +454,7 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
       {data.backdropPath && (
         <div className="media-page-bg-image">
           <CachedImage
+            type="tmdb"
             alt=""
             src={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${data.backdropPath}`}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -419,9 +490,18 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
         revalidate={() => revalidate()}
         show={showManager}
       />
+      <BlacklistModal
+        tmdbId={data.id}
+        type="movie"
+        show={showBlacklistModal}
+        onCancel={closeBlacklistModal}
+        onComplete={onClickHideItemBtn}
+        isUpdating={isBlacklistUpdating}
+      />
       <div className="media-header">
         <div className="media-poster">
           <CachedImage
+            type="tmdb"
             src={
               data.posterPath
                 ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${data.posterPath}`
@@ -495,40 +575,61 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
           </span>
         </div>
         <div className="media-actions">
-          <>
-            {toggleWatchlist ? (
-              <Tooltip content={intl.formatMessage(messages.addtowatchlist)}>
+          {showHideButton &&
+            data?.mediaInfo?.status !== MediaStatus.PROCESSING &&
+            data?.mediaInfo?.status !== MediaStatus.AVAILABLE &&
+            data?.mediaInfo?.status !== MediaStatus.PARTIALLY_AVAILABLE &&
+            data?.mediaInfo?.status !== MediaStatus.PENDING &&
+            data?.mediaInfo?.status !== MediaStatus.BLACKLISTED && (
+              <Tooltip
+                content={intl.formatMessage(globalMessages.addToBlacklist)}
+              >
                 <Button
                   buttonType={'ghost'}
                   className="z-40 mr-2"
                   buttonSize={'md'}
-                  onClick={onClickWatchlistBtn}
+                  onClick={() => setShowBlacklistModal(true)}
                 >
-                  {isUpdating ? (
-                    <Spinner className="h-3" />
-                  ) : (
-                    <StarIcon className={'h-3 text-amber-300'} />
-                  )}
-                </Button>
-              </Tooltip>
-            ) : (
-              <Tooltip
-                content={intl.formatMessage(messages.removefromwatchlist)}
-              >
-                <Button
-                  className="z-40 mr-2"
-                  buttonSize={'md'}
-                  onClick={onClickDeleteWatchlistBtn}
-                >
-                  {isUpdating ? (
-                    <Spinner className="h-3" />
-                  ) : (
-                    <MinusCircleIcon className={'h-3'} />
-                  )}
+                  <EyeSlashIcon className={'h-3'} />
                 </Button>
               </Tooltip>
             )}
-          </>
+          {data?.mediaInfo?.status !== MediaStatus.BLACKLISTED && (
+            <>
+              {toggleWatchlist ? (
+                <Tooltip content={intl.formatMessage(messages.addtowatchlist)}>
+                  <Button
+                    buttonType={'ghost'}
+                    className="z-40 mr-2"
+                    buttonSize={'md'}
+                    onClick={onClickWatchlistBtn}
+                  >
+                    {isUpdating ? (
+                      <Spinner className="h-3" />
+                    ) : (
+                      <StarIcon className={'h-3 text-amber-300'} />
+                    )}
+                  </Button>
+                </Tooltip>
+              ) : (
+                <Tooltip
+                  content={intl.formatMessage(messages.removefromwatchlist)}
+                >
+                  <Button
+                    className="z-40 mr-2"
+                    buttonSize={'md'}
+                    onClick={onClickDeleteWatchlistBtn}
+                  >
+                    {isUpdating ? (
+                      <Spinner className="h-3" />
+                    ) : (
+                      <MinusCircleIcon className={'h-3'} />
+                    )}
+                  </Button>
+                </Tooltip>
+              )}
+            </>
+          )}
           <PlayButton links={mediaLinks} />
           <RequestButton
             mediaType="movie"
@@ -648,6 +749,7 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                 <div className="group relative z-0 scale-100 transform-gpu cursor-pointer overflow-hidden rounded-lg bg-gray-800 bg-cover bg-center shadow-md ring-1 ring-gray-700 transition duration-300 hover:scale-105 hover:ring-gray-500">
                   <div className="absolute inset-0 z-0">
                     <CachedImage
+                      type="tmdb"
                       src={`https://image.tmdb.org/t/p/w1440_and_h320_multi_faces/${data.collection.backdropPath}`}
                       alt=""
                       style={{

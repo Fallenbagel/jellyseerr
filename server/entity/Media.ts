@@ -3,12 +3,14 @@ import SonarrAPI from '@server/api/servarr/sonarr';
 import { MediaStatus, MediaType } from '@server/constants/media';
 import { MediaServerType } from '@server/constants/server';
 import { getRepository } from '@server/datasource';
+import { Blacklist } from '@server/entity/Blacklist';
 import type { User } from '@server/entity/User';
 import { Watchlist } from '@server/entity/Watchlist';
 import type { DownloadingItem } from '@server/lib/downloadtracker';
 import downloadTracker from '@server/lib/downloadtracker';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
+import { DbAwareColumn } from '@server/utils/DbColumnHelper';
 import { getHostname } from '@server/utils/getHostname';
 import {
   AfterLoad,
@@ -17,6 +19,7 @@ import {
   Entity,
   Index,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -38,6 +41,10 @@ class Media {
         finalIds = [tmdbIds];
       } else {
         finalIds = tmdbIds;
+      }
+
+      if (finalIds.length === 0) {
+        return [];
       }
 
       const media = await mediaRepository
@@ -66,7 +73,7 @@ class Media {
 
     try {
       const media = await mediaRepository.findOne({
-        where: { tmdbId: id, mediaType },
+        where: { tmdbId: id, mediaType: mediaType },
         relations: { requests: true, issues: true },
       });
 
@@ -116,16 +123,32 @@ class Media {
   @OneToMany(() => Issue, (issue) => issue.media, { cascade: true })
   public issues: Issue[];
 
+  @OneToOne(() => Blacklist, (blacklist) => blacklist.media)
+  public blacklist: Promise<Blacklist>;
+
   @CreateDateColumn()
   public createdAt: Date;
 
   @UpdateDateColumn()
   public updatedAt: Date;
 
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  /**
+   * The `lastSeasonChange` column stores the date and time when the media was added to the library.
+   * It needs to be database-aware because SQLite supports `datetime` while PostgreSQL supports `timestamp with timezone (timestampz)`.
+   */
+  @DbAwareColumn({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   public lastSeasonChange: Date;
 
-  @Column({ type: 'datetime', nullable: true })
+  /**
+   * The `mediaAddedAt` column stores the date and time when the media was added to the library.
+   * It needs to be database-aware because SQLite supports `datetime` while PostgreSQL supports `timestamp with timezone (timestampz)`.
+   * This column is nullable because it can be null when the media is not yet synced to the library.
+   */
+  @DbAwareColumn({
+    type: 'datetime',
+    default: () => 'CURRENT_TIMESTAMP',
+    nullable: true,
+  })
   public mediaAddedAt: Date;
 
   @Column({ nullable: true, type: 'int' })
@@ -224,7 +247,7 @@ class Media {
         this.mediaUrl = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId}&context=home&serverId=${serverId}`;
       }
       if (this.jellyfinMediaId4k) {
-        this.mediaUrl4k = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId}&context=home&serverId=${serverId}`;
+        this.mediaUrl4k = `${jellyfinHost}/web/index.html#!/${pageName}?id=${this.jellyfinMediaId4k}&context=home&serverId=${serverId}`;
       }
     }
   }

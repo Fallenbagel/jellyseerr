@@ -40,6 +40,7 @@ export class RequestPermissionError extends Error {}
 export class QuotaRestrictedError extends Error {}
 export class DuplicateMediaRequestError extends Error {}
 export class NoSeasonsAvailableError extends Error {}
+export class BlacklistedMediaError extends Error {}
 
 type MediaRequestOptions = {
   isAutoRequest?: boolean;
@@ -143,6 +144,16 @@ export class MediaRequest {
         mediaType: requestBody.mediaType,
       });
     } else {
+      if (media.status === MediaStatus.BLACKLISTED) {
+        logger.warn('Request for media blocked due to being blacklisted', {
+          tmdbId: tmdbMedia.id,
+          mediaType: requestBody.mediaType,
+          label: 'Media Request',
+        });
+
+        throw new BlacklistedMediaError('This media is blacklisted.');
+      }
+
       if (media.status === MediaStatus.UNKNOWN && !requestBody.is4k) {
         media.status = MediaStatus.PENDING;
       }
@@ -246,9 +257,7 @@ export class MediaRequest {
       >;
       const requestedSeasons =
         requestBody.seasons === 'all'
-          ? tmdbMediaShow.seasons
-              .map((season) => season.season_number)
-              .filter((sn) => sn > 0)
+          ? tmdbMediaShow.seasons.map((season) => season.season_number)
           : (requestBody.seasons as number[]);
       let existingSeasons: number[] = [];
 
@@ -376,6 +385,7 @@ export class MediaRequest {
   @ManyToOne(() => Media, (media) => media.requests, {
     eager: true,
     onDelete: 'CASCADE',
+    nullable: false,
   })
   public media: Media;
 
@@ -848,7 +858,7 @@ export class MediaRequest {
             const requestRepository = getRepository(MediaRequest);
 
             this.status = MediaRequestStatus.FAILED;
-            requestRepository.save(this);
+            await requestRepository.save(this);
 
             logger.warn(
               'Something went wrong sending movie request to Radarr, marking status as FAILED',
@@ -1123,13 +1133,14 @@ export class MediaRequest {
             media[this.is4k ? 'externalServiceSlug4k' : 'externalServiceSlug'] =
               sonarrSeries.titleSlug;
             media[this.is4k ? 'serviceId4k' : 'serviceId'] = sonarrSettings?.id;
+
             await mediaRepository.save(media);
           })
           .catch(async () => {
             const requestRepository = getRepository(MediaRequest);
 
             this.status = MediaRequestStatus.FAILED;
-            requestRepository.save(this);
+            await requestRepository.save(this);
 
             logger.warn(
               'Something went wrong sending series request to Sonarr, marking status as FAILED',
