@@ -5,9 +5,6 @@ on:
     branches:
       - develop
 
-env:
-  CHART_SUFFIX: "-chart"
-
 jobs:
   package-helm-chart:
     name: Package helm chart
@@ -41,20 +38,23 @@ jobs:
           mkdir -p ./.cr-release-packages
           for chart_path in ./charts/*; do
             if [ -d "$chart_path" ] && [ -f "$chart_path/Chart.yaml" ]; then
-              chart=$(basename "$chart_path")
+              chart_name=$(grep '^name:' "$chart_path/Chart.yaml" | awk '{print $2}')
               # get current version
               current_version=$(grep '^version:' "$chart_path/Chart.yaml" | awk '{print $2}')
-              # get current release version
-              oras discover ghcr.io/${GITHUB_REPOSITORY@L}/${chart}${CHART_SUFFIX}:${current_version}
+              # try to get current release version
+              set +e
+              oras discover ghcr.io/${GITHUB_REPOSITORY@L}/${chart_name}:${current_version}
+              oras_exit_code=$?
+              set -e
 
-              if [ "$?" -eq 1 ]; then
+              if [ $oras_exit_code -ne 0 ]; then
                 helm dependency build "$chart_path"
                 helm package "$chart_path" --destination ./.cr-release-packages
               else
-                echo "No version change for $chart. Skipping."
+                echo "No version change for $chart_name. Skipping."
               fi
             else
-              echo "Skipping $chart: Not a valid Helm chart"
+              echo "Skipping $chart_name: Not a valid Helm chart"
             fi
           done
 
@@ -89,6 +89,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install helm
+        uses: azure/setup-helm@v4
+
+      - name: Install Oras
+        uses: oras-project/setup-oras@v1
+
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
 
@@ -98,25 +104,32 @@ jobs:
           name: artifacts
           path: .cr-release-packages/
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Push charts to GHCR
         env:
           COSIGN_YES: true
         run: |
           for chart_path in `find .cr-release-packages -name '*.tgz' -print`; do
-            # push chart to OCI  
-            helm push ${chart_path} oci://ghcr.io/${GITHUB_REPOSITORY@L} |& tee helm-push-output.log
+            # push chart to OCI
             chart_release_file=$(basename "$chart_path")
-            chart=${chart_release_file%-*}
+            chart_name=${chart_release_file%-*}
+            helm push ${chart_path} oci://ghcr.io/${GITHUB_REPOSITORY@L} |& tee helm-push-output.log
             chart_digest=$(awk -F "[, ]+" '/Digest/{print $NF}' < helm-push-output.log)
             # sign chart
-            cosign sign "ghcr.io/${GITHUB_REPOSITORY@L}/${chart}${CHART_SUFFIX}@${chart_digest}"
+            cosign sign "ghcr.io/${GITHUB_REPOSITORY@L}/${chart_name}@${chart_digest}"
             # push artifacthub-repo.yml to OCI
             oras push \
-              ghcr.io/${GITHUB_REPOSITORY@L}/${chart}${CHART_SUFFIX}:artifacthub.io \
+              ghcr.io/${GITHUB_REPOSITORY@L}/${chart_name}:artifacthub.io \
               --config /dev/null:application/vnd.cncf.artifacthub.config.v1+yaml \
-              charts/$chart/artifacthub-repo.yml:application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml \
+              charts/$chart_name/artifacthub-repo.yml:application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml \
               |& tee oras-push-output.log
             artifacthub_digest=$(grep "Digest:" oras-push-output.log | awk '{print $2}')
             # sign artifacthub-repo.yml
-            cosign sign "ghcr.io/${GITHUB_REPOSITORY@L}/${chart}${CHART_SUFFIX}:artifacthub.io@${artifacthub_digest}"
+            cosign sign "ghcr.io/${GITHUB_REPOSITORY@L}/${chart_name}:artifacthub.io@${artifacthub_digest}"
           done
