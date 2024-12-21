@@ -1,7 +1,7 @@
 import type { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddOverrideRules1731963944025 implements MigrationInterface {
-  name = 'AddOverrideRules1731963944025';
+export class AddOverrideRules1734805733535 implements MigrationInterface {
+  name = 'AddOverrideRules1734805733535';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
