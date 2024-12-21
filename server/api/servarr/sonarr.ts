@@ -13,8 +13,11 @@ export interface SonarrSeason {
     percentOfEpisodes: number;
   };
 }
+
 interface EpisodeResult {
   seriesId: number;
+  episodeId: number;
+  episode: EpisodeResult;
   episodeFileId: number;
   seasonNumber: number;
   episodeNumber: number;
@@ -99,6 +102,7 @@ export interface AddSeriesOptions {
   seriesType: SonarrSeries['seriesType'];
   monitored?: boolean;
   searchNow?: boolean;
+  autoRequestNewSeasons?: boolean;
 }
 
 export interface LanguageProfile {
@@ -185,7 +189,11 @@ class SonarrAPI extends ServarrBase<{
       if (series.id) {
         series.monitored = options.monitored ?? series.monitored;
         series.tags = options.tags ?? series.tags;
-        series.seasons = this.buildSeasonList(options.seasons, series.seasons);
+        series.seasons = this.buildSeasonList(
+          options.seasons,
+          series.seasons,
+          options.autoRequestNewSeasons
+        );
 
         const newSeriesData = await this.put<SonarrSeries>(
           '/series',
@@ -226,9 +234,9 @@ class SonarrAPI extends ServarrBase<{
           options.seasons,
           series.seasons.map((season) => ({
             seasonNumber: season.seasonNumber,
-            // We force all seasons to false if its the first request
-            monitored: false,
-          }))
+            monitored: false, // Initialize all seasons as unmonitored
+          })),
+          options.autoRequestNewSeasons
         ),
         tags: options.tags,
         seasonFolder: options.seasonFolder,
@@ -236,7 +244,7 @@ class SonarrAPI extends ServarrBase<{
         rootFolderPath: options.rootFolderPath,
         seriesType: options.seriesType,
         addOptions: {
-          ignoreEpisodesWithFiles: true,
+          monitor: options.autoRequestNewSeasons ? 'future' : 'none',
           searchForMissingEpisodes: options.searchNow,
         },
       } as Partial<SonarrSeries>);
@@ -248,7 +256,7 @@ class SonarrAPI extends ServarrBase<{
           movie: createdSeriesData,
         });
       } else {
-        logger.error('Failed to add movie to Sonarr', {
+        logger.error('Failed to add series to Sonarr', {
           label: 'Sonarr',
           options,
         });
@@ -318,39 +326,39 @@ class SonarrAPI extends ServarrBase<{
 
   private buildSeasonList(
     seasons: number[],
-    existingSeasons?: SonarrSeason[]
+    existingSeasons?: SonarrSeason[],
+    autoRequestNewSeasons?: boolean
   ): SonarrSeason[] {
     if (existingSeasons) {
-      const newSeasons = existingSeasons.map((season) => {
+      return existingSeasons.map((season) => {
+        // Monitor requested seasons
         if (seasons.includes(season.seasonNumber)) {
           season.monitored = true;
+        } else {
+          // Set future seasons' monitoring based on autoRequestNewSeasons
+          season.monitored = autoRequestNewSeasons !== false;
         }
         return season;
       });
-
-      return newSeasons;
     }
 
-    const newSeasons = seasons.map(
-      (seasonNumber): SonarrSeason => ({
-        seasonNumber,
-        monitored: true,
-      })
-    );
-
-    return newSeasons;
+    // If no existing seasons, monitor only the requested seasons
+    return seasons.map((seasonNumber) => ({
+      seasonNumber,
+      monitored: true,
+    }));
   }
 
-  public removeSerie = async (serieId: number): Promise<void> => {
+  public removeSeries = async (serieId: number): Promise<void> => {
     try {
       const { id, title } = await this.getSeriesByTvdbId(serieId);
       await this.delete(`/series/${id}`, {
         deleteFiles: 'true',
         addImportExclusion: 'false',
       });
-      logger.info(`[Radarr] Removed serie ${title}`);
+      logger.info(`[Sonarr] Removed series ${title}`);
     } catch (e) {
-      throw new Error(`[Radarr] Failed to remove serie: ${e.message}`);
+      throw new Error(`[Sonarr] Failed to remove series: ${e.message}`);
     }
   };
 }

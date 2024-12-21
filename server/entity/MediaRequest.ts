@@ -205,6 +205,11 @@ export class MediaRequest {
       }
     }
 
+    const autoRequestNewSeasonsValue =
+      typeof requestBody.autoRequestNewSeasons === 'boolean'
+        ? requestBody.autoRequestNewSeasons
+        : true;
+
     if (requestBody.mediaType === MediaType.MOVIE) {
       await mediaRepository.save(media);
 
@@ -247,6 +252,7 @@ export class MediaRequest {
         rootFolder: requestBody.rootFolder,
         tags: requestBody.tags,
         isAutoRequest: options.isAutoRequest ?? false,
+        autoRequestNewSeasons: autoRequestNewSeasonsValue,
       });
 
       await requestRepository.save(request);
@@ -369,6 +375,7 @@ export class MediaRequest {
             })
         ),
         isAutoRequest: options.isAutoRequest ?? false,
+        autoRequestNewSeasons: autoRequestNewSeasonsValue,
       });
 
       await requestRepository.save(request);
@@ -469,6 +476,9 @@ export class MediaRequest {
 
   @Column({ default: false })
   public isAutoRequest: boolean;
+
+  @Column({ nullable: true, default: true })
+  public autoRequestNewSeasons?: boolean;
 
   constructor(init?: Partial<MediaRequest>) {
     Object.assign(this, init);
@@ -1112,6 +1122,7 @@ export class MediaRequest {
           tags,
           monitored: true,
           searchNow: !sonarrSettings.preventSearch,
+          autoRequestNewSeasons: this.autoRequestNewSeasons,
         };
 
         // Run this asynchronously so we don't wait for it on the UI side

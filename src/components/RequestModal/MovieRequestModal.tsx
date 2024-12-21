@@ -34,6 +34,9 @@ const messages = defineMessages('components.RequestModal', {
   requestApproved: 'Request for <strong>{title}</strong> approved!',
   requesterror: 'Something went wrong while submitting the request.',
   pendingapproval: 'Your request is pending approval.',
+  searchAutomatically: 'Search Automatically',
+  searchAutomaticallyDescription:
+    'Automatically search for this movie in Radarr after the request is approved.',
 });
 
 interface RequestModalProps extends React.HTMLAttributes<HTMLDivElement> {

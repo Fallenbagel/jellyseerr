@@ -8,7 +8,7 @@ const SlideCheckbox = ({ onClick, checked = false }: SlideCheckboxProps) => {
     <span
       role="checkbox"
       tabIndex={0}
-      aria-checked={false}
+      aria-checked={checked}
       onClick={() => {
         onClick();
       }}
