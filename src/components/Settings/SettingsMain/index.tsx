@@ -56,6 +56,9 @@ const messages = defineMessages('components.Settings.SettingsMain', {
   validationApplicationUrl: 'You must provide a valid URL',
   validationApplicationUrlTrailingSlash: 'URL must not end in a trailing slash',
   partialRequestsEnabled: 'Allow Partial Series Requests',
+  removeUnmonitoredEnabled: 'Remove Unmonitored Media',
+  removeUnmonitoredExplanation:
+    'Remove Movies/Seasons from Jellyseerr that are not available and have been un-monitored since',
   locale: 'Display Language',
   proxyEnabled: 'HTTP(S) Proxy',
   proxyHostname: 'Proxy Hostname',
@@ -158,6 +161,7 @@ const SettingsMain = () => {
             originalLanguage: data?.originalLanguage,
             streamingRegion: data?.streamingRegion,
             partialRequestsEnabled: data?.partialRequestsEnabled,
+            removeUnmonitoredEnabled: data?.removeUnmonitoredEnabled,
             trustProxy: data?.trustProxy,
             cacheImages: data?.cacheImages,
             proxyEnabled: data?.proxy?.enabled,
@@ -188,6 +192,7 @@ const SettingsMain = () => {
                   streamingRegion: values.streamingRegion,
                   originalLanguage: values.originalLanguage,
                   partialRequestsEnabled: values.partialRequestsEnabled,
+                  removeUnmonitoredEnabled: values.removeUnmonitoredEnabled,
                   trustProxy: values.trustProxy,
                   cacheImages: values.cacheImages,
                   proxy: {
@@ -493,6 +498,35 @@ const SettingsMain = () => {
                         setFieldValue(
                           'partialRequestsEnabled',
                           !values.partialRequestsEnabled
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label
+                    htmlFor="removeUnmonitoredEnabled"
+                    className="checkbox-label"
+                  >
+                    <span className="mr-2">
+                      {intl.formatMessage(messages.removeUnmonitoredEnabled)}
+                    </span>
+                    <SettingsBadge badgeType="experimental" />
+                    <span className="label-tip">
+                      {intl.formatMessage(
+                        messages.removeUnmonitoredExplanation
+                      )}
+                    </span>
+                  </label>
+                  <div className="form-input-area">
+                    <Field
+                      type="checkbox"
+                      id="removeUnmonitoredEnabled"
+                      name="removeUnmonitoredEnabled"
+                      onChange={() => {
+                        setFieldValue(
+                          'removeUnmonitoredEnabled',
+                          !values.removeUnmonitoredEnabled
                         );
                       }}
                     />
