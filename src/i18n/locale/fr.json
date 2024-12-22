@@ -1276,8 +1276,8 @@
   "components.Settings.Notifications.NotificationsPushover.deviceDefault": "Appareil par défaut",
   "components.Settings.Notifications.userEmailRequired": "E-mail utilisateur requis",
   "components.Settings.SettingsAbout.supportjellyseerr": "Soutenez Jellyseerr",
-  "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Scan complet des bibliothèques Jellyfin",
-  "components.Settings.SettingsJobsCache.jellyfin-recently-added-scan": "Scan des ajouts récents aux bibliothèques Jellyfin",
+  "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Analyse librairie complète Jellyfin",
+  "components.Settings.SettingsJobsCache.jellyfin-recently-added-scan": "Analyse Récemment Ajoutés Jellyfin",
   "components.Settings.SonarrModal.animeSeriesType": "Type de série anime",
   "components.Settings.SonarrModal.seriesType": "Type de série",
   "components.Settings.jellyfinsettingsDescription": "Configurez les paramètres de votre serveur {mediaServerName}. {mediaServerName} analyse vos bibliothèques {mediaServerName} pour voir quel contenu est disponible.",
@@ -1346,5 +1346,10 @@
   "components.Setup.signinWithEmby": "Renseigner vos informations d'identification d'Emby",
   "components.Setup.subtitle": "Commencez par choisir votre serveur multimédia",
   "components.StatusBadge.seasonnumber": "S{seasonNumber}",
-  "components.Discover.FilterSlideover.status": "Statut"
+  "components.Discover.FilterSlideover.status": "Statut",
+  "components.Blacklist.mediaType": "Type",
+  "components.Blacklist.mediaTmdbId": "tmdb Id",
+  "components.Blacklist.blacklistdate": "date",
+  "components.Blacklist.blacklistedby": "{date} par {user}",
+  "components.Blacklist.mediaName": "Nom"
 }
