@@ -1226,5 +1226,15 @@
   "components.Settings.SonarrModal.animeSeriesType": "نوع مسلسل الإنمي",
   "components.Settings.SonarrModal.seriesType": "نوع المسلسل",
   "components.UserProfile.UserSettings.UserNotificationSettings.sound": "صوت التنبيه",
-  "components.Settings.Notifications.NotificationsPushover.deviceDefault": "الجهاز الإفتراضي"
+  "components.Settings.Notifications.NotificationsPushover.deviceDefault": "الجهاز الإفتراضي",
+  "component.BlacklistBlock.blacklistedby": "مدرج في القائمة السوداء من قبل",
+  "component.BlacklistBlock.blacklistdate": "تاريخ الإدراج في القائمة السوداء",
+  "component.BlacklistModal.blacklisting": "القائمة السوداء",
+  "components.Blacklist.blacklistNotFoundError": "<strong>{title}</strong> غير مدرج في القائمة السوداء.",
+  "components.Blacklist.blacklistSettingsDescription": "إدارة الوسائط المدرجة في القائمة السوداء.",
+  "components.Blacklist.mediaType": "النوع",
+  "components.Blacklist.mediaName": "الاسم",
+  "components.Blacklist.blacklistdate": "التاريخ",
+  "components.Blacklist.blacklistsettings": "إعدادات القائمة السوداء",
+  "components.Blacklist.blacklistedby": "{date} بواسطة {user}"
 }
