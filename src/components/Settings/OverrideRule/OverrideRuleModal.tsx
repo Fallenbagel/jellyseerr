@@ -16,7 +16,7 @@ import { useIntl } from 'react-intl';
 import Select from 'react-select';
 import { useToasts } from 'react-toast-notifications';
 
-const messages = defineMessages('components.Settings.RadarrModal', {
+const messages = defineMessages('components.Settings.OverrideRuleModal', {
   createrule: 'New Override Rule',
   editrule: 'Edit Override Rule',
   create: 'Create rule',

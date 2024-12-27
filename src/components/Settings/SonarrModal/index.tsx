@@ -2,7 +2,10 @@ import Button from '@app/components/Common/Button';
 import Modal from '@app/components/Common/Modal';
 import SensitiveInput from '@app/components/Common/SensitiveInput';
 import OverrideRuleTile from '@app/components/Settings/OverrideRule/OverrideRuleTile';
-import type { DVRTestResponse } from '@app/components/Settings/SettingsServices';
+import type {
+  DVRTestResponse,
+  SonarrTestResponse,
+} from '@app/components/Settings/SettingsServices';
 import globalMessages from '@app/i18n/globalMessages';
 import defineMessages from '@app/utils/defineMessages';
 import { Transition } from '@headlessui/react';
@@ -85,15 +88,6 @@ const messages = defineMessages('components.Settings.SonarrModal', {
   overrideRules: 'Override Rules',
   addrule: 'New Override Rule',
 });
-
-interface SonarrTestResponse extends DVRTestResponse {
-  languageProfiles:
-    | {
-        id: number;
-        name: string;
-      }[]
-    | null;
-}
 
 interface SonarrModalProps {
   sonarr: SonarrSettings | null;

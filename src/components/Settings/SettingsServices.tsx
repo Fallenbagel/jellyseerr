@@ -75,6 +75,17 @@ export interface DVRTestResponse {
   urlBase?: string;
 }
 
+export type RadarrTestResponse = DVRTestResponse;
+
+export type SonarrTestResponse = DVRTestResponse & {
+  languageProfiles:
+    | {
+        id: number;
+        name: string;
+      }[]
+    | null;
+};
+
 const ServerInstance = ({
   name,
   hostname,
