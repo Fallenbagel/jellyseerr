@@ -29,6 +29,7 @@ export const menuMessages = defineMessages('components.Layout.Sidebar', {
   blacklist: 'Blacklist',
   issues: 'Issues',
   users: 'Users',
+  autoapproval: 'Auto Approval',
   settings: 'Settings',
 });
 
@@ -103,6 +104,14 @@ const SidebarLinks: SidebarLinkProps[] = [
     activeRegExp: /^\/users/,
     requiredPermission: Permission.MANAGE_USERS,
     dataTestId: 'sidebar-menu-users',
+  },
+  {
+    href: '/approval',
+    messagesKey: 'autoapproval',
+    svgIcon: <UsersIcon className="mr-3 h-6 w-6" />,
+    activeRegExp: /^\/approval/,
+    requiredPermission: Permission.MANAGE_USERS,
+    dataTestId: 'sidebar-menu-auto-approval',
   },
   {
     href: '/settings',
