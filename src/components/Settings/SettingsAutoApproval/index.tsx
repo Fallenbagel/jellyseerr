@@ -1,4 +1,4 @@
-import RuleModal from '@app/components/ApprovalRuleList/RuleModal';
+import RuleModal from '@app/components/Settings/SettingsAutoApproval/ApprovalRuleList/RuleModal';
 import Badge from '@app/components/Common/Badge';
 import Button from '@app/components/Common/Button';
 import Header from '@app/components/Common/Header';
@@ -82,7 +82,7 @@ const ApprovalRuleInstance = ({
   );
 };
 
-const AutoApprovalList = () => {
+const SettingsAutoApproval = () => {
   const intl = useIntl();
   const movieRuleData = [
     {
@@ -200,4 +200,4 @@ const AutoApprovalList = () => {
   );
 };
 
-export default AutoApprovalList;
+export default SettingsAutoApproval;

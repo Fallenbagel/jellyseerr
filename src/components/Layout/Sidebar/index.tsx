@@ -106,14 +106,6 @@ const SidebarLinks: SidebarLinkProps[] = [
     dataTestId: 'sidebar-menu-users',
   },
   {
-    href: '/approval',
-    messagesKey: 'autoapproval',
-    svgIcon: <UsersIcon className="mr-3 h-6 w-6" />,
-    activeRegExp: /^\/approval/,
-    requiredPermission: Permission.MANAGE_USERS,
-    dataTestId: 'sidebar-menu-auto-approval',
-  },
-  {
     href: '/settings',
     messagesKey: 'settings',
     svgIcon: <CogIcon className="mr-3 h-6 w-6" />,

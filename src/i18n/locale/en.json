@@ -1064,6 +1064,7 @@
   "components.Settings.menuJobs": "Jobs & Cache",
   "components.Settings.menuLogs": "Logs",
   "components.Settings.menuNotifications": "Notifications",
+  "components.Settings.menuAutoApproval": "Auto Approval",
   "components.Settings.menuPlexSettings": "Plex",
   "components.Settings.menuServices": "Services",
   "components.Settings.menuUsers": "Users",
