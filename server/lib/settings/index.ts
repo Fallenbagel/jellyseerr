@@ -76,6 +76,7 @@ export interface DVRSettings {
   syncEnabled: boolean;
   preventSearch: boolean;
   tagRequests: boolean;
+  overrideRule: number[];
 }
 
 export interface RadarrSettings extends DVRSettings {
@@ -124,11 +125,13 @@ export interface MainSettings {
   hideAvailable: boolean;
   localLogin: boolean;
   newPlexLogin: boolean;
-  region: string;
+  discoverRegion: string;
+  streamingRegion: string;
   originalLanguage: string;
   trustProxy: boolean;
   mediaServerType: number;
   partialRequestsEnabled: boolean;
+  enableSpecialEpisodes: boolean;
   locale: string;
   proxy: ProxySettings;
 }
@@ -144,13 +147,15 @@ interface FullPublicSettings extends PublicSettings {
   localLogin: boolean;
   movie4kEnabled: boolean;
   series4kEnabled: boolean;
-  region: string;
+  discoverRegion: string;
+  streamingRegion: string;
   originalLanguage: string;
   mediaServerType: number;
   jellyfinExternalHost?: string;
   jellyfinForgotPasswordUrl?: string;
   jellyfinServerName?: string;
   partialRequestsEnabled: boolean;
+  enableSpecialEpisodes: boolean;
   cacheImages: boolean;
   vapidPublic: string;
   enablePushRegistration: boolean;
@@ -170,6 +175,7 @@ export interface NotificationAgentDiscord extends NotificationAgentConfig {
     botUsername?: string;
     botAvatarUrl?: string;
     webhookUrl: string;
+    webhookRoleId?: string;
     enableMentions: boolean;
   };
 }
@@ -210,6 +216,7 @@ export interface NotificationAgentTelegram extends NotificationAgentConfig {
     botUsername?: string;
     botAPI: string;
     chatId: string;
+    messageThreadId: string;
     sendSilently: boolean;
   };
 }
@@ -281,6 +288,7 @@ export type JobId =
   | 'plex-recently-added-scan'
   | 'plex-full-scan'
   | 'plex-watchlist-sync'
+  | 'plex-refresh-token'
   | 'radarr-scan'
   | 'sonarr-scan'
   | 'download-sync'
@@ -331,11 +339,13 @@ class Settings {
         hideAvailable: false,
         localLogin: true,
         newPlexLogin: true,
-        region: '',
+        discoverRegion: '',
+        streamingRegion: '',
         originalLanguage: '',
         trustProxy: false,
         mediaServerType: MediaServerType.NOT_CONFIGURED,
         partialRequestsEnabled: true,
+        enableSpecialEpisodes: false,
         locale: 'en',
         proxy: {
           enabled: false,
@@ -394,6 +404,7 @@ class Settings {
             types: 0,
             options: {
               webhookUrl: '',
+              webhookRoleId: '',
               enableMentions: true,
             },
           },
@@ -417,6 +428,7 @@ class Settings {
             options: {
               botAPI: '',
               chatId: '',
+              messageThreadId: '',
               sendSilently: false,
             },
           },
@@ -467,7 +479,10 @@ class Settings {
           schedule: '0 0 3 * * *',
         },
         'plex-watchlist-sync': {
-          schedule: '0 */10 * * * *',
+          schedule: '0 */3 * * * *',
+        },
+        'plex-refresh-token': {
+          schedule: '0 0 5 * * *',
         },
         'radarr-scan': {
           schedule: '0 0 4 * * *',
@@ -570,10 +585,12 @@ class Settings {
       series4kEnabled: this.data.sonarr.some(
         (sonarr) => sonarr.is4k && sonarr.isDefault
       ),
-      region: this.data.main.region,
+      discoverRegion: this.data.main.discoverRegion,
+      streamingRegion: this.data.main.streamingRegion,
       originalLanguage: this.data.main.originalLanguage,
       mediaServerType: this.main.mediaServerType,
       partialRequestsEnabled: this.data.main.partialRequestsEnabled,
+      enableSpecialEpisodes: this.data.main.enableSpecialEpisodes,
       cacheImages: this.data.main.cacheImages,
       vapidPublic: this.vapidPublic,
       enablePushRegistration: this.data.notifications.agents.webpush.enabled,
@@ -682,10 +699,9 @@ class Settings {
   }
 
   public async save(): Promise<void> {
-    await fs.writeFile(
-      SETTINGS_PATH,
-      JSON.stringify(this.data, undefined, ' ')
-    );
+    const tmp = SETTINGS_PATH + '.tmp';
+    await fs.writeFile(tmp, JSON.stringify(this.data, undefined, ' '));
+    await fs.rename(tmp, SETTINGS_PATH);
   }
 }
 

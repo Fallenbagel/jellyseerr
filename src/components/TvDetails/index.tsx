@@ -222,15 +222,15 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     });
   }
 
-  const region = user?.settings?.region
-    ? user.settings.region
-    : settings.currentSettings.region
-    ? settings.currentSettings.region
+  const discoverRegion = user?.settings?.discoverRegion
+    ? user.settings.discoverRegion
+    : settings.currentSettings.discoverRegion
+    ? settings.currentSettings.discoverRegion
     : 'US';
   const seriesAttributes: React.ReactNode[] = [];
 
   const contentRating = data.contentRatings.results.find(
-    (r) => r.iso_3166_1 === region
+    (r) => r.iso_3166_1 === discoverRegion
   )?.rating;
   if (contentRating) {
     seriesAttributes.push(
@@ -238,6 +238,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     );
   }
 
+  // Does NOT include "Specials"
   const seasonCount = data.seasons.filter(
     (season) => season.seasonNumber !== 0 && season.episodeCount !== 0
   ).length;
@@ -299,13 +300,29 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     return [...requestedSeasons, ...availableSeasons];
   };
 
-  const isComplete = seasonCount <= getAllRequestedSeasons(false).length;
+  const showHasSpecials = data.seasons.some(
+    (season) =>
+      season.seasonNumber === 0 &&
+      settings.currentSettings.partialRequestsEnabled
+  );
 
-  const is4kComplete = seasonCount <= getAllRequestedSeasons(true).length;
+  const isComplete =
+    (showHasSpecials ? seasonCount + 1 : seasonCount) <=
+    getAllRequestedSeasons(false).length;
 
+  const is4kComplete =
+    (showHasSpecials ? seasonCount + 1 : seasonCount) <=
+    getAllRequestedSeasons(true).length;
+
+  const streamingRegion = user?.settings?.streamingRegion
+    ? user.settings.streamingRegion
+    : settings.currentSettings.streamingRegion
+    ? settings.currentSettings.streamingRegion
+    : 'US';
   const streamingProviders =
-    data?.watchProviders?.find((provider) => provider.iso_3166_1 === region)
-      ?.flatrate ?? [];
+    data?.watchProviders?.find(
+      (provider) => provider.iso_3166_1 === streamingRegion
+    )?.flatrate ?? [];
 
   function getAvalaibleMediaServerName() {
     if (settings.currentSettings.mediaServerType === MediaServerType.EMBY) {
@@ -784,7 +801,11 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
             {data.seasons
               .slice()
               .reverse()
-              .filter((season) => season.seasonNumber !== 0)
+              .filter(
+                (season) =>
+                  settings.currentSettings.enableSpecialEpisodes ||
+                  season.seasonNumber !== 0
+              )
               .map((season) => {
                 const show4k =
                   settings.currentSettings.series4kEnabled &&
@@ -838,9 +859,11 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                         >
                           <div className="flex flex-1 items-center space-x-2 text-lg">
                             <span>
-                              {intl.formatMessage(messages.seasonnumber, {
-                                seasonNumber: season.seasonNumber,
-                              })}
+                              {season.seasonNumber === 0
+                                ? intl.formatMessage(globalMessages.specials)
+                                : intl.formatMessage(messages.seasonnumber, {
+                                    seasonNumber: season.seasonNumber,
+                                  })}
                             </span>
                             <Badge badgeType="dark">
                               {intl.formatMessage(messages.episodeCount, {

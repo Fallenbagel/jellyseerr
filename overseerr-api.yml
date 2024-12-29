@@ -143,9 +143,11 @@ components:
       properties:
         locale:
           type: string
-        region:
+        discoverRegion:
           type: string
         originalLanguage:
+          type: string
+        streamingRegion:
           type: string
     MainSettings:
       type: object
@@ -186,6 +188,9 @@ components:
         defaultPermissions:
           type: number
           example: 32
+        enableSpecialEpisodes:
+          type: boolean
+          example: false
     PlexLibrary:
       type: object
       properties:
@@ -1273,6 +1278,8 @@ components:
               type: string
             webhookUrl:
               type: string
+            webhookRoleId:
+              type: string
             enableMentions:
               type: boolean
     SlackSettings:
@@ -1333,6 +1340,8 @@ components:
             botAPI:
               type: string
             chatId:
+              type: string
+            messageThreadId:
               type: string
             sendSilently:
               type: boolean
@@ -1817,6 +1826,9 @@ components:
         telegramChatId:
           type: string
           nullable: true
+        telegramMessageThreadId:
+          type: string
+          nullable: true
         telegramSendSilently:
           type: boolean
           nullable: true
@@ -1929,6 +1941,11 @@ components:
         english_name:
           type: string
         native_name:
+          type: string
+    OverrideRule:
+      type: object
+      properties:
+        id:
           type: string
   securitySchemes:
     cookieAuth:
@@ -3753,6 +3770,11 @@ paths:
             type: string
             enum: [created, updated, requests, displayname]
             default: created
+        - in: query
+          name: q
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: A JSON array of all users
@@ -3869,7 +3891,7 @@ paths:
             schema:
               type: object
               properties:
-                jellyfinIds:
+                jellyfinUserIds:
                   type: array
                   items:
                     type: string
@@ -5435,6 +5457,13 @@ paths:
             enum: [added, modified]
             default: added
         - in: query
+          name: sortDirection
+          schema:
+            type: string
+            enum: [asc, desc]
+            nullable: true
+            default: desc
+        - in: query
           name: requestedBy
           schema:
             type: number
@@ -5484,7 +5513,7 @@ paths:
                     - type: array
                       items:
                         type: number
-                        minimum: 1
+                        minimum: 0
                     - type: string
                       enum: [all]
                 is4k:
@@ -5590,7 +5619,7 @@ paths:
                   type: array
                   items:
                     type: number
-                    minimum: 1
+                    minimum: 0
                 is4k:
                   type: boolean
                   example: false
@@ -6954,6 +6983,68 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/WatchProviderDetails'
+  /overrideRule:
+    get:
+      summary: Get override rules
+      description: Returns a list of all override rules with their conditions and settings
+      tags:
+        - overriderule
+      responses:
+        '200':
+          description: Override rules returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OverrideRule'
+    post:
+      summary: Create override rule
+      description: Creates a new Override Rule from the request body.
+      tags:
+        - overriderule
+      responses:
+        '200':
+          description: 'Values were successfully created'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OverrideRule'
+  /overrideRule/{ruleId}:
+    put:
+      summary: Update override rule
+      description: Updates an Override Rule from the request body.
+      tags:
+        - overriderule
+      responses:
+        '200':
+          description: 'Values were successfully updated'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OverrideRule'
+    delete:
+      summary: Delete override rule by ID
+      description: Deletes the override rule with the provided ruleId.
+      tags:
+        - overriderule
+      parameters:
+        - in: path
+          name: ruleId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Override rule successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OverrideRule'
 security:
   - cookieAuth: []
   - apiKey: []

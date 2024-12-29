@@ -13,6 +13,7 @@ import type {
   TmdbKeywordSearchResponse,
 } from '@server/api/themoviedb/interfaces';
 import type { GenreSliderItem } from '@server/interfaces/api/discoverInterfaces';
+import type { UserResultsResponse } from '@server/interfaces/api/userInterfaces';
 import type {
   Keyword,
   ProductionCompany,
@@ -29,6 +30,7 @@ const messages = defineMessages('components.Selector', {
   searchKeywords: 'Search keywords…',
   searchGenres: 'Select genres…',
   searchStudios: 'Search studios…',
+  searchUsers: 'Select users…',
   starttyping: 'Starting typing to search.',
   nooptions: 'No results.',
   showmore: 'Show More',
@@ -374,7 +376,11 @@ export const WatchProviderSelector = ({
   const { currentSettings } = useSettings();
   const [showMore, setShowMore] = useState(false);
   const [watchRegion, setWatchRegion] = useState(
-    region ? region : currentSettings.region ? currentSettings.region : 'US'
+    region
+      ? region
+      : currentSettings.discoverRegion
+      ? currentSettings.discoverRegion
+      : 'US'
   );
   const [activeProvider, setActiveProvider] = useState<number[]>(
     activeProviders ?? []
@@ -437,7 +443,7 @@ export const WatchProviderSelector = ({
                   key={`prodiver-${provider.id}`}
                 >
                   <div
-                    className={`provider-container relative w-full cursor-pointer rounded-lg p-2 ring-1 ${
+                    className={`provider-container w-full cursor-pointer rounded-lg ring-1 ${
                       isActive
                         ? 'bg-gray-600 ring-indigo-500 hover:bg-gray-500'
                         : 'bg-gray-700 ring-gray-500 hover:bg-gray-600'
@@ -451,18 +457,15 @@ export const WatchProviderSelector = ({
                     role="button"
                     tabIndex={0}
                   >
-                    <CachedImage
-                      type="tmdb"
-                      src={`https://image.tmdb.org/t/p/original${provider.logoPath}`}
-                      alt=""
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain',
-                      }}
-                      fill
-                      className="rounded-lg"
-                    />
+                    <div className="relative m-2 aspect-1">
+                      <CachedImage
+                        type="tmdb"
+                        src={`https://image.tmdb.org/t/p/original${provider.logoPath}`}
+                        alt=""
+                        fill
+                        className="rounded-lg object-contain"
+                      />
+                    </div>
                     {isActive && (
                       <div className="pointer-events-none absolute -top-1 -left-1 flex items-center justify-center text-indigo-100 opacity-90">
                         <CheckCircleIcon className="h-6 w-6" />
@@ -483,7 +486,7 @@ export const WatchProviderSelector = ({
                     key={`prodiver-${provider.id}`}
                   >
                     <div
-                      className={`provider-container relative w-full cursor-pointer rounded-lg p-2 ring-1 transition ${
+                      className={`provider-container w-full cursor-pointer rounded-lg ring-1 transition ${
                         isActive
                           ? 'bg-gray-600 ring-indigo-500 hover:bg-gray-500'
                           : 'bg-gray-700 ring-gray-500 hover:bg-gray-600'
@@ -497,18 +500,15 @@ export const WatchProviderSelector = ({
                       role="button"
                       tabIndex={0}
                     >
-                      <CachedImage
-                        type="tmdb"
-                        src={`https://image.tmdb.org/t/p/original${provider.logoPath}`}
-                        alt=""
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                        }}
-                        fill
-                        className="rounded-lg"
-                      />
+                      <div className="relative m-2 aspect-1">
+                        <CachedImage
+                          type="tmdb"
+                          src={`https://image.tmdb.org/t/p/original${provider.logoPath}`}
+                          alt=""
+                          fill
+                          className="rounded-lg object-contain"
+                        />
+                      </div>
                       {isActive && (
                         <div className="pointer-events-none absolute -top-1 -left-1 flex items-center justify-center text-indigo-100 opacity-90">
                           <CheckCircleIcon className="h-6 w-6" />
@@ -546,5 +546,79 @@ export const WatchProviderSelector = ({
         </div>
       )}
     </>
+  );
+};
+
+export const UserSelector = ({
+  isMulti,
+  defaultValue,
+  onChange,
+}: BaseSelectorMultiProps | BaseSelectorSingleProps) => {
+  const intl = useIntl();
+  const [defaultDataValue, setDefaultDataValue] = useState<
+    { label: string; value: number }[] | null
+  >(null);
+
+  useEffect(() => {
+    const loadUsers = async (): Promise<void> => {
+      if (!defaultValue) {
+        return;
+      }
+
+      const users = defaultValue.split(',');
+
+      const res = await fetch(`/api/v1/user`);
+      if (!res.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const response: UserResultsResponse = await res.json();
+
+      const genreData = users
+        .filter((u) => response.results.find((user) => user.id === Number(u)))
+        .map((u) => response.results.find((user) => user.id === Number(u)))
+        .map((u) => ({
+          label: u?.displayName ?? '',
+          value: u?.id ?? 0,
+        }));
+
+      setDefaultDataValue(genreData);
+    };
+
+    loadUsers();
+  }, [defaultValue]);
+
+  const loadUserOptions = async (inputValue: string) => {
+    const res = await fetch(
+      `/api/v1/user${inputValue ? `?q=${encodeURIComponent(inputValue)}` : ''}`
+    );
+    if (!res.ok) throw new Error();
+    const results: UserResultsResponse = await res.json();
+
+    return results.results
+      .map((result) => ({
+        label: result.displayName,
+        value: result.id,
+      }))
+      .filter(({ label }) =>
+        label.toLowerCase().includes(inputValue.toLowerCase())
+      );
+  };
+
+  return (
+    <AsyncSelect
+      key={`user-select-${defaultDataValue}`}
+      className="react-select-container"
+      classNamePrefix="react-select"
+      defaultValue={isMulti ? defaultDataValue : defaultDataValue?.[0]}
+      defaultOptions
+      cacheOptions
+      isMulti={isMulti}
+      loadOptions={loadUserOptions}
+      placeholder={intl.formatMessage(messages.searchUsers)}
+      onChange={(value) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onChange(value as any);
+      }}
+    />
   );
 };

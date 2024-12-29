@@ -5,6 +5,7 @@ import Tooltip from '@app/components/Common/Tooltip';
 import RequestModal from '@app/components/RequestModal';
 import StatusBadge from '@app/components/StatusBadge';
 import useDeepLinks from '@app/hooks/useDeepLinks';
+import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import defineMessages from '@app/utils/defineMessages';
@@ -219,6 +220,7 @@ interface RequestCardProps {
 }
 
 const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
+  const settings = useSettings();
   const { ref, inView } = useInView({
     triggerOnce: true,
   });
@@ -411,8 +413,11 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
               <span className="mr-2 font-bold ">
                 {intl.formatMessage(messages.seasons, {
                   seasonCount:
-                    title.seasons.filter((season) => season.seasonNumber !== 0)
-                      .length === request.seasons.length
+                    (settings.currentSettings.enableSpecialEpisodes
+                      ? title.seasons.length
+                      : title.seasons.filter(
+                          (season) => season.seasonNumber !== 0
+                        ).length) === request.seasons.length
                       ? 0
                       : request.seasons.length,
                 })}
@@ -420,7 +425,11 @@ const RequestCard = ({ request, onTitleData }: RequestCardProps) => {
               <div className="hide-scrollbar overflow-x-scroll">
                 {request.seasons.map((season) => (
                   <span key={`season-${season.id}`} className="mr-2">
-                    <Badge>{season.seasonNumber}</Badge>
+                    <Badge>
+                      {season.seasonNumber === 0
+                        ? intl.formatMessage(globalMessages.specials)
+                        : season.seasonNumber}
+                    </Badge>
                   </span>
                 ))}
               </div>
