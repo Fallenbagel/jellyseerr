@@ -1,8 +1,17 @@
+import Button from '@app/components/Common/Button';
 import Modal from '@app/components/Common/Modal';
 import SensitiveInput from '@app/components/Common/SensitiveInput';
+import OverrideRuleTile from '@app/components/Settings/OverrideRule/OverrideRuleTile';
+import type {
+  DVRTestResponse,
+  SonarrTestResponse,
+} from '@app/components/Settings/SettingsServices';
 import globalMessages from '@app/i18n/globalMessages';
 import defineMessages from '@app/utils/defineMessages';
 import { Transition } from '@headlessui/react';
+import { PlusIcon } from '@heroicons/react/24/solid';
+import type OverrideRule from '@server/entity/OverrideRule';
+import type { OverrideRuleResultsResponse } from '@server/interfaces/api/overrideRuleInterfaces';
 import type { SonarrSettings } from '@server/lib/settings';
 import { Field, Formik } from 'formik';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -10,6 +19,7 @@ import { useIntl } from 'react-intl';
 import type { OnChangeValue } from 'react-select';
 import Select from 'react-select';
 import { useToasts } from 'react-toast-notifications';
+import useSWR from 'swr';
 import * as Yup from 'yup';
 
 type OptionType = {
@@ -75,46 +85,47 @@ const messages = defineMessages('components.Settings.SonarrModal', {
   animeTags: 'Anime Tags',
   notagoptions: 'No tags.',
   selecttags: 'Select tags',
+  overrideRules: 'Override Rules',
+  addrule: 'New Override Rule',
 });
-
-interface TestResponse {
-  profiles: {
-    id: number;
-    name: string;
-  }[];
-  rootFolders: {
-    id: number;
-    path: string;
-  }[];
-  languageProfiles: {
-    id: number;
-    name: string;
-  }[];
-  tags: {
-    id: number;
-    label: string;
-  }[];
-  urlBase?: string;
-}
 
 interface SonarrModalProps {
   sonarr: SonarrSettings | null;
   onClose: () => void;
   onSave: () => void;
+  overrideRuleModal: { open: boolean; rule: OverrideRule | null };
+  setOverrideRuleModal: ({
+    open,
+    rule,
+    testResponse,
+  }: {
+    open: boolean;
+    rule: OverrideRule | null;
+    testResponse: DVRTestResponse;
+  }) => void;
 }
 
-const SonarrModal = ({ onClose, sonarr, onSave }: SonarrModalProps) => {
+const SonarrModal = ({
+  onClose,
+  sonarr,
+  onSave,
+  overrideRuleModal,
+  setOverrideRuleModal,
+}: SonarrModalProps) => {
   const intl = useIntl();
+  const { data: rules, mutate: revalidate } =
+    useSWR<OverrideRuleResultsResponse>('/api/v1/overrideRule');
   const initialLoad = useRef(false);
   const { addToast } = useToasts();
   const [isValidated, setIsValidated] = useState(sonarr ? true : false);
   const [isTesting, setIsTesting] = useState(false);
-  const [testResponse, setTestResponse] = useState<TestResponse>({
+  const [testResponse, setTestResponse] = useState<SonarrTestResponse>({
     profiles: [],
     rootFolders: [],
-    languageProfiles: [],
+    languageProfiles: null,
     tags: [],
   });
+
   const SonarrSettingsSchema = Yup.object().shape({
     name: Yup.string().required(
       intl.formatMessage(messages.validationNameRequired)
@@ -137,11 +148,16 @@ const SonarrModal = ({ onClose, sonarr, onSave }: SonarrModalProps) => {
     activeProfileId: Yup.string().required(
       intl.formatMessage(messages.validationProfileRequired)
     ),
-    activeLanguageProfileId: Yup.number().required(
-      intl.formatMessage(messages.validationLanguageProfileRequired)
-    ),
+    activeLanguageProfileId: testResponse.languageProfiles
+      ? Yup.number().required(
+          intl.formatMessage(messages.validationLanguageProfileRequired)
+        )
+      : Yup.number(),
     externalUrl: Yup.string()
-      .url(intl.formatMessage(messages.validationApplicationUrl))
+      .matches(
+        /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}(\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*))?$/i,
+        intl.formatMessage(messages.validationApplicationUrl)
+      )
       .test(
         'no-trailing-slash',
         intl.formatMessage(messages.validationApplicationUrlTrailingSlash),
@@ -190,7 +206,7 @@ const SonarrModal = ({ onClose, sonarr, onSave }: SonarrModalProps) => {
           }),
         });
         if (!res.ok) throw new Error();
-        const data: TestResponse = await res.json();
+        const data: SonarrTestResponse = await res.json();
 
         setIsValidated(true);
         setTestResponse(data);
@@ -227,6 +243,10 @@ const SonarrModal = ({ onClose, sonarr, onSave }: SonarrModalProps) => {
       });
     }
   }, [sonarr, testConnection]);
+
+  useEffect(() => {
+    revalidate();
+  }, [overrideRuleModal, revalidate]);
 
   return (
     <Transition
@@ -395,6 +415,7 @@ const SonarrModal = ({ onClose, sonarr, onSave }: SonarrModalProps) => {
                       values.is4k ? messages.edit4ksonarr : messages.editsonarr
                     )
               }
+              backgroundClickable={!overrideRuleModal.open}
             >
               <div className="mb-6">
                 <div className="form-row">
@@ -658,54 +679,56 @@ const SonarrModal = ({ onClose, sonarr, onSave }: SonarrModalProps) => {
                       )}
                   </div>
                 </div>
-                <div className="form-row">
-                  <label
-                    htmlFor="activeLanguageProfileId"
-                    className="text-label"
-                  >
-                    {intl.formatMessage(messages.languageprofile)}
-                    <span className="label-required">*</span>
-                  </label>
-                  <div className="form-input-area">
-                    <div className="form-input-field">
-                      <Field
-                        as="select"
-                        id="activeLanguageProfileId"
-                        name="activeLanguageProfileId"
-                        disabled={!isValidated || isTesting}
-                      >
-                        <option value="">
-                          {isTesting
-                            ? intl.formatMessage(
-                                messages.loadinglanguageprofiles
-                              )
-                            : !isValidated
-                            ? intl.formatMessage(
-                                messages.testFirstLanguageProfiles
-                              )
-                            : intl.formatMessage(
-                                messages.selectLanguageProfile
-                              )}
-                        </option>
-                        {testResponse.languageProfiles.length > 0 &&
-                          testResponse.languageProfiles.map((language) => (
-                            <option
-                              key={`loaded-profile-${language.id}`}
-                              value={language.id}
-                            >
-                              {language.name}
-                            </option>
-                          ))}
-                      </Field>
+                {testResponse.languageProfiles && (
+                  <div className="form-row">
+                    <label
+                      htmlFor="activeLanguageProfileId"
+                      className="text-label"
+                    >
+                      {intl.formatMessage(messages.languageprofile)}
+                      <span className="label-required">*</span>
+                    </label>
+                    <div className="form-input-area">
+                      <div className="form-input-field">
+                        <Field
+                          as="select"
+                          id="activeLanguageProfileId"
+                          name="activeLanguageProfileId"
+                          disabled={!isValidated || isTesting}
+                        >
+                          <option value="">
+                            {isTesting
+                              ? intl.formatMessage(
+                                  messages.loadinglanguageprofiles
+                                )
+                              : !isValidated
+                              ? intl.formatMessage(
+                                  messages.testFirstLanguageProfiles
+                                )
+                              : intl.formatMessage(
+                                  messages.selectLanguageProfile
+                                )}
+                          </option>
+                          {testResponse.languageProfiles.length > 0 &&
+                            testResponse.languageProfiles.map((language) => (
+                              <option
+                                key={`loaded-profile-${language.id}`}
+                                value={language.id}
+                              >
+                                {language.name}
+                              </option>
+                            ))}
+                        </Field>
+                      </div>
+                      {errors.activeLanguageProfileId &&
+                        touched.activeLanguageProfileId && (
+                          <div className="error">
+                            {errors.activeLanguageProfileId}
+                          </div>
+                        )}
                     </div>
-                    {errors.activeLanguageProfileId &&
-                      touched.activeLanguageProfileId && (
-                        <div className="error">
-                          {errors.activeLanguageProfileId}
-                        </div>
-                      )}
                   </div>
-                </div>
+                )}
                 <div className="form-row">
                   <label htmlFor="tags" className="text-label">
                     {intl.formatMessage(messages.tags)}
@@ -863,53 +886,55 @@ const SonarrModal = ({ onClose, sonarr, onSave }: SonarrModalProps) => {
                       )}
                   </div>
                 </div>
-                <div className="form-row">
-                  <label
-                    htmlFor="activeAnimeLanguageProfileId"
-                    className="text-label"
-                  >
-                    {intl.formatMessage(messages.animelanguageprofile)}
-                  </label>
-                  <div className="form-input-area">
-                    <div className="form-input-field">
-                      <Field
-                        as="select"
-                        id="activeAnimeLanguageProfileId"
-                        name="activeAnimeLanguageProfileId"
-                        disabled={!isValidated || isTesting}
-                      >
-                        <option value="">
-                          {isTesting
-                            ? intl.formatMessage(
-                                messages.loadinglanguageprofiles
-                              )
-                            : !isValidated
-                            ? intl.formatMessage(
-                                messages.testFirstLanguageProfiles
-                              )
-                            : intl.formatMessage(
-                                messages.selectLanguageProfile
-                              )}
-                        </option>
-                        {testResponse.languageProfiles.length > 0 &&
-                          testResponse.languageProfiles.map((language) => (
-                            <option
-                              key={`loaded-profile-${language.id}`}
-                              value={language.id}
-                            >
-                              {language.name}
-                            </option>
-                          ))}
-                      </Field>
+                {testResponse.languageProfiles && (
+                  <div className="form-row">
+                    <label
+                      htmlFor="activeAnimeLanguageProfileId"
+                      className="text-label"
+                    >
+                      {intl.formatMessage(messages.animelanguageprofile)}
+                    </label>
+                    <div className="form-input-area">
+                      <div className="form-input-field">
+                        <Field
+                          as="select"
+                          id="activeAnimeLanguageProfileId"
+                          name="activeAnimeLanguageProfileId"
+                          disabled={!isValidated || isTesting}
+                        >
+                          <option value="">
+                            {isTesting
+                              ? intl.formatMessage(
+                                  messages.loadinglanguageprofiles
+                                )
+                              : !isValidated
+                              ? intl.formatMessage(
+                                  messages.testFirstLanguageProfiles
+                                )
+                              : intl.formatMessage(
+                                  messages.selectLanguageProfile
+                                )}
+                          </option>
+                          {testResponse.languageProfiles.length > 0 &&
+                            testResponse.languageProfiles.map((language) => (
+                              <option
+                                key={`loaded-profile-${language.id}`}
+                                value={language.id}
+                              >
+                                {language.name}
+                              </option>
+                            ))}
+                        </Field>
+                      </div>
+                      {errors.activeAnimeLanguageProfileId &&
+                        touched.activeAnimeLanguageProfileId && (
+                          <div className="error">
+                            {errors.activeAnimeLanguageProfileId}
+                          </div>
+                        )}
                     </div>
-                    {errors.activeAnimeLanguageProfileId &&
-                      touched.activeAnimeLanguageProfileId && (
-                        <div className="error">
-                          {errors.activeAnimeLanguageProfileId}
-                        </div>
-                      )}
                   </div>
-                </div>
+                )}
                 <div className="form-row">
                   <label htmlFor="tags" className="text-label">
                     {intl.formatMessage(messages.animeTags)}
@@ -1045,6 +1070,38 @@ const SonarrModal = ({ onClose, sonarr, onSave }: SonarrModalProps) => {
                   </div>
                 </div>
               </div>
+              <h3 className="mb-4 text-xl font-bold leading-8 text-gray-100">
+                {intl.formatMessage(messages.overrideRules)}
+              </h3>
+              <ul className="grid grid-cols-2 gap-6">
+                {rules && (
+                  <OverrideRuleTile
+                    rules={rules}
+                    setOverrideRuleModal={setOverrideRuleModal}
+                    testResponse={testResponse}
+                    sonarr={sonarr}
+                    revalidate={revalidate}
+                  />
+                )}
+                <li className="min-h-[8rem] rounded-lg border-2 border-dashed border-gray-400 shadow sm:min-h-[11rem]">
+                  <div className="flex h-full w-full items-center justify-center">
+                    <Button
+                      buttonType="ghost"
+                      onClick={() =>
+                        setOverrideRuleModal({
+                          open: true,
+                          rule: null,
+                          testResponse,
+                        })
+                      }
+                      disabled={!isValidated}
+                    >
+                      <PlusIcon />
+                      <span>{intl.formatMessage(messages.addrule)}</span>
+                    </Button>
+                  </div>
+                </li>
+              </ul>
             </Modal>
           );
         }}

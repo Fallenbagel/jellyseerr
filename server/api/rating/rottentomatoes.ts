@@ -128,7 +128,7 @@ class RottenTomatoes extends ExternalAPI {
         movie = contentResults.hits.find((movie) => movie.title === name);
       }
 
-      if (!movie) {
+      if (!movie?.rottenTomatoes) {
         return null;
       }
 
@@ -182,7 +182,7 @@ class RottenTomatoes extends ExternalAPI {
         );
       }
 
-      if (!tvshow) {
+      if (!tvshow || !tvshow.rottenTomatoes) {
         return null;
       }
 

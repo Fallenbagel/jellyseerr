@@ -48,11 +48,11 @@ All help is welcome and greatly appreciated! If you would like to contribute to 
 4. Run the development environment:
 
    ```bash
-   pnpm
+   pnpm install
    pnpm dev
    ```
 
-   - Alternatively, you can use [Docker](https://www.docker.com/) with `docker-compose up -d`. This method does not require installing NodeJS or Yarn on your machine directly.
+   - Alternatively, you can use [Docker](https://www.docker.com/) with `docker compose up -d`. This method does not require installing NodeJS or Yarn on your machine directly.
 
 5. Create your patch and test your changes.
 
@@ -100,6 +100,46 @@ When adding new UI text, please try to adhere to the following guidelines:
 We use [Weblate](https://jellyseerr.borgcube.de/projects/jellyseerr/jellyseerr-frontend/) for our translations, and your help with localizing Overseerr would be greatly appreciated! If your language is not listed below, please [open a feature request](https://github.com/fallenbagel/jellyseerr/issues/new/choose).
 
 <a href="https://jellyseerr.borgcube.de/engage/jellysseerr/"><img src="https://jellyseerr.borgcube.de/widget/jellyseerr/multi-auto.svg" alt="Translation status" /></a>
+
+## Migrations
+
+If you are adding a new feature that requires a database migration, you will need to create 2 migrations: one for SQLite and one for PostgreSQL. Here is how you could do it:
+
+1. Create a PostgreSQL database or use an existing one:
+
+```bash
+sudo docker run --name postgres-jellyseerr -e POSTGRES_PASSWORD=postgres -d -p 127.0.0.1:5432:5432/tcp postgres:latest
+```
+
+2. Reset the SQLite database and the PostgreSQL database:
+
+```bash
+rm config/db/db.*
+rm config/settings.*
+PGPASSWORD=postgres sudo docker exec -it postgres-jellyseerr /usr/bin/psql -h 127.0.0.1 -U postgres -c "DROP DATABASE IF EXISTS jellyseerr;"
+PGPASSWORD=postgres sudo docker exec -it postgres-jellyseerr /usr/bin/psql -h 127.0.0.1 -U postgres -c "CREATE DATABASE jellyseerr;"
+```
+
+3. Checkout the `develop` branch and create the original database for SQLite and PostgreSQL so that TypeORM can automatically generate the migrations:
+
+```bash
+git checkout develop
+pnpm i
+rm -r .next dist; pnpm build
+pnpm start
+DB_TYPE="postgres" DB_USER=postgres DB_PASS=postgres pnpm start
+```
+
+(You can shutdown the server once the message "Server ready on 5055" appears)
+
+4. Let TypeORM generate the migrations:
+
+```bash
+git checkout -b your-feature-branch
+pnpm i
+pnpm migration:generate server/migration/sqlite/YourMigrationName
+DB_TYPE="postgres" DB_USER=postgres DB_PASS=postgres pnpm migration:generate server/migration/postgres/YourMigrationName
+```
 
 ## Attribution
 
