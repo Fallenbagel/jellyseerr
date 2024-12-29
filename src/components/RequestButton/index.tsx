@@ -78,14 +78,14 @@ const RequestButton = ({
   const activeRequest = useMemo(() => {
     return activeRequests && activeRequests.length > 0
       ? activeRequests.find((request) => request.requestedBy.id === user?.id) ??
-          activeRequests[0]
+      activeRequests[0]
       : undefined;
   }, [activeRequests, user]);
   const active4kRequest = useMemo(() => {
     return active4kRequests && active4kRequests.length > 0
       ? active4kRequests.find(
-          (request) => request.requestedBy.id === user?.id
-        ) ?? active4kRequests[0]
+        (request) => request.requestedBy.id === user?.id
+      ) ?? active4kRequests[0]
       : undefined;
   }, [active4kRequests, user]);
 
@@ -294,23 +294,6 @@ const RequestButton = ({
     });
   } else if (
     mediaType === 'tv' &&
-    hasPermission([Permission.REQUEST, Permission.REQUEST_TV], {
-      type: 'or',
-    }) &&
-    media &&
-    media.status === MediaStatus.PARTIALLY_AVAILABLE
-  ) {
-    buttons.push({
-      id: 'request-more',
-      text: intl.formatMessage(messages.requestmore),
-      action: () => {
-        setEditRequest(false);
-        setShowRequestModal(true);
-      },
-      svg: <ArrowDownTrayIcon />,
-    });
-  } else if (
-    mediaType === 'tv' &&
     (!activeRequest || activeRequest.requestedBy.id !== user?.id) &&
     hasPermission([Permission.REQUEST, Permission.REQUEST_TV], {
       type: 'or',
@@ -421,14 +404,14 @@ const RequestButton = ({
       >
         {others && others.length > 0
           ? others.map((button) => (
-              <ButtonWithDropdown.Item
-                onClick={button.action}
-                key={`request-option-${button.id}`}
-              >
-                {button.svg}
-                <span>{button.text}</span>
-              </ButtonWithDropdown.Item>
-            ))
+            <ButtonWithDropdown.Item
+              onClick={button.action}
+              key={`request-option-${button.id}`}
+            >
+              {button.svg}
+              <span>{button.text}</span>
+            </ButtonWithDropdown.Item>
+          ))
           : null}
       </ButtonWithDropdown>
     </>
