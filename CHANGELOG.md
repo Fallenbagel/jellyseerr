@@ -1,3 +1,11 @@
+## [2.2.3](https://github.com/fallenbagel/jellyseerr/compare/v2.2.2...v2.2.3) (2024-12-30)
+
+
+### Bug Fixes
+
+* properly fetch sonarr/radarr specific override rules ([#1199](https://github.com/fallenbagel/jellyseerr/issues/1199)) ([814a735](https://github.com/fallenbagel/jellyseerr/commit/814a7357c0c7418091e8d3e911adc403811c9dfe))
+* **usersettings:** fix the streaming region setting toggling itself ([#1203](https://github.com/fallenbagel/jellyseerr/issues/1203)) ([7e94ad7](https://github.com/fallenbagel/jellyseerr/commit/7e94ad721026a03d3ae640ee2deb60e321cabf10)), closes [#1200](https://github.com/fallenbagel/jellyseerr/issues/1200)
+
 ## [2.2.2](https://github.com/fallenbagel/jellyseerr/compare/v2.2.1...v2.2.2) (2024-12-30)
 
 
