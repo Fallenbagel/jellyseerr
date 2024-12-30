@@ -1,6 +1,7 @@
 import Alert from '@app/components/Common/Alert';
 import Badge from '@app/components/Common/Badge';
 import Modal from '@app/components/Common/Modal';
+import SlideCheckbox from '@app/components/Common/SlideCheckbox';
 import type { RequestOverrides } from '@app/components/RequestModal/AdvancedRequester';
 import AdvancedRequester from '@app/components/RequestModal/AdvancedRequester';
 import QuotaDisplay from '@app/components/RequestModal/QuotaDisplay';
@@ -49,6 +50,9 @@ const messages = defineMessages('components.RequestModal', {
   autoapproval: 'Automatic Approval',
   requesterror: 'Something went wrong while submitting the request.',
   pendingapproval: 'Your request is pending approval.',
+  autoRequestNewSeasons: 'Automatically Request New Seasons',
+  autoRequestNewSeasonsDescription:
+    'New seasons will be requested automatically when they become available',
 });
 
 interface RequestModalProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -70,6 +74,7 @@ const TvRequestModal = ({
 }: RequestModalProps) => {
   const settings = useSettings();
   const { addToast } = useToasts();
+  const [autoRequestNewSeasons, setAutoRequestNewSeasons] = useState(true);
   const editingSeasons: number[] = (editRequest?.seasons ?? []).map(
     (season) => season.seasonNumber
   );
@@ -124,6 +129,7 @@ const TvRequestModal = ({
             userId: requestOverrides?.user?.id,
             tags: requestOverrides?.tags,
             seasons: selectedSeasons,
+            autoRequestNewSeasons,
           }),
         });
         if (!res.ok) throw new Error();
@@ -213,6 +219,7 @@ const TvRequestModal = ({
           tvdbId: tvdbId ?? data?.externalIds.tvdbId,
           mediaType: 'tv',
           is4k,
+          autoRequestNewSeasons,
           seasons: settings.currentSettings.partialRequestsEnabled
             ? selectedSeasons
             : getAllSeasons().filter(
@@ -719,6 +726,25 @@ const TvRequestModal = ({
           </div>
         </div>
       </div>
+
+      {/* Add auto-request checkbox after the seasons table */}
+      {!editRequest && (
+        <div className="mb-6 mt-4 flex items-center space-x-2">
+          <SlideCheckbox
+            checked={autoRequestNewSeasons}
+            onClick={() => setAutoRequestNewSeasons(!autoRequestNewSeasons)}
+          />
+          <div className="flex flex-col">
+            <span className="text-gray-100">
+              {intl.formatMessage(messages.autoRequestNewSeasons)}
+            </span>
+            <span className="text-sm text-gray-400">
+              {intl.formatMessage(messages.autoRequestNewSeasonsDescription)}
+            </span>
+          </div>
+        </div>
+      )}
+
       {(hasPermission(Permission.REQUEST_ADVANCED) ||
         hasPermission(Permission.MANAGE_REQUESTS)) && (
         <AdvancedRequester
