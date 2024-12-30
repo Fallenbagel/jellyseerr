@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/fallenbagel/jellyseerr/compare/v2.2.0...v2.2.1) (2024-12-30)
+
+
+### Bug Fixes
+
+* **overriderules:** apply override rules during request only for non-admin/non-auto-approve users ([#1197](https://github.com/fallenbagel/jellyseerr/issues/1197)) ([8da4870](https://github.com/fallenbagel/jellyseerr/commit/8da48709977fa0111225c3519f9128bea41867fc)), closes [#1195](https://github.com/fallenbagel/jellyseerr/issues/1195)
+
 # [2.2.0](https://github.com/fallenbagel/jellyseerr/compare/v2.1.0...v2.2.0) (2024-12-29)
 
 
