@@ -218,12 +218,19 @@ export class MediaRequest {
     let tags = requestBody.tags;
 
     if (useOverrides) {
+      const defaultRadarrId = requestBody.is4k
+        ? settings.radarr.findIndex((r) => r.is4k && r.isDefault)
+        : settings.radarr.findIndex((r) => !r.is4k && r.isDefault);
+      const defaultSonarrId = requestBody.is4k
+        ? settings.sonarr.findIndex((s) => s.is4k && s.isDefault)
+        : settings.sonarr.findIndex((s) => !s.is4k && s.isDefault);
+
       const overrideRuleRepository = getRepository(OverrideRule);
       const overrideRules = await overrideRuleRepository.find({
         where:
           requestBody.mediaType === MediaType.MOVIE
-            ? { radarrServiceId: 0 }
-            : { sonarrServiceId: 0 },
+            ? { radarrServiceId: defaultRadarrId }
+            : { sonarrServiceId: defaultSonarrId },
       });
 
       const appliedOverrideRules = overrideRules.filter((rule) => {
