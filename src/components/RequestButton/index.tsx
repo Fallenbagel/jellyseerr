@@ -56,8 +56,6 @@ const RequestButton = ({
   onUpdate,
   media,
   mediaType,
-  isShowComplete = false,
-  is4kShowComplete = false,
 }: RequestButtonProps) => {
   const intl = useIntl();
   const settings = useSettings();
@@ -78,14 +76,14 @@ const RequestButton = ({
   const activeRequest = useMemo(() => {
     return activeRequests && activeRequests.length > 0
       ? activeRequests.find((request) => request.requestedBy.id === user?.id) ??
-      activeRequests[0]
+          activeRequests[0]
       : undefined;
   }, [activeRequests, user]);
   const active4kRequest = useMemo(() => {
     return active4kRequests && active4kRequests.length > 0
       ? active4kRequests.find(
-        (request) => request.requestedBy.id === user?.id
-      ) ?? active4kRequests[0]
+          (request) => request.requestedBy.id === user?.id
+        ) ?? active4kRequests[0]
       : undefined;
   }, [active4kRequests, user]);
 
@@ -300,8 +298,7 @@ const RequestButton = ({
     }) &&
     media &&
     media.status !== MediaStatus.AVAILABLE &&
-    media.status !== MediaStatus.BLACKLISTED &&
-    !isShowComplete
+    media.status !== MediaStatus.BLACKLISTED
   ) {
     buttons.push({
       id: 'request-more',
@@ -347,7 +344,6 @@ const RequestButton = ({
     media &&
     media.status4k !== MediaStatus.AVAILABLE &&
     media.status !== MediaStatus.BLACKLISTED &&
-    !is4kShowComplete &&
     settings.currentSettings.series4kEnabled
   ) {
     buttons.push({
@@ -404,14 +400,14 @@ const RequestButton = ({
       >
         {others && others.length > 0
           ? others.map((button) => (
-            <ButtonWithDropdown.Item
-              onClick={button.action}
-              key={`request-option-${button.id}`}
-            >
-              {button.svg}
-              <span>{button.text}</span>
-            </ButtonWithDropdown.Item>
-          ))
+              <ButtonWithDropdown.Item
+                onClick={button.action}
+                key={`request-option-${button.id}`}
+              >
+                {button.svg}
+                <span>{button.text}</span>
+              </ButtonWithDropdown.Item>
+            ))
           : null}
       </ButtonWithDropdown>
     </>
