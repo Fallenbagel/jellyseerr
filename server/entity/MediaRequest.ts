@@ -208,14 +208,10 @@ export class MediaRequest {
       }
     }
 
-    // Apply overrides if the user is not an admin or has the "auto approve" permission
-    const useOverrides = !user.hasPermission(
-      [
-        requestBody.is4k ? Permission.AUTO_APPROVE_4K : Permission.AUTO_APPROVE,
-        Permission.MANAGE_REQUESTS,
-      ],
-      { type: 'or' }
-    );
+    // Apply overrides if the user is not an admin or has the "advanced request" permission
+    const useOverrides = !user.hasPermission([Permission.MANAGE_REQUESTS], {
+      type: 'or',
+    });
 
     let rootFolder = requestBody.rootFolder;
     let profileId = requestBody.profileId;
