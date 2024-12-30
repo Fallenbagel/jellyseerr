@@ -7,6 +7,7 @@ import type {
 import SonarrAPI from '@server/api/servarr/sonarr';
 import TheMovieDb from '@server/api/themoviedb';
 import { ANIME_KEYWORD_ID } from '@server/api/themoviedb/constants';
+import type { TmdbKeyword } from '@server/api/themoviedb/interfaces';
 import {
   MediaRequestStatus,
   MediaStatus,
@@ -225,10 +226,29 @@ export class MediaRequest {
       const overrideRules = await overrideRuleRepository.find({
         where:
           requestBody.mediaType === MediaType.MOVIE
-            ? { radarrServiceId: requestBody.serverId }
-            : { sonarrServiceId: requestBody.serverId },
+            ? { radarrServiceId: 0 }
+            : { sonarrServiceId: 0 },
       });
+
       const appliedOverrideRules = overrideRules.filter((rule) => {
+        const hasAnimeKeyword =
+          'results' in tmdbMedia.keywords &&
+          tmdbMedia.keywords.results.some(
+            (keyword: TmdbKeyword) => keyword.id === ANIME_KEYWORD_ID
+          );
+
+        // Skip override rules if the media is an anime TV show as anime TV
+        // is handled by default and override rules do not explicitly include
+        // the anime keyword
+        if (
+          requestBody.mediaType === MediaType.TV &&
+          hasAnimeKeyword &&
+          (!rule.keywords ||
+            !rule.keywords.split(',').map(Number).includes(ANIME_KEYWORD_ID))
+        ) {
+          return false;
+        }
+
         if (
           rule.users &&
           !rule.users
@@ -257,31 +277,59 @@ export class MediaRequest {
         ) {
           return false;
         }
+        if (
+          rule.keywords &&
+          !rule.keywords.split(',').some((keywordId) => {
+            let keywordList: TmdbKeyword[] = [];
+
+            if ('keywords' in tmdbMedia.keywords) {
+              keywordList = tmdbMedia.keywords.keywords;
+            } else if ('results' in tmdbMedia.keywords) {
+              keywordList = tmdbMedia.keywords.results;
+            }
+
+            return keywordList
+              .map((keyword: TmdbKeyword) => keyword.id)
+              .includes(Number(keywordId));
+          })
+        ) {
+          return false;
+        }
         return true;
       });
 
-      const overrideRootFolder = appliedOverrideRules.find(
-        (rule) => rule.rootFolder
-      )?.rootFolder;
-      if (overrideRootFolder) {
-        rootFolder = overrideRootFolder;
-      }
+      // hacky way to prioritize rules
+      // TODO: make this better
+      const prioritizedRule = appliedOverrideRules.sort((a, b) => {
+        const keys: (keyof OverrideRule)[] = ['genre', 'language', 'keywords'];
 
-      const overrideProfileId = appliedOverrideRules.find(
-        (rule) => rule.profileId
-      )?.profileId;
-      if (overrideProfileId) {
-        profileId = overrideProfileId;
-      }
+        const aSpecificity = keys.filter((key) => a[key] !== null).length;
+        const bSpecificity = keys.filter((key) => b[key] !== null).length;
 
-      const overrideTags = appliedOverrideRules.find((rule) => rule.tags)?.tags;
-      if (overrideTags) {
-        tags = [
-          ...new Set([
-            ...(tags || []),
-            ...overrideTags.split(',').map((tag) => Number(tag)),
-          ]),
-        ];
+        // Take the rule with the most specific condition first
+        return bSpecificity - aSpecificity;
+      })[0];
+
+      if (prioritizedRule) {
+        if (prioritizedRule.rootFolder) {
+          rootFolder = prioritizedRule.rootFolder;
+        }
+        if (prioritizedRule.profileId) {
+          profileId = prioritizedRule.profileId;
+        }
+        if (prioritizedRule.tags) {
+          tags = [
+            ...new Set([
+              ...(tags || []),
+              ...prioritizedRule.tags.split(',').map((tag) => Number(tag)),
+            ]),
+          ];
+        }
+
+        logger.debug('Override rule applied.', {
+          label: 'Media Request',
+          overrides: prioritizedRule,
+        });
       }
     }
 
