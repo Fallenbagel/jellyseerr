@@ -271,7 +271,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
         ))
     );
   }
-
+  
   const streamingRegion = user?.settings?.streamingRegion
     ? user.settings.streamingRegion
     : settings.currentSettings.streamingRegion

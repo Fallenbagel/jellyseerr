@@ -157,7 +157,7 @@ const SettingsMain = () => {
             locale: data?.locale ?? 'en',
             discoverRegion: data?.discoverRegion,
             originalLanguage: data?.originalLanguage,
-            streamingRegion: data?.streamingRegion,
+            streamingRegion: data?.streamingRegion || 'US',
             partialRequestsEnabled: data?.partialRequestsEnabled,
             enableSpecialEpisodes: data?.enableSpecialEpisodes,
             trustProxy: data?.trustProxy,
@@ -433,7 +433,7 @@ const SettingsMain = () => {
                     </span>
                   </label>
                   <div className="form-input-area">
-                    <div className="form-input-field">
+                    <div className="form-input-field relative z-30">
                       <LanguageSelector
                         setFieldValue={setFieldValue}
                         value={values.originalLanguage}
@@ -449,9 +449,9 @@ const SettingsMain = () => {
                     </span>
                   </label>
                   <div className="form-input-area">
-                    <div className="form-input-field">
+                    <div className="form-input-field relative z-20">
                       <RegionSelector
-                        value={values.streamingRegion || 'US'}
+                        value={values.streamingRegion}
                         name="streamingRegion"
                         onChange={setFieldValue}
                         regionType="streaming"
