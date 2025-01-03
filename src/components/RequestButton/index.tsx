@@ -56,8 +56,6 @@ const RequestButton = ({
   onUpdate,
   media,
   mediaType,
-  isShowComplete = false,
-  is4kShowComplete = false,
 }: RequestButtonProps) => {
   const intl = useIntl();
   const settings = useSettings();
@@ -300,8 +298,7 @@ const RequestButton = ({
     }) &&
     media &&
     media.status !== MediaStatus.AVAILABLE &&
-    media.status !== MediaStatus.BLACKLISTED &&
-    !isShowComplete
+    media.status !== MediaStatus.BLACKLISTED
   ) {
     buttons.push({
       id: 'request-more',
@@ -347,7 +344,6 @@ const RequestButton = ({
     media &&
     media.status4k !== MediaStatus.AVAILABLE &&
     media.status !== MediaStatus.BLACKLISTED &&
-    !is4kShowComplete &&
     settings.currentSettings.series4kEnabled
   ) {
     buttons.push({
