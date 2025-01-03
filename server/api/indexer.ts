@@ -1,0 +1,23 @@
+import type {
+  TmdbSeasonWithEpisodes,
+  TmdbTvDetails,
+} from '@server/api/themoviedb/interfaces';
+
+export interface TvShowIndexer {
+  getTvShow({
+    tvId,
+    language,
+  }: {
+    tvId: number;
+    language?: string;
+  }): Promise<TmdbTvDetails>;
+  getTvSeason({
+    tvId,
+    seasonNumber,
+    language,
+  }: {
+    tvId: number;
+    seasonNumber: number;
+    language?: string;
+  }): Promise<TmdbSeasonWithEpisodes>;
+}
