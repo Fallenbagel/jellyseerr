@@ -29,6 +29,7 @@ export const menuMessages = defineMessages('components.Layout.Sidebar', {
   blacklist: 'Blacklist',
   issues: 'Issues',
   users: 'Users',
+  autoapproval: 'Auto Approval',
   settings: 'Settings',
 });
 
