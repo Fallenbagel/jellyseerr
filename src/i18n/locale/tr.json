@@ -900,7 +900,7 @@
   "components.Settings.menuServices": "Servisler",
   "components.Settings.menuUsers": "Kullanıcılar",
   "components.Settings.mediaTypeSeries": "dizi",
-  "components.Settings.noDefaultServer": "Talebin işlenebilmesi için en azından bir {serverType} sunucusunun {mediaType} içerikleri iöin öntanımlı olarak işaretlenmesi gerekmektedir.",
+  "components.Settings.noDefaultServer": "Talebin işlenebilmesi için en azından bir {serverType} sunucusunun {mediaType} içerikleri için öntanımlı olarak işaretlenmesi gerekmektedir.",
   "components.Settings.notificationAgentSettingsDescription": "Bildirim aracılarını yapılandırın ve etkinleştirin",
   "components.Settings.notifications": "Bildirimler",
   "components.Settings.notificationsettings": "Bildirim Ayarları",
