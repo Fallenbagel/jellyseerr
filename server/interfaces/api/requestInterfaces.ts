@@ -20,3 +20,14 @@ export type MediaRequestBody = {
   userId?: number;
   tags?: number[];
 };
+
+export type RequestCountResponse = {
+  total: number;
+  movie: number;
+  tv: number;
+  pending: number;
+  approved: number;
+  declined: number;
+  processing: number;
+  available: number;
+};

@@ -1,3 +1,4 @@
+import Badge from '@app/components/Common/Badge';
 import UserWarnings from '@app/components/Layout/UserWarnings';
 import VersionStatus from '@app/components/Layout/VersionStatus';
 import useClickOutside from '@app/hooks/useClickOutside';
@@ -15,11 +16,13 @@ import {
   UsersIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+import type { RequestCountResponse } from '@server/interfaces/api/requestInterfaces';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Fragment, useRef } from 'react';
 import { useIntl } from 'react-intl';
+import useSWR from 'swr';
 
 export const menuMessages = defineMessages('components.Layout.Sidebar', {
   dashboard: 'Discover',
@@ -119,6 +122,9 @@ const Sidebar = ({ open, setClosed }: SidebarProps) => {
   const router = useRouter();
   const intl = useIntl();
   const { hasPermission } = useUser();
+  const { data: requests } = useSWR<RequestCountResponse>(
+    '/api/v1/request/count'
+  );
   useClickOutside(navRef, () => setClosed());
 
   return (
@@ -204,6 +210,15 @@ const Sidebar = ({ open, setClosed }: SidebarProps) => {
                             {intl.formatMessage(
                               menuMessages[sidebarLink.messagesKey]
                             )}
+                            {sidebarLink.messagesKey === 'requests' &&
+                              requests &&
+                              requests.pending > 0 && (
+                                <span className="ml-3">
+                                  <Badge badgeType="default">
+                                    {requests.pending}
+                                  </Badge>
+                                </span>
+                              )}
                           </Link>
                         );
                       })}
@@ -265,6 +280,15 @@ const Sidebar = ({ open, setClosed }: SidebarProps) => {
                       {intl.formatMessage(
                         menuMessages[sidebarLink.messagesKey]
                       )}
+                      {sidebarLink.messagesKey === 'requests' &&
+                        requests &&
+                        requests.pending > 0 && (
+                          <span className="ml-3">
+                            <Badge badgeType="default">
+                              {requests.pending}
+                            </Badge>
+                          </span>
+                        )}
                     </Link>
                   );
                 })}
