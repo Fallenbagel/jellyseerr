@@ -1,6 +1,6 @@
 import PersonCard from '@app/components/PersonCard';
 import TitleCard from '@app/components/TitleCard';
-import TmdbTitleCard from '@app/components/TitleCard/TmdbTitleCard';
+import AddedCard from '@app/components/AddedCard';
 import { Permission, useUser } from '@app/hooks/useUser';
 import useVerticalScroll from '@app/hooks/useVerticalScroll';
 import globalMessages from '@app/i18n/globalMessages';
@@ -11,11 +11,14 @@ import type {
   MovieResult,
   PersonResult,
   TvResult,
+  ArtistResult,
+  AlbumResult,
 } from '@server/models/Search';
 import { useIntl } from 'react-intl';
+import GroupCard from '@app/components/GroupCard';
 
 type ListViewProps = {
-  items?: (TvResult | MovieResult | PersonResult | CollectionResult)[];
+  items?: (TvResult | MovieResult | PersonResult | CollectionResult | ArtistResult | AlbumResult)[];
   plexItems?: WatchlistItem[];
   isEmpty?: boolean;
   isLoading?: boolean;
@@ -53,9 +56,10 @@ const ListView = ({
         {plexItems?.map((title, index) => {
           return (
             <li key={`${title.ratingKey}-${index}`}>
-              <TmdbTitleCard
-                id={title.tmdbId}
-                tmdbId={title.tmdbId}
+              <AddedCard
+                id={title.tmdbId ?? 0}
+                tmdbId={title.tmdbId ?? 0}
+                mbId={title.mbId}
                 type={title.mediaType}
                 isAddedToWatchlist={true}
                 canExpand
@@ -68,7 +72,7 @@ const ListView = ({
           ?.filter((title) => {
             if (!blacklistVisibility)
               return (
-                (title as TvResult | MovieResult).mediaInfo?.status !==
+                (title as TvResult | MovieResult | AlbumResult).mediaInfo?.status !==
                 MediaStatus.BLACKLISTED
               );
             return title;
@@ -143,6 +147,47 @@ const ListView = ({
                   />
                 );
                 break;
+              case 'album':
+                titleCard = (
+                  <TitleCard
+                    key={title.id}
+                    id={title.id}
+                    isAddedToWatchlist={
+                      title.mediaInfo?.watchlists?.length ?? 0
+                    }
+                    image={title.images?.find(image => image.CoverType === 'Cover')?.Url}
+                    status={title.mediaInfo?.status}
+                    title={title.title}
+                    artist={title.artistname}
+                    type={title.type}
+                    year={title.releasedate}
+                    mediaType={title.mediaType}
+                    inProgress={
+                      (title.mediaInfo?.downloadStatus ?? []).length > 0
+                    }
+                    canExpand
+                  />
+                );
+                break;
+                case 'artist':
+                  return title.type === 'Group' ? (
+                      <GroupCard
+                          key={title.id}
+                          groupId={title.id}
+                          name={title.artistname}
+                          image={title.artistimage}
+                          canExpand
+                      />
+                  ) : (
+                      <PersonCard
+                          key={title.id}
+                          personId={title.id}
+                          name={title.artistname}
+                          mediaType="artist"
+                          profilePath={title.artistimage}
+                          canExpand
+                      />
+                  );
             }
 
             return <li key={`${title.id}-${index}`}>{titleCard}</li>;

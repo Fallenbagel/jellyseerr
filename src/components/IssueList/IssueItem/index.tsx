@@ -11,6 +11,7 @@ import { MediaType } from '@server/constants/media';
 import type Issue from '@server/entity/Issue';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
+import type { MusicDetails } from '@server/models/Music';
 import Link from 'next/link';
 import { useInView } from 'react-intersection-observer';
 import { FormattedRelativeTime, useIntl } from 'react-intl';
@@ -28,8 +29,13 @@ const messages = defineMessages('components.IssueList.IssueItem', {
   unknownissuetype: 'Unknown',
 });
 
-const isMovie = (movie: MovieDetails | TvDetails): movie is MovieDetails => {
-  return (movie as MovieDetails).title !== undefined;
+const isMovie = (media: MovieDetails | TvDetails | MusicDetails): media is MovieDetails => {
+  return (media as MovieDetails).title !== undefined &&
+         (media as MovieDetails).releaseDate !== undefined;
+};
+
+const isMusic = (media: MovieDetails | TvDetails | MusicDetails): media is MusicDetails => {
+  return (media as MusicDetails).artist !== undefined;
 };
 
 interface IssueItemProps {
@@ -42,11 +48,13 @@ const IssueItem = ({ issue }: IssueItemProps) => {
   const { ref, inView } = useInView({
     triggerOnce: true,
   });
-  const url =
-    issue.media.mediaType === 'movie'
-      ? `/api/v1/movie/${issue.media.tmdbId}`
-      : `/api/v1/tv/${issue.media.tmdbId}`;
-  const { data: title, error } = useSWR<MovieDetails | TvDetails>(
+  const url = issue.media.mediaType === MediaType.MOVIE
+    ? `/api/v1/movie/${issue.media.tmdbId}`
+    : issue.media.mediaType === MediaType.TV
+    ? `/api/v1/tv/${issue.media.tmdbId}`
+    : `/api/v1/music/${issue.media.mbId}`;
+
+  const { data: title, error } = useSWR<MovieDetails | TvDetails | MusicDetails>(
     inView ? url : null
   );
 
@@ -109,11 +117,13 @@ const IssueItem = ({ issue }: IssueItemProps) => {
 
   return (
     <div className="relative flex w-full flex-col justify-between overflow-hidden rounded-xl bg-gray-800 py-4 text-gray-400 shadow-md ring-1 ring-gray-700 xl:h-28 xl:flex-row">
-      {title.backdropPath && (
+      {((!isMusic(title) && title.backdropPath) || isMusic(title)) && (
         <div className="absolute inset-0 z-0 w-full bg-cover bg-center xl:w-2/3">
           <CachedImage
-            type="tmdb"
-            src={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${title.backdropPath}`}
+            type={isMusic(title) ? 'music' : 'tmdb'}
+            src={isMusic(title)
+              ? title.artist.images?.find(img => img.CoverType === 'Fanart')?.Url ?? '/images/overseerr_poster_not_found.png'
+              : `https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${title.backdropPath ?? ''}`}
             alt=""
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             fill
@@ -133,16 +143,20 @@ const IssueItem = ({ issue }: IssueItemProps) => {
             href={
               issue.media.mediaType === MediaType.MOVIE
                 ? `/movie/${issue.media.tmdbId}`
-                : `/tv/${issue.media.tmdbId}`
+                : issue.media.mediaType === MediaType.TV
+                ? `/tv/${issue.media.tmdbId}`
+                : `/music/${issue.media.mbId}`
             }
             className="relative h-auto w-12 flex-shrink-0 scale-100 transform-gpu overflow-hidden rounded-md transition duration-300 hover:scale-105"
           >
             <CachedImage
-              type="tmdb"
+              type={isMusic(title) ? 'music' : 'tmdb'}
               src={
-                title.posterPath
-                  ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${title.posterPath}`
-                  : '/images/overseerr_poster_not_found.png'
+                isMusic(title)
+                  ? title.images?.find(image => image.CoverType === 'Cover')?.Url ?? '/images/overseerr_poster_not_found.png'
+                  : (title.posterPath
+                    ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${title.posterPath}`
+                    : '/images/overseerr_poster_not_found.png')
               }
               alt=""
               sizes="100vw"
@@ -153,20 +167,25 @@ const IssueItem = ({ issue }: IssueItemProps) => {
           </Link>
           <div className="flex flex-col justify-center overflow-hidden pl-2 xl:pl-4">
             <div className="pt-0.5 text-xs text-white sm:pt-1">
-              {(isMovie(title) ? title.releaseDate : title.firstAirDate)?.slice(
-                0,
-                4
-              )}
+              {isMusic(title)
+                ? title.releaseDate?.slice(0, 4)
+                : (isMovie(title) ? title.releaseDate : title.firstAirDate)?.slice(0, 4)}
             </div>
             <Link
               href={
                 issue.media.mediaType === MediaType.MOVIE
                   ? `/movie/${issue.media.tmdbId}`
-                  : `/tv/${issue.media.tmdbId}`
+                  : issue.media.mediaType === MediaType.TV
+                  ? `/tv/${issue.media.tmdbId}`
+                  : `/music/${issue.media.mbId}`
               }
               className="mr-2 min-w-0 truncate text-lg font-bold text-white hover:underline xl:text-xl"
             >
-              {isMovie(title) ? title.title : title.name}
+              {isMusic(title)
+                ? `${title.artist.artistName} - ${title.title}`
+                : isMovie(title)
+                ? title.title
+                : title.name}
             </Link>
             {problemSeasonEpisodeLine.length > 0 && (
               <div className="card-field">

@@ -5,12 +5,17 @@ import type {
   TmdbPersonDetails,
   TmdbPersonResult,
   TmdbSearchMovieResponse,
-  TmdbSearchMultiResponse,
   TmdbSearchTvResponse,
   TmdbTvDetails,
   TmdbTvResult,
+  TmdbCollectionResult
 } from '@server/api/themoviedb/interfaces';
-import {
+import MusicBrainz from '@server/api/musicbrainz';
+import type {
+  MbAlbumResult,
+  MbArtistResult,
+} from '@server/api/musicbrainz/interfaces';
+ import {
   mapMovieDetailsToResult,
   mapPersonDetailsToResult,
   mapTvDetailsToResult,
@@ -19,8 +24,26 @@ import {
   isMovie,
   isMovieDetails,
   isTvDetails,
+  isArtist,
+  isAlbum,
+  isArtistDetails,
+  isAlbumDetails
 } from '@server/utils/typeHelpers';
 
+
+export type CombinedSearchResponse = {
+  page: number;
+  total_pages: number;
+  total_results: number;
+  results: (
+    | MbArtistResult
+    | MbAlbumResult
+    | TmdbMovieResult
+    | TmdbTvResult
+    | TmdbPersonResult
+    | TmdbCollectionResult
+  )[];
+};
 interface SearchProvider {
   pattern: RegExp;
   search: ({
@@ -31,7 +54,7 @@ interface SearchProvider {
     id: string;
     language?: string;
     query?: string;
-  }) => Promise<TmdbSearchMultiResponse>;
+  }) => Promise<CombinedSearchResponse>;
 }
 
 const searchProviders: SearchProvider[] = [];
@@ -213,4 +236,53 @@ searchProviders.push({
       results,
     };
   },
+});
+
+searchProviders.push({
+  pattern: new RegExp(/(?<=musicbrainz:)/),
+  search: async ({ query }) => {
+    const musicbrainz = new MusicBrainz();
+
+    try {
+      // Get results from MusicBrainz API
+      const response = await musicbrainz.searchMulti({
+        query: query || ''
+      });
+
+      // Convert response to match CombinedSearchResponse format
+      const results: CombinedSearchResponse['results'] = response.map(result => {
+        if (result.artist) {
+          return {
+            ...result.artist,
+            media_type: 'artist',
+          } as MbArtistResult;
+        }
+
+        if (result.album) {
+          return {
+            ...result.album,
+            media_type: 'album',
+          } as MbAlbumResult;
+        }
+
+        throw new Error('Invalid search result type');
+      });
+
+      return {
+        page: 1, // MusicBrainz doesn't use pagination in the same way
+        total_pages: 1,
+        total_results: results.length,
+        results
+      };
+
+    } catch (e) {
+      // Return empty results on error
+      return {
+        page: 1,
+        total_pages: 1,
+        total_results: 0,
+        results: []
+      };
+    }
+  }
 });

@@ -5,7 +5,6 @@ import ConfirmButton from '@app/components/Common/ConfirmButton';
 import RequestModal from '@app/components/RequestModal';
 import StatusBadge from '@app/components/StatusBadge';
 import useDeepLinks from '@app/hooks/useDeepLinks';
-import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import defineMessages from '@app/utils/defineMessages';
@@ -22,6 +21,7 @@ import type { MediaRequest } from '@server/entity/MediaRequest';
 import type { NonFunctionProperties } from '@server/interfaces/api/common';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
+import type { MusicDetails } from '@server/models/Music';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useInView } from 'react-intersection-observer';
@@ -42,13 +42,19 @@ const messages = defineMessages('components.RequestList.RequestItem', {
   cancelRequest: 'Cancel Request',
   tmdbid: 'TMDB ID',
   tvdbid: 'TheTVDB ID',
+  mbid: 'MusicBrainz ID',
   unknowntitle: 'Unknown Title',
   removearr: 'Remove from {arr}',
   profileName: 'Profile',
 });
 
-const isMovie = (movie: MovieDetails | TvDetails): movie is MovieDetails => {
-  return (movie as MovieDetails).title !== undefined;
+const isMovie = (media: MovieDetails | TvDetails | MusicDetails): media is MovieDetails => {
+  return (media as MovieDetails).title !== undefined &&
+         !(media as MusicDetails).artist;
+};
+
+const isMusic = (media: MovieDetails | TvDetails | MusicDetails): media is MusicDetails => {
+  return (media as MusicDetails).artistId !== undefined;
 };
 
 interface RequestItemErrorProps {
@@ -88,28 +94,42 @@ const RequestItemError = ({
                 requestData?.type
                   ? requestData?.type === 'movie'
                     ? globalMessages.movie
-                    : globalMessages.tvshow
+                    : requestData?.type === 'tv'
+                    ? globalMessages.tvshow
+                    : globalMessages.music
                   : globalMessages.request
               ),
             })}
           </div>
           {requestData && hasPermission(Permission.MANAGE_REQUESTS) && (
             <>
-              <div className="card-field">
-                <span className="card-field-name">
-                  {intl.formatMessage(messages.tmdbid)}
-                </span>
-                <span className="flex truncate text-sm text-gray-300">
-                  {requestData.media.tmdbId}
-                </span>
-              </div>
-              {requestData.media.tvdbId && (
+              {requestData.type !== 'music' && (
+                <div className="card-field">
+                  <span className="card-field-name">
+                    {intl.formatMessage(messages.tmdbid)}
+                  </span>
+                  <span className="flex truncate text-sm text-gray-300">
+                    {requestData.media.tmdbId}
+                  </span>
+                </div>
+              )}
+              {requestData.media.tvdbId && requestData.type === 'tv' && (
                 <div className="card-field">
                   <span className="card-field-name">
                     {intl.formatMessage(messages.tvdbid)}
                   </span>
                   <span className="flex truncate text-sm text-gray-300">
-                    {requestData?.media.tvdbId}
+                    {requestData.media.tvdbId}
+                  </span>
+                </div>
+              )}
+              {requestData.media.mbId && requestData.type === 'music' && (
+                <div className="card-field">
+                  <span className="card-field-name">
+                    {intl.formatMessage(messages.mbid)}
+                  </span>
+                  <span className="flex truncate text-sm text-gray-300">
+                    {requestData.media.mbId}
                   </span>
                 </div>
               )}
@@ -295,7 +315,6 @@ interface RequestItemProps {
 }
 
 const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
-  const settings = useSettings();
   const { ref, inView } = useInView({
     triggerOnce: true,
   });
@@ -303,12 +322,13 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
   const intl = useIntl();
   const { user, hasPermission } = useUser();
   const [showEditModal, setShowEditModal] = useState(false);
-  const url =
-    request.type === 'movie'
-      ? `/api/v1/movie/${request.media.tmdbId}`
-      : `/api/v1/tv/${request.media.tmdbId}`;
-  const { data: title, error } = useSWR<MovieDetails | TvDetails>(
-    inView ? url : null
+  const url = request.type === 'music'
+    ? `/api/v1/music/${request.media.mbId}`
+    : request.type === 'movie'
+    ? `/api/v1/movie/${request.media.tmdbId}`
+    : `/api/v1/tv/${request.media.tmdbId}`;
+    const { data: title, error } = useSWR<MovieDetails | TvDetails | MusicDetails>(
+      inView ? url : null
   );
   const { data: requestData, mutate: revalidate } = useSWR<
     NonFunctionProperties<MediaRequest>
@@ -409,6 +429,7 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
       <RequestModal
         show={showEditModal}
         tmdbId={request.media.tmdbId}
+        mbId={request.media.mbId}
         type={request.type}
         is4k={request.is4k}
         editRequest={request}
@@ -419,11 +440,13 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
         }}
       />
       <div className="relative flex w-full flex-col justify-between overflow-hidden rounded-xl bg-gray-800 py-2 text-gray-400 shadow-md ring-1 ring-gray-700 xl:h-28 xl:flex-row">
-        {title.backdropPath && (
+         {title && (
           <div className="absolute inset-0 z-0 w-full bg-cover bg-center xl:w-2/3">
             <CachedImage
-              type="tmdb"
-              src={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${title.backdropPath}`}
+              type={isMusic(title) ? 'music' : 'tmdb'}
+              src={isMusic(title)
+                ? title.artist.images?.find(img => img.CoverType === 'Fanart')?.Url || title.artist.images?.find(img => img.CoverType === 'Poster')?.Url || title.images?.find(img => img.CoverType.toLowerCase() === 'cover')?.Url || ''
+                : `https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${title.backdropPath ?? ''}`}
               alt=""
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               fill
@@ -441,53 +464,63 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
           <div className="relative z-10 flex w-full items-center overflow-hidden pl-4 pr-4 sm:pr-0 xl:w-7/12 2xl:w-2/3">
             <Link
               href={
-                requestData.type === 'movie'
+                requestData.type === 'music'
+                  ? `/music/${requestData.media.mbId}`
+                  : requestData.type === 'movie'
                   ? `/movie/${requestData.media.tmdbId}`
                   : `/tv/${requestData.media.tmdbId}`
               }
               className="relative h-auto w-12 flex-shrink-0 scale-100 transform-gpu overflow-hidden rounded-md transition duration-300 hover:scale-105"
             >
-              <CachedImage
-                type="tmdb"
-                src={
-                  title.posterPath
-                    ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${title.posterPath}`
-                    : '/images/overseerr_poster_not_found.png'
-                }
-                alt=""
-                sizes="100vw"
-                style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
-                width={600}
-                height={900}
-              />
+            <CachedImage
+              type={isMusic(title) ? 'music' : 'tmdb'}
+              src={
+                title
+                  ? isMusic(title)
+                    ? title.images?.find(image => image.CoverType === 'Cover')?.Url ?? '/images/overseerr_poster_not_found.png'
+                    : title.posterPath
+                      ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${title.posterPath}`
+                      : '/images/overseerr_poster_not_found.png'
+                  : '/images/overseerr_poster_not_found.png'
+              }
+              alt=""
+              sizes="100vw"
+              style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
+              width={600}
+              height={isMusic(title) ? 600 : 900}
+            />
             </Link>
             <div className="flex flex-col justify-center overflow-hidden pl-2 xl:pl-4">
               <div className="pt-0.5 text-xs font-medium text-white sm:pt-1">
-                {(isMovie(title)
+                {(isMusic(title)
+                  ? title.releaseDate
+                  : isMovie(title)
                   ? title.releaseDate
                   : title.firstAirDate
                 )?.slice(0, 4)}
               </div>
               <Link
                 href={
-                  requestData.type === 'movie'
+                  requestData.type === 'music'
+                    ? `/music/${requestData.media.mbId}`
+                    : requestData.type === 'movie'
                     ? `/movie/${requestData.media.tmdbId}`
                     : `/tv/${requestData.media.tmdbId}`
                 }
                 className="mr-2 min-w-0 truncate text-lg font-bold text-white hover:underline xl:text-xl"
               >
-                {isMovie(title) ? title.title : title.name}
+                {title && (isMusic(title)
+                  ? `${title.artist.artistName} - ${title.title}`
+                  : isMovie(title)
+                  ? title.title
+                  : title.name)}
               </Link>
-              {!isMovie(title) && request.seasons.length > 0 && (
+              {!isMovie(title) && !isMusic(title) && request.seasons.length > 0 && (
                 <div className="card-field">
                   <span className="card-field-name">
                     {intl.formatMessage(messages.seasons, {
                       seasonCount:
-                        (settings.currentSettings.enableSpecialEpisodes
-                          ? title.seasons.length
-                          : title.seasons.filter(
-                              (season) => season.seasonNumber !== 0
-                            ).length) === request.seasons.length
+                        title.seasons.length === request.seasons.length
                           ? 0
                           : request.seasons.length,
                     })}
@@ -533,7 +566,11 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                       requestData.is4k ? 'downloadStatus4k' : 'downloadStatus'
                     ]
                   }
-                  title={isMovie(title) ? title.title : title.name}
+                  title={isMovie(title)
+                    ? title.title
+                    : isMusic(title)
+                    ? title.title
+                    : title.name}
                   inProgress={
                     (
                       requestData.media[
@@ -710,7 +747,11 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                   <TrashIcon />
                   <span>
                     {intl.formatMessage(messages.removearr, {
-                      arr: request.type === 'movie' ? 'Radarr' : 'Sonarr',
+                      arr: request.type === 'music'
+                        ? 'Lidarr'
+                        : request.type === 'movie'
+                        ? 'Radarr'
+                        : 'Sonarr',
                     })}
                   </span>
                 </ConfirmButton>

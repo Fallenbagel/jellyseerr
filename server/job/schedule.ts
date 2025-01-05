@@ -10,6 +10,7 @@ import {
 import { plexFullScanner, plexRecentScanner } from '@server/lib/scanners/plex';
 import { radarrScanner } from '@server/lib/scanners/radarr';
 import { sonarrScanner } from '@server/lib/scanners/sonarr';
+import { lidarrScanner } from '@server/lib/scanners/lidarr';
 import type { JobId } from '@server/lib/settings';
 import { getSettings } from '@server/lib/settings';
 import watchlistSync from '@server/lib/watchlistsync';
@@ -155,6 +156,21 @@ export const startJobs = (): void => {
     }),
     running: () => sonarrScanner.status().running,
     cancelFn: () => sonarrScanner.cancel(),
+  });
+
+  // Run full lidarr scan every 24 hours
+  scheduledJobs.push({
+    id: 'lidarr-scan',
+    name: 'Lidarr Scan',
+    type: 'process',
+    interval: 'hours',
+    cronSchedule: jobs['lidarr-scan'].schedule,
+    job: schedule.scheduleJob(jobs['lidarr-scan'].schedule, () => {
+      logger.info('Starting scheduled job: lidarr Scan', { label: 'Jobs' });
+      lidarrScanner.run();
+    }),
+    running: () => lidarrScanner.status().running,
+    cancelFn: () => lidarrScanner.cancel(),
   });
 
   // Checks if media is still available in plex/sonarr/radarr libs

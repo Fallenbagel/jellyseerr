@@ -128,7 +128,7 @@ class RottenTomatoes extends ExternalAPI {
         movie = contentResults.hits.find((movie) => movie.title === name);
       }
 
-      if (!movie?.rottenTomatoes) {
+      if (!movie) {
         return null;
       }
 

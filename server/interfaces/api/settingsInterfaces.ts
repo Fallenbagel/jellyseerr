@@ -37,7 +37,6 @@ export interface PublicSettingsResponse {
   originalLanguage: string;
   mediaServerType: number;
   partialRequestsEnabled: boolean;
-  enableSpecialEpisodes: boolean;
   cacheImages: boolean;
   vapidPublic: string;
   enablePushRegistration: boolean;
@@ -60,7 +59,13 @@ export interface CacheItem {
 
 export interface CacheResponse {
   apiCaches: CacheItem[];
-  imageCache: Record<'tmdb' | 'avatar', { size: number; imageCount: number }>;
+  imageCache: Record<
+    'tmdb' | 'avatar' | 'caa' | 'lidarr' | 'fanart',
+    {
+      size: number;
+      imageCount: number;
+    }
+  >;
 }
 
 export interface StatusResponse {

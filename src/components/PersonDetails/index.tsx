@@ -1,3 +1,4 @@
+import Button from '@app/components/Common/Button';
 import Ellipsis from '@app/assets/ellipsis.svg';
 import CachedImage from '@app/components/Common/CachedImage';
 import ImageFader from '@app/components/Common/ImageFader';
@@ -9,12 +10,39 @@ import Error from '@app/pages/_error';
 import defineMessages from '@app/utils/defineMessages';
 import type { PersonCombinedCreditsResponse } from '@server/interfaces/api/personInterfaces';
 import type { PersonDetails as PersonDetailsType } from '@server/models/Person';
+import type { ArtistDetailsType } from '@server/models/Artist';
 import { groupBy } from 'lodash';
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import TruncateMarkup from 'react-truncate-markup';
 import useSWR from 'swr';
+import useSWRInfinite from 'swr/infinite';
+
+interface Album {
+  id: string;
+  title: string;
+  type: string;
+  releasedate: string;
+  images: {
+    CoverType: string;
+    Url: string;
+  }[];
+  mediaInfo?: {
+    status?: number;
+    downloadStatus?: unknown[];
+    watchlists?: unknown[];
+  };
+}
+
+interface DiscographyResponse {
+  page: number;
+  pageInfo: {
+    total: number;
+    totalPages: number;
+  };
+  results: Album[];
+}
 
 const messages = defineMessages('components.PersonDetails', {
   birthdate: 'Born {birthdate}',
@@ -23,6 +51,11 @@ const messages = defineMessages('components.PersonDetails', {
   appearsin: 'Appearances',
   crewmember: 'Crew',
   ascharacter: 'as {character}',
+  albums: 'Albums',
+  singles: 'Singles',
+  eps: 'EPs',
+  otherReleases: 'Other Releases',
+  loadmore: 'Load More',
 });
 
 const PersonDetails = () => {
@@ -37,6 +70,58 @@ const PersonDetails = () => {
     useSWR<PersonCombinedCreditsResponse>(
       `/api/v1/person/${router.query.personId}/combined_credits`
     );
+
+  const {
+    data: albumData,
+    size: albumSize,
+    setSize: setAlbumSize,
+    isValidating: isLoadingAlbums,
+  } = useSWRInfinite<DiscographyResponse>(
+    (index) =>
+      data?.mbArtistId
+        ? `/api/v1/person/${router.query.personId}/discography?page=${index + 1}&type=Album&artistId=${data.mbArtistId}`
+        : null,
+    { revalidateFirstPage: false }
+  );
+
+  const {
+    data: singlesData,
+    size: singlesSize,
+    setSize: setSinglesSize,
+    isValidating: isLoadingSingles,
+  } = useSWRInfinite<DiscographyResponse>(
+    (index) =>
+      data?.mbArtistId
+        ? `/api/v1/person/${router.query.personId}/discography?page=${index + 1}&type=Single&artistId=${data.mbArtistId}`
+        : null,
+    { revalidateFirstPage: false }
+  );
+
+  const {
+    data: epsData,
+    size: epsSize,
+    setSize: setEpsSize,
+    isValidating: isLoadingEps,
+  } = useSWRInfinite<DiscographyResponse>(
+    (index) =>
+      data?.mbArtistId
+        ? `/api/v1/person/${router.query.personId}/discography?page=${index + 1}&type=EP&artistId=${data.mbArtistId}`
+        : null,
+    { revalidateFirstPage: false }
+  );
+
+  const {
+    data: otherData,
+    size: otherSize,
+    setSize: setOtherSize,
+    isValidating: isLoadingOther,
+  } = useSWRInfinite<DiscographyResponse>(
+    (index) =>
+      data?.mbArtistId
+        ? `/api/v1/person/${router.query.personId}/discography?page=${index + 1}&type=Other&artistId=${data.mbArtistId}`
+        : null,
+    { revalidateFirstPage: false }
+  );
 
   const sortedCast = useMemo(() => {
     const grouped = groupBy(combinedCredits?.cast ?? [], 'id');
@@ -202,6 +287,81 @@ const PersonDetails = () => {
     </>
   );
 
+  const albumsList = albumData ? albumData.flatMap((page) => page.results) : [];
+  const isReachingEndAlbums = albumData?.[0]?.results.length === 0 ||
+    (albumData && albumData[albumData.length - 1]?.results.length < 20);
+
+  const singlesList = singlesData ? singlesData.flatMap((page) => page.results) : [];
+  const isReachingEndSingles = singlesData?.[0]?.results.length === 0 ||
+    (singlesData && singlesData[singlesData.length - 1]?.results.length < 20);
+
+  const epsList = epsData ? epsData.flatMap((page) => page.results) : [];
+  const isReachingEndEps = epsData?.[0]?.results.length === 0 ||
+    (epsData && epsData[epsData.length - 1]?.results.length < 20);
+
+  const otherList = otherData ? otherData.flatMap((page) => page.results) : [];
+  const isReachingEndOther = otherData?.[0]?.results.length === 0 ||
+    (otherData && otherData[otherData.length - 1]?.results.length < 20);
+
+  const renderAlbumSection = (
+    title: string,
+    albums: Album[],
+    isLoading: boolean,
+    isReachingEnd: boolean,
+    onLoadMore: () => void
+  ) => {
+    if (!albums?.length && !isLoading) return null;
+
+    return (
+      <>
+        <div className="slider-header">
+          <div className="slider-title">
+            <span>{title}</span>
+          </div>
+        </div>
+        <ul className="cards-vertical">
+          {albums?.map((album) => (
+            <li key={`album-${album.id}`}>
+              <TitleCard
+                id={album.id}
+                isAddedToWatchlist={album.mediaInfo?.watchlists?.length ?? 0}
+                title={album.title}
+                image={album.images?.[0]?.Url}
+                year={album.releasedate}
+                type={album.type}
+                mediaType="album"
+                status={album.mediaInfo?.status}
+                inProgress={(album.mediaInfo?.downloadStatus ?? []).length > 0}
+                canExpand
+              />
+            </li>
+          ))}
+          {isLoading &&
+            [...Array(20)].map((_, index) => (
+              <li key={`placeholder-${index}`}>
+                <TitleCard.Placeholder canExpand />
+              </li>
+            ))}
+        </ul>
+        {!isReachingEnd && (
+          <div className="mt-4 flex justify-center">
+            <Button
+              onClick={onLoadMore}
+              disabled={isLoading}
+              className="w-32 h-9 flex items-center justify-center"
+            >
+              {isLoading ? (
+                <LoadingSpinner className="w-5 h-5" />
+              ) : (
+                intl.formatMessage(messages.loadmore)
+              )}
+            </Button>
+          </div>
+        )}
+      </>
+    );
+  };
+
   return (
     <>
       <PageTitle title={data.name} />
@@ -274,6 +434,38 @@ const PersonDetails = () => {
           )}
         </div>
       </div>
+      {data.mbArtistId && (
+        <>
+          {renderAlbumSection(
+            intl.formatMessage(messages.albums),
+            albumsList,
+            isLoadingAlbums,
+            isReachingEndAlbums,
+            () => setAlbumSize(albumSize + 1)
+          )}
+          {renderAlbumSection(
+            intl.formatMessage(messages.singles),
+            singlesList,
+            isLoadingSingles,
+            isReachingEndSingles,
+            () => setSinglesSize(singlesSize + 1)
+          )}
+          {renderAlbumSection(
+            intl.formatMessage(messages.eps),
+            epsList,
+            isLoadingEps,
+            isReachingEndEps,
+            () => setEpsSize(epsSize + 1)
+          )}
+          {renderAlbumSection(
+            intl.formatMessage(messages.otherReleases),
+            otherList,
+            isLoadingOther,
+            isReachingEndOther,
+            () => setOtherSize(otherSize + 1)
+          )}
+        </>
+      )}
       {data.knownForDepartment === 'Acting' ? [cast, crew] : [crew, cast]}
       {isLoading && <LoadingSpinner />}
     </>
