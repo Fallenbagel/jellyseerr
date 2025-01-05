@@ -1286,7 +1286,7 @@
   "components.Settings.timeout": "Temps écoulé",
   "components.Setup.configuremediaserver": "Configurer le serveur multimédia",
   "components.TvDetails.rtaudiencescore": "Score de l'audience sur Rotten Tomatoes",
-  "components.UserProfile.UserSettings.UserGeneralSettings.mediaServerUser": "Utilisateur pour {mediaServerName}",
+  "components.UserProfile.UserSettings.UserGeneralSettings.mediaServerUser": "Utilisateur {mediaServerName}",
   "components.Setup.signinWithJellyfin": "Renseigner vos informations d'identification de Jellyfin",
   "components.UserList.mediaServerUser": "Utilisateur de {mediaServerName}",
   "components.TvDetails.episodeCount": "{episodeCount, plural, one {# Épisode} other {# Épisodes}}",
