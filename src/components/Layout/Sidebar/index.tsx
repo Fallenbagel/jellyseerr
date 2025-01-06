@@ -117,6 +117,33 @@ const SidebarLinks: SidebarLinkProps[] = [
   },
 ];
 
+const PendingRequestsBadge = ({
+  requests,
+  hasPermission,
+}: {
+  requests: RequestCountResponse | undefined;
+  hasPermission: (
+    permission: Permission | Permission[],
+    options?: { type: 'and' | 'or' }
+  ) => boolean;
+}) => {
+  if (
+    !hasPermission([Permission.MANAGE_REQUESTS, Permission.ADMIN], {
+      type: 'or',
+    }) ||
+    !requests ||
+    requests.pending === 0
+  ) {
+    return null;
+  }
+
+  return (
+    <span className="ml-3">
+      <Badge badgeType="default">{requests.pending}</Badge>
+    </span>
+  );
+};
+
 const Sidebar = ({ open, setClosed }: SidebarProps) => {
   const navRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -210,15 +237,12 @@ const Sidebar = ({ open, setClosed }: SidebarProps) => {
                             {intl.formatMessage(
                               menuMessages[sidebarLink.messagesKey]
                             )}
-                            {sidebarLink.messagesKey === 'requests' &&
-                              requests &&
-                              requests.pending > 0 && (
-                                <span className="ml-3">
-                                  <Badge badgeType="default">
-                                    {requests.pending}
-                                  </Badge>
-                                </span>
-                              )}
+                            {sidebarLink.messagesKey === 'requests' && (
+                              <PendingRequestsBadge
+                                requests={requests}
+                                hasPermission={hasPermission}
+                              />
+                            )}
                           </Link>
                         );
                       })}
@@ -280,15 +304,12 @@ const Sidebar = ({ open, setClosed }: SidebarProps) => {
                       {intl.formatMessage(
                         menuMessages[sidebarLink.messagesKey]
                       )}
-                      {sidebarLink.messagesKey === 'requests' &&
-                        requests &&
-                        requests.pending > 0 && (
-                          <span className="ml-3">
-                            <Badge badgeType="default">
-                              {requests.pending}
-                            </Badge>
-                          </span>
-                        )}
+                      {sidebarLink.messagesKey === 'requests' && (
+                        <PendingRequestsBadge
+                          requests={requests}
+                          hasPermission={hasPermission}
+                        />
+                      )}
                     </Link>
                   );
                 })}
