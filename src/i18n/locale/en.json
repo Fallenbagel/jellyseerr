@@ -246,6 +246,7 @@
   "components.Login.initialsigningin": "Connecting…",
   "components.Login.invalidurlerror": "Unable to connect to {mediaServerName} server.",
   "components.Login.loginerror": "Something went wrong while trying to sign in.",
+  "components.Login.noadminerror": "No admin user found on the server.",
   "components.Login.password": "Password",
   "components.Login.port": "Port",
   "components.Login.save": "Add",
