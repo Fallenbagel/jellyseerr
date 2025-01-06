@@ -1007,7 +1007,7 @@
   "components.Settings.SettingsJobsCache.editJobSchedule": "Modifier la tâche",
   "components.NotificationTypeSelector.userissuecreatedDescription": "Être averti(e) lorsque d’autres utilisateurs signalent des problèmes.",
   "components.PermissionEdit.manageissuesDescription": "Autorise à gérer les problèmes liés aux médias.",
-  "components.Settings.SettingsJobsCache.jobScheduleEditFailed": "Un problème est survenu lors de l'enregistrement de la tâche",
+  "components.Settings.SettingsJobsCache.jobScheduleEditFailed": "Un problème est survenu lors de l'enregistrement de la tâche.",
   "components.Settings.SettingsJobsCache.editJobScheduleSelectorMinutes": "Toutes les {jobScheduleMinutes, plural, one {minute} other {{jobScheduleMinutes} minutes}}",
   "components.UserProfile.UserSettings.UserNotificationSettings.pushbulletAccessToken": "Jeton d'accès",
   "components.NotificationTypeSelector.adminissuereopenedDescription": "Être averti(e) lorsqu'un problème est ré-ouvert par d'autres utilisateurs.",
@@ -1276,8 +1276,8 @@
   "components.Settings.Notifications.NotificationsPushover.deviceDefault": "Appareil par défaut",
   "components.Settings.Notifications.userEmailRequired": "E-mail utilisateur requis",
   "components.Settings.SettingsAbout.supportjellyseerr": "Soutenez Jellyseerr",
-  "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Analyse librairie complète Jellyfin",
-  "components.Settings.SettingsJobsCache.jellyfin-recently-added-scan": "Analyse Récemment Ajoutés Jellyfin",
+  "components.Settings.SettingsJobsCache.jellyfin-full-scan": "Scan complet des bibliothèques Jellyfin",
+  "components.Settings.SettingsJobsCache.jellyfin-recently-added-scan": "Scan des ajouts récents aux bibliothèques Jellyfin",
   "components.Settings.SonarrModal.animeSeriesType": "Type de série anime",
   "components.Settings.SonarrModal.seriesType": "Type de série",
   "components.Settings.jellyfinsettingsDescription": "Configurez les paramètres de votre serveur {mediaServerName}. {mediaServerName} analyse vos bibliothèques {mediaServerName} pour voir quel contenu est disponible.",
@@ -1351,5 +1351,12 @@
   "components.Blacklist.mediaTmdbId": "tmdb Id",
   "components.Blacklist.blacklistdate": "date",
   "components.Blacklist.blacklistedby": "{date} par {user}",
-  "components.Blacklist.mediaName": "Nom"
+  "components.Blacklist.mediaName": "Nom",
+  "component.BlacklistBlock.blacklistdate": "Date de mise en liste noire",
+  "component.BlacklistBlock.blacklistedby": "Mis en liste noire par",
+  "component.BlacklistModal.blacklisting": "Ajout en liste noire",
+  "components.Blacklist.blacklistNotFoundError": "<strong>{title}</strong> n'est pas en liste noire.",
+  "components.Blacklist.blacklistSettingsDescription": "Gérer le contenu en liste noire",
+  "components.Blacklist.blacklistsettings": "Paramètres de la liste noire",
+  "components.Layout.Sidebar.blacklist": "Liste noir"
 }
