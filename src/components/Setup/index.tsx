@@ -104,11 +104,17 @@ const Setup = () => {
     if (currentStep === 3) {
       const validateLibraries = async () => {
         try {
+          const endpointMap: Record<MediaServerType, string> = {
+            [MediaServerType.JELLYFIN]: '/api/v1/settings/jellyfin',
+            [MediaServerType.EMBY]: '/api/v1/settings/jellyfin',
+            [MediaServerType.PLEX]: '/api/v1/settings/plex',
+            [MediaServerType.NOT_CONFIGURED]: '',
+          };
+
           const endpoint =
-            settings.currentSettings.mediaServerType ===
-              MediaServerType.JELLYFIN || MediaServerType.EMBY
-              ? '/api/v1/settings/jellyfin'
-              : '/api/v1/settings/plex';
+            endpointMap[
+              settings.currentSettings.mediaServerType as MediaServerType
+            ];
 
           const res = await fetch(endpoint);
           if (!res.ok) throw new Error('Fetch failed');
