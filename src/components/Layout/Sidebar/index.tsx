@@ -150,7 +150,11 @@ const Sidebar = ({ open, setClosed }: SidebarProps) => {
   const intl = useIntl();
   const { hasPermission } = useUser();
   const { data: requests } = useSWR<RequestCountResponse>(
-    '/api/v1/request/count'
+    hasPermission([Permission.MANAGE_REQUESTS, Permission.ADMIN], {
+      type: 'or',
+    })
+      ? '/api/v1/request/count'
+      : null
   );
   useClickOutside(navRef, () => setClosed());
 
