@@ -926,7 +926,7 @@
   "components.Settings.trustProxyTip": "Pozwól Jellyseerr poprawnie rejestrować adresy IP klientów za serwerem proxy",
   "components.Settings.toastPlexConnectingSuccess": "Połączenie Plex nawiązane pomyślnie!",
   "components.Settings.toastSettingsSuccess": "Ustawienia zostały zapisane pomyślnie!",
-  "components.Settings.serviceSettingsDescription": "Skonfiguruj poniżej swój serwer(y) {serverType}. Możesz podłączyć wiele serwerów {serverType}, ale tylko dwa z nich mogą być oznaczone jako domyślne (jeden nie-4K i jeden 4K). Administratorzy mogą zmienić serwer używany do przetwarzania nowych żądań przed zatwierdzeniem.",
+  "components.Settings.videoServiceSettingsDescription": "Skonfiguruj poniżej swój serwer(y) {serverType}. Możesz podłączyć wiele serwerów {serverType}, ale tylko dwa z nich mogą być oznaczone jako domyślne (jeden nie-4K i jeden 4K). Administratorzy mogą zmienić serwer używany do przetwarzania nowych żądań przed zatwierdzeniem.",
   "components.Settings.toastApiKeyFailure": "Coś poszło nie tak podczas generowania nowego klucza API.",
   "components.Settings.toastPlexRefreshSuccess": "Lista serwerów Plex została pobrana pomyślnie!",
   "components.Settings.trustProxy": "Włącz obsługę proxy",

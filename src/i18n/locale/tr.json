@@ -987,7 +987,7 @@
   "components.Settings.manualscanDescription": "Normalde rutin olarak bu işlem 24 saatte bir yapılır. Overseer Plex sunucunuzun en son eklenenlerini sıklıkla kontrol eder. Eğer ki bu Plex sunucunuzu ilk defa düzenleyişiniz ise tek seferlik elle kütüphane taraması yapmanız önerilir!",
   "components.Settings.manualscanJellyfin": "Elle Kütüphaneleri Tara",
   "components.Settings.menuJobs": "İşlemler & Önbellek",
-  "components.Settings.serviceSettingsDescription": "{serverType} sunucu(lar)ınızı aşağıdan düzenleyin. Birden fazla {serverType} sunucusuna bağlanabilirsiniz, ancak sadece iki tanesi varsayılan olarak tanımlanabilir (bir adet 4K-dışı ve bir adet 4K). Yöneticiler sunucuları her daim mutlak bir biçimde yönetebilirler.",
+  "components.Settings.videoServiceSettingsDescription": "{serverType} sunucu(lar)ınızı aşağıdan düzenleyin. Birden fazla {serverType} sunucusuna bağlanabilirsiniz, ancak sadece iki tanesi varsayılan olarak tanımlanabilir (bir adet 4K-dışı ve bir adet 4K). Yöneticiler sunucuları her daim mutlak bir biçimde yönetebilirler.",
   "components.Settings.services": "Servisler",
   "components.Settings.settingUpPlexDescription": "Plex'İ kurmak için gerekli yerleri elle doldurabilir ya da <RegisterPlexTVLink>plex.tv</RegisterPlexTVLink>'den alınmış bir sunucu seöebilirsiniz. Açılır menünün sağında ki tuşa basarak kullanılabilir sunucuların listesini çekebilirsiniz.",
   "components.Settings.ssl": "SSL",
