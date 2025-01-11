@@ -16,6 +16,10 @@ interface ExternalAPIOptions {
   rateLimit?: RateLimitOptions;
 }
 
+interface CustomRequestConfig extends RequestInit {
+  params?: Record<string, unknown>;
+}
+
 class ExternalAPI {
   protected fetch: typeof fetch;
   protected params: Record<string, string>;
@@ -67,12 +71,11 @@ class ExternalAPI {
     endpoint: string,
     params?: Record<string, string>,
     ttl?: number,
-    config?: RequestInit
+    config?: CustomRequestConfig
   ): Promise<T> {
-    const cacheKey = this.serializeCacheKey(endpoint, {
-      ...this.params,
-      ...params,
-    });
+    const headers = { ...this.defaultHeaders, ...config?.headers };
+    const cacheKey = this.serializeCacheKey(endpoint, config?.params, headers);
+
     const cachedItem = this.cache?.get<T>(cacheKey);
     if (cachedItem) {
       return cachedItem;
@@ -325,13 +328,15 @@ class ExternalAPI {
 
   private serializeCacheKey(
     endpoint: string,
-    params?: Record<string, unknown>
+    params?: Record<string, unknown>,
+    headers?: Record<string, unknown>
   ) {
-    if (!params) {
-      return `${this.baseUrl}${endpoint}`;
+    const key = `${this.baseUrl}${endpoint}`;
+    if (!params && !headers) {
+      return key;
     }
 
-    return `${this.baseUrl}${endpoint}${JSON.stringify(params)}`;
+    return `${key}${JSON.stringify({ params, headers })}`;
   }
 
   private async getDataFromResponse(response: Response) {
