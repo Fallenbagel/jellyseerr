@@ -16,10 +16,6 @@ interface ExternalAPIOptions {
   rateLimit?: RateLimitOptions;
 }
 
-interface CustomRequestConfig extends RequestInit {
-  params?: Record<string, unknown>;
-}
-
 class ExternalAPI {
   protected fetch: typeof fetch;
   protected params: Record<string, string>;
@@ -71,10 +67,14 @@ class ExternalAPI {
     endpoint: string,
     params?: Record<string, string>,
     ttl?: number,
-    config?: CustomRequestConfig
+    config?: RequestInit
   ): Promise<T> {
     const headers = { ...this.defaultHeaders, ...config?.headers };
-    const cacheKey = this.serializeCacheKey(endpoint, config?.params, headers);
+    const cacheKey = this.serializeCacheKey(
+      endpoint,
+      { ...this.params, ...params },
+      headers
+    );
 
     const cachedItem = this.cache?.get<T>(cacheKey);
     if (cachedItem) {
@@ -114,10 +114,13 @@ class ExternalAPI {
     ttl?: number,
     config?: RequestInit
   ): Promise<T> {
-    const cacheKey = this.serializeCacheKey(endpoint, {
-      config: { ...this.params, ...params },
-      data,
-    });
+    const headers = { ...this.defaultHeaders, ...config?.headers };
+    const cacheKey = this.serializeCacheKey(
+      endpoint,
+      { ...this.params, ...params },
+      headers
+    );
+
     const cachedItem = this.cache?.get<T>(cacheKey);
     if (cachedItem) {
       return cachedItem;
@@ -158,10 +161,13 @@ class ExternalAPI {
     ttl?: number,
     config?: RequestInit
   ): Promise<T> {
-    const cacheKey = this.serializeCacheKey(endpoint, {
-      config: { ...this.params, ...params },
-      data,
-    });
+    const headers = { ...this.defaultHeaders, ...config?.headers };
+    const cacheKey = this.serializeCacheKey(
+      endpoint,
+      { ...this.params, ...params },
+      headers
+    );
+
     const cachedItem = this.cache?.get<T>(cacheKey);
     if (cachedItem) {
       return cachedItem;
@@ -230,10 +236,13 @@ class ExternalAPI {
     config?: RequestInit,
     overwriteBaseUrl?: string
   ): Promise<T> {
-    const cacheKey = this.serializeCacheKey(endpoint, {
-      ...this.params,
-      ...params,
-    });
+    const headers = { ...this.defaultHeaders, ...config?.headers };
+    const cacheKey = this.serializeCacheKey(
+      endpoint,
+      { ...this.params, ...params },
+      headers
+    );
+
     const cachedItem = this.cache?.get<T>(cacheKey);
 
     if (cachedItem) {
