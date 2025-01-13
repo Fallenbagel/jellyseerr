@@ -586,6 +586,7 @@ class Settings {
       hideAvailable: this.data.main.hideAvailable,
       localLogin: this.data.main.localLogin,
       mediaServerLogin: this.data.main.mediaServerLogin,
+      jellyfinExternalHost: this.data.jellyfin.externalHostname,
       jellyfinForgotPasswordUrl: this.data.jellyfin.jellyfinForgotPasswordUrl,
       movie4kEnabled: this.data.radarr.some(
         (radarr) => radarr.is4k && radarr.isDefault
