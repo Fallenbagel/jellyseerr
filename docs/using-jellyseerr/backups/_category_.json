@@ -1,0 +1,9 @@
+{
+  "label": "Backups",
+  "position": 1,
+  "link": {
+    "type": "generated-index",
+    "title": "Backups",
+    "description": "Understand which data you should back up"
+  }
+}
