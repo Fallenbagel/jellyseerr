@@ -1,4 +1,5 @@
 import { Field } from 'formik';
+import { twMerge } from 'tailwind-merge';
 
 interface LabeledCheckboxProps {
   id: string;
@@ -19,7 +20,7 @@ const LabeledCheckbox: React.FC<LabeledCheckboxProps> = ({
 }) => {
   return (
     <>
-      <div className={`relative flex items-start ${className}`}>
+      <div className={twMerge('relative flex items-start', className)}>
         <div className="flex h-6 items-center">
           <Field type="checkbox" id={id} name={id} onChange={onChange} />
         </div>
