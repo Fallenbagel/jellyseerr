@@ -1321,7 +1321,7 @@
   "components.Settings.jellyfinSettingsFailure": "Beim Speichern der Einstellungen von {mediaServerName} ist ein Fehler aufgetreten.",
   "components.Settings.manualscanDescriptionJellyfin": "Normalerweise wird dieser Vorgang nur einmal alle 24 Stunden durchgeführt. Jellyseerr wird die kürzlich hinzugefügten Bibliotheken deines {mediaServerName} Servers aggressiver überprüfen. Wenn dies das erste Mal ist, dass du Jellyseerr konfigurierst, wird ein einmaliger vollständiger manueller Bibliotheks-Scan empfohlen!",
   "components.Settings.save": "Änderungen speichern",
-  "components.Settings.Notifications.userEmailRequired": "Benutzer-E-Mai",
+  "components.Settings.Notifications.userEmailRequired": "Benutzer-E-Mail",
   "components.Settings.Notifications.NotificationsPushover.sound": "Benachrichtigungston",
   "components.Settings.SonarrModal.seriesType": "TV-Serie Typ",
   "components.Settings.jellyfinlibrariesDescription": "Die Bibliotheken {mediaServerName} werden nach Titeln durchsucht. Klicke auf die Schaltfläche unten, wenn keine Bibliotheken aufgelistet sind.",
