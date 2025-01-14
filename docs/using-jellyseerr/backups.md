@@ -1,7 +1,7 @@
 ---
 title: Backups
 description: Understand which data you should back up.
-sidebar_position: 1
+sidebar_position: 4
 ---
 
 # Which data does Jellyseerr save and where?
