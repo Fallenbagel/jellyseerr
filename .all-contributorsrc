@@ -556,6 +556,33 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "GkhnGRBZ",
+      "name": "GkhnGRBZ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/127258824?v=4",
+      "profile": "https://github.com/GkhnGRBZ",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "benhaney",
+      "name": "Ben Haney",
+      "avatar_url": "https://avatars.githubusercontent.com/u/31331498?v=4",
+      "profile": "http://benhaney.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Wunderharke",
+      "name": "Wunderharke",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5105672?v=4",
+      "profile": "https://github.com/Wunderharke",
+      "contributions": [
+        "doc"
+      ]
     }
   ]
 }
