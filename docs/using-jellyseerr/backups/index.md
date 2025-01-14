@@ -54,6 +54,8 @@ Once the files are restored, start the Jellyseerr application.
 
 ### PostgreSQL
 
+Restore the PostgreSQL database and, optionally, the `settings.json` file. Then start the Jellyseerr application.
+
 After restoring the PostgreSQL database, the `config` folder structure should look like this:
 
 ```
@@ -64,4 +66,4 @@ After restoring the PostgreSQL database, the `config` folder structure should lo
 └── settings.json    <-- Optional (required if you want to avoid reconfiguring Jellyseerr)
 ```
 
-Restore the PostgreSQL database and, optionally, the `settings.json` file. Then start the Jellyseerr application.
+One the database and files are restored, start the Jellyseerr application.
