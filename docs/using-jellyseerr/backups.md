@@ -39,9 +39,9 @@ Install [postgresql-client](https://www.postgresql.org/download/) and run the fo
 :::info
 Depending on how your PostgreSQL instance is configured, you may need to add these options to the command below.
 
-  -d, --dbname=DBNAME      database to dump
-
   -h, --host=HOSTNAME      database server host or socket directory
+
+  -p, --port=PORT          database server port number
 :::
 
 ```bash
@@ -73,9 +73,9 @@ Install the [PostgreSQL client](https://www.postgresql.org/download/) and restor
 :::info
 Depending on how your PostgreSQL instance is configured, you may need to add these options to the command below.
 
-  -d, --dbname=DBNAME      database to dump
-
   -h, --host=HOSTNAME      database server host or socket directory
+
+  -p, --port=PORT          database server port number
 :::
 
 ```bash
