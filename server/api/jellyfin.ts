@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import ExternalAPI from '@server/api/externalapi';
 import { ApiErrorCode } from '@server/constants/error';
+import { MediaServerType } from '@server/constants/server';
 import availabilitySync from '@server/lib/availabilitySync';
+import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { ApiError } from '@server/types/error';
 import { getAppVersion } from '@server/utils/appVersion';
@@ -103,12 +105,17 @@ class JellyfinAPI extends ExternalAPI {
       authHeaderVal = `MediaBrowser Client="Jellyseerr", Device="Jellyseerr", DeviceId="${deviceId}", Version="${getAppVersion()}"`;
     }
 
+    const settings = getSettings();
+
     super(
       jellyfinHost,
       {},
       {
         headers: {
           'X-Emby-Authorization': authHeaderVal,
+          ...(settings.main.mediaServerType === MediaServerType.EMBY && {
+            'Accept-Encoding': 'gzip',
+          }),
         },
       }
     );
