@@ -60,7 +60,6 @@ After restoring your `db/db.sqlite3` file and, optionally, the `settings.json` f
 ├── db
 │   └── db.sqlite3
 ├── logs             <-- Optional
-├── lost+found       <-- Optional
 └── settings.json    <-- Optional (required if you want to avoid reconfiguring Jellyseerr)
 ```
 
@@ -88,7 +87,6 @@ Optionally, restore the `settings.json` file. The `config` folder structure shou
 .
 ├── cache            <-- Optional
 ├── logs             <-- Optional
-├── lost+found       <-- Optional
 └── settings.json    <-- Optional (required if you want to avoid reconfiguring Jellyseerr)
 ```
 
