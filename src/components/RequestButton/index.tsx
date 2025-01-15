@@ -43,10 +43,11 @@ interface ButtonOption {
 }
 
 interface RequestButtonProps {
-  mediaType: 'movie' | 'tv';
+  mediaType: 'movie' | 'tv' | 'music';
   onUpdate: () => void;
-  tmdbId: number;
+  tmdbId?: number;
   media?: Media;
+  mbId?: string;
   isShowComplete?: boolean;
   is4kShowComplete?: boolean;
 }
@@ -56,6 +57,7 @@ const RequestButton = ({
   onUpdate,
   media,
   mediaType,
+  mbId,
   isShowComplete = false,
   is4kShowComplete = false,
 }: RequestButtonProps) => {
@@ -67,12 +69,15 @@ const RequestButton = ({
   const [editRequest, setEditRequest] = useState(false);
 
   // All pending requests
-  const activeRequests = media?.requests.filter(
-    (request) => request.status === MediaRequestStatus.PENDING && !request.is4k
-  );
-  const active4kRequests = media?.requests.filter(
-    (request) => request.status === MediaRequestStatus.PENDING && request.is4k
-  );
+  const activeRequests =
+    media?.requests?.filter(
+      (request) =>
+        request.status === MediaRequestStatus.PENDING && !request.is4k
+    ) ?? [];
+  const active4kRequests =
+    media?.requests?.filter(
+      (request) => request.status === MediaRequestStatus.PENDING && request.is4k
+    ) ?? [];
 
   // Current user's pending request, or the first pending request
   const activeRequest = useMemo(() => {
@@ -278,6 +283,8 @@ const RequestButton = ({
         Permission.REQUEST,
         mediaType === 'movie'
           ? Permission.REQUEST_MOVIE
+          : mediaType === 'music'
+          ? Permission.REQUEST_MUSIC
           : Permission.REQUEST_TV,
       ],
       { type: 'or' }
@@ -371,6 +378,7 @@ const RequestButton = ({
     <>
       <RequestModal
         tmdbId={tmdbId}
+        mbId={mbId}
         show={showRequestModal}
         type={mediaType}
         editRequest={editRequest ? activeRequest : undefined}
@@ -380,18 +388,20 @@ const RequestButton = ({
         }}
         onCancel={() => setShowRequestModal(false)}
       />
-      <RequestModal
-        tmdbId={tmdbId}
-        show={showRequest4kModal}
-        type={mediaType}
-        editRequest={editRequest ? active4kRequest : undefined}
-        is4k
-        onComplete={() => {
-          onUpdate();
-          setShowRequest4kModal(false);
-        }}
-        onCancel={() => setShowRequest4kModal(false)}
-      />
+      {mediaType !== 'music' && (
+        <RequestModal
+          tmdbId={tmdbId}
+          show={showRequest4kModal}
+          type={mediaType}
+          editRequest={editRequest ? active4kRequest : undefined}
+          is4k
+          onComplete={() => {
+            onUpdate();
+            setShowRequest4kModal(false);
+          }}
+          onCancel={() => setShowRequest4kModal(false)}
+        />
+      )}
       <ButtonWithDropdown
         text={
           <>

@@ -53,6 +53,7 @@
     "csurf": "1.11.0",
     "date-fns": "2.29.3",
     "dayjs": "1.11.7",
+    "dompurify": "^3.2.3",
     "email-templates": "9.0.0",
     "email-validator": "2.0.4",
     "express": "4.18.2",
