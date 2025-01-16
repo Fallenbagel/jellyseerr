@@ -191,6 +191,12 @@ components:
         enableSpecialEpisodes:
           type: boolean
           example: false
+        forceIpv4First:
+          type: boolean
+          example: false
+        dnsServers:
+          type: string
+          example: '1.1.1.1'
     PlexLibrary:
       type: object
       properties:
@@ -7018,6 +7024,12 @@ paths:
       description: Updates an Override Rule from the request body.
       tags:
         - overriderule
+      parameters:
+        - in: path
+          name: ruleId
+          required: true
+          schema:
+            type: number
       responses:
         '200':
           description: 'Values were successfully updated'

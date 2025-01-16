@@ -386,14 +386,14 @@ export class MediaRequest {
       const tmdbMediaShow = tmdbMedia as Awaited<
         ReturnType<typeof tmdb.getTvShow>
       >;
-      const requestedSeasons =
+      let requestedSeasons =
         requestBody.seasons === 'all'
-          ? settings.main.enableSpecialEpisodes
-            ? tmdbMediaShow.seasons.map((season) => season.season_number)
-            : tmdbMediaShow.seasons
-                .map((season) => season.season_number)
-                .filter((sn) => sn > 0)
+          ? tmdbMediaShow.seasons.map((season) => season.season_number)
           : (requestBody.seasons as number[]);
+      if (!settings.main.enableSpecialEpisodes) {
+        requestedSeasons = requestedSeasons.filter((sn) => sn > 0);
+      }
+
       let existingSeasons: number[] = [];
 
       // We need to check existing requests on this title to make sure we don't double up on seasons that were
@@ -719,10 +719,15 @@ export class MediaRequest {
       // Do not update the status if the item is already partially available or available
       media[this.is4k ? 'status4k' : 'status'] !== MediaStatus.AVAILABLE &&
       media[this.is4k ? 'status4k' : 'status'] !==
-        MediaStatus.PARTIALLY_AVAILABLE
+        MediaStatus.PARTIALLY_AVAILABLE &&
+      media[this.is4k ? 'status4k' : 'status'] !== MediaStatus.PROCESSING
     ) {
-      media[this.is4k ? 'status4k' : 'status'] = MediaStatus.PROCESSING;
-      mediaRepository.save(media);
+      const statusField = this.is4k ? 'status4k' : 'status';
+
+      await mediaRepository.update(
+        { id: this.media.id },
+        { [statusField]: MediaStatus.PROCESSING }
+      );
     }
 
     if (
@@ -1005,6 +1010,14 @@ export class MediaRequest {
             );
 
             this.sendNotification(media, Notification.MEDIA_FAILED);
+          })
+          .finally(() => {
+            radarr.clearCache({
+              tmdbId: movie.id,
+              externalId: this.is4k
+                ? media.externalServiceId4k
+                : media.externalServiceId,
+            });
           });
         logger.info('Sent request to Radarr', {
           label: 'Media Request',
@@ -1262,19 +1275,23 @@ export class MediaRequest {
               throw new Error('Media data not found');
             }
 
-            media[this.is4k ? 'externalServiceId4k' : 'externalServiceId'] =
-              sonarrSeries.id;
-            media[this.is4k ? 'externalServiceSlug4k' : 'externalServiceSlug'] =
-              sonarrSeries.titleSlug;
-            media[this.is4k ? 'serviceId4k' : 'serviceId'] = sonarrSettings?.id;
+            const updateFields = {
+              [this.is4k ? 'externalServiceId4k' : 'externalServiceId']:
+                sonarrSeries.id,
+              [this.is4k ? 'externalServiceSlug4k' : 'externalServiceSlug']:
+                sonarrSeries.titleSlug,
+              [this.is4k ? 'serviceId4k' : 'serviceId']: sonarrSettings?.id,
+            };
 
-            await mediaRepository.save(media);
+            await mediaRepository.update({ id: this.media.id }, updateFields);
           })
           .catch(async () => {
             const requestRepository = getRepository(MediaRequest);
 
-            this.status = MediaRequestStatus.FAILED;
-            await requestRepository.save(this);
+            await requestRepository.update(
+              { id: this.id },
+              { status: MediaRequestStatus.FAILED }
+            );
 
             logger.warn(
               'Something went wrong sending series request to Sonarr, marking status as FAILED',
@@ -1287,6 +1304,15 @@ export class MediaRequest {
             );
 
             this.sendNotification(media, Notification.MEDIA_FAILED);
+          })
+          .finally(() => {
+            sonarr.clearCache({
+              tvdbId,
+              externalId: this.is4k
+                ? media.externalServiceId4k
+                : media.externalServiceId,
+              title: series.name,
+            });
           });
         logger.info('Sent request to Sonarr', {
           label: 'Media Request',

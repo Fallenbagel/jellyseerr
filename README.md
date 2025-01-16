@@ -11,17 +11,17 @@
 <a href="http://translate.jellyseerr.dev/engage/jellyseerr/"><img src="http://translate.jellyseerr.dev/widget/jellyseerr/jellyseerr-frontend/svg-badge.svg" alt="Translation status" /></a>
 <a href="https://github.com/fallenbagel/jellyseerr/blob/develop/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/fallenbagel/jellyseerr"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-60-orange.svg"/></a>
+<a href="#contributors-"><img alt="All Contributors" src="https://img.shields.io/badge/all_contributors-64-orange.svg"/></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-**Jellyseerr** is a free and open source software application for managing requests for your media library.
-It is a fork of [Overseerr](https://github.com/sct/overseerr) built to bring support for [Jellyfin](https://github.com/jellyfin/jellyfin) & [Emby](https://github.com/MediaBrowser/Emby) media servers!
+**Jellyseerr** is a free and open source software application for managing requests for your media library. It integrates with the media server of your choice: [Jellyfin](https://jellyfin.org), [Plex](https://plex.tv), and [Emby](https://emby.media/). In addition, it integrates with your existing services, such as **[Sonarr](https://sonarr.tv/)**, **[Radarr](https://radarr.video/)**.
 
 ## Current Features
 
-- Full Jellyfin/Emby/Plex integration including authentication with user import & management
-- Supports Movies, Shows and Mixed Libraries
-- Ability to change email addresses for smtp purposes
+- Full Jellyfin/Emby/Plex integration including authentication with user import & management.
+- Support for **PostgreSQL** and **SQLite** databases.
+- Supports Movies, Shows and Mixed Libraries.
+- Ability to change email addresses for SMTP purposes.
 - Easy integration with your existing services. Currently, Jellyseerr supports Sonarr and Radarr. More to come!
 - Jellyfin/Emby/Plex library scan, to keep track of the titles which are already available.
 - Customizable request system, which allows users to request individual seasons or movies in a friendly, easy-to-use interface.
@@ -29,8 +29,7 @@ It is a fork of [Overseerr](https://github.com/sct/overseerr) built to bring sup
 - Granular permission system.
 - Support for various notification agents.
 - Mobile-friendly design, for when you need to approve requests on the go!
-
-  (Upcoming Features include: Multiple Server Instances, and much more!)
+- Support for watchlisting & blacklisting media.
 
 With more features on the way! Check out our [issue tracker](https://github.com/fallenbagel/jellyseerr/issues) to see the features which have already been requested.
 
@@ -163,6 +162,12 @@ Thanks goes to these wonderful people from Overseerr ([emoji key](https://allcon
       <td align="center" valign="top" width="14.28%"><a href="https://me.garnx.fr"><img src="https://avatars.githubusercontent.com/u/37373941?v=4?s=100" width="100px;" alt="Guillaume ARNOUX"/><br /><sub><b>Guillaume ARNOUX</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=guillaumearnx" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/dr-carrot"><img src="https://avatars.githubusercontent.com/u/17272571?v=4?s=100" width="100px;" alt="dr-carrot"/><br /><sub><b>dr-carrot</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=dr-carrot" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/gageorsburn"><img src="https://avatars.githubusercontent.com/u/4692734?v=4?s=100" width="100px;" alt="Gage Orsburn"/><br /><sub><b>Gage Orsburn</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=gageorsburn" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/GkhnGRBZ"><img src="https://avatars.githubusercontent.com/u/127258824?v=4?s=100" width="100px;" alt="GkhnGRBZ"/><br /><sub><b>GkhnGRBZ</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=GkhnGRBZ" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://benhaney.com"><img src="https://avatars.githubusercontent.com/u/31331498?v=4?s=100" width="100px;" alt="Ben Haney"/><br /><sub><b>Ben Haney</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=benhaney" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Wunderharke"><img src="https://avatars.githubusercontent.com/u/5105672?v=4?s=100" width="100px;" alt="Wunderharke"/><br /><sub><b>Wunderharke</b></sub></a><br /><a href="https://github.com/Fallenbagel/jellyseerr/commits?author=Wunderharke" title="Documentation">📖</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/methbkts"><img src="https://avatars.githubusercontent.com/u/30674934?v=4?s=100" width="100px;" alt="Metin Bektas"/><br /><sub><b>Metin Bektas</b></sub></a><br /><a href="#infra-methbkts" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
     </tr>
   </tbody>
 </table>
