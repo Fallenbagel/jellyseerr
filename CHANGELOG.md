@@ -24,6 +24,32 @@
 * Add release charts workflow ([#1140](https://github.com/fallenbagel/jellyseerr/issues/1140)) ([3cc34b0](https://github.com/fallenbagel/jellyseerr/commit/3cc34b0db6b868a6133408a69a60b7eab69d9ea3))
 * **settings:** add settings for custom DNS servers and IPv4 resolution first ([#1266](https://github.com/fallenbagel/jellyseerr/issues/1266)) ([7fcc0eb](https://github.com/fallenbagel/jellyseerr/commit/7fcc0eb66d907e74b72197d6abee511150ab5e1e))
 
+# [2.3.0](https://github.com/fallenbagel/jellyseerr/compare/v2.2.3...v2.3.0) (2025-01-16)
+
+
+### Bug Fixes
+
+* correct typos for the special episodes setting ([#1209](https://github.com/fallenbagel/jellyseerr/issues/1209)) ([ebe7d11](https://github.com/fallenbagel/jellyseerr/commit/ebe7d11a5393f3d444dd9613854d6054af1ec58b)), closes [#1193](https://github.com/fallenbagel/jellyseerr/issues/1193) [#1208](https://github.com/fallenbagel/jellyseerr/issues/1208)
+* **externalapi:** clear cache after a request is made ([#1217](https://github.com/fallenbagel/jellyseerr/issues/1217)) ([f718cec](https://github.com/fallenbagel/jellyseerr/commit/f718cec23fccbfd16fdb792c2778cd543b751799)), closes [#1207](https://github.com/fallenbagel/jellyseerr/issues/1207)
+* **jellyfinlogin:** add proper error message when no admin user exists ([#1216](https://github.com/fallenbagel/jellyseerr/issues/1216)) ([ac90802](https://github.com/fallenbagel/jellyseerr/commit/ac908026dbb7ca06c0fb520bbb360120d6b87feb))
+* optimize media status update to avoid lifecycle hook triggers ([#1218](https://github.com/fallenbagel/jellyseerr/issues/1218)) ([656cd91](https://github.com/fallenbagel/jellyseerr/commit/656cd91c9c90e57914b7fedb097f29e21fb18090))
+* **overriderules:** allow override rules only when the service is created ([#1259](https://github.com/fallenbagel/jellyseerr/issues/1259)) ([ce1b39f](https://github.com/fallenbagel/jellyseerr/commit/ce1b39f73b953b6fa0a00948e72d24c43476bc5f))
+* prevent TypeORM subscribers from calling itself over and over ([#1215](https://github.com/fallenbagel/jellyseerr/issues/1215)) ([d67ec57](https://github.com/fallenbagel/jellyseerr/commit/d67ec571c5950f04b85f5a268b38eb026a156320))
+* resolve plex user mismatch due to caching issues ([#1242](https://github.com/fallenbagel/jellyseerr/issues/1242)) ([131a5a2](https://github.com/fallenbagel/jellyseerr/commit/131a5a2b0b1a235599940affc183b93c36f12ade)), closes [#1227](https://github.com/fallenbagel/jellyseerr/issues/1227)
+* **settingsmigrator:** prevent region migration from running multiple times ([#1255](https://github.com/fallenbagel/jellyseerr/issues/1255)) ([1c6f536](https://github.com/fallenbagel/jellyseerr/commit/1c6f5362d773c850a5e58b5013f0d65474467e9c)), closes [#1251](https://github.com/fallenbagel/jellyseerr/issues/1251)
+* **setup:** fix continue button disabled on refresh in setup 3 ([#1211](https://github.com/fallenbagel/jellyseerr/issues/1211)) ([0b331ca](https://github.com/fallenbagel/jellyseerr/commit/0b331ca579c75e546dcdbf0f1896e0f0ec3a89f1))
+* **setup:** plex library setting validation ([#1233](https://github.com/fallenbagel/jellyseerr/issues/1233)) ([b8dbfaa](https://github.com/fallenbagel/jellyseerr/commit/b8dbfaaed083734b05a28a05bf100941dc673ea7))
+* specify cached image type ([#1237](https://github.com/fallenbagel/jellyseerr/issues/1237)) ([d71ee58](https://github.com/fallenbagel/jellyseerr/commit/d71ee58302fe95c9c79e27b4edf317a98faf6f5c))
+* **ui:** resolve streaming region dropdown overlap ([#1210](https://github.com/fallenbagel/jellyseerr/issues/1210)) ([2f0e493](https://github.com/fallenbagel/jellyseerr/commit/2f0e4932572497322df0d7d7f4377aeb9cc35d5b)), closes [#1206](https://github.com/fallenbagel/jellyseerr/issues/1206)
+* **users:** correct request count query for PostgreSQL compatibility ([#1213](https://github.com/fallenbagel/jellyseerr/issues/1213)) ([f3ebf60](https://github.com/fallenbagel/jellyseerr/commit/f3ebf6028b23f803a1c8801b1541a444e8856421))
+
+
+### Features
+
+* Add latest tag to ghcr container image ([#1224](https://github.com/fallenbagel/jellyseerr/issues/1224)) ([b9dc9bc](https://github.com/fallenbagel/jellyseerr/commit/b9dc9bceb5805889c1ea3157c3ace880865eaf9c))
+* Add release charts workflow ([#1140](https://github.com/fallenbagel/jellyseerr/issues/1140)) ([3cc34b0](https://github.com/fallenbagel/jellyseerr/commit/3cc34b0db6b868a6133408a69a60b7eab69d9ea3))
+* **settings:** add settings for custom DNS servers and IPv4 resolution first ([#1266](https://github.com/fallenbagel/jellyseerr/issues/1266)) ([7fcc0eb](https://github.com/fallenbagel/jellyseerr/commit/7fcc0eb66d907e74b72197d6abee511150ab5e1e))
+
 ## [2.2.3](https://github.com/fallenbagel/jellyseerr/compare/v2.2.2...v2.2.3) (2024-12-30)
 
 
