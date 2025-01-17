@@ -47,7 +47,8 @@ jobs:
     name: Build & Publish Docker Images
     if: github.ref == 'refs/heads/develop' && !contains(github.event.head_commit.message, '[skip ci]')
     strategy:
-      matrix: [ubuntu-22.04, ubuntu-22.04-arm64]
+      matrix:
+        runner: [ubuntu-22.04, ubuntu-22.04-arm64]
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout
