@@ -42,7 +42,9 @@ class WebPushAgent
     const mediaType = payload.media
       ? payload.media.mediaType === MediaType.MOVIE
         ? 'movie'
-        : 'series'
+        : payload.media.mediaType === MediaType.TV
+        ? 'series'
+        : 'album'
       : undefined;
     const is4k = payload.request?.is4k;
 
@@ -114,7 +116,9 @@ class WebPushAgent
     const actionUrl = payload.issue
       ? `/issues/${payload.issue.id}`
       : payload.media
-      ? `/${payload.media.mediaType}/${payload.media.tmdbId}`
+      ? payload.media.mediaType === MediaType.MUSIC
+        ? `/music/${payload.media.mbId}`
+        : `/${payload.media.mediaType}/${payload.media.tmdbId}`
       : undefined;
 
     const actionUrlTitle = actionUrl
