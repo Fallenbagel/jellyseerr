@@ -34,7 +34,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
       - name: Sanitize Owner and Platform name
         run: |
-          echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+          echo "OWNER_LC=$(echo '${OWNER}' | tr '[:upper:]' '[:lower:]')" >>${GITHUB_ENV}
           echo "PLATFORM=$(echo '${PLATFORM}' | sed 's|/|-|g')" >>${GITHUB_ENV}
         env:
           OWNER: 'Fallenbagel'
