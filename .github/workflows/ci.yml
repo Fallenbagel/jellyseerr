@@ -62,13 +62,12 @@ jobs:
         include:
           - runner: ubuntu-24.04
             platform: linux/amd64
-            id: amd64
           - runner: ubuntu-24.04-arm
             platform: linux/arm64
-            id: arm64
     runs-on: ${{ matrix.runner }}
     outputs:
-      digest-${{ matrix.id }}: ${{ steps.build.outputs.digest }}
+      digest-amd64: ${{ steps.set_outputs.outputs.digest-amd64 }}
+      digest-arm64: ${{ steps.set_outputs.outputs.digest-arm64 }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -116,6 +115,11 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.platform }}
           cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
           provenance: false
+      - name: Set outputs
+        id: set_outputs
+        run: |
+          platform="${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }}"
+          echo "digest-${platform}=${{ steps.build.outputs.digest }}" >> $GITHUB_OUTPUT
 
   merge_and_push:
     name: Create and Push Multi-arch Manifest
