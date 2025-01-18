@@ -39,10 +39,10 @@ jobs:
         env:
           OWNER: 'Fallenbagel'
           PLATFORM: 'linux/amd64'
-      - name: Test sanitation
+      - name: Test Sanitized Variables
         run: |
-          echo "OWNER_LC=${OWNER}"
-          echo "PLATFORM=${PLATFORM}"
+          echo "Sanitized Owner: ${OWNER_LC}"
+          echo "Sanitized Platform: ${PLATFORM}"
       - name: Install dependencies
         env:
           HUSKY: 0
