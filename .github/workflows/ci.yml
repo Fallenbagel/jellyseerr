@@ -62,12 +62,13 @@ jobs:
         include:
           - runner: ubuntu-24.04
             platform: linux/amd64
+            id: amd64
           - runner: ubuntu-24.04-arm
             platform: linux/arm64
+            id: arm64
     runs-on: ${{ matrix.runner }}
     outputs:
-      digest-amd64: ${{ steps.build-amd64.outputs.digest }}
-      digest-arm64: ${{ steps.build-arm64.outputs.digest }}
+      digest-${{ matrix.id }}: ${{ steps.build.outputs.digest }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -100,7 +101,7 @@ jobs:
             type=ref,event=branch
             type=sha,prefix=,suffix=,format=short
       - name: Build and push by digest
-        id: ${{ matrix.platform == 'linux/amd64' && 'build-amd64' || 'build-arm64' }}
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
