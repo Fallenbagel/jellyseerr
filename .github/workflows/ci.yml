@@ -139,14 +139,14 @@ jobs:
       - name: Create and push manifest
         run: |
           docker manifest create fallenbagel/jellyseerr:develop \
-            fallenbagel/jellyseerr:{{ needs.build.outputs.digest-amd64 }} \
-            fallenbagel/jellyseerr:{{ needs.build.outputs.digest-arm64 }}
+            --amend fallenbagel/jellyseerr@${{ needs.build.outputs.digest-amd64 }} \
+            --amend fallenbagel/jellyseerr@${{ needs.build.outputs.digest-arm64 }}
           docker manifest push fallenbagel/jellyseerr:develop
 
           # GHCR manifest
           docker manifest create ghcr.io/${{ env.OWNER_LC }}/jellyseerr:develop \
-            ghcr.io/${{ env.OWNER_LC }}/jellyseerr:{{ needs.build.outputs.digest-amd64 }} \
-            ghcr.io/${{ env.OWNER_LC }}/jellyseerr:{{ needs.build.outputs.digest-arm64 }}
+            --amend ghcr.io/${{ env.OWNER_LC }}/jellyseerr@${{ needs.build.outputs.digest-amd64 }} \
+            --amend ghcr.io/${{ env.OWNER_LC }}/jellyseerr@${{ needs.build.outputs.digest-arm64 }}
           docker manifest push ghcr.io/${{ env.OWNER_LC }}/jellyseerr:develop
 
   discord:
