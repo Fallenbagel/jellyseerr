@@ -1416,6 +1416,7 @@ export class MediaRequest {
       const settings = getSettings();
       const media = await mediaRepository.findOne({
         where: { id: this.media.id },
+        relations: { requests: true },
       });
 
       if (!media?.mbId) {
@@ -1517,8 +1518,8 @@ export class MediaRequest {
         });
 
         media.externalServiceId = album.id;
-        media.externalServiceSlug = album.titleSlug;
-        media.serviceId = lidarrSettings.id;
+        (media.externalServiceSlug = media.mbId),
+          (media.serviceId = lidarrSettings.id);
         media.status = MediaStatus.PROCESSING;
         await mediaRepository.save(media);
         setTimeout(async () => {
@@ -1577,7 +1578,7 @@ export class MediaRequest {
 
           if (existingAlbum) {
             media.externalServiceId = existingAlbum.id;
-            media.externalServiceSlug = existingAlbum.titleSlug;
+            media.externalServiceSlug = media.mbId;
             media.serviceId = lidarrSettings.id;
             media.status = MediaStatus.PROCESSING;
             await mediaRepository.save(media);
