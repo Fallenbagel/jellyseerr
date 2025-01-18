@@ -3,57 +3,17 @@ import Modal from '@app/components/Common/Modal';
 import Table from '@app/components/Common/Table';
 import { Transition } from '@headlessui/react';
 import { PlusIcon } from '@heroicons/react/24/solid';
+import type AutoApprovalSpecificationBase from '@server/entity/AutoApproval/AutoApprovalSpecificationBase';
 import type { AutoApprovalRule } from '@server/lib/autoapproval';
 import { useState } from 'react';
-import Select from 'react-select';
-
-type OptionType = { value: number; label: string; exists: boolean };
+import GenreSpecificationItem from './Specifications/GenreSpecificationItem';
+import UserSpecificationItem from './Specifications/UserSpecification';
 
 interface RuleModalProps {
   approvalRule: AutoApprovalRule | null;
   onClose: () => void;
   onSave: () => void;
 }
-
-const GenreCondition = (comparison = 'is', values) => {
-  const genreOptions = [
-    { label: 'Action', value: 0 },
-    { label: 'Comedy', value: 1 },
-    { label: 'Documentary', value: 2 },
-    { label: 'Romance', value: 3 },
-    { label: 'Drama', value: 4 },
-  ];
-  return (
-    <div>
-      <Table.TD>
-        <select
-          id="condition-type"
-          name="condition-type"
-          className=""
-          defaultValue={comparison}
-        >
-          <option value="is">is</option>
-          <option value="isnot">is not</option>
-          <option value="contains">contains</option>
-          <option value="containsnot">does not contain</option>
-        </select>
-      </Table.TD>
-      <Table.TD>
-        <Select<OptionType, true>
-          options={genreOptions}
-          isMulti
-          className="react-select-container rounded-r-only"
-          classNamePrefix="react-select"
-          defaultValue={genreOptions.filter((genre) =>
-            typeof values == 'number'
-              ? genre.value == values
-              : values.includes(genre.value)
-          )}
-        />
-      </Table.TD>
-    </div>
-  );
-};
 
 const ReleaseYearCondition = (comparison = 'equals') => {
   const options = [
@@ -79,12 +39,10 @@ const ReleaseYearCondition = (comparison = 'equals') => {
   );
 };
 
-const ConditionItem = (
-  defaultImplementation: string,
-  comparison = '',
-  values: any
-) => {
-  const [implementation, setImplementation] = useState(defaultImplementation);
+const ConditionItem = (condition: AutoApprovalSpecificationBase) => {
+  const [implementation, setImplementation] = useState(
+    condition.implementationName
+  );
   return (
     <tr
       key="approval-rule-condition-0"
@@ -99,13 +57,26 @@ const ConditionItem = (
         >
           <option value="genre">Genre</option>
           <option value="release-year">Release Year</option>
+          <option value="user">User</option>
         </select>
       </Table.TD>
       <Table.TD>
         {
           {
-            genre: GenreCondition(comparison, values),
-            'release-year': ReleaseYearCondition(comparison),
+            genre: (
+              <GenreSpecificationItem
+                isMovie={true}
+                comparator={condition.comparator}
+                currentValue={condition.value as string}
+              />
+            ),
+            user: (
+              <UserSpecificationItem
+                comparator={condition.comparator}
+                currentValue={condition.value as number}
+              />
+            ),
+            'release-year': ReleaseYearCondition('is'),
           }[implementation]
         }
       </Table.TD>
@@ -115,12 +86,9 @@ const ConditionItem = (
 
 const RuleModal = ({ onClose, approvalRule }: RuleModalProps) => {
   const conditionsList = approvalRule?.conditions.map((condition) =>
-    ConditionItem(
-      condition.implementation,
-      condition.comparisonType,
-      condition.value
-    )
+    ConditionItem(condition)
   );
+
   return (
     <Transition
       as="div"

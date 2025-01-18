@@ -1,10 +1,5 @@
+import type AutoApprovalSpecificationBase from '@server/entity/AutoApproval/AutoApprovalSpecificationBase';
 export interface AutoApprovalRule {
   name: string;
-  conditions: AutoApprovalCondition[];
-}
-
-export interface AutoApprovalCondition {
-  implementation: string;
-  comparisonType: string;
-  value;
+  conditions: AutoApprovalSpecificationBase[];
 }

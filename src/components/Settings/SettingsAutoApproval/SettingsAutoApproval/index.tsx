@@ -2,12 +2,10 @@ import Badge from '@app/components/Common/Badge';
 import Button from '@app/components/Common/Button';
 import Header from '@app/components/Common/Header';
 import RuleModal from '@app/components/Settings/SettingsAutoApproval/RuleModal';
-import defineMessages from '@app/utils/defineMessages';
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/solid';
-import GenreSpecification from '@server/entity/AutoApproval/GenreSpecification';
-import UserSpecification from '@server/entity/AutoApproval/UserSpecification';
 import type { AutoApprovalRule } from '@server/lib/autoapproval';
 import { useState } from 'react';
+import { defineMessages } from 'react-intl';
 
 export const messages = defineMessages('components.ApprovalRuleList', {
   autoapprovalrules: 'Auto Approval Rules',
@@ -34,12 +32,11 @@ const ApprovalRuleInstance = ({
     ['contains', 'contains'],
     ['does not contain'],
   ]);
+  const valueNames: string[] = ['Action', 'Comedy', 'Documentary', 'Romance'];
   const conditionBadges = currentRule.conditions.map((condition) => (
     <Badge key={`auto-approval-badge-`} className="m-0.5">
-      <>
-        {condition.implementationName}{' '}
-        {comparisonNames.get(condition.comparator)} {condition.value}
-      </>
+      {condition.implementation} {comparisonNames.get(condition.comparisonType)}{' '}
+      {condition.value > 1000 ? condition.value : valueNames[condition.value]}
     </Badge>
   ));
 
@@ -89,11 +86,23 @@ const SettingsAutoApproval = () => {
   const movieRuleData = [
     {
       name: 'Test Rule',
-      conditions: [
-        new UserSpecification('is', 0),
-        new GenreSpecification('is', '16,14'),
-        new GenreSpecification('isnot', '12'),
-      ],
+      currentRule: {
+        name: 'Test Rule',
+        conditions: [
+          { implementation: 'genre', comparisonType: 'is', value: 0 },
+          {
+            implementation: 'release-year',
+            comparisonType: 'lessthan',
+            value: 2020,
+          },
+          { implementation: 'genre', comparisonType: 'isnot', value: 2 },
+          {
+            implementation: 'genre',
+            comparisonType: 'contains',
+            value: [1, 4],
+          },
+        ],
+      },
     },
   ];
   const [editRuleModal, setEditRuleModal] = useState<{
@@ -130,12 +139,12 @@ const SettingsAutoApproval = () => {
                 onEdit={() =>
                   setEditRuleModal({
                     open: true,
-                    approvalRule: rule,
+                    approvalRule: rule.currentRule,
                   })
                 }
                 currentRule={{
                   name: rule.name,
-                  conditions: rule.conditions,
+                  conditions: rule.currentRule.conditions,
                 }}
               />
             ))}
@@ -151,20 +160,14 @@ const SettingsAutoApproval = () => {
                         name: 'Test rule',
                         conditions: [
                           {
-                            implementationName: 'genre',
-                            comparator: 'is',
-                            value: 'Documentary',
-                            isSatisfiedBy: () => {
-                              return false;
-                            },
+                            implementation: 'genre',
+                            comparisonType: 'is',
+                            value: 4,
                           },
                           {
-                            implementationName: 'release-year',
-                            comparator: 'lessthan',
-                            value: '2012',
-                            isSatisfiedBy: () => {
-                              return false;
-                            },
+                            implementation: 'release-year',
+                            comparisonType: 'lessthan',
+                            value: 2,
                           },
                         ],
                       },
