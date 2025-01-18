@@ -41,8 +41,8 @@ jobs:
           PLATFORM: 'linux/amd64'
       - name: Test Sanitized Variables
         run: |
-          echo "Sanitized Owner: ${OWNER_LC}"
-          echo "Sanitized Platform: ${PLATFORM}"
+          echo "Sanitized Owner: ${{ env.OWNER_LC }}"
+          echo "Sanitized Platform: ${{ env.PLATFORM }}"
       - name: Install dependencies
         env:
           HUSKY: 0
