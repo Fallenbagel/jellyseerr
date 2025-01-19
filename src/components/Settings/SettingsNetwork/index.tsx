@@ -153,7 +153,7 @@ const SettingsMain = () => {
             setFieldValue,
           }) => {
             return (
-              <Form className="section" data-testid="settings-main-form">
+              <Form className="section" data-testid="settings-network-form">
                 <div className="form-row">
                   <label htmlFor="trustProxy" className="checkbox-label">
                     <span className="mr-2">
