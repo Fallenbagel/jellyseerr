@@ -506,7 +506,7 @@ const SettingsServices = () => {
       </div>
       <div className="section">
         <ul className="grid max-w-6xl grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-          {rules && (
+          {rules && radarrData && sonarrData && (
             <OverrideRuleTiles
               rules={rules}
               radarrServices={radarrData}
