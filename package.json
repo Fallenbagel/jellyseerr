@@ -1,6 +1,6 @@
 {
   "name": "jellyseerr",
-  "version": "2.2.3",
+  "version": "2.3.0",
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
@@ -123,7 +123,7 @@
     "@types/express-session": "1.17.6",
     "@types/lodash": "4.14.191",
     "@types/mime": "3",
-    "@types/node": "20.14.8",
+    "@types/node": "22.10.5",
     "@types/node-schedule": "2.1.0",
     "@types/nodemailer": "6.4.7",
     "@types/react": "^18.3.3",
@@ -169,7 +169,7 @@
     "typescript": "4.9.5"
   },
   "engines": {
-    "node": "^20.0.0",
+    "node": "^22.0.0",
     "pnpm": "^9.0.0"
   },
   "overrides": {
@@ -235,7 +235,8 @@
           "COMMIT_TAG": "$GIT_SHA"
         },
         "imageNames": [
-          "fallenbagel/jellyseerr"
+          "fallenbagel/jellyseerr",
+          "ghcr.io/fallenbagel/jellyseerr"
         ],
         "platforms": [
           "linux/amd64",
