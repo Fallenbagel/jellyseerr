@@ -6,7 +6,7 @@ import SettingsBadge from '@app/components/Settings/SettingsBadge';
 import globalMessages from '@app/i18n/globalMessages';
 import defineMessages from '@app/utils/defineMessages';
 import { ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
-import type { MainSettings } from '@server/lib/settings';
+import type { NetworkSettings } from '@server/lib/settings';
 import { Field, Form, Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
@@ -53,7 +53,7 @@ const SettingsMain = () => {
     data,
     error,
     mutate: revalidate,
-  } = useSWR<MainSettings>('/api/v1/settings/main');
+  } = useSWR<NetworkSettings>('/api/v1/settings/network');
 
   const NetworkSettingsSchema = Yup.object().shape({
     proxyPort: Yup.number().when('proxyEnabled', {
@@ -104,7 +104,7 @@ const SettingsMain = () => {
           validationSchema={NetworkSettingsSchema}
           onSubmit={async (values) => {
             try {
-              const res = await fetch('/api/v1/settings/main', {
+              const res = await fetch('/api/v1/settings/network', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
