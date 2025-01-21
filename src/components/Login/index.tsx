@@ -137,6 +137,7 @@ const Login = () => {
         (mediaServerLogin ? (
           <Button
             key="jellyseerr"
+            data-testid="jellyseerr-login-button"
             className="flex-1 bg-transparent"
             onClick={() => setMediaServerLogin(false)}
           >
@@ -151,6 +152,7 @@ const Login = () => {
         ) : (
           <Button
             key="mediaserver"
+            data-testid="mediaserver-login-button"
             className="flex-1 bg-transparent"
             onClick={() => setMediaServerLogin(true)}
           >
