@@ -29,6 +29,7 @@ const PlexLoginButton = ({
       className="relative flex-1 border-[#cc7b19] bg-[rgba(204,123,25,0.3)] hover:border-[#cc7b19] hover:bg-[rgba(204,123,25,0.7)] disabled:opacity-50"
       onClick={login}
       disabled={loading || isProcessing}
+      data-testid="plex-login-button"
     >
       {loading && (
         <div className="absolute right-0 mr-4 h-4 w-4">
