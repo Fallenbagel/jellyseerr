@@ -165,7 +165,7 @@ app
       }
     });
     if (settings.main.csrfProtection) {
-      server.use(
+      server.use(() =>
         csurf({
           cookie: {
             httpOnly: true,
