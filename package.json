@@ -248,7 +248,8 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "sqlite3"
+      "sqlite3",
+      "bcrypt"
     ]
   }
 }
