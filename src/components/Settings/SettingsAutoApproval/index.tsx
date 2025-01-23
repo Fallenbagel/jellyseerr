@@ -4,10 +4,9 @@ import Header from '@app/components/Common/Header';
 import RuleModal from '@app/components/Settings/SettingsAutoApproval/RuleModal';
 import defineMessages from '@app/utils/defineMessages';
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/solid';
-import GenreSpecification from '@server/entity/AutoApproval/GenreSpecification';
-import UserSpecification from '@server/entity/AutoApproval/UserSpecification';
 import type { AutoApprovalRule } from '@server/lib/autoapproval';
 import { useState } from 'react';
+import useSWR from 'swr';
 
 export const messages = defineMessages('components.ApprovalRuleList', {
   autoapprovalrules: 'Auto Approval Rules',
@@ -86,16 +85,10 @@ const ApprovalRuleInstance = ({
 };
 
 const SettingsAutoApproval = () => {
-  const movieRuleData = [
-    {
-      name: 'Test Rule',
-      conditions: [
-        new UserSpecification('is', 0),
-        new GenreSpecification('is', '16,14'),
-        new GenreSpecification('isnot', '12'),
-      ],
-    },
-  ];
+  const { data: mockData } = useSWR<AutoApprovalRule[]>(
+    '/api/v1/autoApprovalRule'
+  );
+  const movieRuleData = mockData;
   const [editRuleModal, setEditRuleModal] = useState<{
     open: boolean;
     approvalRule: AutoApprovalRule | null;
@@ -123,22 +116,23 @@ const SettingsAutoApproval = () => {
         <h3 className="heading">Movie Auto-approval rules</h3>
         <div className="section">
           <ul className="xl:grid-cols3 grid max-w-4xl grid-cols-1 gap-6 lg:grid-cols-2">
-            {movieRuleData.map((rule) => (
-              <ApprovalRuleInstance
-                key={`approval-rule-`}
-                name={rule.name}
-                onEdit={() =>
-                  setEditRuleModal({
-                    open: true,
-                    approvalRule: rule,
-                  })
-                }
-                currentRule={{
-                  name: rule.name,
-                  conditions: rule.conditions,
-                }}
-              />
-            ))}
+            {movieRuleData &&
+              movieRuleData.map((rule) => (
+                <ApprovalRuleInstance
+                  key={`approval-rule-`}
+                  name={rule.name}
+                  onEdit={() =>
+                    setEditRuleModal({
+                      open: true,
+                      approvalRule: rule,
+                    })
+                  }
+                  currentRule={{
+                    name: rule.name,
+                    conditions: rule.conditions,
+                  }}
+                />
+              ))}
             <li className="col-span-1 h-32 rounded-lg border-2 border-dashed border-gray-400 shadow sm:h-44">
               <div className="flex h-full w-full items-center justify-center">
                 <Button

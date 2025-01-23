@@ -15,6 +15,7 @@ import { checkUser, isAuthenticated } from '@server/middleware/auth';
 import { mapWatchProviderDetails } from '@server/models/common';
 import { mapProductionCompany } from '@server/models/Movie';
 import { mapNetwork } from '@server/models/Tv';
+import autoApprovalRuleRoutes from '@server/routes/autoApprovalRule';
 import overrideRuleRoutes from '@server/routes/overrideRule';
 import settingsRoutes from '@server/routes/settings';
 import watchlistRoutes from '@server/routes/watchlist';
@@ -165,6 +166,11 @@ router.use(
   '/overrideRule',
   isAuthenticated(Permission.ADMIN),
   overrideRuleRoutes
+);
+router.use(
+  '/autoApprovalRule',
+  isAuthenticated(Permission.ADMIN),
+  autoApprovalRuleRoutes
 );
 
 router.get('/regions', isAuthenticated(), async (req, res, next) => {

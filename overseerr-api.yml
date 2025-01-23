@@ -1944,6 +1944,11 @@ components:
       properties:
         id:
           type: string
+    AutoApprovalRule:
+      type: object
+      properties:
+        id:
+          type: string
   securitySchemes:
     cookieAuth:
       type: apiKey
@@ -7042,6 +7047,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OverrideRule'
+  /autoApprovalRule:
+    get:
+      summary: 'Get autoapproval rules'
+      description: 'Returns a list of all autoapproval rules with their conditions'
+      tags:
+        - 'autoapprovalrule'
+      responses:
+        '200':
+          description: 'Values were successfully created'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AutoApprovalRule'
 security:
   - cookieAuth: []
   - apiKey: []
