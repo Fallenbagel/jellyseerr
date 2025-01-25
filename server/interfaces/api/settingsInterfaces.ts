@@ -35,6 +35,8 @@ export interface PublicSettingsResponse {
   discoverRegion: string;
   streamingRegion: string;
   originalLanguage: string;
+  blacktags: string;
+  blacktagsLimit: number;
   mediaServerType: number;
   partialRequestsEnabled: boolean;
   enableSpecialEpisodes: boolean;
