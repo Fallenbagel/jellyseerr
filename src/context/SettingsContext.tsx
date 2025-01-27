@@ -19,8 +19,6 @@ const defaultSettings = {
   discoverRegion: '',
   streamingRegion: '',
   originalLanguage: '',
-  blacktags: '',
-  blacktagsLimit: 50,
   mediaServerType: MediaServerType.NOT_CONFIGURED,
   partialRequestsEnabled: true,
   enableSpecialEpisodes: false,
