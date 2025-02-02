@@ -319,6 +319,10 @@ const SETTINGS_PATH = process.env.CONFIG_DIRECTORY
   ? `${process.env.CONFIG_DIRECTORY}/settings.json`
   : path.join(__dirname, '../../../config/settings.json');
 
+const SETTINGS_OVERRIDE_PATH = process.env.CONFIG_DIRECTORY
+  ? `${process.env.CONFIG_DIRECTORY}/settings.override.json`
+  : path.join(__dirname, '../../../config/settings.override.json');
+
 class Settings {
   private data: AllSettings;
 
@@ -695,6 +699,12 @@ class Settings {
       this.data.vapidPublic = vapidKeys.publicKey;
       change = true;
     }
+
+    const defaultOverrideSettings = JSON.parse(
+      await fs.readFile(SETTINGS_OVERRIDE_PATH, 'utf-8').catch(() => '{}')
+    );
+    this.data = merge(this.data, defaultOverrideSettings);
+
     if (change) {
       await this.save();
     }
