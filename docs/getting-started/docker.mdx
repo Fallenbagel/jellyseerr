@@ -179,7 +179,7 @@ volumes:
   </TabItem>
 </Tabs>
 
-To access the files inside the volume created above, navigate to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes\jellyseerr-data\_data` using File Explorer.
+To access the files inside the volume created above, navigate to `\\wsl$\docker-desktop\mnt\docker-desktop-disk\data\docker\volumes\jellyseerr-data\_data` using File Explorer.
 
 :::info
 Docker on Windows works differently than it does on Linux; it runs Docker inside of a stripped-down Linux VM. Volume mounts are exposed to Docker inside this VM via SMB mounts. While this is fine for media, it is unacceptable for the `/app/config` directory because SMB does not support file locking. This will eventually corrupt your database, which can lead to slow behavior and crashes.
