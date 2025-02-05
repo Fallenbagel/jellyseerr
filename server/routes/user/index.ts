@@ -42,6 +42,9 @@ router.get('/', async (req, res, next) => {
       : Math.max(10, includeIds.length);
     const skip = req.query.skip ? Number(req.query.skip) : 0;
     const q = req.query.q ? req.query.q.toString().toLowerCase() : '';
+    const includeIds = req.query.includeIds
+      ? req.query.includeIds.toString().split(',')
+      : '';
     let query = getRepository(User).createQueryBuilder('user');
 
     if (q) {
