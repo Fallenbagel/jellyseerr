@@ -579,9 +579,7 @@ export const UserSelector = ({
       const users = defaultValue.split(',');
 
       const res = await fetch(
-        `/api/v1/user${
-          defaultValue ? `?includeIds=${encodeURIComponent(defaultValue)}` : ''
-        }`
+        `/api/v1/user?includeIds=${encodeURIComponent(defaultValue)}`
       );
 
       if (!res.ok) {

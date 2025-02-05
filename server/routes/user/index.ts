@@ -37,7 +37,7 @@ router.get('/', async (req, res, next) => {
     const q = req.query.q ? req.query.q.toString().toLowerCase() : '';
     const includeIds = req.query.includeIds
       ? req.query.includeIds.toString().split(',')
-      : '';
+      : [];
     let query = getRepository(User).createQueryBuilder('user');
 
     if (q) {
