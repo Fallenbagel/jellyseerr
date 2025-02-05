@@ -578,7 +578,12 @@ export const UserSelector = ({
 
       const users = defaultValue.split(',');
 
-      const res = await fetch(`/api/v1/user`);
+      const res = await fetch(
+        `/api/v1/user${
+          defaultValue ? `?includeIds=${encodeURIComponent(defaultValue)}` : ''
+        }`
+      );
+
       if (!res.ok) {
         throw new Error('Network response was not ok');
       }
