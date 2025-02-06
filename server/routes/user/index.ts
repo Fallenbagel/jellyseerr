@@ -32,9 +32,11 @@ const router = Router();
 
 router.get('/', async (req, res, next) => {
   try {
-    const includeIds = req.query.includeIds
-      ? req.query.includeIds.toString().split(',')
-      : [];
+    const includeIds = [
+      ...new Set(
+        req.query.includeIds ? req.query.includeIds.toString().split(',') : []
+      ),
+    ];
     const pageSize = req.query.take
       ? Number(req.query.take)
       : Math.max(10, includeIds.length);
