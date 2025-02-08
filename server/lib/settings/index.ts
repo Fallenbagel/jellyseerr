@@ -129,6 +129,7 @@ export interface MainSettings {
   streamingRegion: string;
   originalLanguage: string;
   trustProxy: boolean;
+  enableForwardAuth: boolean;
   mediaServerType: number;
   partialRequestsEnabled: boolean;
   enableSpecialEpisodes: boolean;
@@ -345,6 +346,7 @@ class Settings {
         streamingRegion: '',
         originalLanguage: '',
         trustProxy: false,
+        enableForwardAuth: false,
         mediaServerType: MediaServerType.NOT_CONFIGURED,
         partialRequestsEnabled: true,
         enableSpecialEpisodes: false,
