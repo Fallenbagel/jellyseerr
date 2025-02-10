@@ -295,6 +295,14 @@ class DiscordAgent
         userMentions.push(`<@&${settings.options.webhookRoleId}>`);
       }
 
+      logger.debug('Discord notification details', {
+        username: settings.options.botUsername
+          ? settings.options.botUsername
+          : getSettings().main.applicationTitle,
+        avatar_url: settings.options.botAvatarUrl,
+        embeds: [this.buildEmbed(type, payload)],
+        content: userMentions.join(' '),
+      });
       const response = await fetch(settings.options.webhookUrl, {
         method: 'POST',
         headers: {
@@ -310,6 +318,12 @@ class DiscordAgent
         } as DiscordWebhookPayload),
       });
       if (!response.ok) {
+        logger.debug('Error sending Discord notification, response not ok', {
+          label: 'Notifications',
+          type: Notification[type],
+          subject: payload.subject,
+          response: response.statusText,
+        });
         throw new Error(response.statusText, { cause: response });
       }
 
@@ -328,6 +342,7 @@ class DiscordAgent
         subject: payload.subject,
         errorMessage: e.message,
         response: errorData,
+        stack: e.stack,
       });
 
       return false;
