@@ -247,5 +247,11 @@
       },
       "@semantic-release/github"
     ]
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sqlite3",
+      "bcrypt"
+    ]
   }
 }
