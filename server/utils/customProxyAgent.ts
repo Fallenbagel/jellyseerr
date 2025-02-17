@@ -63,7 +63,7 @@ export default async function createCustomProxyAgent(
       interceptors: {
         Client: [noProxyInterceptor],
       },
-      keepAliveTimeout: 4000,
+      keepAliveTimeout: 5000,
     });
 
     setGlobalDispatcher(proxyAgent);
