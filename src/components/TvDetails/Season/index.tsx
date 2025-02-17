@@ -1,8 +1,8 @@
 import AirDateBadge from '@app/components/AirDateBadge';
+import Image from '@app/components/Common/BaseImage';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import defineMessages from '@app/utils/defineMessages';
 import type { SeasonWithEpisodes } from '@server/models/Tv';
-import Image from 'next/image';
 import { useIntl } from 'react-intl';
 import useSWR from 'swr';
 

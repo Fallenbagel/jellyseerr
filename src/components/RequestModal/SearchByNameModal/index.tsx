@@ -1,9 +1,9 @@
 import Alert from '@app/components/Common/Alert';
+import Image from '@app/components/Common/BaseImage';
 import Modal from '@app/components/Common/Modal';
 import globalMessages from '@app/i18n/globalMessages';
 import defineMessages from '@app/utils/defineMessages';
 import type { SonarrSeries } from '@server/api/servarr/sonarr';
-import Image from 'next/image';
 import { useIntl } from 'react-intl';
 import useSWR from 'swr';
 

@@ -142,12 +142,17 @@ const CoreApp: Omit<NextAppComponentType, 'origGetInitialProps'> = ({
     <SWRConfig
       value={{
         fetcher: async (resource, init) => {
-          const res = await fetch(resource, init);
+          const API_BASE = process.env.NEXT_PUBLIC_BASE_PATH || '';
+          const fullUrl =
+            resource.startsWith('/') && !resource.startsWith(API_BASE)
+              ? `${API_BASE}${resource}`
+              : resource;
+          const res = await fetch(fullUrl, init);
           if (!res.ok) throw new Error();
           return await res.json();
         },
         fallback: {
-          '/api/v1/auth/me': user,
+          [`${process.env.NEXT_PUBLIC_BASE_PATH}/api/v1/auth/me`]: user,
         },
       }}
     >
@@ -207,11 +212,14 @@ CoreApp.getInitialProps = async (initialProps) => {
     emailEnabled: false,
     newPlexLogin: true,
   };
+  const API_BASE = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
   if (ctx.res) {
     // Check if app is initialized and redirect if necessary
     const res = await fetch(
-      `http://localhost:${process.env.PORT || 5055}/api/v1/settings/public`
+      `http://localhost:${
+        process.env.PORT || 5055
+      }${API_BASE}/api/v1/settings/public`
     );
     if (!res.ok) throw new Error();
     currentSettings = await res.json();
@@ -221,7 +229,7 @@ CoreApp.getInitialProps = async (initialProps) => {
     if (!initialized) {
       if (!router.pathname.match(/(setup|login\/plex)/)) {
         ctx.res.writeHead(307, {
-          Location: '/setup',
+          Location: `${API_BASE}/setup`,
         });
         ctx.res.end();
       }
@@ -229,7 +237,9 @@ CoreApp.getInitialProps = async (initialProps) => {
       try {
         // Attempt to get the user by running a request to the local api
         const res = await fetch(
-          `http://localhost:${process.env.PORT || 5055}/api/v1/auth/me`,
+          `http://localhost:${
+            process.env.PORT || 5055
+          }${API_BASE}/api/v1/auth/me`,
           {
             headers:
               ctx.req && ctx.req.headers.cookie
@@ -242,7 +252,7 @@ CoreApp.getInitialProps = async (initialProps) => {
 
         if (router.pathname.match(/(setup|login)/)) {
           ctx.res.writeHead(307, {
-            Location: '/',
+            Location: `/`,
           });
           ctx.res.end();
         }
@@ -252,7 +262,7 @@ CoreApp.getInitialProps = async (initialProps) => {
         // before anything actually renders
         if (!router.pathname.match(/(login|setup|resetpassword)/)) {
           ctx.res.writeHead(307, {
-            Location: '/login',
+            Location: `${API_BASE}/login`,
           });
           ctx.res.end();
         }

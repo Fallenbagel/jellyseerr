@@ -18,11 +18,17 @@ const isSameOrigin = (url: RequestInfo | URL): boolean => {
 // to all requests. This is required when CSRF protection is enabled.
 if (typeof window !== 'undefined') {
   const originalFetch: typeof fetch = window.fetch;
+  const API_BASE = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
   (window as typeof globalThis).fetch = async (
     input: RequestInfo | URL,
     init?: RequestInit
   ): Promise<Response> => {
+    let url = input;
+    if (typeof input === 'string' && input.startsWith('/api/')) {
+      url = `${API_BASE}${input}`;
+    }
+
     if (!isSameOrigin(input)) {
       return originalFetch(input, init);
     }
@@ -39,7 +45,7 @@ if (typeof window !== 'undefined') {
       headers,
     };
 
-    return originalFetch(input, newInit);
+    return originalFetch(url, newInit);
   };
 }
 
