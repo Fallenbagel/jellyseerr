@@ -1,3 +1,4 @@
+import BlacklistedTagsSelector from '@app/components/BlacklistedTagsSelector';
 import Button from '@app/components/Common/Button';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import PageTitle from '@app/components/Common/PageTitle';
@@ -29,12 +30,19 @@ const messages = defineMessages('components.Settings.SettingsMain', {
   generalsettingsDescription:
     'Configure global and default settings for Jellyseerr.',
   apikey: 'API Key',
+  apikeyCopied: 'Copied API key to clipboard.',
   applicationTitle: 'Application Title',
   applicationurl: 'Application URL',
   discoverRegion: 'Discover Region',
   discoverRegionTip: 'Filter content by regional availability',
   originallanguage: 'Discover Language',
   originallanguageTip: 'Filter content by original language',
+  blacklistedTags: 'Blacklist Content with Tags',
+  blacklistedTagsTip:
+    'Automatically add content with tags to the blacklist using the "Process Blacklisted Tags" job',
+  blacklistedTagsLimit: 'Limit Content Blacklisted per Tag',
+  blacklistedTagsLimitTip:
+    'The "Process Blacklisted Tags" job will blacklist this many pages into each sort. Larger numbers will create a more accurate blacklist, but use more space.',
   streamingRegion: 'Streaming Region',
   streamingRegionTip: 'Show streaming sites by regional availability',
   toastApiKeySuccess: 'New API key generated successfully!',
@@ -111,6 +119,17 @@ const SettingsMain = () => {
         intl.formatMessage(messages.validationProxyPort)
       ),
     }),
+    blacklistedTagsLimit: Yup.number()
+      .test(
+        'positive',
+        'Number must be greater than 0.',
+        (value) => (value ?? 0) >= 0
+      )
+      .test(
+        'lte-250',
+        'Number must be less than or equal to 250.',
+        (value) => (value ?? 0) <= 250
+      ),
   });
 
   const regenerate = async () => {
@@ -164,6 +183,8 @@ const SettingsMain = () => {
             discoverRegion: data?.discoverRegion,
             originalLanguage: data?.originalLanguage,
             streamingRegion: data?.streamingRegion || 'US',
+            blacklistedTags: data?.blacklistedTags,
+            blacklistedTagsLimit: data?.blacklistedTagsLimit || 50,
             partialRequestsEnabled: data?.partialRequestsEnabled,
             enableSpecialEpisodes: data?.enableSpecialEpisodes,
             forceIpv4First: data?.forceIpv4First,
@@ -197,6 +218,8 @@ const SettingsMain = () => {
                   discoverRegion: values.discoverRegion,
                   streamingRegion: values.streamingRegion,
                   originalLanguage: values.originalLanguage,
+                  blacklistedTags: values.blacklistedTags,
+                  blacklistedTagsLimit: values.blacklistedTagsLimit,
                   partialRequestsEnabled: values.partialRequestsEnabled,
                   enableSpecialEpisodes: values.enableSpecialEpisodes,
                   forceIpv4First: values.forceIpv4First,
@@ -267,6 +290,9 @@ const SettingsMain = () => {
                         />
                         <CopyButton
                           textToCopy={data?.apiKey ?? ''}
+                          toastMessage={intl.formatMessage(
+                            messages.apikeyCopied
+                          )}
                           key={data?.apiKey}
                         />
                         <button
@@ -275,6 +301,7 @@ const SettingsMain = () => {
                             regenerate();
                           }}
                           className="input-action"
+                          type="button"
                         >
                           <ArrowPathIcon />
                         </button>
@@ -468,6 +495,49 @@ const SettingsMain = () => {
                         disableAll
                       />
                     </div>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label htmlFor="blacklistedTags" className="text-label">
+                    <span>{intl.formatMessage(messages.blacklistedTags)}</span>
+                    <span className="label-tip">
+                      {intl.formatMessage(messages.blacklistedTagsTip)}
+                    </span>
+                  </label>
+                  <div className="form-input-area">
+                    <div className="form-input-field relative z-10">
+                      <BlacklistedTagsSelector
+                        defaultValue={values.blacklistedTags}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label htmlFor="blacklistedTagsLimit" className="text-label">
+                    <span className="mr-2">
+                      {intl.formatMessage(messages.blacklistedTagsLimit)}
+                    </span>
+                    <SettingsBadge badgeType="advanced" />
+                    <span className="label-tip">
+                      {intl.formatMessage(messages.blacklistedTagsLimitTip)}
+                    </span>
+                  </label>
+                  <div className="form-input-area">
+                    <Field
+                      id="blacklistedTagsLimit"
+                      name="blacklistedTagsLimit"
+                      type="text"
+                      inputMode="numeric"
+                      className="short"
+                      placeholder={50}
+                    />
+                    {errors.blacklistedTagsLimit &&
+                      touched.blacklistedTagsLimit &&
+                      typeof errors.blacklistedTagsLimit === 'string' && (
+                        <div className="error">
+                          {errors.blacklistedTagsLimit}
+                        </div>
+                      )}
                   </div>
                 </div>
                 <div className="form-row">

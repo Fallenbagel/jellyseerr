@@ -128,6 +128,8 @@ export interface MainSettings {
   discoverRegion: string;
   streamingRegion: string;
   originalLanguage: string;
+  blacklistedTags: string;
+  blacklistedTagsLimit: number;
   trustProxy: boolean;
   mediaServerType: number;
   partialRequestsEnabled: boolean;
@@ -298,7 +300,8 @@ export type JobId =
   | 'jellyfin-recently-added-scan'
   | 'jellyfin-full-scan'
   | 'image-cache-cleanup'
-  | 'availability-sync';
+  | 'availability-sync'
+  | 'process-blacklisted-tags';
 
 export interface AllSettings {
   clientId: string;
@@ -344,6 +347,8 @@ class Settings {
         discoverRegion: '',
         streamingRegion: '',
         originalLanguage: '',
+        blacklistedTags: '',
+        blacklistedTagsLimit: 50,
         trustProxy: false,
         mediaServerType: MediaServerType.NOT_CONFIGURED,
         partialRequestsEnabled: true,
@@ -511,6 +516,9 @@ class Settings {
         },
         'image-cache-cleanup': {
           schedule: '0 0 5 * * *',
+        },
+        'process-blacklisted-tags': {
+          schedule: '0 30 1 */7 * *',
         },
       },
     };
