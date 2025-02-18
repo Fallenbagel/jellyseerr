@@ -273,7 +273,9 @@ class PlexScanner
       await this.processHamaSpecials(metadata, mediaIds.tvdbId);
     }
 
-    const tvShow = await this.tmdb.getTvShow({ tvId: mediaIds.tmdbId });
+    const tvShow = await this.tmdb.getTvShow({
+      tvId: mediaIds.tmdbId,
+    });
 
     const seasons = tvShow.seasons;
     const processableSeasons: ProcessableSeason[] = [];

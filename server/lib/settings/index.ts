@@ -100,6 +100,29 @@ interface Quota {
   quotaDays?: number;
 }
 
+export enum IndexerType {
+  TMDB,
+  TVDB,
+}
+
+export interface MetadataSettings {
+  settings: MetadataTypeSettings;
+  providers: ProviderSettings;
+}
+
+export interface TvdbSettings {
+  apiKey?: string;
+  pin?: string;
+}
+
+export interface ProviderSettings {
+  tvdb: TvdbSettings;
+}
+export interface MetadataTypeSettings {
+  tv: IndexerType;
+  anime: IndexerType;
+}
+
 export interface ProxySettings {
   enabled: boolean;
   hostname: string;
@@ -313,6 +336,8 @@ export interface AllSettings {
   public: PublicSettings;
   notifications: NotificationSettings;
   jobs: Record<JobId, JobSettings>;
+  tvdb: TvdbSettings;
+  metadataSettings: MetadataSettings;
 }
 
 const SETTINGS_PATH = process.env.CONFIG_DIRECTORY
@@ -382,6 +407,22 @@ class Settings {
         apiKey: '',
       },
       tautulli: {},
+      metadataSettings: {
+        settings: {
+          tv: IndexerType.TMDB,
+          anime: IndexerType.TVDB,
+        },
+        providers: {
+          tvdb: {
+            apiKey: '',
+            pin: '',
+          },
+        },
+      },
+      tvdb: {
+        apiKey: '',
+        pin: '',
+      },
       radarr: [],
       sonarr: [],
       public: {
@@ -549,6 +590,30 @@ class Settings {
 
   set tautulli(data: TautulliSettings) {
     this.data.tautulli = data;
+  }
+
+  get metadataSettings(): MetadataSettings {
+    return this.data.metadataSettings;
+  }
+
+  set metadataSettings(data: MetadataSettings) {
+    this.data.metadataSettings = data;
+  }
+
+  get tvdb(): TvdbSettings {
+    return this.data.tvdb;
+  }
+
+  set tvdb(data: TvdbSettings) {
+    this.data.tvdb = data;
+  }
+
+  get metadataType(): MetadataTypeSettings {
+    return this.data.metadataSettings.settings;
+  }
+
+  set metadataType(data: MetadataTypeSettings) {
+    this.data.metadataSettings.settings = data;
   }
 
   get radarr(): RadarrSettings[] {

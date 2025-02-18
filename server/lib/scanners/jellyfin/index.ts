@@ -1,3 +1,4 @@
+import type { TvShowIndexer } from '@server/api/indexer';
 import type { JellyfinLibraryItem } from '@server/api/jellyfin';
 import JellyfinAPI from '@server/api/jellyfin';
 import TheMovieDb from '@server/api/themoviedb';
@@ -30,6 +31,7 @@ interface SyncStatus {
 class JellyfinScanner {
   private sessionId: string;
   private tmdb: TheMovieDb;
+  private tvShowIndexer: TvShowIndexer;
   private jfClient: JellyfinAPI;
   private items: JellyfinLibraryItem[] = [];
   private progress = 0;
@@ -43,6 +45,7 @@ class JellyfinScanner {
 
   constructor({ isRecentOnly }: { isRecentOnly?: boolean } = {}) {
     this.tmdb = new TheMovieDb();
+
     this.isRecentOnly = isRecentOnly ?? false;
   }
 
@@ -212,7 +215,7 @@ class JellyfinScanner {
 
       if (metadata.ProviderIds.Tmdb) {
         try {
-          tvShow = await this.tmdb.getTvShow({
+          tvShow = await this.tvShowIndexer.getTvShow({
             tvId: Number(metadata.ProviderIds.Tmdb),
           });
         } catch {
@@ -223,7 +226,7 @@ class JellyfinScanner {
       }
       if (!tvShow && metadata.ProviderIds.Tvdb) {
         try {
-          tvShow = await this.tmdb.getShowByTvdbId({
+          tvShow = await this.tvShowIndexer.getShowByTvdbId({
             tvdbId: Number(metadata.ProviderIds.Tvdb),
           });
         } catch {
