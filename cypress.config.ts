@@ -1,10 +1,19 @@
 import { defineConfig } from 'cypress';
+import { initializeDnsCacheForTesting } from './server/utils/dnsCacheManager';
 
 export default defineConfig({
   projectId: 'xkm1b4',
   e2e: {
     baseUrl: 'http://localhost:5055',
     experimentalSessionAndOrigin: true,
+    setupNodeEvents(on) {
+      on('task', {
+        initDnsCache() {
+          initializeDnsCacheForTesting();
+          return null;
+        },
+      });
+    },
   },
   env: {
     ADMIN_EMAIL: 'admin@seerr.dev',
