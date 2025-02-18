@@ -63,6 +63,9 @@ const messages = defineMessages('components.Settings.SettingsMain', {
   dnsServers: 'Custom DNS Servers',
   dnsServersTip:
     'Comma-separated list of custom DNS servers, e.g. "1.1.1.1,[2606:4700:4700::1111]"',
+  removeUnmonitoredEnabled: 'Remove Unmonitored Media',
+  removeUnmonitoredExplanation:
+    'Remove Movies/Seasons from Jellyseerr that are not available and have been un-monitored since',
   locale: 'Display Language',
   proxyEnabled: 'HTTP(S) Proxy',
   proxyHostname: 'Proxy Hostname',
@@ -171,6 +174,7 @@ const SettingsMain = () => {
             trustProxy: data?.trustProxy,
             cacheImages: data?.cacheImages,
             proxyEnabled: data?.proxy?.enabled,
+            removeUnmonitoredEnabled: data?.removeUnmonitoredEnabled,
             proxyHostname: data?.proxy?.hostname,
             proxyPort: data?.proxy?.port,
             proxySsl: data?.proxy?.useSsl,
@@ -201,6 +205,7 @@ const SettingsMain = () => {
                   enableSpecialEpisodes: values.enableSpecialEpisodes,
                   forceIpv4First: values.forceIpv4First,
                   dnsServers: values.dnsServers,
+                  removeUnmonitoredEnabled: values.removeUnmonitoredEnabled,
                   trustProxy: values.trustProxy,
                   cacheImages: values.cacheImages,
                   proxy: {
@@ -552,6 +557,35 @@ const SettingsMain = () => {
                       name="forceIpv4First"
                       onChange={() => {
                         setFieldValue('forceIpv4First', !values.forceIpv4First);
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label
+                    htmlFor="removeUnmonitoredEnabled"
+                    className="checkbox-label"
+                  >
+                    <span className="mr-2">
+                      {intl.formatMessage(messages.removeUnmonitoredEnabled)}
+                    </span>
+                    <SettingsBadge badgeType="experimental" />
+                    <span className="label-tip">
+                      {intl.formatMessage(
+                        messages.removeUnmonitoredExplanation
+                      )}
+                    </span>
+                  </label>
+                  <div className="form-input-area">
+                    <Field
+                      type="checkbox"
+                      id="removeUnmonitoredEnabled"
+                      name="removeUnmonitoredEnabled"
+                      onChange={() => {
+                        setFieldValue(
+                          'removeUnmonitoredEnabled',
+                          !values.removeUnmonitoredEnabled
+                        );
                       }}
                     />
                   </div>
