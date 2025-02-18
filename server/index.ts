@@ -178,7 +178,7 @@ app
 
                   dnsCache.updateCache(hostname, cacheEntry).catch(() => {
                     logger.debug(
-                      `Failed to update DNS cache for ${hostname}: ${err.message}`,
+                      `Failed to update DNS cache for ${hostname}: ${error.message}`,
                       {
                         label: 'DNSCache',
                       }
@@ -306,7 +306,7 @@ app
 
               dnsCache.updateCache(hostname, cacheEntry).catch(() => {
                 logger.debug(
-                  `Failed to update DNS cache for ${hostname} after native lookup: ${err.message}`,
+                  `Failed to update DNS cache for ${hostname} after native lookup: ${error.message}`,
                   {
                     label: 'DNSCache',
                   }
