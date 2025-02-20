@@ -33,6 +33,9 @@ const messages = defineMessages('components.Settings.SettingsNetwork', {
   dnsServers: 'Custom DNS Servers',
   dnsServersTip:
     'Comma-separated list of custom DNS servers, e.g. "1.1.1.1,[2606:4700:4700::1111]"',
+  networkDisclaimer:
+    'Network parameters from your container/system should be used instead of this setting. See the {docs} for more information.',
+  docs: 'documentation',
   proxyEnabled: 'HTTP(S) Proxy',
   proxyHostname: 'Proxy Hostname',
   proxyPort: 'Proxy Port',
@@ -46,7 +49,7 @@ const messages = defineMessages('components.Settings.SettingsNetwork', {
   validationProxyPort: 'You must provide a valid port',
 });
 
-const SettingsMain = () => {
+const SettingsNetwork = () => {
   const { addToast } = useToasts();
   const intl = useIntl();
   const {
@@ -213,8 +216,22 @@ const SettingsMain = () => {
                     </span>
                     <SettingsBadge badgeType="advanced" className="mr-2" />
                     <SettingsBadge badgeType="restartRequired" />
+                    <SettingsBadge badgeType="experimental" />
                     <span className="label-tip">
                       {intl.formatMessage(messages.forceIpv4FirstTip)}
+                    </span>
+                    <span className="label-tip mt-0.5">
+                      {intl.formatMessage(messages.networkDisclaimer, {
+                        docs: (
+                          <a
+                            href="https://docs.jellyseerr.dev/troubleshooting"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {intl.formatMessage(messages.docs)}
+                          </a>
+                        ),
+                      })}
                     </span>
                   </label>
                   <div className="form-input-area">
@@ -235,8 +252,22 @@ const SettingsMain = () => {
                     </span>
                     <SettingsBadge badgeType="advanced" className="mr-2" />
                     <SettingsBadge badgeType="restartRequired" />
+                    <SettingsBadge badgeType="experimental" />
                     <span className="label-tip">
                       {intl.formatMessage(messages.dnsServersTip)}
+                    </span>
+                    <span className="label-tip mt-0.5">
+                      {intl.formatMessage(messages.networkDisclaimer, {
+                        docs: (
+                          <a
+                            href="https://docs.jellyseerr.dev/troubleshooting"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {intl.formatMessage(messages.docs)}
+                          </a>
+                        ),
+                      })}
                     </span>
                   </label>
                   <div className="form-input-area">
@@ -458,4 +489,4 @@ const SettingsMain = () => {
   );
 };
 
-export default SettingsMain;
+export default SettingsNetwork;
