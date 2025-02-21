@@ -935,6 +935,7 @@
   "components.Settings.SettingsMain.validationApplicationTitle": "You must provide an application title",
   "components.Settings.SettingsMain.validationApplicationUrl": "You must provide a valid URL",
   "components.Settings.SettingsMain.validationApplicationUrlTrailingSlash": "URL must not end in a trailing slash",
+  "components.Settings.SettingsNetwork.advancedNetworkSettings": "Advanced Network Settings",
   "components.Settings.SettingsNetwork.csrfProtection": "Enable CSRF Protection",
   "components.Settings.SettingsNetwork.csrfProtectionHoverTip": "Do NOT enable this setting unless you understand what you are doing!",
   "components.Settings.SettingsNetwork.csrfProtectionTip": "Set external API access to read-only (requires HTTPS)",
