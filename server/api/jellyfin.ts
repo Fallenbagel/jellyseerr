@@ -187,6 +187,14 @@ class JellyfinAPI extends ExternalAPI {
       if (e.cause.status === 401) {
         throw new ApiError(e.cause.status, ApiErrorCode.InvalidCredentials);
       }
+    }
+
+    try {
+      return await authenticate(false);
+    } catch (e) {
+      if (e.cause.status === 401) {
+        throw new ApiError(e.cause.status, ApiErrorCode.InvalidCredentials);
+      }
 
       logger.error(
         'Something went wrong while authenticating with the Jellyfin server',
@@ -196,24 +204,8 @@ class JellyfinAPI extends ExternalAPI {
           ip: ClientIP,
         }
       );
-    }
 
-    try {
-      return await authenticate(false);
-    } catch (e) {
-      if (e.cause.status === 401) {
-        throw new ApiError(e.cause.status, ApiErrorCode.InvalidCredentials);
-      } else {
-        logger.error(
-          'Something went wrong while authenticating with the Jellyfin server',
-          {
-            label: 'Jellyfin API',
-            error: e.cause.message ?? e.cause.statusText,
-            ip: ClientIP,
-          }
-        );
-        throw new ApiError(e.cause.status, ApiErrorCode.Unknown);
-      }
+      throw new ApiError(e.cause.status, ApiErrorCode.Unknown);
     }
   }
 
