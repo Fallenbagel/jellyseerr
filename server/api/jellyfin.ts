@@ -122,7 +122,7 @@ class JellyfinAPI extends ExternalAPI {
         },
       }
     );
-    this.deviceId = deviceId;
+    this.deviceId = deviceId ? deviceId : undefined;
   }
 
   public async login(
@@ -187,6 +187,15 @@ class JellyfinAPI extends ExternalAPI {
       if (e.cause.status === 401) {
         throw new ApiError(e.cause.status, ApiErrorCode.InvalidCredentials);
       }
+
+      logger.error(
+        'Something went wrong while authenticating with the Jellyfin server',
+        {
+          label: 'Jellyfin API',
+          error: e.cause.message ?? e.cause.statusText,
+          ip: ClientIP,
+        }
+      );
     }
 
     try {

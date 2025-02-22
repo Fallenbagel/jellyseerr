@@ -269,14 +269,9 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
       select: { id: true, jellyfinDeviceId: true },
     });
 
-    let deviceId = '';
-    if (user) {
-      deviceId = user.jellyfinDeviceId ?? '';
-    } else {
-      deviceId = Buffer.from(`BOT_overseerr_${body.username ?? ''}`).toString(
-        'base64'
-      );
-    }
+    const deviceId =
+      user?.jellyfinDeviceId ??
+      Buffer.from(`BOT_overseerr_${body.username ?? ''}`).toString('base64');
 
     // First we need to attempt to log the user in to jellyfin
     const jellyfinserver = new JellyfinAPI(hostname ?? '', undefined, deviceId);
@@ -414,7 +409,7 @@ authRoutes.post('/jellyfin', async (req, res, next) => {
         serverType === ServerType.JELLYFIN ? UserType.JELLYFIN : UserType.EMBY;
 
       logger.info(
-        `Found matching ${serverType} user; updating user with ${userType}`,
+        `Found matching ${serverType} user; updating user with ${serverType}`,
         {
           label: 'API',
           ip: req.ip,
