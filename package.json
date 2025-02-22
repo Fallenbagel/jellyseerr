@@ -93,7 +93,7 @@
     "secure-random-password": "0.2.3",
     "semver": "7.3.8",
     "sharp": "^0.33.4",
-    "sqlite3": "5.1.4",
+    "sqlite3": "5.1.7",
     "swagger-ui-express": "4.6.2",
     "swr": "2.2.5",
     "tailwind-merge": "^2.6.0",
