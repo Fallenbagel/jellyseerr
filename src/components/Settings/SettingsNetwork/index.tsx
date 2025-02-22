@@ -40,7 +40,7 @@ const messages = defineMessages('components.Settings.SettingsNetwork', {
   validationProxyPort: 'You must provide a valid port',
   advancedNetworkSettings: 'Advanced Network Settings',
   networkDisclaimer:
-    'Network parameters from your container/system should be used instead of this setting. See the {docs} for more information.',
+    'Network parameters from your container/system should be used instead of these settings. See the {docs} for more information.',
   docs: 'documentation',
   forceIpv4First: 'IPv4 Resolution First',
   forceIpv4FirstTip:
