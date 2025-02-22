@@ -1,4 +1,4 @@
-FROM node:20-alpine AS BUILD_IMAGE
+FROM node:22-alpine AS BUILD_IMAGE
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ RUN \
   ;; \
   esac
 
-RUN npm install --global pnpm
+RUN npm install --global pnpm@9
 
 COPY package.json pnpm-lock.yaml postinstall-win.js ./
 RUN CYPRESS_INSTALL_BINARY=0 pnpm install --frozen-lockfile
@@ -29,14 +29,14 @@ RUN pnpm build
 # remove development dependencies
 RUN pnpm prune --prod --ignore-scripts
 
-RUN rm -rf src server .next/cache
+RUN rm -rf src server .next/cache charts gen-docs docs
 
 RUN touch config/DOCKER
 
 RUN echo "{\"commitTag\": \"${COMMIT_TAG}\"}" > committag.json
 
 
-FROM node:20-alpine
+FROM node:22-alpine
 
 # Metadata for Github Package Registry
 LABEL org.opencontainers.image.source="https://github.com/Fallenbagel/jellyseerr"
@@ -45,7 +45,7 @@ WORKDIR /app
 
 RUN apk add --no-cache tzdata tini && rm -rf /tmp/*
 
-RUN npm install -g pnpm
+RUN npm install -g pnpm@9
 
 # copy from build image
 COPY --from=BUILD_IMAGE /app ./

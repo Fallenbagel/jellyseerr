@@ -7,12 +7,14 @@ import type {
 import SonarrAPI from '@server/api/servarr/sonarr';
 import TheMovieDb from '@server/api/themoviedb';
 import { ANIME_KEYWORD_ID } from '@server/api/themoviedb/constants';
+import type { TmdbKeyword } from '@server/api/themoviedb/interfaces';
 import {
   MediaRequestStatus,
   MediaStatus,
   MediaType,
 } from '@server/constants/media';
 import { getRepository } from '@server/datasource';
+import OverrideRule from '@server/entity/OverrideRule';
 import type { MediaRequestBody } from '@server/interfaces/api/requestInterfaces';
 import notificationManager, { Notification } from '@server/lib/notifications';
 import { Permission } from '@server/lib/permissions';
@@ -40,6 +42,7 @@ export class RequestPermissionError extends Error {}
 export class QuotaRestrictedError extends Error {}
 export class DuplicateMediaRequestError extends Error {}
 export class NoSeasonsAvailableError extends Error {}
+export class BlacklistedMediaError extends Error {}
 
 type MediaRequestOptions = {
   isAutoRequest?: boolean;
@@ -56,6 +59,7 @@ export class MediaRequest {
     const mediaRepository = getRepository(Media);
     const requestRepository = getRepository(MediaRequest);
     const userRepository = getRepository(User);
+    const settings = getSettings();
 
     let requestUser = user;
 
@@ -143,6 +147,16 @@ export class MediaRequest {
         mediaType: requestBody.mediaType,
       });
     } else {
+      if (media.status === MediaStatus.BLACKLISTED) {
+        logger.warn('Request for media blocked due to being blacklisted', {
+          tmdbId: tmdbMedia.id,
+          mediaType: requestBody.mediaType,
+          label: 'Media Request',
+        });
+
+        throw new BlacklistedMediaError('This media is blacklisted.');
+      }
+
       if (media.status === MediaStatus.UNKNOWN && !requestBody.is4k) {
         media.status = MediaStatus.PENDING;
       }
@@ -194,6 +208,134 @@ export class MediaRequest {
       }
     }
 
+    // Apply overrides if the user is not an admin or has the "advanced request" permission
+    const useOverrides = !user.hasPermission([Permission.MANAGE_REQUESTS], {
+      type: 'or',
+    });
+
+    let rootFolder = requestBody.rootFolder;
+    let profileId = requestBody.profileId;
+    let tags = requestBody.tags;
+
+    if (useOverrides) {
+      const defaultRadarrId = requestBody.is4k
+        ? settings.radarr.findIndex((r) => r.is4k && r.isDefault)
+        : settings.radarr.findIndex((r) => !r.is4k && r.isDefault);
+      const defaultSonarrId = requestBody.is4k
+        ? settings.sonarr.findIndex((s) => s.is4k && s.isDefault)
+        : settings.sonarr.findIndex((s) => !s.is4k && s.isDefault);
+
+      const overrideRuleRepository = getRepository(OverrideRule);
+      const overrideRules = await overrideRuleRepository.find({
+        where:
+          requestBody.mediaType === MediaType.MOVIE
+            ? { radarrServiceId: defaultRadarrId }
+            : { sonarrServiceId: defaultSonarrId },
+      });
+
+      const appliedOverrideRules = overrideRules.filter((rule) => {
+        const hasAnimeKeyword =
+          'results' in tmdbMedia.keywords &&
+          tmdbMedia.keywords.results.some(
+            (keyword: TmdbKeyword) => keyword.id === ANIME_KEYWORD_ID
+          );
+
+        // Skip override rules if the media is an anime TV show as anime TV
+        // is handled by default and override rules do not explicitly include
+        // the anime keyword
+        if (
+          requestBody.mediaType === MediaType.TV &&
+          hasAnimeKeyword &&
+          (!rule.keywords ||
+            !rule.keywords.split(',').map(Number).includes(ANIME_KEYWORD_ID))
+        ) {
+          return false;
+        }
+
+        if (
+          rule.users &&
+          !rule.users
+            .split(',')
+            .some((userId) => Number(userId) === requestUser.id)
+        ) {
+          return false;
+        }
+        if (
+          rule.genre &&
+          !rule.genre
+            .split(',')
+            .some((genreId) =>
+              tmdbMedia.genres
+                .map((genre) => genre.id)
+                .includes(Number(genreId))
+            )
+        ) {
+          return false;
+        }
+        if (
+          rule.language &&
+          !rule.language
+            .split('|')
+            .some((languageId) => languageId === tmdbMedia.original_language)
+        ) {
+          return false;
+        }
+        if (
+          rule.keywords &&
+          !rule.keywords.split(',').some((keywordId) => {
+            let keywordList: TmdbKeyword[] = [];
+
+            if ('keywords' in tmdbMedia.keywords) {
+              keywordList = tmdbMedia.keywords.keywords;
+            } else if ('results' in tmdbMedia.keywords) {
+              keywordList = tmdbMedia.keywords.results;
+            }
+
+            return keywordList
+              .map((keyword: TmdbKeyword) => keyword.id)
+              .includes(Number(keywordId));
+          })
+        ) {
+          return false;
+        }
+        return true;
+      });
+
+      // hacky way to prioritize rules
+      // TODO: make this better
+      const prioritizedRule = appliedOverrideRules.sort((a, b) => {
+        const keys: (keyof OverrideRule)[] = ['genre', 'language', 'keywords'];
+
+        const aSpecificity = keys.filter((key) => a[key] !== null).length;
+        const bSpecificity = keys.filter((key) => b[key] !== null).length;
+
+        // Take the rule with the most specific condition first
+        return bSpecificity - aSpecificity;
+      })[0];
+
+      if (prioritizedRule) {
+        if (prioritizedRule.rootFolder) {
+          rootFolder = prioritizedRule.rootFolder;
+        }
+        if (prioritizedRule.profileId) {
+          profileId = prioritizedRule.profileId;
+        }
+        if (prioritizedRule.tags) {
+          tags = [
+            ...new Set([
+              ...(tags || []),
+              ...prioritizedRule.tags.split(',').map((tag) => Number(tag)),
+            ]),
+          ];
+        }
+
+        logger.debug('Override rule applied.', {
+          label: 'Media Request',
+          overrides: prioritizedRule,
+        });
+      }
+    }
+
     if (requestBody.mediaType === MediaType.MOVIE) {
       await mediaRepository.save(media);
 
@@ -232,9 +374,9 @@ export class MediaRequest {
           : undefined,
         is4k: requestBody.is4k,
         serverId: requestBody.serverId,
-        profileId: requestBody.profileId,
-        rootFolder: requestBody.rootFolder,
-        tags: requestBody.tags,
+        profileId: profileId,
+        rootFolder: rootFolder,
+        tags: tags,
         isAutoRequest: options.isAutoRequest ?? false,
       });
 
@@ -244,12 +386,14 @@ export class MediaRequest {
       const tmdbMediaShow = tmdbMedia as Awaited<
         ReturnType<typeof tmdb.getTvShow>
       >;
-      const requestedSeasons =
+      let requestedSeasons =
         requestBody.seasons === 'all'
-          ? tmdbMediaShow.seasons
-              .map((season) => season.season_number)
-              .filter((sn) => sn > 0)
+          ? tmdbMediaShow.seasons.map((season) => season.season_number)
           : (requestBody.seasons as number[]);
+      if (!settings.main.enableSpecialEpisodes) {
+        requestedSeasons = requestedSeasons.filter((sn) => sn > 0);
+      }
+
       let existingSeasons: number[] = [];
 
       // We need to check existing requests on this title to make sure we don't double up on seasons that were
@@ -335,10 +479,10 @@ export class MediaRequest {
           : undefined,
         is4k: requestBody.is4k,
         serverId: requestBody.serverId,
-        profileId: requestBody.profileId,
-        rootFolder: requestBody.rootFolder,
+        profileId: profileId,
+        rootFolder: rootFolder,
         languageProfileId: requestBody.languageProfileId,
-        tags: requestBody.tags,
+        tags: tags,
         seasons: finalSeasons.map(
           (sn) =>
             new SeasonRequest({
@@ -575,10 +719,15 @@ export class MediaRequest {
       // Do not update the status if the item is already partially available or available
       media[this.is4k ? 'status4k' : 'status'] !== MediaStatus.AVAILABLE &&
       media[this.is4k ? 'status4k' : 'status'] !==
-        MediaStatus.PARTIALLY_AVAILABLE
+        MediaStatus.PARTIALLY_AVAILABLE &&
+      media[this.is4k ? 'status4k' : 'status'] !== MediaStatus.PROCESSING
     ) {
-      media[this.is4k ? 'status4k' : 'status'] = MediaStatus.PROCESSING;
-      mediaRepository.save(media);
+      const statusField = this.is4k ? 'status4k' : 'status';
+
+      await mediaRepository.update(
+        { id: this.media.id },
+        { [statusField]: MediaStatus.PROCESSING }
+      );
     }
 
     if (
@@ -848,7 +997,7 @@ export class MediaRequest {
             const requestRepository = getRepository(MediaRequest);
 
             this.status = MediaRequestStatus.FAILED;
-            requestRepository.save(this);
+            await requestRepository.save(this);
 
             logger.warn(
               'Something went wrong sending movie request to Radarr, marking status as FAILED',
@@ -861,6 +1010,14 @@ export class MediaRequest {
             );
 
             this.sendNotification(media, Notification.MEDIA_FAILED);
+          })
+          .finally(() => {
+            radarr.clearCache({
+              tmdbId: movie.id,
+              externalId: this.is4k
+                ? media.externalServiceId4k
+                : media.externalServiceId,
+            });
           });
         logger.info('Sent request to Radarr', {
           label: 'Media Request',
@@ -1118,18 +1275,23 @@ export class MediaRequest {
               throw new Error('Media data not found');
             }
 
-            media[this.is4k ? 'externalServiceId4k' : 'externalServiceId'] =
-              sonarrSeries.id;
-            media[this.is4k ? 'externalServiceSlug4k' : 'externalServiceSlug'] =
-              sonarrSeries.titleSlug;
-            media[this.is4k ? 'serviceId4k' : 'serviceId'] = sonarrSettings?.id;
-            await mediaRepository.save(media);
+            const updateFields = {
+              [this.is4k ? 'externalServiceId4k' : 'externalServiceId']:
+                sonarrSeries.id,
+              [this.is4k ? 'externalServiceSlug4k' : 'externalServiceSlug']:
+                sonarrSeries.titleSlug,
+              [this.is4k ? 'serviceId4k' : 'serviceId']: sonarrSettings?.id,
+            };
+
+            await mediaRepository.update({ id: this.media.id }, updateFields);
           })
           .catch(async () => {
             const requestRepository = getRepository(MediaRequest);
 
-            this.status = MediaRequestStatus.FAILED;
-            requestRepository.save(this);
+            await requestRepository.update(
+              { id: this.id },
+              { status: MediaRequestStatus.FAILED }
+            );
 
             logger.warn(
               'Something went wrong sending series request to Sonarr, marking status as FAILED',
@@ -1142,6 +1304,15 @@ export class MediaRequest {
             );
 
             this.sendNotification(media, Notification.MEDIA_FAILED);
+          })
+          .finally(() => {
+            sonarr.clearCache({
+              tvdbId,
+              externalId: this.is4k
+                ? media.externalServiceId4k
+                : media.externalServiceId,
+              title: series.name,
+            });
           });
         logger.info('Sent request to Sonarr', {
           label: 'Media Request',

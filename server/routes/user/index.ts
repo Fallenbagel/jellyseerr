@@ -2,6 +2,7 @@ import JellyfinAPI from '@server/api/jellyfin';
 import PlexTvAPI from '@server/api/plextv';
 import TautulliAPI from '@server/api/tautulli';
 import { MediaType } from '@server/constants/media';
+import { MediaServerType } from '@server/constants/server';
 import { UserType } from '@server/constants/user';
 import { getRepository } from '@server/datasource';
 import Media from '@server/entity/Media';
@@ -33,7 +34,15 @@ router.get('/', async (req, res, next) => {
   try {
     const pageSize = req.query.take ? Number(req.query.take) : 10;
     const skip = req.query.skip ? Number(req.query.skip) : 0;
+    const q = req.query.q ? req.query.q.toString().toLowerCase() : '';
     let query = getRepository(User).createQueryBuilder('user');
+
+    if (q) {
+      query = query.where(
+        'LOWER(user.username) LIKE :q OR LOWER(user.email) LIKE :q OR LOWER(user.plexUsername) LIKE :q OR LOWER(user.jellyfinUsername) LIKE :q',
+        { q: `%${q}%` }
+      );
+    }
 
     switch (req.query.sort) {
       case 'updated':
@@ -44,7 +53,7 @@ router.get('/', async (req, res, next) => {
           `CASE WHEN (user.username IS NULL OR user.username = '') THEN (
              CASE WHEN (user.plexUsername IS NULL OR user.plexUsername = '') THEN (
                CASE WHEN (user.jellyfinUsername IS NULL OR user.jellyfinUsername = '') THEN
-                 user.email
+                 "user"."email"
                ELSE
                  LOWER(user.jellyfinUsername)
                END)
@@ -61,11 +70,11 @@ router.get('/', async (req, res, next) => {
         query = query
           .addSelect((subQuery) => {
             return subQuery
-              .select('COUNT(request.id)', 'requestCount')
+              .select('COUNT(request.id)', 'request_count')
               .from(MediaRequest, 'request')
               .where('request.requestedBy.id = user.id');
-          }, 'requestCount')
-          .orderBy('requestCount', 'DESC');
+          }, 'request_count')
+          .orderBy('request_count', 'DESC');
         break;
       default:
         query = query.orderBy('user.id', 'ASC');
@@ -515,12 +524,6 @@ router.post(
 
       //const jellyfinUsersResponse = await jellyfinClient.getUsers();
       const createdUsers: User[] = [];
-      const { externalHostname } = getSettings().jellyfin;
-
-      const jellyfinHost =
-        externalHostname && externalHostname.length > 0
-          ? externalHostname
-          : hostname;
 
       jellyfinClient.setUserId(admin.jellyfinUserId ?? '');
       const jellyfinUsers = await jellyfinClient.getUsers();
@@ -544,13 +547,11 @@ router.post(
             ).toString('base64'),
             email: jellyfinUser?.Name,
             permissions: settings.main.defaultPermissions,
-            avatar: jellyfinUser?.PrimaryImageTag
-              ? `${jellyfinHost}/Users/${jellyfinUser.Id}/Images/Primary/?tag=${jellyfinUser.PrimaryImageTag}&quality=90`
-              : gravatarUrl(jellyfinUser?.Name ?? '', {
-                  default: 'mm',
-                  size: 200,
-                }),
-            userType: UserType.JELLYFIN,
+            avatar: `/avatarproxy/${jellyfinUser?.Id}`,
+            userType:
+              settings.main.mediaServerType === MediaServerType.JELLYFIN
+                ? UserType.JELLYFIN
+                : UserType.EMBY,
           });
 
           await userRepository.save(newUser);
@@ -771,6 +772,7 @@ router.get<{ id: string }, WatchlistResponse>(
       totalPages: Math.ceil(watchlist.totalSize / itemsPerPage),
       totalResults: watchlist.totalSize,
       results: watchlist.items.map((item) => ({
+        id: item.tmdbId,
         ratingKey: item.ratingKey,
         title: item.title,
         mediaType: item.type === 'show' ? 'tv' : 'movie',

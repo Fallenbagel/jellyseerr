@@ -34,6 +34,7 @@ const messages = defineMessages('components.Login', {
   validationUrlBaseTrailingSlash: 'URL base must not end in a trailing slash',
   loginerror: 'Something went wrong while trying to sign in.',
   adminerror: 'You must use an admin account to sign in.',
+  noadminerror: 'No admin user found on the server.',
   credentialerror: 'The username or password is incorrect.',
   invalidurlerror: 'Unable to connect to {mediaServerName} server.',
   signingin: 'Signing in…',
@@ -82,10 +83,17 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
       port: Yup.number().required(
         intl.formatMessage(messages.validationPortRequired)
       ),
-      urlBase: Yup.string().matches(
-        /^(.*[^/])$/,
-        intl.formatMessage(messages.validationUrlBaseTrailingSlash)
-      ),
+      urlBase: Yup.string()
+        .test(
+          'leading-slash',
+          intl.formatMessage(messages.validationUrlBaseLeadingSlash),
+          (value) => !value || value.startsWith('/')
+        )
+        .test(
+          'trailing-slash',
+          intl.formatMessage(messages.validationUrlBaseTrailingSlash),
+          (value) => !value || !value.endsWith('/')
+        ),
       email: Yup.string()
         .email(intl.formatMessage(messages.validationemailformat))
         .required(intl.formatMessage(messages.validationemailrequired)),
@@ -149,6 +157,9 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                 break;
               case ApiErrorCode.NotAdmin:
                 errorMessage = messages.adminerror;
+                break;
+              case ApiErrorCode.NoAdminUser:
+                errorMessage = messages.noadminerror;
                 break;
               default:
                 errorMessage = messages.loginerror;
@@ -381,14 +392,35 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                   email: values.username,
                 }),
               });
-              if (!res.ok) throw new Error();
+              if (!res.ok) throw new Error(res.statusText, { cause: res });
             } catch (e) {
+              let errorData;
+              try {
+                errorData = await e.cause?.text();
+                errorData = JSON.parse(errorData);
+              } catch {
+                /* empty */
+              }
+              let errorMessage = null;
+              switch (errorData?.message) {
+                case ApiErrorCode.InvalidUrl:
+                  errorMessage = messages.invalidurlerror;
+                  break;
+                case ApiErrorCode.InvalidCredentials:
+                  errorMessage = messages.credentialerror;
+                  break;
+                case ApiErrorCode.NotAdmin:
+                  errorMessage = messages.adminerror;
+                  break;
+                case ApiErrorCode.NoAdminUser:
+                  errorMessage = messages.noadminerror;
+                  break;
+                default:
+                  errorMessage = messages.loginerror;
+                  break;
+              }
               toasts.addToast(
-                intl.formatMessage(
-                  e.message == 'Request failed with status code 401'
-                    ? messages.credentialerror
-                    : messages.loginerror
-                ),
+                intl.formatMessage(errorMessage, mediaServerFormatValues),
                 {
                   autoDismiss: true,
                   appearance: 'error',

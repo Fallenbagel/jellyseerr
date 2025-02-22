@@ -16,11 +16,15 @@
     "hideAvailable": false,
     "localLogin": true,
     "newPlexLogin": true,
-    "region": "",
+    "discoverRegion": "",
+    "streamingRegion": "",
     "originalLanguage": "",
     "trustProxy": false,
     "mediaServerType": 1,
     "partialRequestsEnabled": true,
+    "enableSpecialEpisodes": false,
+    "forceIpv4First": false,
+    "dnsServers": "",
     "locale": "en"
   },
   "plex": {
@@ -75,6 +79,7 @@
         "types": 0,
         "options": {
           "webhookUrl": "",
+          "webhookRoleId": "",
           "enableMentions": true
         }
       },
@@ -98,6 +103,7 @@
         "options": {
           "botAPI": "",
           "chatId": "",
+          "messageThreadId": "",
           "sendSilently": false
         }
       },

@@ -14,10 +14,12 @@ import useLocale from '@app/hooks/useLocale';
 import useSettings from '@app/hooks/useSettings';
 import defineMessages from '@app/utils/defineMessages';
 import { MediaServerType } from '@server/constants/server';
+import type { Library } from '@server/lib/settings';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
+import { useToasts } from 'react-toast-notifications';
 import useSWR, { mutate } from 'swr';
 import SetupLogin from './SetupLogin';
 
@@ -35,6 +37,8 @@ const messages = defineMessages('components.Setup', {
   signin: 'Sign In',
   configuremediaserver: 'Configure Media Server',
   configureservices: 'Configure Services',
+  librarieserror:
+    'Validation failed. Please toggle the libraries again to continue.',
 });
 
 const Setup = () => {
@@ -49,6 +53,7 @@ const Setup = () => {
   const router = useRouter();
   const { locale } = useLocale();
   const settings = useSettings();
+  const toasts = useToasts();
 
   const finishSetup = async () => {
     setIsUpdating(true);
@@ -77,6 +82,37 @@ const Setup = () => {
     }
   };
 
+  const validateLibraries = useCallback(async () => {
+    try {
+      const endpointMap: Record<MediaServerType, string> = {
+        [MediaServerType.JELLYFIN]: '/api/v1/settings/jellyfin',
+        [MediaServerType.EMBY]: '/api/v1/settings/jellyfin',
+        [MediaServerType.PLEX]: '/api/v1/settings/plex',
+        [MediaServerType.NOT_CONFIGURED]: '',
+      };
+
+      const endpoint = endpointMap[mediaServerType];
+      if (!endpoint) return;
+
+      const res = await fetch(endpoint);
+      if (!res.ok) throw new Error('Fetch failed');
+      const data = await res.json();
+
+      const hasEnabledLibraries = data?.libraries?.some(
+        (library: Library) => library.enabled
+      );
+
+      setMediaServerSettingsComplete(hasEnabledLibraries);
+    } catch (e) {
+      toasts.addToast(intl.formatMessage(messages.librarieserror), {
+        autoDismiss: true,
+        appearance: 'error',
+      });
+
+      setMediaServerSettingsComplete(false);
+    }
+  }, [intl, mediaServerType, toasts]);
+
   const { data: backdrops } = useSWR<string[]>('/api/v1/backdrops', {
     refreshInterval: 0,
     refreshWhenHidden: false,
@@ -87,18 +123,37 @@ const Setup = () => {
     if (settings.currentSettings.initialized) {
       router.push('/');
     }
+
     if (
       settings.currentSettings.mediaServerType !==
       MediaServerType.NOT_CONFIGURED
     ) {
-      setCurrentStep(3);
       setMediaServerType(settings.currentSettings.mediaServerType);
+      if (currentStep < 3) {
+        setCurrentStep(3);
+      }
     }
   }, [
     settings.currentSettings.mediaServerType,
     settings.currentSettings.initialized,
     router,
+    toasts,
+    intl,
+    currentStep,
+    mediaServerType,
+    validateLibraries,
   ]);
+
+  useEffect(() => {
+    if (currentStep === 3) {
+      validateLibraries();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep]);
+
+  const handleComplete = () => {
+    validateLibraries();
+  };
 
   if (settings.currentSettings.initialized) return <></>;
 
@@ -225,14 +280,9 @@ const Setup = () => {
           {currentStep === 3 && (
             <div className="p-2">
               {mediaServerType === MediaServerType.PLEX ? (
-                <SettingsPlex
-                  onComplete={() => setMediaServerSettingsComplete(true)}
-                />
+                <SettingsPlex onComplete={handleComplete} />
               ) : (
-                <SettingsJellyfin
-                  isSetupSettings
-                  onComplete={() => setMediaServerSettingsComplete(true)}
-                />
+                <SettingsJellyfin isSetupSettings onComplete={handleComplete} />
               )}
               <div className="actions">
                 <div className="flex justify-end">

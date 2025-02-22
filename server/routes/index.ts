@@ -15,14 +15,20 @@ import { checkUser, isAuthenticated } from '@server/middleware/auth';
 import { mapWatchProviderDetails } from '@server/models/common';
 import { mapProductionCompany } from '@server/models/Movie';
 import { mapNetwork } from '@server/models/Tv';
+import overrideRuleRoutes from '@server/routes/overrideRule';
 import settingsRoutes from '@server/routes/settings';
 import watchlistRoutes from '@server/routes/watchlist';
-import { appDataPath, appDataStatus } from '@server/utils/appDataVolume';
+import {
+  appDataPath,
+  appDataPermissions,
+  appDataStatus,
+} from '@server/utils/appDataVolume';
 import { getAppVersion, getCommitTag } from '@server/utils/appVersion';
 import restartFlag from '@server/utils/restartFlag';
 import { isPerson } from '@server/utils/typeHelpers';
 import { Router } from 'express';
 import authRoutes from './auth';
+import blacklistRoutes from './blacklist';
 import collectionRoutes from './collection';
 import discoverRoutes, { createTmdbWithRegionLanguage } from './discover';
 import issueRoutes from './issue';
@@ -92,6 +98,7 @@ router.get('/status/appdata', (_req, res) => {
   return res.status(200).json({
     appData: appDataStatus(),
     appDataPath: appDataPath(),
+    appDataPermissions: appDataPermissions(),
   });
 });
 
@@ -144,6 +151,7 @@ router.use('/search', isAuthenticated(), searchRoutes);
 router.use('/discover', isAuthenticated(), discoverRoutes);
 router.use('/request', isAuthenticated(), requestRoutes);
 router.use('/watchlist', isAuthenticated(), watchlistRoutes);
+router.use('/blacklist', isAuthenticated(), blacklistRoutes);
 router.use('/movie', isAuthenticated(), movieRoutes);
 router.use('/tv', isAuthenticated(), tvRoutes);
 router.use('/media', isAuthenticated(), mediaRoutes);
@@ -153,6 +161,11 @@ router.use('/service', isAuthenticated(), serviceRoutes);
 router.use('/issue', isAuthenticated(), issueRoutes);
 router.use('/issueComment', isAuthenticated(), issueCommentRoutes);
 router.use('/auth', authRoutes);
+router.use(
+  '/overrideRule',
+  isAuthenticated(Permission.ADMIN),
+  overrideRuleRoutes
+);
 
 router.get('/regions', isAuthenticated(), async (req, res, next) => {
   const tmdb = new TheMovieDb();

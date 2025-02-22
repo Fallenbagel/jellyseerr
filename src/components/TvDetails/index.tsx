@@ -4,6 +4,7 @@ import RTFresh from '@app/assets/rt_fresh.svg';
 import RTRotten from '@app/assets/rt_rotten.svg';
 import Spinner from '@app/assets/spinner.svg';
 import TmdbLogo from '@app/assets/tmdb_logo.svg';
+import BlacklistModal from '@app/components/BlacklistModal';
 import Badge from '@app/components/Common/Badge';
 import Button from '@app/components/Common/Button';
 import CachedImage from '@app/components/Common/CachedImage';
@@ -38,14 +39,13 @@ import {
   ArrowRightCircleIcon,
   CogIcon,
   ExclamationTriangleIcon,
+  EyeSlashIcon,
   FilmIcon,
-  PlayIcon,
-} from '@heroicons/react/24/outline';
-import {
-  ChevronDownIcon,
   MinusCircleIcon,
+  PlayIcon,
   StarIcon,
-} from '@heroicons/react/24/solid';
+} from '@heroicons/react/24/outline';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import type { RTRating } from '@server/api/rating/rottentomatoes';
 import { ANIME_KEYWORD_ID } from '@server/api/themoviedb/constants';
 import { IssueStatus } from '@server/constants/issue';
@@ -61,7 +61,7 @@ import { countries } from 'country-flag-icons';
 import 'country-flag-icons/3x2/flags.css';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
@@ -101,7 +101,7 @@ const messages = defineMessages('components.TvDetails', {
   watchlistSuccess: '<strong>{title}</strong> added to watchlist successfully!',
   watchlistDeleted:
     '<strong>{title}</strong> Removed from watchlist successfully!',
-  watchlistError: 'Something went wrong try again.',
+  watchlistError: 'Something went wrong. Please try again.',
   removefromwatchlist: 'Remove From Watchlist',
   addtowatchlist: 'Add To Watchlist',
 });
@@ -125,6 +125,9 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
   const [toggleWatchlist, setToggleWatchlist] = useState<boolean>(
     !tv?.onUserWatchlist
   );
+  const [isBlacklistUpdating, setIsBlacklistUpdating] =
+    useState<boolean>(false);
+  const [showBlacklistModal, setShowBlacklistModal] = useState(false);
   const { addToast } = useToasts();
 
   const {
@@ -155,6 +158,11 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     setShowManager(router.query.manage == '1' ? true : false);
   }, [router.query.manage]);
 
+  const closeBlacklistModal = useCallback(
+    () => setShowBlacklistModal(false),
+    []
+  );
+
   const { mediaUrl: plexUrl, mediaUrl4k: plexUrl4k } = useDeepLinks({
     mediaUrl: data?.mediaInfo?.mediaUrl,
     mediaUrl4k: data?.mediaInfo?.mediaUrl4k,
@@ -179,7 +187,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     })
   ) {
     mediaLinks.push({
-      text: getAvalaibleMediaServerName(),
+      text: getAvailableMediaServerName(),
       url: plexUrl,
       svg: <PlayIcon />,
     });
@@ -193,7 +201,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     })
   ) {
     mediaLinks.push({
-      text: getAvalaible4kMediaServerName(),
+      text: getAvailable4kMediaServerName(),
       url: plexUrl4k,
       svg: <PlayIcon />,
     });
@@ -212,15 +220,15 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     });
   }
 
-  const region = user?.settings?.region
-    ? user.settings.region
-    : settings.currentSettings.region
-    ? settings.currentSettings.region
+  const discoverRegion = user?.settings?.discoverRegion
+    ? user.settings.discoverRegion
+    : settings.currentSettings.discoverRegion
+    ? settings.currentSettings.discoverRegion
     : 'US';
   const seriesAttributes: React.ReactNode[] = [];
 
   const contentRating = data.contentRatings.results.find(
-    (r) => r.iso_3166_1 === region
+    (r) => r.iso_3166_1 === discoverRegion
   )?.rating;
   if (contentRating) {
     seriesAttributes.push(
@@ -228,6 +236,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     );
   }
 
+  // Does NOT include "Specials"
   const seasonCount = data.seasons.filter(
     (season) => season.seasonNumber !== 0 && season.episodeCount !== 0
   ).length;
@@ -289,15 +298,31 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     return [...requestedSeasons, ...availableSeasons];
   };
 
-  const isComplete = seasonCount <= getAllRequestedSeasons(false).length;
+  const showHasSpecials = data.seasons.some(
+    (season) =>
+      season.seasonNumber === 0 &&
+      settings.currentSettings.enableSpecialEpisodes
+  );
 
-  const is4kComplete = seasonCount <= getAllRequestedSeasons(true).length;
+  const isComplete =
+    (showHasSpecials ? seasonCount + 1 : seasonCount) <=
+    getAllRequestedSeasons(false).length;
 
+  const is4kComplete =
+    (showHasSpecials ? seasonCount + 1 : seasonCount) <=
+    getAllRequestedSeasons(true).length;
+
+  const streamingRegion = user?.settings?.streamingRegion
+    ? user.settings.streamingRegion
+    : settings.currentSettings.streamingRegion
+    ? settings.currentSettings.streamingRegion
+    : 'US';
   const streamingProviders =
-    data?.watchProviders?.find((provider) => provider.iso_3166_1 === region)
-      ?.flatrate ?? [];
+    data?.watchProviders?.find(
+      (provider) => provider.iso_3166_1 === streamingRegion
+    )?.flatrate ?? [];
 
-  function getAvalaibleMediaServerName() {
+  function getAvailableMediaServerName() {
     if (settings.currentSettings.mediaServerType === MediaServerType.EMBY) {
       return intl.formatMessage(messages.play, { mediaServerName: 'Emby' });
     }
@@ -309,7 +334,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     return intl.formatMessage(messages.play, { mediaServerName: 'Jellyfin' });
   }
 
-  function getAvalaible4kMediaServerName() {
+  function getAvailable4kMediaServerName() {
     if (settings.currentSettings.mediaServerType === MediaServerType.EMBY) {
       return intl.formatMessage(messages.play, { mediaServerName: 'Emby' });
     }
@@ -397,6 +422,60 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
     }
   };
 
+  const onClickHideItemBtn = async (): Promise<void> => {
+    setIsBlacklistUpdating(true);
+
+    const res = await fetch('/api/v1/blacklist', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        tmdbId: tv?.id,
+        mediaType: 'tv',
+        title: tv?.name,
+        user: user?.id,
+      }),
+    });
+
+    if (res.status === 201) {
+      addToast(
+        <span>
+          {intl.formatMessage(globalMessages.blacklistSuccess, {
+            title: tv?.name,
+            strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+          })}
+        </span>,
+        { appearance: 'success', autoDismiss: true }
+      );
+
+      revalidate();
+    } else if (res.status === 412) {
+      addToast(
+        <span>
+          {intl.formatMessage(globalMessages.blacklistDuplicateError, {
+            title: tv?.name,
+            strong: (msg: React.ReactNode) => <strong>{msg}</strong>,
+          })}
+        </span>,
+        { appearance: 'info', autoDismiss: true }
+      );
+    } else {
+      addToast(intl.formatMessage(globalMessages.blacklistError), {
+        appearance: 'error',
+        autoDismiss: true,
+      });
+    }
+
+    setIsBlacklistUpdating(false);
+    closeBlacklistModal();
+  };
+
+  const showHideButton = hasPermission([Permission.MANAGE_BLACKLIST], {
+    type: 'or',
+  });
+
   return (
     <div
       className="media-page"
@@ -407,6 +486,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
       {data.backdropPath && (
         <div className="media-page-bg-image">
           <CachedImage
+            type="tmdb"
             alt=""
             src={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${data.backdropPath}`}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -423,6 +503,14 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
         </div>
       )}
       <PageTitle title={data.name} />
+      <BlacklistModal
+        tmdbId={data.id}
+        type="tv"
+        show={showBlacklistModal}
+        onCancel={closeBlacklistModal}
+        onComplete={onClickHideItemBtn}
+        isUpdating={isBlacklistUpdating}
+      />
       <IssueModal
         onCancel={() => setShowIssueModal(false)}
         show={showIssueModal}
@@ -455,6 +543,7 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
       <div className="media-header">
         <div className="media-poster">
           <CachedImage
+            type="tmdb"
             src={
               data.posterPath
                 ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${data.posterPath}`
@@ -528,40 +617,61 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
           </span>
         </div>
         <div className="media-actions">
-          <>
-            {toggleWatchlist ? (
-              <Tooltip content={intl.formatMessage(messages.addtowatchlist)}>
+          {showHideButton &&
+            data?.mediaInfo?.status !== MediaStatus.PROCESSING &&
+            data?.mediaInfo?.status !== MediaStatus.AVAILABLE &&
+            data?.mediaInfo?.status !== MediaStatus.PARTIALLY_AVAILABLE &&
+            data?.mediaInfo?.status !== MediaStatus.PENDING &&
+            data?.mediaInfo?.status !== MediaStatus.BLACKLISTED && (
+              <Tooltip
+                content={intl.formatMessage(globalMessages.addToBlacklist)}
+              >
                 <Button
                   buttonType={'ghost'}
                   className="z-40 mr-2"
                   buttonSize={'md'}
-                  onClick={onClickWatchlistBtn}
+                  onClick={() => setShowBlacklistModal(true)}
                 >
-                  {isUpdating ? (
-                    <Spinner className="h-3" />
-                  ) : (
-                    <StarIcon className={'h-3 text-amber-300'} />
-                  )}
-                </Button>
-              </Tooltip>
-            ) : (
-              <Tooltip
-                content={intl.formatMessage(messages.removefromwatchlist)}
-              >
-                <Button
-                  className="z-40 mr-2"
-                  buttonSize={'md'}
-                  onClick={onClickDeleteWatchlistBtn}
-                >
-                  {isUpdating ? (
-                    <Spinner className="h-3" />
-                  ) : (
-                    <MinusCircleIcon className={'h-3'} />
-                  )}
+                  <EyeSlashIcon className={'h-3'} />
                 </Button>
               </Tooltip>
             )}
-          </>
+          {data?.mediaInfo?.status !== MediaStatus.BLACKLISTED && (
+            <>
+              {toggleWatchlist ? (
+                <Tooltip content={intl.formatMessage(messages.addtowatchlist)}>
+                  <Button
+                    buttonType={'ghost'}
+                    className="z-40 mr-2"
+                    buttonSize={'md'}
+                    onClick={onClickWatchlistBtn}
+                  >
+                    {isUpdating ? (
+                      <Spinner className="h-3" />
+                    ) : (
+                      <StarIcon className={'h-3 text-amber-300'} />
+                    )}
+                  </Button>
+                </Tooltip>
+              ) : (
+                <Tooltip
+                  content={intl.formatMessage(messages.removefromwatchlist)}
+                >
+                  <Button
+                    className="z-40 mr-2"
+                    buttonSize={'md'}
+                    onClick={onClickDeleteWatchlistBtn}
+                  >
+                    {isUpdating ? (
+                      <Spinner className="h-3" />
+                    ) : (
+                      <MinusCircleIcon className={'h-3'} />
+                    )}
+                  </Button>
+                </Tooltip>
+              )}
+            </>
+          )}
           <PlayButton links={mediaLinks} />
           <RequestButton
             mediaType="tv"
@@ -689,7 +799,11 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
             {data.seasons
               .slice()
               .reverse()
-              .filter((season) => season.seasonNumber !== 0)
+              .filter(
+                (season) =>
+                  settings.currentSettings.enableSpecialEpisodes ||
+                  season.seasonNumber !== 0
+              )
               .map((season) => {
                 const show4k =
                   settings.currentSettings.series4kEnabled &&
@@ -743,9 +857,11 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                         >
                           <div className="flex flex-1 items-center space-x-2 text-lg">
                             <span>
-                              {intl.formatMessage(messages.seasonnumber, {
-                                seasonNumber: season.seasonNumber,
-                              })}
+                              {season.seasonNumber === 0
+                                ? intl.formatMessage(globalMessages.specials)
+                                : intl.formatMessage(messages.seasonnumber, {
+                                    seasonNumber: season.seasonNumber,
+                                  })}
                             </span>
                             <Badge badgeType="dark">
                               {intl.formatMessage(messages.episodeCount, {
@@ -1125,14 +1241,26 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
               </div>
             )}
             {!!streamingProviders.length && (
-              <div className="media-fact">
+              <div className="media-fact flex-col gap-1">
                 <span>{intl.formatMessage(messages.streamingproviders)}</span>
-                <span className="media-fact-value">
+                <span className="media-fact-value flex flex-row flex-wrap gap-5">
                   {streamingProviders.map((p) => {
                     return (
-                      <span className="block" key={`provider-${p.id}`}>
-                        {p.name}
-                      </span>
+                      <Tooltip content={p.name}>
+                        <span
+                          className="opacity-50 transition duration-300 hover:opacity-100"
+                          key={`provider-${p.id}`}
+                        >
+                          <CachedImage
+                            type="tmdb"
+                            src={'https://image.tmdb.org/t/p/w45/' + p.logoPath}
+                            alt={p.name}
+                            width={32}
+                            height={32}
+                            className="rounded-md"
+                          />
+                        </span>
+                      </Tooltip>
                     );
                   })}
                 </span>

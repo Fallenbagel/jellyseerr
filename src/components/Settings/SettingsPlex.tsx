@@ -190,7 +190,10 @@ const SettingsPlex = ({ onComplete }: SettingsPlexProps) => {
         otherwise: Yup.string().nullable(),
       }),
       tautulliExternalUrl: Yup.string()
-        .url(intl.formatMessage(messages.validationUrl))
+        .matches(
+          /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}(\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*))?$/i,
+          intl.formatMessage(messages.validationUrl)
+        )
         .test(
           'no-trailing-slash',
           intl.formatMessage(messages.validationUrlTrailingSlash),
@@ -347,6 +350,10 @@ const SettingsPlex = ({ onComplete }: SettingsPlexProps) => {
       );
       if (!res.ok) throw new Error();
     }
+
+    if (onComplete) {
+      onComplete();
+    }
     setIsSyncing(false);
     revalidate();
   };
@@ -432,10 +439,6 @@ const SettingsPlex = ({ onComplete }: SettingsPlexProps) => {
               autoDismiss: true,
               appearance: 'success',
             });
-
-            if (onComplete) {
-              onComplete();
-            }
           } catch (e) {
             if (toastId) {
               removeToast(toastId);

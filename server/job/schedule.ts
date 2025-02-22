@@ -2,6 +2,7 @@ import { MediaServerType } from '@server/constants/server';
 import availabilitySync from '@server/lib/availabilitySync';
 import downloadTracker from '@server/lib/downloadtracker';
 import ImageProxy from '@server/lib/imageproxy';
+import refreshToken from '@server/lib/refreshToken';
 import {
   jellyfinFullScanner,
   jellyfinRecentScanner,
@@ -13,7 +14,6 @@ import type { JobId } from '@server/lib/settings';
 import { getSettings } from '@server/lib/settings';
 import watchlistSync from '@server/lib/watchlistsync';
 import logger from '@server/logger';
-import random from 'lodash/random';
 import schedule from 'node-schedule';
 
 interface ScheduledJob {
@@ -70,6 +70,35 @@ export const startJobs = (): void => {
       running: () => plexFullScanner.status().running,
       cancelFn: () => plexFullScanner.cancel(),
     });
+
+    scheduledJobs.push({
+      id: 'plex-refresh-token',
+      name: 'Plex Refresh Token',
+      type: 'process',
+      interval: 'fixed',
+      cronSchedule: jobs['plex-refresh-token'].schedule,
+      job: schedule.scheduleJob(jobs['plex-refresh-token'].schedule, () => {
+        logger.info('Starting scheduled job: Plex Refresh Token', {
+          label: 'Jobs',
+        });
+        refreshToken.run();
+      }),
+    });
+
+    // Watchlist Sync
+    scheduledJobs.push({
+      id: 'plex-watchlist-sync',
+      name: 'Plex Watchlist Sync',
+      type: 'process',
+      interval: 'seconds',
+      cronSchedule: jobs['plex-watchlist-sync'].schedule,
+      job: schedule.scheduleJob(jobs['plex-watchlist-sync'].schedule, () => {
+        logger.info('Starting scheduled job: Plex Watchlist Sync', {
+          label: 'Jobs',
+        });
+        watchlistSync.syncWatchlist();
+      }),
+    });
   } else if (
     mediaServerType === MediaServerType.JELLYFIN ||
     mediaServerType === MediaServerType.EMBY
@@ -111,31 +140,6 @@ export const startJobs = (): void => {
       cancelFn: () => jellyfinFullScanner.cancel(),
     });
   }
-
-  // Watchlist Sync
-  const watchlistSyncJob: ScheduledJob = {
-    id: 'plex-watchlist-sync',
-    name: 'Plex Watchlist Sync',
-    type: 'process',
-    interval: 'fixed',
-    cronSchedule: jobs['plex-watchlist-sync'].schedule,
-    job: schedule.scheduleJob(new Date(Date.now() + 1000 * 60 * 20), () => {
-      logger.info('Starting scheduled job: Plex Watchlist Sync', {
-        label: 'Jobs',
-      });
-      watchlistSync.syncWatchlist();
-    }),
-  };
-
-  // To help alleviate load on Plex's servers, we will add some fuzziness to the next schedule
-  // after each run
-  watchlistSyncJob.job.on('run', () => {
-    watchlistSyncJob.job.schedule(
-      new Date(Math.floor(Date.now() + 1000 * 60 * random(14, 24, true)))
-    );
-  });
-
-  scheduledJobs.push(watchlistSyncJob);
 
   // Run full radarr scan every 24 hours
   scheduledJobs.push({
@@ -227,6 +231,9 @@ export const startJobs = (): void => {
       });
       // Clean TMDB image cache
       ImageProxy.clearCache('tmdb');
+
+      // Clean users avatar image cache
+      ImageProxy.clearCache('avatar');
     }),
   });
 

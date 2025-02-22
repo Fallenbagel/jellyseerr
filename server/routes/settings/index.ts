@@ -32,7 +32,6 @@ import { getHostname } from '@server/utils/getHostname';
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import fs from 'fs';
-import gravatarUrl from 'gravatar-url';
 import { escapeRegExp, merge, omit, set, sortBy } from 'lodash';
 import { rescheduleJob } from 'node-schedule';
 import path from 'path';
@@ -70,19 +69,34 @@ settingsRoutes.get('/main', (req, res, next) => {
   res.status(200).json(filteredMainSettings(req.user, settings.main));
 });
 
-settingsRoutes.post('/main', (req, res) => {
+settingsRoutes.post('/main', async (req, res) => {
   const settings = getSettings();
 
   settings.main = merge(settings.main, req.body);
-  settings.save();
+  await settings.save();
 
   return res.status(200).json(settings.main);
 });
 
-settingsRoutes.post('/main/regenerate', (req, res, next) => {
+settingsRoutes.get('/network', (req, res) => {
   const settings = getSettings();
 
-  const main = settings.regenerateApiKey();
+  res.status(200).json(settings.network);
+});
+
+settingsRoutes.post('/network', async (req, res) => {
+  const settings = getSettings();
+
+  settings.network = merge(settings.network, req.body);
+  await settings.save();
+
+  return res.status(200).json(settings.network);
+});
+
+settingsRoutes.post('/main/regenerate', async (req, res, next) => {
+  const settings = getSettings();
+
+  const main = await settings.regenerateApiKey();
 
   if (!req.user) {
     return next({ status: 500, message: 'User missing from request.' });
@@ -119,7 +133,7 @@ settingsRoutes.post('/plex', async (req, res, next) => {
     settings.plex.machineId = result.MediaContainer.machineIdentifier;
     settings.plex.name = result.MediaContainer.friendlyName;
 
-    settings.save();
+    await settings.save();
   } catch (e) {
     logger.error('Something went wrong testing Plex connection', {
       label: 'API',
@@ -232,7 +246,7 @@ settingsRoutes.get('/plex/library', async (req, res) => {
     ...library,
     enabled: enabledLibraries.includes(library.id),
   }));
-  settings.save();
+  await settings.save();
   return res.status(200).json(settings.plex.libraries);
 });
 
@@ -283,7 +297,7 @@ settingsRoutes.post('/jellyfin', async (req, res, next) => {
     Object.assign(settings.jellyfin, req.body);
     settings.jellyfin.serverId = result.Id;
     settings.jellyfin.name = result.ServerName;
-    settings.save();
+    await settings.save();
   } catch (e) {
     if (e instanceof ApiError) {
       logger.error('Something went wrong testing Jellyfin connection', {
@@ -371,17 +385,12 @@ settingsRoutes.get('/jellyfin/library', async (req, res, next) => {
     ...library,
     enabled: enabledLibraries.includes(library.id),
   }));
-  settings.save();
+  await settings.save();
   return res.status(200).json(settings.jellyfin.libraries);
 });
 
 settingsRoutes.get('/jellyfin/users', async (req, res) => {
   const settings = getSettings();
-  const { externalHostname } = settings.jellyfin;
-  const jellyfinHost =
-    externalHostname && externalHostname.length > 0
-      ? externalHostname
-      : getHostname();
 
   const userRepository = getRepository(User);
   const admin = await userRepository.findOneOrFail({
@@ -400,9 +409,7 @@ settingsRoutes.get('/jellyfin/users', async (req, res) => {
   const users = resp.users.map((user) => ({
     username: user.Name,
     id: user.Id,
-    thumb: user.PrimaryImageTag
-      ? `${jellyfinHost}/Users/${user.Id}/Images/Primary/?tag=${user.PrimaryImageTag}&quality=90`
-      : gravatarUrl(user.Name, { default: 'mm', size: 200 }),
+    thumb: `/avatarproxy/${user.Id}`,
     email: user.Name,
   }));
 
@@ -442,7 +449,7 @@ settingsRoutes.post('/tautulli', async (req, res, next) => {
         throw new Error('Tautulli version not supported');
       }
 
-      settings.save();
+      await settings.save();
     } catch (e) {
       logger.error('Something went wrong testing Tautulli connection', {
         label: 'API',
@@ -703,7 +710,7 @@ settingsRoutes.post<{ jobId: JobId }>(
 
 settingsRoutes.post<{ jobId: JobId }>(
   '/jobs/:jobId/schedule',
-  (req, res, next) => {
+  async (req, res, next) => {
     const scheduledJob = scheduledJobs.find(
       (job) => job.id === req.params.jobId
     );
@@ -717,7 +724,7 @@ settingsRoutes.post<{ jobId: JobId }>(
 
     if (result) {
       settings.jobs[scheduledJob.id].schedule = req.body.schedule;
-      settings.save();
+      await settings.save();
 
       scheduledJob.cronSchedule = req.body.schedule;
 
@@ -746,11 +753,13 @@ settingsRoutes.get('/cache', async (_req, res) => {
   }));
 
   const tmdbImageCache = await ImageProxy.getImageStats('tmdb');
+  const avatarImageCache = await ImageProxy.getImageStats('avatar');
 
   return res.status(200).json({
     apiCaches,
     imageCache: {
       tmdb: tmdbImageCache,
+      avatar: avatarImageCache,
     },
   });
 });
@@ -772,11 +781,11 @@ settingsRoutes.post<{ cacheId: AvailableCacheIds }>(
 settingsRoutes.post(
   '/initialize',
   isAuthenticated(Permission.ADMIN),
-  (_req, res) => {
+  async (_req, res) => {
     const settings = getSettings();
 
     settings.public.initialized = true;
-    settings.save();
+    await settings.save();
 
     return res.status(200).json(settings.public);
   }

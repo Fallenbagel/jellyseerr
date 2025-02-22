@@ -303,10 +303,10 @@ class SonarrAPI extends ServarrBase<{
     });
 
     try {
-      await this.runCommand('SeriesSearch', { seriesId });
+      await this.runCommand('MissingEpisodeSearch', { seriesId });
     } catch (e) {
       logger.error(
-        'Something went wrong while executing Sonarr series search.',
+        'Something went wrong while executing Sonarr missing episode search.',
         {
           label: 'Sonarr API',
           errorMessage: e.message,
@@ -351,6 +351,30 @@ class SonarrAPI extends ServarrBase<{
       logger.info(`[Radarr] Removed serie ${title}`);
     } catch (e) {
       throw new Error(`[Radarr] Failed to remove serie: ${e.message}`);
+    }
+  };
+
+  public clearCache = ({
+    tvdbId,
+    externalId,
+    title,
+  }: {
+    tvdbId?: number | null;
+    externalId?: number | null;
+    title?: string | null;
+  }) => {
+    if (tvdbId) {
+      this.removeCache('/series/lookup', {
+        term: `tvdb:${tvdbId}`,
+      });
+    }
+    if (externalId) {
+      this.removeCache(`/series/${externalId}`);
+    }
+    if (title) {
+      this.removeCache('/series/lookup', {
+        term: title,
+      });
     }
   };
 }

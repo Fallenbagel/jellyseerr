@@ -12,6 +12,7 @@ import { SettingsProvider } from '@app/context/SettingsContext';
 import { UserContext } from '@app/context/UserContext';
 import type { User } from '@app/hooks/useUser';
 import '@app/styles/globals.css';
+import '@app/utils/fetchOverride';
 import { polyfillIntl } from '@app/utils/polyfillIntl';
 import { MediaServerType } from '@server/constants/server';
 import type { PublicSettingsResponse } from '@server/interfaces/api/settingsInterfaces';
@@ -84,6 +85,8 @@ const loadLocaleData = (locale: AvailableLocale): Promise<any> => {
       return import('../i18n/locale/sr.json');
     case 'sv':
       return import('../i18n/locale/sv.json');
+    case 'tr':
+      return import('../i18n/locale/tr.json');
     case 'uk':
       return import('../i18n/locale/uk.json');
     case 'zh-CN':
@@ -191,10 +194,12 @@ CoreApp.getInitialProps = async (initialProps) => {
     movie4kEnabled: false,
     series4kEnabled: false,
     localLogin: true,
-    region: '',
+    discoverRegion: '',
+    streamingRegion: '',
     originalLanguage: '',
     mediaServerType: MediaServerType.NOT_CONFIGURED,
     partialRequestsEnabled: true,
+    enableSpecialEpisodes: false,
     cacheImages: false,
     vapidPublic: '',
     enablePushRegistration: false,

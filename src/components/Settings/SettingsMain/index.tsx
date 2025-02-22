@@ -2,7 +2,6 @@ import Button from '@app/components/Common/Button';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
 import PageTitle from '@app/components/Common/PageTitle';
 import SensitiveInput from '@app/components/Common/SensitiveInput';
-import Tooltip from '@app/components/Common/Tooltip';
 import LanguageSelector from '@app/components/LanguageSelector';
 import RegionSelector from '@app/components/RegionSelector';
 import CopyButton from '@app/components/Settings/CopyButton';
@@ -31,29 +30,25 @@ const messages = defineMessages('components.Settings.SettingsMain', {
   apikey: 'API Key',
   applicationTitle: 'Application Title',
   applicationurl: 'Application URL',
-  region: 'Discover Region',
-  regionTip: 'Filter content by regional availability',
+  discoverRegion: 'Discover Region',
+  discoverRegionTip: 'Filter content by regional availability',
   originallanguage: 'Discover Language',
   originallanguageTip: 'Filter content by original language',
+  streamingRegion: 'Streaming Region',
+  streamingRegionTip: 'Show streaming sites by regional availability',
   toastApiKeySuccess: 'New API key generated successfully!',
   toastApiKeyFailure: 'Something went wrong while generating a new API key.',
   toastSettingsSuccess: 'Settings saved successfully!',
   toastSettingsFailure: 'Something went wrong while saving settings.',
   hideAvailable: 'Hide Available Media',
-  csrfProtection: 'Enable CSRF Protection',
-  csrfProtectionTip: 'Set external API access to read-only (requires HTTPS)',
-  csrfProtectionHoverTip:
-    'Do NOT enable this setting unless you understand what you are doing!',
   cacheImages: 'Enable Image Caching',
   cacheImagesTip:
     'Cache externally sourced images (requires a significant amount of disk space)',
-  trustProxy: 'Enable Proxy Support',
-  trustProxyTip:
-    'Allow Jellyseerr to correctly register client IP addresses behind a proxy',
   validationApplicationTitle: 'You must provide an application title',
   validationApplicationUrl: 'You must provide a valid URL',
   validationApplicationUrlTrailingSlash: 'URL must not end in a trailing slash',
   partialRequestsEnabled: 'Allow Partial Series Requests',
+  enableSpecialEpisodes: 'Allow Special Episodes Requests',
   locale: 'Display Language',
 });
 
@@ -76,7 +71,10 @@ const SettingsMain = () => {
       intl.formatMessage(messages.validationApplicationTitle)
     ),
     applicationUrl: Yup.string()
-      .url(intl.formatMessage(messages.validationApplicationUrl))
+      .matches(
+        /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}(\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*))?$/i,
+        intl.formatMessage(messages.validationApplicationUrl)
+      )
       .test(
         'no-trailing-slash',
         intl.formatMessage(messages.validationApplicationUrlTrailingSlash),
@@ -129,13 +127,13 @@ const SettingsMain = () => {
           initialValues={{
             applicationTitle: data?.applicationTitle,
             applicationUrl: data?.applicationUrl,
-            csrfProtection: data?.csrfProtection,
             hideAvailable: data?.hideAvailable,
             locale: data?.locale ?? 'en',
-            region: data?.region,
+            discoverRegion: data?.discoverRegion,
             originalLanguage: data?.originalLanguage,
+            streamingRegion: data?.streamingRegion || 'US',
             partialRequestsEnabled: data?.partialRequestsEnabled,
-            trustProxy: data?.trustProxy,
+            enableSpecialEpisodes: data?.enableSpecialEpisodes,
             cacheImages: data?.cacheImages,
           }}
           enableReinitialize
@@ -150,13 +148,13 @@ const SettingsMain = () => {
                 body: JSON.stringify({
                   applicationTitle: values.applicationTitle,
                   applicationUrl: values.applicationUrl,
-                  csrfProtection: values.csrfProtection,
                   hideAvailable: values.hideAvailable,
                   locale: values.locale,
-                  region: values.region,
+                  discoverRegion: values.discoverRegion,
+                  streamingRegion: values.streamingRegion,
                   originalLanguage: values.originalLanguage,
                   partialRequestsEnabled: values.partialRequestsEnabled,
-                  trustProxy: values.trustProxy,
+                  enableSpecialEpisodes: values.enableSpecialEpisodes,
                   cacheImages: values.cacheImages,
                 }),
               });
@@ -267,58 +265,6 @@ const SettingsMain = () => {
                   </div>
                 </div>
                 <div className="form-row">
-                  <label htmlFor="trustProxy" className="checkbox-label">
-                    <span className="mr-2">
-                      {intl.formatMessage(messages.trustProxy)}
-                    </span>
-                    <SettingsBadge badgeType="restartRequired" />
-                    <span className="label-tip">
-                      {intl.formatMessage(messages.trustProxyTip)}
-                    </span>
-                  </label>
-                  <div className="form-input-area">
-                    <Field
-                      type="checkbox"
-                      id="trustProxy"
-                      name="trustProxy"
-                      onChange={() => {
-                        setFieldValue('trustProxy', !values.trustProxy);
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="form-row">
-                  <label htmlFor="csrfProtection" className="checkbox-label">
-                    <span className="mr-2">
-                      {intl.formatMessage(messages.csrfProtection)}
-                    </span>
-                    <SettingsBadge badgeType="advanced" className="mr-2" />
-                    <SettingsBadge badgeType="restartRequired" />
-                    <span className="label-tip">
-                      {intl.formatMessage(messages.csrfProtectionTip)}
-                    </span>
-                  </label>
-                  <div className="form-input-area">
-                    <Tooltip
-                      content={intl.formatMessage(
-                        messages.csrfProtectionHoverTip
-                      )}
-                    >
-                      <Field
-                        type="checkbox"
-                        id="csrfProtection"
-                        name="csrfProtection"
-                        onChange={() => {
-                          setFieldValue(
-                            'csrfProtection',
-                            !values.csrfProtection
-                          );
-                        }}
-                      />
-                    </Tooltip>
-                  </div>
-                </div>
-                <div className="form-row">
                   <label htmlFor="cacheImages" className="checkbox-label">
                     <span className="mr-2">
                       {intl.formatMessage(messages.cacheImages)}
@@ -364,17 +310,17 @@ const SettingsMain = () => {
                   </div>
                 </div>
                 <div className="form-row">
-                  <label htmlFor="region" className="text-label">
-                    <span>{intl.formatMessage(messages.region)}</span>
+                  <label htmlFor="discoverRegion" className="text-label">
+                    <span>{intl.formatMessage(messages.discoverRegion)}</span>
                     <span className="label-tip">
-                      {intl.formatMessage(messages.regionTip)}
+                      {intl.formatMessage(messages.discoverRegionTip)}
                     </span>
                   </label>
                   <div className="form-input-area">
                     <div className="form-input-field">
                       <RegionSelector
-                        value={values.region ?? ''}
-                        name="region"
+                        value={values.discoverRegion ?? ''}
+                        name="discoverRegion"
                         onChange={setFieldValue}
                       />
                     </div>
@@ -388,10 +334,29 @@ const SettingsMain = () => {
                     </span>
                   </label>
                   <div className="form-input-area">
-                    <div className="form-input-field">
+                    <div className="form-input-field relative z-30">
                       <LanguageSelector
                         setFieldValue={setFieldValue}
                         value={values.originalLanguage}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label htmlFor="streamingRegion" className="text-label">
+                    <span>{intl.formatMessage(messages.streamingRegion)}</span>
+                    <span className="label-tip">
+                      {intl.formatMessage(messages.streamingRegionTip)}
+                    </span>
+                  </label>
+                  <div className="form-input-area">
+                    <div className="form-input-field relative z-20">
+                      <RegionSelector
+                        value={values.streamingRegion}
+                        name="streamingRegion"
+                        onChange={setFieldValue}
+                        regionType="streaming"
+                        disableAll
                       />
                     </div>
                   </div>
@@ -432,6 +397,29 @@ const SettingsMain = () => {
                         setFieldValue(
                           'partialRequestsEnabled',
                           !values.partialRequestsEnabled
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label
+                    htmlFor="enableSpecialEpisodes"
+                    className="checkbox-label"
+                  >
+                    <span className="mr-2">
+                      {intl.formatMessage(messages.enableSpecialEpisodes)}
+                    </span>
+                  </label>
+                  <div className="form-input-area">
+                    <Field
+                      type="checkbox"
+                      id="enableSpecialEpisodes"
+                      name="enableSpecialEpisodes"
+                      onChange={() => {
+                        setFieldValue(
+                          'enableSpecialEpisodes',
+                          !values.enableSpecialEpisodes
                         );
                       }}
                     />
