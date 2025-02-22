@@ -85,6 +85,7 @@ class EmbyConnectAPI extends ExternalAPI {
     return {
       User: {
         Name: connectAuthResponse.User.Name,
+        Email: connectAuthResponse.User.Email,
         ServerId: matchingServer.SystemId,
         ServerName: matchingServer.Name,
         Id: localUserExchangeResponse.LocalUserId,
@@ -122,7 +123,10 @@ class EmbyConnectAPI extends ExternalAPI {
         label: 'EmbyConnect API',
         ip: this.ClientIP,
       });
-      throw new ApiError(e.cause?.status, ApiErrorCode.InvalidCredentials);
+      throw new ApiError(
+        e.cause?.status ?? 401,
+        ApiErrorCode.InvalidCredentials
+      );
     }
   }
 

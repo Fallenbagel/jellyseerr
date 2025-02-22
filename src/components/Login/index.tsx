@@ -175,7 +175,10 @@ const Login = () => {
                           onAuthToken={(authToken) => setAuthToken(authToken)}
                         />
                       ) : (
-                        <JellyfinLogin revalidate={revalidate} />
+                        <JellyfinLogin
+                          revalidate={revalidate}
+                          serverType={settings.currentSettings.mediaServerType}
+                        />
                       )}
                     </div>
                   </AccordionContent>

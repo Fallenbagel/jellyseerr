@@ -12,6 +12,7 @@ import * as EmailValidator from 'email-validator';
 
 export interface JellyfinUserResponse {
   Name: string;
+  Email?: string;
   ServerId: string;
   ServerName: string;
   Id: string;
@@ -141,6 +142,31 @@ class JellyfinAPI extends ExternalAPI {
       );
     };
 
+    if (
+      getSettings().main.mediaServerType === MediaServerType.EMBY &&
+      Username &&
+      EmailValidator.validate(Username)
+    ) {
+      try {
+        const connectApi = new EmbyConnectAPI({
+          ClientIP: ClientIP,
+          DeviceId: this.deviceId,
+        });
+        return await connectApi.authenticateConnectUser(Username, Password);
+      } catch (e) {
+        // Possible local Emby user with email as username
+        logger.warn(
+          `Emby Connect authentication failed: ${e}, attempting local Emby server authentication`,
+          {
+            label: 'Jellyfin API',
+            error:
+              e.cause?.message ?? e.cause?.statusText ?? ApiErrorCode.Unknown,
+            ip: ClientIP,
+          }
+        );
+      }
+    }
+
     try {
       return await authenticate(true);
     } catch (e) {
@@ -164,38 +190,17 @@ class JellyfinAPI extends ExternalAPI {
     } catch (e) {
       if (e.cause.status === 401) {
         throw new ApiError(e.cause.status, ApiErrorCode.InvalidCredentials);
+      } else {
+        logger.error(
+          'Something went wrong while authenticating with the Jellyfin server',
+          {
+            label: 'Jellyfin API',
+            error: e.cause.message ?? e.cause.statusText,
+            ip: ClientIP,
+          }
+        );
+        throw new ApiError(e.cause.status, ApiErrorCode.Unknown);
       }
-    }
-
-    const settings = getSettings();
-
-    if (
-      settings.main.mediaServerType === MediaServerType.EMBY &&
-      Username &&
-      EmailValidator.validate(Username)
-    ) {
-      try {
-        const connectApi = new EmbyConnectAPI({
-          ClientIP: ClientIP,
-          DeviceId: this.deviceId,
-        });
-
-        return await connectApi.authenticateConnectUser(Username, Password);
-      } catch (e) {
-        logger.debug(`Emby Connect authentication failed: ${e}`);
-        throw new ApiError(e.cause?.status, ApiErrorCode.InvalidCredentials);
-      }
-    } else {
-      logger.error(
-        'Something went wrong while authenticating with the Jellyfin server',
-        {
-          label: 'Jellyfin API',
-          error: e.cause.message ?? e.cause.statusText,
-          ip: ClientIP,
-        }
-      );
-
-      throw new ApiError(e.cause.status, ApiErrorCode.Unknown);
     }
   }
 
@@ -233,9 +238,9 @@ class JellyfinAPI extends ExternalAPI {
 
   public async getUsers(): Promise<JellyfinUserListResponse> {
     try {
-      const userReponse = await this.get<JellyfinUserResponse[]>(`/Users`);
+      const userResponse = await this.get<JellyfinUserResponse[]>(`/Users`);
 
-      return { users: userReponse };
+      return { users: userResponse };
     } catch (e) {
       logger.error(
         'Something went wrong while getting the account from the Jellyfin server',
@@ -248,10 +253,10 @@ class JellyfinAPI extends ExternalAPI {
 
   public async getUser(): Promise<JellyfinUserResponse> {
     try {
-      const userReponse = await this.get<JellyfinUserResponse>(
+      const userResponse = await this.get<JellyfinUserResponse>(
         `/Users/${this.userId ?? 'Me'}`
       );
-      return userReponse;
+      return userResponse;
     } catch (e) {
       logger.error(
         'Something went wrong while getting the account from the Jellyfin server',

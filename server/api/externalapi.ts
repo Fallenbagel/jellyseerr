@@ -112,7 +112,10 @@ class ExternalAPI {
     ttl?: number,
     config?: RequestInit
   ): Promise<T> {
-    const headers = { ...this.defaultHeaders, ...config?.headers };
+    const headers = new Headers({
+      ...this.defaultHeaders,
+      ...(config?.headers || {}),
+    });
     const cacheKey = this.serializeCacheKey(endpoint, {
       config: { ...this.params, ...params },
       headers,
@@ -125,10 +128,6 @@ class ExternalAPI {
     }
 
     const url = this.formatUrl(endpoint, params);
-    const headers = new Headers({
-      ...this.defaultHeaders,
-      ...(config?.headers || {}),
-    });
 
     const isFormUrlEncoded = headers
       .get('Content-Type')

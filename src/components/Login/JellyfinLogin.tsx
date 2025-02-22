@@ -437,7 +437,11 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                 <Form>
                   <div className="sm:border-t sm:border-gray-800">
                     <label htmlFor="username" className="text-label">
-                      {intl.formatMessage(messages.username)}
+                      {serverType === MediaServerType.EMBY
+                        ? `Emby Connect ${intl.formatMessage(
+                            messages.email
+                          )} / ${intl.formatMessage(messages.username)}`
+                        : intl.formatMessage(messages.username)}
                     </label>
                     <div className="mt-1 mb-2 sm:col-span-2 sm:mt-0">
                       <div className="flex max-w-lg rounded-md shadow-sm">
@@ -445,7 +449,13 @@ const JellyfinLogin: React.FC<JellyfinLoginProps> = ({
                           id="username"
                           name="username"
                           type="text"
-                          placeholder={intl.formatMessage(messages.username)}
+                          placeholder={
+                            serverType === MediaServerType.EMBY
+                              ? `Emby Connect ${intl.formatMessage(
+                                  messages.email
+                                )} / ${intl.formatMessage(messages.username)}`
+                              : intl.formatMessage(messages.username)
+                          }
                         />
                       </div>
                       {errors.username && touched.username && (
