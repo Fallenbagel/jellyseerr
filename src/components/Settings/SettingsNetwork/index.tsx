@@ -42,7 +42,7 @@ const messages = defineMessages('components.Settings.SettingsNetwork', {
   networkDisclaimer:
     'Network parameters from your container/system should be used instead of these settings. See the {docs} for more information.',
   docs: 'documentation',
-  forceIpv4First: 'IPv4 Resolution First',
+  forceIpv4First: 'Force IPv4 Resolution First',
   forceIpv4FirstTip:
     'Force Jellyseerr to resolve IPv4 addresses first instead of IPv6',
   dnsServers: 'Custom DNS Servers',
