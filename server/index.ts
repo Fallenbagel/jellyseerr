@@ -91,7 +91,7 @@ app
     }
 
     // Add DNS caching
-    if (settings.network.cacheDns) {
+    if (settings.network.dnsCache) {
       dnsCache.initialize();
     }
 
