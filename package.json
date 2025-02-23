@@ -98,7 +98,7 @@
     "swr": "2.2.5",
     "tailwind-merge": "^2.6.0",
     "typeorm": "0.3.11",
-    "undici": "^6.20.1",
+    "undici": "^7.3.0",
     "web-push": "3.5.0",
     "wink-jaro-distance": "^2.0.0",
     "winston": "3.8.2",
