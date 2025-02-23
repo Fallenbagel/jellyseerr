@@ -15,6 +15,7 @@ const messages = defineMessages('components.Settings', {
   menuServices: 'Services',
   menuNetwork: 'Network',
   menuNotifications: 'Notifications',
+  menuAutoApproval: 'Auto Approval',
   menuLogs: 'Logs',
   menuJobs: 'Jobs & Cache',
   menuAbout: 'About',
@@ -63,6 +64,11 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
       text: intl.formatMessage(messages.menuNotifications),
       route: '/settings/notifications/email',
       regex: /^\/settings\/notifications/,
+    },
+    {
+      text: intl.formatMessage(messages.menuAutoApproval),
+      route: '/settings/autoapproval',
+      regex: /^\/settings\/autoapproval/,
     },
     {
       text: intl.formatMessage(messages.menuLogs),

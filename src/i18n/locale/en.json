@@ -1084,6 +1084,7 @@
   "components.Settings.menuLogs": "Logs",
   "components.Settings.menuNetwork": "Network",
   "components.Settings.menuNotifications": "Notifications",
+  "components.Settings.menuAutoApproval": "Auto Approval",
   "components.Settings.menuPlexSettings": "Plex",
   "components.Settings.menuServices": "Services",
   "components.Settings.menuUsers": "Users",
