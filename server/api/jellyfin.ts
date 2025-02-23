@@ -1,13 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import EmbyConnectAPI from '@server/api/embyconnect';
 import ExternalAPI from '@server/api/externalapi';
 import { ApiErrorCode } from '@server/constants/error';
+import { MediaServerType } from '@server/constants/server';
 import availabilitySync from '@server/lib/availabilitySync';
+import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { ApiError } from '@server/types/error';
 import { getAppVersion } from '@server/utils/appVersion';
+import * as EmailValidator from 'email-validator';
 
 export interface JellyfinUserResponse {
   Name: string;
+  Email?: string;
   ServerId: string;
   ServerName: string;
   Id: string;
@@ -94,6 +99,7 @@ export interface JellyfinLibraryItemExtended extends JellyfinLibraryItem {
 
 class JellyfinAPI extends ExternalAPI {
   private userId?: string;
+  private deviceId?: string;
 
   constructor(
     jellyfinHost: string,
@@ -116,6 +122,7 @@ class JellyfinAPI extends ExternalAPI {
         },
       }
     );
+    this.deviceId = deviceId ? deviceId : undefined;
   }
 
   public async login(
@@ -138,6 +145,31 @@ class JellyfinAPI extends ExternalAPI {
         { headers }
       );
     };
+
+    if (
+      getSettings().main.mediaServerType === MediaServerType.EMBY &&
+      Username &&
+      EmailValidator.validate(Username)
+    ) {
+      try {
+        const connectApi = new EmbyConnectAPI({
+          ClientIP: ClientIP,
+          DeviceId: this.deviceId,
+        });
+        return await connectApi.authenticateConnectUser(Username, Password);
+      } catch (e) {
+        // Possible local Emby user with email as username
+        logger.warn(
+          `Emby Connect authentication failed: ${e}, attempting local Emby server authentication`,
+          {
+            label: 'Jellyfin API',
+            error:
+              e.cause?.message ?? e.cause?.statusText ?? ApiErrorCode.Unknown,
+            ip: ClientIP,
+          }
+        );
+      }
+    }
 
     try {
       return await authenticate(true);
@@ -211,9 +243,9 @@ class JellyfinAPI extends ExternalAPI {
 
   public async getUsers(): Promise<JellyfinUserListResponse> {
     try {
-      const userReponse = await this.get<JellyfinUserResponse[]>(`/Users`);
+      const userResponse = await this.get<JellyfinUserResponse[]>(`/Users`);
 
-      return { users: userReponse };
+      return { users: userResponse };
     } catch (e) {
       logger.error(
         'Something went wrong while getting the account from the Jellyfin server',
@@ -226,10 +258,10 @@ class JellyfinAPI extends ExternalAPI {
 
   public async getUser(): Promise<JellyfinUserResponse> {
     try {
-      const userReponse = await this.get<JellyfinUserResponse>(
+      const userResponse = await this.get<JellyfinUserResponse>(
         `/Users/${this.userId ?? 'Me'}`
       );
-      return userReponse;
+      return userResponse;
     } catch (e) {
       logger.error(
         'Something went wrong while getting the account from the Jellyfin server',
