@@ -48,6 +48,11 @@ const messages = defineMessages('components.Settings.SettingsNetwork', {
   dnsServers: 'Custom DNS Servers',
   dnsServersTip:
     'Comma-separated list of custom DNS servers, e.g. "1.1.1.1,[2606:4700:4700::1111]"',
+  dnsCache: 'DNS Cache',
+  dnsCacheTip:
+    'Enable caching of DNS lookups to optimize performance and avoid making unnecessary API calls',
+  dnsCacheHoverTip:
+    'Do NOT enable this if you are experiencing issues with DNS lookups',
 });
 
 const SettingsNetwork = () => {
@@ -94,6 +99,7 @@ const SettingsNetwork = () => {
             csrfProtection: data?.csrfProtection,
             forceIpv4First: data?.forceIpv4First,
             dnsServers: data?.dnsServers,
+            dnsCache: data?.dnsCache,
             trustProxy: data?.trustProxy,
             proxyEnabled: data?.proxy?.enabled,
             proxyHostname: data?.proxy?.hostname,
@@ -117,6 +123,7 @@ const SettingsNetwork = () => {
                   csrfProtection: values.csrfProtection,
                   forceIpv4First: values.forceIpv4First,
                   dnsServers: values.dnsServers,
+                  dnsCache: values.dnsCache,
                   trustProxy: values.trustProxy,
                   proxy: {
                     enabled: values.proxyEnabled,
@@ -205,6 +212,33 @@ const SettingsNetwork = () => {
                             'csrfProtection',
                             !values.csrfProtection
                           );
+                        }}
+                      />
+                    </Tooltip>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label htmlFor="dnsCache" className="checkbox-label">
+                    <span className="mr-2">
+                      {intl.formatMessage(messages.dnsCache)}
+                    </span>
+                    <SettingsBadge badgeType="advanced" className="mr-2" />
+                    <SettingsBadge badgeType="restartRequired" />
+                    <SettingsBadge badgeType="experimental" className="mr-2" />
+                    <span className="label-tip">
+                      {intl.formatMessage(messages.dnsCacheTip)}
+                    </span>
+                  </label>
+                  <div className="form-input-area">
+                    <Tooltip
+                      content={intl.formatMessage(messages.dnsCacheHoverTip)}
+                    >
+                      <Field
+                        type="checkbox"
+                        id="dnsCache"
+                        name="dnsCache"
+                        onChange={() => {
+                          setFieldValue('dnsCache', !values.dnsCache);
                         }}
                       />
                     </Tooltip>

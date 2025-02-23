@@ -140,6 +140,7 @@ export interface NetworkSettings {
   dnsServers: string;
   trustProxy: boolean;
   proxy: ProxySettings;
+  dnsCache: boolean;
 }
 
 interface PublicSettings {
@@ -521,6 +522,7 @@ class Settings {
           bypassFilter: '',
           bypassLocalAddresses: true,
         },
+        dnsCache: false,
       },
     };
     if (initialSettings) {
