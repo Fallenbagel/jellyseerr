@@ -159,7 +159,7 @@
     "eslint-plugin-react-hooks": "4.6.0",
     "husky": "8.0.3",
     "lint-staged": "13.1.2",
-    "nodemon": "2.0.20",
+    "nodemon": "3.1.9",
     "postcss": "8.4.21",
     "prettier": "2.8.4",
     "prettier-plugin-organize-imports": "3.2.2",
@@ -249,5 +249,10 @@
       },
       "@semantic-release/github"
     ]
+  },
+  "pnpm": {
+    "overrides": {
+      "cross-spawn@>=7.0.0 <7.0.5": ">=7.0.5"
+    }
   }
 }
