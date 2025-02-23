@@ -168,22 +168,6 @@ app
       }
     });
     if (settings.network.csrfProtection) {
-      // server.use(
-      //   csurf({
-      //     cookie: {
-      //       httpOnly: true,
-      //       sameSite: true,
-      //       secure: !dev,
-      //     },
-      //   })
-      // );
-      // server.use((req, res, next) => {
-      //   res.cookie('XSRF-TOKEN', req.csrfToken(), {
-      //     sameSite: true,
-      //     secure: !dev,
-      //   });
-      //   next();
-      // });
       const { doubleCsrfProtection, generateToken } = doubleCsrf({
         getSecret: () => settings.clientId,
         cookieName: 'XSRF-TOKEN',
