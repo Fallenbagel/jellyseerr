@@ -4,16 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  cross-spawn@>=7.0.0 <7.0.5: '>=7.0.5'
-  xml2js@<0.5.0: '>=0.5.0'
-  tough-cookie@<4.1.3: '>=4.1.3'
-  micromatch@<4.0.8: '>=4.0.8'
-  '@octokit/request-error@>=1.0.0 <5.1.1': '>=5.1.1'
-  '@octokit/request@>=1.0.0 <9.2.1': '>=9.2.1'
-  '@octokit/plugin-paginate-rest@>=1.0.0 <11.4.1': '>=11.4.1'
-  cookie@<0.7.0: '>=0.7.0'
-
 importers:
 
   .:
@@ -232,8 +222,8 @@ importers:
         specifier: 4.7.1
         version: 4.7.1(winston@3.8.2)
       xml2js:
-        specifier: '>=0.5.0'
-        version: 0.6.2
+        specifier: 0.4.23
+        version: 0.4.23
       yamljs:
         specifier: 0.3.0
         version: 0.3.0
@@ -252,16 +242,16 @@ importers:
         version: 17.4.4
       '@semantic-release/changelog':
         specifier: 6.0.2
-        version: 6.0.2(semantic-release@19.0.5)
+        version: 6.0.2(semantic-release@19.0.5(encoding@0.1.13))
       '@semantic-release/commit-analyzer':
         specifier: 9.0.2
-        version: 9.0.2(semantic-release@19.0.5)
+        version: 9.0.2(semantic-release@19.0.5(encoding@0.1.13))
       '@semantic-release/exec':
         specifier: 6.0.3
-        version: 6.0.3(semantic-release@19.0.5)
+        version: 6.0.3(semantic-release@19.0.5(encoding@0.1.13))
       '@semantic-release/git':
         specifier: 10.0.1
-        version: 10.0.1(semantic-release@19.0.5)
+        version: 10.0.1(semantic-release@19.0.5(encoding@0.1.13))
       '@tailwindcss/aspect-ratio':
         specifier: 0.4.2
         version: 0.4.2(tailwindcss@3.2.7(postcss@8.4.31)(ts-node@10.9.1(@swc/core@1.6.5(@swc/helpers@0.5.11))(@types/node@22.10.5)(typescript@4.9.5)))
@@ -411,10 +401,10 @@ importers:
         version: 0.2.3(prettier-plugin-organize-imports@3.2.2(prettier@2.8.4)(typescript@4.9.5))(prettier@2.8.4)
       semantic-release:
         specifier: 19.0.5
-        version: 19.0.5
+        version: 19.0.5(encoding@0.1.13)
       semantic-release-docker-buildx:
         specifier: 1.0.1
-        version: 1.0.1(semantic-release@19.0.5)
+        version: 1.0.1(semantic-release@19.0.5(encoding@0.1.13))
       tailwindcss:
         specifier: 3.2.7
         version: 3.2.7(postcss@8.4.31)(ts-node@10.9.1(@swc/core@1.6.5(@swc/helpers@0.5.11))(@types/node@22.10.5)(typescript@4.9.5))
@@ -2236,9 +2226,9 @@ packages:
     resolution: {integrity: sha512-rYKilwgzQ7/imScn3M9/pFfUf4I1AZEH3KhyJmtPdE2zfaXAn2mFfUy4FbKewzc2We5y/LlKLj36fWJLKC2SIQ==}
     engines: {node: '>= 14'}
 
-  '@octokit/endpoint@10.1.3':
-    resolution: {integrity: sha512-nBRBMpKPhQUxCsQQeW+rCJ/OPSMcj3g0nfHn01zGYZXuNDvvXudF/TYY6APj5THlurerpFN4a/dQAIAaM6BYhA==}
-    engines: {node: '>= 18'}
+  '@octokit/endpoint@7.0.6':
+    resolution: {integrity: sha512-5L4fseVRUsDFGR00tMWD/Trdeeihn999rTMGRMC1G/Ldi1uWlWJzI98H4Iak5DB/RVvQuyMYKqSK/R6mbSOQyg==}
+    engines: {node: '>= 14'}
 
   '@octokit/graphql@5.0.6':
     resolution: {integrity: sha512-Fxyxdy/JH0MnIB5h+UQ3yCoh1FG4kWXfFKkpWqjZHw/p+Kc8Y44Hu/kCgNBT6nU1shNumEchmW/sUO1JuQnPcw==}
@@ -2247,14 +2237,11 @@ packages:
   '@octokit/openapi-types@18.1.1':
     resolution: {integrity: sha512-VRaeH8nCDtF5aXWnjPuEMIYf1itK/s3JYyJcWFJT8X9pSNnBtriDf7wlEWsGuhPLl4QIH4xM8fqTXDwJ3Mu6sw==}
 
-  '@octokit/openapi-types@23.0.1':
-    resolution: {integrity: sha512-izFjMJ1sir0jn0ldEKhZ7xegCTj/ObmEDlEfpFrx4k/JyZSMRHbO3/rBwgE7f3m2DHt+RrNGIVw4wSmwnm3t/g==}
-
-  '@octokit/plugin-paginate-rest@11.4.2':
-    resolution: {integrity: sha512-BXJ7XPCTDXFF+wxcg/zscfgw2O/iDPtNSkwwR1W1W5c4Mb3zav/M2XvxQ23nVmKj7jpweB4g8viMeCQdm7LMVA==}
-    engines: {node: '>= 18'}
+  '@octokit/plugin-paginate-rest@6.1.2':
+    resolution: {integrity: sha512-qhrmtQeHU/IivxucOV1bbI/xZyC/iOBhclokv7Sut5vnejAIAEXVcGQeRpQlU39E0WwK9lNvJHphHri/DB6lbQ==}
+    engines: {node: '>= 14'}
     peerDependencies:
-      '@octokit/core': '>=6'
+      '@octokit/core': '>=4'
 
   '@octokit/plugin-retry@4.1.6':
     resolution: {integrity: sha512-obkYzIgEC75r8+9Pnfiiqy3y/x1bc3QLE5B7qvv9wi9Kj0R5tGQFC6QMBg1154WQ9lAVypuQDGyp3hNpp15gQQ==}
@@ -2268,16 +2255,16 @@ packages:
     peerDependencies:
       '@octokit/core': ^4.0.0
 
-  '@octokit/request-error@6.1.7':
-    resolution: {integrity: sha512-69NIppAwaauwZv6aOzb+VVLwt+0havz9GT5YplkeJv7fG7a40qpLt/yZKyiDxAhgz0EtgNdNcb96Z0u+Zyuy2g==}
-    engines: {node: '>= 18'}
+  '@octokit/request-error@3.0.3':
+    resolution: {integrity: sha512-crqw3V5Iy2uOU5Np+8M/YexTlT8zxCfI+qu+LxUB7SZpje4Qmx3mub5DfEKSO8Ylyk0aogi6TYdf6kxzh2BguQ==}
+    engines: {node: '>= 14'}
 
-  '@octokit/request@9.2.2':
-    resolution: {integrity: sha512-dZl0ZHx6gOQGcffgm1/Sf6JfEpmh34v3Af2Uci02vzUYz6qEN6zepoRtmybWXIGXFIK8K9ylE3b+duCWqhArtg==}
-    engines: {node: '>= 18'}
+  '@octokit/request@6.2.8':
+    resolution: {integrity: sha512-ow4+pkVQ+6XVVsekSYBzJC0VTVvh/FCTUUgTsboGq+DTeWdyIFV8WSCdo0RIxk6wSkBTHqIK1mYuY7nOBXOchw==}
+    engines: {node: '>= 14'}
 
-  '@octokit/types@13.8.0':
-    resolution: {integrity: sha512-x7DjTIbEpEWXK99DMd01QfWy0hd5h4EN+Q7shkdKds3otGQP+oWE/y0A76i1OvH9fygo4ddvNf7ZvF0t78P98A==}
+  '@octokit/tsconfig@1.0.2':
+    resolution: {integrity: sha512-I0vDR0rdtP8p2lGMzvsJzbhdOWy405HcGovrspJ8RRibHnyRgggUSNO5AIox5LmqiwmatHKYsvj6VGFHkqS7lA==}
 
   '@octokit/types@9.3.2':
     resolution: {integrity: sha512-D4iHGTdAnEEVsB8fl95m1hiz7D5YiRdQ9b/OEb3BYRVwbLsGHcRVPz+u+BgRLNk0Q0/4iZCBqDN96j2XNxfXrA==}
@@ -4418,6 +4405,10 @@ packages:
   cookie-signature@1.0.6:
     resolution: {integrity: sha512-QADzlaHc8icV8I7vbaJXJwod9HWYp8uCqf1xa4OfNu1T7JVxQIrUgOWtHdNDtPiywmFbiS12VjotIXLrKM3orQ==}
 
+  cookie@0.4.2:
+    resolution: {integrity: sha512-aSWTXFzaKWkvHO1Ny/s+ePFpvKsPnjc551iI41v3ny/ow6tBG5Vd+FuqGNhh1LxOmVzOlGUriIlOaokOvhaStA==}
+    engines: {node: '>= 0.6'}
+
   cookie@0.7.1:
     resolution: {integrity: sha512-6DnInpx7SJ2AK3+CTUE/ZM0vWTUboZCegxhC2xiIydHR9jNuTAASBrfEpHhiGOZw/nX51bHt6YQl8jsGo4y/0w==}
     engines: {node: '>= 0.6'}
@@ -4701,6 +4692,9 @@ packages:
   depd@2.0.0:
     resolution: {integrity: sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==}
     engines: {node: '>= 0.8'}
+
+  deprecation@2.3.1:
+    resolution: {integrity: sha512-xmHIy4F3scKVwMsQ4WnVaS8bHOx0DmVwRywosKhaILI0ywMDWPtBSku2HNxRvF7jtwDRsoEwYQSfbxj8b7RlJQ==}
 
   dequal@2.0.3:
     resolution: {integrity: sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==}
@@ -5247,9 +5241,6 @@ packages:
   extsprintf@1.4.1:
     resolution: {integrity: sha512-Wrk35e8ydCKDj/ArClo1VrPVmN8zph5V4AtHwIuHhvMXsKf73UT3BOD+azBIW+3wOJ4FhEH7zyaJCFvChjYvMA==}
     engines: {'0': node >=0.6.0}
-
-  fast-content-type-parse@2.0.1:
-    resolution: {integrity: sha512-nGqtvLrj5w0naR6tDPfB4cUmYCqouzyQiz6C5y/LtcDllJdrcc6WaWW6iXyIIOErTa/XRybj28aasdn4LkVk6Q==}
 
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
@@ -6024,6 +6015,10 @@ packages:
 
   is-plain-object@2.0.4:
     resolution: {integrity: sha512-h5PpgXkWitc38BBMYawTYMWJHFZJVnBquFE57xFpjB8pJFiF6gZ+bU+WyI/yqXiFR5mdLsgYNaPe8uao6Uv9Og==}
+    engines: {node: '>=0.10.0'}
+
+  is-plain-object@5.0.0:
+    resolution: {integrity: sha512-VRSzKkbMm5jMDoKLbltAkFQ5Qr7VDiTFGXxYFXXowVj387GeGNOCsOH6Msy00SGZ3Fp84b1Naa1psqgcCIEP5Q==}
     engines: {node: '>=0.10.0'}
 
   is-promise@2.2.2:
@@ -7836,6 +7831,9 @@ packages:
   proxy-from-env@1.0.0:
     resolution: {integrity: sha512-F2JHgJQ1iqwnHDcQjVBsq3n/uoaFL+iPW/eAeL7kVxy/2RrWaN4WroKjjvbsoRtv0ftelNyC01bjRhn/bhcf4A==}
 
+  psl@1.15.0:
+    resolution: {integrity: sha512-JZd3gMVBAVQkSs6HdNZo9Sdo0LNcQeMNP3CozBJb3JYC/QUYZTnKxP+f8oWRX4rHP5EurWxqAHTSwUCjlNKa1w==}
+
   pstree.remy@1.1.8:
     resolution: {integrity: sha512-77DZwxQmxKnu3aR542U+X8FypNzbfJ+C5XQDk3uWjWxn6151aIMGthWYRXTqT1E5oJvg+ljaa2OJi+VfvCOQ8w==}
 
@@ -8976,6 +8974,10 @@ packages:
     resolution: {integrity: sha512-r0eojU4bI8MnHr8c5bNo7lJDdI2qXlWWJk6a9EAFG7vbhTjElYhBVS3/miuE0uOuoLdb8Mc/rVfsmm6eo5o9GA==}
     hasBin: true
 
+  tough-cookie@2.5.0:
+    resolution: {integrity: sha512-nlLsUzgm1kfLXSXfRZMc1KLAugd4hqJHDTvc2hDIwS3mZAfMEuMbc03SujMF+GEcpaX/qboeycw6iO8JwVv2+g==}
+    engines: {node: '>=0.8'}
+
   tough-cookie@5.1.1:
     resolution: {integrity: sha512-Ek7HndSVkp10hmHP9V4qZO1u+pn1RU5sI0Fw+jCU3lyvuMZcgqsNgc6CmJJZyByK4Vm/qotGRJlfgAX8q+4JiA==}
     engines: {node: '>=16'}
@@ -9307,9 +9309,6 @@ packages:
   universal-user-agent@6.0.1:
     resolution: {integrity: sha512-yCzhz6FN2wU1NiiQRogkTQszlQSlpWaw8SvVegAc+bDxbzHgh1vX8uIe8OYyMH6DwH+sdTJsgMl36+mSMdRJIQ==}
 
-  universal-user-agent@7.0.2:
-    resolution: {integrity: sha512-0JCqzSKnStlRRQfCdowvqy3cy0Dvtlb8xecj/H8JFZuCze4rwjPZQOgvFvn0Ws/usCHQFGpyr+pB9adaGwXn4Q==}
-
   universalify@0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}
     engines: {node: '>= 4.0.0'}
@@ -9547,12 +9546,26 @@ packages:
       utf-8-validate:
         optional: true
 
-  xml2js@0.6.2:
-    resolution: {integrity: sha512-T4rieHaC1EXcES0Kxxj4JWgaUQHDk+qwHcYOCFHfiwKz7tOVPLq7Hjq9dM1WCMhylqMEfP7hMcOIChvotiZegA==}
+  xml2js@0.4.16:
+    resolution: {integrity: sha512-9rH7UTUNphxeDRCeJBi4Fxp/z0fd92WeXNQ1dtUYMpqO3PaK59hVDCuUmOGHRZvufJDzcX8TG+Kdty7ylM0t2w==}
+
+  xml2js@0.4.19:
+    resolution: {integrity: sha512-esZnJZJOiJR9wWKMyuvSE1y6Dq5LCuJanqhxslH2bxM6duahNZ+HMpCLhBQGZkbX6xRf8x1Y2eJlgt2q3qo49Q==}
+
+  xml2js@0.4.23:
+    resolution: {integrity: sha512-ySPiMjM0+pLDftHgXY4By0uswI3SPKLDw/i3UXbnO8M/p28zqexCUoPmQFrYD+/1BzhGJSs2i1ERWKJAtiLrug==}
     engines: {node: '>=4.0.0'}
 
   xmlbuilder@11.0.1:
     resolution: {integrity: sha512-fDlsI/kFEx7gLvbecc0/ohLG50fugQp8ryHzMTuW9vSa1GJ0XYWKnhsUx7oie3G98+r56aTQIUB4kht42R3JvA==}
+    engines: {node: '>=4.0'}
+
+  xmlbuilder@4.2.1:
+    resolution: {integrity: sha512-oEePiEefhQhAeUnwRnIBLBWmk/fsWWbQ53EEWsRuzECbQ3m5o/Esmq6H47CYYwSLW+Ynt0rS9hd0pd2ogMAWjg==}
+    engines: {node: '>=0.8.0'}
+
+  xmlbuilder@9.0.7:
+    resolution: {integrity: sha512-7YXTQc3P2l9+0rjaUbLwMKRhtmwg1M1eDf6nag7urC7pIPYLD9W/jmzQ4ptRSUbodw5S0jfoGTflLemQibSpeQ==}
     engines: {node: '>=4.0'}
 
   xtend@4.0.2:
@@ -11891,63 +11904,70 @@ snapshots:
 
   '@octokit/auth-token@3.0.4': {}
 
-  '@octokit/core@4.2.4':
+  '@octokit/core@4.2.4(encoding@0.1.13)':
     dependencies:
       '@octokit/auth-token': 3.0.4
-      '@octokit/graphql': 5.0.6
-      '@octokit/request': 9.2.2
-      '@octokit/request-error': 6.1.7
+      '@octokit/graphql': 5.0.6(encoding@0.1.13)
+      '@octokit/request': 6.2.8(encoding@0.1.13)
+      '@octokit/request-error': 3.0.3
       '@octokit/types': 9.3.2
       before-after-hook: 2.2.3
       universal-user-agent: 6.0.1
+    transitivePeerDependencies:
+      - encoding
 
-  '@octokit/endpoint@10.1.3':
+  '@octokit/endpoint@7.0.6':
     dependencies:
-      '@octokit/types': 13.8.0
-      universal-user-agent: 7.0.2
+      '@octokit/types': 9.3.2
+      is-plain-object: 5.0.0
+      universal-user-agent: 6.0.1
 
-  '@octokit/graphql@5.0.6':
+  '@octokit/graphql@5.0.6(encoding@0.1.13)':
     dependencies:
-      '@octokit/request': 9.2.2
+      '@octokit/request': 6.2.8(encoding@0.1.13)
       '@octokit/types': 9.3.2
       universal-user-agent: 6.0.1
+    transitivePeerDependencies:
+      - encoding
 
   '@octokit/openapi-types@18.1.1': {}
 
-  '@octokit/openapi-types@23.0.1': {}
-
-  '@octokit/plugin-paginate-rest@11.4.2(@octokit/core@4.2.4)':
+  '@octokit/plugin-paginate-rest@6.1.2(@octokit/core@4.2.4(encoding@0.1.13))':
     dependencies:
-      '@octokit/core': 4.2.4
-      '@octokit/types': 13.8.0
+      '@octokit/core': 4.2.4(encoding@0.1.13)
+      '@octokit/tsconfig': 1.0.2
+      '@octokit/types': 9.3.2
 
-  '@octokit/plugin-retry@4.1.6(@octokit/core@4.2.4)':
+  '@octokit/plugin-retry@4.1.6(@octokit/core@4.2.4(encoding@0.1.13))':
     dependencies:
-      '@octokit/core': 4.2.4
+      '@octokit/core': 4.2.4(encoding@0.1.13)
       '@octokit/types': 9.3.2
       bottleneck: 2.19.5
 
-  '@octokit/plugin-throttling@5.2.3(@octokit/core@4.2.4)':
+  '@octokit/plugin-throttling@5.2.3(@octokit/core@4.2.4(encoding@0.1.13))':
     dependencies:
-      '@octokit/core': 4.2.4
+      '@octokit/core': 4.2.4(encoding@0.1.13)
       '@octokit/types': 9.3.2
       bottleneck: 2.19.5
 
-  '@octokit/request-error@6.1.7':
+  '@octokit/request-error@3.0.3':
     dependencies:
-      '@octokit/types': 13.8.0
+      '@octokit/types': 9.3.2
+      deprecation: 2.3.1
+      once: 1.4.0
 
-  '@octokit/request@9.2.2':
+  '@octokit/request@6.2.8(encoding@0.1.13)':
     dependencies:
-      '@octokit/endpoint': 10.1.3
-      '@octokit/request-error': 6.1.7
-      '@octokit/types': 13.8.0
-      fast-content-type-parse: 2.0.1
-      universal-user-agent: 7.0.2
+      '@octokit/endpoint': 7.0.6
+      '@octokit/request-error': 3.0.3
+      '@octokit/types': 9.3.2
+      is-plain-object: 5.0.0
+      node-fetch: 2.7.0(encoding@0.1.13)
+      universal-user-agent: 6.0.1
+    transitivePeerDependencies:
+      - encoding
 
-  '@octokit/types@13.8.0':
-    dependencies:
-      '@octokit/openapi-types': 23.0.1
+  '@octokit/tsconfig@1.0.2': {}
 
   '@octokit/types@9.3.2':
     dependencies:
@@ -13188,15 +13208,15 @@ snapshots:
       domhandler: 5.0.3
       selderee: 0.11.0
 
-  '@semantic-release/changelog@6.0.2(semantic-release@19.0.5)':
+  '@semantic-release/changelog@6.0.2(semantic-release@19.0.5(encoding@0.1.13))':
     dependencies:
       '@semantic-release/error': 3.0.0
       aggregate-error: 3.1.0
       fs-extra: 11.2.0
       lodash: 4.17.21
-      semantic-release: 19.0.5
+      semantic-release: 19.0.5(encoding@0.1.13)
 
-  '@semantic-release/commit-analyzer@9.0.2(semantic-release@19.0.5)':
+  '@semantic-release/commit-analyzer@9.0.2(semantic-release@19.0.5(encoding@0.1.13))':
     dependencies:
       conventional-changelog-angular: 5.0.13
       conventional-commits-filter: 2.0.7
@@ -13205,13 +13225,13 @@ snapshots:
       import-from: 4.0.0
       lodash: 4.17.21
       micromatch: 4.0.8
-      semantic-release: 19.0.5
+      semantic-release: 19.0.5(encoding@0.1.13)
     transitivePeerDependencies:
       - supports-color
 
   '@semantic-release/error@3.0.0': {}
 
-  '@semantic-release/exec@6.0.3(semantic-release@19.0.5)':
+  '@semantic-release/exec@6.0.3(semantic-release@19.0.5(encoding@0.1.13))':
     dependencies:
       '@semantic-release/error': 3.0.0
       aggregate-error: 3.1.0
@@ -13219,11 +13239,11 @@ snapshots:
       execa: 5.1.1
       lodash: 4.17.21
       parse-json: 5.2.0
-      semantic-release: 19.0.5
+      semantic-release: 19.0.5(encoding@0.1.13)
     transitivePeerDependencies:
       - supports-color
 
-  '@semantic-release/git@10.0.1(semantic-release@19.0.5)':
+  '@semantic-release/git@10.0.1(semantic-release@19.0.5(encoding@0.1.13))':
     dependencies:
       '@semantic-release/error': 3.0.0
       aggregate-error: 3.1.0
@@ -13233,16 +13253,16 @@ snapshots:
       lodash: 4.17.21
       micromatch: 4.0.8
       p-reduce: 2.1.0
-      semantic-release: 19.0.5
+      semantic-release: 19.0.5(encoding@0.1.13)
     transitivePeerDependencies:
       - supports-color
 
-  '@semantic-release/github@8.1.0(semantic-release@19.0.5)':
+  '@semantic-release/github@8.1.0(encoding@0.1.13)(semantic-release@19.0.5(encoding@0.1.13))':
     dependencies:
-      '@octokit/core': 4.2.4
-      '@octokit/plugin-paginate-rest': 11.4.2(@octokit/core@4.2.4)
-      '@octokit/plugin-retry': 4.1.6(@octokit/core@4.2.4)
-      '@octokit/plugin-throttling': 5.2.3(@octokit/core@4.2.4)
+      '@octokit/core': 4.2.4(encoding@0.1.13)
+      '@octokit/plugin-paginate-rest': 6.1.2(@octokit/core@4.2.4(encoding@0.1.13))
+      '@octokit/plugin-retry': 4.1.6(@octokit/core@4.2.4(encoding@0.1.13))
+      '@octokit/plugin-throttling': 5.2.3(@octokit/core@4.2.4(encoding@0.1.13))
       '@semantic-release/error': 3.0.0
       aggregate-error: 3.1.0
       debug: 4.3.5
@@ -13255,12 +13275,13 @@ snapshots:
       lodash: 4.17.21
       mime: 3.0.0
       p-filter: 2.1.0
-      semantic-release: 19.0.5
+      semantic-release: 19.0.5(encoding@0.1.13)
       url-join: 4.0.1
     transitivePeerDependencies:
+      - encoding
       - supports-color
 
-  '@semantic-release/npm@9.0.2(semantic-release@19.0.5)':
+  '@semantic-release/npm@9.0.2(semantic-release@19.0.5(encoding@0.1.13))':
     dependencies:
       '@semantic-release/error': 3.0.0
       aggregate-error: 3.1.0
@@ -13273,11 +13294,11 @@ snapshots:
       rc: 1.2.8
       read-pkg: 5.2.0
       registry-auth-token: 5.0.2
-      semantic-release: 19.0.5
+      semantic-release: 19.0.5(encoding@0.1.13)
       semver: 7.7.1
       tempy: 1.0.1
 
-  '@semantic-release/release-notes-generator@10.0.3(semantic-release@19.0.5)':
+  '@semantic-release/release-notes-generator@10.0.3(semantic-release@19.0.5(encoding@0.1.13))':
     dependencies:
       conventional-changelog-angular: 5.0.13
       conventional-changelog-writer: 5.0.1
@@ -13289,7 +13310,7 @@ snapshots:
       into-stream: 6.0.0
       lodash: 4.17.21
       read-pkg-up: 7.0.1
-      semantic-release: 19.0.5
+      semantic-release: 19.0.5(encoding@0.1.13)
     transitivePeerDependencies:
       - supports-color
 
@@ -14907,6 +14928,8 @@ snapshots:
 
   cookie-signature@1.0.6: {}
 
+  cookie@0.4.2: {}
+
   cookie@0.7.1: {}
 
   cookie@0.7.2: {}
@@ -15267,6 +15290,8 @@ snapshots:
   denodeify@1.2.1: {}
 
   depd@2.0.0: {}
+
+  deprecation@2.3.1: {}
 
   dequal@2.0.3: {}
 
@@ -16046,7 +16071,7 @@ snapshots:
 
   express-session@1.17.3:
     dependencies:
-      cookie: 0.7.2
+      cookie: 0.4.2
       cookie-signature: 1.0.6
       debug: 2.6.9
       depd: 2.0.0
@@ -16117,8 +16142,6 @@ snapshots:
   extsprintf@1.3.0: {}
 
   extsprintf@1.4.1: {}
-
-  fast-content-type-parse@2.0.1: {}
 
   fast-deep-equal@3.1.3: {}
 
@@ -16989,6 +17012,8 @@ snapshots:
   is-plain-object@2.0.4:
     dependencies:
       isobject: 3.0.1
+
+  is-plain-object@5.0.0: {}
 
   is-promise@2.2.2: {}
 
@@ -18770,7 +18795,7 @@ snapshots:
       bluebird: 3.7.2
       plex-api-headers: 1.1.0
       request-promise: 4.2.4(request@2.88.2)
-      xml2js: 0.6.2
+      xml2js: 0.4.19
     transitivePeerDependencies:
       - request
 
@@ -18782,7 +18807,7 @@ snapshots:
       plex-api-headers: 1.1.0
       request: 2.88.2
       uuid: 3.4.0
-      xml2js: 0.6.2
+      xml2js: 0.4.16
 
   plimit-lit@1.6.1:
     dependencies:
@@ -18949,6 +18974,10 @@ snapshots:
       ipaddr.js: 1.9.1
 
   proxy-from-env@1.0.0: {}
+
+  psl@1.15.0:
+    dependencies:
+      punycode: 2.3.1
 
   pstree.remy@1.1.8: {}
 
@@ -19549,7 +19578,7 @@ snapshots:
       request: 2.88.2
       request-promise-core: 1.1.2(request@2.88.2)
       stealthy-require: 1.1.1
-      tough-cookie: 5.1.1
+      tough-cookie: 2.5.0
 
   request@2.88.2:
     dependencies:
@@ -19570,7 +19599,7 @@ snapshots:
       performance-now: 2.1.0
       qs: 6.5.3
       safe-buffer: 5.2.1
-      tough-cookie: 5.1.1
+      tough-cookie: 2.5.0
       tunnel-agent: 0.6.0
       uuid: 3.4.0
 
@@ -19711,18 +19740,18 @@ snapshots:
       '@types/node-forge': 1.3.11
       node-forge: 1.3.1
 
-  semantic-release-docker-buildx@1.0.1(semantic-release@19.0.5):
+  semantic-release-docker-buildx@1.0.1(semantic-release@19.0.5(encoding@0.1.13)):
     dependencies:
       execa: 5.1.1
-      semantic-release: 19.0.5
+      semantic-release: 19.0.5(encoding@0.1.13)
 
-  semantic-release@19.0.5:
+  semantic-release@19.0.5(encoding@0.1.13):
     dependencies:
-      '@semantic-release/commit-analyzer': 9.0.2(semantic-release@19.0.5)
+      '@semantic-release/commit-analyzer': 9.0.2(semantic-release@19.0.5(encoding@0.1.13))
       '@semantic-release/error': 3.0.0
-      '@semantic-release/github': 8.1.0(semantic-release@19.0.5)
-      '@semantic-release/npm': 9.0.2(semantic-release@19.0.5)
-      '@semantic-release/release-notes-generator': 10.0.3(semantic-release@19.0.5)
+      '@semantic-release/github': 8.1.0(encoding@0.1.13)(semantic-release@19.0.5(encoding@0.1.13))
+      '@semantic-release/npm': 9.0.2(semantic-release@19.0.5(encoding@0.1.13))
+      '@semantic-release/release-notes-generator': 10.0.3(semantic-release@19.0.5(encoding@0.1.13))
       aggregate-error: 3.1.0
       cosmiconfig: 7.1.0
       debug: 4.3.5
@@ -19747,6 +19776,7 @@ snapshots:
       signale: 1.4.0
       yargs: 16.2.0
     transitivePeerDependencies:
+      - encoding
       - supports-color
 
   semver-diff@3.1.1:
@@ -20403,6 +20433,11 @@ snapshots:
 
   touch@3.1.1: {}
 
+  tough-cookie@2.5.0:
+    dependencies:
+      psl: 1.15.0
+      punycode: 2.3.1
+
   tough-cookie@5.1.1:
     dependencies:
       tldts: 6.1.78
@@ -20595,7 +20630,7 @@ snapshots:
       sha.js: 2.4.11
       tslib: 2.6.3
       uuid: 8.3.2
-      xml2js: 0.6.2
+      xml2js: 0.4.23
       yargs: 17.7.2
     optionalDependencies:
       pg: 8.11.0
@@ -20714,8 +20749,6 @@ snapshots:
       unist-util-visit-parents: 5.1.3
 
   universal-user-agent@6.0.1: {}
-
-  universal-user-agent@7.0.2: {}
 
   universalify@0.1.2: {}
 
@@ -20985,12 +21018,28 @@ snapshots:
 
   ws@7.5.10: {}
 
-  xml2js@0.6.2:
+  xml2js@0.4.16:
+    dependencies:
+      sax: 1.4.1
+      xmlbuilder: 4.2.1
+
+  xml2js@0.4.19:
+    dependencies:
+      sax: 1.4.1
+      xmlbuilder: 9.0.7
+
+  xml2js@0.4.23:
     dependencies:
       sax: 1.4.1
       xmlbuilder: 11.0.1
 
   xmlbuilder@11.0.1: {}
+
+  xmlbuilder@4.2.1:
+    dependencies:
+      lodash: 4.17.21
+
+  xmlbuilder@9.0.7: {}
 
   xtend@4.0.2: {}
 
