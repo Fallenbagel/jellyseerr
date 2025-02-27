@@ -198,6 +198,10 @@ function JellyfinSetup({
                         messages.hostname,
                         mediaServerFormatValues
                       )}
+                      autoComplete="off"
+                      data-1pignore="true"
+                      data-lpignore="true"
+                      data-bwignore="true"
                     />
                   </div>
                   {errors.hostname && touched.hostname && (
@@ -282,6 +286,10 @@ function JellyfinSetup({
                   name="email"
                   type="text"
                   placeholder={intl.formatMessage(messages.email)}
+                  autoComplete="off"
+                  data-1pignore="true"
+                  data-lpignore="true"
+                  data-bwignore="true"
                 />
               </div>
               {errors.email && touched.email && (
@@ -298,6 +306,10 @@ function JellyfinSetup({
                   name="username"
                   type="text"
                   placeholder={intl.formatMessage(messages.username)}
+                  autoComplete="off"
+                  data-1pignore="true"
+                  data-lpignore="true"
+                  data-bwignore="true"
                 />
               </div>
               {errors.username && touched.username && (
@@ -314,6 +326,10 @@ function JellyfinSetup({
                   name="password"
                   type="password"
                   placeholder={intl.formatMessage(messages.password)}
+                  autoComplete="off"
+                  data-1pignore="true"
+                  data-lpignore="true"
+                  data-bwignore="true"
                 />
               </div>
               {errors.password && touched.password && (
